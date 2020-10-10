@@ -1,0 +1,45 @@
+{
+  "name": "@orgstack/core",
+  "version": "1.0.0-alpha.1",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "react-scripts": "latest",
+    "uuid": "latest"
+  },
+  "devDependencies": {
+    "@babel/core": "latest",
+    "@babel/plugin-proposal-class-properties": "latest",
+    "@babel/plugin-proposal-decorators": "latest",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "latest",
+    "@babel/preset-typescript": "latest",
+    "@types/uuid": "latest",
+    "babel-plugin-styled-components": "latest",
+    "babel-plugin-transform-define": "latest",
+    "codemirror": "latest",
+    "parcel-bundler": "latest",
+    "tslint": "latest",
+    "typescript": "latest"
+  }
+}
