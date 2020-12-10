@@ -1,18 +1,24 @@
+import { ID } from './../types/data'
 import { Document, DocumentModel } from './document'
 
 /**
- * Instance outline for modeling a collection of documents of a
- * specific type (aka the model)
+ * Instance outline for modeling a collection of documents
  *
  * @export
  * @interface CollectionModel
- * @extends {DocumentModel}
+ * @extends {DocumentModel<F>}
  * @extends {IterableIterator<T>}
  * @template T
+ * @template F
  */
-export interface CollectionModel<T> extends DocumentModel, IterableIterator<T> {
-  modeler: new (...args: any[]) => T
+export interface CollectionModel<T extends Document = Document, F = any> extends DocumentModel<F>, IterableIterator<T> {
+  model: new (...args: any[]) => T
   items: T[]
+
+  getItem(id: ID): T
+  addItem(item: T): this
+  createItem(...args: any[]): T
+  deleteItem(...args: any[]): this
 
   length: number
   [Symbol.iterator](): IterableIterator<T>
@@ -20,28 +26,46 @@ export interface CollectionModel<T> extends DocumentModel, IterableIterator<T> {
 }
 
 /**
-   * Provides logic for modeling collections of documents of a
-   * specific type (aka the model)
-   *
-   * @export
-   * @class Collection
-   * @extends {Document}
-   * @implements {CollectionModel<T>}
-   * @template T
-   */
-export class Collection<T = any> extends Document implements CollectionModel<T> {
+ * Provides logic for modeling collections of documents
+ *
+ * @export
+ * @class Collection
+ * @extends {Document<F>}
+ * @implements {CollectionModel<T, F>}
+ * @template T
+ * @template F
+ */
+export class Collection<T extends Document = Document, F = any> extends Document<F> implements CollectionModel<T, F> {
 
-  protected __modeler__: new (...args: any[]) => T = Document as any
+  public model: new (...args: any[]) => T
+  public get items(): T[] { return this.get('items') }
+  public set items(v: T[]) { this.set('items', v) }
+  public get length(): number { return (this.items ?? []).length }
 
-  get modeler() { return this.__modeler__ }
-  set modeler(v: new (...args: any[]) => T) { this.__modeler__ = v }
+  getItem(id: ID): T {
+    return this.items.find(i => i?.getId() === id)
+  }
 
-  get items(): T[] { return this.get('items') }
-  set items(v: T[]) { this.set('items', v) }
+  getItems(ids?: ID[]): T[] {
+    return ids ? Array.from(ids).map(id => this.getItem(id)) : this.items
+  }
 
-  private __index__ = 0
-  get length(): number { return (this.items ?? []).length }
+  addItem(item: T): this {
+    (this.items ??= []).push(item)
+    return this
+  }
 
+  createItem(...args: any[]): T {
+    return new this.model(...args)
+  }
+
+  deleteItem(item: T): this {
+    const items = Array.from(this.items)
+    this.items = items.filter(i => i != item)
+    return this
+  }
+
+  private __index__ = 0;
   /** @inheritdoc */
   [Symbol.iterator](): IterableIterator<T> { return this }
   /** @inheritdoc */
@@ -57,16 +81,5 @@ export class Collection<T = any> extends Document implements CollectionModel<T> 
         value: null
       }
     }
-  }
-
-  addItem(item: T): this {
-    this.items.push(item)
-    return this
-  }
-
-  delItem(item: T): this {
-    const items = Array.from(this.items)
-    this.items = items.filter(i => i != item)
-    return this
   }
 }

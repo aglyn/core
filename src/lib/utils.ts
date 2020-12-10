@@ -128,7 +128,7 @@ export type MapObjectOptions = { copy?: boolean, filter?: boolean, advanced?: bo
 export function mapObject(target, callbackfn: MapObjectClbkFn, opt?: MapObjectOptions) {
   const { copy: cp = false, filter = false, advanced = false, forEach = false } = opt ?? {}
   const data = cp ? copy(target) : target
-  const entries = Object.entries(data)
+  const entries = Object.entries(data) ?? []
   const method = forEach ? entries.forEach.bind(null) : entries.map.bind(null)
   const result: any = method(([key, value], index, array) => (
     // If advanced is true allow the user to set the

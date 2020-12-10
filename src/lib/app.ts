@@ -6,7 +6,9 @@ import { ID } from '../types/data'
 import { Data, n, Sig } from './const'
 import { s } from './utils'
 
-const fields = new Collection<Document>({
+const fieldsColl = {
+  id: 'fields',
+  name: 'Fields Collection',
   items: [
     {
       id: Sig.ID,
@@ -38,19 +40,21 @@ const fields = new Collection<Document>({
       name: n.displayName[Sig.DELETED],
       kind: Data.TEXT,
     },
-  ].map(i => new Document(i))
-})
+  ].map(i => new Document(i).init())
+}
 
-const docs = new Collection<Document>({
+const docsColl = {
+  id: 'documents',
+  name: 'Documents Collection',
   items: [
     {
       id: Sig.MODEL,
-      name: 'Default Document Model',
+      name: 'Default Document Fields',
       cid: Sig.FIELDS,
-      items: Array.from(fields.items).map(i => s(i.id))
+      items: Array.from(fieldsColl.items).map(i => s(i.getId()))
     },
-  ].map(i => new Document(i))
-})
+  ].map(i => new Document(i).init())
+}
 
 export class AppController {
 
@@ -61,26 +65,26 @@ export class AppController {
     return this.instance
   }
 
-  collections = new Collection<Collection<Document>>()
+  private collections: Collection<Collection<Document>>
 
   private constructor() {
-    this.collections.set('fields', fields)
-    this.collections.set('documents', docs)
+    this.collections = new Collection<Collection<Document>>()
+    this.collections.model = Collection
+    this.addCollection(this.collections.createItem(fieldsColl))
+    this.addCollection(this.collections.createItem(docsColl))
   }
 
-  getCollectionFromId(id: ID): Collection<Document> {
-    return this[Sig.COLLECTIONS][id]
+  getCollection(id: ID): Collection<Document> {
+    return this.collections.getItem(id)
   }
 
-  addCollection(id: ID, v: Collection<Document>): this {
-    console.log('add, ', id, v)
-    this[Sig.COLLECTIONS][id] = v
-    console.log('add after, ', AppController.getInstance().getCollectionFromId(id))
+  addCollection(v: Collection<Document>): this {
+    this.collections.addItem(v)
     return this
   }
 
-  delCollection(id: ID): this {
-    this.collections.del(id)
+  deleteCollection(id: ID): this {
+    this.collections.deleteItem(this.getCollection(id))
     return this
   }
 

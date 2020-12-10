@@ -1,4 +1,4 @@
-import { Dictionary, ID } from './data'
+import { ID } from './data'
 
 /**
  * Local properties and methods required for CRUD logic
@@ -8,11 +8,9 @@ import { Dictionary, ID } from './data'
  * @interface CrudData
  * @template T
  */
-export interface CrudModel<D extends Dictionary = any> {
-  readonly data: D
+export interface CrudModel {
   has(id: ID): boolean
   get(id: ID): any
   set(id: ID, item: any): this
   del(id: ID): this
-  toJSON(): Dictionary
 }

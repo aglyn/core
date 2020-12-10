@@ -6,4 +6,6 @@ export * from './lib/const'
 export * from './lib/guards'
 export * from './lib/utils'
 
-export * from './models'
+export * from './models/collection'
+export * from './models/document'
+export * from './models/normalized'

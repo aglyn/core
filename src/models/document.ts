@@ -1,4 +1,3 @@
-import { mapObject, s } from '../lib/utils'
 import { CrudModel } from '../types/crud'
 import { Dictionary, ID } from '../types/data'
 
@@ -12,23 +11,19 @@ export type DocumentType<T extends Dictionary = any> = { [P in keyof T]: T[P] }
  * @export
  * @interface DocumentModel
  * @extends {CrudModel}
- * @template T
+ * @template F
  */
-export interface DocumentModel extends CrudModel {
+export interface DocumentModel<F = any> extends CrudModel {
+  fields: Readonly<F>
 
-  id: string | undefined
+  getId(): string | undefined
+  getFields(): F
 
   preInit?(): void
   init(...args: any[]): this
   onInit?(): void
 
-  has(id: ID): boolean
-  get(id: ID): any
-  set(id: ID, item: any): this
-  del(id: ID): this
-
-  toJSON(): object
-
+  toJSON(): Dictionary
 }
 
 /**
@@ -36,17 +31,15 @@ export interface DocumentModel extends CrudModel {
  *
  * @export
  * @class Document
- * @implements {DocumentModel}
- * @template T
+ * @implements {DocumentModel<F>}
+ * @template F
  */
-export class Document implements DocumentModel {
+export class Document<F = any> implements DocumentModel<F> {
 
-  get data(): Dictionary { return this.__data__ }
+  constructor(public fields: Readonly<F> | F = {} as any) { }
 
-  get id(): string | undefined { return this.get('id') }
-  set id(v: string) { this.set('id', v) }
-
-  constructor(protected readonly __data__: Dictionary = {}) { }
+  getFields(): Readonly<F> | F { return this.fields }
+  getId(): string | undefined { return this.get('id') }
 
   /**
    * Hook called before init
@@ -65,7 +58,8 @@ export class Document implements DocumentModel {
    */
   init(): this {
     this.preInit && this.preInit()
-    this.data && mapObject(this.data, ((v, k) => this.set(s(k), v)), { forEach: true })
+    // this.fields && mapObject(this.fields ?? {}, ((v, k) => this.set(s(k), v)), { forEach: true })
+    // TODO: Initialize?
     this.onInit && this.onInit()
     return this
   }
@@ -78,10 +72,10 @@ export class Document implements DocumentModel {
    */
   onInit?(): void
 
-  set(id: ID, v: any): this { this.__data__[id] = v; return this }
-  get(id: ID): any { return this.__data__[id] }
-  del(id: ID): this { delete this.__data__[id]; return this }
-  has(id: ID): boolean { return Object.prototype.hasOwnProperty.call(this.__data__, id) }
+  set(id: ID, v: any): this { this.fields[id] = v; return this }
+  get(id: ID): any { return this.fields[id] }
+  del(id: ID): this { delete this.fields[id]; return this }
+  has(id: ID): boolean { return Object.prototype.hasOwnProperty.call(this.fields, id) }
 
-  toJSON(): Dictionary { return { ...this.__data__ } }
+  toJSON(): Dictionary { return { ...this.fields } }
 }
