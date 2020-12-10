@@ -1,4 +1,4 @@
-import { _isArr, _isStr, _isObjT, _isObj, _isFn, _isUndef, hasLength, _isNum } from './guards'
+import { _isArr, _isFn, _isNum, _isObj, _isObjT, _isStr, _isUndef, hasLength } from './guards'
 
 export function getLength<T>(val: Iterable<T> | ArrayLike<T>): number {
   return _isArr(val) || _isStr(val) ? val.length : 0
@@ -259,7 +259,7 @@ export function numeronym(str: string, opt?: NumeronymOpts) {
 }
 
 export function toNum(val: any, elseT?: any, radix?: number): number | typeof elseT {
-  let num = _isNum(radix) && _isStr(val) ? parseInt(val, radix) : Number(val)
+  const num = _isNum(radix) && _isStr(val) ? parseInt(val, radix) : Number(val)
   return isNaN(num) ? num : elseT
 }
 

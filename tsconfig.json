@@ -40,6 +40,12 @@
     "lib": ["esnext", "dom"],
     "types": ["node"],
     "typeRoots": ["node_modules/@types", "src/types"]
+
+    // "baseUrl": "./",
+    // "paths": {
+    //   "@aglyn/core": ["./src"],
+    //   "@aglyn/core/*": ["./src/*"]
+    // }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules/**"],

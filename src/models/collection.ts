@@ -1,5 +1,23 @@
-import { CollectionModel } from '../types/collection'
-import { Document } from './document'
+import { Document, DocumentModel } from './document'
+
+/**
+ * Instance outline for modeling a collection of documents of a
+ * specific type (aka the model)
+ *
+ * @export
+ * @interface CollectionModel
+ * @extends {DocumentModel}
+ * @extends {IterableIterator<T>}
+ * @template T
+ */
+export interface CollectionModel<T> extends DocumentModel, IterableIterator<T> {
+  modeler: new (...args: any[]) => T
+  items: T[]
+
+  length: number
+  [Symbol.iterator](): IterableIterator<T>
+  next(): IteratorResult<T>
+}
 
 /**
    * Provides logic for modeling collections of documents of a
@@ -21,7 +39,7 @@ export class Collection<T = any> extends Document implements CollectionModel<T> 
   get items(): T[] { return this.get('items') }
   set items(v: T[]) { this.set('items', v) }
 
-  private __index__: number = 0
+  private __index__ = 0
   get length(): number { return (this.items ?? []).length }
 
   /** @inheritdoc */

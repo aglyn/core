@@ -10,7 +10,7 @@ export function _isNumT(val: any): val is number {
   return typeof val === 'number'
 }
 export function _isNum(val: any, noStr?: boolean): val is number {
-  return noStr && _isStr(val) ? false : Number(val) !== NaN
+  return noStr && _isStr(val) ? false : !isNaN(val)
 }
 export function _isSym(val: any): val is symbol {
   return typeof val === 'symbol'
@@ -19,7 +19,7 @@ export function _isFn(val: any): val is Function {
   return typeof val === 'function'
 }
 export function _isArr<T>(val: T | {}): val is (T extends readonly any[] ? (unknown extends T ? never : readonly any[]) : any[]) {
-  return Array.isArray<T>(val)
+  return Array.isArray(val)
 }
 export function _isArrEmpty(val: any): val is [] {
   return _isArr(val) && !val.length

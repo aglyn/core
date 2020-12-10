@@ -1,4 +1,4 @@
-import { ID, Dictionary } from './data'
+import { Dictionary, ID } from './data'
 
 /**
  * Local properties and methods required for CRUD logic

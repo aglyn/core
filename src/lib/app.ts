@@ -1,9 +1,10 @@
-import { s } from './utils'
-import { Sig, Data, n } from './const'
+import { Collection } from '../models/collection'
+import { Document } from '../models/document'
 // import { Normalized } from './models/normalized'
-import { Document } from './models/document'
-import { Collection } from './models/collection'
-import { ID } from './types/data'
+import { ID } from '../types/data'
+
+import { Data, n, Sig } from './const'
+import { s } from './utils'
 
 const fields = new Collection<Document>({
   items: [

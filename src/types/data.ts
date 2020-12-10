@@ -1,4 +1,4 @@
-import { Data } from '../const'
+import { Data } from '../lib/const'
 
 /** The index signature of any object */
 export type ID = string
@@ -29,7 +29,7 @@ export type GeoPoint = { longitude: number, latitude: number }
 export type FieldType<Kind extends Data = any> =
   Kind extends Data.ARRAY ? any[]
   : Kind extends Data.BOOLEAN ? boolean
-  : Kind extends Data.BYTES ? Number
+  : Kind extends Data.BYTES ? number
   : Kind extends Data.DATETIME ? number
   : Kind extends Data.FLOAT ? number
   : Kind extends Data.GEOPOINT ? GeoPoint
