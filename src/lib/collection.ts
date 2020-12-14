@@ -1,5 +1,6 @@
-import { ID } from './../types/data'
 import { Document, DocumentModel } from './document'
+import { _isObj } from './guards'
+import { ID } from './types'
 
 /**
  * Instance outline for modeling a collection of documents
@@ -11,7 +12,7 @@ import { Document, DocumentModel } from './document'
  * @template T
  * @template F
  */
-export interface CollectionModel<T extends Document = Document, F = any> extends DocumentModel<F>, IterableIterator<T> {
+export interface CollectionModel<T extends DocumentModel = DocumentModel, F = any> extends DocumentModel<F>, IterableIterator<T> {
   model: new (...args: any[]) => T
   items: T[]
 
@@ -35,15 +36,30 @@ export interface CollectionModel<T extends Document = Document, F = any> extends
  * @template T
  * @template F
  */
-export class Collection<T extends Document = Document, F = any> extends Document<F> implements CollectionModel<T, F> {
+export class Collection<T extends DocumentModel = Document, F = any> extends Document<F> implements CollectionModel<T, F> {
 
-  public model: new (...args: any[]) => T
-  public get items(): T[] { return this.get('items') }
-  public set items(v: T[]) { this.set('items', v) }
+  public model: new (...args: any[]) => T = Document as any
+
+  public get items(): T[] { return this.fields['items'] }
+  public set items(v: T[]) { this.fields['items'] = v }
+
   public get length(): number { return (this.items ?? []).length }
 
+  init(): this {
+    this.preInit && this.preInit()
+    // Ensure if items are an object we ensure they are a document instance
+    this.items = this.items.map(item => {
+      if (_isObj(item) && !(item instanceof this.model)) {
+        return this.createItem(item).init()
+      }
+      return item
+    })
+    this.onInit && this.onInit()
+    return this
+  }
+
   getItem(id: ID): T {
-    return this.items.find(i => i?.getId() === id)
+    return this.items?.find(i => i?.get('id') === id)
   }
 
   getItems(ids?: ID[]): T[] {

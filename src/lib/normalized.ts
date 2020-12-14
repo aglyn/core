@@ -1,6 +1,6 @@
-import { _isNum, _isObj } from '../lib/guards'
-import { copy, deleteProperty, removeFromArray, reorderArray } from '../lib/utils'
-import { ID } from '../types/data'
+import { _isNum, _isObj } from './guards'
+import { ID } from './types'
+import { copy, deleteProperty, removeFromArray, reorderArray } from './utils'
 
 /** Normalized local state design for interfacing with 3NF rules  */
 export type NormalizedData<T extends any = object, K extends ID = ID> = {

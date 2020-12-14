@@ -1,5 +1,5 @@
-import { CrudModel } from '../types/crud'
-import { Dictionary, ID } from '../types/data'
+import { CrudModel } from './crud'
+import { Dictionary, ID } from './types'
 
 
 /** A document-oriented db document type */
@@ -16,7 +16,6 @@ export type DocumentType<T extends Dictionary = any> = { [P in keyof T]: T[P] }
 export interface DocumentModel<F = any> extends CrudModel {
   fields: Readonly<F>
 
-  getId(): string | undefined
   getFields(): F
 
   preInit?(): void
@@ -39,7 +38,6 @@ export class Document<F = any> implements DocumentModel<F> {
   constructor(public fields: Readonly<F> | F = {} as any) { }
 
   getFields(): Readonly<F> | F { return this.fields }
-  getId(): string | undefined { return this.get('id') }
 
   /**
    * Hook called before init
@@ -58,8 +56,7 @@ export class Document<F = any> implements DocumentModel<F> {
    */
   init(): this {
     this.preInit && this.preInit()
-    // this.fields && mapObject(this.fields ?? {}, ((v, k) => this.set(s(k), v)), { forEach: true })
-    // TODO: Initialize?
+    // this.fields && mapObject(this.fields, ((v, k) => this.set(s(k), v)), { forEach: true })
     this.onInit && this.onInit()
     return this
   }

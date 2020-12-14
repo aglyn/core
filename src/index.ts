@@ -1,11 +1,16 @@
 export * from './lib/async'
 export * from './lib/hash'
 export * from './lib/number'
-export * from './lib/app'
-export * from './lib/const'
+
+// Helpers
 export * from './lib/guards'
 export * from './lib/utils'
 
-export * from './models/collection'
-export * from './models/document'
-export * from './models/normalized'
+// Models
+export * from './lib/collection'
+export * from './lib/document'
+export * from './lib/normalized'
+
+// Data
+export * from './lib/config'
+export * from './lib/app-controller'

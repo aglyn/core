@@ -1,5 +1,3 @@
-import { toNum } from './utils'
-
 /**
  * Is literal type 'boolean'
  *
@@ -39,7 +37,7 @@ export function _isNumT(val: any): val is number {
  * @returns {val is number}
  */
 export function _isNum(val: any, noStr?: boolean): val is number {
-  return noStr && _isStr(val) ? false : !isNaN(val)
+  return noStr && _isStr(val) ? false : !isNaN(Number(val))
 }
 /**
  * Is literal type symbol
@@ -100,7 +98,7 @@ export function _isObjT(val: any): val is object {
  * @returns {val is Object}
  */
 export function _isObj(val: any): val is Object {
-  return _isObjT(val) && !_isArr(val)
+  return !_isNull(val) && _isObjT(val) && !_isArr(val)
 }
 /**
  * Is literal type null... null is actually 'object' type literal
@@ -215,10 +213,13 @@ type Primitive = symbol | bigint | boolean | number | string | undefined
  * @param {HasLenOpt<U>} opts
  * @returns {boolean}
  */
-export function hasLn<T extends Iterable<U> | ArrayLike<U> | number, U>(val: T, opts?: HasLenOpt<U>): boolean {
-  const { equalTo, lessThan, moreThan, and, also } = opts ?? {}
-  const v = _isNum(val) ? toNum(val) : val as unknown as Iterable<T> | ArrayLike<T>
-  const len: number = _isNum(val) ? v : v.length
+export function hasLn<T extends Iterable<U> | ArrayLike<U> | number, U>(val: T, opts?: HasLenOpt<U>): boolean
+export function hasLn<T extends Iterable<U> | ArrayLike<U> | number, U>(val: T, equalTo: number): boolean
+export function hasLn<T extends Iterable<U> | ArrayLike<U> | number, U>(val: T, opts: any): boolean {
+  const _opts = !opts || _isObj(opts) ? { ...opts } : { equalTo: opts }
+  const { equalTo, lessThan, moreThan, and, also } = _opts ?? {}
+  const v = _isNum(val) ? Number(val) : val as unknown as Iterable<T> | ArrayLike<T>
+  const len: number = _isNum(v) ? v : (v as any).length
   const e = equalTo
   const l = lessThan
   const m = moreThan
@@ -269,7 +270,7 @@ export type HasLenOpt<U> = {
  * @returns {(val is number & boolean)}
  */
 export function isNegNum(val: any): val is number & boolean {
-  return (_isStr(val) ? parseInt(val) : Number(val)) < 0
+  return _isNum(val) && Number(val) < 0
 }
 /**
  *
@@ -279,7 +280,7 @@ export function isNegNum(val: any): val is number & boolean {
  * @returns {(val is number & boolean)}
  */
 export function isPosNum(val: any): val is number & boolean {
-  return toNum(val, 0) > 0
+  return _isNum(val) && Number(val) > 0
 }
 /**
  *
@@ -289,7 +290,7 @@ export function isPosNum(val: any): val is number & boolean {
  * @returns {val is 0}
  */
 export function isZero(val: any): val is 0 {
-  return toNum(val, false) === 0
+  return _isNum(val) && Number(val) === 0
 }
 /**
  *

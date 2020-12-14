@@ -1,4 +1,4 @@
-import { Data } from '../lib/const'
+import { DK } from './config'
 
 /** The index signature of any object */
 export type ID = string
@@ -26,16 +26,16 @@ export type GeoPoint = { longitude: number, latitude: number }
 
 /** The Type literal equivalent for named constants in FieldKind */
 /** A document-oriented database *document value type* i.e. {[P in Key]: <Field>value} */
-export type FieldType<Kind extends Data = any> =
-  Kind extends Data.ARRAY ? any[]
-  : Kind extends Data.BOOLEAN ? boolean
-  : Kind extends Data.BYTES ? number
-  : Kind extends Data.DATETIME ? number
-  : Kind extends Data.FLOAT ? number
-  : Kind extends Data.GEOPOINT ? GeoPoint
-  : Kind extends Data.INTEGER ? number
-  : Kind extends Data.MAP ? object
-  : Kind extends Data.NULL ? null
-  : Kind extends Data.REFERENCE ? string
-  : Kind extends Data.TEXT ? string
+export type FieldType<Kind extends DK = any> =
+  Kind extends DK.ARRAY ? any[]
+  : Kind extends DK.BOOLEAN ? boolean
+  : Kind extends DK.BLOB ? Uint8Array | string /* Base64 string */
+  : Kind extends DK.DATETIME ? number | Date
+  : Kind extends DK.FLOAT ? number
+  : Kind extends DK.GEOPOINT ? GeoPoint
+  : Kind extends DK.INTEGER ? number
+  : Kind extends DK.DICTIONARY ? Dictionary
+  : Kind extends DK.NULL ? null
+  : Kind extends DK.RELATION ? Dictionary
+  : Kind extends DK.TEXT ? string
   : never

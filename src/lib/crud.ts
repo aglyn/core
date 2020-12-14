@@ -1,4 +1,4 @@
-import { ID } from './data'
+import { ID } from './types'
 
 /**
  * Local properties and methods required for CRUD logic

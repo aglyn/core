@@ -3,14 +3,14 @@
  *
  * ### Example (es module)
  * ```js
- * import { double } from 'typescript-starter'
+ * import { double } from '@aglyn/core'
  * console.log(double(4))
  * // => 8
  * ```
  *
  * ### Example (commonjs)
  * ```js
- * var double = require('typescript-starter').double;
+ * var double = require('@aglyn/core').double;
  * console.log(double(4))
  * // => 8
  * ```
@@ -20,8 +20,8 @@
  * @anotherNote Some other value.
  */
 export const double = (value: number) => {
-  return value * 2;
-};
+  return value * 2
+}
 
 /**
  * Raise the value of the first parameter to the power of the second using the
@@ -29,14 +29,14 @@ export const double = (value: number) => {
  *
  * ### Example (es module)
  * ```js
- * import { power } from 'typescript-starter'
+ * import { power } from '@aglyn/core'
  * console.log(power(2,3))
  * // => 8
  * ```
  *
  * ### Example (commonjs)
  * ```js
- * var power = require('typescript-starter').power;
+ * var power = require('@aglyn/core').power;
  * console.log(power(2,3))
  * // => 8
  * ```
@@ -47,5 +47,5 @@ export const power = (base: number, exponent: number) => {
   /**
    * This es7 exponentiation operator is transpiled by TypeScript
    */
-  return base ** exponent;
-};
+  return base ** exponent
+}

@@ -50,25 +50,21 @@ export function ensureObject<T>(val: T, elseT: any = {}): T extends object ? T :
 }
 
 /**
- * Set a nested property within an object literal
+ * Get safe property
  *
- * EXAMPLE:
- * const obj = {'a': {'prop': {'that': 'exists'}}};
- * setNestedProperty(obj, 'a.very.deep.prop', 'value')
+ * @see getDeepProperty
+ * @see setDeepProperty
  *
- * @see getNestedProperty
- *
- * @param obj {object}
- * @param path {string}
- * @param val {any}
+ * @export
+ * @template T
+ * @template K
+ * @param {T} obj
+ * @param {K} key
+ * @returns {T[K]}
  */
-export function setNestedProperty(obj: object, path: string, val: any) {
-  const keys = path.split('.')
-  const lastKey = keys.pop()
-  const lastObj = keys.reduce((obj, key) =>
-    obj[key] = obj[key] || {}, obj,
-  )
-  lastObj[lastKey] = val
+export function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] | undefined {
+  if (!_isObj(obj)) return undefined
+  return obj[key]
 }
 
 /**
@@ -78,33 +74,69 @@ export function setNestedProperty(obj: object, path: string, val: any) {
  * const obj = {'a': {'prop': {'that': 'exists'}}};
  * getNestedProperty(obj, 'a.very.deep.prop', 'value')
  *
- * @see setNestedProperty
+ * @see getProperty
+ * @see setDeepProperty
  *
- * @param obj {object}
- * @param path {string}
+ * @export
+ * @template T
+ * @param {T} obj
+ * @param {string} path
+ * @param {string} [separator='.']
+ * @returns {*}
  */
-export function getNestedProperty(obj: object, path: string): any {
-  const keys = path.split('.')
+export function getDeepProperty<T>(obj: T, path: string, separator = '.'): any {
+  const keys = path.split(separator)
   const lastKey = keys.pop()
-  const lastObj = keys.reduce((obj, key) =>
-    obj[key] = obj[key] || {}, obj,
-  )
+  const lastObj = keys.reduce((v, k) => (
+    v[k] = v[k] ?? {}
+  ), obj)
   return lastObj[lastKey]
 }
 
 /**
+ * Set a nested property within an object literal
  *
+ * EXAMPLE:
+ * const obj = {'a': {'prop': {'that': 'exists'}}};
+ * setNestedProperty(obj, 'a.very.deep.prop', 'value')
+ *
+ * @see getProperty
+ * @see getDeepProperty
  *
  * @export
  * @template T
- * @template K
  * @param {T} obj
- * @param {K} key
- * @returns {T[K]}
+ * @param {string} path
+ * @param {*} val
+ * @param {string} [separator='.']
  */
-export function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
-  if (!_isObj(obj)) return undefined
-  return obj[key]
+export function setDeepProperty<T>(obj: T, path: string, val: any, separator = '.'): T {
+  const keys = path.split(separator)
+  const lastKey = keys.pop()
+  const lastObj = keys.reduce((v, k) => (
+    v[k] = v[k] ?? {}
+  ), obj)
+  lastObj[lastKey] = val
+  return obj
+}
+
+/**
+ * Sort an array of object by a specified property path, optional second sorter
+ *
+ * @export
+ * @template T
+ * @param {T[]} items
+ * @param {string} firstPath
+ * @param {string} [secondPath]
+ * @returns {T[]}
+ */
+export function sortBy<T>(items: T[], firstPath: string, secondPath?: string): T[] {
+  const lgr = (a, b, p) => getDeepProperty(a, p) > getDeepProperty(b, p)
+  const eq = (a, b, p) => getDeepProperty(a, p) === getDeepProperty(b, p)
+  return items.sort((a, b) => (lgr(a, b, firstPath) ? 1
+    : (secondPath && eq(a, b, firstPath)) ? lgr(a, b, secondPath) ? 1 : -1
+      : -1
+  ))
 }
 
 /**
@@ -433,19 +465,19 @@ export function reorderArray<K extends number & keyof T, T extends Array<U>, U>(
 }
 
 /**
- *
+ * Shortcut to trim a string
  *
  * @export
  * @template T
  * @param {T} val
  * @returns {string}
  */
-export function trimString<T>(val: T): string {
+export function trim<T>(val: T): string {
   return s(val).trim()
 }
 
 /**
- *
+ * Capitalize the first word in the string
  *
  * @export
  * @template T
@@ -458,7 +490,7 @@ export function capitalize<T extends string>(val: T): T {
 }
 
 /**
- *
+ * Capitalize every word separated by a space
  *
  * @export
  * @template T
@@ -471,7 +503,7 @@ export function capitalizeTitle<T extends string>(val: T): T {
 
 
 /**
- *
+ * Create a numeronym string from the provided string of characters
  *
  * @export
  * @param {string} str
@@ -503,21 +535,21 @@ export type NumeronymOpts = {
 }
 
 /**
- *
+ * Ensure and parse any value to a number
  *
  * @export
- * @param {*} val
- * @param {*} [elseT]
- * @param {number} [radix]
+ * @param {*} val the value to parse into a number
+ * @param {*} [elseT] returns this if parsing fails
+ * @param {number} [radix] only necessary if value is of type string
  * @returns {(number | typeof elseT)}
  */
 export function toNum(val: any, elseT?: any, radix?: number): number | typeof elseT {
   const num = _isNum(radix) && _isStr(val) ? parseInt(val, radix) : Number(val)
-  return isNaN(num) ? elseT : num
+  return isNaN(num) ? elseT ?? 0 : num
 }
 
 /**
- *
+ * Convert decimal/number into its Base16/Hexadecimal equivalent
  *
  * @export
  * @param {number} val
@@ -528,7 +560,7 @@ export function numToHex(val: number): string {
 }
 
 /**
- *
+ * Convert Base16/Hexadecimal string to its decimal/number equivalent
  *
  * @export
  * @param {string} val
