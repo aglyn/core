@@ -1,30 +1,3 @@
-import { numeronym } from './utils'
-
-
-/**
- * The classification to describe the Document model instance
- */
-export enum Classification {
-  FIELD = 'f3d',
-  DOCUMENT = 'd6t',
-  COLLECTION = 'c8n',
-  SUB_COLLECTION = 's12n',
-  VALUE = 'v3e',
-}
-
-/**
- * Used for local reference to specify/determine remote data type in storage
- * All values stored are critically dependent on the values of the enum named constants
- */
-export type DataTypeConfig = {
-  id?: string
-  name: string
-}
-export function buildDataType(cnf: DataTypeConfig) {
-  const id = numeronym(cnf.name.toLowerCase())
-  return { ...cnf, id }
-}
-
 /**
  * Data kind
  *
@@ -32,73 +5,28 @@ export function buildDataType(cnf: DataTypeConfig) {
  * @enum {string}
  */
 export enum DK {
-  COLLECTION = 'c8n',
-  DOCUMENT = 'd6t',
+  FIELD = 'f2ld',
+  SUBFIELD = 's5ld',
+  DOCUMENT = 'd5nt',
+  COLLECTION = 'c7on',
+  SUBCOLLECTION = 'sAon',
 
-  ARRAY = 'a3y',
-  BOOLEAN = 'b5n',
-  BLOB = 'b3s',
-  DATETIME = 'd6e',
-  DICTIONARY = 'd8y',
-  FLOAT = 'f3t',
-  GEOPOINT = 'g6t',
-  INTEGER = 'i5r',
-  NULL = 'n2l',
-  RELATION = 'r6n',
-  TEXT = 't2t',
+  BLUEPRINT = 'b6nt',
+  ENTRY = 'e2ry',
+
+  ARRAY = 'a2ay',
+  BOOLEAN = 'b4an',
+  BLOB = 'b1ob',
+  DATETIME = 'd5me',
+  DICTIONARY = 'd7ry',
+  FLOAT = 'f2at',
+  GEOPOINT = 'g5nt',
+  INTEGER = 'i4er',
+  NULL = 'n2ll',
+  TEXT = 't1xt',
+
+  RELATION = 'r5on',
 }
-
-// export const DKMeta = mapObject(DK, (value, key) => {
-//   const nym =
-
-// })
-
-// const a = mapObject(DK, (v, k, i, arr) => {
-//   console.log('Zach last prt differ on enumerate', 'i', i, JSON.stringify(arr))
-//   return v + 'aa'
-// })
-
-export const dataTypes = {
-  ARRAY: buildDataType({ name: 'Array' }),
-  BOOLEAN: buildDataType({ name: 'Boolean' }),
-  BYTES: buildDataType({ name: 'Bytes' }),
-  DATETIME: buildDataType({ name: 'DateTime' }),
-  FLOAT: buildDataType({ name: 'Float' }),
-  GEOPOINT: buildDataType({ name: 'GeoPoint' }),
-  INTEGER: buildDataType({ name: 'Integer' }),
-  MAP: buildDataType({ name: 'Map' }),
-  NULL: buildDataType({ name: 'Null' }),
-  RELATION: buildDataType({ name: 'Relation' }),
-  TEXT: buildDataType({ name: 'Text' }),
-}
-
-export const DataFlags = [
-  DK.ARRAY,
-  DK.BOOLEAN,
-  DK.BLOB,
-  DK.DATETIME,
-  DK.FLOAT,
-  DK.GEOPOINT,
-  DK.INTEGER,
-  DK.DICTIONARY,
-  DK.NULL,
-  DK.RELATION,
-  DK.TEXT,
-]
-
-/** Dynamic data kind allowing nesting */
-export type NestableDataKind = DK.ARRAY | DK.DICTIONARY
-/** Static data kinds (i.e. string, number, boolean, null) */
-export type StaticDataKind =
-  DK.BOOLEAN
-  | DK.BLOB
-  | DK.DATETIME
-  | DK.FLOAT
-  | DK.GEOPOINT
-  | DK.INTEGER
-  | DK.NULL
-  | DK.RELATION
-  | DK.TEXT
 
 /**
  * Evaluation kinds
@@ -108,17 +36,22 @@ export enum Eval {
   Regex = 'r3x',
 }
 
+console.log('DKDKDKDKDK Mapped', DK, JSON.stringify(DK), Object.keys(DK))
+
 /**
  * Property name index signatures
  */
 export const Sig = {
-  Collection: 'collection',
-  Document: 'document',
-  Field: 'field',
-  SubField: 'subfield',
+
+  Fields: 'fields',
+  Subfields: 'subfields',
+  Documents: 'documents',
+  Collections: 'collections',
+  Subcollections: 'subcollections',
 
   Model: 'model',
   Blueprint: 'blueprint',
+  Entries: 'entries',
 
   Id: 'id',
   Name: 'name',
@@ -139,9 +72,16 @@ export const Sig = {
 export const lbl = {
 
   /** System class types */
+  [DK.FIELD]: 'Field',
+  [DK.SUBFIELD]: 'Subfield',
   [DK.DOCUMENT]: 'Document',
   [DK.COLLECTION]: 'Collection',
-  /** Data Types */
+  [DK.SUBCOLLECTION]: 'Subcollection',
+
+  [DK.BLUEPRINT]: 'Blueprint',
+  [DK.ENTRY]: 'Entry',
+
+  /** Field Data Types */
   [DK.ARRAY]: 'Array',
   [DK.BOOLEAN]: 'Boolean',
   [DK.BLOB]: 'Bytes',
@@ -155,14 +95,16 @@ export const lbl = {
   [DK.TEXT]: 'Text',
 
   /** Entity type fields */
-  [Sig.Collection]: 'Collection',
-  [Sig.Document]: 'Documents',
-  [Sig.Field]: 'Fields',
-  [Sig.SubField]: 'Subfields',
+  [Sig.Fields]: 'Fields',
+  [Sig.Subfields]: 'Subfields',
+  [Sig.Documents]: 'Documents',
+  [Sig.Collections]: 'Collections',
+  [Sig.Subcollections]: 'Subcollections',
 
   /** Instance fields */
   [Sig.Blueprint]: 'Blueprint',
   [Sig.Model]: 'Model',
+  [Sig.Entries]: 'Entries',
 
   /** Meta fields */
   [Sig.Id]: 'Unique ID',
@@ -171,7 +113,8 @@ export const lbl = {
   [Sig.Value]: 'Value',
 
   /** Timestamp fields */
-  [Sig.Created]: 'Created Date',
-  [Sig.Updated]: 'Updated Date',
-  [Sig.Deleted]: 'Deleted Date',
+  [Sig.Created]: 'Created At',
+  [Sig.Updated]: 'Updated At',
+  [Sig.Deleted]: 'Deleted At',
+
 }

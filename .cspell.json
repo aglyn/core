@@ -24,6 +24,8 @@
         "Numeronym",
         "prettierignore",
         "sandboxed",
+        "SUBCOLLECTION",
+        "subcollections",
         "transpiled",
         "typedoc",
         "untracked"

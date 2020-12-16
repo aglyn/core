@@ -1,24 +1,25 @@
 import { defaultAppConfig } from '../app-defaults'
 
-import { Collection, CollectionModel } from './collection'
-import { DK } from './config'
-import { DocumentModel } from './document'
+import { DK, } from './config'
+import { Document, DocumentModel } from './document'
+import { Field } from './field'
 import { Dictionary, FieldType, ID } from './types'
+import { copy } from './utils'
 
 interface ModelBase extends Dictionary {
   id?: ID
   name?: string
   kind?: DK
 }
-export interface Field extends ModelBase {
-  subFields?: Field[]
+export interface FieldT extends ModelBase {
+  subfields?: Field[]
 
   // TODO: evaluation rules
   // eval?: Eval | Eval[] | { [field: string]: Eval | Eval[] }
 }
 export interface Blueprint extends ModelBase {
   kind: DK.DOCUMENT | DK.COLLECTION
-  fields?: Field[]
+  fields?: FieldT[]
 
   // TODO: rules for the fields
   // rules?: any[]
@@ -42,7 +43,7 @@ export interface BlueprintCollection<Model extends Blueprint = Blueprint> extend
  * Describes the initial configuration for the application controller
  */
 export interface AppControllerConfig {
-  blueprints: BlueprintCollection
+  structure: DocumentModel//Blueprint
 }
 
 /**
@@ -118,37 +119,39 @@ export class AppController {
    * @type {CollectionModel}
    * @memberof AppController
    */
-  private _collections: CollectionModel
+  private _app: DocumentModel
 
 
   private constructor(config?: AppControllerConfig) {
-    this._config = { ...defaultAppConfig, ...config }
-    this._collections = new Collection()
-    const bpCollection = new Collection(this._config.blueprints).init()
-    this._collections.addSubCollection(bpCollection)
-    this._collections.init()
+    this._config = { ...copy(defaultAppConfig), ...copy(config) }
+    this._app = new Document(this._config.structure).init()
+    console.log('appp', this._app)
   }
 
-  getCollectionById(id: ID): CollectionModel | undefined
-  getCollectionById(...ids: ID[]): CollectionModel[]
-  getCollectionById(id: ID, ...ids: ID[]): CollectionModel | CollectionModel[] | undefined {
-    return this._collections.getSubCollectionById(id, ...ids)
+  getConfig() {
+    return this._config
   }
 
-  addCollection(v: CollectionModel<DocumentModel>): this {
-    this._collections.addSubCollection(v)
+  getCollectionById(id: ID): DocumentModel | undefined
+  getCollectionById(...ids: ID[]): DocumentModel[]
+  getCollectionById(id: ID, ...ids: ID[]): DocumentModel | DocumentModel[] | undefined {
+    return this._app.getSubcollectionById(id, ...ids)
+  }
+
+  addCollection(v: DocumentModel): this {
+    this._app.addSubcollection(v)
     return this
   }
 
   removeCollection(id: ID): this
-  removeCollection(item: CollectionModel): this
-  removeCollection(item: ID | CollectionModel): this {
-    this._collections.removeSubCollection(item)
+  removeCollection(item: DocumentModel): this
+  removeCollection(item: ID | DocumentModel): this {
+    this._app.removeSubcollection(item)
     return this
   }
 
-  getAllCollections(): CollectionModel {
-    return this._collections
+  getAllCollections(): DocumentModel {
+    return this._app
   }
 
 }

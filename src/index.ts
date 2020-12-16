@@ -9,6 +9,7 @@ export * from './lib/utils'
 // Models
 export * from './lib/collection'
 export * from './lib/document'
+export * from './lib/field'
 export * from './lib/normalized'
 
 // Data
