@@ -1,63 +1,30 @@
-import { BaseDocument, BaseDocumentModel } from './base'
-import { Collection, CollectionModel } from './collection'
-import { Dod } from './dod'
-import { Field, FieldModel } from './field'
-import { Normalized, NormalizedData } from './normalized'
-import { ID } from './types'
+import { Dod } from '../interfaces/dod'
+import { NormalizedData } from '../interfaces/normalized'
+import { CollectionRef, DocumentRef, FieldRef } from '../interfaces/ref-controller'
+import { Normalized } from '../models/normalized'
+import { ID } from '../types'
+
+import { BaseRefController } from './BaseRefController'
+import { CollectionRefController } from './CollectionRefController'
+import { FieldRefController } from './FieldRefController'
 
 
-/**
- * Instance outline base for all documents in the DB
- *
- * @export
- * @interface DocumentModel
- * @extends {Dod.DocumentRef<FT, ST>}
- * @extends {BaseDocumentModel<Dod.DocumentRef<FT, ST>>}
- * @template FT
- * @template ST
- */
-export interface DocumentModel<FT extends FieldModel = FieldModel, ST extends CollectionModel = CollectionModel> extends Dod.Ref.DocumentRef<FT, ST>, BaseDocumentModel<Dod.Ref.DocumentRef<FT, ST>> {
 
-  fieldModel: new (...args: any[]) => FT
-  subcollectionModel: new (...args: any[]) => ST
-
-  readonly fields: NormalizedData<FT>
-  readonly subcollections: NormalizedData<ST>
-
-  createField(...args: any[]): FT
-  createSubcollection(...args: any[]): ST
-
-  setField(id: ID, value: FT, index?: number): this
-  setSubcollection(id: ID, value: ST, index?: number): this
-
-  getField(id: ID): FT | null
-  getSubcollection(id: ID): ST | null
-
-  removeField(id: ID): this
-  removeSubcollection(id: ID): this
-
-  getAllFields(): FT[]
-  getAllSubcollections(): ST[]
-
-  setFields(fields: NormalizedData<FT>): this
-  setSubcollections(collections: NormalizedData<ST>): this
-
-}
 
 /**
  * Provides base logic for all documents in the DB
  *
  * @export
- * @class Document
- * @extends {BaseDocument<Dod.DocumentRef<FT, ST>>}
- * @implements {DocumentModel<FT, ST>}
+ * @class DocumentRefController
+ * @extends {BaseRefController<Dod.DocumentRef<FT, ST>>}
+ * @implements {DocumentRef<FT, ST>}
  * @template FT
  * @template ST
  */
-export class Document<FT extends FieldModel = FieldModel, ST extends CollectionModel = CollectionModel> extends BaseDocument<Dod.Ref.DocumentRef<FT, ST>> implements DocumentModel<FT, ST> {
+export class DocumentRefController<FT extends FieldRef = FieldRef, ST extends CollectionRef = CollectionRef> extends BaseRefController<Dod.Ref.DocumentRef<FT, ST>> implements DocumentRef<FT, ST> {
 
-  public fieldModel: new (...args: any[]) => FT = Field as any
-  public subcollectionModel: new (...args: any[]) => ST = Collection as any
+  public fieldModel: new (...args: any[]) => FT = FieldRefController as any
+  public subcollectionModel: new (...args: any[]) => ST = CollectionRefController as any
 
   public get fields(): NormalizedData<FT> { return this.get('fields') }
   public get subcollections(): NormalizedData<ST> { return this.get('subcollections') }
@@ -79,7 +46,7 @@ export class Document<FT extends FieldModel = FieldModel, ST extends CollectionM
    * creating the object
    *
    * @public
-   * @memberof Document
+   * @memberof DocumentRefController
    */
   public init(): this {
     this.preInit && this.preInit()
@@ -97,7 +64,7 @@ export class Document<FT extends FieldModel = FieldModel, ST extends CollectionM
     }
     if (this.fields instanceof Normalized) {
       this.fields.toArray().forEach(field => {
-        if (!(field instanceof Field)) {
+        if (!(field instanceof FieldRefController)) {
           this.setField(
             field.id, this.createField(field).init()
           )
@@ -114,7 +81,7 @@ export class Document<FT extends FieldModel = FieldModel, ST extends CollectionM
     }
     if (this.subcollections instanceof Normalized) {
       this.subcollections.toArray().forEach(col => {
-        if (!(col instanceof Collection)) {
+        if (!(col instanceof CollectionRefController)) {
           this.setSubcollection(
             col.id, this.createSubcollection(col).init()
           )

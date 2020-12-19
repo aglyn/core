@@ -1,5 +1,6 @@
+import { Dictionary } from '../types'
+
 import { NormalizedData } from './normalized'
-import { Dictionary } from './types'
 
 /**
  * (D)Document-(o)oriented (d)database (Dob)
@@ -50,13 +51,13 @@ export namespace Dod {
   }
 
   /** Document Field */
-  export type Field<T = any> = FT.Any<T>
+  export type FieldValueType<T = any> = FT.Any<T>
 
   /** Document */
-  export type Document = { [fieldId: string]: Field }
+  export type DocumentType = { [fieldId: string]: FieldValueType }
 
   /** Collection */
-  export type Collection = { [documentId: string]: Document }
+  export type CollectionType = { [documentId: string]: DocumentType }
 
   /** Ref Models */
   export namespace Ref {
@@ -69,7 +70,7 @@ export namespace Dod {
       kind: string | number
     }
 
-    export type Value<T = Field> = {
+    export type Value<T = FieldValueType> = {
       value?: T
     }
 
@@ -85,7 +86,7 @@ export namespace Dod {
       subcollections?: T
     }
 
-    export type FieldRef<T = Field> =
+    export type FieldRef<T = FieldValueType> =
       Id & Kind & Value<T>
 
     export type DocumentRef<F = FieldRef, S = CollectionRef<any>> =

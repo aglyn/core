@@ -1,39 +1,19 @@
-import { BaseDocument, BaseDocumentModel } from './base'
-import { Dod } from './dod'
-import { ID } from './types'
+import { Dod } from '../interfaces/dod'
+import { FieldRef } from '../interfaces/ref-controller'
+import { ID } from '../types'
 
-/**
- * Instance outline base for all documents in the DB
- *
- * @export
- * @interface FieldModel
- * @extends {Dod.FieldRef<T>}
- * @extends {BaseDocumentModel<Dod.FieldRef<T>>}
- * @template T
- */
-export interface FieldModel<T extends Dod.Field = Dod.Field> extends Dod.Ref.FieldRef<T>, BaseDocumentModel<Dod.Ref.FieldRef<T>> {
-
-  readonly value: T | null
-  readonly kind: string | number
-
-  getValue(): T | null
-  setValue(value: T): this
-
-  getKind(): string | number
-  setKind(value: string | number): this
-
-}
+import { BaseRefController } from './BaseRefController'
 
 /**
  * Provides base logic for all documents in the DB
  *
  * @export
- * @class Field
- * @extends {BaseDocument<Dod.FieldRef<T>>}
- * @implements {FieldModel<T>}
+ * @class FieldRefController
+ * @extends {BaseRefController<Dod.FieldRef<T>>}
+ * @implements {FieldRef<T>}
  * @template T
  */
-export class Field<T extends Dod.Field = Dod.Field> extends BaseDocument<Dod.Ref.FieldRef<T>> implements FieldModel<T> {
+export class FieldRefController<T extends Dod.FieldValueType = Dod.FieldValueType> extends BaseRefController<Dod.Ref.FieldRef<T>> implements FieldRef<T> {
 
   public get value(): T { return this.get('value') }
   public get kind(): string | number { return this.get('kind') }
@@ -51,7 +31,7 @@ export class Field<T extends Dod.Field = Dod.Field> extends BaseDocument<Dod.Ref
    * creating the object
    *
    * @public
-   * @memberof Field
+   * @memberof FieldRefController
    */
   public init(): this {
     this.preInit && this.preInit()

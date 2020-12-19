@@ -10,6 +10,7 @@ import { toJSON } from './json'
  * @template T
  * @template V
  */
+
 export interface CrudModel<T = any, V = any> extends toJSON<T> {
 
   /**
@@ -35,7 +36,7 @@ export interface CrudModel<T = any, V = any> extends toJSON<T> {
    *
    * @param {ID} id
    * @returns {(V | null)}
-   * @memberof Crud
+   * @memberof CrudModel
    */
   get<K extends keyof T>(id: K): T[K] | null
 
@@ -56,38 +57,4 @@ export interface CrudModel<T = any, V = any> extends toJSON<T> {
    * @memberof CrudModel
    */
   del<K extends keyof T>(id: K): this
-}
-
-/**
- * Methods (set, get, has, del) to c.r.u.d. an index of the data property
- *
- * @export
- * @abstract
- * @class Crud
- * @implements {CrudModel<T>}
- * @template T
- */
-export abstract class Crud<T = any> implements CrudModel<T> {
-  /**
-   * Creates an instance of Crud.
-   * @param {T} [data={} as any]
-   * @memberof Crud
-   */
-  constructor(public readonly data: T = {} as any) { }
-
-  /** @inheritdoc */
-  toJSON(): T { return this.data }
-
-  /** @inheritdoc */
-  set<K extends keyof T>(id: K, value: any): this { this.data[id] = value; return this }
-
-  /** @inheritdoc */
-  get<K extends keyof T>(id: K): T[K] | null { return this.data[id] }
-
-  /** @inheritdoc */
-  has<K extends keyof T>(id: K): boolean { return Object.prototype.hasOwnProperty.call(this.data, id) }
-
-  /** @inheritdoc */
-  del<K extends keyof T>(id: K): this { delete this.data[id]; return this }
-
 }

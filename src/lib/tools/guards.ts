@@ -56,18 +56,18 @@ export function _isSym(val: any): val is symbol {
  * @param {*} val
  * @returns {val is Function}
  */
-export function _isFn(val: any): val is Function {
+export function _isFn(val: any): val is Func {
   return typeof val === 'function'
 }
+export interface Func { (...args: any[]): any }
 /**
- * Is literal type array
+ * Shortcut for Array.isArray
  *
  * @export
- * @template T
- * @param {(T | {})} val
- * @returns {val is (T extends readonly any[] ? (unknown extends T ? never : readonly}
+ * @param {*} val
+ * @returns {val is any[]}
  */
-export function _isArr<T>(val: T | {}): val is (T extends readonly any[] ? (unknown extends T ? never : readonly any[]) : any[]) {
+export function _isArr(val: any): val is any[] {
   return Array.isArray(val)
 }
 /**
@@ -81,23 +81,25 @@ export function _isArrEmpty(val: any): val is [] {
   return _isArr(val) && !val.length
 }
 /**
- * Is literal type object
+ * Is literal type object, this could be any Object type
+ * such as a function, class, null, {}, array etc
  *
  * @export
  * @param {*} val
  * @returns {val is object}
  */
-export function _isObjT(val: any): val is object {
+export function _isObjT(val: any): val is Record<string | number, unknown> {
   return typeof val === 'object'
 }
 /**
- * Is actually a dictionary object and not an array
+ * Is actually a dictionary object (e.g. key:value), but not
+ * an array or null
  *
  * @export
  * @param {*} val
  * @returns {val is Object}
  */
-export function _isObj(val: any): val is object {
+export function _isObj(val: any): val is Record<string, unknown> {
   return !_isNull(val) && _isObjT(val) && !_isArr(val)
 }
 /**
@@ -157,7 +159,7 @@ export function _isStrEmpty(val: any): val is '' {
  * @param {*} val
  * @returns {(val is '' | [])}
  */
-export function _isEmptyStrOrArr(val: any): val is '' | [] {
+export function _isEmptyStrOrArr(val: any): val is ('' | []) {
   return _isStrEmpty(val) && _isArrEmpty(val)
 }
 /**

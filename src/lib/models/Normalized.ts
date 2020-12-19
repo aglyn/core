@@ -1,70 +1,8 @@
-import { _isNum, _isObj } from './guards'
-import { toJSON } from './json'
-import { ID } from './types'
-import { deleteProperty, removeFromArray, reorderArray } from './utils'
+import { NormalizedData, NormalizedModel } from '../interfaces/normalized'
+import { _isNum, _isObj } from '../tools/guards'
+import { deleteProperty, removeFromArray, reorderArray } from '../tools/utils'
+import { ID } from '../types'
 
-/** Normalized local state design for interfacing with 3NF rules  */
-export type NormalizedData<T = any, K extends ID = ID> = {
-  allIds: K[],
-  byId: { [P in K]?: T }
-}
-
-export interface NormalizedModel<T = any, K extends ID = ID> extends NormalizedData<T, K>, toJSON<NormalizedData<T, K>> {
-  readonly length: number
-  /**
-   * The properties to keep when object is passed to JSON.stringify(...)
-   * @returns {NormalizedData<T, K>}
-   * @memberof NormalizedModel
-   */
-  toJSON(): NormalizedData<T, K>
-  /**
-   * Converts the current values into an array ordered by the
-   * appearance of the key in allIds array
-   * @returns {Array<T>}
-   * @memberof NormalizedModel
-   */
-  toArray(): Array<T>
-  /**
-   * Clears all values
-   * @returns {this}
-   * @memberof NormalizedModel
-   */
-  clear(): this
-  /**
-   * Aliases the static method to shortcut delete operations on this instance
-   *
-   * @param {K} id
-   * @returns {this}
-   * @memberof NormalizedModel
-   */
-  remove(id: K): this
-  /**
-   * Returns whether or not the data byId has property key
-   *
-   * @param {ID} id
-   * @returns {boolean}
-   * @memberof NormalizedModel
-   */
-  has(id: ID): boolean
-  /**
-   * Aliases the static method to shortcut set operations on this instance
-   *
-   * @param {ID} id
-   * @param {*} [value]
-   * @param {number} [index]
-   * @returns {this}
-   * @memberof NormalizedModel
-   */
-  set(id: ID, value?: T, index?: number): this
-  /**
-   * Shortcuts getting the value of properties of the current instance
-   *
-   * @param {ID} id
-   * @returns {(undefined | T)}
-   * @memberof NormalizedModel
-   */
-  get(id: ID): undefined | T
-}
 
 /**
  * Normalized data for 3NF

@@ -1,16 +1,23 @@
 import { blueprintModelId, createNewBlueprintEntryDocument, defaultAppConfig } from '../app-defaults'
+import { Dod } from '../interfaces/dod'
+import { CollectionRef, DocumentRef } from "../interfaces/ref-controller"
+import { copyJson } from '../tools/utils'
+import { ID } from '../types'
 
-import { CollectionModel } from './collection'
-import { Document, DocumentModel } from './document'
-import { ID } from './types'
-import { copyJson } from './utils'
+import { DocumentRefController } from './DocumentRefController'
 
+
+export interface CollectionSchema {
+  name: Dod.FT.Text
+
+}
 
 /**
  * Describes the initial configuration for the application controller
  */
 export interface AppControllerConfig {
-  blueprints: DocumentModel
+  blueprints: DocumentRef
+  collections: Dod.CollectionType
 }
 
 /**
@@ -83,10 +90,10 @@ export class AppController {
    * Living collections data
    *
    * @private
-   * @type {CollectionModel}
+   * @type {CollectionRef}
    * @memberof AppController
    */
-  private _blueprints: DocumentModel
+  private _blueprints: DocumentRef
 
 
   private constructor(config?: AppControllerConfig) {
@@ -94,7 +101,7 @@ export class AppController {
       ...copyJson(defaultAppConfig),
       ...copyJson(config ?? {})
     }
-    this._blueprints = Document.from(this._config.blueprints)
+    this._blueprints = DocumentRefController.from(this._config.blueprints)
     this._blueprints.init()
     console.log('_blueprints', this._blueprints)
   }
@@ -103,31 +110,31 @@ export class AppController {
     return this._config
   }
 
-  public createBlueprint(): DocumentModel {
+  public createBlueprint(): DocumentRef {
     const model = this._blueprints.getField(blueprintModelId)
     return createNewBlueprintEntryDocument(model as any)
   }
 
-  public getBlueprintsCollection(): CollectionModel {
+  public getBlueprintsCollection(): CollectionRef {
     console.log("this._blueprints.getSubcollection('blueprints')", this._blueprints.getSubcollection('blueprints'))
     return this._blueprints.getSubcollection('blueprints')
   }
 
-  public getBlueprint(id: ID): DocumentModel | null {
+  public getBlueprint(id: ID): DocumentRef | null {
     return this.getBlueprintsCollection().getDocument(id)
   }
 
-  public setBlueprint(id: ID, value: DocumentModel, index?: number): this {
+  public setBlueprint(id: ID, value: DocumentRef, index?: number): this {
     this.getBlueprintsCollection().setDocument(id, value, index)
     return this
   }
 
-  public getAllBlueprints(): DocumentModel[] {
+  public getAllBlueprints(): DocumentRef[] {
     console.log('getBlueprintsCollection()', this.getBlueprintsCollection())
     return this.getBlueprintsCollection().getAllDocuments()
   }
 
-  public getBlueprints(): DocumentModel {
+  public getBlueprints(): DocumentRef {
     return this._blueprints
   }
 

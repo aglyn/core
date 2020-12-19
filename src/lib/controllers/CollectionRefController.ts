@@ -1,45 +1,23 @@
-import { BaseDocument, BaseDocumentModel } from './base'
-import { Document, DocumentModel } from './document'
-import { Dod } from './dod'
-import { Normalized, NormalizedData } from './normalized'
-import { ID } from './types'
+import { Dod } from '../interfaces/dod'
+import { NormalizedData } from '../interfaces/normalized'
+import { CollectionRef, DocumentRef } from '../interfaces/ref-controller'
+import { Normalized } from '../models/normalized'
+import { ID } from '../types'
 
-/**
- * Instance outline for modeling a collection of documents
- *
- * @export
- * @interface CollectionModel
- * @extends {DocumentModel<F>}
- * @extends {IterableIterator<D>}
- * @template D
- * @template F
- */
-export interface CollectionModel<D extends DocumentModel = any> extends Dod.Ref.CollectionRef<D>, BaseDocumentModel<Dod.Ref.CollectionRef<D>> {
-
-  documentModel: new (...args: any[]) => D
-  readonly documents: NormalizedData<D>
-  readonly length: number
-
-  createDocument(...args: any[]): D
-  setDocument(id: ID, value: D, index?: number): this
-  getDocument(id: ID): D | null
-  removeDocument(id: ID): this
-  getAllDocuments(): D[]
-  setDocuments(documents: NormalizedData<D>): this
-
-}
+import { BaseRefController } from './BaseRefController'
+import { DocumentRefController } from './DocumentRefController'
 
 /**
  * Provides logic for modeling collections of documents
  *
  * @export
- * @class Collection
- * @implements {CollectionModel<D>}
+ * @class CollectionRefController
+ * @implements {CollectionRef<D>}
  * @template D
  */
-export class Collection<D extends DocumentModel = DocumentModel> extends BaseDocument<Dod.Ref.CollectionRef<D>> implements CollectionModel<D> {
+export class CollectionRefController<D extends DocumentRef = DocumentRef> extends BaseRefController<Dod.Ref.CollectionRef<D>> implements CollectionRef<D> {
 
-  public documentModel: new (...args: any[]) => D = Document as any
+  public documentModel: new (...args: any[]) => D = DocumentRefController as any
   public get documents(): NormalizedData<D> { return this.get('documents') }
   public get length(): number { return this.documents?.allIds?.length ?? 0 }
 
@@ -59,7 +37,7 @@ export class Collection<D extends DocumentModel = DocumentModel> extends BaseDoc
    * creating the object
    *
    * @public
-   * @memberof Collection
+   * @memberof CollectionRefController
    */
   public init(): this {
     this.preInit && this.preInit()
@@ -76,7 +54,7 @@ export class Collection<D extends DocumentModel = DocumentModel> extends BaseDoc
     }
     if (this.documents instanceof Normalized) {
       this.documents.toArray().forEach(doc => {
-        if (!(doc instanceof Document)) {
+        if (!(doc instanceof DocumentRefController)) {
           this.setDocument(
             doc.id, this.createDocument(doc).init()
           )

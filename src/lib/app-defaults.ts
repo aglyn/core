@@ -1,58 +1,58 @@
-import { AppControllerConfig } from './lib/app-controller'
-import { Collection } from './lib/collection'
-import { DK, lbl, Sig } from './lib/config'
-import { Document } from './lib/document'
-import { Dod } from './lib/dod'
-import { Field } from './lib/field'
-import { Normalized } from './lib/normalized'
-import { createUid } from './lib/uid'
-import { copyJson, s } from './lib/utils'
+import { DK, lbl, Sig } from './constants'
+import { AppControllerConfig } from './controllers/AppController'
+import { CollectionRefController } from './controllers/CollectionRefController'
+import { DocumentRefController } from './controllers/DocumentRefController'
+import { FieldRefController } from './controllers/FieldRefController'
+import { Dod } from './interfaces/dod'
+import { Normalized } from './models/Normalized'
+import { createUid } from './tools/uid'
+import { copyJson, s } from './tools/utils'
 
 /**
  * Blueprint field model document
  */
 export const fieldModelId = [s(Sig.Field), s(Sig.Model)].join('_')
 export const blueprintModelId = [s(Sig.Blueprint), s(Sig.Model)].join('_')
-export const fieldModel: Document = new Document(
-  s(fieldModelId),
+export const fieldModel: DocumentRefController = new DocumentRefController(
+  fieldModelId,
   Normalized.from(
-    new Field(s(Sig.Name), DK.TEXT).init(),
-    new Field(s(Sig.Kind), DK.TEXT).init(),
-    new Field(s(Sig.Created), DK.DATETIME).init(),
-    new Field(s(Sig.Updated), DK.DATETIME).init(),
-    new Field(s(Sig.Deleted), DK.DATETIME).init(),
+    new FieldRefController(Sig.Name, DK.TEXT).init(),
+    new FieldRefController(Sig.Kind, DK.TEXT).init(),
+    new FieldRefController(Sig.Created, DK.DATETIME).init(),
+    new FieldRefController(Sig.Updated, DK.DATETIME).init(),
+    new FieldRefController(Sig.Deleted, DK.DATETIME).init(),
   )
 ).init()
 
 /**
  * Blueprint model document
  */
-export const blueprintModel: Document = new Document(
-  s(blueprintModelId),
+export const blueprintModel: DocumentRefController = new DocumentRefController(
+  blueprintModelId,
   Normalized.from(
-    new Field(s(Sig.Name), DK.TEXT).init(),
-    new Field(s(Sig.Kind), DK.TEXT, DK.BLUEPRINT).init(),
-    new Field(
-      s(fieldModelId),
+    new FieldRefController(Sig.Name, DK.TEXT).init(),
+    new FieldRefController(Sig.Kind, DK.TEXT, DK.BLUEPRINT).init(),
+    new FieldRefController(
+      fieldModelId,
       DK.DOCUMENT,
       fieldModel
     ).init(),
-    new Field(s(Sig.Created), DK.DATETIME).init(),
-    new Field(s(Sig.Updated), DK.DATETIME).init(),
-    new Field(s(Sig.Deleted), DK.DATETIME).init(),
+    new FieldRefController(Sig.Created, DK.DATETIME).init(),
+    new FieldRefController(Sig.Updated, DK.DATETIME).init(),
+    new FieldRefController(Sig.Deleted, DK.DATETIME).init(),
   ),
   Normalized.from(
-    new Collection(s(Sig.Fields)).init(),
-    new Collection(s(Sig.Entries)).init()
+    new CollectionRefController(s(Sig.Fields)).init(),
+    new CollectionRefController(s(Sig.Entries)).init()
   )
 ).init()
 
 export const createNewBlueprintDocument = (
   name: string,
   kind: string,
-): Document => {
+): DocumentRefController => {
   const copy = copyJson(blueprintModel)
-  const blueprint = new Document(
+  const blueprint = new DocumentRefController(
     createUid(),
     copy.fields,
     copy.subcollections
@@ -64,21 +64,21 @@ export const createNewBlueprintDocument = (
   return blueprint
 }
 
-export const createNewBlueprintFieldDocument = (blueprint: Document) => {
+export const createNewBlueprintFieldDocument = (blueprint: DocumentRefController) => {
   const modelField = blueprint.getField(fieldModelId)
   const copied = copyJson(modelField.getValue() as Dod.Ref.DocumentRef)
-  const modelFieldVal = Document.from(copied).init()
+  const modelFieldVal = DocumentRefController.from(copied).init()
 
-  return new Document(
+  return new DocumentRefController(
     createUid(),
     modelFieldVal.fields,
     modelFieldVal.subcollections
   ).init()
 }
 
-export const createNewBlueprintEntryDocument = (blueprint: Document) => {
+export const createNewBlueprintEntryDocument = (blueprint: DocumentRefController) => {
   console.log('before fieldsCollection', blueprint)
-  const fieldsCollection = Collection.from(
+  const fieldsCollection = CollectionRefController.from(
     copyJson(
       <Dod.Ref.CollectionRef>blueprint.getSubcollection(Sig.Fields)
     )
@@ -88,25 +88,25 @@ export const createNewBlueprintEntryDocument = (blueprint: Document) => {
   const entrySubcollections = new Normalized()
 
   fieldsCollection.getAllDocuments().forEach(document => {
-    const _document = Document.from(document).init()
+    const _document = DocumentRefController.from(document).init()
     entryFields.set(
-      s(_document.id),
-      new Field(
-        s(_document.id),
+      _document.id,
+      new FieldRefController(
+        _document.id,
         _document.getField(Sig.Kind).getValue() as string,
         _document.getField(Sig.Value).getValue(),
       )
     )
     _document.getAllSubcollections().forEach(collection => {
-      const _collection = Collection.from(collection).init()
+      const _collection = CollectionRefController.from(collection).init()
       entrySubcollections.set(
-        s(_collection.id),
+        _collection.id,
         _collection
       )
     })
   })
 
-  return new Document(
+  return new DocumentRefController(
     createUid(),
     entryFields,
     entrySubcollections
@@ -130,15 +130,15 @@ sampleBlueprint
 /**
  * Blueprints collection document
  */
-const blueprints = new Document(
+const blueprints = new DocumentRefController(
   'blueprints',
   Normalized.from(
-    new Field('name', DK.TEXT, lbl[Sig.Blueprint]).init(),
-    new Field('kind', DK.TEXT, DK.COLLECTION).init(),
-    new Field(blueprintModelId, DK.DOCUMENT, blueprintModel).init(),
+    new FieldRefController('name', DK.TEXT, lbl[Sig.Blueprint]).init(),
+    new FieldRefController('kind', DK.TEXT, DK.COLLECTION).init(),
+    new FieldRefController(blueprintModelId, DK.DOCUMENT, blueprintModel).init(),
   ),
   Normalized.from(
-    new Collection('blueprints').init()
+    new CollectionRefController('blueprints').init()
   ),
 ).init()
 
@@ -176,6 +176,7 @@ console.log('blueprintsblue333', blueprints.getSubcollection(Sig.Blueprints).get
  */
 export const defaultAppConfig: AppControllerConfig = {
 
-  blueprints
+  blueprints,
+  collections: {}
 
 }

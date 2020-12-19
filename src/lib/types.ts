@@ -1,4 +1,4 @@
-import { DK } from './config'
+import { DK } from './constants'
 
 /** The index signature of any object */
 export type ID = string

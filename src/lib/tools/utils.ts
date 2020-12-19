@@ -1,7 +1,8 @@
-import { _isArr, _isFn, _isNum, _isObj, _isObjT, _isStr, _isUndef, hasLn } from './guards'
+import { _isArr, _isFn, _isNum, _isObj, _isStr, _isUndef, hasLn } from './guards'
 
 /**
- *
+ * Shortcut for retrieving the length property,
+ * defaults to zero (0) if the property does not exist
  *
  * @export
  * @template T
@@ -9,11 +10,14 @@ import { _isArr, _isFn, _isNum, _isObj, _isObjT, _isStr, _isUndef, hasLn } from 
  * @returns {number}
  */
 export function ln<T>(val: Iterable<T> | ArrayLike<T>): number {
-  return _isArr(val) || _isStr(val) ? val.length : 0
+  if (Object.prototype.hasOwnProperty.call(val ?? [], 'length')) {
+    return val['length'] ?? 0
+  }
+  return 0
 }
 
 /**
- * To string type alias shortcut
+ * Shortcut for String(...)
  *
  * @export
  * @param {*} val
@@ -24,29 +28,29 @@ export function s(val: any): string {
 }
 
 /**
- *
- *
- * @export
- * @template T
- * @param {(T | T[])} val
- * @param {any[]} [elseT=[]]
- * @returns {(T[] | typeof elseT)}
- */
-export function ensureArray<T>(val: T | T[], elseT: any[] = []): T[] | typeof elseT {
-  return _isArr(val) ? val : elseT
-}
-
-/**
- *
+ * Safe array, will always return an array
  *
  * @export
  * @template T
  * @param {T} val
- * @param {*} [elseT={}]
- * @returns {T extends object ? T : typeof elseT}
+ * @param {any[]} [or]
+ * @returns {any[]}
  */
-export function ensureObject<T>(val: T, elseT: any = {}): T extends object ? T : typeof elseT {
-  return _isObjT(val) ? val : elseT
+export function safeArray<T>(val: T, or?: any[]): any[] {
+  return _isArr(val) ? val : _isArr(or) ? or : []
+}
+
+/**
+ * Safe object/{} will always return an object
+ *
+ * @export
+ * @template T
+ * @param {T} val
+ * @param {Record<string, unknown>} [or]
+ * @returns {Record<string, unknown>}
+ */
+export function safeObj<T>(val: T, or?: Record<string, unknown>): Record<string, unknown> {
+  return _isObj(val) ? val : _isObj(or) ? or : {}
 }
 
 /**
@@ -140,19 +144,18 @@ export function sortBy<T>(items: T[], firstPath: string, secondPath?: string): T
 }
 
 /**
- *
+ * Copy an object literal
  *
  * @export
- * @template T
- * @param {T} obj
- * @returns {T}
+ * @param {Record<string, unknown>} obj
+ * @returns
  */
-export function copyObject<T>(obj: T): T {
-  return copy(_isObj(obj) ? obj as Object : obj as unknown)
+export function copyObj(obj: Record<string, unknown>) {
+  return copy(obj)
 }
 
 /**
- * Copy a json object by stringifying it and then parsing
+ * Copy a json object by stringify and then parsing
  *
  * @export
  * @template T
@@ -183,7 +186,7 @@ export function arrayToObjectLiteral(arr: [any, any][]) {
  * @param {T} obj
  * @returns {K[]}
  */
-export function getAllObjectKeys<T extends object, K extends keyof T>(obj: T): K[] {
+export function getAllObjectKeys<T extends Record<string, unknown>, K extends keyof T>(obj: T): K[] {
   return (
     _isFn(Object.getOwnPropertySymbols)
       ? Object.keys(obj).concat(Object.getOwnPropertySymbols(obj) as any)
@@ -201,12 +204,12 @@ export function getAllObjectKeys<T extends object, K extends keyof T>(obj: T): K
  * @param {(val: T[K], key?: K, original?: T) => T[K]} reducerCallback
  * @returns {T}
  */
-export function reduceObject<T extends object, K extends keyof T>(
+export function reduceObject<T extends Record<string, unknown>, K extends keyof T>(
   target: T, reducerCallback: (val: T[K], key?: K, original?: T) => T[K],
 ): T {
   if (_isUndef(reducerCallback)) return target
-  const _target: T = copyObject(target)
-  const original: T = copyObject(target)
+  const _target: T = copyObj(target)
+  const original: T = copyObj(target)
 
   return getAllObjectKeys(_target).reduce((result, key) => {
     result[key as string] = reducerCallback(_target[key] as T[K], key as K, original)
@@ -265,7 +268,7 @@ export function mapObject(target, callbackfn: MapObjectClbkFn, opt?: MapObjectOp
 export type MapObjectClbkFn = (
   value: any,
   key?: string | number,
-  index?: string | number,
+  index?: number,
   array?: Array<any>
 ) => [key: string | number, value: any] | any | void
 export type MapObjectOptions = {
@@ -276,36 +279,41 @@ export type MapObjectOptions = {
 }
 
 /**
- *
+ * Filter indexes inside an object literal. Similar to
+ * Array.filter(...)
  *
  * @export
  * @param {*} target
  * @param {*} callbackfn
  * @returns
  */
-export function filterObject(target, callbackfn) {
-  return mapObject(target, (value, key, ...args): [any, any] | null => {
-    if (_isFn(callbackfn) && callbackfn(value, key, ...args)) {
-      return [key, value]
+export function filterObject<T>(target, predicate: FilterObjPredicate<T>) {
+  return mapObject(target, (v, k, i, a): [any, any] | null => {
+    if (predicate(v, k, i, a)) {
+      return [k, v]
     }
     return null
   }, { advanced: true, filter: true })
 }
+type FilterObjPredicate<T> = {
+  (value: T, key: keyof any, index: number, array: T[]): unknown
+}
 
 
 /**
- *
+ * Shortcut for Object.assign({}, target, ...otherTargets)
  *
  * @export
  * @template T
+ * @template U
  * @param {T} target
- * @param {T} source
- * @returns {T}
+ * @param {...U[]} source
+ * @returns {(T & U)}
  */
-export function updateObject<T>(target: T, source: T): T {
+export function updateObj<T, U>(target: T, ...source: U[]): T & U {
   // Encapsulate the idea of passing a new object as the first parameter
   // to Object.assign to ensure we correctly copy data instead of mutating
-  return Object.assign({}, target, source)
+  return Object.assign({}, target, ...source)
 }
 
 /**
@@ -321,7 +329,7 @@ export function updateObject<T>(target: T, source: T): T {
  */
 export function deleteProperty<T, K extends keyof T>(obj: Readonly<T>, key: K, options?: { copy: boolean }): T {
   const opts = { copy: false, ...options }
-  const newObj = opts.copy ? copyObject(obj) : obj
+  const newObj = opts.copy ? copyObj(obj) : obj
   delete newObj[key]
   return newObj
 }
@@ -371,7 +379,7 @@ export function copyArray<T, U, F extends (v: T, k: number) => U = undefined>(
  * @param {(Array<T> | object)} newArray
  * @returns {Array<T>}
  */
-export function updateArray<T>(oldArray: Array<T>, newArray: Array<T> | object): Array<T> {
+export function updateArray<T>(oldArray: Array<T>, newArray: Array<T> | Record<string, unknown>): Array<T> {
   return Object.assign([], oldArray, newArray)
 }
 
@@ -394,7 +402,7 @@ export function mutateArray<T>(
 ): MutatedArrayResponse<T> {
   const { replace, copy } = { replace: true, copy: false, ...options }
   const _array = copy ? copyArray(array) : array
-  const _items = ensureArray(items, items ? [items] : [])
+  const _items = safeArray(items, items ? [items] : [])
   const deleteCount = (replace ? ln(_items) : 0)
   const deleted = _array.splice(index, deleteCount, ..._items)
 
@@ -454,7 +462,7 @@ export function removeAtIndex<T>(index: number, array: Array<T>): MutatedArrayRe
  * @returns {Array<T>}
  */
 export function removeFromArray<T>(item: T, array: Array<T>): Array<T> {
-  return ensureArray(array).filter(i => i !== item)
+  return safeArray(array).filter(i => i !== item)
 }
 
 /**
@@ -477,7 +485,7 @@ export function reorderArray<K extends number & keyof T, T extends Array<U>, U>(
 }
 
 /**
- * Shortcut to trim a string
+ * Shortcut for String(val).trim()
  *
  * @export
  * @template T
@@ -509,8 +517,8 @@ export function capitalize<T extends string>(val: T): T {
  * @param {T} val
  * @returns {T}
  */
-export function capitalizeTitle<T extends string>(val: T): T {
-  return s(val).split(' ').map(i => capitalize(i)).join(' ') as T
+export function capitalizeTitle<T extends string>(val: T, separator = ' '): T {
+  return s(val).split(separator).map(i => capitalize(i)).join(separator) as T
 }
 
 
@@ -604,26 +612,22 @@ const assign = Object.assign || /* istanbul ignore next */ (<T, S>(target: T, so
   return target as T & S
 })
 export function copy<T, U, K, V, X>(
-  object: T extends ReadonlyArray<U>
-    ? ReadonlyArray<U>
-    : T extends Map<K, V>
-    ? Map<K, V>
-    : T extends Set<X>
-    ? Set<X>
-    : T extends object
-    ? T
+  value: T extends ReadonlyArray<U> ? ReadonlyArray<U>
+    : T extends Map<K, V> ? Map<K, V>
+    : T extends Set<X> ? Set<X>
+    : T extends Record<string, unknown> ? T
     : any,
 ) {
-  return Array.isArray(object)
-    ? assign(object.constructor(object.length), object)
-    : (type(object) === 'Map')
-      ? new Map(object as Map<K, V>)
-      : (type(object) === 'Set')
-        ? new Set(object as Set<X>)
-        : (object && typeof object === 'object')
-          ? assign(Object.create(Object.getPrototypeOf(object)), object) as T
+  return Array.isArray(value)
+    ? assign(value.constructor(value.length), value)
+    : (type(value) === 'Map')
+      ? new Map(value as Map<K, V>)
+      : (type(value) === 'Set')
+        ? new Set(value as Set<X>)
+        : (value && typeof value === 'object')
+          ? assign(Object.create(Object.getPrototypeOf(value)), value) as T
           /* istanbul ignore next */
-          : object as T
+          : value as T
 }
 /** ===================================================================================
  * END CHERRY PICK FROM:
