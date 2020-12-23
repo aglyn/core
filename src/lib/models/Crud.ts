@@ -15,7 +15,7 @@ export abstract class Crud<T = any> implements CrudModel<T> {
    * @param {T} [model={} as any]
    * @memberof Crud
    */
-  constructor(public readonly model: T = {} as any) { }
+  constructor(public model: T = {} as any) { }
 
   /** @inheritdoc */
   toJSON(): T { return this.model }

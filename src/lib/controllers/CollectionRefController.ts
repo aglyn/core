@@ -3,14 +3,14 @@ import { PKey, Ref, Schema } from '../interfaces/dod'
 import { BaseRefController } from './BaseRefController'
 
 
-export class CollectionRefController<S extends Schema.CollectionDocumentMeta> extends BaseRefController<Ref.Collection<S>> {
+export class CollectionRefController<S extends Schema.CollectionModel> extends BaseRefController<S, Ref.Collection<S>> {
 
-  constructor(id: PKey, schema: S, documents?: Ref.CollectionDocuments<S>) {
-    super({ id, schema, documents })
+  constructor(id: PKey, schema: S, documents?: Ref.Collection<S>) {
+    super({ id, schema }, { ...documents })
   }
 
-  public static from<S extends Schema.CollectionDocumentMeta>(model: Ref.Collection<S>) {
-    return new this(model?.id, model?.schema, model?.documents)
+  public static from<S extends Schema.CollectionModel>(id: PKey, schema: S, documents?: Ref.Collection<S>) {
+    return new this(id, schema, documents)
   }
 
   /**
@@ -45,11 +45,12 @@ export class CollectionRefController<S extends Schema.CollectionDocumentMeta> ex
   }
 
   public getDocuments(): Ref.CollectionDocuments<S> {
-    return this.get('documents')
+    return this.model
   }
 
   public setDocuments(value: Ref.CollectionDocuments<S>): this {
-    return this.set('documents', value)
+    this.model = value
+    return this
   }
 
 }

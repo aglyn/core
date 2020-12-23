@@ -1,5 +1,5 @@
 import { AppControllerConfig } from './controllers/AppController'
-import { FT, Schema } from './interfaces/dod'
+import { FT, Ref } from './interfaces/dod'
 
 // /**
 //  * Blueprint field model document
@@ -148,21 +148,31 @@ import { FT, Schema } from './interfaces/dod'
 //   ])
 // ).init()
 
-const testDbSchema: Schema.CollectionsMeta = {
-  test_collection: {
-    name: { singular: 'Test Collection', plural: 'Test Collections' },
-    created: Date.now(),
-    fields: {
-      sjdf5lgnc: {
-        name: { singular: 'First Name', plural: 'First Names' },
-        $type: FT.Tag.text
-      },
-      sdkgmlr34: {
-        name: { singular: 'Last Name', plural: 'Last Names' },
-        $type: FT.Tag.text
-      },
+const testDb: Ref.Database = {
+  schemas: {
+    'test_collection': {
+      name: { singular: 'Test Collection', plural: 'Test Collections' },
+      created: Date.now(),
+      fields: {
+        sjdf5lgnc: {
+          name: { singular: 'First Name', plural: 'First Names' },
+          $type: FT.Tag.text
+        },
+        sdkgmlr34: {
+          name: { singular: 'Last Name', plural: 'Last Names' },
+          $type: FT.Tag.text
+        },
+      }
     }
   },
+  instances: {
+    'test_collection': {
+      test_document: {
+        sjdf5lgnc: 'Zach',
+        sdkgmlr34: 'Gover',
+      }
+    }
+  }
 }
 
 /**
@@ -172,34 +182,9 @@ const testDbSchema: Schema.CollectionsMeta = {
 export const defaultAppConfig: AppControllerConfig = {
 
   databases: {
-    test_db: {
-      id: 'test_db',
-      schema: testDbSchema,
-      collections: {
-        test_collection: {
-          id: 'test_collection',
-          schema: testDbSchema.test_collection,
-          documents: {
-            test_document: {
-              id: 'test_document',
-              schema: testDbSchema.test_collection.fields,
-              fields: {
-                sjdf5lgnc: {
-                  id: 'sjdf5lgnc',
-                  schema: testDbSchema.test_collection.fields.sjdf5lgnc,
-                  value: 'Zach'
-                },
-                sdkgmlr34: {
-                  id: 'sdkgmlr34',
-                  schema: testDbSchema.test_collection.fields.sdkgmlr34,
-                  value: 'Zach'
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+
+    test_db: testDb
+
   }
 
 }

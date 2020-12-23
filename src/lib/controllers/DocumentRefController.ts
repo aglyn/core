@@ -11,14 +11,14 @@ import { BaseRefController } from './BaseRefController'
  * @extends {BaseRefController<Ref.Document<S>>}
  * @template S
  */
-export class DocumentRefController<S extends Schema.ModelFields> extends BaseRefController<Ref.Document<S>> {
+export class DocumentRefController<S extends Schema.ModelFields> extends BaseRefController<S, Ref.Document<S>> {
 
-  constructor(id: PKey, schema: S, fields?: Ref.DocumentFields<S>) {
-    super({ id, schema, fields })
+  constructor(id: PKey, schema: S, fields?: Ref.Document<S>) {
+    super({ id, schema }, { ...fields })
   }
 
-  public static from<S extends Schema.ModelFields>(model: Ref.Document<S>) {
-    return new this(model?.id, model?.schema, model?.fields)
+  public static from<S extends Schema.ModelFields>(id: PKey, schema: S, fields?: Ref.Document<S>) {
+    return new this(id, schema, fields)
   }
 
   /**
@@ -53,11 +53,12 @@ export class DocumentRefController<S extends Schema.ModelFields> extends BaseRef
   }
 
   public getFields(): Ref.DocumentFields<S> {
-    return this.get('fields')
+    return this.model
   }
 
   public setFields(value: Ref.DocumentFields<S>): this {
-    return this.set('fields', value)
+    this.model = value
+    return this
   }
 
 }

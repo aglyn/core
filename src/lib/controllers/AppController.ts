@@ -1,5 +1,5 @@
 import { defaultAppConfig } from '../app-defaults'
-import { PKey, Schema } from '../interfaces/dod'
+import { PKey } from '../interfaces/dod'
 import { Ref } from '../interfaces/dod'
 import { copyJson } from '../tools/utils'
 
@@ -13,7 +13,7 @@ import { FieldRefController } from './FieldRefController'
  */
 export interface AppControllerConfig {
   databases: {
-    [databaseId: string]: Ref.Database<Schema.CollectionsMeta>
+    [databaseId: string]: Ref.Database
   }
 }
 
@@ -91,7 +91,7 @@ export class AppController {
    * @memberof AppController
    */
   private _databases: {
-    [databaseId: string]: Ref.Database<any>
+    [databaseId: string]: Ref.Database
   } = {}
 
 
@@ -109,27 +109,31 @@ export class AppController {
   }
 
   public getDatabase(dbId: PKey): DatabaseRefController<any> {
-    return DatabaseRefController.from(this._databases[dbId])
+    const db = this._databases[dbId]
+    return DatabaseRefController.from(dbId, db.schemas, db.instances)
   }
 
-  public setDatabase(dbId: PKey, value: Ref.Database<any>): this {
+  public setDatabase(dbId: PKey, value: Ref.Database): this {
     this._databases[dbId] = value
     return this
   }
 
   public getCollection(dbId: PKey, cId: PKey): CollectionRefController<any> {
-    const collection = this._databases[dbId]?.collections[cId]
-    return collection ? CollectionRefController.from(collection) : null
+    const db = this.getDatabase(dbId)
+    const c = db?.get(cId)
+    return !c ? null : CollectionRefController.from(cId, db.meta.schema[cId], c)
   }
 
   public getDocument(dbId: PKey, cId: PKey, dId: PKey): DocumentRefController<any> {
-    const document = this._databases[dbId]?.collections[cId]?.documents[dId]
-    return document ? DocumentRefController.from(document) : null
+    const c = this.getCollection(dbId, cId)
+    const doc = c?.get(dId)
+    return !doc ? null : DocumentRefController.from(dId, c.meta.schema.fields, doc)
   }
 
   public getField(dbId: PKey, cId: PKey, dId: PKey, fId: PKey): FieldRefController<any> {
-    const field = this._databases[dbId]?.collections[cId]?.documents[dId]?.fields[fId]
-    return field ? FieldRefController.from(field) : null
+    const doc = this.getDocument(dbId, cId, dId)
+    const f = doc?.get(fId)
+    return !f ? null : FieldRefController.from(fId, doc.meta.schema[fId], f)
   }
 
 }

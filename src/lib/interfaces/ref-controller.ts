@@ -1,5 +1,4 @@
 import { CrudModel } from "./crud"
-import { Ref } from './dod'
 import { Initializable } from './initializable'
 
 /**
@@ -12,7 +11,7 @@ import { Initializable } from './initializable'
  * @extends {toJSON<T>}
  * @template T
  */
-export interface RefController<T extends Ref.Base> extends Initializable, CrudModel<T> {
+export interface RefController<T> extends Initializable, CrudModel<T> {
 
 
 

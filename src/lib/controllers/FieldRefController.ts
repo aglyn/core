@@ -10,14 +10,14 @@ import { BaseRefController } from './BaseRefController'
  * @extends {BaseRefController<Ref.Field<S>>}
  * @template S
  */
-export class FieldRefController<S extends Schema.FieldMeta> extends BaseRefController<Ref.Field<S>> {
+export class FieldRefController<S extends Schema.FieldMeta> extends BaseRefController<S, { value: Ref.Field<S> }> {
 
   constructor(id: PKey, schema: S, value?: FT.TypeFromTag<S['$type']>) {
-    super({ id, schema, value })
+    super({ id, schema }, { value: value })
   }
 
-  public static from<S extends Schema.FieldMeta>(model: Ref.Field<S>) {
-    return new this(model?.id, <any>model?.schema, model?.value)
+  public static from<S extends Schema.FieldMeta>(id: PKey, schema: S, value: Ref.Field<S>) {
+    return new this(id, schema, value)
   }
 
   /**
@@ -38,20 +38,12 @@ export class FieldRefController<S extends Schema.FieldMeta> extends BaseRefContr
     console.debug('initValue', this.getId(), this.getSchema(), this.getValue())
   }
 
-  public getValue(): Ref.FieldValue<S> {
+  public getValue(): Ref.Field<S> {
     return this.get('value')
   }
 
-  public setValue(value: Ref.FieldValue<S>): this {
+  public setValue(value: Ref.Field<S>): this {
     return this.set('value', value)
-  }
-
-  public getSchema(): S {
-    return this.get('schema')
-  }
-
-  public setSchema(value: S): this {
-    return this.set('schema', value)
   }
 
 }

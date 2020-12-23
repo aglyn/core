@@ -11,7 +11,11 @@ import { Crud } from '../models/Crud'
  * @implements {RefController<S>}
  * @template S
  */
-export class BaseRefController<T extends Ref.Base> extends Crud<T> implements RefController<T> {
+export class BaseRefController<S, T> extends Crud<T> implements RefController<T> {
+
+  constructor(public readonly meta: Ref.Base<S>, model: T) {
+    super(model)
+  }
 
   /** @inheritdoc */
   public preInit?(): void
@@ -34,19 +38,21 @@ export class BaseRefController<T extends Ref.Base> extends Crud<T> implements Re
   public onInit?(): void
 
   public getId(): PKey {
-    return this.get('id')
+    return this.meta.id
   }
 
   public setId(value: PKey): this {
-    return this.set('id', value)
+    this.meta.id = value
+    return this
   }
 
-  public getSchema(): T['schema'] {
-    return this.get('schema')
+  public getSchema(): S {
+    return this.meta.schema
   }
 
-  public setSchema(value: T['schema']): this {
-    return this.set('schema', value)
+  public setSchema(value: S): this {
+    this.meta.schema = value
+    return this
   }
 
 }

@@ -231,10 +231,10 @@ export namespace Schema {
 
   /**
    * Describes a collection of documents, the fields
-   * property mocks a model as it describes any
-   * document within the collection.
+   * property describes the fields of any document an
+   * instance of the collection.
    */
-  export interface CollectionDocumentMeta extends DocumentType, StampedLifecycle, NamedField {
+  export interface CollectionModel extends DocumentType, StampedLifecycle, NamedField {
     fields: ModelFields
   }
 
@@ -242,14 +242,18 @@ export namespace Schema {
    * Describes a collection of documents, each document
    * only describes another collection e.g. the meta
    */
-  export type CollectionsMeta = CollectionType & {
-    [collectionIdAsDocumentId: string]: CollectionDocumentMeta
+  export type CollectionModels = CollectionType & {
+    [collectionIdAsDocumentId: string]: CollectionModel
   }
+
+  /**
+   * =======================================================
+   */
 
   /**
    * The actual collection instance of a collection meta
    */
-  export type CollectionInstance<T extends CollectionDocumentMeta> = CollectionType & {
+  export type CollectionInstance<T extends CollectionModel> = CollectionType & {
     [documentId: string]: DocumentType<
       FT.TypeFromTag<T['fields'][string]['$type']>
     >
@@ -258,7 +262,7 @@ export namespace Schema {
   /**
    * Just simply a database of collections
    */
-  export type DatabaseCollections<C extends CollectionsMeta> = DatabaseType & {
+  export type DatabaseCollections<C extends CollectionModels> = DatabaseType & {
     [CID in keyof C]: CollectionInstance<C[CID]>
   }
 
@@ -274,10 +278,7 @@ export namespace Ref {
   /**
    * =======================================================
    */
-  export type FieldValue<S extends Schema.FieldMeta> = FT.TypeFromTag<S['$type']>
-  export interface Field<S extends Schema.FieldMeta> extends Base<S> {
-    value: FieldValue<S>
-  }
+  export type Field<S extends Schema.FieldMeta> = FT.TypeFromTag<S['$type']>
 
   /**
    * =======================================================
@@ -285,28 +286,25 @@ export namespace Ref {
   export type DocumentFields<S extends Schema.ModelFields> = {
     [K in keyof S]: Field<S[K]>
   }
-  export interface Document<S extends Schema.ModelFields> extends Base<S> {
-    fields: DocumentFields<S>
-  }
+  export type Document<S extends Schema.ModelFields> = DocumentFields<S>
 
   /**
    * =======================================================
    */
-  export type CollectionDocuments<S extends Schema.CollectionDocumentMeta> = {
+  export type CollectionDocuments<S extends Schema.CollectionModel> = {
     [documentId: string]: Document<S['fields']>
   }
-  export interface Collection<S extends Schema.CollectionDocumentMeta> extends Base<S> {
-    documents: CollectionDocuments<S>
-  }
+  export type Collection<S extends Schema.CollectionModel> = CollectionDocuments<S>
 
   /**
    * =======================================================
    */
-  export type DatabaseCollections<S extends Schema.CollectionsMeta> = {
+  export type DatabaseCollections<S extends Schema.CollectionModels> = {
     [K in keyof S]: Collection<S[K]>
   }
-  export interface Database<S extends Schema.CollectionsMeta> extends Base<S> {
-    collections: DatabaseCollections<S>
+  export interface Database {
+    schemas: Schema.CollectionModels
+    instances: Schema.DatabaseCollections<this['schemas']>
   }
 
 }
