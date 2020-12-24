@@ -1,4 +1,5 @@
 import { defaultAppConfig } from '../app-defaults'
+import { firebase, initFirebase } from '../firebase'
 import { PKey } from '../interfaces/dod'
 import { Ref } from '../interfaces/dod'
 import { copyJson } from '../tools/utils'
@@ -96,40 +97,46 @@ export class AppController {
 
 
   private constructor(config?: AppControllerConfig) {
+    this.initializeRemote()
     this._config = {
       ...copyJson(defaultAppConfig),
       ...copyJson(config ?? {})
     }
     this._databases = this._config.databases
-    console.log('_blueprints', this._databases)
   }
+
+
+  /** @ignore */
+  public initializeRemote() {
+    initFirebase()
+  }
+  public initializeAnalytics() {
+    require('firebase/analytics')
+    firebase.analytics()
+  }
+
 
   public getConfig() {
     return this._config
   }
-
   public getDatabase(dbId: PKey): DatabaseRefController<any> {
     const db = this._databases[dbId]
     return DatabaseRefController.from(dbId, db.schemas, db.instances)
   }
-
   public setDatabase(dbId: PKey, value: Ref.Database): this {
     this._databases[dbId] = value
     return this
   }
-
   public getCollection(dbId: PKey, cId: PKey): CollectionRefController<any> {
     const db = this.getDatabase(dbId)
     const c = db?.get(cId)
     return !c ? null : CollectionRefController.from(cId, db.meta.schema[cId], c)
   }
-
   public getDocument(dbId: PKey, cId: PKey, dId: PKey): DocumentRefController<any> {
     const c = this.getCollection(dbId, cId)
     const doc = c?.get(dId)
     return !doc ? null : DocumentRefController.from(dId, c.meta.schema.fields, doc)
   }
-
   public getField(dbId: PKey, cId: PKey, dId: PKey, fId: PKey): FieldRefController<any> {
     const doc = this.getDocument(dbId, cId, dId)
     const f = doc?.get(fId)
@@ -137,5 +144,3 @@ export class AppController {
   }
 
 }
-
-// console.log('app controller', AppController)

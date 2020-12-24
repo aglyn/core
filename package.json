@@ -36,14 +36,17 @@
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && npm i",
-    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish"
+    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish",
+    "firebase-emulate": "firebase emulators:start --import=./.firebase --export-on-exit"
   },
   "engines": {
     "node": ">=10"
   },
   "dependencies": {
     "@bitauth/libauth": "^1.17.1",
-    "nanoid": "^3.1.20"
+    "firebase": "^8.2.1",
+    "nanoid": "^3.1.20",
+    "js-cookie": "^2.2.1"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",

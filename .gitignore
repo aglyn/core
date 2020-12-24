@@ -7,3 +7,9 @@ src/**.js
 coverage
 *.log
 yarn.lock
+
+
+# Firebase logs
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*

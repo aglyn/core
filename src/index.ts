@@ -35,3 +35,9 @@ export * from './lib/controllers/FieldRefController'
 // Data
 export * from './lib/app-defaults'
 export * from './lib/constants'
+
+// TODO: Implement middlemen functions so we do not have to export these
+// Firebase
+export * from './lib/firebase'
+export * from './lib/firebase.cookies'
+export * from './lib/firebase.user'

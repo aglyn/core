@@ -26,6 +26,8 @@
         "prettierignore",
         "RDBMS",
         "sandboxed",
+        "signin",
+        "signup",
         "SUBCOLLECTION",
         "subcollections",
         "transpiled",
