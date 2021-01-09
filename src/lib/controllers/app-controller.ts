@@ -1,12 +1,13 @@
 import firebase from 'firebase/app'
 
+import { Persist } from '../constants'
 import { PKey } from '../interfaces/dod'
 import { FT, Ref } from '../interfaces/dod'
-import { Persist } from '../types'
+import { Permission, Role, User } from '../types'
 
 import 'firebase/analytics'
 import 'firebase/auth'
-// import 'firebase/firestore'
+import 'firebase/firestore'
 
 import { CollectionRefController } from './CollectionRefController'
 import { DatabaseRefController } from './DatabaseRefController'
@@ -26,15 +27,6 @@ export type FbDocumentRef<T = FbDocumentData> = firebase.firestore.DocumentRefer
 export type FbDocumentSnapshot<T = FbDocumentData> = firebase.firestore.DocumentSnapshot<T>
 
 export type FbCollectionRef<T = FbDocumentData> = firebase.firestore.CollectionReference<T>
-
-export interface UserDocument<User extends FbUser = FbUser> extends FbDocumentData {
-  uid: User['uid']
-  email: User['email']
-  birthday?: number
-  firstName?: string
-  lastName?: string
-  middleInitial?: string
-}
 
 /**
  * Describes the initial configuration for the application controller
@@ -56,6 +48,8 @@ export interface AppControllerConfig {
 
 export enum SysCid {
   USERS = 'users',
+  ROLES = 'roles',
+  PERMISSIONS = 'permissions',
 }
 
 export interface AppController {
@@ -71,9 +65,9 @@ export interface AppController {
   signOutUser: (onSuccess?: () => void, onError?: (error: any) => void) => Promise<void>
   setAuthPersistence: (onSuccess?: () => void, onError?: (error: any) => void, override?: Persist) => Promise<void>
   getCollectionRef: <T extends firebase.firestore.DocumentData>(cid: string) => FbCollectionRef<T>
-  getUsersCollectionRef: () => FbCollectionRef<UserDocument>
-  getUserDocumentRef: (uid: PKey) => Promise<FbDocumentRef<UserDocument>>
-  getCurrentUserDocumentRef: () => Promise<FbDocumentRef<UserDocument>>
+  getUsersCollectionRef: () => FbCollectionRef<User>
+  getUserDocumentRef: (uid: PKey) => FbDocumentRef<User>
+  getCurrentUserDocumentRef: () => FbDocumentRef<User>
   getDodDatabase: (dbId: PKey) => DatabaseRefController<any>
   setDodDatabase: (dbId: PKey, value: Ref.Database) => void
   getDodCollection: (dbId: PKey, cId: PKey) => CollectionRefController<any>
@@ -215,11 +209,6 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   // MARK: Instances
   /////////////////////////////
 
-  // let app: FbApp = null
-  let auth: FbAuth = null
-  let analytics: FbAnalytics = null
-  let firestore: FbFirestore = null
-
   const getConfig = (): AppControllerConfig => {
     return config
   }
@@ -227,13 +216,13 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
     return app
   }
   const getAnalytics = (): FbAnalytics => {
-    return analytics
+    return app?.analytics()
   }
   const getAuth = (): FbAuth => {
-    return auth
+    return app?.auth()
   }
   const getFirestore = (): FbFirestore => {
-    return firestore
+    return app?.firestore()
   }
 
 
@@ -248,11 +237,6 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
     } else {
       app = firebase.app()
     }
-    auth = app.auth()
-    if (typeof window !== undefined && !firebase.apps.length) {
-      analytics = app.analytics()
-      firestore = app.firestore()
-    }
     console.info(`Finished app initialization(${config.appName})`)
   }
   catch (error) {
@@ -266,7 +250,7 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   /////////////////////////////
 
   const getCollectionRef = <T extends FbDocumentData>(cid: string): FbCollectionRef<T> => {
-    return firestore.collection(cid) as FbCollectionRef<T>
+    return getFirestore()?.collection(cid) as FbCollectionRef<T>
   }
 
 
@@ -275,15 +259,14 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   /////////////////////////////
 
   const getCurrentUser = (): FbUser => {
-    return auth.currentUser
+    return getAuth()?.currentUser
   }
   const setAuthPersistence = async (
     onSuccess?: () => void,
     onError?: (error: any) => void,
     override?: Persist,
   ) => {
-    await auth
-      .setPersistence(persistAsAuthPersist[override ?? config.authPersistence])
+    await getAuth()?.setPersistence(persistAsAuthPersist[override ?? config.authPersistence])
       .then(() => onSuccess && onSuccess())
       .catch((error) => onError && onError(error))
   }
@@ -296,7 +279,7 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   ) => {
     await setAuthPersistence(
       async () => {
-        await auth.signInWithEmailAndPassword(email, password)
+        await getAuth()?.signInWithEmailAndPassword(email, password)
           .then((user) => onSuccess && onSuccess(user))
           .catch((error) => onError && onError(error))
       },
@@ -313,7 +296,7 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   ) => {
     await setAuthPersistence(
       async () => {
-        await auth.createUserWithEmailAndPassword(email, password)
+        await getAuth()?.createUserWithEmailAndPassword(email, password)
           .then((user) => onSuccess && onSuccess(user))
           .catch((error) => onError && onError(error))
       },
@@ -325,7 +308,7 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
     onSuccess?: () => void,
     onError?: (error: any) => void
   ) => {
-    await auth.signOut()
+    await getAuth()?.signOut()
       .then(() => onSuccess && onSuccess())
       .catch((error) => onError && onError(error))
   }
@@ -335,15 +318,32 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   // MARK: User methods
   /////////////////////////////
 
-  const getUsersCollectionRef = (): FbCollectionRef<UserDocument> => {
+  const getUsersCollectionRef = (): FbCollectionRef<User> => {
     return getCollectionRef(SysCid.USERS)
   }
-  const getUserDocumentRef = async (uid: PKey): Promise<FbDocumentRef<UserDocument>> => {
-    return await getUsersCollectionRef().doc(uid)
+  const getUserDocumentRef = (uid: PKey): FbDocumentRef<User> => {
+    return getUsersCollectionRef().doc(uid)
   }
-  const getCurrentUserDocumentRef = (): Promise<FbDocumentRef<UserDocument>> => {
+  const getCurrentUserDocumentRef = (): FbDocumentRef<User> => {
     const uid = getCurrentUser()?.uid ?? ''
     return getUserDocumentRef(uid)
+  }
+
+  /////////////////////////////
+  // MARK: Roles & Permissions
+  /////////////////////////////
+
+  const getRolesCollectionRef = (): FbCollectionRef<Role> => {
+    return getCollectionRef(SysCid.ROLES)
+  }
+  const getRoleDocumentRef = (id: PKey): FbDocumentRef<Role> => {
+    return getRolesCollectionRef().doc(id)
+  }
+  const getPermissionsCollectionRef = (): FbCollectionRef<Permission> => {
+    return getCollectionRef(SysCid.PERMISSIONS)
+  }
+  const getPermissionDocumentRef = (id: PKey): FbDocumentRef<Permission> => {
+    return getPermissionsCollectionRef().doc(id)
   }
 
 
@@ -395,15 +395,24 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
     getAnalytics,
     getAuth,
     getFirestore,
+
     getCurrentUser,
     signInUser,
     signUpUser,
     signOutUser,
     setAuthPersistence,
+
     getCollectionRef,
+
     getUsersCollectionRef,
     getUserDocumentRef,
     getCurrentUserDocumentRef,
+
+    getRolesCollectionRef,
+    getRoleDocumentRef,
+    getPermissionsCollectionRef,
+    getPermissionDocumentRef,
+
     getDodDatabase,
     setDodDatabase,
     getDodCollection,

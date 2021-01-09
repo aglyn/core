@@ -92,3 +92,10 @@ export const lbl = {
   [Sig.Deleted]: 'Deleted At',
 
 }
+
+/** Contextual persistence types */
+export enum Persist {
+  NONE = 'none',
+  SESSION = 'session',
+  LOCAL = 'local',
+}

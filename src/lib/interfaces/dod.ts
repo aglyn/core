@@ -21,7 +21,7 @@
  * @module dod
  */
 
-import { Dictionary } from '../types'
+import { KV } from '../types'
 
 /** Primary key */
 export type PKey = string
@@ -115,7 +115,7 @@ export namespace FT {
   export type Null = null
   export type Text = string
   export type Coordinates = Record<'longitude' | 'latitude', number>
-  export type Map = Dictionary
+  export type Map = KV
   export type Sorted<T = any> = T extends any[] ? never : T[]
 
   export type Nestable = Map | Sorted<any>

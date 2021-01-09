@@ -1,18 +1,47 @@
-/** Allows conditional typing type alias */
-export type Conditional<T, U, X, Y> = T extends U ? X : Y
+/** Allows conditional typing ype alias */
+export type Conditional<X, T, A, B = never> = X extends T ? A : B
 
-/** Plain old object of key(K)-value(T) pairs */
-export type Dictionary<T = any> = Record<string, T> // AKA { [P in Key]: T }
+/** If X extends true then Y */
+export type IF<X, Y> = Conditional<X, true, Y>
 
-/** The index signature type within the dictionary */
-export type SignatureTypeOf<T extends Dictionary> = keyof T
+/** Plain old dictionary of key(K)-value(T) pairs with string signatures */
+export type KV<T = unknown, K extends string = string> = Record<K, T>
 
-/** The index type within the dictionary */
-export type IndexOf<T extends Dictionary, K extends keyof T = keyof T> = T[K]
+/** The index signature type of T */
+export type KeyOf<T> = keyof T
 
-/** Persistence types */
-export enum Persist {
-  NONE = 'none',
-  SESSION = 'session',
-  LOCAL = 'local',
+/** The index value type of T  */
+export type IndexOf<T, K extends KeyOf<T> = KeyOf<T>> = T[K]
+
+/** ========== AUTH ============ */
+export type UserClaims = {
+  admin?: boolean
+  role?: string
+}
+
+export type User = {
+  id?: string
+  email: string
+  birthday?: number
+  firstName?: string
+  lastName?: string
+  middleInitial?: string
+  role?: string
+}
+
+export type Permission = {
+  id?: string
+  name: string
+  comments?: string
+}
+
+export type Role = {
+  id?: string
+  name: {
+    singular: string
+    plural: string
+  }
+  permissions: {
+    [K in Permission['id']]: true
+  }
 }
