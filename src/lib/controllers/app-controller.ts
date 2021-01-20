@@ -32,10 +32,31 @@ export type FbCollectionRef<T = FbDocumentData> = firebase.firestore.CollectionR
  * Describes the initial configuration for the application controller
  */
 export interface AppControllerConfig {
+  /**
+   * The app unique ID, if none provided defaults to '[DEFAULT]'
+   */
   appName?: string
+  /**
+   * For multi-tenancy
+   * @see https://cloud.google.com/identity-platform/docs/multi-tenancy-authentication
+   */
   tenantId?: string
+  /**
+   * Default browser auth persistence
+   */
   authPersistence?: Persist
+  /**
+   * URL of local firebase auth emulator, only used if set
+   */
+  authEmulator?: string
+  /**
+   * URL of local firebase firestore emulator, only used if set
+   */
+  firestoreEmulator?: { host: string, port: number }
 
+  // =================
+  // START – FIREBASE PROJECT CONFIG
+  // =================
   apiKey: string
   authDomain: string
   databaseURL: string
@@ -43,9 +64,18 @@ export interface AppControllerConfig {
   storageBucket: string
   messagingSenderId: string
   appId: string
+  /**
+   * Google Analytics measurement ID
+   */
   measurementId: string
+  // =================
+  // END – FIREBASE PROJECT CONFIG START
+  // =================
 }
 
+/**
+ * System collection IDs
+ */
 export enum SysCid {
   USERS = 'users',
   ROLES = 'roles',
@@ -75,6 +105,9 @@ export interface AppController {
   getDodField: (dbId: PKey, cId: PKey, dId: PKey, fId: PKey) => FieldRefController<any>
 }
 
+/**
+ * Convert Persist enums to Firebase Persistence enum
+ */
 export const persistAsAuthPersist = {
   [Persist.NONE]: firebase.auth.Auth.Persistence.NONE,
   [Persist.SESSION]: firebase.auth.Auth.Persistence.SESSION,
@@ -131,9 +164,6 @@ export const defaultAppConfig: AppControllerConfig = {
   //   test_db: testDb
   // }
 }
-const isProduction = process.env.NODE_ENV === 'production'
-
-let app: FbApp
 
 /**
  * All top level support
@@ -184,7 +214,9 @@ let app: FbApp
  * @export
  * @function withAppController
  */
-export function withAppController(options: AppControllerConfig = defaultAppConfig): AppController {
+export function withAppController(options: Partial<AppControllerConfig> = defaultAppConfig): AppController {
+
+  let app: FbApp
 
   /////////////////////////////
   // MARK: Config
@@ -195,32 +227,45 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
     ...options
   }
 
-  const firebaseConfig = isProduction ?
-    {
-      apiKey: config.apiKey,
-      authDomain: config.authDomain,
-      databaseURL: config.databaseURL,
-      projectId: config.projectId,
-      storageBucket: config.storageBucket,
-      messagingSenderId: config.messagingSenderId,
-      appId: config.appId,
-      measurementId: config.measurementId,
-    } : {
-      apiKey: config.apiKey,
-      authDomain: config.authDomain,
-      databaseURL: config.databaseURL,
-      projectId: config.projectId,
-      storageBucket: config.storageBucket,
-      messagingSenderId: config.messagingSenderId,
-      appId: config.appId,
-    }
+  console.debug('config', config)
+
+  const firebaseConfig = {
+    apiKey: config.apiKey,
+    authDomain: config.authDomain,
+    databaseURL: config.databaseURL,
+    projectId: config.projectId,
+    storageBucket: config.storageBucket,
+    messagingSenderId: config.messagingSenderId,
+    appId: config.appId,
+    measurementId: config.measurementId,
+  }
 
   /////////////////////////////
   // MARK: Instances
   /////////////////////////////
 
+  let existingApp = false
   let setAuth = false
   let setFirestore = false
+
+  const setupAuth = (auth: FbAuth): FbAuth => {
+    setAuth = true
+    if (config.authEmulator) {
+      console.debug('setting auth emulator')
+      auth.useEmulator(config.authEmulator)
+    }
+    return auth
+  }
+
+  const setupFirestore = (firestore: FbFirestore): FbFirestore => {
+    setFirestore = true
+    if (config.firestoreEmulator) {
+      console.debug('setting firestore emulator')
+      const { host, port } = config.firestoreEmulator
+      firestore.useEmulator(host, port)
+    }
+    return firestore
+  }
 
   const getConfig = (): AppControllerConfig => {
     return config
@@ -236,19 +281,11 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   }
   const getAuth = (): FbAuth => {
     const auth = app?.auth()
-    if (!setAuth && !isProduction) {
-      setAuth = true
-      auth.useEmulator('http://localhost:9099/')
-    }
-    return auth
+    return !setAuth && !existingApp && auth ? setupAuth(auth) : auth
   }
   const getFirestore = (): FbFirestore => {
     const firestore = app?.firestore()
-    if (!setFirestore && !isProduction) {
-      setFirestore = true
-      firestore.useEmulator('localhost', 8080)
-    }
-    return firestore
+    return !setFirestore && !existingApp && firestore ? setupFirestore(firestore) : firestore
   }
 
 
@@ -257,13 +294,17 @@ export function withAppController(options: AppControllerConfig = defaultAppConfi
   /////////////////////////////
 
   try {
-    console.info(`Beginning app initializing(${config.appName})`)
-    if (!firebase.apps.length) {
-      app = firebase.initializeApp(firebaseConfig, config.appName)
+    console.debug(`Beginning app setup(${config.appName})`)
+    // Check if app is already initialized
+    if (firebase.apps.length && firebase.apps.some(i => i.name === config.appName)) {
+      console.debug(`Retrieving app already initialized(${config.appName})`)
+      existingApp = true
+      app = firebase.app(config.appName)
     } else {
-      app = firebase.app()
+      console.debug(`Initializing app(${config.appName})`)
+      app = firebase.initializeApp(firebaseConfig, config.appName)
     }
-    console.info(`Finished app initialization(${config.appName})`)
+    console.debug(`Finished app setup(${config.appName})`)
   }
   catch (error) {
     console.error(`Error initializing app(${config.appName})`, error)
