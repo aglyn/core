@@ -1,20 +1,11 @@
 {
   "version": 2,
-  "cli": {
-    "defaultCollection": "@nrwl/next"
-  },
+  "cli": { "defaultCollection": "@nrwl/next" },
   "defaultProject": "console",
   "generators": {
-    "@nrwl/react": {
-      "application": {
-        "babel": true
-      }
-    },
+    "@nrwl/react": { "application": { "babel": true } },
     "@nrwl/next": {
-      "application": {
-        "style": "@emotion/styled",
-        "linter": "eslint"
-      }
+      "application": { "style": "@emotion/styled", "linter": "eslint" }
     }
   },
   "projects": {
@@ -30,16 +21,11 @@
             "root": "apps/console",
             "outputPath": "dist/apps/console"
           },
-          "configurations": {
-            "production": {}
-          }
+          "configurations": { "production": {} }
         },
         "serve": {
           "executor": "@nrwl/next:server",
-          "options": {
-            "buildTarget": "console:build",
-            "dev": true
-          },
+          "options": { "buildTarget": "console:build", "dev": true },
           "configurations": {
             "production": {
               "buildTarget": "console:build:production",
@@ -49,9 +35,7 @@
         },
         "export": {
           "executor": "@nrwl/next:export",
-          "options": {
-            "buildTarget": "console:build:production"
-          }
+          "options": { "buildTarget": "console:build:production" }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -82,15 +66,32 @@
             "devServerTarget": "console:serve"
           },
           "configurations": {
-            "production": {
-              "devServerTarget": "console:serve:production"
-            }
+            "production": { "devServerTarget": "console:serve:production" }
           }
         },
         "lint": {
           "executor": "@nrwl/linter:eslint",
+          "options": { "lintFilePatterns": ["apps/console-e2e/**/*.{js,ts}"] }
+        }
+      }
+    },
+    "ui-common": {
+      "root": "libs/ui-common",
+      "sourceRoot": "libs/ui-common/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["apps/console-e2e/**/*.{js,ts}"]
+            "lintFilePatterns": ["libs/ui-common/**/*.{ts,tsx,js,jsx}"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/ui-common"],
+          "options": {
+            "jestConfig": "libs/ui-common/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }
