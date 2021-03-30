@@ -9,13 +9,14 @@
 import type DdfSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
 import EventEmitter from 'events'
 
-
 const PKG_VERSION = JSON.stringify(process.env.PKG_VERSION ?? 'N/A')
 const PRODUCTION = process.env.NODE_ENV === 'production'
 
-export enum AppEvent {
-  INSTANCE_CREATED = 'app.created-singleton-instance',
-  COMPONENT_REGISTERED = 'app.registered-site-component',
+const siteEmitter = new EventEmitter()
+
+export enum SiteEvent {
+  INSTANCE_CREATED = 'site.created-singleton-instance',
+  COMPONENT_REGISTERED = 'site.registered-site-component',
 }
 export enum RestrictType {
   LIMIT = 'limit',
@@ -51,7 +52,7 @@ export interface SiteComponent {
   }
 }
 export class SiteComponentModel {
-  public static readonly event: EventEmitter = new EventEmitter()
+  public static readonly event: EventEmitter
   constructor(public config: SiteComponent) {}
 }
 export interface SiteElement {
@@ -65,45 +66,42 @@ export interface SiteElement {
   description?: string
 }
 
-
-class App {
-
-  private static instance?: App
+class Site {
+  private static instance?: Site
 
   public static readonly version: string = PKG_VERSION
   public static readonly production: boolean = PRODUCTION
-  public static readonly development: boolean = !App.production
-  public static readonly event: EventEmitter = new EventEmitter()
+  public static readonly development: boolean = !Site.production
+  public static readonly event: EventEmitter = siteEmitter
   public static readonly siteComponents: SiteComponentsMap = new Map()
 
-
   /**
-   * Get the currently living singleton instance
+   * Get the currently living singleton instance of Site
    * @throws
-   * @returns {App} instance
+   * @returns {Site} instance
    */
-  public static getInstance(): App {
-    if (App.instance instanceof App) {
-      return App.instance
+  public static getInstance(): Site {
+    if (Site.instance instanceof Site) {
+      return Site.instance
     }
     throw new Error("Instance doesn't exist! You must call createInstance(...) first!")
   }
 
   /**
-   * Creates a new singleton instance of App
+   * Creates a new singleton instance of Site
    * @throws
    */
   public static createInstance() {
-    if (App.instance instanceof App) {
+    if (Site.instance instanceof Site) {
       throw new Error('Instance exist! You have already created an instance.')
     }
-    App.instance = new App()
-    App.event.emit(AppEvent.INSTANCE_CREATED, this.instance)
+    Site.instance = new Site()
+    Site.event.emit(SiteEvent.INSTANCE_CREATED, this.instance)
   }
 
   /**
-   * Builds and registers a App.ComponentModel instance from the provided
-   * App.Component options
+   * Builds and registers a SiteComponentModel instance from the provided
+   * SiteComponent options
    * @throws
    * @param {*} component
    * @param {SiteComponent} options
@@ -111,18 +109,20 @@ class App {
    */
   public static registerSiteComponent(component: any, options: SiteComponent): SiteComponentModel {
     const { _id, ...opts } = options
-    if (App.siteComponents.has(_id)) {
+    if (Site.siteComponents.has(_id)) {
       throw new Error(`SiteComponent with same ID(${_id}) already exists!`)
     }
     const model = new SiteComponentModel({
-      ...opts, ClassFn: component, _id
+      ...opts,
+      ClassFn: component,
+      _id,
     })
-    App.siteComponents.set(_id, model)
-    App.event.emit(AppEvent.COMPONENT_REGISTERED, App.instance, model)
+    Site.siteComponents.set(_id, model)
+    Site.event.emit(SiteEvent.COMPONENT_REGISTERED, Site.instance, model)
     return model
   }
 }
 
-export function app() {
-  return 'app'
+export function site() {
+  return 'site'
 }
