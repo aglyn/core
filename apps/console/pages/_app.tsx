@@ -3,6 +3,9 @@ import { AppProps } from 'next/app';
 import Head from 'next/head';
 import { ReactComponent as NxLogo } from '../public/nx-logo-white.svg';
 import './styles.css';
+import { website } from '@aglyn/website/feature-core'
+
+website.app.App.createInstance()
 
 function CustomApp({ Component, pageProps }: AppProps) {
   return (

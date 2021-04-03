@@ -1,5 +1,5 @@
 import { EffectCallback, DependencyList, useEffect, useRef } from 'react'
-import { _isFn } from '@aglyn/tools'
+import { _isFn } from '@aglyn/shared/util'
 
 export function useEffectPostMount(callback: EffectCallback, deps?: DependencyList): void {
   const isOnInitialMount = useRef(true)

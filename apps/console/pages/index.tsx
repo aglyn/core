@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import { SvgPathIcon, GridButtons } from '@aglyn/shared/ui-react'
+import { website } from '@aglyn/website/feature-core'
 
 const StyledPage = styled.div`
   .page {
@@ -8,6 +9,9 @@ const StyledPage = styled.div`
 `
 
 export function Index() {
+
+  console.log('index', website.app.App.getInstance())
+
   /*
    * Replace the elements below with your own.
    *

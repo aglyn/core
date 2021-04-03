@@ -1,7 +1,7 @@
-import { site } from './core'
+import { core } from './core'
 
-describe('site', () => {
+describe('core', () => {
   it('should work', () => {
-    expect(site()).toEqual('site')
+    expect(core()).toEqual('core')
   })
 })
