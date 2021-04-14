@@ -37,6 +37,10 @@ export class App {
     return this.instance
   }
 
+  public static init(): App {
+    return this.getInstance()
+  }
+
   public static setModule(props: { _id: string, declarations: Component[] }) {
     const { _id, declarations } = props
     const module = { _id, declarations }

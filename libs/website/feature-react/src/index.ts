@@ -1,1 +1,1 @@
-export * from './lib/website-feature-react'
+export * from './lib/feature-react'
