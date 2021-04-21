@@ -39,6 +39,7 @@
     "deep-equal": "^2.0.5",
     "deepmerge": "^4.2.2",
     "document-register-element": "1.13.1",
+    "flat": "^5.0.2",
     "fuse.js": "^6.4.6",
     "jss": "^10.6.0",
     "jss-rtl": "^0.3.0",

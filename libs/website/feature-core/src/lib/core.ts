@@ -13,12 +13,12 @@ import type { RestrictType } from '../const'
 export type AnyProps = Record<string, unknown>
 
 export interface Module {
-  _id?: string
+  $id?: string
   declarations: Component[]
 }
 
 export interface Component<T = unknown> {
-  _id: string
+  $id: string
   ctor: T
   metadata: {
     displayName?: string
@@ -44,10 +44,10 @@ export interface Component<T = unknown> {
   }
 }
 
-export interface DataElement {
-  _id: string
+export interface ElementData {
+  $id: string
   component?: Component | string
-  children?: DataElement[]
+  children?: ElementData[]
   props: AnyProps
   temp?: boolean
   parent?: string

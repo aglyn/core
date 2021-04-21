@@ -6,10 +6,10 @@
  * found in the root directory of this source tree.
  */
 
-import { utils } from './utils'
+import { tools } from './tools'
 
-describe('utils', () => {
+describe('tools', () => {
   it('should work', () => {
-    expect(utils()).toEqual('utils')
+    expect(tools()).toEqual('tools')
   })
 })

@@ -5,7 +5,7 @@ import { ReactComponent as NxLogo } from '../public/nx-logo-white.svg';
 import './styles.css';
 import Website from '@aglyn/website/feature-core'
 
-Website.app.App.init()
+Website.App.init()
 
 function CustomApp({ Component, pageProps }: AppProps) {
   return (

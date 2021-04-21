@@ -8,8 +8,9 @@
 
 import { _isArr, _isFn, _isNum, _isObj, _isStr, _isUndef, hasLn } from './guards'
 
-export function utils(): string {
-  return 'utils'
+
+export function tools(): string {
+  return 'tools'
 }
 
 /**
@@ -80,7 +81,7 @@ export function JSONp(...args: Parameters<typeof JSON.parse>): ReturnType<typeof
  * @param thisArg
  * @returns {T[]}
  */
-export function sortBy<T>(target: T[], callbackFn: ((item: T) => string | number), thisArg?: any) {
+export function sortBy<T>(target: T[], callbackFn: ((item: T, target: T[]) => string | number), thisArg?: any) {
   return target.slice().sort((a, b) => {
     const propA = callbackFn.call(thisArg, a, target) // callbackFn(a)
     const propB = callbackFn.call(thisArg, b, target) // prop(b)
@@ -203,7 +204,7 @@ export function sortByProperty<T>(items: T[], firstPath: string, secondPath?: st
   const lgr = (a, b, p) => getDeepProperty(a, p) > getDeepProperty(b, p)
   const eq = (a, b, p) => getDeepProperty(a, p) === getDeepProperty(b, p)
   return items.sort((a, b) =>
-    lgr(a, b, firstPath) ? 1 : secondPath && eq(a, b, firstPath) ? (lgr(a, b, secondPath) ? 1 : -1) : -1
+    lgr(a, b, firstPath) ? 1 : secondPath && eq(a, b, firstPath) ? (lgr(a, b, secondPath) ? 1 : -1) : -1,
   )
 }
 
@@ -268,7 +269,7 @@ export function getAllObjectKeys<T extends Record<string, unknown>, K extends ke
  */
 export function reduceObject<T extends Record<string, unknown>, K extends keyof T>(
   target: T,
-  reducerCallback: (val: T[K], key?: K, original?: T) => T[K]
+  reducerCallback: (val: T[K], key?: K, original?: T) => T[K],
 ): T {
   if (_isUndef(reducerCallback)) {
     return target
@@ -296,7 +297,7 @@ export function reduceObject<T extends Record<string, unknown>, K extends keyof 
 export function map<K extends string, V, U>(
   target: { [key in K]: V },
   callbackFn: (value: V, key: K, obj: { [key in K]: V }) => U,
-  thisArg?: unknown
+  thisArg?: unknown,
 ): { [key in K]: U } {
   const res: Partial<{ [key in K]: U }> = {}
   for (const key in target) {
@@ -359,7 +360,7 @@ export type MapObjectClbkFn = (
   value: any,
   key?: string | number,
   index?: number,
-  array?: Array<any>
+  array?: Array<any>,
 ) => [key: string | number, value: any] | any | void
 export type MapObjectOptions = {
   copy?: boolean
@@ -384,7 +385,7 @@ export function filterObject<T>(target, predicate: FilterObjPredicate<T>) {
       }
       return null
     },
-    { advanced: true, filter: true }
+    { advanced: true, filter: true },
   )
 }
 type FilterObjPredicate<T> = {
@@ -440,7 +441,7 @@ export function deleteProperty<T, K extends keyof T>(obj: Readonly<T>, key: K, o
 export function toArray<T, U, F extends (v: T, k: number) => U = undefined>(
   iterable: Iterable<T> | ArrayLike<T>,
   mapfn?: (v: T, k: number) => U,
-  thisArg?: any
+  thisArg?: any,
 ): F extends undefined ? Array<T> : Array<U> {
   return Array.from(iterable, mapfn, thisArg) as F extends undefined ? Array<T> : Array<U>
 }
@@ -460,7 +461,7 @@ export function toArray<T, U, F extends (v: T, k: number) => U = undefined>(
 export function copyArray<T, U, F extends (v: T, k: number) => U = undefined>(
   iterable: Iterable<T> | ArrayLike<T>,
   mapfn?: F,
-  thisArg?: any
+  thisArg?: any,
 ): F extends undefined ? Array<T> : Array<U> {
   return toArray(iterable, mapfn, thisArg)
 }
@@ -493,7 +494,7 @@ export function mutateArray<T>(
   index: number | any,
   array: Array<T>,
   items?: T | Array<T>,
-  options?: { replace?: boolean; copy?: boolean }
+  options?: { replace?: boolean; copy?: boolean },
 ): MutatedArrayResponse<T> {
   const { replace, copy } = { replace: true, copy: false, ...options }
   const _array = copy ? copyArray(array) : array
@@ -575,7 +576,7 @@ export function removeFromArray<T>(item: T, array: Array<T>): Array<T> {
 export function reorderArray<K extends number & keyof T, T extends Array<U>, U>(
   array: T,
   currentIndex: K | any,
-  newIndex: K | any
+  newIndex: K | any,
 ): T {
   const arr = mutateArray(currentIndex, array)
   return addAtIndex(newIndex, arr.items, arr.deleted).items as T
@@ -618,9 +619,9 @@ export function capitalize<T extends string>(val: T): T {
  */
 export function capitalizeTitle<T extends string>(val: T, separator = ' '): T {
   return s(val)
-    .split(separator)
-    .map((i) => capitalize(i))
-    .join(separator) as T
+  .split(separator)
+  .map((i) => capitalize(i))
+  .join(separator) as T
 }
 
 /**
@@ -649,11 +650,13 @@ export function numeronym(str: string, opt?: NumeronymOpts) {
 
   return builder[NumeronymKind[kind] ?? NumeronymKind.n19s]()
 }
+
 export enum NumeronymKind {
   n19s = 'NumericalContractions' /* first letter + len between(+ last letter) */,
   A9bs = 'AlphanumericAbbreviationS' /* AlphaN. = A9, Abbr. = bs */,
   A2S = 'AlphanumericAcronymS' /* (2) A's and (1) S (e.g. W3 or W3C) */,
 }
+
 export type NumeronymOpts = {
   kind?: NumeronymKind
   short?: boolean
@@ -706,53 +709,67 @@ export function getDisplayName(fn, fallback = 'Component'): string {
   return fn?.displayName ?? fn?.name ?? fallback
 }
 
-/** =========
- * START CHERRY PICK `kolodny/immutability-helper`
- * @see https://github.com/kolodny/immutability-helper/blob/master/index.ts
- * ========== */
-function type<T>(obj: T) {
-  return (toString.call(obj) as string).slice(8, -1)
+/**
+ * No operation function with no return
+ * @param args
+ * @returns {any}
+ */
+export function noop(...args: any[]): any {
+  // Do nothing.
 }
 
-const getAllKeys =
-  typeof Object.getOwnPropertySymbols === 'function'
-    ? (obj) => Object.keys(obj).concat(Object.getOwnPropertySymbols(obj) as any)
-    : /* istanbul ignore next */
-      (obj) => Object.keys(obj)
+/**
+ * Convince closure compiler that the wrapped function has no side-effects.
+ *
+ * Closure compiler always assumes that `toString` has no side-effects. We use this quirk to
+ * allow us to execute a function but have closure compiler mark the call as no-side-effects.
+ * It is important that the return value for the `noSideEffects` function be assigned
+ * to something which is retained otherwise the call to `noSideEffects` will be removed by closure
+ * compiler.
+ *
+ * @see https://github.com/angular/angular/blob/master/packages/core/src/util/closure.ts
+ */
+export function noSideEffects<T>(fn: () => T): T {
+  return { toString: fn }.toString() as unknown as T
+}
 
-const assign =
-  Object.assign ||
-  /* istanbul ignore next */ (<T, S>(target: T, source: S) => {
+namespace Copy {
+  const getType = <T>(obj: T) => (toString.call(obj) as string).slice(8, -1)
+  const defaultAssign = <T, S>(target: T, source: S) => {
     getAllKeys(source).forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(source, key)) {
         target[key] = source[key]
       }
     })
     return target as T & S
-  })
-export function copy<T, U, K, V, X>(
-  value: T extends ReadonlyArray<U>
+  }
+  const objectAssign = Object.assign ?? defaultAssign
+  const getAllKeys = typeof Object.getOwnPropertySymbols === 'function'
+    ? (obj) => Object.keys(obj).concat(Object.getOwnPropertySymbols(obj) as any)
+    : (obj) => Object.keys(obj)
+  type CopyParams<T, U, K, V, X> = T extends ReadonlyArray<U>
     ? ReadonlyArray<U>
     : T extends Map<K, V>
-    ? Map<K, V>
-    : T extends Set<X>
-    ? Set<X>
-    : T extends Record<string, unknown>
-    ? T
-    : any
-) {
-  return Array.isArray(value)
-    ? assign(value.constructor(value.length), value)
-    : type(value) === 'Map'
-    ? new Map(value as Map<K, V>)
-    : type(value) === 'Set'
-    ? new Set(value as Set<X>)
-    : value && typeof value === 'object'
-    ? (assign(Object.create(Object.getPrototypeOf(value)), value) as T)
-    : /* istanbul ignore next */
-      (value as T)
+      ? Map<K, V>
+      : T extends Set<X>
+        ? Set<X>
+        : T extends Record<string, unknown>
+          ? T
+          : any
+  /**
+   * Immutability Copy Cherry Pick
+   * @see {@link:https://github.com/kolodny/immutability-helper/blob/master/index.ts}
+   */
+  export function copy<T, U, K, V, X>(value: CopyParams<T, U, K, V, X>) {
+    return Array.isArray(value)
+      ? objectAssign(value.constructor(value.length), value)
+      : getType(value) === 'Map'
+        ? new Map(value as Map<K, V>)
+        : getType(value) === 'Set'
+          ? new Set(value as Set<X>)
+          : value && typeof value === 'object'
+            ? objectAssign(Object.create(Object.getPrototypeOf(value)), value) as T
+            : value as T
+  }
 }
-/** =========
- * END CHERRY PICK `kolodny/immutability-helper`
- * @see https://github.com/kolodny/immutability-helper/blob/master/index.ts
- * ========== */
+export const copy = Copy.copy

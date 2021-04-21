@@ -1,30 +1,27 @@
 import React from 'react'
 import Website from '@aglyn/website/feature-core'
-import {ElementComponent} from './element-component'
+import { ElementComponent, ElementComponentProps } from './element-component'
 
 /* eslint-disable-next-line */
 export interface FeatureReactProps {
   component?: any
-  elements?: Website.core.DataElement[]
-  elementComponent?: any
+  elements?: Website.ElementData[]
+  elementComponent?: ElementComponentProps['childrenComponent']
 }
 
 export function FeatureReact(props: FeatureReactProps) {
   const {
-    component: Component,
-    elementComponent: ElementComponent,
+    component: Wrapper,
+    elementComponent: Component,
     elements,
     ...rest
   } = props
   return (
-    <Component {...rest}>
-      {elements.map(data => (
-        <ElementComponent
-          data={data}
-          elementComponent={ElementComponent}
-        />
-      ))}
-    </Component>
+    <Wrapper {...rest}>
+      {elements.map(data =>
+        <Component elementData={data} childrenComponent={Component} />
+      )}
+    </Wrapper>
   )
 }
 

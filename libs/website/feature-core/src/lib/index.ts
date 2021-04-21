@@ -6,5 +6,5 @@
  * found in the root directory of this source tree.
  */
 
-export * as core from './core'
-export * as app from './app'
+export * from './core'
+export * from './app'

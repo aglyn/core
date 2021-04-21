@@ -7,37 +7,37 @@ export interface BuilderProps {}
 
 const Root = ({children, ...props}) => <div data-cid={'root'} {...props}>{children}</div>
 
-Website.app.App.setComponent({
+Website.App.setComponent({
   moduleId: 'react',
-  _id: 'root',
+  $id: 'root',
   ctor: Root
 })
 
 export function Builder(props: BuilderProps) {
   const [elements, setElements] = useState([
     {
-      _id: 'root',
+      $id: 'root',
       component: 'root',
       props: {
         children: 'hello'
       },
       children: [
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
@@ -46,28 +46,28 @@ export function Builder(props: BuilderProps) {
       ]
     },
     {
-      _id: 'root',
+      $id: 'root',
       component: 'root',
       props: {
         children: 'hello'
       },
       children: [
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
@@ -76,28 +76,28 @@ export function Builder(props: BuilderProps) {
       ]
     },
     {
-      _id: 'root',
+      $id: 'root',
       component: 'root',
       props: {
         children: 'hello'
       },
       children: [
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
           }
         },
         {
-          _id: 'root',
+          $id: 'root',
           component: 'root',
           props: {
             children: 'hello'
@@ -107,7 +107,7 @@ export function Builder(props: BuilderProps) {
     },
   ])
 
-  console.log('page:/builder', Website.app.App.getInstance())
+  console.log('page:/builder', Website.App.getInstance())
   return (
     <FeatureReact elements={elements} />
   )

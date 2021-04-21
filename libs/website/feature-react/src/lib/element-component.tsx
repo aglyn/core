@@ -1,41 +1,48 @@
 import React from 'react'
 import Website from '@aglyn/website/feature-core'
-import { _isStr } from '@aglyn/shared/util'
+import { _isArr, _isArrEmpty, _isFn, _isStr, deepMerge } from '@aglyn/shared/util'
+import { isReactComponent } from '@aglyn/shared/ui-react'
 
 /* eslint-disable-next-line */
 export interface ElementComponentProps {
-  data: Website.core.DataElement
-  elementComponent: any
+  elementData: Website.ElementData
+  childrenComponent?: React.ComponentType<ElementComponentProps>
 }
 
 export function ElementComponent(props: ElementComponentProps) {
-  const {
-    data,
-    elementComponent: ElementComponent
-  } = props
-  const { children = [], component } = data
-  let Component: any = component
-  if (_isStr(Component)) {
-    Component = Website.app.App.getComponent({moduleId: 'react', componentId: Component })
-  }
-  const resolveProps = Component?.metadata?.resolveProps ?? ((p) => p)
-  const { children: content = null, ...cProps } = {
-    ...Component?.metadata?.defaultProps,
-    ...data.props,
-  }
-  const CompCtor = Component?.ctor ?? 'div'
+  const { elementData, childrenComponent: ChildrenComponent } = props
+  const { children, component: cIdOrData } = elementData
+  const component: Website.Component = !_isStr(cIdOrData)
+    ? cIdOrData as Website.Component
+    : Website.App.getComponent({
+      moduleId: 'react', componentId: cIdOrData,
+    })
+  const { ctor, metadata } = component
+  const { defaultProps, resolveProps: metaResolve } = metadata ?? {}
+  const resolveProps = _isFn(metaResolve) ? metaResolve : ((p) => p)
+  const { children: content = null, ...ctorProps } = resolveProps.call(
+    component,
+    deepMerge(defaultProps, elementData.props),
+  )
+  const ComponentCtor = isReactComponent(ctor) || _isStr(ctor) ? ctor : 'div'
   return (
-    <CompCtor {...resolveProps.call(cProps)}>
-      {content}
-      {children.map(data => (
-        <ElementComponent data={data}/>
-      ))}
-    </CompCtor>
+    <ComponentCtor {...ctorProps}>
+      {
+        !_isArr(children) || _isArrEmpty(children)
+          ? content
+          : children.map(data => (
+            <ChildrenComponent
+              childrenComponent={ChildrenComponent}
+              elementData={data}
+            />
+          ))
+      }
+    </ComponentCtor>
   )
 }
 
 ElementComponent.defaultProps = {
-  elementComponent: ElementComponent
+  childrenComponent: ElementComponent,
 }
 
 export default ElementComponent

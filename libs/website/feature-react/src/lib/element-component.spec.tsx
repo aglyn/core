@@ -4,7 +4,13 @@ import ElementComponent from './element-component'
 
 describe('ElementComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<ElementComponent />)
+    const { baseElement } = render(
+      <ElementComponent
+        elementData={{
+
+        }}
+      />
+    )
     expect(baseElement).toBeTruthy()
   })
 })

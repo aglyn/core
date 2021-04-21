@@ -6,7 +6,6 @@
  * found in the root directory of this source tree.
  */
 
-// import EventEmitter from 'events'
 import { Component, ModulesMap } from './core'
 import { EventFlag, PKG_VERSION } from '../const'
 import EventEmitter from 'events'
@@ -43,32 +42,32 @@ export class App {
     return this.getInstance()
   }
 
-  public static setModule(props: { _id: string, declarations: Component[] }) {
-    const { _id, declarations } = props
-    const module = { _id, declarations }
-    this.modules.set(_id, module)
+  public static setModule(props: { $id: string, declarations: Component[] }) {
+    const { $id, declarations } = props
+    const module = { $id, declarations }
+    this.modules.set($id, module)
     this.event.emit(EventFlag.SET_MODULE, this, module)
     return this
   }
 
   public static getComponent(props: { moduleId: string, componentId: string }) {
     const { moduleId, componentId } = props
-    return this.modules.get(moduleId)?.declarations.find(m=>m._id === componentId)
+    return this.modules.get(moduleId)?.declarations.find(m => m.$id === componentId)
   }
 
   public static setComponent(props: {
     moduleId: string,
-    _id: string
+    $id: string
     ctor: Component['ctor'],
     metadata?: Component['metadata']
   }) {
-    const { moduleId, _id, ctor, metadata } = props
-    const module = this.modules.get(moduleId) ?? { _id: moduleId, declarations: [] }
+    const { moduleId, $id, ctor, metadata } = props
+    const module = this.modules.get(moduleId) ?? { $id: moduleId, declarations: [] }
     let component
-    if (module.declarations.some(i=>i._id === _id)) {
-      component = module.declarations.find(i=>i._id === _id)
+    if (module.declarations.some(i => i.$id === $id)) {
+      component = module.declarations.find(i => i.$id === $id)
     }
-    component = {...component,  _id, ctor, metadata}
+    component = { ...component, $id, ctor, metadata }
     module.declarations.push(component)
     this.modules.set(moduleId, module)
     this.event.emit(EventFlag.SET_COMPONENT, this, module)

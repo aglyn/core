@@ -10,7 +10,7 @@ const StyledPage = styled.div`
 
 export function Index() {
 
-  console.log('page:/index', Website.app.App.getInstance())
+  console.log('page:/index', Website.App.getInstance())
 
   /*
    * Replace the elements below with your own.
