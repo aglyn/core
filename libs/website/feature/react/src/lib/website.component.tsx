@@ -1,5 +1,5 @@
 import React from 'react'
-import Website from '@aglyn/website/feature/core'
+import Website from '@aglyn/website/core'
 import { ElementComponent, ElementComponentProps } from './element.component'
 
 /* eslint-disable-next-line */

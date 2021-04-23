@@ -1,6 +1,6 @@
 import React from 'react'
-import Website from '@aglyn/website/feature/core'
-import { _isArr, _isArrEmpty, _isFn, _isStr, deepMerge } from '@aglyn/shared/util'
+import Website from '@aglyn/website/core'
+import { _isArr, _isArrEmpty, _isFn, _isStr, deepMerge } from '@aglyn/shared/util/helpers'
 import * as ReactIs from 'react-is'
 
 /* eslint-disable-next-line */

@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import { SvgPathIcon, GridButtons } from '@aglyn/shared/ui-react'
-import Website from '@aglyn/website/feature/core'
+import { SvgPathIcon, GridButtons } from '@aglyn/shared/ui/react'
+import Website from '@aglyn/website/core'
 
 const StyledPage = styled.div`
   .page {

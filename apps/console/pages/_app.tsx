@@ -3,7 +3,7 @@ import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { ReactComponent as NxLogo } from '../public/nx-logo-white.svg'
 import './styles.css'
-import Website from '@aglyn/website/feature/core'
+import Website from '@aglyn/website/core'
 
 Website.App.init()
 

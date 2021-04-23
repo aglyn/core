@@ -16,11 +16,11 @@
     "strictBindCallApply": true,
     "baseUrl": ".",
     "paths": {
-      "@aglyn/shared/ui-react": ["libs/shared/ui-react/src/index.ts"],
-      "@aglyn/shared/util": ["libs/shared/util/src/index.ts"],
-      "@aglyn/shared/feature-mdi-icon": ["libs/shared/feature-mdi-icon/src/index.ts"],
-      "@aglyn/website/feature/core": ["libs/website/feature/core/src/index.ts"],
-      "@aglyn/website/feature/react": ["libs/website/feature/react/src/index.ts"]
+      "@aglyn/shared/data/mdi": ["libs/shared/data/mdi/src/index.ts"],
+      "@aglyn/shared/ui/react": ["libs/shared/ui/react/src/index.ts"],
+      "@aglyn/shared/util/helpers": ["libs/shared/util/helpers/src/index.ts"],
+      "@aglyn/website/feature/react": ["libs/website/feature/react/src/index.ts"],
+      "@aglyn/website/core": ["libs/website/core/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -31,20 +31,20 @@
       "tags": ["scope:app", "scope:app:console"],
       "implicitDependencies": ["console"]
     },
+    "shared-data-mdi": {
+      "tags": ["scope:lib", "scope:shared", "scope:shared:data"],
+      "implicitDependencies": []
+    },
     "shared-ui-react": {
       "tags": ["scope:lib", "scope:shared", "scope:shared:ui"],
       "implicitDependencies": []
     },
-    "shared-util": {
+    "shared-util-helpers": {
       "tags": ["scope:lib", "scope:shared", "scope:shared:util"],
       "implicitDependencies": []
     },
-    "shared-feature-mdi-icon": {
-      "tags": ["scope:lib", "scope:shared", "scope:shared:data"],
-      "implicitDependencies": []
-    },
-    "website-feature-core": {
-      "tags": ["scope:lib", "scope:website", "scope:website:data"],
+    "website-core": {
+      "tags": ["scope:lib", "scope:website", "scope:website:core"],
       "implicitDependencies": []
     },
     "website-feature-react": {
