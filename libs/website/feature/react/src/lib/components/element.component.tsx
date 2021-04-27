@@ -20,27 +20,29 @@ export interface ElementComponentProps {
 export function ElementComponent(props: ElementComponentProps) {
   const { elementData, childrenComponent: ChildrenComponent } = props
   const { children, component: cIdOrData } = elementData
-  const component: Website.Component = !_isStr(cIdOrData)
-    ? (cIdOrData as Website.Component)
-    : Website.App.getComponent({
-        moduleId: 'react',
-        componentId: cIdOrData,
-      })
+  const component = !_isStr(cIdOrData)
+    ? cIdOrData as Website.Component
+    : Website.App.getComponent({ moduleId: 'react', componentId: cIdOrData })
   const { ctor, metadata } = component
-  const { defaultProps, resolveProps: metaResolve } = metadata ?? {}
-  const resolveProps = _isFn(metaResolve) ? metaResolve : (p) => p
-  const { children: content = null, ...ctorProps } = resolveProps.call(
-    component,
-    deepMerge(defaultProps, elementData.props)
-  )
+  const { defaultProps, resolveProps } = metadata ?? {}
+  const propsResolver = _isFn(resolveProps) ? resolveProps : (p) => p
+  const mergedProps = deepMerge(defaultProps, elementData.props)
+  const resolvedProps = propsResolver.call(component, mergedProps)
+  const { children: content = null, ...ctorProps } = resolvedProps
   const ComponentCtor = ReactIs.isValidElementType(ctor) ? ctor : 'div'
   return (
     <ComponentCtor {...ctorProps}>
-      {!_isArr(children) || _isArrEmpty(children)
-        ? content
-        : children.map((data) => (
-            <ChildrenComponent key={data.$id} childrenComponent={ChildrenComponent} elementData={data} />
-          ))}
+      {
+        !_isArr(children) || _isArrEmpty(children)
+          ? content
+          : children.map((data) => (
+            <ChildrenComponent
+              key={data.$id}
+              childrenComponent={ChildrenComponent}
+              elementData={data}
+            />
+          ))
+      }
     </ComponentCtor>
   )
 }

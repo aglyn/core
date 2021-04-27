@@ -11,7 +11,9 @@ import Website from '@aglyn/website/core'
 import { WebsiteComponent } from '@aglyn/website/feature/react'
 
 /* eslint-disable-next-line */
-export interface BuilderProps {}
+export interface BuilderProps {
+
+}
 
 const Root = ({ children, ...props }) => <span {...props}>{children}</span>
 
