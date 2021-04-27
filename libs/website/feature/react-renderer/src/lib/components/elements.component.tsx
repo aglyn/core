@@ -10,35 +10,37 @@ import React from 'react'
 import Website from '@aglyn/website/core'
 import { ElementComponent, ElementComponentProps } from './element.component'
 import { ComponentProp } from '@aglyn/shared/ui/react'
-import { ElementsComponent } from './elements.component'
 
 
-export interface WebsiteComponentProps extends ComponentProp {
+export interface ElementsComponentProps extends ComponentProp {
   elements?: Website.ElementData[]
   elementComponent?: ElementComponentProps['childrenComponent']
 }
 
-export function WebsiteComponent(props: WebsiteComponentProps) {
+export function ElementsComponent(props: ElementsComponentProps) {
   const {
     component: Component,
-    elementComponent,
+    elementComponent: ElementRenderer,
     elements,
     ...rest
   } = props
   return (
     <Component {...rest}>
-      <ElementsComponent
-        elements={elements}
-        elementComponent={elementComponent}
-      />
+      {elements.map((data) => (
+        <ElementRenderer
+          key={data.$id}
+          elementData={data}
+          childrenComponent={ElementRenderer}
+        />
+      ))}
     </Component>
   )
 }
 
-WebsiteComponent.defaultProps = {
-  component: 'div',
+ElementsComponent.defaultProps = {
+  component: React.Fragment,
   elementComponent: ElementComponent,
   elements: [],
 }
 
-export default WebsiteComponent
+export default ElementsComponent

@@ -21,7 +21,9 @@ export function Builder(props: BuilderProps) {
   const [elements, setElements] = useState(samplePageData)
 
   console.log('page:/builder', Website.App.getInstance())
-  return <WebsiteComponent elements={elements} />
+  return (
+    <WebsiteComponent elements={elements} />
+  )
 }
 
 export default Builder

@@ -6,14 +6,13 @@
  * found in the root directory of this source tree.
  */
 
-import React from 'react'
 import { render } from '@testing-library/react'
 
-import UiCommon from './ui-common'
+import ElementsComponent from './elements.component'
 
-describe('UiCommon', () => {
+describe('ElementsComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<UiCommon />)
+    const { baseElement } = render(<ElementsComponent />)
     expect(baseElement).toBeTruthy()
   })
 })

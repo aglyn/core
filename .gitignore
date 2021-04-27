@@ -27,6 +27,8 @@
 .idea/*
 !.idea/copyright
 !.idea/codeStyles
+!.idea/fileTemplates
+!.idea/file.template.settings.xml
 
 # misc
 /.sass-cache
