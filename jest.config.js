@@ -7,5 +7,6 @@ module.exports = {
     '<rootDir>/libs/shared/featured-mdi-icons',
     '<rootDir>/libs/website/feature-react',
     '<rootDir>/libs/website/feature/react-builder',
+    '<rootDir>/apps/www',
   ],
 }
