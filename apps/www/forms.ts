@@ -6,7 +6,9 @@
  * found in the root directory of this source tree.
  */
 
-import { ln } from '@aglyn/shared/util/helpers'
+import { Schema, Validator } from '@data-driven-forms/react-form-renderer'
+import md5 from 'md5'
+import { _hasKey, _isStr, ln } from '@aglyn/shared/util/helpers'
 
 
 export const validateRegex = (value: string, regex) => (new RegExp(regex)).test(value)
@@ -260,9 +262,30 @@ export namespace DdfForms {
         label: 'Comments',
         helperText: 'Type a short description of your inquiry',
         variant: 'outlined',
-        rows: 4
+        rows: 4,
       },
     ],
   }
+
+  enum FormId {
+    CONTACT = 'contact'
+  }
+
+  export const formIds = {
+    contact: md5(FormId.CONTACT).toLowerCase().trim(),
+  }
+  const formSchemaFromId = {
+    [formIds.contact]: ContactFormSchema,
+  }
+  export function isValidFormId(id: unknown): id is string {
+    return _isStr(id) && _hasKey(id, formIds)
+  }
+  export function getFormSchemaFromId(id: string): Schema {
+    return formSchemaFromId[id]
+  }
+  export function isValidForm(values) {
+
+  }
+
 
 }
