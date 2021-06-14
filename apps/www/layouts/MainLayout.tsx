@@ -33,11 +33,10 @@ import React, { Fragment, PropsWithChildren } from 'react'
 import { Props as BreadcrumbsProps } from '../components/Breadcrumbs'
 import Copyright from '../components/Copyright'
 import Link, { LinkProps as LinkProps } from '../components/Link'
-import { APP } from '../const'
+import { APP, tailNavigation } from '../const'
 import { withCurrentUserCtx } from '../contexts/current-user-context'
 import { withAggregatedPageMeta } from '../lib/app-pages'
 import { getGravatarUrl } from '../lib/gravatar'
-import { footerItems } from '../lib/navigation-menus'
 
 
 export const styles = (theme: Theme) => createStyles({
@@ -403,7 +402,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                 </div>
                 <div className={classes.right}>
                   <GridButtons
-                    items={footerNavItems}
+                    items={footerNavItems.map(i=>({size: 'small', ...i}))}
                     spacing={1}
                   />
                 </div>
@@ -420,9 +419,9 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                     color="textSecondary"
                     variant="overline"
                   >
-                    <span children={`Version ${APP.PKG_VERSION}`} />
+                    <span children={`Version ${APP.VERSION}`} />
                     {' '}
-                    <span children={`(${APP.LIB_BUILD_ID})`} />
+                    <span children={`(${APP.BUILD_ID})`} />
                   </Typography>
                 </Box>
               </Box>
@@ -436,7 +435,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
 
 MainLayout.displayName = 'Layout:MainLayout'
 MainLayout.defaultProps = {
-  footerNavItems: footerItems.map(i => Object.assign(i, { size: 'small' })) as any,
+  footerNavItems: tailNavigation,
 }
 
 export default withStyles(styles, { name: 'Layout:MainLayout' })(MainLayout)

@@ -17,6 +17,7 @@ import MainLayout from '../layouts/MainLayout'
 import Image from 'next/image'
 import PromoSectionView from '../views/PromoSectionView'
 import SiteFooterView from '../views/SiteFooterView'
+import { mainNavigation, productNames } from '../const'
 
 
 const styles = (theme: Theme) => createStyles({
@@ -49,25 +50,8 @@ function Index(props: Props) {
   return (
     <MainLayout
       title={'Website Designer Platform for Your Business Goals | Aglyn'}
-      centerNavigationItems={[
-        {
-          children: 'Features',
-        },
-        {
-          children: 'Partners',
-          items: [],
-        },
-        {
-          children: 'Company',
-          items: [],
-        },
-        {
-          children: 'Get Access',
-          variant: 'contained',
-          color: 'secondary',
-        },
-      ]}
-      productName={'.com'}
+      centerNavigationItems={mainNavigation}
+      productName={productNames.www}
     >
       <BackgroundImage
         component={'header'}

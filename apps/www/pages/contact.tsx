@@ -23,10 +23,12 @@ import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
 import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
+import LinearProgress from '@material-ui/core/LinearProgress'
 import React, { useCallback } from 'react'
 import { DdfForms } from '../forms'
 import MainLayout from '../layouts/MainLayout'
 import SiteFooterView from '../views/SiteFooterView'
+import { mainNavigation, productNames } from '../const'
 
 
 const componentMapper = {
@@ -107,13 +109,18 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
       <FormSpy>
         {() => (
           <Grid item xs={12} align="center">
+            {submitting && (
+              <Box mb={1}>
+                <LinearProgress color="secondary" />
+              </Box>
+            )}
             <Button
               disabled={submitting || !valid || pristine}
               type="submit"
               color="secondary"
               variant="contained"
             >
-              Continue
+              {submitting ? 'Please wait...' : 'Continue'}
             </Button>
           </Grid>
         )}
@@ -141,25 +148,8 @@ function Contact(props: WithStyles<typeof styles>) {
   return (
     <MainLayout
       title={'Contact Us | Aglyn'}
-      centerNavigationItems={[
-        {
-          children: 'Features',
-        },
-        {
-          children: 'Partners',
-          items: [],
-        },
-        {
-          children: 'Company',
-          items: [],
-        },
-        {
-          children: 'Get Access',
-          variant: 'contained',
-          color: 'secondary',
-        },
-      ]}
-      productName={'.com'}
+      centerNavigationItems={mainNavigation}
+      productName={productNames.www}
       className={classes.root}
     >
       <main>
