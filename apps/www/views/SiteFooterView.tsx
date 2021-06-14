@@ -49,9 +49,11 @@ const SiteFooterView = forwardRef<any, SiteFooterViewProps & WithStyles<typeof S
         {...rest}
       >
         <Box pt={4}>
-          <Container maxWidth="lg">
-            {children}
-          </Container>
+          {children && (
+            <Container maxWidth="lg">
+              {children}
+            </Container>
+          )}
           <Container maxWidth="lg">
             <GridItems
               spacing={2}

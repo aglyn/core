@@ -10,7 +10,12 @@ import fbStore from './fb-store'
 import { createDocumentId, createTimestamp } from './tools'
 
 
-export async function saveFormSubmit(formId: string, fields: Record<string, any>) {
+interface SaveFormSubmitParams {
+  formId: string
+  fields: Record<string, any>
+}
+
+export async function saveFormSubmit({ formId, fields }: SaveFormSubmitParams) {
   const docRef = fbStore.collection('forms').doc(createDocumentId())
   return await docRef.set({
     formId: formId,

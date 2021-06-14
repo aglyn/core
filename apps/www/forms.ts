@@ -6,10 +6,12 @@
  * found in the root directory of this source tree.
  */
 
-import { Schema as DdfSchema, Validator } from '@data-driven-forms/react-form-renderer'
+import { Schema as DdfSchema } from '@data-driven-forms/react-form-renderer'
 import validatorTypes from '@data-driven-forms/react-form-renderer/validator-types'
+import validation from '@data-driven-forms/react-form-renderer/validation'
 import md5 from 'md5'
-import { _hasKey, _isObjT, _isStr, ln } from '@aglyn/shared/util/helpers'
+import { _hasKey, _isStr, ln } from '@aglyn/shared/util/helpers'
+import { ValidationOptions } from '@data-driven-forms/react-form-renderer/validation/validation'
 
 
 export const validateRegex = (value: string, regex) => (new RegExp(regex)).test(value)
@@ -286,18 +288,8 @@ export namespace DdfForms {
   export function getFormSchemaFromId(id: string): Schema {
     return formSchemaFromId[id]
   }
-  export function checkRequiredValues(values: Record<string, any>, schema: Schema) {
-    // TODO: Update with full validation from data-driven-forms upon API docs
-    const { fields } = schema
-    const invalid = []
-    fields.forEach(i => {
-      if (i.validate?.find(i => _isObjT(i) && i.type === ValidatorType.REQUIRED)) {
-        if (!values[i.name]) {
-          invalid.push({ name: i.name, message: 'Required' })
-        }
-      }
-    })
-    return invalid
+  export function checkRequiredValues(schema: Schema, options: ValidationOptions) {
+    return validation(schema, options)
   }
 
 

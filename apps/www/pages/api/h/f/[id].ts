@@ -21,23 +21,27 @@ import { saveFormSubmit } from '../../../../lib/firebase/form-submission'
  * @param {NextApiResponse} res
  */
 async function formHandler(req: NextApiRequest, res: NextApiResponse) {
-  const { query: { id, ...params } } = req
+  const { query: { id, ...values } } = req
   // Ensure Form ID exists
   if (!DdfForms.isValidFormId(id)) {
     return Res.Error.handleJsonError(res, Res.Error.notFound)
   }
   const schema = DdfForms.getFormSchemaFromId(id)
-  const missingValues = DdfForms.checkRequiredValues(params, schema)
-  if (missingValues.length) {
+  const errors = await DdfForms.checkRequiredValues(schema, { values })
+  if (Object.keys(errors).length) {
     return Res.Error.handleJsonError(
       res,
-      Res.Error.missingParams('Failed Validation', { errors: missingValues }),
+      Res.Error.missingParams({ errors }),
     )
   }
 
-  await saveFormSubmit(id, params)
+  let saveRes
 
-  return res.status(200).json(Res.Data.success)
+  await saveFormSubmit({formId : id, fields : values})
+    .then(response => saveRes = response)
+    .catch(error => saveRes = error)
+
+  return res.status(200).json(Res.Data.success({ response: saveRes }))
 }
 
 export default handleMiddleware(

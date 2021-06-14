@@ -61,7 +61,7 @@ function _App(props: AppProps) {
     }
   })
 
-  const Wrapper = isProduction ? Fragment : StrictMode
+  const Wrapper = isProduction ? Fragment : Fragment// StrictMode
 
   return (
     <Wrapper>

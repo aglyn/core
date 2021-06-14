@@ -27,8 +27,8 @@
   },
   "private": true,
   "dependencies": {
-    "@data-driven-forms/mui-component-mapper": "^3.6.3",
-    "@data-driven-forms/react-form-renderer": "^3.6.3",
+    "@data-driven-forms/mui-component-mapper": "^3.8.2",
+    "@data-driven-forms/react-form-renderer": "^3.8.2",
     "@emotion/react": "11.1.5",
     "@emotion/server": "11.0.0",
     "@emotion/styled": "11.1.5",

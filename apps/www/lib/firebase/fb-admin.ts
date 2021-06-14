@@ -7,17 +7,16 @@
  */
 
 import * as fbAdmin from 'firebase-admin'
-import { TextFieldProps } from '@material-ui/core'
 
 
-let fbAdminApp: fbAdmin.app.App
+export let fbAdminApp: fbAdmin.app.App
 
 /**
  * @ignore - default module loading invokes
  */
 (function main(): void {
   if (!fbAdmin.apps.length) {
-    fbAdminApp = initializeAdminApp({
+    fbAdminApp = fbAdmin.initializeApp({
       credential: fbAdmin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
@@ -32,12 +31,6 @@ let fbAdminApp: fbAdmin.app.App
     fbAdminApp = fbAdmin.app()
   }
 })()
-
-type A = TextFieldProps
-
-export function initializeAdminApp(options: fbAdmin.AppOptions, name?: string): fbAdmin.app.App {
-  return fbAdmin.initializeApp(options, name)
-}
 
 export { fbAdmin }
 export default fbAdmin

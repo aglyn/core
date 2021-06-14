@@ -45,7 +45,7 @@ export namespace Res {
     /////////////////
     // RESPONSES
     /////////////////
-    export const success = buildResponse({})
+    export const success = (data = {}) => buildResponse(data)
 
 
   }
@@ -124,12 +124,12 @@ export namespace Res {
       message,
     )
 
-    export const missingParams = (message: string = Message.INVALID_REQUEST, errors: Record<string, any>) => buildError(
+    export const missingParams = (extras: Record<string, any>) => buildError(
       StatusCode.HTTP400,
       Prefix.BAD_REQ,
       MsgCode.FAILED_REQUIREMENTS,
       Message.INVALID_REQUEST,
-      errors,
+      extras,
     )
 
     export const notFound = buildError(
