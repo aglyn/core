@@ -8,6 +8,7 @@
 
 import { ElementType, forwardRef, ReactNode, HTMLAttributes } from 'react'
 import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles'
+import ${COMPONENT}, { ${COMPONENT}Props } from '@material-ui/core/${COMPONENT}' 
 import clsx from 'clsx'
 
 
@@ -15,8 +16,8 @@ export const ${NAME}Styles = (theme: Theme) => createStyles({
   root: {},
 })
 
-export interface ${NAME}Props<C extends React.ElementType = any> extends WithStyles<typeof ${NAME}Styles> {
-  component?: C
+export interface ${NAME}Props<C extends React.ElementType> extends ${Mui}Props<C, { component?: C }>, WithStyles<typeof ${NAME}Styles> {
+  
 }
 
 export const Unstyled${NAME} = forwardRef<any, ${NAME}Props>(
@@ -24,7 +25,7 @@ export const Unstyled${NAME} = forwardRef<any, ${NAME}Props>(
     const { 
       children,
       component: Component,
-      className: prop_className,
+      className: classNameProp,
       classes,
       ...rest
     } = props

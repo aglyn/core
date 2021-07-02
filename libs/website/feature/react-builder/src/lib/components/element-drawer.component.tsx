@@ -8,7 +8,7 @@
 
 import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
-import { forwardRef, useCallback, Fragment } from 'react'
+import { forwardRef, useCallback, Fragment, MouseEventHandler, SyntheticEvent } from 'react'
 import IconButton from '@material-ui/core/IconButton'
 import {
   GridList,
@@ -26,11 +26,8 @@ import Box from '@material-ui/core/Box'
 import FormControl from '@material-ui/core/FormControl'
 import Typography from '@material-ui/core/Typography'
 import Website from '@aglyn/website/core'
+import { ElementDrawerOptions } from '../contexts/element-drawer.context'
 
-
-export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> {
-
-}
 
 export const styles = (theme: Theme) => createStyles({
   title: {},
@@ -90,10 +87,11 @@ export const styles = (theme: Theme) => createStyles({
   },
 })
 
-enum AddChildVariant {
-  PREPEND = 'prepend',
-  APPEND = 'append',
-  CHILD = 'child'
+
+export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> {
+  options: ElementDrawerOptions
+  onCancel: MouseEventHandler<unknown>
+  onConfirm: (event: SyntheticEvent<any>, item: any) => void
 }
 
 export const ElementDrawerComponent = forwardRef<any, ElementDrawerComponentProps & WithStyles<typeof styles>>(
@@ -101,23 +99,37 @@ export const ElementDrawerComponent = forwardRef<any, ElementDrawerComponentProp
     const {
       classes,
       className,
+      options,
+      onConfirm,
+      // onClose,
       ...rest
     } = props
+
+    const { title } = options
+    console.log('props', props)
 
 
     const drawerState: any = { type: 'browse-site-components' }
     const selectedElementProps: any = {}
     const propsSchema: any = {}
-    const handleDrawerOpen = useCallback(() => {}, [])
-    const handleElementSave = useCallback(() => {}, [])
-    const handleDrawerClose = useCallback(() => {}, [])
-    const handleDeleteButtonClick = useCallback(() => {}, [])
-    const handleItemClick = useCallback((e, item) => {}, [])
+    const handleElementSave = useCallback(() => {
+
+    }, [])
+    const handleDrawerClose = useCallback((e) => {
+      // onClose(e, null)
+    }, [])
+    const handleDeleteButtonClick = useCallback(() => {
+
+    }, [])
+    const handleItemClick = useCallback((e, item) => {
+      console.log('handleItemClick', item)
+      onConfirm(e, item)
+    }, [])
     const components = Website.App.getComponents({ moduleId: 'react' })
     const items = components.map(i => ({
       id: i?.$id,
       title: i?.metadata?.title,
-      icon: i?.metadata?.icon
+      icon: i?.metadata?.icon,
     }))
 
     const renderItemContent = useCallback((item) => {
@@ -153,7 +165,7 @@ export const ElementDrawerComponent = forwardRef<any, ElementDrawerComponentProp
               onClick={handleDrawerClose}
             />
             <Typography
-              children={drawerState?.label}
+              children={title}
               className={classes.title}
               color="inherit"
               variant="h6"
@@ -173,9 +185,8 @@ export const ElementDrawerComponent = forwardRef<any, ElementDrawerComponentProp
           paper: classes.paper,
           content: classes.content,
         }}
-        onClose={handleDrawerClose}
-        open={drawerState?.open}
         variant="temporary"
+        onClose={handleDrawerClose}
         {...rest}
       >
         {

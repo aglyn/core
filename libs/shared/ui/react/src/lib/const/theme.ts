@@ -6,11 +6,7 @@
  * found in the root directory of this source tree.
  */
 
-import { map } from '@aglyn/shared/util/helpers'
-import type { Color } from '@material-ui/core'
-import { cyan, lightBlue, lime, orange, red, purple } from '@material-ui/core/colors'
 import { createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core/styles'
-import type { CSSProperties } from 'react'
 
 // START EXAMPLE – MODULE AUGMENTATION ↓
 // ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
@@ -94,79 +90,12 @@ declare module '@material-ui/core/styles/createPalette' {
   interface Palette {
     tertiary: Palette['primary']
     quaternary: Palette['primary']
-    brand: {
-      primary: CSSProperties['color']
-      secondary: CSSProperties['color']
-      purple: Color
-      coral: CSSProperties['color']
-      green: CSSProperties['color']
-      orange: CSSProperties['color']
-    }
   }
 
   interface PaletteOptions {
     tertiary: PaletteOptions['primary']
     quaternary: PaletteOptions['primary']
-    brand: {
-      primary: CSSProperties['color']
-      secondary: CSSProperties['color']
-      purple: Color
-      coral: CSSProperties['color']
-      green: CSSProperties['color']
-      orange: CSSProperties['color']
-    }
   }
-}
-
-/**
- * Console Theme
- */
-const consoleOptions: ThemeOptions = {
-  palette: {
-    type: 'light',
-    primary: { main: '#404c5c' },
-    secondary: { main: lightBlue['600'] /* '#039be5' */ },
-    tertiary: { main: purple['500'] /* '#9c27b0' */ },
-    quaternary: { main: purple.A200 /* '#e040fb' */ },
-    brand: {
-      primary: purple['500'],
-      secondary: lightBlue['500'],
-      purple: purple,
-      coral: '#ef464f',
-      green: '#00c853',
-      orange: '#f2ab5d',
-    },
-    info: { main: cyan['300'] },
-    warning: { main: orange.A200 },
-    error: { main: red['600'] },
-  },
-  props: {
-    MuiIconButton: {
-      // color: 'inherit', // Default color to inherit
-    },
-  },
-  overrides: {
-    MuiAvatar: {
-      root: {
-        width: 32,
-        height: 32,
-      },
-    },
-    MuiIconButton: { root: { padding: 8 } },
-  },
-}
-
-/**
- * Builder Theme
- */
-const builderOptions: ThemeOptions = {
-  ...consoleOptions,
-  palette: {
-    ...consoleOptions.palette,
-    primary: { main: lightBlue['A700'] } /* #0091EA */,
-    secondary: { main: purple['A200'] } /* #E040FB */,
-    tertiary: { main: '#37474F' },
-  },
 }
 
 /**
@@ -184,9 +113,160 @@ export function createTheme(options?: ThemeOptions): Theme {
   })
 }
 
-export const options = {
-  console: consoleOptions,
-  builder: builderOptions,
+/**
+ * Console Theme
+ */
+export namespace ConsoleTheme {
+  export const palette: ThemeOptions['palette'] = {
+    type: 'light',
+    primary: { main: '#404c5c' },
+    secondary: { main: '#039be5' },
+    tertiary: { main: '#9c27b0' },
+    quaternary: { main: '#e040fb' },
+    info: { main: '#4dd0e1' },
+    warning: { main: '#ffab40' },
+    error: { main: '#e53935' },
+    success: { main: '#4caf50' },
+  }
+  export const typography: ThemeOptions['typography'] = {
+    fontFamily: '"Raleway", "Helvetica", "Arial", sans-serif',
+    fontSize: 14,
+    htmlFontSize: 16,
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+    fontWeightBold: 700,
+    h1: {
+      fontSize: '4rem',
+      fontWeight: 200,
+      lineHeight: 1.167,
+      letterSpacing: 'auto',
+    },
+    h2: {
+      fontSize: '3.75rem',
+      fontWeight: 300,
+      lineHeight: 1.2,
+      letterSpacing: 'auto',
+    },
+    h3: {
+      fontSize: '3rem',
+      fontWeight: 400,
+      lineHeight: 1.167,
+      letterSpacing: 'auto',
+    },
+    h4: {
+      fontSize: '2.125rem',
+      fontWeight: 400,
+      lineHeight: 1.235,
+      letterSpacing: 'auto',
+    },
+    h5: {
+      fontSize: '1.5rem',
+      fontWeight: 500,
+      lineHeight: 1.334,
+      letterSpacing: 'auto',
+    },
+    h6: {
+      fontSize: '1.25rem',
+      fontWeight: 700,
+      lineHeight: 1.6,
+      letterSpacing: 'auto',
+    },
+    subtitle1: {
+      fontSize: '1.2rem',
+      fontWeight: 400,
+      lineHeight: 1.65,
+      letterSpacing: 'auto',
+    },
+    subtitle2: {
+      fontSize: '1rem',
+      fontWeight: 500,
+      lineHeight: 1.57,
+      letterSpacing: 'auto',
+    },
+    body1: {
+      fontSize: '1rem',
+      fontWeight: 400,
+      lineHeight: 1.5,
+      letterSpacing: 'auto',
+    },
+    body2: {
+      fontSize: '0.875rem',
+      fontWeight: 400,
+      lineHeight: 1.43,
+      letterSpacing: 'auto',
+    },
+    button: {
+      fontSize: '0.875rem',
+      fontWeight: 500,
+      lineHeight: 1.75,
+      letterSpacing: 'auto',
+    },
+    caption: {
+      fontSize: '0.75rem',
+      fontWeight: 400,
+      lineHeight: 1.66,
+      letterSpacing: 'auto',
+    },
+    overline: {
+      fontSize: '0.75rem',
+      fontWeight: 400,
+      lineHeight: 2.66,
+      letterSpacing: 'auto',
+    },
+  }
+  export const props: ThemeOptions['props'] = {
+    MuiIconButton: {
+      // color: 'inherit', // Default color to inherit
+    },
+  }
+  export const overrides: ThemeOptions['overrides'] = {
+    MuiAvatar: {
+      root: {
+        width: 32,
+        height: 32,
+      },
+    },
+    MuiIconButton: { root: { padding: 8 } },
+  }
+  export const options: ThemeOptions = {
+    palette: ConsoleTheme.palette,
+    typography: ConsoleTheme.typography,
+    props: ConsoleTheme.props,
+    overrides: ConsoleTheme.overrides,
+  }
+  export const theme: Theme = createTheme(options)
 }
 
-export const themes = map(options, (value) => createTheme(value))
+/**
+ * Builder Theme
+ */
+export namespace BuilderTheme {
+  export const palette: ThemeOptions['palette'] = {
+    ...ConsoleTheme.palette,
+    primary: { main: '#0091ea' },
+    secondary: { main: '#e040fb' },
+    tertiary: { main: '#37474F' },
+  }
+  export const typography: ThemeOptions['typography'] = {
+    ...ConsoleTheme.typography
+  }
+  export const props: ThemeOptions['props'] = {
+    ...ConsoleTheme.props
+  }
+  export const overrides: ThemeOptions['overrides'] = {
+    ...ConsoleTheme.overrides
+  }
+  export const options: ThemeOptions = {
+    palette: palette,
+    typography: typography,
+    props: props,
+    overrides: overrides,
+  }
+  export const theme: Theme = createTheme(options)
+}
+
+export const themes = {
+  console: ConsoleTheme.theme,
+  builder: BuilderTheme.theme,
+}

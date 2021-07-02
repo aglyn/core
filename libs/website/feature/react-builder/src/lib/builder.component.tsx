@@ -13,8 +13,9 @@ import { ThemeProvider } from '@material-ui/core/styles'
 import { forwardRef } from 'react'
 import { ElementComponent, ElementComponentProps } from './components/element.component'
 import AppBarComponent from './components/appbar.component'
-import ElementDrawerComponent from './components/element-drawer.component'
+import ElementDrawerProviderComponent from './components/element-drawer-provider.component'
 import SelectionProviderComponent from './components/selection-provider.component'
+import NoSsr from '@material-ui/core/NoSsr'
 
 
 export interface BuilderComponentProps extends ComponentProp {
@@ -32,22 +33,23 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
     } = props
 
     return (
+      <NoSsr>
       <ThemeProvider theme={themes.builder}>
         <Component ref={ref} {...rest}>
           <ConfirmationProviderComponent>
             <SelectionProviderComponent>
-              <WebsiteComponent
-                elements={elements}
-                elementComponent={elementComponent}
-              />
-              <AppBarComponent />
-              <ElementDrawerComponent
-                
-              />
+              <ElementDrawerProviderComponent>
+                <WebsiteComponent
+                  elements={elements}
+                  elementComponent={elementComponent}
+                />
+                <AppBarComponent />
+              </ElementDrawerProviderComponent>
             </SelectionProviderComponent>
           </ConfirmationProviderComponent>
         </Component>
       </ThemeProvider>
+      </NoSsr>
     )
   },
 )

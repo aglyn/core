@@ -129,7 +129,7 @@ class AppDocument<P = {}> extends NextDocument<P> {
   linkElements: LinkElementsConfig = [
     ['shortcut icon', '/favicon.ico'],
     ['manifest', '/manifest.json'],
-    ['stylesheet', 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap'],
+    ['stylesheet', 'https://fonts.googleapis.com/css?family=Raleway:300,400,500,700&display=swap'],
   ]
 
   static makeMetaElem = ([name, content, { ...rest }]: MetaElementsConfig[number]) => (

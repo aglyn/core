@@ -6,21 +6,18 @@
  * found in the root directory of this source tree.
  */
 
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
+import { createStyles, WithStyles, withStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
-import { forwardRef, HTMLAttributes } from 'react'
+import { forwardRef, useCallback } from 'react'
 import AppBar, { AppBarProps } from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import IconButton from '@material-ui/core/IconButton'
 import Fab from '@material-ui/core/Fab'
 import { SvgPathIcon } from '@aglyn/shared/ui/react'
+import { useElementDrawerContext } from '../contexts/element-drawer.context'
 
 
-export interface AppBarComponentProps extends Partial<AppBarProps> {
-
-}
-
-export const styles = (theme: Theme) => createStyles({
+export const styles = () => createStyles({
   root: {
     top: 'auto',
     bottom: 0,
@@ -38,6 +35,10 @@ export const styles = (theme: Theme) => createStyles({
   },
 })
 
+export interface AppBarComponentProps extends Partial<AppBarProps> {
+
+}
+
 export const AppBarComponent = forwardRef<any, AppBarComponentProps & WithStyles<typeof styles>>(
   function RefRenderFn(props, ref) {
     const {
@@ -45,6 +46,19 @@ export const AppBarComponent = forwardRef<any, AppBarComponentProps & WithStyles
       className,
       ...rest
     } = props
+
+    const { elementDrawer } = useElementDrawerContext()
+    const handleFabClick = useCallback( async () => {
+      await elementDrawer({ title: 'Add New Element' })
+        .then(res => {
+          console.log('res', res)
+        })
+        .catch(error => {
+          console.log('errror', error)
+        })
+
+    }, [elementDrawer])
+
 
     return (
       <AppBar
@@ -58,7 +72,12 @@ export const AppBarComponent = forwardRef<any, AppBarComponentProps & WithStyles
           <IconButton edge="start" color="inherit" aria-label="open drawer">
             <SvgPathIcon iconId={'menu'} />
           </IconButton>
-          <Fab color="secondary" aria-label="add" className={classes.fabButton}>
+          <Fab
+            color="secondary"
+            aria-label="add"
+            className={classes.fabButton}
+            onClick={handleFabClick}
+          >
             <SvgPathIcon iconId={'plus'} />
           </Fab>
           <div className={classes.grow} />
