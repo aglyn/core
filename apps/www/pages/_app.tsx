@@ -7,20 +7,21 @@
  */
 
 import CssBaseline from '@material-ui/core/CssBaseline'
-import Slide from '@material-ui/core/Slide'
 import { MuiThemeProvider } from '@material-ui/core/styles'
 import { console } from '@aglyn/shared/ui/themes'
-import React, { Fragment, StrictMode, useEffect } from 'react'
-import { AppProps } from 'next/app'
+import { Fragment, useEffect } from 'react'
+import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { AppLoaderProviderComponent } from '../contexts/app-loader-context'
-import { useOnRouteChangeComplete } from '../hooks/router-events'
-import { withAppController } from '../lib/aglyn-deprecated'
 import AppLoaderOverlayView from '../views/AppLoaderOverlayView'
 import { AppContextProvider } from '../contexts/app-context'
 import { CurrentUserProviderComponent } from '../contexts/current-user-context'
-import { MetaElementsConfig } from './_document'
 import { APP } from '../const'
+
+import { withAppController as AppControllerFactory } from '../lib/aglyn-deprecated'
+
+
+declare function require(moduleName: string): any;
 
 
 const previewProduction = false
@@ -33,22 +34,52 @@ const appOptions = {
       firestoreEmulator: {host: 'localhost', port: 8080},
     }),
 }
-const app = withAppController(appOptions)
 
-const metaElements: MetaElementsConfig = [
-  ['viewport', 'width=device-width,initial-scale=1'],
-]
+let app
+if (typeof window !== 'undefined') {
+  const withAppController: typeof AppControllerFactory = require('../lib/aglyn-deprecated')
+  app = withAppController(appOptions)
+}
 
-
-function _App(props: AppProps) {
+/**
+ *
+ * App component manages mounting and hydration for the client app
+ * at the Next.JS app entry point, removes server styles and is
+ * responsible for rendering every page Component
+ *
+ * @example
+ * > ## Resolution order
+ * >
+ * > ### Server-side
+ * > 1. [_App]{@link _App}.getInitialProps (if-exists)
+ * > 2. <PageComponent>.getInitialProps
+ * > 3. [_Document]{@link _Document}.getInitialProps
+ * > 4. [_App]{@link _App}.render
+ * > 5. <PageComponent>.render
+ * > 6. [_Document]{@link _Document}.render
+ * >
+ * > ### Server-side (w/ error)
+ * > 1. [_Document]{@link _Document}.getInitialProps
+ * > 2. [_App]{@link _App}.render
+ * > 3. <PageComponent>.render
+ * > 4. [_Document]{@link _Document}.render
+ * >
+ * > ### Client-side
+ * > 1. [_App]{@link _App}.getInitialProps (if-exists)
+ * > 2. <PageComponent>.getInitialProps
+ * > 3. [_App]{@link _App}.render
+ * > 4. <PageComponent>.render
+ *
+ * @param {AppProps} props
+ * @returns {JSX.Element}
+ */
+function _App(props: AppProps): JSX.Element {
   const {Component, pageProps} = props
 
   useEffect(() => {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side')
-    if (jssStyles) {
-      jssStyles.parentElement.removeChild(jssStyles)
-    }
+    if (jssStyles) jssStyles.parentElement.removeChild(jssStyles)
   }, [])
 
   useEffect(() => {
@@ -60,29 +91,31 @@ function _App(props: AppProps) {
   const Wrapper = isProduction ? Fragment : Fragment// StrictMode
 
   return (
-    <Wrapper>
-      <AppContextProvider value={app}>
-        <CurrentUserProviderComponent>
-          <Head>
-            <title children={APP.META_TITLE} />
-            <meta name="description" content={APP.META_DESCRIPTION} />
-          </Head>
-          <MuiThemeProvider theme={console}>
-            <CssBaseline>
-              <AppLoaderProviderComponent>
-                <div className="app">
-                  <main>
-                    <Component {...pageProps} />
-                  </main>
-                </div>
-                <AppLoaderOverlayView />
-              </AppLoaderProviderComponent>
-            </CssBaseline>
-          </MuiThemeProvider>
-        </CurrentUserProviderComponent>
-      </AppContextProvider>
-    </Wrapper>
+    <>
+      <Head>
+        <title children={APP.META_TITLE} />
+        <meta name="description" content={APP.META_DESCRIPTION} />
+      </Head>
+      <Wrapper>
+        <AppContextProvider value={app}>
+          <CurrentUserProviderComponent>
+            <MuiThemeProvider theme={console}>
+              <CssBaseline>
+                <AppLoaderProviderComponent>
+                  <div className="app">
+                    <main>
+                      <Component {...pageProps} />
+                    </main>
+                  </div>
+                  <AppLoaderOverlayView />
+                </AppLoaderProviderComponent>
+              </CssBaseline>
+            </MuiThemeProvider>
+          </CurrentUserProviderComponent>
+        </AppContextProvider>
+      </Wrapper>
+    </>
   )
 }
-
+_App.displayName = '_App'
 export default _App

@@ -6,7 +6,7 @@
  * found in the root directory of this source tree.
  */
 
-import { Palette, PaletteOptions } from '@material-ui/core/styles'
+import { Palette, PaletteOptions } from '@material-ui/core/styles/createPalette'
 
 
 declare module '@material-ui/core/styles/createPalette' {
@@ -20,6 +20,8 @@ declare module '@material-ui/core/styles/createPalette' {
     quaternary: PaletteOptions['primary']
   }
 }
+
+export {}
 
 /** START EXAMPLE – MODULE AUGMENTATION ↓
  * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄

@@ -1,5 +1,5 @@
 import React from 'react'
-import GridItems, { Props as GridItemsProps } from '@aglyn/common/components/GridItems'
+import { GridItems, GridItemsProps } from '@aglyn/shared/ui/react'
 import { GridField } from '../lib/input-fields'
 
 

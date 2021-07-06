@@ -9,7 +9,7 @@ import NextDocument, {
   Main,
   NextScript,
 } from 'next/document'
-import React from 'react'
+import { Children, HTMLProps } from 'react'
 
 
 const isProduction = Boolean(process.env.NODE_ENV === 'production')
@@ -31,8 +31,8 @@ if (isProduction) {
 
 export type InitPropsResponse = Promise<DocumentInitialProps>
 
-export type MetaElemProps = React.HTMLProps<HTMLMetaElement>
-export type LinkElemProps = React.HTMLProps<HTMLLinkElement>
+export type MetaElemProps = HTMLProps<HTMLMetaElement>
+export type LinkElemProps = HTMLProps<HTMLLinkElement>
 export type MetaElementsConfig = [name: MetaElemProps['name'], content: MetaElemProps['content'], other?: MetaElemProps][]
 export type LinkElementsConfig = [rel: LinkElemProps['rel'], href: LinkElemProps['href'], other?: LinkElemProps][]
 
@@ -63,11 +63,11 @@ export type LinkElementsConfig = [rel: LinkElemProps['rel'], href: LinkElemProps
  * 4. page.render
  *
  * @exports
- * @class AppDocument
+ * @class _Document
  * @extends {NextDocument<P>}
  * @template P
  */
-class AppDocument<P = {}> extends NextDocument<P> {
+export default class _Document<P = {}> extends NextDocument<P> {
 
   /**
    * Returns the context object with the addition of `renderPage`
@@ -78,7 +78,7 @@ class AppDocument<P = {}> extends NextDocument<P> {
    * @param {DocumentContext} ctx
    * @returns {InitPropsResponse}
    */
-  public static async getInitialProps(ctx: DocumentContext): InitPropsResponse {
+  static async getInitialProps(ctx: DocumentContext): InitPropsResponse {
     // Render app and page and get the context of the page with collected side effects.
     const sheets = new ServerStyleSheets()
     const originalRenderPage = ctx.renderPage
@@ -110,7 +110,7 @@ class AppDocument<P = {}> extends NextDocument<P> {
       ...initialProps,
       // Styles fragment is rendered after the app and page rendering finish.
       styles: [
-        ...React.Children.toArray(initialProps.styles),
+        ...Children.toArray(initialProps.styles),
         // sheets.getStyleElement() // LEAVE FOR REFERENCE IN CASE OF ISSUE BELOW
         <style
           key="jss-server-side"
@@ -132,30 +132,26 @@ class AppDocument<P = {}> extends NextDocument<P> {
     ['stylesheet', 'https://fonts.googleapis.com/css?family=Raleway:300,400,500,700&display=swap'],
   ]
 
-  static makeMetaElem = ([name, content, {...rest}]: MetaElementsConfig[number]) => (
+  makeMetaElem = ([name, content, {...rest}]: MetaElementsConfig[number]) => (
     <meta key={name + content} name={name} content={content} {...rest} />
   )
 
-  static makeLinkElem = ([rel, href, {...rest}]: LinkElementsConfig[number]) => (
+  makeLinkElem = ([rel, href, {...rest}]: LinkElementsConfig[number]) => (
     <link key={href} rel={rel} href={href} {...rest} />
   )
 
   public render(): JSX.Element {
     return (
-      <>
-        <Html lang="en">
-          <Head>
-            {this.metaElements.map(AppDocument.makeMetaElem)}
-            {this.linkElements.map(AppDocument.makeLinkElem)}
-          </Head>
-          <body>
+      <Html lang="en">
+        <Head>
+          {this.metaElements.map(this.makeMetaElem)}
+          {this.linkElements.map(this.makeLinkElem)}
+        </Head>
+        <body>
           <Main />
           <NextScript />
-          </body>
-        </Html>
-      </>
+        </body>
+      </Html>
     )
   }
 }
-
-export default AppDocument

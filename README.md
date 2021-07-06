@@ -29,6 +29,17 @@ Next start up the firebase emulators by running the following command:
 - Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/`
   directory. Use the `--prod` flag for a production build.
 
+#### Version bump and changelog automation
+
+###### Utilizes [SemVer](https://semver.org/) and [ConventionalCommits](https://www.conventionalcommits.org/en/v1.0.0/)
+
+- Run `nx run workspace:version --version=[major|minor|patch|prerelease] --preid=beta --dry-run` for
+  version bump and generation of CHANGELOG
+- Run `nx run <my-lib>:version [...options]` for independent project app or lib version and
+  generation of CHANGELOG
+
+> @See [`@jscutlery/semver`](https://github.com/jscutlery/semver) Nx plugin repository for full list of commands and options.
+
 #### Running Tests
 
 **Unit tests**
@@ -77,5 +88,31 @@ Libraries are shareable across libraries and applications. They can be imported 
 3. If everything succeeded, stage the changes and remove the `migrations.json` file.
 
 More info detailed on the [Nx documentation](https://nx.dev/latest/react/core-concepts/updating-nx)
+
+------------------------------------------------------------
+
+## Git 
+
+### Commit messages
+
+Follow guide for commit-lint: [ConventionalCommits](https://www.conventionalcommits.org)
+
+```markdown
+<type>[(optional-scope)]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+The above commit contains the following structural elements, to communicate intent to the consumers
+of your library:
+
+1. fix: a commit of the *type* `fix` patches a bug in your codebase (this correlates with [`PATCH`](http://semver.org/#summary) in Semantic Versioning).
+2. feat: a commit of the *type* `feat` introduces a new feature to the codebase (this correlates with [`MINOR`](http://semver.org/#summary) in Semantic Versioning).
+3. BREAKING CHANGE: a commit that has a footer `BREAKING CHANGE:`, or appends a `!` after the type/scope, introduces a breaking API change (correlating with [`MAJOR`](http://semver.org/#summary) in Semantic Versioning). A BREAKING CHANGE can be part of commits of any *type*.
+4. *types* other than `fix:` and `feat:` are allowed, for example [@commitlint/config-conventional](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional) (based on the [the Angular convention](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines)) recommends: 
+   - `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, and others.
+5. *footers* other than `BREAKING CHANGE: <description>` may be provided and follow a convention similar to [git trailer format](https://git-scm.com/docs/git-interpret-trailers).
 
 ------------------------------------------------------------

@@ -1,8 +1,8 @@
 import React from 'react'
 import { Components, FieldPreset } from '../lib/input-fields'
-import { FT, lbl } from '@aglyn/core'
+import { FT, lbl } from '../lib/aglyn-deprecated'
 import FormFields, { Props as FormFieldsProps } from './FormFields'
-import SvgPathIcon from '@aglyn/common/components/SvgPathIcon'
+import { SvgPathIcon } from '@aglyn/shared/ui/react'
 
 function FieldObjectProperty(props: ObjectPropertyProps) {
   const { value, ...rest } = props

@@ -27,22 +27,22 @@ export type Props = {}
 
 export const CurrentUserProviderComponent = withAppContext<Props>(
   function CurrentUserProviderComponent(props) {
-    const { children, app } = props
-    const currentUser = app.getCurrentUser()
+    const {children, app} = props
+    const currentUser = app?.getCurrentUser()
     const [ctxState, setCtxState] = useState({
       currentUser,
       loading: true,
-      error: null
+      error: null,
     })
 
     useEffect(() => {
-      const unsubscribe = app.getApp().auth().onAuthStateChanged(
+      const unsubscribe = app?.onAuthStateChanged(
         (user: FbUser) => {
           setCtxState(prev => ({
             ...prev,
             currentUser: user ?? null,
             loading: false,
-            error: null
+            error: null,
           }))
         },
         (error) => {
@@ -51,7 +51,7 @@ export const CurrentUserProviderComponent = withAppContext<Props>(
             loading: false,
             error,
           }))
-        }
+        },
       )
       // Unsubscribe auth listener on unmount
       return () => { unsubscribe() }
@@ -62,7 +62,7 @@ export const CurrentUserProviderComponent = withAppContext<Props>(
         {children}
       </CurrentUserContextProvider>
     )
-  }
+  },
 )
 
 const WithN = 'currentUserContext'

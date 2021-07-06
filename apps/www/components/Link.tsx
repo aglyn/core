@@ -51,14 +51,14 @@ export function InnerRefLink(props: LinkProps) {
   } = props
 
   const router = useRouter()
-  const pathname = typeof href === 'object' ? href.pathname : href
+  const pathname = typeof href === 'object' ? href['pathname'] : href
   const className = clsx(classNameProps, { [activeClassName]: router.pathname === pathname && activeClassName })
 
   if (naked) {
     return <NextLink ref={innerRef} className={className} href={href} {...other} />
   }
 
-  if (button || other.disabled) {
+  if (button || other['disabled']) {
     return (
       <MuiButton
         ref={innerRef}

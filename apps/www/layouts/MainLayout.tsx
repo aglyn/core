@@ -18,7 +18,7 @@ import AppBar from '@material-ui/core/AppBar'
 import Avatar from '@material-ui/core/Avatar'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
-import { cyan } from '@material-ui/core/colors'
+import { cyan, purple } from '@material-ui/core/colors'
 import Container from '@material-ui/core/Container'
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton'
 import { createStyles, darken, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
@@ -161,8 +161,8 @@ export const styles = (theme: Theme) => createStyles({
   header: {
     paddingTop: theme.spacing(8),
     paddingBottom: theme.spacing(10),
-    background: theme.palette.brand.purple['600'],
-    color: theme.palette.getContrastText(theme.palette.brand.purple['600']),
+    background: purple['600'],
+    color: theme.palette.getContrastText(purple['600']),
   },
   heading: {
     letterSpacing: '-0.04em',
@@ -176,11 +176,11 @@ export const styles = (theme: Theme) => createStyles({
   },
   breadcrumbs: {
     marginTop: theme.spacing(1),
-    color: darken(theme.palette.getContrastText(theme.palette.brand.purple['600']), 0.12),
+    color: darken(theme.palette.getContrastText(purple['600']), 0.12),
     '& $item': {
       color: 'inherit',
       '&$last': {
-        color: theme.palette.getContrastText(theme.palette.brand.purple['600']),
+        color: theme.palette.getContrastText(purple['600']),
         fontWeight: theme.typography.fontWeightMedium,
       },
     },

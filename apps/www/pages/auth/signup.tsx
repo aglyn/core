@@ -29,9 +29,8 @@ export default withStyles(styles, { name: 'Page:SignUp' })(
   withAppContext<Props & WithStyles<typeof styles>>(
     function SignUp(props) {
       const { app, classes } = props
-      const { getCurrentUser, signUpUser } = app
-      const currentUser = getCurrentUser()
-      // console.log('getCurrentUser()', currentUser)
+      const currentUser = app?.getCurrentUser()
+      // console.log('app?.getCurrentUser()', currentUser)
       const router = useRouter()
       if (currentUser) {
         router.push('/')
@@ -71,7 +70,7 @@ export default withStyles(styles, { name: 'Page:SignUp' })(
           return
         }
 
-        await signUpUser(
+        await app?.signUpUser(
           fields.email.value,
           fields.password.value,
           (user) => {

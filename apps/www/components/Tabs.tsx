@@ -6,8 +6,7 @@ import MuiTab from '@material-ui/core/Tab'
 import Typography from '@material-ui/core/Typography'
 import Box from '@material-ui/core/Box'
 import { Button } from '@material-ui/core'
-import GridButtons from './GridButtons'
-import SvgPathIcon from '@aglyn/common/components/SvgPathIcon'
+import { GridButtons, SvgPathIcon } from '@aglyn/shared/ui/react'
 
 interface TabPanelProps {
   children?: React.ReactNode

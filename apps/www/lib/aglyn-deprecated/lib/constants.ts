@@ -95,7 +95,7 @@ export const lbl = {
 
 /** Contextual persistence types */
 export enum Persist {
-  NONE = 'none',
-  SESSION = 'session',
-  LOCAL = 'local',
+  NONE = 'NONE',
+  SESSION = 'SESSION',
+  LOCAL = 'LOCAL',
 }

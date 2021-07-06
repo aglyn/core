@@ -23,15 +23,12 @@ const styles = (theme: Theme) => createStyles({
   },
 })
 
-type Props = {}
-
 export default withStyles(styles, { name: 'Page:SignIn' })(
-  withAppContext<Props & WithStyles<typeof styles>>(
+  withAppContext<WithStyles<typeof styles>>(
     function SignIn(props) {
       const { app, classes } = props
-      const { getCurrentUser, signInUser } = app
-      const currentUser = getCurrentUser()
-      // console.log('getCurrentUser()', currentUser)
+      const currentUser = app?.getCurrentUser()
+      // console.log('app?.getCurrentUser()', currentUser)
       const router = useRouter()
       if (currentUser) {
         router.push('/')
@@ -68,7 +65,7 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
           return
         }
 
-        await signInUser(
+        await app?.signInUser(
           fields.email.value,
           fields.password.value,
           (user) => {
