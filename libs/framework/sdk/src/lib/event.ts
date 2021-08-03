@@ -15,13 +15,7 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
+import { AglynEmitter } from '@aglyn/framework/sdk'
+import { Mitt } from '@aglyn/shared/util/helpers'
 
-import Material from './material'
-
-describe('Material', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<Material />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export const event: AglynEmitter = Mitt()

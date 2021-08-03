@@ -18,75 +18,87 @@
 
 import { logger } from './logger'
 import {
-  AppComponent,
-  AppEvent,
-  AppEventHandler,
-  AppExtension,
-  AppOptions,
-  ComponentMetadata,
-  ExtensionConfig,
-  WebApp,
+  AglynApp,
+  AglynAppOptions,
+  AglynCommand,
+  AglynCommandController,
+  AglynExtension,
+  AglynExtensionController,
 } from './types'
-import { APP_API_ERROR, AppErrorFlag, AppEventFlag, DEFAULT_ENTRY_NAME } from './constants'
+import {
+  AGLYN_APP_ERROR,
+  AglynAppEventFlag,
+  AglynErrorEventFlag,
+  DEFAULT_ENTRY_NAME,
+} from './constants'
 import { _apps } from './internal'
 import { LogCallback, Logger, LogLevelString, LogOptions } from '@aglyn/shared/feature/logger'
 import { _isFn, _isNull, _isStrEmpty } from '@aglyn/shared/util/guards'
 import { trim } from '@aglyn/shared/util/tools'
-import { WithPartial } from '@aglyn/shared/util/types'
-import { WebAppModel } from './models/web-app.model'
-import { AppExtensionModel } from './models/app-extension.model'
+import { AglynAppImpl } from './models'
+import { event } from './event'
 
 
-export function initializeApp(options: AppOptions = {}): WebApp {
-  const {name = DEFAULT_ENTRY_NAME} = options
-  const _name = trim(name)
-  if (_isStrEmpty(_name)) {
-    throw APP_API_ERROR.create(AppErrorFlag.BAD_APP_NAME, {appName: _name})
+export function initializeApp(appOptions: AglynAppOptions = {}): AglynApp {
+  const options = {...appOptions}
+  const {name: _name = DEFAULT_ENTRY_NAME} = options
+  const name = trim(_name)
+  if (_isStrEmpty(name)) {
+    throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.BAD_APP_NAME, {appName: name})
   }
-  if (_apps.has(_name)) {
-    throw APP_API_ERROR.create(AppErrorFlag.DUPLICATE_APP, {appName: _name})
+  if (_apps.has(name)) {
+    throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.DUPLICATE_APP, {appName: name})
   }
-  const app: WebApp = new WebAppModel(options)
-  _apps.set(_name, app)
-  app.event.emit(AppEventFlag.CREATED_APP, app)
-  logger.debug(`Created app instance ${_name}`)
+  const app: AglynApp = AglynAppImpl(options, event, logger)
+  _apps.set(name, app)
+
+  logger.debug(AglynAppEventFlag.APP_CREATED, {app})
+  event.emit(AglynAppEventFlag.APP_CREATED, {app})
+
   return app
 }
 
-export function getApps(): WebApp[] {
+export function getApps(): AglynApp[] {
   return [..._apps.values()]
 }
 
-export function getApp(name: string = DEFAULT_ENTRY_NAME): WebApp {
+export function getApp(name: string = DEFAULT_ENTRY_NAME): AglynApp {
   const app = _apps.get(name)
   if (!app) {
-    throw APP_API_ERROR.create(AppErrorFlag.DUPLICATE_APP, {appName: name})
+    throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.NO_APP, {appName: name})
   }
   return _apps.get(name)
 }
 
-export function deleteApp(app: WebApp): void {
+export function deleteApp(app: AglynApp): void {
+  _validateAppArg(app)
   const name = app.getName()
-  if (_apps.has(name)) {
-    app.event.emit(AppEventFlag.BEFORE_DELETE_APP, _apps.get(name))
-    _apps.delete(name)
-    app.event.emit(AppEventFlag.DELETED_APP, name)
-    logger.debug(`Deleted app ${name}`)
+  logger.debug(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
+  event.emit(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
+  app.unloadApp()
+  _apps.delete(name)
+  app['deleted'] = true
+  logger.debug(AglynAppEventFlag.APP_DELETED, {appName: name})
+  event.emit(AglynAppEventFlag.APP_DELETED, {appName: name})
+}
+
+export function _validateAppArg(app: AglynApp): void {
+  if (!(app as AglynApp)) {
+    throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.INVALID_APP_ARG, {appName: app?.getName?.()})
+  }
+  if (app['deleted']) {
+    throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.APP_DELETED, {appName: app?.getName?.()})
   }
 }
 
-export function _validateApp(app: WebApp): void {
-  if (!(app as WebApp)) {
-    throw APP_API_ERROR.create(AppErrorFlag.INVALID_APP_ARG, {appName: app?.getName?.()})
-  }
+export function _getExtensionController(app: AglynApp): AglynExtensionController {
+  _validateAppArg(app)
+  return AglynAppImpl.extensionController.get(app.getName())
 }
 
-export function _appListenOn(app: WebApp, name: AppEvent, listener: AppEventHandler) {
-  app.event.on(name, listener)
-}
-
-export function _appListenOff(app: WebApp, name: AppEvent, listener: AppEventHandler) {
-  app.event.off(name, listener)
+export function _getCommandController(app: AglynApp): AglynCommandController {
+  _validateAppArg(app)
+  return AglynAppImpl.commandController.get(app.getName())
 }
 
 /**
@@ -97,7 +109,7 @@ export function _appListenOff(app: WebApp, name: AppEvent, listener: AppEventHan
  */
 export function onLog(callbackFn: LogCallback | null, options?: LogOptions): void {
   if (!_isNull(callbackFn) && !_isFn(callbackFn)) {
-    throw APP_API_ERROR.create(AppErrorFlag.INVALID_LOG_ARG)
+    throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.INVALID_LOG_ARG, undefined)
   }
   Logger.setUserLogHandler(callbackFn, options)
 }
@@ -113,48 +125,77 @@ export function setLogLevel(logLevel: LogLevelString): void {
   Logger.setLogLevel(logLevel)
 }
 
-export function addExtension(app: WebApp, config: ExtensionConfig): void {
-  const _extension: AppExtension = new AppExtensionModel(app, config)
-  app.extension.set(_extension.getId(), _extension)
-  app.event.emit(AppEventFlag.SET_EXTENSION, _extension)
-  logger.debug(`Set module value for ${_extension.getId()}`)
+export function registerExtension(app: AglynApp, extension: AglynExtension): void {
+  const extensionController = _getExtensionController(app)
+  extensionController.registerExtension(extension)
 }
 
-export function getExtension(app: WebApp, options: { $id: string }): AppExtension {
-  const {$id} = options
-  return app.extension.get($id)
+export function unregisterExtension(app: AglynApp, extension: AglynExtension): void {
+  const extensionController = _getExtensionController(app)
+  extensionController.unregisterExtension(extension)
 }
 
-export function getExtensions(app: WebApp): AppExtension[] {
-  return [...app.extension.values()]
+export function getExtension(app: AglynApp, options: { $id: string }): AglynExtension {
+  const extensionController = _getExtensionController(app)
+  return extensionController.getExtension(options?.$id)
 }
 
-export function getComponent(app: WebApp, extId: string, options: { $id: string }) {
-  const {$id} = options
-  return app.extension.get(extId)?.component.find((m) => m.$id === $id)
+export function getExtensions(app: AglynApp): AglynExtension[] {
+  const extensionController = _getExtensionController(app)
+  return extensionController.getExtensions()
 }
 
-export function getComponents(app: WebApp, extId: string, props: { componentIds?: string[] }) {
-  const {componentIds} = props
-  return componentIds
-    ? componentIds.map(($id) => getComponent(app, {extId, $id}))
-    : [...app.extension.get(extId)?.component.values()]
+export function loadExtension(app: AglynApp, id: string) {
+  const extensionController = _getExtensionController(app)
+  extensionController.loadExtension(id)
 }
 
-export function addComponent(
-  app: WebApp,
-  extId: string,
-  component: WithPartial<AppComponent, 'metadata'>,
-) {
-  const extension = app.extension?.get(extId)
-  if (!extension) {
-    throw APP_API_ERROR.create(AppErrorFlag.NO_APP_EXTENSION, {
-      appName: app.getName(), extensionId: extId,
-    })
-  }
-  if (!(component.metadata)) component.metadata = {}
-  extension.component.push(component as AppComponent)
-  app.event.emit(AppEventFlag.SET_COMPONENT, component)
-  logger.debug(`Set component id = ${$id} for extension id = ${extId}`)
-  return this
+export function unloadExtension(app: AglynApp, id: string) {
+  const extensionController = _getExtensionController(app)
+  extensionController.loadExtension(id)
 }
+
+export function registerCommand(app: AglynApp, command: AglynCommand): void {
+  const commandController = _getCommandController(app)
+  commandController.registerCommand(command)
+}
+
+export function unregisterCommand(app: AglynApp, command: AglynCommand): void {
+  const commandController = _getCommandController(app)
+  commandController.unregisterCommand(command)
+}
+
+export function triggerCommand(app: AglynApp, id: string): void {
+  const commandController = _getCommandController(app)
+  commandController.triggerCommand({$id: id})
+}
+
+// export function getComponent(app: AglynApp, extId: string, options: { $id: string }) {
+//   const {$id} = options
+//   return app.extensions.get(extId)?.component.find((m) => m.$id === $id)
+// }
+//
+// export function getComponents(app: AglynApp, extId: string, props: { componentIds?: string[] }) {
+//   const {componentIds} = props
+//   return componentIds
+//     ? componentIds.map(($id) => getComponent(app, {extId, $id}))
+//     : [...app.extensions.get(extId)?.component.values()]
+// }
+//
+// export function addComponent(
+//   app: AglynApp,
+//   extId: string,
+//   component: PartPartial<AglynComponent, 'options'>,
+// ) {
+//   const extension = app.extensions?.get(extId)
+//   if (!extension) {
+//     throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.NO_APP_EXTENSION, {
+//       appName: app.getName(), extensionId: extId,
+//     })
+//   }
+//   if (!(component.options)) component.options = {}
+//   extension.component.push(component as AglynComponent)
+//   app.event.emit(AglynAppEventFlag.SET_COMPONENT, component)
+//   logger.debug(`Set component id = ${$id} for extension id = ${extId}`)
+//   return this
+// }

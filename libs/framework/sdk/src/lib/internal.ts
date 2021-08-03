@@ -14,7 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AppsMap } from './types'
+import { AglynAppsMap } from './types'
 
 
-export const _apps: AppsMap = new Map()
+export const _apps: AglynAppsMap = new Map()
+export const _modules = {
+  extensions: [
+    require('./extensions/components.extension'),
+  ],
+  commands: [],
+}

@@ -18,9 +18,9 @@
 import { initializeApp } from './api'
 
 
-describe('WebApp', () => {
+describe('AglynApp', () => {
   it('should work', () => {
-    const name = 'TestWebApp'
+    const name = 'TestAglynApp'
     expect(initializeApp({name})).toHaveProperty('name', name)
   })
 })

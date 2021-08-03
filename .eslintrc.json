@@ -14,23 +14,47 @@
             "depConstraints": [
               {
                 "sourceTag": "scope:app",
-                "onlyDependOnLibsWithTags": ["scope:app", "scope:lib"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:app",
+                  "scope:lib"
+                ]
+              },
+              {
+                "sourceTag": "scope:app:www",
+                "onlyDependOnLibsWithTags": [
+                  "*"
+                ]
               },
               {
                 "sourceTag": "scope:lib",
-                "onlyDependOnLibsWithTags": ["scope:lib"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib"
+                ]
               },
               {
                 "sourceTag": "scope:lib:shared",
-                "onlyDependOnLibsWithTags": ["scope:lib:shared"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared"
+                ]
               },
               {
                 "sourceTag": "scope:lib:shared:util",
-                "onlyDependOnLibsWithTags": ["scope:lib:shared:util"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared:util"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:shared:feature",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:shared:feature"
+                ]
               },
               {
                 "sourceTag": "scope:lib:framework",
-                "onlyDependOnLibsWithTags": ["scope:lib:framework", "scope:lib:shared"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework",
+                  "scope:lib:shared"
+                ]
               },
               {
                 "sourceTag": "scope:lib:framework:core",
@@ -50,12 +74,10 @@
                 ]
               },
               {
-                "sourceTag": "scope:app:www",
-                "onlyDependOnLibsWithTags": ["*"]
-              },
-              {
                 "sourceTag": "*",
-                "onlyDependOnLibsWithTags": ["*"]
+                "onlyDependOnLibsWithTags": [
+                  "*"
+                ]
               }
             ]
           }

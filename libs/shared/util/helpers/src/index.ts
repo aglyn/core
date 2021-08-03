@@ -16,5 +16,9 @@
  */
 
 export * from './lib/external'
+
+// TODO: Replace dependents with direct lib import and remove below re-exports
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 export * from '../../guards/src/lib/guards'
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 export * from '../../tools/src/lib/tools'

@@ -15,9 +15,15 @@
  * limitations under the License.
  */
 
-
-const PATTERN = /\{\$([^}]+)}/g
 const ERROR_NAME = 'AppError'
+
+export type ReadonlyRecord<K extends keyof any, T> = Readonly<Record<K, T>>
+export type ErrorMap<ErrorCode extends string> = ReadonlyRecord<ErrorCode, string>
+export type ErrorParams<ErrorCode extends string> = Partial<ReadonlyRecord<ErrorCode, ErrorData>>
+
+export interface ErrorData {
+  [key: string]: unknown
+}
 
 /**
  * Standardized App Errors
@@ -62,14 +68,20 @@ const ERROR_NAME = 'AppError'
  * @see Based on code from:
  *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#Custom_Error_Types
  */
-export class ErrorFactory<ErrorCode extends string, Params extends ErrorParams<ErrorCode> = any> {
+export class ErrorFactory<Errors extends Record<ErrorCode, Params>,
+  ErrorCode extends string = (keyof Errors extends string ? keyof Errors : never),
+  Params extends ErrorParams<ErrorCode> = any> {
+
   constructor(
     private readonly service: string,
     private readonly serviceName: string,
     private readonly errors: ErrorMap<ErrorCode>,
   ) {}
 
-  create<K extends ErrorCode>(code: K, ...data: K extends keyof Params ? [Params[K]] : []): AppError {
+  create<K extends ErrorCode>(
+    code: K,
+    ...data: K extends keyof Params ? [Params[K]] : []
+  ): AppError {
     const customData = (data[0] as ErrorData) || {}
     const fullCode = `${this.service}/${code}`
     const template = this.errors[code]
@@ -83,11 +95,7 @@ export class ErrorFactory<ErrorCode extends string, Params extends ErrorParams<E
 export class AppError extends Error {
   readonly name = ERROR_NAME
 
-  constructor(
-    readonly code: string,
-    message: string,
-    public customData?: Record<string, unknown>,
-  ) {
+  constructor(readonly code: string, message: string, public customData?: Record<string, unknown>) {
     super(message)
     // Fix For ES5
     // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
@@ -101,25 +109,14 @@ export class AppError extends Error {
   }
 }
 
-function replaceTemplate(template: string, data: ErrorData): string {
-  return template.replace(PATTERN, (_, key) => {
+function replaceTemplate(stringTemplate: string, data: ErrorData, replacePattern?: RegExp): string {
+  const pattern = replacePattern ?? replaceTemplate.DEFAULT_PATTERN
+  return String(stringTemplate).replace(pattern, (_, key) => {
     const value = data[key]
     return value != null ? String(value) : `<${key}?>`
   })
 }
 
-export type ErrorMap<ErrorCode extends string> = {
-  readonly [K in ErrorCode]: string;
-}
-
-export type ErrorParams<ErrorCode extends string> = {
-  readonly [K in ErrorCode]?: ErrorData
-}
-
-export interface StringLike {
-  toString(): string;
-}
-
-export interface ErrorData {
-  [key: string]: unknown;
+namespace replaceTemplate {
+  export const DEFAULT_PATTERN = /\{\$([^}]+)}/g
 }

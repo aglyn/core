@@ -15,68 +15,94 @@
  * limitations under the License.
  */
 
-/** Type any property on object with string keys */
+/** Any type of object record with string index types */
 export type AnyProps = Record<string, unknown>
 
-/** Dictionary collection optionally specify values to T */
+/** Dictionary collection with string index types (optionally specify value by setting T) */
 export type Dictionary<T = unknown> = Record<string, T>
 
 /** Dictionary collection optionally specify values to T */
-export type EmptyObj<K extends keyof any = never> = Record<K, never>
+export type EmptyObj<K extends keyof any = PropertyKey> = Record<K, never>
 
-/** Type safe object "{}" record */
-export type AnyObj = Record<PropertyKey, unknown>
+/** Type safe object "{}" record (optionally specify index type) */
+export type AnyObj<K extends PropertyKey = PropertyKey> = Record<K, unknown>
 
-/** Make object properties writeable */
+/** Record with only readonly properties */
+export type ReadonlyRecord<K extends keyof any, T> = Readonly<Record<K, T>>
+
+/** From T, make all top level keys mutable (removes readonly) */
 export type Mutable<T> = {
   -readonly [P in keyof T]: T[P]
 }
-/** Make deeply nest object properties writeable */
-export type MutableDeep<T> = {
-  -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U>
-    ? MutableDeep<U>[]
-    : MutableDeep<T[P]>
+/** From T, make all keys mutable including nested objects/arrays (removes readonly) */
+export type DeeplyMutable<T> = {
+  -readonly [P in keyof T]: (T[P] extends ReadonlyArray<infer U> ? DeeplyMutable<U>[] : DeeplyMutable<T[P]>)
 }
 
-/** Make specific keys optional */
-export type WithRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
-/** Make specific keys required */
-export type WithPartial<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+/** From T, require properties whose keys are in union K (make specific keys required) */
+export type PartRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
+/** From T, make properties partial whose keys are in union K (Make specific keys optional) */
+export type PartPartial<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
-/** Extract keys from T whose types are required and exclude those which are optional  */
-export type TheRequiredKeys<T, K extends keyof T = keyof T> = {
-  [P in K]-?: (Pick<T, P> extends AnyObj
-    ? never : P)
+/** From T, extract keys whose types are required (excludes optional properties) (optionally narrow keys in union by specifying K) */
+export type RequiredKeysOnly<T, K extends keyof T = keyof T> = {
+  [P in K]-?: (Pick<T, P> extends AnyObj ? never : P)
 }[K]
-/** Extract keys from T whose types are optional and exclude those which are required */
-export type TheOptionalKeys<T, K extends keyof T = keyof T> = {
-  [P in K]-?: (Pick<T, P> extends AnyObj
-    ? P : never)
+/** From T, extract keys whose types are optional (excludes required properties) (optionally narrow keys in union by specifying K) */
+export type PartialKeysOnly<T, K extends keyof T = keyof T> = {
+  [P in K]-?: (Pick<T, P> extends AnyObj ? P : never)
 }[K]
 
-/** From T, pick a set of properties whose keys are in the union with required keys */
-export type PickRequired<T, K extends keyof T = keyof T> = Pick<T, TheRequiredKeys<T, K>>
-/** From T, pick a set of properties whose keys are in the union with optional keys */
-export type PickOptionals<T, K extends keyof T = keyof T> = Pick<T, TheOptionalKeys<T, K>>
+/** From T, pick a set of properties whose keys are in the union with required keys only, (optionally narrow results by specifying K) */
+export type PickRequiredOnly<T, K extends keyof T = keyof T> = Pick<T, {
+  [P in K]-?: (Pick<T, P> extends AnyObj ? never : P)
+}[K]>
+/** From T, pick a set of properties whose keys are in the union with partial keys only, (optionally narrow results by specifying K) */
+export type PickPartialOnly<T, K extends keyof T = keyof T> = Pick<T, {
+  [P in K]-?: (Pick<T, P> extends AnyObj ? P : never)
+}[K]>
 
-/** From T, rename a property whose key is in the union K with that of N */
-export type RenameKey<Old extends keyof T, New extends string, T> = (
-  Omit<T, Old> & { [P in New]: T[Old] }
-  )
+/** From T, rename a property whose key is in the union K (old key) with that of U (new key)  */
+export type RenameKey<T, K extends keyof T, U extends string> = (Omit<T, K> & { [P in U]: T[K] })
 
-/** Spreads object literal properties of Left(L) and Right(R) result: { ...L, ...R } */
-export type Spread<L, R> = (
-  /* Properties in L that don't exist in R */
+/** With L (left), spread properties with R (right) (e.g. [...L, ...R], {...L, ...R}) */
+export type Spreaded<L, R> = (
+  /* With L (left), omit keys not in union with keys of R (right)*/
   Omit<L, keyof R>
-  /* Properties in R with types that exclude optional */
-  & Omit<R, TheOptionalKeys<R>>
-  /* Properties in R, with types that include optional, that don't exist in L */
-  & Pick<R, Exclude<TheOptionalKeys<R>, keyof L>>
-  /* Properties in R, with types that include optional, that exist in L */
-  & SpreadProperties<L, R, TheOptionalKeys<R> & keyof L>
+  /* With R (right), omit keys in union with partial types*/
+  & Omit<R, PartialKeysOnly<R>>
+  /* With R (right), pick properties in union with optional types that do not exist in L (left) */
+  & Pick<R, Exclude<PartialKeysOnly<R>, keyof L>>
+  /* With L (left), replace properties of the keys in union with the keys in R (right) excluding properties of R (right) with types in union with undefined */
+  & { [P in (PartialKeysOnly<R> & (keyof L extends (keyof L & keyof R) ? (PartialKeysOnly<R> & keyof L) : never))]: (L[P] | Exclude<R[P], undefined>) }
   )
 
-/** Common properties from L and R with undefined in R[K] replaced by type in L[K] */
-type SpreadProperties<L, R, K extends keyof L & keyof R> = {
-  [P in K]: L[P] | Exclude<R[P], undefined>
+
+/** Implements a toString method */
+export interface StringLike {
+  toString(): string
+  [Symbol.toStringTag]?: string
 }
+
+/** Implements a toJSON method */
+export interface Serializable {
+  toJSON(): any
+}
+
+/** Field property getters */
+export type Getters<T> = {
+  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K]
+}
+
+/** Field property setters */
+export type Setters<T> = {
+  [K in keyof T as `set${Capitalize<string & K>}`]: (value: T[K] | null) => T
+}
+
+/** Field property setters */
+export type Implements<K1 extends string, K2 extends string, T extends (...args: unknown[]) => unknown> = {
+  [P in K2 as `${K1}${Capitalize<string & K2>}`]: T
+}
+
+/** Field property setters */
+export type ImplementsOn<K extends string, T extends (...args: unknown[]) => void> = Implements<'on', K, T>

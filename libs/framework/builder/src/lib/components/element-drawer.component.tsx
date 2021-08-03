@@ -17,32 +17,26 @@
 
 import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
-import {
-  forwardRef,
-  useCallback,
-  Fragment,
-  MouseEventHandler,
-  SyntheticEvent,
-  MouseEvent,
-} from 'react'
+import { forwardRef, Fragment, MouseEvent, useCallback } from 'react'
 import IconButton from '@material-ui/core/IconButton'
 import {
-  GridList,
   CardIconListItem,
-  NavbarDrawer,
-  NavbarDrawerProps,
-  SvgPathIcon,
   componentMapper,
   FormRenderer,
   GridFormTemplate,
+  GridList,
+  NavbarDrawer,
+  NavbarDrawerProps,
+  SvgPathIcon,
 } from '@aglyn/shared/ui/react'
 import { _isStr } from '@aglyn/shared/util/helpers'
 import Button from '@material-ui/core/Button'
 import Box from '@material-ui/core/Box'
 import FormControl from '@material-ui/core/FormControl'
 import Typography from '@material-ui/core/Typography'
-import { getComponents, getApp } from '@aglyn/framework/sdk'
+import { getApp, getComponents } from '@aglyn/framework/sdk'
 import { ElementDrawerOptions } from '../contexts/element-drawer.context'
+
 
 export const styles = (theme: Theme) =>
   createStyles({
@@ -50,12 +44,12 @@ export const styles = (theme: Theme) =>
     label: {},
     icon: {},
     root: {
-      '& $title': { fontSize: theme.typography.pxToRem(20) },
+      '& $title': {fontSize: theme.typography.pxToRem(20)},
       '&>$paper': {
         margin: '0 auto',
         height: '100%',
         maxHeight: '100vh',
-        [theme.breakpoints.up('sm')]: { height: theme.breakpoints.values.sm },
+        [theme.breakpoints.up('sm')]: {height: theme.breakpoints.values.sm},
       },
     },
     paper: {
@@ -68,8 +62,8 @@ export const styles = (theme: Theme) =>
       // padding: theme.spacing(2, 2, 2, 2),
       overflow: 'auto',
     },
-    closeButton: { marginRight: theme.spacing(2) },
-    deleteButton: { color: theme.palette.error.main },
+    closeButton: {marginRight: theme.spacing(2)},
+    deleteButton: {color: theme.palette.error.main},
     gridList: {
       padding: theme.spacing(2, 2, 2, 2),
       overflowX: 'hidden',
@@ -77,8 +71,8 @@ export const styles = (theme: Theme) =>
     gridListItem: {},
     card: {
       color: theme.palette.text.primary,
-      '& $label': { textTransform: 'uppercase' },
-      '& $icon': { color: theme.palette.text.secondary },
+      '& $label': {textTransform: 'uppercase'},
+      '& $icon': {color: theme.palette.text.secondary},
     },
     cardContent: {
       width: '100%',
@@ -116,53 +110,51 @@ export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> 
   }['bivarianceHack']
 }
 
-const ElementDrawerComponent = forwardRef<
-  any,
-  ElementDrawerComponentProps & WithStyles<typeof styles>
->(function RefRenderFn(props, ref) {
-  const { classes, className, options, onConfirm, onClose, onCancel, onDelete, ...rest } = props
+const ElementDrawerComponent = forwardRef<any,
+  ElementDrawerComponentProps & WithStyles<typeof styles>>(function RefRenderFn(props, ref) {
+  const {classes, className, options, onConfirm, onClose, onCancel, onDelete, ...rest} = props
 
-  const { title, type = 'browse-site-components' } = options
+  const {title, type = 'browse-site-components'} = options
   console.log('props', props)
 
   const selectedElementProps: any = {}
   const propsSchema: any = {}
   const handleElementSave = useCallback(
     (values) => {
-      onConfirm(null, { type: 'save', data: values })
+      onConfirm(null, {type: 'save', data: values})
     },
-    [onConfirm]
+    [onConfirm],
   )
   const handleDrawerClose = useCallback(
     (e, reason) => {
       onClose(e, reason)
     },
-    [onClose]
+    [onClose],
   )
   const handleDrawerCancel = useCallback(
     (e) => {
       onCancel(e, 'canceled')
     },
-    [onCancel]
+    [onCancel],
   )
   const handleDeleteButtonClick = useCallback(
     (e) => {
-      onDelete(e, { type: 'delete' })
+      onDelete(e, {type: 'delete'})
     },
-    [onDelete]
+    [onDelete],
   )
   const handleItemClick = useCallback(
     (e, item) => {
-      onConfirm(e, { type: 'selection', data: item })
+      onConfirm(e, {type: 'selection', data: item})
     },
-    [onConfirm]
+    [onConfirm],
   )
 
-  const components = getComponents(getApp(), { moduleId: 'react' })
+  const components = getComponents(getApp(), {moduleId: 'react'})
   const items = components.map((i) => ({
     id: i?.$id,
-    title: i?.metadata?.title,
-    icon: i?.metadata?.icon,
+    title: i?.options?.title,
+    icon: i?.options?.icon,
   }))
 
   const appBarLeft = (
@@ -193,7 +185,7 @@ const ElementDrawerComponent = forwardRef<
           onActionClick={handleItemClick}
           preview={
             (_isStr(item.icon) ? (
-              <Box fontSize={'4.17em'} component={SvgPathIcon} {...{ iconId: item.icon }} />
+              <Box fontSize={'4.17em'} component={SvgPathIcon} {...{iconId: item.icon}} />
             ) : (
               <Fragment>{item.icon}</Fragment>
             )) as unknown as any
@@ -201,16 +193,16 @@ const ElementDrawerComponent = forwardRef<
         />
       )
     },
-    [handleItemClick]
+    [handleItemClick],
   )
 
   const views = {
     'browse-site-components': (
       <GridList
-        GridContainerProps={{ spacing: 2 }}
-        GridItemProps={{ xs: 6, sm: 4 }}
-        ListWrapperProps={{ className: classes.gridList }}
-        classes={{ itemContent: classes.cardContent }}
+        GridContainerProps={{spacing: 2}}
+        GridItemProps={{xs: 6, sm: 4}}
+        ListWrapperProps={{className: classes.gridList}}
+        classes={{itemContent: classes.cardContent}}
         renderItemContent={renderItemContent}
         items={items}
       />
@@ -245,7 +237,7 @@ const ElementDrawerComponent = forwardRef<
     <NavbarDrawer
       ref={ref}
       className={clsx(classes.root, className)}
-      AppBarProps={{ color: 'primary' }}
+      AppBarProps={{color: 'primary'}}
       anchor="bottom"
       appBarLeft={appBarLeft}
       appBarRight={appBarRight[type]}
@@ -265,4 +257,4 @@ const ElementDrawerComponent = forwardRef<
 ElementDrawerComponent.displayName = 'ElementDrawerComponent'
 ElementDrawerComponent.defaultProps = {}
 
-export default withStyles(styles, { name: 'ElementDrawerComponent' })(ElementDrawerComponent)
+export default withStyles(styles, {name: 'ElementDrawerComponent'})(ElementDrawerComponent)

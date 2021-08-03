@@ -296,22 +296,22 @@
         }
       }
     },
-    "shared-util-error": {
-      "root": "libs/shared/util/error",
-      "sourceRoot": "libs/shared/util/error/src",
+    "shared-util-errors": {
+      "root": "libs/shared/util/errors",
+      "sourceRoot": "libs/shared/util/errors/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/shared/util/error/**/*.ts"]
+            "lintFilePatterns": ["libs/shared/util/errors/**/*.ts"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/shared/util/error"],
+          "outputs": ["coverage/libs/shared/util/errors"],
           "options": {
-            "jestConfig": "libs/shared/util/error/jest.config.js",
+            "jestConfig": "libs/shared/util/errors/jest.config.js",
             "passWithNoTests": true
           }
         }

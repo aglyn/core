@@ -17,9 +17,7 @@
 
 import { ErrorFactory } from './error'
 
-
 describe('error', () => {
-
   // Closure enum for type-safe error codes
   // at-enum {string}
   enum Err {
@@ -37,7 +35,7 @@ describe('error', () => {
   function getMissingFile() {
     try {
       // Service: Could not file file: foo.txt (service/file-not-found).
-      throw error.create(Err.FILE_NOT_FOUND, {'file': 'fileName.txt'})
+      throw error.create(Err.FILE_NOT_FOUND, { file: 'fileName.txt' })
     } catch (e) {
       if (e.code === 'service/file-not-found') {
         console.log('Could not read file: ' + e['file'])

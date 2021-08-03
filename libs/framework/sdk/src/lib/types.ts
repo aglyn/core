@@ -15,66 +15,121 @@
  * limitations under the License.
  */
 
-import { AnyProps } from '@aglyn/shared/util/types'
-import { AppErrorFlag, AppEventFlag, RestrictFlag } from './constants'
-import { Emitter, Handler } from 'mitt'
+import {
+  AnyProps,
+  Dictionary,
+  Implements,
+  ImplementsOn,
+  Serializable,
+  StringLike,
+} from '@aglyn/shared/util/types'
+import {
+  AglynAppEventFlag,
+  AglynErrorEventFlag,
+  AglynModuleTriggerFlag,
+  LoadStatusFlag,
+  RestrictFlag,
+} from './constants'
+import { Emitter } from 'mitt'
 import { Timestamp } from '@aglyn/shared/feature/timestamp'
 import { FormSchema } from '@aglyn/shared/ui/react'
+import { ErrorFactory } from '@aglyn/shared/util/errors'
+import { Logger } from '@aglyn/shared/feature/logger'
 
 
-export type AppsMap = Map<string, WebApp>
-export type AppExtMap = Map<string, AppExtension>
-export type AppExtComponents = AppComponent[]
+export type Payload<T = any> = { payload: T }
+export type PayloadData<T extends Dictionary = any> = T
 
-export type AppEmitter = Emitter<AppEvents>
-export type AppEventHandler<T = unknown> = Handler<T>
-export type AppEvent = AppEventFlag
-export type AppEvents = {
-  [AppEventFlag.CREATED_APP]: WebApp,
-  [AppEventFlag.BEFORE_DELETE_APP]: WebApp,
-  [AppEventFlag.DELETED_APP]: string,
-  [AppEventFlag.SET_EXTENSION]: AppExtension,
-  [AppEventFlag.SET_COMPONENT]: AppComponent,
+export type AglynAppsMap = Map<string, AglynApp>
+export type AglynAppModule<T extends AglynUniqueId = any> = T
+export type AglynExtensionMap = Map<string, AglynExtension>
+export type AglynEmitterParams = AglynAppEventParams & AglynModuleTriggerParams
+export type AglynEmitter = Emitter<AglynEmitterParams>
+export type AglynError = ErrorFactory<AglynErrorEventParams>
+export type AglynLogger = Logger
+export type AglynCommander = Emitter<AglynCommandParams>
+
+export type AglynErrorEventParams = {
+  [AglynErrorEventFlag.NO_APP]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.BAD_APP_NAME]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.DUPLICATE_APP]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.APP_DELETED]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.INVALID_APP_ARG]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.NO_APP_EXTENSION]: PayloadData<{ extensionId: string }>
+  [AglynErrorEventFlag.INVALID_LOG_ARG]: undefined
+}
+export type AglynAppEventParams = {
+  [AglynAppEventFlag.APP_CREATED]: PayloadData<{ app: AglynApp }>
+  [AglynAppEventFlag.BEFORE_DELETE_APP]: PayloadData<{ app: AglynApp }>
+  [AglynAppEventFlag.APP_UNLOADED]: PayloadData<{ appName: string }>
+  [AglynAppEventFlag.APP_DELETED]: PayloadData<{ appName: string }>
+  [AglynAppEventFlag.REGISTERED_EXTENSION]: PayloadData<{ extension: AglynExtension }>
+  [AglynAppEventFlag.UNREGISTERED_EXTENSION]: PayloadData<{ extension: AglynExtension }>
+  [AglynAppEventFlag.LOADED_EXTENSION]: PayloadData<{ extension: AglynExtension }>
+  [AglynAppEventFlag.UNLOADED_EXTENSION]: PayloadData<{ extension: AglynExtension }>
+  [AglynAppEventFlag.REGISTERED_COMMAND]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.UNREGISTERED_COMMAND]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.TRIGGERED_COMMAND]: PayloadData<{ commandId: string }>
+}
+export type AglynModuleTriggerParams = {
+  [AglynModuleTriggerFlag.REGISTER_EXTENSION]: PayloadData<{ extension: AglynExtension }>
+  [AglynModuleTriggerFlag.UNREGISTER_EXTENSION]: PayloadData<{ extensionId: string }>
+  [AglynModuleTriggerFlag.LOAD_EXTENSION]: PayloadData<{ extensionId: string }>
+  [AglynModuleTriggerFlag.UNLOAD_EXTENSION]: PayloadData<{ extensionId: string }>
+  [AglynModuleTriggerFlag.REGISTER_EXTENSION_COMPONENT]: PayloadData<{ $id: string, component: any, options?: Partial<AglynComponentOptions> }>
+  [AglynModuleTriggerFlag.UNREGISTER_EXTENSION_COMPONENT]: PayloadData<{ componentId: string }>
+  [AglynModuleTriggerFlag.LOAD_EXTENSION_COMPONENT]: PayloadData<{ componentId: string }>
+  [AglynModuleTriggerFlag.UNLOAD_EXTENSION_COMPONENT]: PayloadData<{ componentId: string }>
+  [AglynModuleTriggerFlag.REGISTER_COMMAND]: PayloadData<{ commandId: string, callbackFn: ({app: AglynApp}) => void }>
+  [AglynModuleTriggerFlag.UNREGISTER_COMMAND]: PayloadData<{ commandId: string, callbackFn: ({app: AglynApp}) => void }>
+  [AglynModuleTriggerFlag.TRIGGER_COMMAND]: PayloadData<{ commandId: string }>
+}
+export type AglynCommandParams = {
+  [P in string | '*']: PayloadData<{ app: AglynApp }>
 }
 
-export interface WebApp {
-  readonly event: AppEmitter
-  readonly extension: AppExtMap
-  getName(): string
-  getCreated(): Timestamp
-  getOptions(): AppOptions
-  getExtensions(): AppExtension[]
+export interface AglynUniqueId {
+  readonly $id: string
 }
 
-export interface AppOptions {
+export interface AglynNamed {
   name?: string
 }
 
-export interface AppExtension {
-  component: AppExtComponents
-  getApp(): WebApp
-  getId(): ExtensionConfig['$id']
-  getConfig(): ExtensionConfig
-  getComponents(): AppComponent[]
+export type AglynLoadable<T> =
+  ImplementsOn<'load', ((...arg: T[]) => void)> &
+  ImplementsOn<'unload', ((...arg: T[]) => void)>
+
+export type AglynLoads<K extends string, T extends AglynUniqueId & AglynLoadable<unknown>> =
+  Implements<'load', K, (...data: T[]) => void> &
+  Implements<'unload', K, (...data: T[]) => void>
+
+export type AglynRegistersType<K extends string, T extends AglynUniqueId> =
+  Implements<'register', '', (type: K, data: T) => void> &
+  Implements<'unregister', '', (type: K, id: T['$id']) => void>
+
+export type AglynRegisters<K extends string, T extends AglynUniqueId> =
+  Implements<'register', K, (...data: T[]) => void> &
+  Implements<'unregister', K, (...data: (T | AglynUniqueId)[]) => void>
+
+export interface AglynBaseModel extends StringLike, Serializable {
+
 }
 
-export interface ExtensionConfig {
-  $id: string
-  components?: AppExtComponents
+export interface AglynAppOptions extends AglynNamed {
+
 }
 
-export interface AppComponent<T = unknown> {
-  $id: string
-  ctor: T
-  metadata: Partial<ComponentMetadata>
+export interface AglynExtensionOptions extends AglynUniqueId {
+
 }
 
-export interface ComponentMetadata {
+export interface AglynComponentOptions {
   displayName: string
-  description: string
   title: string
   subtitle: string
-  icon: any
+  description: string
+  icon: unknown
   propsSchema: FormSchema
   defaultProps: AnyProps
   resolveProps: <T>(...args: T[]) => AnyProps | void
@@ -92,22 +147,61 @@ export interface ComponentMetadata {
   restrictParents: [type: RestrictFlag, ids: string[]]
 }
 
-export interface ElementData {
+export interface AglynApp extends AglynBaseModel,
+  AglynRegistersType<string, AglynAppModule> {
+
+  readonly event: AglynEmitter
+  readonly logger: AglynLogger
+
+  getCreatedAt(): Timestamp
+  getName(): string
+  getOptions(): AglynAppOptions
+
+  getExtension(id: string): AglynExtension
+  getExtensions(): AglynExtension[]
+  unloadApp(): void
+}
+
+export interface AglynExtensionController extends AglynBaseModel,
+  AglynRegisters<'extension', AglynAppModule>,
+  AglynLoads<'extension', AglynAppModule>,
+  AglynLoads<'', undefined> {
+
+  getExtension(id: string): AglynExtension
+  getExtensions(): AglynExtension[]
+  unloadExtensions(): void
+}
+
+export interface AglynCommandController extends AglynBaseModel,
+  AglynRegisters<'command', AglynAppModule<AglynCommand>>,
+  AglynLoads<'', undefined> {
+
+  triggerCommand(data: { $id: string }): void
+}
+
+export interface AglynExtension extends AglynBaseModel,
+  AglynUniqueId,
+  AglynLoadable<AglynApp> {
+
+  readonly status?: undefined | LoadStatusFlag
+}
+
+export interface AglynCommand extends AglynUniqueId {
+  callbackFn({app: AglynApp}): void
+}
+
+export interface AglynComponent {
   $id: string
-  component?: AppComponent | string
-  children?: (ElementData | string)[]
+  options: Partial<AglynComponentOptions>
+  component: any
+}
+
+export interface AglynComponentData extends AglynUniqueId {
+  component?: AglynComponent | string
+  children?: (AglynComponentData | string)[]
   props: AnyProps
   temporary?: boolean
   parent?: string
   name?: string
   description?: string
-}
-
-export interface ErrorParams {
-  [AppErrorFlag.NO_APP]: { appName: string };
-  [AppErrorFlag.BAD_APP_NAME]: { appName: string };
-  [AppErrorFlag.DUPLICATE_APP]: { appName: string };
-  [AppErrorFlag.APP_DELETED]: { appName: string };
-  [AppErrorFlag.INVALID_APP_ARG]: { appName: string };
-  [AppErrorFlag.NO_APP_EXTENSION]: { extensionId: string, appName: string }
 }

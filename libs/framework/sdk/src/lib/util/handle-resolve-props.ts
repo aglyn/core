@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AppComponent } from '../types'
+import { AglynComponent } from '../types'
 import { _isFn } from '@aglyn/shared/util/helpers'
 import { handlePropDefaults } from './handle-prop-defaults'
 import { AnyProps } from '@aglyn/shared/util/types'
@@ -24,16 +24,16 @@ import { AnyProps } from '@aglyn/shared/util/types'
 /**
  * Merges properties of a resolving function with currents
  * @param {AnyProps} props
- * @param {AppComponent["metadata"]} metadata
+ * @param {AglynComponent["options"]} metadata
  * @param {ThisType<unknown>} thisArg
  * @returns {any}
  */
 export function handleResolveProps(
   props: AnyProps,
-  metadata: Pick<AppComponent['metadata'], 'resolveProps'|'defaultProps'>,
+  metadata: Pick<AglynComponent['options'], 'resolveProps' | 'defaultProps'>,
   thisArg?: ThisType<unknown>,
 ) {
-  const {resolveProps, defaultProps={}} = metadata
+  const {resolveProps, defaultProps = {}} = metadata
   const mergedProps = handlePropDefaults(props, defaultProps)
   return _isFn(resolveProps) ? resolveProps.call(thisArg, mergedProps) : mergedProps
 }

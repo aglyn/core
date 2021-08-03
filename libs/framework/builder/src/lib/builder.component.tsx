@@ -17,7 +17,7 @@
 
 import { ComponentProp, ConfirmationProviderComponent } from '@aglyn/shared/ui/react'
 import { builder } from '@aglyn/shared/ui/themes'
-import { ElementData } from '@aglyn/framework/sdk'
+import { AglynComponentData } from '@aglyn/framework/sdk'
 import { WebsiteComponent } from '@aglyn/framework/renderer'
 import { ThemeProvider } from '@material-ui/core/styles'
 import { forwardRef } from 'react'
@@ -30,16 +30,17 @@ import ElementsProviderComponent from './contexts/elements-provider.component'
 import ElementsContext from './contexts/elements.context'
 import { SnackbarProvider } from 'notistack'
 
+
 export interface BuilderComponentProps extends ComponentProp {
-  elements?: ElementData[]
+  elements?: AglynComponentData[]
   elementComponent?: ElementComponentProps['component']
 }
 
 export const BuilderComponent = forwardRef<any, BuilderComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { component: Component, elementComponent, elements, ...rest } = props
+  const {component: Component, elementComponent, elements, ...rest} = props
 
   return (
     <NoSsr>
@@ -51,7 +52,7 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(function 
                 <SelectionProviderComponent>
                   <ElementDrawerProviderComponent>
                     <ElementsContext.Consumer>
-                      {({ elements }) => (
+                      {({elements}) => (
                         <WebsiteComponent elements={elements} elementComponent={elementComponent} />
                       )}
                     </ElementsContext.Consumer>

@@ -17,8 +17,8 @@
 
 import { ComponentType, forwardRef } from 'react'
 import {
-  AppComponent,
-  ElementData,
+  AglynComponent,
+  AglynComponentData,
   getApp,
   getComponent,
   handleResolveProps,
@@ -30,14 +30,14 @@ import { AnyProps } from '@aglyn/shared/util/types'
 
 
 export interface ElementComponentProps extends AnyProps {
-  elementData: ElementData
+  elementData: AglynComponentData
   elementComponent?: ComponentType<ElementComponentProps>
 }
 
 const ElementComponent = forwardRef<any, ElementComponentProps>(function RefRenderFn(props, ref) {
   const {elementData: data, elementComponent, ...rest} = props
   const component = !_isStr(data?.component)
-    ? (data?.component as AppComponent)
+    ? (data?.component as AglynComponent)
     : getComponent(getApp(), {moduleId: 'react', componentId: data?.component})
   const {ctor, metadata = {}} = component ?? {}
   const resolvedProps = handleResolveProps(data?.props, metadata, component)
@@ -50,7 +50,7 @@ const ElementComponent = forwardRef<any, ElementComponentProps>(function RefRend
       {!haveChildren ? (
         <ElementsComponent
           elementComponent={elementComponent}
-          children={data?.children as ElementData[]}
+          children={data?.children as AglynComponentData[]}
         />
       ) : (
         content

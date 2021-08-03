@@ -22,4 +22,4 @@ export * from './lib/version'
 export * from './lib/util/handle-resolve-props'
 export * from './lib/util/handle-prop-defaults'
 
-export { RestrictFlag, AppEventFlag } from './lib/constants'
+export { RestrictFlag, AglynAppEventFlag } from './lib/constants'

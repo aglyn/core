@@ -16,18 +16,19 @@
  */
 
 import { forwardRef } from 'react'
-import { ElementData } from '@aglyn/framework/sdk'
+import { AglynComponentData } from '@aglyn/framework/sdk'
 import ElementComponent, { ElementComponentProps } from './element.component'
 import { ComponentProp } from '@aglyn/shared/ui/react'
 import ElementsComponent from './elements.component'
 
+
 export interface WebsiteComponentProps extends ComponentProp {
-  elements?: ElementData[]
+  elements?: AglynComponentData[]
   elementComponent?: ElementComponentProps['elementComponent']
 }
 
 const WebsiteComponent = forwardRef<any, WebsiteComponentProps>(function RefRenderFn(props, ref) {
-  const { component: Component, elementComponent, elements, ...rest } = props
+  const {component: Component, elementComponent, elements, ...rest} = props
   return (
     <Component ref={ref} {...rest}>
       <ElementsComponent children={elements} elementComponent={elementComponent} />

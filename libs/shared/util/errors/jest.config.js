@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'shared-util-error',
+  displayName: 'shared-util-errors',
   preset: '../../../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,5 +11,5 @@ module.exports = {
     '^.+\\.[tj]sx?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../../../coverage/libs/shared/util/error',
+  coverageDirectory: '../../../../coverage/libs/shared/util/errors',
 }

@@ -354,15 +354,34 @@ export function _isNumPos(val: unknown): val is number & boolean {
 export function _isNumZero(val: unknown): val is 0 {
   return _isNum(val) && Number(val) === 0
 }
-/**
- * Check if the value is same as one of the values within the array
- *
- * @export
- * @template U
- * @param {*} val
- * @param {Array<U>} possible
- * @returns {val is U}
- */
-export function isOneOf<U>(val: unknown, possible: Array<U>): val is U {
-  return possible.some((i) => val === i)
+
+export namespace EqualityIs {
+
+  type EqualityOperator = 'strict' | 'loose'
+
+  export enum Equality {
+    STRICT,
+    LOOSE,
+    DEFAULT = STRICT,
+  }
+
+
+  export function sameType<T, U extends T>(
+    value: T,
+    ...possibilities: U[]
+  ): value is U
+  export function sameType<T, U extends T>(
+    value: T,
+    possibilities: U[],
+    options?: { equality?: EqualityOperator }
+  ): value is U {
+    const {equality = Equality.DEFAULT} = {...options}
+    return possibilities.some((possibility) => {
+      if (equality === 'loose') {
+        return possibility == value
+      }
+      return possibility === value
+    })
+  }
+
 }

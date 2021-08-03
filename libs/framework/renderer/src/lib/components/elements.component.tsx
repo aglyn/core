@@ -16,17 +16,18 @@
  */
 
 import { forwardRef, Fragment } from 'react'
-import { ElementData } from '@aglyn/framework/sdk'
+import { AglynComponentData } from '@aglyn/framework/sdk'
 import ElementComponent, { ElementComponentProps } from './element.component'
 import { ComponentProp } from '@aglyn/shared/ui/react'
 
+
 export interface ElementsComponentProps extends ComponentProp {
   elementComponent?: ElementComponentProps['elementComponent']
-  children?: ElementData[]
+  children?: AglynComponentData[]
 }
 
 const ElementsComponent = forwardRef<any, ElementsComponentProps>(function RefRenderFn(props, ref) {
-  const { component: Component, elementComponent: ElementComponent, children, ...rest } = props
+  const {component: Component, elementComponent: ElementComponent, children, ...rest} = props
   return (
     <Component ref={ref} {...rest}>
       {children.map((data, i) => (

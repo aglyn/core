@@ -17,11 +17,11 @@
 
 import ElementsContext from './elements.context'
 import { ReactNode, useState } from 'react'
-import { ElementData } from '@aglyn/framework/sdk'
+import { AglynComponentData } from '@aglyn/framework/sdk'
 
 export interface ElementsProviderComponentProps {
   children?: ReactNode
-  elements?: ElementData[]
+  elements?: AglynComponentData[]
 }
 
 function ElementsProviderComponent(props: ElementsProviderComponentProps) {

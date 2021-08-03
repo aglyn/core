@@ -14,16 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { AglynExtension } from '@aglyn/framework/sdk'
 
-/* eslint-disable-next-line */
-export interface WebsiteFeatureElementsMaterialProps {}
 
-export function Material(props: WebsiteFeatureElementsMaterialProps) {
-  return (
-    <div>
-      <h1>Welcome to website-feature-elements-material!</h1>
-    </div>
-  )
-}
+const TAG = 'mui'
 
-export default Material
+
+export const extension: AglynExtension = {}
