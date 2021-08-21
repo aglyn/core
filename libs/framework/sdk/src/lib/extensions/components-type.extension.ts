@@ -16,11 +16,12 @@
  */
 
 import { AglynType, AglynUniqueId, PayloadData } from '../types'
-import { AglynSymbol, RestrictFlag } from '../constants'
+import { RestrictFlag } from '../constants'
 import { AnyProps } from '@aglyn/shared/util/types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import { FormSchema } from '@aglyn/shared/ui/react'
 import { AglynExtensionModel } from '../models/aglyn-extension.model'
+import { EXTENSION_TYPE, MODULE_TYPE } from '../aglyn-symbol'
 
 
 export interface AglynComponentOptions {
@@ -47,7 +48,7 @@ export interface AglynComponentOptions {
 }
 
 export interface AglynComponent extends AglynUniqueId,
-  AglynType<typeof AglynSymbol.MODULE_TYPE, typeof AglynSymbol.EXTENSION_TYPE> {
+  AglynType<typeof MODULE_TYPE, typeof EXTENSION_TYPE> {
   options: Partial<AglynComponentOptions>
   <T>(...args: T[]): unknown
 }

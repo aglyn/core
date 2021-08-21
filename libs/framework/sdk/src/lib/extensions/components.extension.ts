@@ -27,9 +27,9 @@ import {
 import { AglynExtensionModel } from '../models/aglyn-extension.model'
 
 
-const extension = new (class extends AglynExtensionModel implements AglynComponentsExtension {
-  protected static override __$ID__ = 'components'
-  public override context: ComponentsRegistry = new Map()
+export default class AglynComponentsExtensionModel extends AglynExtensionModel implements AglynComponentsExtension {
+  protected static __$ID__ = 'components'
+  public context: ComponentsRegistry = new Map()
   constructor() {
     super()
   }
@@ -86,12 +86,10 @@ const extension = new (class extends AglynExtensionModel implements AglynCompone
       this.delete,
     )
   }
-  public override toJSON() {
+  toJSON() {
     return {
       ...super.toJSON(),
       componentIds: this.context.keys(),
     }
   }
-})()
-
-exports = extension
+}

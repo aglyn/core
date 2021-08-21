@@ -19,28 +19,40 @@ import {
   AglynAppModule,
   AglynCommandHandler,
   AglynExtension,
+  APP_TYPE,
+  COMMAND_TYPE,
+  EXTENSION_TYPE,
+  MODULE_TYPE, TypeKind,
+  TypeOf,
 } from '@aglyn/framework/sdk'
-import { _isObj } from '@aglyn/shared/util/guards'
-import { AglynSymbol } from '../constants'
+import { _isFnT, _isObj } from '@aglyn/shared/util/guards'
 
 
 export function typeOf(object: unknown) {
-  if (_isObj(object)) {
-    const _typeof = object[AglynSymbol.TypeOf]
+  if (_isFnT(object) || _isObj(object)) {
+    const _typeof = object[TypeOf]
     switch (_typeof) {
-      case AglynSymbol.MODULE_TYPE:
-        // eslint-disable-next-line no-case-declarations
-        const kind = object['kind']
-
-        switch (kind) {
-          case AglynSymbol.COMMAND_TYPE:
-          case AglynSymbol.EXTENSION_TYPE:
-          default:
-            return kind
-        }
-      case AglynSymbol.APP_TYPE:
-      default:
+      case MODULE_TYPE:
         return _typeof
+      case APP_TYPE:
+      default:
+        return typeof object
+    }
+  }
+
+  return undefined
+}
+
+export function kindOf(object: unknown) {
+  if (_isFnT(object) || _isObj(object)) {
+    // eslint-disable-next-line no-case-declarations
+    const kind = object[TypeKind]
+
+    switch (kind) {
+      case COMMAND_TYPE:
+      case EXTENSION_TYPE:
+      default:
+        return kind
     }
   }
 
@@ -48,14 +60,14 @@ export function typeOf(object: unknown) {
 }
 
 export function isApp<T>(object: unknown): object is AglynApp {
-  return typeOf(object) === AglynSymbol.APP_TYPE
+  return typeOf(object) === APP_TYPE
 }
 export function isAppModule<T>(object: unknown): object is AglynAppModule {
-  return typeOf(object) === AglynSymbol.MODULE_TYPE
+  return typeOf(object) === MODULE_TYPE
 }
 export function isCommand<T>(object: unknown): object is AglynCommandHandler {
-  return typeOf(object) === AglynSymbol.COMMAND_TYPE
+  return kindOf(object) === COMMAND_TYPE
 }
 export function isExtension<T>(object: unknown): object is AglynExtension {
-  return typeOf(object) === AglynSymbol.EXTENSION_TYPE
+  return kindOf(object) === EXTENSION_TYPE
 }

@@ -28,13 +28,21 @@ import {
   AglynCommandFlag,
   AglynErrorEventFlag,
   AglynModuleTriggerFlag,
-  AglynSymbol,
 } from './constants'
 import { Emitter } from 'mitt'
 import { Timestamp } from '@aglyn/shared/feature/timestamp'
 import { NsErrorFactory } from '@aglyn/shared/util/errors'
 import { Logger } from '@aglyn/shared/feature/logger'
 import { AglynComponent, AglynComponentOptions } from './extensions/components-type.extension'
+import {
+  APP_TYPE,
+  COMMAND_TYPE,
+  EXTENSION_TYPE,
+  MODULE_TYPE,
+  TAG_TYPE,
+  TypeKind,
+  TypeOf,
+} from './aglyn-symbol'
 
 
 export type Payload<T = any> = { payload: T }
@@ -125,10 +133,10 @@ export interface AglynExtensionConfig extends AglynUniqueId {
   autoload?: boolean
 }
 
-export interface AglynType<T extends AglynSymbol.TAG_TYPE,
-  U extends AglynSymbol.TAG_TYPE = never> {
-  readonly [AglynSymbol.TypeOf]?: T
-  readonly [AglynSymbol.TypeKind]?: U
+export interface AglynType<T extends TAG_TYPE,
+  U extends TAG_TYPE = never> {
+  readonly [TypeOf]?: T
+  readonly [TypeKind]?: U
 }
 
 export interface AglynEffectType<T, U = unknown> extends Payload<U> {
@@ -137,7 +145,7 @@ export interface AglynEffectType<T, U = unknown> extends Payload<U> {
 
 export interface AglynApp extends AglynBaseModel,
   LifecycleObserver,
-  AglynType<typeof AglynSymbol.APP_TYPE> {
+  AglynType<typeof APP_TYPE> {
 
   readonly deleted?: boolean
   readonly event: AglynEmitter
@@ -165,7 +173,7 @@ export interface AglynCommandController extends AglynModuleController,
 }
 
 export interface AglynCommandHandler extends AglynUniqueId,
-  AglynType<typeof AglynSymbol.MODULE_TYPE, typeof AglynSymbol.COMMAND_TYPE> {
+  AglynType<typeof MODULE_TYPE, typeof COMMAND_TYPE> {
   (data: AglynCommandParams['*']): void
 }
 
@@ -183,7 +191,7 @@ export interface AglynExtensionController extends AglynModuleController,
 export interface AglynExtension extends AglynBaseModel,
   LifecycleObserver,
   AglynUniqueId,
-  AglynType<typeof AglynSymbol.MODULE_TYPE, typeof AglynSymbol.EXTENSION_TYPE> {
+  AglynType<typeof MODULE_TYPE, typeof EXTENSION_TYPE> {
   readonly lifecycle?: LifecycleFlag | null
   readonly config?: AglynExtensionConfig
 }

@@ -25,8 +25,9 @@ import {
   AglynExtensionController,
   AglynLogger,
   AglynModuleTriggerFlag,
-  AglynSymbol,
+  APP_TYPE,
   DEFAULT_ENTRY_NAME,
+  TypeOf,
 } from '@aglyn/framework/sdk'
 import { Timestamp } from '@aglyn/shared/feature/timestamp'
 import { AglynAppExtensionController } from './aglyn-app-extension.controller'
@@ -37,15 +38,20 @@ const TAG = 'AglynApp'
 
 export class AglynAppController implements AglynApp {
 
-  #deleted = false
+  public static readonly [TypeOf] = APP_TYPE
+  public static [Symbol.toStringTag] = TAG
+  public readonly AglynAppCommandController = AglynAppCommandController
+  public readonly AglynAppExtensionController = AglynAppExtensionController
   protected options: AglynAppOptions
   protected emitter: AglynEmitter
   protected logger: AglynLogger
   protected name: string
   protected created: Timestamp = Timestamp.now()
-  protected commandController: AglynCommandController = new AglynAppCommandController({app: this})
-  protected extensionController: AglynExtensionController = new AglynAppExtensionController({app: this})
-
+  protected commandController: AglynCommandController
+  protected extensionController: AglynExtensionController
+  #deleted = false
+  public get [TypeOf]() {return AglynAppController[TypeOf]}
+  public get [Symbol.toStringTag]() {return AglynAppController[Symbol.toStringTag]}
   get event() {
     return this.emitter
   }
@@ -58,13 +64,12 @@ export class AglynAppController implements AglynApp {
   get commands() {
     return this.commandController
   }
-  set deleted(value: boolean) {
-    this.#deleted = Boolean(value)
-  }
   get deleted(): boolean {
     return this.#deleted
   }
-
+  set deleted(value: boolean) {
+    this.#deleted = Boolean(value)
+  }
   constructor(props: {
     options: AglynAppOptions,
     emitter: AglynEmitter,
@@ -75,12 +80,17 @@ export class AglynAppController implements AglynApp {
     this.name = this.options.name ?? DEFAULT_ENTRY_NAME
     this.emitter = emitter
     this.logger = logger
+    this.initialize()
+  }
 
+  initialize() {
+    this.commandController = new this.AglynAppCommandController({app: this})
+    this.extensionController = new this.AglynAppExtensionController({app: this})
     AglynAppController.commandControllers.set(this.name, this.commandController)
     AglynAppController.extensionControllers.set(this.name, this.extensionController)
 
-    logger.debug(AglynAppEventFlag.APP_CREATED, {app: this})
-    emitter.emit(AglynAppEventFlag.APP_CREATED, {app: this})
+    this.logger.debug(AglynAppEventFlag.APP_CREATED, {app: this})
+    this.emitter.emit(AglynAppEventFlag.APP_CREATED, {app: this})
   }
 
   getCreatedAt = () => {
@@ -95,12 +105,6 @@ export class AglynAppController implements AglynApp {
   effect = (data: AglynEffectType<AglynModuleTriggerFlag>) => {
     const {type, payload} = data
     this.emitter.emit(type, payload as any)
-  }
-  get [AglynSymbol.TypeOf]() {
-    return AglynSymbol.APP_TYPE
-  }
-  get [Symbol.toStringTag]() {
-    return `${TAG}`
   }
   toString = () => {
     return `${TAG}(name: '${name}')`

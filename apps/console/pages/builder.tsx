@@ -17,7 +17,7 @@
 
 import React, { useState } from 'react'
 import { getApp } from '@aglyn/framework/sdk'
-import { BuilderComponent } from '@aglyn/framework/builder'
+// import { BuilderComponent } from '@aglyn/framework/builder'
 import { samplePageData } from '../constants/sample-data'
 
 const Root = ({ children, innerRef, ...props }) => (

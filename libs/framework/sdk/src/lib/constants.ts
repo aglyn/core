@@ -17,55 +17,9 @@
 
 import { AglynError } from './types'
 import { ErrorTagMessages, NsErrorFactory } from '@aglyn/shared/util/errors'
-import { _isFnT } from '@aglyn/shared/util/guards'
 
 
 export const DEFAULT_ENTRY_NAME = '[DEFAULT]'
-
-export namespace AglynSymbol {
-
-  // The Symbol used to tag the AglynObject-like types. If there is no native Symbol
-  // nor polyfill, then a plain number is used for performance.
-
-  export type TAG_TYPE = symbol | number
-
-  export enum Hex {
-    x60103 = 0xeac7,
-    x60106 = 0xeaca,
-    x60107 = 0xeacb,
-    x60108 = 0xeacc,
-    x60109 = 0xeacd,
-    x60110 = 0xeace,
-    x60112 = 0xead0,
-    x60113 = 0xead1,
-    x60114 = 0xead2,
-    x60115 = 0xead3,
-    x60116 = 0xead4,
-    x60119 = 0xead7,
-    x60120 = 0xead8,
-    x60128 = 0xeae0,
-    x60129 = 0xeae1,
-    x60130 = 0xeae2,
-    x60131 = 0xeae3,
-    x60132 = 0xeae4,
-  }
-
-  export const TypeOf = 'ßßtypeof'
-  export const TypeKind = 'kind'
-
-  export let APP_TYPE: TAG_TYPE = Hex.x60103
-  export let MODULE_TYPE: TAG_TYPE = Hex.x60106
-  export let COMMAND_TYPE: TAG_TYPE = Hex.x60109
-  export let EXTENSION_TYPE: TAG_TYPE = Hex.x60107
-
-  if (_isFnT(Symbol) && Symbol.for) {
-    APP_TYPE = Symbol.for('aglyn.app')
-    MODULE_TYPE = Symbol.for('aglyn.module')
-    COMMAND_TYPE = Symbol.for('aglyn.command')
-    EXTENSION_TYPE = Symbol.for('aglyn.extension')
-  }
-
-}
 
 export enum RestrictFlag {
   LIMIT = 'limit',

@@ -16,6 +16,6 @@
  */
 
 import { AglynEmitter } from '@aglyn/framework/sdk'
-import { Mitt } from '@aglyn/shared/util/helpers'
+import { EmitterFn } from '@aglyn/shared/feature/emitter'
 
-export const emitter: AglynEmitter = Mitt()
+export const emitter: AglynEmitter = EmitterFn()

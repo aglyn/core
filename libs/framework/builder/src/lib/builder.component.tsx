@@ -16,7 +16,7 @@
  */
 
 import { ComponentProp, ConfirmationProviderComponent } from '@aglyn/shared/ui/react'
-import { builder } from '@aglyn/shared/ui/themes'
+import { builderTheme } from '@aglyn/shared/ui/themes'
 import { AglynComponentData } from '@aglyn/framework/sdk'
 import { WebsiteComponent } from '@aglyn/framework/renderer'
 import { ThemeProvider } from '@material-ui/core/styles'
@@ -44,7 +44,7 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(function 
 
   return (
     <NoSsr>
-      <ThemeProvider theme={builder}>
+      <ThemeProvider theme={builderTheme}>
         <Component ref={ref} {...rest}>
           <ElementsProviderComponent elements={elements}>
             <SnackbarProvider maxSnack={3}>

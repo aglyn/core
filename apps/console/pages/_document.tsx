@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { console } from '@aglyn/shared/ui/themes'
+import { consoleTheme } from '@aglyn/shared/ui/themes'
 import { ServerStyleSheets } from '@material-ui/core/styles'
 import { NextComponentType } from 'next'
 import NextDocument, {
@@ -142,7 +142,7 @@ export default class _Document<P = {}> extends NextDocument<P> {
   }
 
   metaElements: MetaElementsConfig = [
-    ['theme-color', console.palette.primary.main],
+    ['theme-color', consoleTheme.palette.primary.main],
     ['X-UA-Compatible', 'IE=edge'],
   ]
   linkElements: LinkElementsConfig = [

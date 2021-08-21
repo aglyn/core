@@ -79,6 +79,19 @@ export function _isFnT(val: unknown): val is (...args: unknown[]) => unknown {
   return typeof val === 'function'
 }
 /**
+ * Is type a newable constructor function
+ *
+ * @export
+ * @param {*} val
+ * @returns {val is new Function}
+ */
+export function _isCtor(val: unknown): val is new (...args: unknown[]) => unknown {
+  if (typeof val !== 'function') {return false}
+  const ctor = val as new (...args: unknown[]) => unknown
+  try { new ctor() } catch (e) { return false }
+  return true
+}
+/**
  * Shortcut for Array.isArray
  *
  * @export

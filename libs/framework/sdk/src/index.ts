@@ -23,4 +23,5 @@ export * from './lib/util/handle-resolve-props'
 export * from './lib/util/handle-prop-defaults'
 
 export * from './lib/constants'
+export * from './lib/aglyn-symbol'
 export * from './lib/extensions/components-type.extension'

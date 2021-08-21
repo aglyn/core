@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core/styles'
+// import { createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core/styles'
+import { createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core'
 import './createPalette'
 
 

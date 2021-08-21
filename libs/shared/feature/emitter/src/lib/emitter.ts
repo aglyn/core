@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 import { EventEmitter2 } from 'eventemitter2'
+import mitt from 'mitt'
 
 
+export * from 'mitt'
 export {
   event,
   eventNS,
@@ -35,3 +37,5 @@ export {
 export class Emitter extends EventEmitter2 {
 
 }
+
+export const EmitterFn = mitt

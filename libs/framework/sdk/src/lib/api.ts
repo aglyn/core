@@ -34,7 +34,7 @@ import {
 } from './constants'
 import { _apps, _modules } from './internal'
 import { LogCallback, Logger, LogLevelString, LogOptions } from '@aglyn/shared/feature/logger'
-import { _isFnT, _isNull, _isStrEmpty } from '@aglyn/shared/util/guards'
+import { _isCtor, _isFnT, _isNull, _isStrEmpty } from '@aglyn/shared/util/guards'
 import { trim } from '@aglyn/shared/util/tools'
 import { emitter } from './emitter'
 import { Mutable } from '@aglyn/shared/util/types'
@@ -42,11 +42,23 @@ import { isAppModule, isCommand, isExtension } from './util/aglyn-is'
 import { AglynAppController } from './controllers/aglyn-app.controller'
 
 
-export function registerModules(app: AglynApp, ...modules: any[]) {
-  modules.forEach(module => {
+export async function registerModules(app: AglynApp, ...modules: any[]) {
+  await modules.forEach(async (module) => {
     if (!module) {
       throw AGLYN_APP_ERROR.create(AglynErrorEventFlag.NO_MODULE, undefined)
     }
+
+    module = await module().then(m => {
+      return m?.default
+    }).catch(e => {
+      throw AGLYN_APP_ERROR.create(
+        AglynErrorEventFlag.INVALID_MODULE_ARG, {
+          moduleName: module?.['$id'] ?? module?.['name'] ?? 'unknown',
+          appName: app.getName() ?? DEFAULT_ENTRY_NAME,
+        },
+      )
+    })
+
     if (!isAppModule(module)) {
       throw AGLYN_APP_ERROR.create(
         AglynErrorEventFlag.INVALID_MODULE_ARG, {
@@ -55,10 +67,11 @@ export function registerModules(app: AglynApp, ...modules: any[]) {
         },
       )
     }
+
     if (isExtension(module)) {
       app.effect({
         type: AglynModuleTriggerFlag.EXTENSION_REGISTER,
-        payload: {extension: module},
+        payload: {extension: _isFnT(module) ? (_isCtor(module) ? new module() : module()) : module},
       })
     }
     if (isCommand(module)) {

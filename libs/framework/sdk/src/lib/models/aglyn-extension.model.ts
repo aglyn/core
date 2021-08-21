@@ -15,41 +15,45 @@
  * limitations under the License.
  */
 
-import { AglynExtension, AglynExtensionConfig, AglynSymbol } from '@aglyn/framework/sdk'
+import { AglynExtension, AglynExtensionConfig } from '@aglyn/framework/sdk'
 import { LifecycleFlag } from '@aglyn/shared/util/types'
+import { EXTENSION_TYPE, MODULE_TYPE, TypeKind, TypeOf } from '../aglyn-symbol'
 
+
+const TAG = 'AglynExtension'
 
 export abstract class AglynExtensionModel implements AglynExtension {
 
+  public static readonly [TypeOf] = MODULE_TYPE
+  public static readonly [TypeKind] = EXTENSION_TYPE
   protected static __$ID__: string = null
-  static #__TAG__ = 'AglynExtension'
+  public context?: any = null
+  public readonly config: AglynExtensionConfig = {autoload: true}
+  public [Symbol.toStringTag] = TAG
   #lifecycle?: LifecycleFlag = null
-  context?: any = null
-  protected getContext() { return this.context }
-  protected setContext(value) { this.context = value }
+  public get [TypeOf]() {return AglynExtensionModel[TypeOf]}
+  public get [TypeKind]() {return AglynExtensionModel[TypeKind]}
   public get lifecycle() { return this.#lifecycle }
   public set lifecycle(value) {
     if (value in LifecycleFlag) {
       this.#lifecycle = value
     }
   }
-  public readonly config: AglynExtensionConfig = {autoload: true}
   public get $id() { return AglynExtensionModel.__$ID__ }
-  public get [AglynSymbol.TypeOf]() { return AglynSymbol.MODULE_TYPE }
-  public get [AglynSymbol.TypeKind]() { return AglynSymbol.EXTENSION_TYPE }
-  public get [Symbol.toStringTag]() { return `${AglynExtensionModel.#__TAG__}` }
   protected constructor() {
 
   }
+  protected getContext() { return this.context }
+  protected setContext(value) { this.context = value }
   public toString() {
-    const pfx = AglynExtensionModel.#__TAG__
+    const pfx = TAG
     const extensionId = AglynExtensionModel.__$ID__ ?? 'NONE'
     return `${pfx}(id: '${extensionId}')`
   }
   public toJSON() {
     return {
-      [AglynSymbol.TypeOf]: AglynExtensionModel[AglynSymbol.TypeOf],
-      [AglynSymbol.TypeKind]: AglynExtensionModel[AglynSymbol.TypeKind],
+      [TypeOf]: AglynExtensionModel[TypeOf],
+      [TypeKind]: AglynExtensionModel[TypeKind],
       $id: AglynExtensionModel.__$ID__,
     }
   }

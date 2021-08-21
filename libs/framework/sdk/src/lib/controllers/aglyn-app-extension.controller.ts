@@ -34,11 +34,11 @@ const TAG = 'AglynExtensionController'
 
 export class AglynAppExtensionController implements AglynExtensionController {
 
+  public [Symbol.toStringTag] = `${TAG}`
   protected app: AglynApp
   protected event: AglynEmitter
   protected logger: AglynLogger
   protected extensions: AglynExtensionMap = new Map()
-
   constructor(props: {
     app: AglynApp
   }) {
@@ -120,9 +120,6 @@ export class AglynAppExtensionController implements AglynExtensionController {
     this.extensions.forEach((_, extensionId) => {
       this.unloadExtension({extensionId})
     })
-  }
-  get [Symbol.toStringTag as any]() {
-    return `${TAG}`
   }
   toString = () => {
     return `${TAG}(appName: '${this.app.getName()}')`

@@ -19,7 +19,9 @@ import {
   AglynApp,
   AglynAppEventFlag,
   AglynCommandController,
-  AglynCommander, AglynEmitter, AglynExtensionMap, AglynLogger,
+  AglynCommander,
+  AglynEmitter,
+  AglynLogger,
   AglynModuleTriggerFlag,
   AglynModuleTriggerParams,
 } from '@aglyn/framework/sdk'
@@ -30,11 +32,11 @@ const TAG = 'AglynCommandController'
 
 export class AglynAppCommandController implements AglynCommandController {
 
+  public [Symbol.toStringTag] = TAG
   protected app: AglynApp
   protected appEvent: AglynEmitter
   protected appLogger: AglynLogger
   protected commander: AglynCommander = Mitt()
-
   constructor(props: {
     app: AglynApp
   }) {
@@ -69,9 +71,6 @@ export class AglynAppCommandController implements AglynCommandController {
     this.commander.emit(commandId, {app: this.app})
     this.appLogger.debug(AglynAppEventFlag.TRIGGERED_COMMAND, {commandId})
     this.appEvent.emit(AglynAppEventFlag.TRIGGERED_COMMAND, {commandId})
-  }
-  get [Symbol.toStringTag as any]() {
-    return `${TAG}`
   }
   toString = () => {
     return `${TAG}(app: '${this.app.getName()}')`

@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "noImplicitOverride": true,
+    "noImplicitOverride": false,
     "noUncheckedIndexedAccess": true,
     "stripInternal": true,
     "resolveJsonModule": true,

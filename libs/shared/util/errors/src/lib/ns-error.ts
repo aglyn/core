@@ -20,7 +20,7 @@ import { EventPayload } from './types'
 
 
 export class NsError extends Error {
-  override readonly name = 'NsError'
+  readonly name = 'NsError'
 
   constructor(
     public readonly code: string,
