@@ -17,7 +17,7 @@
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { MuiThemeProvider } from '@material-ui/core/styles'
-import { console } from '@aglyn/shared/ui/themes'
+import { consoleTheme } from '@aglyn/shared/ui/themes'
 import { Fragment, useEffect } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
@@ -26,13 +26,13 @@ import AppLoaderOverlayView from '../views/AppLoaderOverlayView'
 import { AppContextProvider } from '../contexts/app-context'
 import { CurrentUserProviderComponent } from '../contexts/current-user-context'
 import { APP } from '../const'
+import * as AppController from '../lib/aglyn-deprecated'
 
 
 declare function require(
   moduleNames: string[],
   onLoad: (...args: any[]) => void,
 ): void
-import * as AppController from '../lib/aglyn-deprecated'
 
 
 const previewProduction = false
@@ -105,13 +105,13 @@ function _App(props: AppProps): JSX.Element {
   return (
     <>
       <Head>
-        <title children={APP.META_TITLE} />
+        <title>{APP.META_TITLE}</title>
         <meta name="description" content={APP.META_DESCRIPTION} />
       </Head>
       <Wrapper>
         <AppContextProvider value={app}>
           <CurrentUserProviderComponent>
-            <MuiThemeProvider theme={console}>
+            <MuiThemeProvider theme={consoleTheme}>
               <CssBaseline>
                 <AppLoaderProviderComponent>
                   <div className="app">

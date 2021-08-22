@@ -57,20 +57,26 @@
                 ]
               },
               {
-                "sourceTag": "scope:lib:framework:core",
+                "sourceTag": "scope:lib:framework:sdk",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:framework:core",
+                  "scope:lib:framework:sdk",
                   "scope:lib:shared:util",
-                  "scope:lib:logger",
-                  "scope:lib:timestemp"
+                  "scope:lib:shared:feature"
                 ]
               },
               {
                 "sourceTag": "scope:lib:framework:feature",
                 "onlyDependOnLibsWithTags": [
                   "scope:lib:framework:feature",
-                  "scope:lib:shared",
-                  "scope:lib:framework:core"
+                  "scope:lib:framework:sdk",
+                  "scope:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "scope:lib:framework:plugin",
+                "onlyDependOnLibsWithTags": [
+                  "scope:lib:framework:plugin",
+                  "scope:lib"
                 ]
               },
               {
@@ -93,7 +99,9 @@
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-namespace": "off",
         "@typescript-eslint/no-unused-vars": "warn",
-        "@typescript-eslint/no-var-requires": "off"
+        "@typescript-eslint/no-var-requires": "off",
+        "react/no-children-prop": "off",
+        "no-fallthrough": "off"
       }
     },
     {

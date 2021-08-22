@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core/styles'
+import { createTheme as createMuiTheme, responsiveFontSizes, Theme, ThemeOptions } from '@material-ui/core/styles'
 import './createPalette'
 
 
@@ -67,8 +67,8 @@ import './createPalette'
  */
 export function createTheme(options?: ThemeOptions): Theme {
   const theme = createMuiTheme(options)
-  theme.palette.tertiary = theme.palette.augmentColor(theme.palette.tertiary)
-  theme.palette.quaternary = theme.palette.augmentColor(theme.palette.quaternary)
+  // theme.palette.tertiary = theme.palette.augmentColor(theme.palette.tertiary)
+  // theme.palette.quaternary = theme.palette.augmentColor(theme.palette.quaternary)
   return responsiveFontSizes(theme, {
     // Override to include `xs` and `xl` - default: ['sm', 'md', 'lg']
     breakpoints: ['xs', 'sm', 'md', 'lg', 'xl'],

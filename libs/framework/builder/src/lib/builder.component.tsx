@@ -16,14 +16,14 @@
  */
 
 import { ComponentProp, ConfirmationProviderComponent } from '@aglyn/shared/ui/react'
-import { builder } from '@aglyn/shared/ui/themes'
+import { builderTheme } from '@aglyn/shared/ui/themes'
 import { AglynComponentData } from '@aglyn/framework/sdk'
-import { WebsiteComponent } from '@aglyn/framework/renderer'
+import { WebsiteRendererComponent } from '@aglyn/framework/renderer'
 import { ThemeProvider } from '@material-ui/core/styles'
-import { forwardRef } from 'react'
-import ElementComponent, { ElementComponentProps } from './components/element.component'
+import { forwardRef, memo } from 'react'
+import ElementBuilderComponent, { ElementComponentProps } from './components/element-builder.component'
 import AppBarComponent from './components/appbar.component'
-import ElementDrawerProviderComponent from './contexts/element-drawer-provider.component'
+import ElementDrawerProviderComponent, { ElementDrawerProviderComponentProps } from './contexts/element-drawer-provider.component'
 import SelectionProviderComponent from './contexts/selection-provider.component'
 import NoSsr from '@material-ui/core/NoSsr'
 import ElementsProviderComponent from './contexts/elements-provider.component'
@@ -33,47 +33,53 @@ import { SnackbarProvider } from 'notistack'
 
 export interface BuilderComponentProps extends ComponentProp {
   elements?: AglynComponentData[]
-  elementComponent?: ElementComponentProps['component']
+  elementComponents: ElementDrawerProviderComponentProps['elements']
 }
 
-export const BuilderComponent = forwardRef<any, BuilderComponentProps>(function RefRenderFn(
-  props,
-  ref,
-) {
-  const {component: Component, elementComponent, elements, ...rest} = props
+export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {
+      component: Component,
+      elements,
+      elementComponents,
+      ...rest
+    } = props
 
-  return (
-    <NoSsr>
-      <ThemeProvider theme={builder}>
-        <Component ref={ref} {...rest}>
-          <ElementsProviderComponent elements={elements}>
-            <SnackbarProvider maxSnack={3}>
-              <ConfirmationProviderComponent>
-                <SelectionProviderComponent>
-                  <ElementDrawerProviderComponent>
-                    <ElementsContext.Consumer>
-                      {({elements}) => (
-                        <WebsiteComponent elements={elements} elementComponent={elementComponent} />
-                      )}
-                    </ElementsContext.Consumer>
+    return (
+      <NoSsr>
+        <ThemeProvider theme={builderTheme}>
+          <Component ref={ref} {...rest}>
+            <ElementsProviderComponent elements={elements}>
+              <SnackbarProvider maxSnack={3}>
+                <ConfirmationProviderComponent>
+                  <SelectionProviderComponent>
+                    <ElementDrawerProviderComponent elements={elementComponents}>
+                      <ElementsContext.Consumer>
+                        {({elements}) => (
+                          <WebsiteRendererComponent
+                            elements={elements}
+                            elementComponent={ElementBuilderComponent}
+                          />
+                        )}
+                      </ElementsContext.Consumer>
 
-                    <AppBarComponent />
-                  </ElementDrawerProviderComponent>
-                </SelectionProviderComponent>
-              </ConfirmationProviderComponent>
-            </SnackbarProvider>
-          </ElementsProviderComponent>
-        </Component>
-      </ThemeProvider>
-    </NoSsr>
-  )
-})
+                      <AppBarComponent />
+                    </ElementDrawerProviderComponent>
+                  </SelectionProviderComponent>
+                </ConfirmationProviderComponent>
+              </SnackbarProvider>
+            </ElementsProviderComponent>
+          </Component>
+        </ThemeProvider>
+      </NoSsr>
+    )
+  },
+)
 
 BuilderComponent.displayName = 'BuilderComponent'
 BuilderComponent.defaultProps = {
   component: 'div',
-  elementComponent: ElementComponent,
   elements: [],
 }
 
-export default BuilderComponent
+export default memo(BuilderComponent)

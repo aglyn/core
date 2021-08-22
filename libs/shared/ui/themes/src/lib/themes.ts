@@ -16,7 +16,7 @@
  */
 
 export * from './console'
-export { default as console } from './console'
+export { default as consoleTheme } from './console'
 
 export * from './builder'
-export { default as builder } from './builder'
+export { default as builderTheme } from './builder'

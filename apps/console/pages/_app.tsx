@@ -17,20 +17,29 @@
 
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { MuiThemeProvider } from '@material-ui/core/styles'
-import { console } from '@aglyn/shared/ui/themes'
-import React, { Fragment, StrictMode, useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
 import { APP } from '../../www/const'
-import { initializeApp } from '@aglyn/framework/sdk'
+import { AglynExtension, initializeApp } from '@aglyn/framework/sdk'
+import { consoleTheme } from '@aglyn/shared/ui/themes'
 
-initializeApp()
+
+try {
+  initializeApp({
+    extensions: {
+      [AglynExtension.COMPONENTS]: true
+    }
+  })
+} catch (e) {
+  console.error(e, 'initialize aglyn app')
+}
 
 const previewProduction = false
 const isProduction = process.env.NODE_ENV === 'production' || previewProduction
 
-function _App(props: AppProps) {
-  const { Component, pageProps } = props
+export default function _App(props: AppProps) {
+  const {Component, pageProps} = props
 
   useEffect(() => {
     // Remove the server-side injected CSS.
@@ -45,10 +54,10 @@ function _App(props: AppProps) {
   return (
     <Wrapper>
       <Head>
-        <title children={APP.META_TITLE} />
+        <title>{APP.META_TITLE}</title>
         <meta name="description" content={APP.META_DESCRIPTION} />
       </Head>
-      <MuiThemeProvider theme={console}>
+      <MuiThemeProvider theme={consoleTheme}>
         <CssBaseline>
           <div className="app">
             <main>
@@ -60,5 +69,3 @@ function _App(props: AppProps) {
     </Wrapper>
   )
 }
-
-export default _App
