@@ -18,10 +18,10 @@
 import { ComponentProp, ConfirmationProviderComponent } from '@aglyn/shared/ui/react'
 import { builderTheme } from '@aglyn/shared/ui/themes'
 import { AglynComponentData } from '@aglyn/framework/sdk'
-import { WebsiteRendererComponent } from '@aglyn/framework/renderer'
+import { CanvasRendererComponent } from '@aglyn/framework/renderer'
 import { ThemeProvider } from '@material-ui/core/styles'
 import { forwardRef, memo } from 'react'
-import ElementBuilderComponent, { ElementComponentProps } from './components/element-builder.component'
+import BuilderElementRendererComponent from './components/builder-element-renderer.component'
 import AppBarComponent from './components/appbar.component'
 import ElementDrawerProviderComponent, { ElementDrawerProviderComponentProps } from './contexts/element-drawer-provider.component'
 import SelectionProviderComponent from './contexts/selection-provider.component'
@@ -29,6 +29,7 @@ import NoSsr from '@material-ui/core/NoSsr'
 import ElementsProviderComponent from './contexts/elements-provider.component'
 import ElementsContext from './contexts/elements.context'
 import { SnackbarProvider } from 'notistack'
+import { PanZoom } from 'react-easy-panzoom'
 
 
 export interface BuilderComponentProps extends ComponentProp {
@@ -48,22 +49,25 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
     return (
       <NoSsr>
         <ThemeProvider theme={builderTheme}>
-          <Component ref={ref} {...rest}>
+          <Component ref={ref} id="aglyn:builder" {...rest}>
             <ElementsProviderComponent elements={elements}>
               <SnackbarProvider maxSnack={3}>
                 <ConfirmationProviderComponent>
                   <SelectionProviderComponent>
                     <ElementDrawerProviderComponent elements={elementComponents}>
-                      <ElementsContext.Consumer>
-                        {({elements}) => (
-                          <WebsiteRendererComponent
-                            elements={elements}
-                            elementComponent={ElementBuilderComponent}
-                          />
-                        )}
-                      </ElementsContext.Consumer>
+                      <PanZoom>
+                        <ElementsContext.Consumer>
+                          {({elements}) => (
+                            <CanvasRendererComponent
+                              id="aglyn:canvas"
+                              elements={elements}
+                              elementComponent={BuilderElementRendererComponent}
+                            />
+                          )}
+                        </ElementsContext.Consumer>
+                      </PanZoom>
 
-                      <AppBarComponent />
+                      <AppBarComponent id="aglyn:app-bar" />
                     </ElementDrawerProviderComponent>
                   </SelectionProviderComponent>
                 </ConfirmationProviderComponent>

@@ -22,11 +22,11 @@ import { ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/
 import { useSelectionContext } from '../contexts/selection.context'
 
 
-export interface ElementComponentProps extends ElementRendererComponentProps {
+export interface BuilderElementRendererComponentProps extends ElementRendererComponentProps {
   [prop: string]: any
 }
 
-const ElementBuilderComponent = forwardRef<any, ElementComponentProps>(
+const BuilderElementRendererComponent = forwardRef<any, BuilderElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {...rest} = props
     const {confirm} = useConfirmationContext()
@@ -65,9 +65,9 @@ const ElementBuilderComponent = forwardRef<any, ElementComponentProps>(
   },
 )
 
-ElementBuilderComponent.displayName = 'ElementBuilderComponent'
-ElementBuilderComponent.defaultProps = {
-  elementComponent: ElementBuilderComponent,
+BuilderElementRendererComponent.displayName = 'BuilderElementRendererComponent'
+BuilderElementRendererComponent.defaultProps = {
+  elementComponent: BuilderElementRendererComponent,
 }
 
-export default ElementBuilderComponent
+export default BuilderElementRendererComponent

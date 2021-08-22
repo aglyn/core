@@ -17,11 +17,11 @@
 
 import { render } from '@testing-library/react'
 
-import WebsiteRendererComponent from './website-renderer.component'
+import CanvasRendererComponent from './canvas-renderer.component'
 
-describe('WebsiteRendererComponent', () => {
+describe('CanvasRendererComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<WebsiteRendererComponent />)
+    const { baseElement } = render(<CanvasRendererComponent />)
     expect(baseElement).toBeTruthy()
   })
 })

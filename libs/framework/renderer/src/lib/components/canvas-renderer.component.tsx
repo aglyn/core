@@ -15,32 +15,34 @@
  * limitations under the License.
  */
 
-import { forwardRef, memo } from 'react'
+import { forwardRef, HTMLAttributes } from 'react'
 import { AglynComponentData } from '@aglyn/framework/sdk'
 import ElementComponent, { ElementRendererComponentProps } from './element-renderer.component'
 import { ComponentProp } from '@aglyn/shared/ui/react'
 import ElementsComponent from './elements-renderer.component'
 
 
-export interface WebsiteComponentProps extends ComponentProp {
+export interface CanvasRendererComponentProps extends HTMLAttributes<HTMLElement>, ComponentProp {
   elements?: AglynComponentData[]
   elementComponent?: ElementRendererComponentProps['elementComponent']
 }
 
-const WebsiteRendererComponent = forwardRef<any, WebsiteComponentProps>(function RefRenderFn(props, ref) {
-  const {component: Component, elementComponent, elements, ...rest} = props
-  return (
-    <Component ref={ref} {...rest}>
-      <ElementsComponent children={elements} elementComponent={elementComponent} />
-    </Component>
-  )
-})
+const CanvasRendererComponent = forwardRef<HTMLElement, CanvasRendererComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {component: Component, elementComponent, elements, ...rest} = props
+    return (
+      <Component ref={ref} {...rest}>
+        <ElementsComponent children={elements} elementComponent={elementComponent} />
+      </Component>
+    )
+  },
+)
 
-WebsiteRendererComponent.displayName = 'WebsiteComponent'
-WebsiteRendererComponent.defaultProps = {
+CanvasRendererComponent.displayName = 'CanvasRendererComponent'
+CanvasRendererComponent.defaultProps = {
   component: 'div',
   elementComponent: ElementComponent,
   elements: [],
 }
 
-export default memo(WebsiteRendererComponent)
+export default CanvasRendererComponent
