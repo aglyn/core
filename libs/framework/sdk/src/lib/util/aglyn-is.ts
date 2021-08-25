@@ -23,15 +23,15 @@ import {
   COMMAND_TYPE,
   EXTENSION_TYPE,
   MODULE_TYPE,
-  TypeKind,
-  TypeOf,
+  TYPE_KIND,
+  TYPE_OF,
 } from '@aglyn/framework/sdk'
 import { _isFnT, _isObj } from '@aglyn/shared/util/guards'
 
 
 export function typeOf(object: unknown) {
   if (_isFnT(object) || _isObj(object)) {
-    const _typeof = object[TypeOf]
+    const _typeof = object[TYPE_OF]
     switch (_typeof) {
       case MODULE_TYPE:
         return _typeof
@@ -47,7 +47,7 @@ export function typeOf(object: unknown) {
 export function kindOf(object: unknown) {
   if (_isFnT(object) || _isObj(object)) {
     // eslint-disable-next-line no-case-declarations
-    const kind = object[TypeKind]
+    const kind = object[TYPE_KIND]
 
     switch (kind) {
       case COMMAND_TYPE:

@@ -37,18 +37,17 @@ export interface ElementRendererComponentProps extends AnyProps {
 const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {elementData: data, elementRendererComponent, ...rest} = props
-    const component = _isStrT(data?.component)
-      ? getComponent(getApp(), {componentId: _s(data?.component)})
-      : data?.component as AglynComponent
+    const component = getComponent(getApp(), {componentId: _s(data?.component)})
     const ctor = component
     const options = component?.options
     const resolvedProps = handleResolveProps(data?.props, options, ctor)
     const {children: content = null, ...ctorProps} = resolvedProps
     const ComponentCtor = (ReactIs.isValidElementType(ctor) ? ctor : 'div') as ElementType
     const haveChildren = yes(!_isArr(data?.children) || _isArrEmpty(data?.children))
+    const refProps = options?.disableRef ? {} : {innerRef: ref}
 
     return (
-      <ComponentCtor innerRef={ref} {...ctorProps} {...rest}>
+      <ComponentCtor {...refProps} {...ctorProps} {...rest}>
         {!haveChildren ? (
           <ElementsComponent
             elementRendererComponent={elementRendererComponent}

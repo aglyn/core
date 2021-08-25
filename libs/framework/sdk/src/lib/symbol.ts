@@ -21,9 +21,9 @@ import { _isFnT } from '@aglyn/shared/util/guards'
 // The Symbol used to tag the AglynObject-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
 
-export type TAG_TYPE = symbol | number
+export type SYMBOL_TYPE = symbol | number
 
-export enum Hex {
+export enum HexTag {
   x60103 = 0xeac7,
   x60106 = 0xeaca,
   x60107 = 0xeacb,
@@ -44,12 +44,39 @@ export enum Hex {
   x60132 = 0xeae4,
 }
 
-const useSym = Boolean(_isFnT(Symbol) && Symbol.for)
+export enum SymTag {
+  APP = 'app',
+  MODULE = 'module',
+  COMMAND = 'command',
+  EXTENSION = 'extension',
+}
 
-export const TypeOf = 'ßßtypeof'
-export const TypeKind = 'ßßkind'
+export const HexSym: Partial<Record<HexTag, SymTag>> = {
+  [HexTag.x60103]: SymTag.APP,
+  [HexTag.x60106]: SymTag.MODULE,
+  [HexTag.x60107]: SymTag.EXTENSION,
+  [HexTag.x60109]: SymTag.COMMAND,
+}
 
-export const APP_TYPE: TAG_TYPE = useSym ? Symbol.for('aglyn.app') : Hex.x60103
-export const MODULE_TYPE: TAG_TYPE = useSym ? Symbol.for('aglyn.module') : Hex.x60106
-export const COMMAND_TYPE: TAG_TYPE = useSym ? Symbol.for('aglyn.command') : Hex.x60109
-export const EXTENSION_TYPE: TAG_TYPE = useSym ? Symbol.for('aglyn.extension') : Hex.x60107
+const symAvail = Boolean(_isFnT(Symbol) && Symbol.for)
+const symFor = (hex: HexTag) => Symbol.for(`${SymPrefix}${HexSym[hex]}`)
+
+export const SymbolNamespace = 'aglyn'
+export const SymbolSeparator = '.'
+export const SymPrefix = `${SymbolNamespace}${SymbolSeparator}`
+export const FieldPrefix = 'ßß'
+
+export const TYPE_OF = 'ßßtypeof'
+export const TYPE_KIND = 'ßßkind'
+
+export let APP_TYPE: SYMBOL_TYPE = HexTag.x60103
+export let MODULE_TYPE: SYMBOL_TYPE = HexTag.x60106
+export let COMMAND_TYPE: SYMBOL_TYPE = HexTag.x60109
+export let EXTENSION_TYPE: SYMBOL_TYPE = HexTag.x60107
+
+if (symAvail) {
+  APP_TYPE = symFor(APP_TYPE)
+  MODULE_TYPE = symFor(MODULE_TYPE)
+  COMMAND_TYPE = symFor(COMMAND_TYPE)
+  EXTENSION_TYPE = symFor(EXTENSION_TYPE)
+}

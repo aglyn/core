@@ -22,10 +22,10 @@ import Card, { CardProps as MuiCardProps } from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import Typography from '@material-ui/core/Typography'
 import { Item } from './grid-list'
-import { BuilderTheme } from '@aglyn/shared/ui/themes'
+import { Theme } from '@aglyn/shared/ui/themes'
 
 
-export const cardIconListItemStyles = (theme: BuilderTheme) => createStyles({
+export const cardIconListItemStyles = (theme: Theme) => createStyles({
   selected: {},
   root: {
     '&$selected $actionArea': {
@@ -64,17 +64,17 @@ export const cardIconListItemStyles = (theme: BuilderTheme) => createStyles({
   },
 })
 
-export interface CardIconListItemProps extends Partial<Omit<MuiCardProps, 'classes'>> {
+type ExtendedMuiProps = Partial<MuiCardProps> & WithStyles<typeof cardIconListItemStyles>
+
+export interface CardIconListItemProps extends ExtendedMuiProps {
   item: Item
   preview: ReactNode
   label: ReactNode
   selected?: boolean
-  onActionClick?: {
-    bivarianceHack<T>(event: MouseEvent<T>, selection: unknown): void;
-  }['bivarianceHack']
+  onActionClick?: { bivarianceHack<T>(event: MouseEvent<T>, selection: unknown): void; }['bivarianceHack']
 }
 
-const CardIconListItemRaw = forwardRef<any, CardIconListItemProps & WithStyles<typeof cardIconListItemStyles>>(
+const UnstyledComponent = forwardRef<any, CardIconListItemProps>(
   function RefRenderFn(props, ref) {
     const {
       classes,
@@ -84,7 +84,7 @@ const CardIconListItemRaw = forwardRef<any, CardIconListItemProps & WithStyles<t
       label,
       onActionClick,
       preview,
-      ...restProps
+      ...rest
     } = props
     const isSelected = Boolean(selected)
     const elemClassName = clsx(classes.root, {
@@ -94,7 +94,7 @@ const CardIconListItemRaw = forwardRef<any, CardIconListItemProps & WithStyles<t
       onActionClick && onActionClick(e, item)
     }, [item, onActionClick])
     return (
-      <Card ref={ref} className={elemClassName} {...restProps}>
+      <Card ref={ref} className={elemClassName} {...rest}>
         <CardActionArea
           className={classes.actionArea}
           disabled={isSelected}
@@ -121,12 +121,9 @@ const CardIconListItemRaw = forwardRef<any, CardIconListItemProps & WithStyles<t
   }
 )
 
-CardIconListItemRaw.displayName = 'CardIconListItemRaw'
-CardIconListItemRaw.defaultProps = {}
+export const CardIconListItem = withStyles(cardIconListItemStyles, {name: 'CardIconListItem'})(UnstyledComponent)
 
-export const CardIconListItem = withStyles(cardIconListItemStyles, {name: 'CardIconListItem'})(
-  CardIconListItemRaw
-)
 CardIconListItem.displayName = 'CardIconListItem'
+CardIconListItem.defaultProps = {}
 
 export default CardIconListItem

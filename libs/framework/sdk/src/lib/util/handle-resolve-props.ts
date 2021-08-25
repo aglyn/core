@@ -24,16 +24,16 @@ import { AglynComponent } from '../models/extensions/components-types.extension'
 /**
  * Merges properties of a resolving function with currents
  * @param {AnyProps} props
- * @param {AglynComponent["options"]} metadata
+ * @param options
  * @param {ThisType<unknown>} thisArg
  * @returns {any}
  */
 export function handleResolveProps(
   props: AnyProps,
-  metadata: Pick<AglynComponent['options'], 'resolveProps' | 'defaultProps'>,
+  options: Pick<AglynComponent['options'], 'resolveProps' | 'defaultProps'>,
   thisArg?: ThisType<unknown>,
 ) {
-  const {resolveProps, defaultProps = {}} = metadata
+  const {resolveProps, defaultProps = {}} = {...options}
   const mergedProps = handlePropDefaults(props, defaultProps)
   return _isFnT(resolveProps) ? resolveProps.call(thisArg, mergedProps) : mergedProps
 }

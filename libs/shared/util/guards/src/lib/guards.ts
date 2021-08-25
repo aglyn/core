@@ -167,10 +167,11 @@ export function _isUndOrNull(val: unknown): val is null | undefined {
  *
  * @export
  * @param {*} val
+ * @param includeEmpty
  * @returns {val is string}
  */
-export function _isStrT(val: unknown): val is string {
-  return typeof val === 'string'
+export function _isStrT(val: unknown, includeEmpty = true): val is string {
+  return typeof val === 'string' && (includeEmpty ? true : Boolean(val.length))
 }
 /**
  * Is type empty string (e.g. "" vs "foo")

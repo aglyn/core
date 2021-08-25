@@ -15,72 +15,133 @@
  * limitations under the License.
  */
 
-import { AglynExtensionInstance, AglynType, AglynUniqueId, PayloadData } from '../../types'
+import { AglynExtensionInstance, AglynTypeFields, AglynUniqueId, PayloadData } from '../../types'
 import { RestrictFlag } from '../../constants'
 import { AnyProps } from '@aglyn/shared/util/types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { FormSchema } from '@aglyn/shared/ui/react'
-import { EXTENSION_TYPE, MODULE_TYPE } from '../../aglyn-symbol'
+import { FormSchema, InnerRefProps } from '@aglyn/shared/ui/react'
+import { EXTENSION_TYPE, MODULE_TYPE } from '../../symbol'
+import '../../emitter'
+import { AglynEmitterPayload } from '../../emitter'
+import { ComponentClass, FunctionComponent, Ref } from 'react'
 
 
-export interface AglynComponentOptions {
-  displayName: string
-  title: string
-  subtitle: string
-  description: string
-  icon: unknown
-  propsSchema: FormSchema
-  defaultProps: AnyProps
-  resolveProps: <T>(...args: T[]) => AnyProps
-  disableActions: boolean
-  disableBadge: boolean
-  disableCopying: boolean
-  disableDragging: boolean
-  disableDropping: boolean
-  disableEditing: boolean
-  disableNesting: boolean
-  disableOutline: boolean
-  disableRemoving: boolean
-  disableSelecting: boolean
-  restrictChildren: [type: RestrictFlag, ids: string[]]
-  restrictParents: [type: RestrictFlag, ids: string[]]
+export type AglynComponentTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof EXTENSION_TYPE>
+export type PluginId = string
+export type SelfComponentId = string
+export type PluginNsComponentSep = '::'
+export type Pid = PluginId
+export type ScId = SelfComponentId
+export type PnCs = PluginNsComponentSep
+export type PluginComponentIdTuple = [Pid, ScId]
+export type PluginComponentIdString = `${Pid}${PnCs}${ScId}`
+export type PluginComponentId = PluginComponentIdTuple | PluginComponentIdString
+export type ComponentId = SelfComponentId | PluginComponentId
+export type RegistryEntry = [id: ComponentId, component: AglynComponent]
+export type RegistryEntries = RegistryEntry[]
+export type RegistryKeys = ComponentId[]
+export type RegistryValue = AglynComponent
+export type RegistryValues = RegistryValue[]
+export type RegistryPluginMap = Map<PluginId, AglynComponentsPlugin>
+export type RegistryComponentsMap = Map<ComponentId, AglynComponent>
+
+type IntrinsicElements<P = any> = {
+  [K in keyof JSX.IntrinsicElements]: P extends JSX.IntrinsicElements[K] ? K : never
+}
+export type AglynComponentClassType<P = any> = ComponentClass<P>
+export type AglynComponentFunctionType<P = any> = FunctionComponent<P>
+export type AglynComponentIntrinsicType<P = any> = IntrinsicElements[keyof JSX.IntrinsicElements]
+export type AglynComponentElementType<P = any> =
+  AglynComponentClassType<P>
+  | AglynComponentFunctionType<P>
+  | AglynComponentIntrinsicType<P>
+
+export type AglynComponent<P = any> = AglynComponentClassType<P & InnerRefProps<any>> & AglynComponentFields
+
+export type GetComponentPayload = PayloadData<{ componentId: string }>
+export type RegisterComponentPayload = PayloadData<{ component: AglynComponent }>
+export type UnregisterComponentPayload = PayloadData<{ componentId: string }>
+export type RegisterPluginPayload = PayloadData<{ plugin: AglynComponentsPlugin }>
+export type UnregisterPluginPayload = PayloadData<{ pluginId: string }>
+
+export enum AglynComponentEventFlag {
+  COMPONENT_GET = 'module:extension:components:get-component',
+  COMPONENTS_GET = 'module:extension:components:get-components',
+  COMPONENT_REGISTER = 'module:extension:components:register-component',
+  COMPONENT_UNREGISTER = 'module:extension:components:unregister-component',
+  COMPONENTS_PLUGIN_REGISTER = 'module:extension:components:register-components-plugin',
+  COMPONENTS_PLUGIN_UNREGISTER = 'module:extension:components:unregister-components-plugin',
 }
 
-export interface AglynComponent extends AglynUniqueId,
-  AglynType<typeof MODULE_TYPE, typeof EXTENSION_TYPE> {
-  options: Partial<AglynComponentOptions>
-  <T>(...args: T[]): unknown
+export interface ComponentsRegistry {
+  plugins: RegistryPluginMap
+  components: RegistryComponentsMap
+}
+
+export interface AglynModuleEventParams extends Record<AglynComponentEventFlag, AglynEmitterPayload> {
+  [AglynComponentEventFlag.COMPONENT_GET]: GetComponentPayload
+  [AglynComponentEventFlag.COMPONENTS_GET]: undefined
+  [AglynComponentEventFlag.COMPONENT_REGISTER]: UnregisterComponentPayload
+  [AglynComponentEventFlag.COMPONENT_UNREGISTER]: UnregisterComponentPayload
+  [AglynComponentEventFlag.COMPONENTS_PLUGIN_REGISTER]: RegisterPluginPayload
+  [AglynComponentEventFlag.COMPONENTS_PLUGIN_UNREGISTER]: UnregisterPluginPayload
+}
+
+export interface AglynComponentOptions<P = any> {
+  displayName: string
+  title?: string
+  subtitle?: string
+  description?: string
+  icon?: unknown
+  propsSchema?: FormSchema
+  defaultProps?: Partial<P>
+  resolveProps?: <T>(...args: T[]) => AnyProps
+  disableActions?: boolean
+  disableBadge?: boolean
+  disableCopying?: boolean
+  disableDragging?: boolean
+  disableDropping?: boolean
+  disableEditing?: boolean
+  disableNesting?: boolean
+  disableOutline?: boolean
+  disableRemoving?: boolean
+  disableSelecting?: boolean
+  disableRef?: boolean
+  restrictChildren?: [type: RestrictFlag, ids: string[]]
+  restrictParents?: [type: RestrictFlag, ids: string[]]
+}
+
+export interface AglynComponentFields extends AglynUniqueId, AglynComponentTypeFields {
+  options: AglynComponentOptions
+}
+
+export interface AglynComponentPluginOptions {
+  displayName: string
+}
+
+export interface AglynComponentsPlugin extends AglynUniqueId, AglynComponentTypeFields {
+  components: RegistryComponentsMap
+  options: AglynComponentPluginOptions
 }
 
 export interface AglynComponentData extends AglynUniqueId {
-  component?: AglynComponent | string
+  component?: ComponentId
+  plugin?: PluginId
   children?: (AglynComponentData | string)[]
-  props: AnyProps
+  props?: AnyProps
   temporary?: boolean
   parent?: string
   name?: string
   description?: string
 }
 
-export type ComponentId = string
-export type RegistryEntry = [id: ComponentId, component: AglynComponent]
-export type RegistryEntries = RegistryEntry[]
-export type RegistryKeys = ComponentId[]
-export type RegistryValue = AglynComponent
-export type RegistryValues = RegistryValue[]
-export type ComponentsRegistry = Map<string, AglynComponent>
-
-export namespace PayloadParams {
-  export type Register = PayloadData<{ component: AglynComponent }>
-  export type Get = PayloadData<{ componentId: string }>
-  export type Delete = PayloadData<{ componentId: string }>
-}
-
 export interface AglynComponentsExtension extends AglynExtensionInstance {
   getAllComponentsValues(): RegistryValues
   getAllComponentsKeys(): RegistryKeys
   getAllComponents(): RegistryEntries
-  getComponent(payload: PayloadParams.Get): AglynComponent
-  registerComponent(payload: PayloadParams.Register): this
-  deleteComponent(payload: PayloadParams.Delete): this
+  getComponent(payload: GetComponentPayload): AglynComponent
+  unregisterComponent(payload: UnregisterComponentPayload): this
+  registerComponent(payload: RegisterComponentPayload): this
+  registerComponentsPlugin(payload: RegisterPluginPayload): this
+  unregisterComponentsPlugin(payload: UnregisterPluginPayload): this
 }

@@ -16,7 +16,8 @@
  */
 
 import { ErrorTagMessages, NsErrorFactory } from '@aglyn/shared/util/errors'
-import { AglynError } from './types'
+import { PayloadData, PayloadParams } from './types'
+import { IndexOf } from '@aglyn/shared/util/types'
 
 
 export enum AglynErrorEventFlag {
@@ -31,7 +32,19 @@ export enum AglynErrorEventFlag {
   INVALID_MODULE_ARG = 'error:invalid-module-argument',
 }
 
-const AGLYN_APP_SDK_ERROR_MSG: ErrorTagMessages<AglynErrorEventFlag> = {
+export interface AglynErrorEventParams extends Record<AglynErrorEventType, unknown> {
+  [AglynErrorEventFlag.NO_APP]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.BAD_APP_NAME]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.DUPLICATE_APP]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.APP_DELETED]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.INVALID_APP_ARG]: PayloadData<{ appName: string }>
+  [AglynErrorEventFlag.NO_APP_EXTENSION]: PayloadData<{ name: string }>
+  [AglynErrorEventFlag.INVALID_LOG_ARG]: undefined
+  [AglynErrorEventFlag.NO_MODULE]: undefined
+  [AglynErrorEventFlag.INVALID_MODULE_ARG]: PayloadData<{ moduleName: string, appName: string }>
+}
+
+export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof AglynErrorEventFlag>> = {
   [AglynErrorEventFlag.NO_APP]: 'No AglynApp \'{$appName}\' has been created - call Web initializeApp()',
   [AglynErrorEventFlag.BAD_APP_NAME]: 'Illegal App name: \'{$appName}\'',
   [AglynErrorEventFlag.DUPLICATE_APP]: 'AglynApp named \'{$appName}\' already exists',
@@ -42,4 +55,10 @@ const AGLYN_APP_SDK_ERROR_MSG: ErrorTagMessages<AglynErrorEventFlag> = {
   [AglynErrorEventFlag.NO_MODULE]: 'No module has been provided for loading',
   [AglynErrorEventFlag.INVALID_MODULE_ARG]: 'An invalid AppModule \'{$moduleName}\' has been provided on AglynApp \'{$appName}\'',
 }
-export const AGLYN_ERROR: AglynError = new NsErrorFactory('sdk', 'AglynApp', AGLYN_APP_SDK_ERROR_MSG)
+
+export type AglynErrorParams = PayloadParams<AglynErrorEventParams>
+export type AglynErrorEventType = IndexOf<typeof AglynErrorEventFlag>
+export type AglynError = NsErrorFactory<AglynErrorEventFlag, AglynErrorParams>
+
+export const AGLYN_ERROR: AglynError = new NsErrorFactory('sdk', 'AglynApp', AglynErrorEventMessageTemplates)
+export default AGLYN_ERROR

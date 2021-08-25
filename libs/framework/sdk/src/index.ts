@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export * from './lib/aglyn-symbol'
+export * from './lib/symbol'
 export * from './lib/api'
 export * from './lib/constants'
 export * from './lib/types'
@@ -29,3 +29,9 @@ export * from './lib/models/aglyn-extension.model'
 
 export * from './lib/models/extensions/components-types.extension'
 export * from './lib/models/extensions/components-api.extension'
+export { AglynModuleEventPayload } from './lib/emitter'
+export { AglynAppEventPayload } from './lib/emitter'
+export { AglynEmitter } from './lib/emitter'
+export { AglynEmitterParams } from './lib/emitter'
+export { AglynModuleEventFlag } from './lib/emitter'
+export { AglynAppEventFlag } from './lib/emitter'

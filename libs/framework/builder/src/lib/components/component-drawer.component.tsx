@@ -163,25 +163,20 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
       ),
     }
 
-    const renderItemContent = useCallback(
-      (item) => {
-        return (
-          <CardIconListItem
-            item={item}
-            label={item.title}
-            onActionClick={handleItemClick}
-            preview={
-              (_isStrT(item.icon) ? (
-                <Box fontSize={'4.17em'} component={SvgPathIcon} {...{iconId: item.icon}} />
-              ) : (
-                <Fragment>{item.icon}</Fragment>
-              )) as unknown as any
-            }
-          />
-        )
-      },
-      [handleItemClick],
-    )
+    const renderItemContent = useCallback((item) => (
+      <CardIconListItem
+        item={item}
+        label={item.title}
+        onActionClick={handleItemClick}
+        preview={
+          (_isStrT(item.icon) ? (
+            <Box fontSize={'4.17em'} component={SvgPathIcon} {...{iconId: item.icon}} />
+          ) : (
+            <Fragment>{item.icon}</Fragment>
+          )) as unknown as any
+        }
+      />
+    ), [handleItemClick])
 
     const views = {
       'browse-site-components': (

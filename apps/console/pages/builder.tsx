@@ -16,21 +16,27 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
-import { aglynComponent, getAllComponents, getApp, registerComponent } from '@aglyn/framework/sdk'
+import {
+  aglynComponent,
+  getAllComponents,
+  getApp,
+  getComponent,
+  registerComponent,
+} from '@aglyn/framework/sdk'
 import { BuilderComponent } from '@aglyn/framework/builder'
 import { samplePageData } from '../constants/sample-data'
 
 
 const Root = aglynComponent('root', {
+  displayName: 'Root Element',
   title: 'Root element',
   icon: 'block',
-})(
-  ({children, innerRef, ...props}) => (
-    <span ref={innerRef} {...props}>{children}</span>
-  ),
-)
+})(({children, innerRef, ...props}) => (
+  <span ref={innerRef} {...props}>{children}</span>
+))
 
 registerComponent(getApp(), {component: Root})
+const component = getComponent(getApp(), {componentId: 'root'})
 
 export interface BuilderProps {}
 

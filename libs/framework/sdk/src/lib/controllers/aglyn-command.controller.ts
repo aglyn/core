@@ -20,8 +20,8 @@ import {
   AglynAppInstance,
   AglynCommandControllerInstance,
   AglynCommander,
-  AglynModuleTriggerFlag,
-  AglynModuleTriggerParams,
+  AglynModuleEventFlag,
+  AglynModuleEventPayload,
 } from '@aglyn/framework/sdk'
 import { Mitt } from '@aglyn/shared/util/helpers'
 import { AglynBaseModel } from '../models/aglyn-base.model'
@@ -56,20 +56,20 @@ export class AglynCommandController extends AglynBaseModel implements AglynComma
     }
   }
   public onInit = (): void => {
-    this.getEmitter().on(AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER, this.registerAction)
-    this.getEmitter().on(AglynModuleTriggerFlag.COMMAND_ACTION_UNREGISTER, this.unregisterAction)
-    this.getEmitter().on(AglynModuleTriggerFlag.COMMAND_TRIGGER, this.executeCommand)
+    this.getEmitter().on(AglynModuleEventFlag.COMMAND_ACTION_REGISTER, this.registerAction)
+    this.getEmitter().on(AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER, this.unregisterAction)
+    this.getEmitter().on(AglynModuleEventFlag.COMMAND_TRIGGER, this.executeCommand)
   }
   public onDestroy = (): void => {
-    this.getEmitter().off(AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER, this.registerAction)
-    this.getEmitter().off(AglynModuleTriggerFlag.COMMAND_ACTION_UNREGISTER, this.unregisterAction)
-    this.getEmitter().off(AglynModuleTriggerFlag.COMMAND_TRIGGER, this.executeCommand)
+    this.getEmitter().off(AglynModuleEventFlag.COMMAND_ACTION_REGISTER, this.registerAction)
+    this.getEmitter().off(AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER, this.unregisterAction)
+    this.getEmitter().off(AglynModuleEventFlag.COMMAND_TRIGGER, this.executeCommand)
   }
   public getCommander = (): AglynCommander => {
     return this.#commander
   }
   public registerAction = (
-    data: AglynModuleTriggerParams[AglynModuleTriggerFlag.COMMAND_ACTION_REGISTER],
+    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_REGISTER],
   ): void => {
     const {handler} = data
     const commandId = handler?.$id
@@ -78,7 +78,7 @@ export class AglynCommandController extends AglynBaseModel implements AglynComma
     this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMMAND, {commandId})
   }
   public unregisterAction = (
-    data: AglynModuleTriggerParams[AglynModuleTriggerFlag.COMMAND_ACTION_UNREGISTER],
+    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER],
   ): void => {
     const {handler} = data
     const commandId = handler?.$id
@@ -87,7 +87,7 @@ export class AglynCommandController extends AglynBaseModel implements AglynComma
     this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMMAND, {commandId})
   }
   public executeCommand = (
-    data: AglynModuleTriggerParams[AglynModuleTriggerFlag.COMMAND_TRIGGER],
+    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_TRIGGER],
   ): void => {
     const {commandId} = data
     this.#commander.emit(commandId, {app: this.app})
