@@ -54,7 +54,7 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 function Index(props: Props) {
-  const { classes } = props
+  const {classes} = props
 
   return (
     <MainLayout
@@ -82,6 +82,7 @@ function Index(props: Props) {
                       alt="website designer preview collage"
                       width="504"
                       height="380"
+                      loading="eager"
                     />
                   ),
                 },
@@ -242,7 +243,7 @@ function Index(props: Props) {
           backgroundUrl={'/backgrounds/patterns/abstract-wave-lines.svg'}
           heading={'Get Access and Make Your New Website'}
           link={{
-            as: '/get', href: '/get',
+            as: '/contact', href: '/contact',
             children: 'Get Your Access',
           }}
         />
@@ -251,4 +252,4 @@ function Index(props: Props) {
   )
 }
 
-export default withStyles(styles, { name: 'Page:Index' })(Index)
+export default withStyles(styles, {name: 'Page:Index'})(Index)
