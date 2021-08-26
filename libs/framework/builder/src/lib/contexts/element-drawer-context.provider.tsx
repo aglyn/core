@@ -19,18 +19,18 @@ import ElementDrawerContext, {
   buildOptions,
   DEFAULT_OPTIONS,
   ElementDrawerOptions,
-} from './element-drawer.context'
+} from './element-drawer-context'
 import { ElementType, Fragment, ReactNode, useCallback, useState } from 'react'
 import ElementDrawerComponent, { ElementDrawerComponentProps } from '../components/component-drawer.component'
 
 
-export interface ElementDrawerProviderComponentProps extends Partial<ElementDrawerComponentProps> {
+export interface ElementDrawerContextProviderProps extends Partial<ElementDrawerComponentProps> {
   defaultOptions?: ElementDrawerOptions
   children?: ReactNode
   component: ElementType<ElementDrawerComponentProps>
 }
 
-function ElementDrawerProviderComponent(props: ElementDrawerProviderComponentProps) {
+function ElementDrawerContextProvider(props: ElementDrawerContextProviderProps) {
   const {
     children,
     defaultOptions = {},
@@ -79,8 +79,8 @@ function ElementDrawerProviderComponent(props: ElementDrawerProviderComponentPro
     </Fragment>
   )
 }
-ElementDrawerProviderComponent.displayName = 'ElementDrawerProviderComponent'
-ElementDrawerProviderComponent.defaultProps = {
+ElementDrawerContextProvider.displayName = 'ElementDrawerContextProvider'
+ElementDrawerContextProvider.defaultProps = {
   component: ElementDrawerComponent,
 }
-export default ElementDrawerProviderComponent
+export default ElementDrawerContextProvider

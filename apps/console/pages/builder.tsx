@@ -36,7 +36,6 @@ const Root = aglynComponent('root', {
 ))
 
 registerComponent(getApp(), {component: Root})
-const component = getComponent(getApp(), {componentId: 'root'})
 
 export interface BuilderProps {}
 

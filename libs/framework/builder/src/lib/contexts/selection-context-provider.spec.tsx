@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
+import React from 'react'
 import { render } from '@testing-library/react'
+import SelectionContextProvider from './selection-context-provider'
 
-import BuilderComponent from './builder.component'
 
-describe('BuilderComponent', () => {
+describe('SelectionContextProvider', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<BuilderComponent />)
+    const {baseElement} = render(<SelectionContextProvider />)
     expect(baseElement).toBeTruthy()
   })
 })

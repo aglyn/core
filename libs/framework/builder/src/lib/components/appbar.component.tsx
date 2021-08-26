@@ -23,7 +23,7 @@ import Toolbar from '@material-ui/core/Toolbar'
 import IconButton from '@material-ui/core/IconButton'
 import Fab from '@material-ui/core/Fab'
 import { SvgPathIcon } from '@aglyn/shared/ui/react'
-import { useElementDrawerContext } from '../contexts/element-drawer.context'
+import { useElementDrawerContext } from '../contexts/element-drawer-context'
 
 export const styles = createStyles({
   root: {

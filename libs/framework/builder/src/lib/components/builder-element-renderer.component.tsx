@@ -19,7 +19,7 @@ import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared/ui/react'
 import { copyJson } from '@aglyn/shared/util/helpers'
 import { forwardRef, useCallback, useRef, useState } from 'react'
 import { ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/framework/renderer'
-import { useSelectionContext } from '../contexts/selection.context'
+import { useSelectionContext } from '../contexts/selection-context'
 
 
 export interface BuilderElementRendererComponentProps extends ElementRendererComponentProps {

@@ -34,7 +34,7 @@ import Button from '@material-ui/core/Button'
 import Box from '@material-ui/core/Box'
 import FormControl from '@material-ui/core/FormControl'
 import Typography from '@material-ui/core/Typography'
-import { ElementDrawerOptions } from '../contexts/element-drawer.context'
+import { ElementDrawerOptions } from '../contexts/element-drawer-context'
 
 
 export const styles = (theme: Theme) =>
@@ -238,6 +238,8 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
 )
 
 ComponentDrawerComponent.displayName = 'ComponentDrawerComponent'
-ComponentDrawerComponent.defaultProps = {}
+ComponentDrawerComponent.defaultProps = {
+  elements: []
+}
 
 export default withStyles(styles, {name: 'ComponentDrawerComponent'})(ComponentDrawerComponent)

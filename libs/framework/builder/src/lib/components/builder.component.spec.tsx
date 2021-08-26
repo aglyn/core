@@ -15,18 +15,13 @@
  * limitations under the License.
  */
 
-import { createContext, useContext } from 'react'
-import { AglynComponentData } from '@aglyn/framework/sdk'
+import { render } from '@testing-library/react'
 
-export interface ElementsContextType {
-  elements?: AglynComponentData[]
-}
+import BuilderComponent from './builder.component'
 
-export type UseElementsContextType = () => ElementsContextType
-
-export const ElementsContext = createContext<ElementsContextType>(null)
-export const useElementsContext: UseElementsContextType = () => {
-  return useContext(ElementsContext)
-}
-
-export default ElementsContext
+describe('BuilderComponent', () => {
+  it('should render successfully', () => {
+    const { baseElement } = render(<BuilderComponent elementComponents={[]} />)
+    expect(baseElement).toBeTruthy()
+  })
+})

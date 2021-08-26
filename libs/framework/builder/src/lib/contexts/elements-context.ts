@@ -15,23 +15,25 @@
  * limitations under the License.
  */
 
-import ElementsContext from './elements.context'
-import { ReactNode, useState } from 'react'
+import { createContext, useContext } from 'react'
 import { AglynComponentData } from '@aglyn/framework/sdk'
 
-export interface ElementsProviderComponentProps {
-  children?: ReactNode
-  elements?: AglynComponentData[]
+
+export type UseElementsContextType = () => ElementsContextType
+
+export interface ElementsContextType {
+  elements: AglynComponentData[]
+  updateElements: (elements: AglynComponentData[]) => void
 }
 
-function ElementsProviderComponent(props: ElementsProviderComponentProps) {
-  const { children, elements } = props
-  const [ctx, setCtx] = useState({ elements })
-
-  return <ElementsContext.Provider value={ctx}>{children}</ElementsContext.Provider>
-}
-
-ElementsProviderComponent.defaultProps = {
+export const DEFAULT_ELEMENTS_CONTEXT: ElementsContextType = {
   elements: [],
+  updateElements: (prev) => prev,
 }
-export default ElementsProviderComponent
+export const ElementsContext = createContext<ElementsContextType>(DEFAULT_ELEMENTS_CONTEXT)
+
+export const useElementsContext: UseElementsContextType = () => {
+  return useContext(ElementsContext)
+}
+
+export default ElementsContext

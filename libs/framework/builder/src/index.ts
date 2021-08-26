@@ -17,5 +17,5 @@
 
 export * from './lib/components/builder-element-renderer.component'
 export { default as ElementComponent } from './lib/components/builder-element-renderer.component'
-export * from './lib/builder.component'
-export { default as BuilderComponent } from './lib/builder.component'
+export * from './lib/components/builder.component'
+export { default as BuilderComponent } from './lib/components/builder.component'

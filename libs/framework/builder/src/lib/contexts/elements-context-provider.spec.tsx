@@ -17,11 +17,12 @@
 
 import React from 'react'
 import { render } from '@testing-library/react'
-import SelectionProviderComponent from './selection-provider.component'
+import ElementsContextProvider from './elements-context-provider'
 
-describe('SelectionProviderComponent', () => {
+
+describe('ElementsContextProvider', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<SelectionProviderComponent />)
+    const {baseElement} = render(<ElementsContextProvider />)
     expect(baseElement).toBeTruthy()
   })
 })

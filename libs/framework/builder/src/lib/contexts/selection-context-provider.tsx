@@ -20,11 +20,12 @@ import {
   DEFAULT_OPTIONS,
   SelectionContext,
   SelectionOptions,
-} from './selection.context'
+} from './selection-context'
 import { ElementType, Fragment, MouseEventHandler, ReactNode, useCallback, useState } from 'react'
 import SelectionComponent from '../components/selection.component'
 
-export interface SelectionProviderComponentProps {
+
+export interface SelectionContextProviderProps {
   defaultOptions?: SelectionOptions
   children?: ReactNode
   component: ElementType<{
@@ -36,15 +37,16 @@ export interface SelectionProviderComponentProps {
   }>
 }
 
-function SelectionProviderComponent(props: SelectionProviderComponentProps) {
-  const { children, defaultOptions = {}, component: Component } = props
-  const [options, setOptions] = useState({ ...DEFAULT_OPTIONS, ...defaultOptions })
+function SelectionContextProvider(props: SelectionContextProviderProps) {
+  const {children, defaultOptions = {}, component: Component} = props
+  const [options, setOptions] = useState({...DEFAULT_OPTIONS, ...defaultOptions})
   const [resolveReject, setResolveReject] = useState([])
   const [resolve, reject] = resolveReject
 
-  const select = useCallback((options: SelectionOptions = {}) => {
+  const select = useCallback((options: SelectionOptions) => {
+    const opts = {...options}
     return new Promise((resolve, reject) => {
-      setOptions(buildOptions(defaultOptions, options))
+      setOptions(buildOptions(defaultOptions, opts))
       setResolveReject([resolve, reject])
     })
   }, [defaultOptions])
@@ -65,7 +67,7 @@ function SelectionProviderComponent(props: SelectionProviderComponentProps) {
 
   return (
     <Fragment>
-      <SelectionContext.Provider value={{ select }}>
+      <SelectionContext.Provider value={{select}}>
         {children}
       </SelectionContext.Provider>
       <Component
@@ -79,7 +81,7 @@ function SelectionProviderComponent(props: SelectionProviderComponentProps) {
   )
 }
 
-SelectionProviderComponent.defaultProps = {
+SelectionContextProvider.defaultProps = {
   component: SelectionComponent,
 }
-export default SelectionProviderComponent
+export default SelectionContextProvider

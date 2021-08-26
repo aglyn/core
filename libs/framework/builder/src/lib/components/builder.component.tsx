@@ -20,21 +20,21 @@ import { builderTheme } from '@aglyn/shared/ui/themes'
 import { AglynComponentData } from '@aglyn/framework/sdk'
 import { CanvasRendererComponent } from '@aglyn/framework/renderer'
 import { ThemeProvider } from '@material-ui/core/styles'
-import { forwardRef, memo } from 'react'
-import BuilderElementRendererComponent from './components/builder-element-renderer.component'
-import AppBarComponent from './components/appbar.component'
-import ElementDrawerProviderComponent, { ElementDrawerProviderComponentProps } from './contexts/element-drawer-provider.component'
-import SelectionProviderComponent from './contexts/selection-provider.component'
+import { forwardRef } from 'react'
+import BuilderElementRendererComponent from './builder-element-renderer.component'
+import AppBarComponent from './appbar.component'
+import ElementDrawerContextProvider, { ElementDrawerContextProviderProps } from '../contexts/element-drawer-context.provider'
+import SelectionContextProvider from '../contexts/selection-context-provider'
 import NoSsr from '@material-ui/core/NoSsr'
-import ElementsProviderComponent from './contexts/elements-provider.component'
-import ElementsContext from './contexts/elements.context'
+import ElementsContextProvider from '../contexts/elements-context-provider'
+import ElementsContext from '../contexts/elements-context'
 import { SnackbarProvider } from 'notistack'
 import { PanZoom } from 'react-easy-panzoom'
 
 
 export interface BuilderComponentProps extends ComponentProp {
   elements?: AglynComponentData[]
-  elementComponents: ElementDrawerProviderComponentProps['elements']
+  elementComponents: ElementDrawerContextProviderProps['elements']
 }
 
 export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
@@ -50,11 +50,11 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
       <NoSsr>
         <ThemeProvider theme={builderTheme}>
           <Component ref={ref} id="aglyn:builder" {...rest}>
-            <ElementsProviderComponent elements={elements}>
+            <ElementsContextProvider elements={elements}>
               <SnackbarProvider maxSnack={3}>
                 <ConfirmationProviderComponent>
-                  <SelectionProviderComponent>
-                    <ElementDrawerProviderComponent elements={elementComponents}>
+                  <SelectionContextProvider>
+                    <ElementDrawerContextProvider elements={elementComponents}>
                       <PanZoom disabled>
                         <ElementsContext.Consumer>
                           {({elements}) => (
@@ -68,11 +68,11 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
                       </PanZoom>
 
                       <AppBarComponent id="aglyn:toolbar" />
-                    </ElementDrawerProviderComponent>
-                  </SelectionProviderComponent>
+                    </ElementDrawerContextProvider>
+                  </SelectionContextProvider>
                 </ConfirmationProviderComponent>
               </SnackbarProvider>
-            </ElementsProviderComponent>
+            </ElementsContextProvider>
           </Component>
         </ThemeProvider>
       </NoSsr>
@@ -86,4 +86,4 @@ BuilderComponent.defaultProps = {
   elements: [],
 }
 
-export default memo(BuilderComponent)
+export default BuilderComponent
