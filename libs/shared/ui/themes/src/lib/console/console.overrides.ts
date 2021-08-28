@@ -18,13 +18,18 @@
 import { ThemeOptions } from '../mui'
 
 
-export const consoleOverrides: ThemeOptions['overrides'] = {
+export const consoleOverrides: ThemeOptions['components'] = {
   MuiAvatar: {
-    root: {
-      width: 32,
-      height: 32,
-    },
+    styleOverrides: {
+      root: {
+        width: 32,
+        height: 32,
+      },
+    }
   },
-  MuiIconButton: {root: {padding: 8}},
+  MuiIconButton: {
+    // color: 'inherit', // Default color to inherit
+    styleOverrides: {root: {padding: 8}},
+  },
 }
 export default consoleOverrides

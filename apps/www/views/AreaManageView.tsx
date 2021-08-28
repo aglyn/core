@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { _s, remap } from '@aglyn/shared/util/tools'
-import { createUid } from '@aglyn/shared/util/helpers'
-import WidgetCard from '../components/WidgetCard'
-import ConsoleLayout from '../layouts/ConsoleLayout'
-import DataTable, { Props as DataTableProps } from '../components/DataTable'
-import IconButton from '@material-ui/core/IconButton'
 import { SvgPathIcon } from '@aglyn/shared/ui/react'
-import AreaManageNavigationListWidgetView from './AreaManageNavigationListWidgetView'
-import { withAppContext } from '../contexts/app-context'
-import { useSnackbar } from 'notistack'
-import { useAppLoader } from '../contexts/app-loader-context'
-import DrawerFormView from './DrawerFormView'
-import { Fields } from '../forms'
+import { createUid } from '@aglyn/shared/util/helpers'
+import { _s, remap } from '@aglyn/shared/util/tools'
+import IconButton from '@material-ui/core/IconButton'
 import { useRouter } from 'next/router'
+import { useSnackbar } from 'notistack'
+import React from 'react'
+import DataTable, { Props as DataTableProps } from '../components/DataTable'
+import WidgetCard from '../components/WidgetCard'
+import { withAppContext } from '../contexts/app-context'
+import { useAppLoader } from '../contexts/app-loader-context'
+import { Fields } from '../forms'
+import ConsoleLayout from '../layouts/ConsoleLayout'
+import AreaManageNavigationListWidgetView from './AreaManageNavigationListWidgetView'
+import DrawerFormView from './DrawerFormView'
 
 
 const pageLen = 25
@@ -201,7 +201,7 @@ export const AreaManageView = withAppContext<Props>(
     }, [documentId, documents])
 
     const mappedFields = remap(fields, (value => ({
-      ...value, value: activeDocument?.data[value.id] ?? value.value
+      ...value, value: activeDocument?.data[value.id] ?? value.value,
     })))
 
     return (
@@ -210,7 +210,7 @@ export const AreaManageView = withAppContext<Props>(
           items={[
             {
               xs: 12, md: 3,
-              children: (<AreaManageNavigationListWidgetView />),
+              children: (<AreaManageNavigationListWidgetView/>),
             },
             {
               xs: 12, md: 9,
@@ -221,12 +221,12 @@ export const AreaManageView = withAppContext<Props>(
                     action: (
                       <React.Fragment>
                         <IconButton
-                          children={<SvgPathIcon iconId="filter-variant" />}
+                          children={<SvgPathIcon iconId="filter-variant"/>}
                           title="Filter list"
                           disabled
                         />
                         <IconButton
-                          children={<SvgPathIcon iconId="plus" />}
+                          children={<SvgPathIcon iconId="plus"/>}
                           title="Add item"
                           onClick={handleCreateDocumentFormOpen}
                         />
@@ -256,14 +256,14 @@ export const AreaManageView = withAppContext<Props>(
           label={documentName.singular}
           loading={isLoading}
           open={Boolean(documentId || formOpen)}
-          variant={activeDocument?.type}
+          formVariant={activeDocument?.type}
           onClose={handleCloseForm}
           onSave={setRemoteDocument}
           onUpdate={handleFieldUpdate}
         />
       </React.Fragment>
     )
-  }
+  },
 )
 
 AreaManageView.displayName = 'AreaManageView'

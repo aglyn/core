@@ -16,27 +16,28 @@
  */
 
 import { GridItems } from '@aglyn/shared/ui/react'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import TextField from '@data-driven-forms/mui-component-mapper/text-field'
 import Textarea from '@data-driven-forms/mui-component-mapper/textarea'
-import FormTemplateRenderProps from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
+import FormTemplateRenderProps
+  from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
 import componentTypes from '@data-driven-forms/react-form-renderer/component-types'
 import FormRenderer from '@data-driven-forms/react-form-renderer/form-renderer'
-import useFormApi from '@data-driven-forms/react-form-renderer/use-form-api'
 import FormSpy from '@data-driven-forms/react-form-renderer/form-spy'
-import Grid from '@material-ui/core/Grid'
+import useFormApi from '@data-driven-forms/react-form-renderer/use-form-api'
 import Box from '@material-ui/core/Box'
-import Alert from '@material-ui/lab/Alert'
-import AlertTitle from '@material-ui/lab/AlertTitle'
 import Button from '@material-ui/core/Button'
 import Container from '@material-ui/core/Container'
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
-import Typography from '@material-ui/core/Typography'
+import Grid from '@material-ui/core/Grid'
 import LinearProgress from '@material-ui/core/LinearProgress'
+import Typography from '@material-ui/core/Typography'
+import Alert from '@material-ui/lab/Alert'
+import AlertTitle from '@material-ui/lab/AlertTitle'
 import React, { useCallback } from 'react'
+import { mainNavigation, productNames } from '../const'
 import { DdfForms } from '../forms'
 import MainLayout from '../layouts/MainLayout'
 import SiteFooterView from '../views/SiteFooterView'
-import { mainNavigation, productNames } from '../const'
 
 
 const componentMapper = {
@@ -67,9 +68,9 @@ const styles = (theme: Theme) => createStyles({
 })
 
 const FormTemplate = (props: FormTemplateRenderProps) => {
-  const { formFields, schema } = props
-  const { handleSubmit, getState } = useFormApi()
-  const { submitting, submitSucceeded, submitFailed, submitErrors, valid, pristine } = getState()
+  const {formFields, schema} = props
+  const {handleSubmit, getState} = useFormApi()
+  const {submitting, submitSucceeded, submitFailed, submitErrors, valid, pristine} = getState()
 
   if (submitFailed) {
     return (
@@ -78,7 +79,8 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
           <Alert severity="error">
             <AlertTitle>Error — Form Submission Failed</AlertTitle>
             Sorry, please try again later. If the issue persists please send a direct email to <em>info@aglyn.com</em>
-            <br /><br />
+            <br/>
+            <br/>
             <small>Error details:</small>
             <pre>{JSON.stringify(submitErrors, null, 2)}</pre>
           </Alert>
@@ -104,7 +106,7 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
     <Grid
       container
       component={'form'}
-      style={{ width: '100%' }}
+      style={{width: '100%'}}
       onSubmit={handleSubmit}
       spacing={3}
     >
@@ -119,7 +121,7 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
           <Grid item xs={12} align="center">
             {submitting && (
               <Box mb={1}>
-                <LinearProgress color="secondary" />
+                <LinearProgress color="secondary"/>
               </Box>
             )}
             <Button
@@ -138,7 +140,7 @@ const FormTemplate = (props: FormTemplateRenderProps) => {
 }
 
 function Contact(props: WithStyles<typeof styles>) {
-  const { classes } = props
+  const {classes} = props
 
   const handleSubmit = useCallback(async (values) => {
     return await fetch(`/api/h/f/${DdfForms.formIds.contact}`, {
@@ -207,9 +209,9 @@ function Contact(props: WithStyles<typeof styles>) {
           </Container>
         </Box>
       </main>
-      <SiteFooterView />
+      <SiteFooterView/>
     </MainLayout>
   )
 }
 
-export default withStyles(styles, { name: 'Page:Contact' })(Contact)
+export default withStyles(styles, {name: 'Page:Contact'})(Contact)

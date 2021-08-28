@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-import { forwardRef, HTMLProps, ReactNode, useCallback, useMemo } from 'react'
-
 import {
   createStyles,
   decomposeColor,
@@ -24,11 +22,12 @@ import {
   styled,
   withStyles,
   WithStyles,
-} from '@material-ui/core/styles'
-import Grid, { GridProps as MuiGridProps } from '@material-ui/core/Grid'
+} from '@aglyn/shared/ui/themes'
 import Card from '@material-ui/core/Card'
+import Grid, { GridProps as MuiGridProps } from '@material-ui/core/Grid'
 
 import clsx from 'clsx'
+import { forwardRef, HTMLProps, ReactNode, useCallback, useMemo } from 'react'
 import { VirtuosoGrid, VirtuosoGridHandle, VirtuosoGridProps } from 'react-virtuoso'
 
 
@@ -53,7 +52,8 @@ function clamp(value, min = 0, max = 1) {
  * TODO: Remove when upgraded to @material-ui/core v5+
  * Set the absolute transparency of a color.
  * Any existing alpha values are overwritten.
- * @param {string} color - CSS color, i.e. one of: #nnn, #nnnnnn, rgb(), rgba(), hsl(), hsla(), color()
+ * @param {string} color - CSS color, i.e. one of: #nnn, #nnnnnn, rgb(), rgba(), hsl(), hsla(),
+ *   color()
  * @param {number} value - value to set the alpha channel to in the range 0 - 1
  * @returns {string} A CSS color string. Hex input values are returned as rgb
  */
@@ -132,13 +132,13 @@ const GridListRaw = forwardRef<VirtuosoGridHandle, GridListProps & WithStyles<ty
             <Grid ref={ref} container {...GridContainerProps} {...props} />
           </div>
         )
-      }
+      },
     ), [ListWrapperProps, GridContainerProps, classes])
 
     const GridItem = useMemo(() => forwardRef<any, MuiGridProps>(
       function RefRenderFn(itemProps, ref) {
         return <Grid ref={ref} item {...GridItemProps} {...itemProps} />
-      }
+      },
     ), [GridItemProps])
 
     const MemoizedItemContent = useMemo(() => forwardRef<any, MuiGridProps>(
@@ -149,7 +149,7 @@ const GridListRaw = forwardRef<VirtuosoGridHandle, GridListProps & WithStyles<ty
             <ItemContent className={classes.itemContent}>{children}</ItemContent>
           </ItemWrapper>
         )
-      }
+      },
     ), [classes])
 
     const itemContent = useCallback((index) => (

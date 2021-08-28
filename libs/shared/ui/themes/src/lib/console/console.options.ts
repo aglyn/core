@@ -16,16 +16,26 @@
  */
 
 import { ThemeOptions } from '../mui'
-import { consolePalette } from './console.palette'
-import { consoleTypography } from './console.typography'
-import { consoleProps } from './console.props'
 import { consoleOverrides } from './console.overrides'
+import { consolePalette } from './console.palette'
+import { consoleShape } from './console.shape'
+import { consoleSpacing } from './console.spacing'
+import { consoleTypography } from './console.typography'
 
 
-export const consoleOptions: ThemeOptions = {
-  palette: consolePalette.LIGHT,
+const baseOptions: ThemeOptions = {
   typography: consoleTypography,
-  props: consoleProps,
-  overrides: consoleOverrides,
+  components: consoleOverrides,
+  spacing: consoleSpacing,
+  shape: consoleShape,
+}
+
+export const consoleOptions = {
+  palette: consolePalette.LIGHT,
+  ...baseOptions
+}
+export const consoleOptionsDark: ThemeOptions = {
+  palette: consolePalette.DARK,
+  ...baseOptions
 }
 export default consoleOptions

@@ -15,14 +15,21 @@
  * limitations under the License.
  */
 
+import SvgPathIcon from '@aglyn/common/components/SvgPathIcon'
+import { makeStyles, Theme, createStyles } from '@aglyn/shared/ui/themes'
+import {
+  Collapse,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListSubheader,
+} from '@material-ui/core'
+import clsx from 'clsx'
+import Link from 'components/Link'
 import React from 'react'
 import WidgetCard, { Props as WidgetCardProps } from '../components/WidgetCard'
 import { withAggregatedPageMeta } from '../lib/app-pages'
-import { Collapse, IconButton, List, ListItem, ListItemText, ListSubheader } from '@material-ui/core'
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles'
-import SvgPathIcon from '@aglyn/common/components/SvgPathIcon'
-import Link from 'components/Link'
-import clsx from 'clsx'
 
 
 const useStyles = makeStyles<Theme, Props>((theme) => createStyles({
@@ -39,7 +46,7 @@ const useStyles = makeStyles<Theme, Props>((theme) => createStyles({
         borderRadius: '50%',
         left: theme.spacing(0.75),
         top: 'calc(50% - 2.5px)',
-        background: theme.palette.secondary.main
+        background: theme.palette.secondary.main,
       },
     },
     '&$childActive': {
@@ -52,7 +59,7 @@ const useStyles = makeStyles<Theme, Props>((theme) => createStyles({
         borderRadius: '3px 0 0 3px',
         right: 0,
         top: 0,
-        background: theme.palette.secondary.main
+        background: theme.palette.secondary.main,
       },
     },
     '&$nested': {paddingLeft: theme.spacing(4)},
@@ -62,7 +69,7 @@ const useStyles = makeStyles<Theme, Props>((theme) => createStyles({
   preTitle: {
     display: 'block',
     lineHeight: 1,
-    marginBottom: theme.spacing(1.5)
+    marginBottom: theme.spacing(1.5),
   },
   active: {},
   childActive: {},
@@ -70,14 +77,12 @@ const useStyles = makeStyles<Theme, Props>((theme) => createStyles({
   open: {},
 }))
 
-export type Props = Partial<WidgetCardProps> & {
-
-}
+export type Props = Partial<WidgetCardProps> & {}
 
 export default withAggregatedPageMeta<Props>(
   function AreaManageNavigationListWidgetView(props) {
     const classes = useStyles(props)
-    const { aggregatedPageMeta, ...rest } = props
+    const {aggregatedPageMeta, ...rest} = props
     const {
       pathname,
       pageMeta,
@@ -86,13 +91,13 @@ export default withAggregatedPageMeta<Props>(
       denormalizedAreaPages,
     } = aggregatedPageMeta
     const [activeCollapse, setActiveCollapse] = React.useState(
-      subArea?.id ?? pageMeta?.dynamic ? pageMeta?.parent : pageMeta?.id
+      subArea?.id ?? pageMeta?.dynamic ? pageMeta?.parent : pageMeta?.id,
     )
     const openAreaCollapse = (id) => (e) => {
       e.preventDefault()
       e.stopPropagation()
       setActiveCollapse(
-        prev => prev === id ? null : id
+        prev => prev === id ? null : id,
       )
     }
     const isOpen = React.useCallback((item) => {
@@ -140,7 +145,7 @@ export default withAggregatedPageMeta<Props>(
               >
                 <ListItemText
                   children={item?.name.long}
-                  classes={{ primary: classes.primary }}
+                  classes={{primary: classes.primary}}
                 />
                 {item?.pages?.length ? (
                   <IconButton
@@ -184,7 +189,7 @@ export default withAggregatedPageMeta<Props>(
                         button
                         dense
                       >
-                        <ListItemText primary={item?.name.long} />
+                        <ListItemText primary={item?.name.long}/>
                       </ListItem>
                     ))}
                   </List>
@@ -195,5 +200,5 @@ export default withAggregatedPageMeta<Props>(
         </List>
       </WidgetCard>
     )
-  }
+  },
 )

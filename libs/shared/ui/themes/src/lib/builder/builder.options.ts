@@ -15,19 +15,20 @@
  * limitations under the License.
  */
 
-import { consoleOptions } from '../console/console.options'
 import { ThemeOptions } from '../mui'
 import { builderOverrides } from './builder.overrides'
 import { builderPalette } from './builder.palette'
-import { builderProps } from './builder.props'
 import { builderTypography } from './builder.typography'
 
 
 export const builderOptions: ThemeOptions = {
-  ...consoleOptions,
-  palette: builderPalette,
+  palette: builderPalette.LIGHT,
   typography: builderTypography,
-  props: builderProps,
-  overrides: builderOverrides,
+  components: builderOverrides,
+}
+export const builderOptionsDark: ThemeOptions = {
+  palette: builderPalette.DARK,
+  typography: builderTypography,
+  components: builderOverrides,
 }
 export default builderOptions

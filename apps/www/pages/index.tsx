@@ -16,17 +16,17 @@
  */
 
 import { GridItems } from '@aglyn/shared/ui/react'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
+import Image from 'next/image'
 import React from 'react'
 import BackgroundImage from '../components/BackgroundImage'
+import { mainNavigation, productNames } from '../const'
 import MainLayout from '../layouts/MainLayout'
-import Image from 'next/image'
 import PromoSectionView from '../views/PromoSectionView'
 import SiteFooterView from '../views/SiteFooterView'
-import { mainNavigation, productNames } from '../const'
 
 
 const styles = (theme: Theme) => createStyles({
@@ -64,7 +64,7 @@ function Index(props: Props) {
     >
       <BackgroundImage
         component={'header'}
-        url={'/backgrounds/patterns/abstract-wave-lines.svg'}
+        url={'/images/backgrounds/patterns/abstract-wave-lines.svg'}
         className={classes.header}
       >
         <Box py={6}>
@@ -78,7 +78,7 @@ function Index(props: Props) {
                   xs: 12, md: 5,
                   children: (
                     <Image
-                      src="/designer/website-designer-preview-collage.png"
+                      src="/images/designer/website-designer-preview-collage.png"
                       alt="website designer preview collage"
                       width="504"
                       height="380"
@@ -123,7 +123,7 @@ function Index(props: Props) {
                   xs: 12, md: 4,
                   children: (
                     <Image
-                      src="/designer/website-designer-element-categories.png"
+                      src="/images/designer/website-designer-element-categories.png"
                       alt="website designer element category search"
                       width="400"
                       height="478"
@@ -165,7 +165,7 @@ function Index(props: Props) {
                   xs: 12, md: 4,
                   children: (
                     <Image
-                      src="/designer/website-designer-custom-element-attributes.png"
+                      src="/images/designer/website-designer-custom-element-attributes.png"
                       alt="website designer custom element attributes"
                       width="400"
                       height="477"
@@ -207,7 +207,7 @@ function Index(props: Props) {
                   xs: 12, md: 4,
                   children: (
                     <Image
-                      src="/designer/website-designer-functional-operations.png"
+                      src="/images/designer/website-designer-functional-operations.png"
                       alt="website designer functional operations"
                       width="400"
                       height="440"
@@ -240,7 +240,7 @@ function Index(props: Props) {
       </main>
       <SiteFooterView>
         <PromoSectionView
-          backgroundUrl={'/backgrounds/patterns/abstract-wave-lines.svg'}
+          backgroundUrl={'/images/backgrounds/patterns/abstract-wave-lines.svg'}
           heading={'Get Access and Make Your New Website'}
           link={{
             as: '/contact', href: '/contact',

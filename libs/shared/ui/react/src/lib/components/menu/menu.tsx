@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import React, { HTMLProps, Children, MouseEvent, useState, forwardRef, cloneElement } from 'react'
+import { createStyles, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
 import MuiMenu, { MenuProps as MuiMenuProps } from '@material-ui/core/Menu'
 import MuiMenuItem, { MenuItemProps as MuiMenuItemProps } from '@material-ui/core/MenuItem'
-import { createStyles, withStyles, WithStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import React, { HTMLProps, Children, MouseEvent, useState, forwardRef, cloneElement } from 'react'
 
 
 const ITEM_HEIGHT = 48
@@ -36,7 +36,7 @@ const initialState: State = {
 }
 
 const styles = createStyles<'root' | string, MenuProps>({
-  root: { cursor: (props) => (props.context ? 'context-menu' : undefined) },
+  root: {cursor: (props) => (props.context ? 'context-menu' : undefined)},
 })
 
 /* eslint-disable-next-line */
@@ -46,9 +46,9 @@ export interface MenuProps extends HTMLProps<HTMLDivElement> {
   MenuProps?: Partial<MuiMenuProps>
 }
 
-export const Menu = withStyles(styles, { name: 'Menu' })(
+export const Menu = withStyles(styles, {name: 'Menu'})(
   forwardRef<any, MenuProps & WithStyles<typeof styles>>(function Menu(props, ref) {
-    const { classes, children, items, context, className, MenuProps, ...rest } = props
+    const {classes, children, items, context, className, MenuProps, ...rest} = props
 
     const [state, setState] = useState<State>(initialState)
     const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -64,14 +64,14 @@ export const Menu = withStyles(styles, { name: 'Menu' })(
     const handleClose = () => setState(initialState)
     const open = Boolean(state.anchorEl || state.mouseY)
     const child = Children.only(children)
-    const cloned = cloneElement(child as any, { onClick: handleClick })
+    const cloned = cloneElement(child as any, {onClick: handleClick})
 
     return (
       <div
         ref={ref}
         className={clsx(classes.root, className)}
         onContextMenu={handleClick}
-        {...(context ? { onContextMenu: handleClick } : {})}
+        {...(context ? {onContextMenu: handleClick} : {})}
         {...rest}
       >
         {cloned}

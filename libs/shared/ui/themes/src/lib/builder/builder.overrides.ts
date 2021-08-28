@@ -19,7 +19,7 @@ import { ThemeOptions } from '../mui'
 import { consoleOverrides } from '../console/console.overrides'
 
 
-export const builderOverrides: ThemeOptions['overrides'] = {
+export const builderOverrides: ThemeOptions['components'] = {
   ...consoleOverrides,
 }
 export default builderOverrides

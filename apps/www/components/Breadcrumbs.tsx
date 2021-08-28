@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { withStyles, WithStyles, Theme, createStyles } from '@material-ui/core/styles'
-import MuiBreadcrumb, { BreadcrumbsProps as MuiBreadcrumbsProps } from '@material-ui/core/Breadcrumbs'
-import Link, { LinkProps as LinkProps } from './Link'
-import clsx from 'clsx'
 import { SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
+import { withStyles, WithStyles, Theme, createStyles } from '@aglyn/shared/ui/themes'
+import MuiBreadcrumb, { BreadcrumbsProps as MuiBreadcrumbsProps } from '@material-ui/core/Breadcrumbs'
 import Typography from '@material-ui/core/Typography'
+import clsx from 'clsx'
+import React from 'react'
+import Link, { LinkProps as LinkProps } from './Link'
 
 
 const styles = (theme: Theme) => createStyles({
@@ -34,12 +34,12 @@ const styles = (theme: Theme) => createStyles({
     display: 'flex',
     cursor: 'pointer',
   },
-  disabled: { cursor: 'default' },
+  disabled: {cursor: 'default'},
   last: {
     opacity: 0.68,
     textDecoration: 'none',
   },
-  centered: { alignItems: 'center' },
+  centered: {alignItems: 'center'},
   icon: {
     marginRight: theme.spacing(0.5),
     width: 20,
@@ -55,12 +55,12 @@ export type Props = MuiBreadcrumbsProps & {
 
 const Breadcrumbs = React.forwardRef<any, Props & WithStyles<typeof styles>>(
   function RefRenderFn(props, ref) {
-    const { classes, className, centerIcons, children, items, ...rest } = props
+    const {classes, className, centerIcons, children, items, ...rest} = props
 
     const Item = React.useMemo(() => (
       React.forwardRef<any, ItemProps & { isLast: boolean }>(
         function RefRenderFn(itemProps, ref) {
-          const { icon, className, isLast, disabled, ...item } = itemProps
+          const {icon, className, isLast, disabled, ...item} = itemProps
           const itemClass = clsx(classes.item, {
             [classes.centered]: Boolean(centerIcons),
             [classes.disabled]: Boolean(disabled || isLast),
@@ -87,7 +87,7 @@ const Breadcrumbs = React.forwardRef<any, Props & WithStyles<typeof styles>>(
         {...rest}
       >
         {items.map((item, key) => (
-          <Item {...item} key={key} isLast={key === items.length - 1} />
+          <Item {...item} key={key} isLast={key === items.length - 1}/>
         ))}
         {children}
       </MuiBreadcrumb>
@@ -97,4 +97,4 @@ const Breadcrumbs = React.forwardRef<any, Props & WithStyles<typeof styles>>(
 
 Breadcrumbs.displayName = 'Breadcrumbs'
 
-export default withStyles(styles, { name: 'Breadcrumbs' })(Breadcrumbs)
+export default withStyles(styles, {name: 'Breadcrumbs'})(Breadcrumbs)

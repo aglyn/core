@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { forwardRef, useEffect, useState } from 'react'
+import { Theme, createStyles, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import Box, { BoxProps } from '@material-ui/core/Box'
-import { Theme, createStyles, WithStyles, withStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import { forwardRef } from 'react'
 
 
 const styles = (theme: Theme) => createStyles({
@@ -38,7 +38,7 @@ export interface BackgroundImageProps extends BoxProps {
 
 const BackgroundImage = forwardRef<any, BackgroundImageProps & WithStyles<typeof styles>>(
   function RefRenderFn(props, ref) {
-    const { children, parallax, url, className, classes, ...rest } = props
+    const {children, parallax, url, className, classes, ...rest} = props
 
     return (
       <Box
@@ -58,4 +58,4 @@ const BackgroundImage = forwardRef<any, BackgroundImageProps & WithStyles<typeof
 
 BackgroundImage.displayName = 'BackgroundImage'
 
-export default withStyles(styles, { name: 'BackgroundImage' })(BackgroundImage)
+export default withStyles(styles, {name: 'BackgroundImage'})(BackgroundImage)

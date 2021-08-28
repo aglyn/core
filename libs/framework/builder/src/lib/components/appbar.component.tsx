@@ -15,52 +15,52 @@
  * limitations under the License.
  */
 
-import { createStyles, WithStyles, withStyles } from '@material-ui/core/styles'
+import { SvgPathIcon } from '@aglyn/shared/ui/react'
+import { createStyles, withStyles, ExtendPropsOfWithStyles, styled } from '@aglyn/shared/ui/themes'
+import AppBar, { AppBarProps } from '@material-ui/core/AppBar'
+import Box from '@material-ui/core/Box'
+import Fab from '@material-ui/core/Fab'
+import IconButton from '@material-ui/core/IconButton'
+import Toolbar from '@material-ui/core/Toolbar'
 import clsx from 'clsx'
 import { forwardRef, useCallback } from 'react'
-import AppBar, { AppBarProps } from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar'
-import IconButton from '@material-ui/core/IconButton'
-import Fab from '@material-ui/core/Fab'
-import { SvgPathIcon } from '@aglyn/shared/ui/react'
 import { useElementDrawerContext } from '../contexts/element-drawer-context'
 
-export const styles = createStyles({
+
+const StyledFab = styled(Fab)({
+  position: 'absolute',
+  zIndex: 1,
+  top: -30,
+  left: 0,
+  right: 0,
+  margin: '0 auto',
+})
+
+export const appBarComponentStyles = createStyles({
   root: {
     top: 'auto',
     bottom: 0,
   },
-  grow: {
-    flexGrow: 1,
-  },
-  fabButton: {
-    position: 'absolute',
-    zIndex: 1,
-    top: -30,
-    left: 0,
-    right: 0,
-    margin: '0 auto',
-  },
 })
 
-export interface AppBarComponentProps extends Partial<AppBarProps> {}
+export interface AppBarComponentProps extends ExtendPropsOfWithStyles<Partial<AppBarProps>, typeof appBarComponentStyles> {}
 
-const AppBarComponent = forwardRef<any, AppBarComponentProps & WithStyles<typeof styles>>(
+const AppBarComponentRaw = forwardRef<any, AppBarComponentProps>(
   function RefRenderFn(props, ref) {
-    const { classes, className, ...rest } = props
+    const {classes, className, ...rest} = props
 
-    const { elementDrawer } = useElementDrawerContext()
+    const {elementDrawer} = useElementDrawerContext()
     const handleFabClick = useCallback(async () => {
-      const choice = await elementDrawer({ title: 'Add New Elements' })
-        .then((res) => {
-          console.log('res', res)
-          return res
-        })
-        .catch((error) => {
-          if (error instanceof Error) {
-          }
-          console.log('errror', error)
-        })
+      const choice = await elementDrawer({title: 'Add New Elements'})
+      .then((res) => {
+        console.log('res', res)
+        return res
+      })
+      .catch((error) => {
+        if (error instanceof Error) {
+        }
+        console.log('errror', error)
+      })
 
       console.warn('async choice', choice)
     }, [elementDrawer])
@@ -75,30 +75,33 @@ const AppBarComponent = forwardRef<any, AppBarComponentProps & WithStyles<typeof
       >
         <Toolbar>
           <IconButton edge="start" color="inherit" aria-label="open drawer">
-            <SvgPathIcon iconId={'menu'} />
+            <SvgPathIcon iconId={'menu'}/>
           </IconButton>
-          <Fab
+          <StyledFab
             color="secondary"
             aria-label="add"
-            className={classes.fabButton}
             onClick={handleFabClick}
           >
-            <SvgPathIcon iconId={'plus'} />
-          </Fab>
-          <div className={classes.grow} />
+            <SvgPathIcon iconId={'plus'}/>
+          </StyledFab>
+          <Box sx={{flexGrow: 1}}/>
           <IconButton color="inherit">
-            <SvgPathIcon iconId={'search'} />
+            <SvgPathIcon iconId={'search'}/>
           </IconButton>
           <IconButton edge="end" color="inherit">
-            <SvgPathIcon iconId={'more'} />
+            <SvgPathIcon iconId={'more'}/>
           </IconButton>
         </Toolbar>
       </AppBar>
     )
-  }
+  },
 )
 
-AppBarComponent.displayName = 'AppBarComponent'
-AppBarComponent.defaultProps = {}
+AppBarComponentRaw.displayName = 'AppBarComponent'
+AppBarComponentRaw.defaultProps = {}
 
-export default withStyles(styles, { name: 'AppBarComponent' })(AppBarComponent)
+export const AppbarComponent = withStyles(
+  appBarComponentStyles,
+  {name: 'AppBarComponent'},
+)(AppBarComponentRaw)
+export default AppbarComponent

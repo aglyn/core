@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
+import { Theme, createStyles, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
 import { remap } from '@aglyn/shared/util/helpers'
-import React, { useCallback, useState } from 'react'
-import { makeStyles, Theme, createStyles, withStyles, WithStyles } from '@material-ui/core/styles'
 import { Button, Typography, Box } from '@material-ui/core'
-import AuthLayout from '../../layouts/AuthLayout'
+import { useRouter } from 'next/router'
+import React, { useCallback, useState } from 'react'
+import FieldSet from '../../components/FieldSet'
 import Link from '../../components/Link'
 import { withAppContext } from '../../contexts/app-context'
-import { Fields, validateField, formIsValid, fieldHasError } from '../../forms'
-import FieldSet from '../../components/FieldSet'
-import { useRouter } from 'next/router'
+import { Fields, validateField, formIsValid } from '../../forms'
+import AuthLayout from '../../layouts/AuthLayout'
 
 
 const styles = (theme: Theme) => createStyles({
-  form: { '& .MuiTextField-root': {} },
-  uppercase: { textTransform: 'uppercase' },
+  form: {'& .MuiTextField-root': {}},
+  uppercase: {textTransform: 'uppercase'},
   button: {
     marginTop: theme.spacing(2),
     marginBottom: theme.spacing(2),
@@ -40,10 +40,10 @@ const styles = (theme: Theme) => createStyles({
   },
 })
 
-export default withStyles(styles, { name: 'Page:SignIn' })(
+export default withStyles(styles, {name: 'Page:SignIn'})(
   withAppContext<WithStyles<typeof styles>>(
     function SignIn(props) {
-      const { app, classes } = props
+      const {app, classes} = props
       const currentUser = app?.getCurrentUser()
       // console.log('app?.getCurrentUser()', currentUser)
       const router = useRouter()
@@ -60,7 +60,7 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
 
       const handleUpdate = (name: string) => e => {
         const value = e.target?.value
-        setFields(prev => ({ ...prev, [name]: validateField(prev[name], value) }))
+        setFields(prev => ({...prev, [name]: validateField(prev[name], value)}))
       }
       const clearForm = () => {
         setFields(prev => {
@@ -92,7 +92,7 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
           },
           (error) => {
             console.error('Form Error: ', error)
-            const { code, message } = error
+            const {code, message} = error
             setFormError(`(Code: ${code}) ${message}`)
             clearForm()
             setSubmitting(false)
@@ -110,7 +110,7 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
                 variant="h5"
                 gutterBottom
               />
-              <FieldSet fields={fields} loading={submitting} onUpdate={handleUpdate} />
+              <FieldSet fields={fields} loading={submitting} onUpdate={handleUpdate}/>
               <Link
                 children="Forgot password?"
                 color="primary"
@@ -151,8 +151,8 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
             component="div"
             variant="overline"
           >
-            <b children={'Don\'t have an account?'} />
-            <br />
+            <b children={'Don\'t have an account?'}/>
+            <br/>
             <Link
               children="Create an account"
               color="secondary"
@@ -161,6 +161,6 @@ export default withStyles(styles, { name: 'Page:SignIn' })(
           </Typography>
         </AuthLayout>
       )
-    }
-  )
+    },
+  ),
 )

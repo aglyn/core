@@ -15,10 +15,30 @@
  * limitations under the License.
  */
 
+import consoleTheme from '../console/console.theme'
 import { Theme } from '../mui'
-import { createTheme } from '../util/create-theme'
-import { builderOptions } from './builder.options'
+import createResponsiveTheme from '../util/create-responsive-theme'
+import builderOptions, { builderOptionsDark } from './builder.options'
 
 
-export const builderTheme: Theme = createTheme(builderOptions)
+export const builderTheme: Theme = createResponsiveTheme({
+  themeOptions: builderOptions,
+})
+export const builderThemeDark: Theme = createResponsiveTheme({
+  themeOptions: builderOptionsDark,
+})
+export const getBuilderTheme = (mode: 'light' | 'dark' = 'light') => {
+  const theme = {
+    light: builderTheme,
+    dark: builderThemeDark,
+  }
+  return theme[mode]
+}
+export const getBuilderMetaThemeColor = (mode: 'light' | 'dark' = 'light') => {
+  const themeColor = {
+    light: builderTheme.palette.primary.main,
+    dark: builderThemeDark.palette.primary.main,
+  }
+  return themeColor[mode]
+}
 export default builderTheme

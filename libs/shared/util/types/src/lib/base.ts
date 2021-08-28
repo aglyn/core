@@ -84,10 +84,10 @@ export type Conditional<LEFT, RIGHT, TRUE, FALSE = never> = LEFT extends RIGHT ?
 export type ConditionalNonDist<LEFT, RIGHT, TRUE, FALSE = never> = [LEFT] extends [RIGHT] ? TRUE : FALSE
 
 /** If X extends true then Y */
-export type IfTrueElse<TRUE, ELSE> = Conditional<TRUE, true, ELSE>
+export type IfTrueOr<TRUE, ELSE> = Conditional<TRUE, true, ELSE>
 
 /** If X extends true then Y */
-export type IfTrueElseNonDist<TRUE, ELSE> = ConditionalNonDist<TRUE, true, ELSE>
+export type IfTrueOrNonDist<TRUE, ELSE> = ConditionalNonDist<TRUE, true, ELSE>
 
 /** From T, make all top level keys mutable (removes readonly) */
 export type MutableShallow<T> = {
@@ -100,28 +100,28 @@ export type MutableDeep<T> = {
 }
 
 /** From T, require properties whose keys are in union K (make specific keys required) */
-export type MakeKeysRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
+export type RequiredPick<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 
 /** From T, make properties partial whose keys are in union K (Make specific keys optional) */
-export type MakeKeysPartial<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+export type PartialPick<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
 /** From T, extract keys whose types are required (excludes optional properties) (optionally narrow keys in union by specifying K) */
-export type KeyOfOnlyRequiredKeys<T, K extends keyof T = keyof T> = {
+export type KeyOfPickRequired<T, K extends keyof T = keyof T> = {
   [P in K]-?: (Pick<T, P> extends AnyObj ? never : P)
 }[K]
 
 /** From T, extract keys whose types are optional (excludes required properties) (optionally narrow keys in union by specifying K) */
-export type KeyOfOnlyPartialKeys<T, K extends keyof T = keyof T> = {
+export type KeyOfPickPartial<T, K extends keyof T = keyof T> = {
   [P in K]-?: (Pick<T, P> extends AnyObj ? P : never)
 }[K]
 
 /** From T, pick a set of properties whose keys are in the union with required keys only, (optionally narrow results by specifying K) */
-export type PickOnlyRequiredKeys<T, K extends keyof T = keyof T> = Pick<T, {
+export type PickRequired<T, K extends keyof T = keyof T> = Pick<T, {
   [P in K]-?: (Pick<T, P> extends AnyObj ? never : P)
 }[K]>
 
 /** From T, pick a set of properties whose keys are in the union with partial keys only, (optionally narrow results by specifying K) */
-export type PickOnlyPartialKeys<T, K extends keyof T = keyof T> = Pick<T, {
+export type PickPartial<T, K extends keyof T = keyof T> = Pick<T, {
   [P in K]-?: (Pick<T, P> extends AnyObj ? P : never)
 }[K]>
 
@@ -135,11 +135,11 @@ export type Spreaded<L, R> = (
   /* With L (left), omit keys not in union with keys of R (right)*/
   Omit<L, keyof R>
   /* With R (right), omit keys in union with partial types*/
-  & Omit<R, KeyOfOnlyPartialKeys<R>>
+  & Omit<R, KeyOfPickPartial<R>>
   /* With R (right), pick properties in union with optional types that do not exist in L (left) */
-  & Pick<R, Exclude<KeyOfOnlyPartialKeys<R>, keyof L>>
+  & Pick<R, Exclude<KeyOfPickPartial<R>, keyof L>>
   /* With L (left), replace properties of the keys in union with the keys in R (right) excluding properties of R (right) with types in union with undefined */
-  & { [P in (KeyOfOnlyPartialKeys<R> & (keyof L extends (keyof L & keyof R) ? (KeyOfOnlyPartialKeys<R> & keyof L) : never))]: (L[P] | Exclude<R[P], undefined>) }
+  & { [P in (KeyOfPickPartial<R> & (keyof L extends (keyof L & keyof R) ? (KeyOfPickPartial<R> & keyof L) : never))]: (L[P] | Exclude<R[P], undefined>) }
   )
 
 /** Field property getters */
@@ -152,9 +152,12 @@ export type Setters<T> = {
   [K in keyof T as `set${Capitalize<string & K>}`]: (value: T[K] | null) => T
 }
 
-/** Field property setters */
-export type Implements<K1 extends string, K2 extends string, T extends (...args: unknown[]) => unknown> = {
-  [P in K2 as `${K1}${Capitalize<string & K2>}`]: T
+/** Field property setters e.g. Implements<'get', 'id', ()=>string> === { getId:()=>this.id } */
+export type Implements<Verb extends string,
+  Noun extends string,
+  T extends (...args: unknown[]) => unknown | void> = {
+
+  [P in Noun as `${Verb}${Capitalize<string & Noun>}`]: T
 }
 
 /** Field property setters */

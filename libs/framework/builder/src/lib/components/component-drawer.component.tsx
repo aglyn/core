@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
-import clsx from 'clsx'
-import { forwardRef, Fragment, MouseEvent, useCallback } from 'react'
-import IconButton from '@material-ui/core/IconButton'
 import {
   CardIconListItem,
   componentMapper,
@@ -29,11 +25,15 @@ import {
   NavbarDrawerProps,
   SvgPathIcon,
 } from '@aglyn/shared/ui/react'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import { _isStrT } from '@aglyn/shared/util/helpers'
-import Button from '@material-ui/core/Button'
 import Box from '@material-ui/core/Box'
+import Button from '@material-ui/core/Button'
 import FormControl from '@material-ui/core/FormControl'
+import IconButton from '@material-ui/core/IconButton'
 import Typography from '@material-ui/core/Typography'
+import clsx from 'clsx'
+import { forwardRef, Fragment, MouseEvent, useCallback } from 'react'
 import { ElementDrawerOptions } from '../contexts/element-drawer-context'
 
 
@@ -147,19 +147,19 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
     const appBarLeft = (
       <Fragment>
         <IconButton
-          children={<SvgPathIcon iconId="close" />}
+          children={<SvgPathIcon iconId="close"/>}
           className={classes.closeButton}
           color="inherit"
           edge="start"
           onClick={handleDrawerCancel}
         />
-        <Typography children={title} className={classes.title} color="inherit" variant="h6" />
+        <Typography children={title} className={classes.title} color="inherit" variant="h6"/>
       </Fragment>
     )
 
     const appBarRight = {
       'edit-element-traits': (
-        <Button color="inherit" onClick={handleDrawerCancel} children="Cancel" />
+        <Button color="inherit" onClick={handleDrawerCancel} children="Cancel"/>
       ),
     }
 
@@ -239,7 +239,7 @@ const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps & W
 
 ComponentDrawerComponent.displayName = 'ComponentDrawerComponent'
 ComponentDrawerComponent.defaultProps = {
-  elements: []
+  elements: [],
 }
 
 export default withStyles(styles, {name: 'ComponentDrawerComponent'})(ComponentDrawerComponent)

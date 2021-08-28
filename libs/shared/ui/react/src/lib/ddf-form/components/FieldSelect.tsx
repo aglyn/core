@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 
-import { forwardRef, ReactNode } from 'react'
+import { createStyles, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
+import useFieldApi, { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-field-api'
+import MuiFormControl, { FormControlProps as MuiFormControlProps } from '@material-ui/core/FormControl'
+import MuiFormHelperText from '@material-ui/core/FormHelperText'
+import MuiInputLabel from '@material-ui/core/InputLabel'
+import MuiMenuItem, { MenuItemProps as MuiMenuItemProps } from '@material-ui/core/MenuItem'
 
 import MuiSelect, { SelectProps as MuiSelectProps } from '@material-ui/core/Select'
-import MuiFormControl, { FormControlProps as MuiFormControlProps } from '@material-ui/core/FormControl'
-import MuiFormHelperText, { FormHelperTextProps as MuiFormHelperTextProps } from '@material-ui/core/FormHelperText'
-import MuiInputLabel, { InputLabelProps as MuiInputLabelProps } from '@material-ui/core/InputLabel'
-import MuiMenuItem, { MenuItemProps as MuiMenuItemProps } from '@material-ui/core/MenuItem'
-import { createStyles, WithStyles, withStyles, Theme } from '@material-ui/core/styles'
 
 import clsx from 'clsx'
-import useFieldApi, { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-field-api'
+import { forwardRef, ReactNode } from 'react'
 
 import { withGridItem } from '../field-hocs'
 import { validationMessage } from '../utils'
@@ -46,11 +46,11 @@ const styles = createStyles({
   root: {
     width: '100%',
     display: 'flex',
-  }
+  },
 })
 
 const FieldSelect = forwardRef<any, Props & WithStyles<typeof styles>>(
-  function  RefRenderFn(props, ref) {
+  function RefRenderFn(props, ref) {
     const {
       input,
       isReadOnly,
@@ -89,7 +89,7 @@ const FieldSelect = forwardRef<any, Props & WithStyles<typeof styles>>(
           {...input}
           disabled={isDisabled}
           error={Boolean(invalidMessage)}
-          inputProps={{ readOnly: isReadOnly, ...inputProps }}
+          inputProps={{readOnly: isReadOnly, ...inputProps}}
           label={label}
           labelId={`field-select-${input.name}`}
           required={isRequired}
@@ -113,7 +113,7 @@ const FieldSelect = forwardRef<any, Props & WithStyles<typeof styles>>(
         )}
       </MuiFormControl>
     )
-  }
+  },
 )
 
 FieldSelect.displayName = 'FieldSelect'

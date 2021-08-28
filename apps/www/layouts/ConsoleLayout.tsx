@@ -16,16 +16,15 @@
  */
 
 import { GridItems, GridItemsProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
-import { _isStrT, _s, copy } from '@aglyn/shared/util/helpers'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
+import { _isStrT, _s, copy, getGravatarUrl } from '@aglyn/shared/util/helpers'
 import Container from '@material-ui/core/Container'
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import clsx from 'clsx'
 import React from 'react'
 import Breadcrumbs from '../components/Breadcrumbs'
 import { withCurrentUserCtx } from '../contexts/current-user-context'
 import { withAggregatedPageMeta } from '../lib/app-pages'
-import { getGravatarUrl } from '@aglyn/shared/util/helpers'
 import { tabItems } from '../lib/navigation-menus'
 import MainLayout, { Props as MainLayoutProps, styles as mainStyles } from './MainLayout'
 
@@ -119,7 +118,7 @@ const ConsoleLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
           {...rest}
         >
           <header className={classes.header}>
-            <div className={classes.navBarSpacer} />
+            <div className={classes.navBarSpacer}/>
             <Container maxWidth={CONTENT_MAX_WIDTH}>
               <Typography
                 className={classes.heading}

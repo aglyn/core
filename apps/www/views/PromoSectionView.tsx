@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
+import { createStyles, Theme, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
 import Typography from '@material-ui/core/Typography'
-import React, { ElementType, forwardRef, HTMLAttributes, ReactNode } from 'react'
-import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
+import React, { ElementType, forwardRef, HTMLAttributes, ReactNode } from 'react'
 import BackgroundImage from '../components/BackgroundImage'
 import Link, { LinkProps } from '../components/Link'
 

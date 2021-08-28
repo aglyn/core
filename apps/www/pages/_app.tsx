@@ -15,18 +15,32 @@
  * limitations under the License.
  */
 
+import {
+  makeLinkElements,
+  MakeLinkElementsConfig,
+  makeMetaElements,
+  MakeMetaElementsConfig,
+} from '@aglyn/shared/ui/react'
+import {
+  CacheProvider,
+  consoleTheme,
+  createEmotionCache,
+  EmotionCache,
+  JSS,
+  jssPreset,
+  jssRtl,
+  ThemeProvider,
+} from '@aglyn/shared/ui/themes'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import { MuiThemeProvider } from '@material-ui/core/styles'
-import { consoleTheme } from '@aglyn/shared/ui/themes'
-import { Fragment, useEffect } from 'react'
-import type { AppProps } from 'next/app'
+import { AppProps as NextAppProps } from 'next/app'
 import Head from 'next/head'
-import { AppLoaderProviderComponent } from '../contexts/app-loader-context'
-import AppLoaderOverlayView from '../views/AppLoaderOverlayView'
-import { AppContextProvider } from '../contexts/app-context'
-import { CurrentUserProviderComponent } from '../contexts/current-user-context'
+import { Fragment, useEffect } from 'react'
 import { APP } from '../const'
+import { AppContextProvider } from '../contexts/app-context'
+import { AppLoaderProviderComponent } from '../contexts/app-loader-context'
+import { CurrentUserProviderComponent } from '../contexts/current-user-context'
 import * as AppController from '../lib/aglyn-deprecated'
+import AppLoaderOverlayView from '../views/AppLoaderOverlayView'
 
 
 declare function require(
@@ -51,6 +65,27 @@ if (typeof window !== 'undefined') {
   require(['../lib/aglyn-deprecated'], (withAppController: typeof AppController) => {
     app = withAppController.withAppController(appOptions)
   })
+}
+
+
+// Client-side cache, shared for the whole session of the user in the browser.
+const clientSideEmotionCache = createEmotionCache()
+
+// // Configure JSS
+// const jss = JSS.create({
+//   plugins: [...jssPreset().plugins, jssRtl()],
+//   insertionPoint: process.browser ? document.getElementById('insertion-point-jss') : null,
+// })
+
+
+const metaElements: MakeMetaElementsConfig = [
+  ['viewport', 'width=device-width, initial-scale=1'],
+  ['description', APP.META_DESCRIPTION],
+]
+const linkElements: MakeLinkElementsConfig = []
+
+export interface _AppProps extends NextAppProps {
+  emotionCache?: EmotionCache
 }
 
 /**
@@ -85,8 +120,8 @@ if (typeof window !== 'undefined') {
  * @param {AppProps} props
  * @returns {JSX.Element}
  */
-function _App(props: AppProps): JSX.Element {
-  const {Component, pageProps} = props
+function _App(props: _AppProps) {
+  const {Component, emotionCache, pageProps} = props
 
   useEffect(() => {
     // Remove the server-side injected CSS.
@@ -103,31 +138,79 @@ function _App(props: AppProps): JSX.Element {
   const Wrapper = isProduction ? Fragment : Fragment// StrictMode
 
   return (
-    <>
-      <Head>
-        <title>{APP.META_TITLE}</title>
-        <meta name="description" content={APP.META_DESCRIPTION} />
-      </Head>
-      <Wrapper>
+    <Wrapper>
+      <CacheProvider value={emotionCache}>
+        <Head>
+          <title>{APP.META_TITLE}</title>
+          {makeMetaElements(metaElements)}
+          {makeLinkElements(linkElements)}
+        </Head>
         <AppContextProvider value={app}>
           <CurrentUserProviderComponent>
-            <MuiThemeProvider theme={consoleTheme}>
-              <CssBaseline>
+            {/*<StylesProvider jss={jss}>*/}
+            <ThemeProvider theme={consoleTheme}>
+              <CssBaseline/>
+              <div className="app">
                 <AppLoaderProviderComponent>
-                  <div className="app">
-                    <main>
-                      <Component {...pageProps} />
-                    </main>
-                  </div>
-                  <AppLoaderOverlayView />
+                  <main>
+                    <Component {...pageProps} />
+                  </main>
+
+                  <AppLoaderOverlayView/>
                 </AppLoaderProviderComponent>
-              </CssBaseline>
-            </MuiThemeProvider>
+              </div>
+            </ThemeProvider>
+            {/*</StylesProvider>*/}
           </CurrentUserProviderComponent>
         </AppContextProvider>
-      </Wrapper>
-    </>
+      </CacheProvider>
+    </Wrapper>
   )
 }
 _App.displayName = '_App'
+_App.defaultProps = {
+  emotionCache: clientSideEmotionCache,
+}
+_App.getInitialProps = async ({ctx, Component}) => {
+  let pageProps = {}
+
+  if (Component.getInitialProps) {
+    pageProps = await Component.getInitialProps(ctx)
+  }
+
+  return {
+    pageProps: {
+      userLanguage: ctx.query.userLanguage || 'en',
+      ...pageProps,
+    },
+  }
+}
 export default _App
+
+
+if (process.browser) {
+  console.log(
+    `%c
+       d8888          888                         888      888       .d8888b.
+      d88888          888                         888      888      d88P  Y88b
+     d88P888          888                         888      888      888    888
+    d88P 888  .d88b.  888 888  888 88888b.        888      888      888
+   d88P  888 d88P"88b 888 888  888 888 "88b       888      888      888
+  d88P   888 888  888 888 888  888 888  888       888      888      888    888
+ d8888888888 Y88b 888 888 Y88b 888 888  888       888      888      Y88b  d88P
+d88P     888  "Y88888 888  "Y88888 888  888       88888888 88888888  "Y8888P"
+                  888          888
+             Y8b d88P     Y8b d88P
+              "Y88P"       "Y88P"
+
+                            Copyright (c) 2021 Aglyn LLC. All Rights Reserved.
+
+Hello there, Friend! 👋
+
+For detailed information please visit 'https://aglyn.com' or you may send an
+email to 'info@aglyn.com'.
+– Aglyn Engineering Team
+`,
+    'font-family:monospace;color:#E040FB;font-size:12px;',
+  )
+}

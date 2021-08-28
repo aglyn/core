@@ -16,10 +16,10 @@
  */
 
 import { GridItems } from '@aglyn/shared/ui/react'
+import { createStyles, Theme, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
 import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import MuiLink from '@material-ui/core/Link'
-import { createStyles, Theme, withStyles, WithStyles } from '@material-ui/core/styles'
 import Typography from '@material-ui/core/Typography'
 import clsx from 'clsx'
 import React, { ElementType, forwardRef, HTMLAttributes } from 'react'
@@ -42,12 +42,12 @@ export interface SiteFooterViewProps extends HTMLAttributes<HTMLElement> {
 const SiteFooterView = forwardRef<any, SiteFooterViewProps & WithStyles<typeof SiteFooterStyles>>(
   function RefRenderFn(props, ref) {
     const {
-      children,
-      component: Component,
-      className: propClass,
-      classes,
-      ...rest
-    } = props
+            children,
+            component: Component,
+            className: propClass,
+            classes,
+            ...rest
+          } = props
     const className = clsx(classes.root, propClass)
 
     return (
@@ -72,7 +72,7 @@ const SiteFooterView = forwardRef<any, SiteFooterViewProps & WithStyles<typeof S
                   children: (
                     <>
                       <img
-                        src="/brand/logo.svg"
+                        src="/images/brand/logo.svg"
                         width={150}
                         height={'auto'}
                         alt="aglyn logo"

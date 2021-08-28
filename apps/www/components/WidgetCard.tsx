@@ -16,7 +16,7 @@
  */
 
 import React from 'react'
-import { createStyles, WithStyles, withStyles, Theme } from '@material-ui/core/styles'
+import { createStyles, WithStyles, withStyles, Theme } from '@aglyn/shared/ui/themes'
 import clsx from 'clsx'
 import Card, { CardProps } from '@material-ui/core/Card'
 import CardHeader, { CardHeaderProps } from '@material-ui/core/CardHeader'

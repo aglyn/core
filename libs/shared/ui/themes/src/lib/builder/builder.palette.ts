@@ -15,14 +15,22 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../mui'
-import { consolePalette } from '../console/console.palette'
+import { ConsolePalette, consolePalette } from '../console/console.palette'
+import { PaletteOptions } from '../mui'
 
 
-export const builderPalette: ThemeOptions['palette'] = {
-  ...consolePalette.LIGHT,
-  primary: {main: '#0091ea'},
-  secondary: {main: '#e040fb'},
-  tertiary: {main: '#37474f'},
+export const builderPalette: Record<Uppercase<ConsolePalette.ColorVariant>, PaletteOptions> = {
+  LIGHT: {
+    ...consolePalette.LIGHT,
+    primary: {main: '#0091EA'},
+    secondary: {main: '#E040FB'},
+    tertiary: {main: '#37474F'},
+  },
+  DARK: {
+    ...consolePalette.DARK,
+    primary: {main: '#37474F'},
+    secondary: {main: '#E040FB'},
+    tertiary: {main: '#0091EA'},
+  },
 }
 export default builderPalette

@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import { createStyles, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
-import clsx from 'clsx'
-import { forwardRef, Fragment, HTMLAttributes } from 'react'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import { ButtonProps } from '@material-ui/core/Button'
 import { DialogProps } from '@material-ui/core/Dialog'
 import { DialogContentTextProps } from '@material-ui/core/DialogContentText'
 import { DialogTitleProps } from '@material-ui/core/DialogTitle'
+import clsx from 'clsx'
+import { forwardRef, Fragment, HTMLAttributes } from 'react'
 
 
 export interface SelectionComponentOptions {

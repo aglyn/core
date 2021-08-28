@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../mui'
+import { PaletteOptions } from '../mui'
 
 
 /**
@@ -24,85 +24,85 @@ import { ThemeOptions } from '../mui'
 export namespace ConsolePalette {
 
   export type ColorVariant = 'light' | 'dark'
-  export type BackgroundRecord = ThemeOptions['palette']['background']
+  export type BackgroundRecord = PaletteOptions['background']
 
   export namespace Background {
     export const light: BackgroundRecord = {
-      default: '#fafafa',
-      paper: '#ffffff',
+      default: '#FAFAFA',
+      paper: '#FFFFFF',
     }
     export const dark: BackgroundRecord = {
-      default: '#1e242b',
-      paper: '#2c3540',
+      default: '#1E242B',
+      paper: '#2C3540',
     }
   }
 
   export type OrdinalIdentifier = 'primary' | 'secondary' | 'tertiary' | 'quaternary'
-  export type OrdinalRecord = Pick<ThemeOptions['palette'], OrdinalIdentifier>
+  export type OrdinalRecord = Pick<PaletteOptions, OrdinalIdentifier>
 
   export namespace Ordinal {
-    export type PrimaryRecord = ThemeOptions['palette']['primary']
-    export type SecondaryRecord = ThemeOptions['palette']['secondary']
-    export type TertiaryRecord = ThemeOptions['palette']['tertiary']
-    export type QuaternaryRecord = ThemeOptions['palette']['quaternary']
+    export type PrimaryRecord = PaletteOptions['primary']
+    export type SecondaryRecord = PaletteOptions['secondary']
+    export type TertiaryRecord = PaletteOptions['tertiary']
+    export type QuaternaryRecord = PaletteOptions['quaternary']
 
     export namespace Primary {
       export const LIGHT: PrimaryRecord = {
-        main: '#404c5c',
-        light: '#666f7c',
-        dark: '#2c3540',
-        contrastText: '#ffffff',
+        main: '#404C5C',
+        light: '#666F7C',
+        dark: '#2C3540',
+        contrastText: '#FFFFFF',
       }
       export const DARK: PrimaryRecord = {
-        main: '#2c3540',
-        light: '#3d4b5c',
+        main: '#2C3540',
+        light: '#3D4B5C',
         dark: '#202830',
-        contrastText: '#ffffff',
+        contrastText: '#FFFFFF',
       }
     }
 
     export namespace Secondary {
       export const LIGHT: SecondaryRecord = {
-        main: '#039be5',
-        light: '#40c4ff',
-        dark: '#0277bd',
-        contrastText: '#ffffff',
+        main: '#039BE5',
+        light: '#40C4FF',
+        dark: '#0277BD',
+        contrastText: '#FFFFFF',
       }
       export const DARK: SecondaryRecord = {
-        main: '#03a9f4',
-        light: '#40c4ff',
-        dark: '#026ca0',
+        main: '#03A9F4',
+        light: '#40C4FF',
+        dark: '#026CA0',
         contrastText: '#000000',
       }
     }
 
     export namespace Tertiary {
       export const LIGHT: TertiaryRecord = {
-        main: '#9c27b0',
-        light: '#af52bf',
-        dark: '#6d1b7b',
-        contrastText: '#ffffff',
+        main: '#9C27B0',
+        light: '#AF52BF',
+        dark: '#6D1B7B',
+        contrastText: '#FFFFFF',
       }
       export const DARK: TertiaryRecord = {
-        main: '#ab47bc',
-        light: '#ba68c8',
-        dark: '#9c27b0',
-        contrastText: '#ffffff',
+        main: '#AB47BC',
+        light: '#BA68C8',
+        dark: '#9C27B0',
+        contrastText: '#FFFFFF',
       }
     }
 
     export namespace Quaternary {
       export const LIGHT: QuaternaryRecord = {
-        main: '#e040fb',
-        light: '#e666fb',
-        dark: '#9c2caf',
-        contrastText: '#ffffff',
+        main: '#E040FB',
+        light: '#E666FB',
+        dark: '#9C2CAF',
+        contrastText: '#FFFFFF',
       }
       export const DARK: QuaternaryRecord = {
-        main: '#e040fb',
-        light: '#e666fb',
-        dark: '#9c2caf',
-        contrastText: '#ffffff',
+        main: '#E040FB',
+        light: '#E666FB',
+        dark: '#9C2CAF',
+        contrastText: '#FFFFFF',
       }
     }
 
@@ -122,63 +122,87 @@ export namespace ConsolePalette {
 
   export const status = {
     info: {
-      main: '#e53935',
-      light: '#ea605d',
-      dark: '#a02725',
-      contrastText: '#ffffff',
+      main: '#E53935',
+      light: '#EA605D',
+      dark: '#A02725',
+      contrastText: '#FFFFFF',
     },
     error: {
-      main: '#e53935',
-      light: '#ea605d',
-      dark: '#a02725',
-      contrastText: '#ffffff',
+      main: '#E53935',
+      light: '#EA605D',
+      dark: '#A02725',
+      contrastText: '#FFFFFF',
     },
     success: {
-      light: '#81c784',
-      main: '#4caf50',
-      dark: '#388e3c',
-      contrastText: '#000000de',
+      light: '#81C784',
+      main: '#4CAF50',
+      dark: '#388E3C',
+      contrastText: '#000000DE',
     },
     warning: {
-      main: '#ffab40',
-      light: '#ffbb66',
-      dark: '#b2772c',
-      contrastText: '#000000de',
+      main: '#FFAB40',
+      light: '#FFBB66',
+      dark: '#B2772C',
+      contrastText: '#000000DE',
     },
   }
 
   export const shadesOfGrey = {
-    50: '#fafafa',
-    100: '#f5f5f5',
-    200: '#eeeeee',
-    300: '#e0e0e0',
-    400: '#bdbdbd',
-    500: '#9e9e9e',
+    50: '#FAFAFA',
+    100: '#F5F5F5',
+    200: '#EEEEEE',
+    300: '#E0E0E0',
+    400: '#BDBDBD',
+    500: '#9E9E9E',
     600: '#757575',
     700: '#616161',
     800: '#424242',
     900: '#212121',
-    A100: '#d5d5d5',
-    A200: '#aaaaaa',
+    A100: '#D5D5D5',
+    A200: '#AAAAAA',
     A400: '#303030',
     A700: '#616161',
   }
 }
 
-export const consolePalette: Record<Uppercase<ConsolePalette.ColorVariant>, ThemeOptions['palette']> = {
+export const consolePalette: Record<Uppercase<ConsolePalette.ColorVariant>, PaletteOptions> = {
   LIGHT: {
-    type: 'light',
+    mode: 'light',
     ...ConsolePalette.Ordinal.LIGHT,
     ...ConsolePalette.status,
     grey: {...ConsolePalette.shadesOfGrey},
     background: {...ConsolePalette.Background.light},
+    svgBg: {
+      base: ConsolePalette.shadesOfGrey[50],
+      active: ConsolePalette.shadesOfGrey[50],
+    },
+    svgFilled: {
+      base: ConsolePalette.shadesOfGrey[500],
+      active: ConsolePalette.Ordinal.LIGHT.secondary['light'],
+    },
+    svgStroke: {
+      base: '#FFFFFF',
+      active: '#FFFFFF',
+    },
   },
   DARK: {
-    type: 'dark',
+    mode: 'dark',
     ...ConsolePalette.Ordinal.DARK,
     ...ConsolePalette.status,
     grey: {...ConsolePalette.shadesOfGrey},
     background: {...ConsolePalette.Background.dark},
+    svgBg: {
+      base: ConsolePalette.Ordinal.DARK.secondary['dark'],
+      active: ConsolePalette.Ordinal.DARK.secondary['dark'],
+    },
+    svgFilled: {
+      base: ConsolePalette.Ordinal.DARK.primary['dark'],
+      active: ConsolePalette.Ordinal.DARK.secondary['dark'],
+    },
+    svgStroke: {
+      base: ConsolePalette.Ordinal.DARK.primary['main'],
+      active: ConsolePalette.Ordinal.DARK.secondary['main'],
+    },
   },
 }
 

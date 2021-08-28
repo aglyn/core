@@ -16,9 +16,28 @@
  */
 
 import { Theme } from '../mui'
-import { createTheme } from '../util/create-theme'
-import { consoleOptions } from './console.options'
+import { createResponsiveTheme } from '../util/create-responsive-theme'
+import consoleOptions, { consoleOptionsDark } from './console.options'
 
 
-export const consoleTheme: Theme = createTheme(consoleOptions)
+export const consoleTheme: Theme = createResponsiveTheme({
+  themeOptions: consoleOptions,
+})
+export const consoleThemeDark: Theme = createResponsiveTheme({
+  themeOptions: consoleOptionsDark,
+})
+export const getConsoleTheme = (mode: 'light' | 'dark' = 'light') => {
+  const theme = {
+    light: consoleTheme,
+    dark: consoleThemeDark,
+  }
+  return theme[mode]
+}
+export const getConsoleMetaThemeColor = (mode: 'light' | 'dark' = 'light') => {
+  const themeColor = {
+    light: consoleTheme.palette.secondary.main,
+    dark: consoleThemeDark.palette.primary.main,
+  }
+  return themeColor[mode]
+}
 export default consoleTheme

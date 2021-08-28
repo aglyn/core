@@ -17,3 +17,5 @@
 
 export * from './lib/themes'
 export * from './lib/mui'
+export * from './lib/emotion'
+export * from './lib/util/create-responsive-theme'

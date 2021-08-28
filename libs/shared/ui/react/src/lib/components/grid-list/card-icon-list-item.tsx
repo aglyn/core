@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import { forwardRef, MouseEvent, ReactNode, useCallback } from 'react'
-import { createStyles, WithStyles, withStyles } from '@material-ui/core/styles'
-import clsx from 'clsx'
+import { createStyles, WithStyles, withStyles, Theme, ExtendPropsOfWithStyles } from '@aglyn/shared/ui/themes'
 import Card, { CardProps as MuiCardProps } from '@material-ui/core/Card'
 import CardActionArea from '@material-ui/core/CardActionArea'
 import Typography from '@material-ui/core/Typography'
+import clsx from 'clsx'
+import { forwardRef, MouseEvent, ReactNode, useCallback } from 'react'
 import { Item } from './grid-list'
-import { Theme } from '@aglyn/shared/ui/themes'
 
 
 export const cardIconListItemStyles = (theme: Theme) => createStyles({
@@ -64,9 +63,7 @@ export const cardIconListItemStyles = (theme: Theme) => createStyles({
   },
 })
 
-type ExtendedMuiProps = Partial<MuiCardProps> & WithStyles<typeof cardIconListItemStyles>
-
-export interface CardIconListItemProps extends ExtendedMuiProps {
+export interface CardIconListItemProps extends ExtendPropsOfWithStyles<Partial<MuiCardProps>, typeof cardIconListItemStyles> {
   item: Item
   preview: ReactNode
   label: ReactNode
@@ -74,21 +71,21 @@ export interface CardIconListItemProps extends ExtendedMuiProps {
   onActionClick?: { bivarianceHack<T>(event: MouseEvent<T>, selection: unknown): void; }['bivarianceHack']
 }
 
-const UnstyledComponent = forwardRef<any, CardIconListItemProps>(
+const CardIconListItemRaw = forwardRef<any, CardIconListItemProps>(
   function RefRenderFn(props, ref) {
     const {
-      classes,
-      className,
-      selected,
-      item,
-      label,
-      onActionClick,
-      preview,
-      ...rest
-    } = props
+            classes,
+            className,
+            selected,
+            item,
+            label,
+            onActionClick,
+            preview,
+            ...rest
+          } = props
     const isSelected = Boolean(selected)
     const elemClassName = clsx(classes.root, {
-      [classes.selected]: isSelected
+      [classes.selected]: isSelected,
     }, className)
     const handleClick = useCallback((e) => {
       onActionClick && onActionClick(e, item)
@@ -118,12 +115,11 @@ const UnstyledComponent = forwardRef<any, CardIconListItemProps>(
         </CardActionArea>
       </Card>
     )
-  }
+  },
 )
 
-export const CardIconListItem = withStyles(cardIconListItemStyles, {name: 'CardIconListItem'})(UnstyledComponent)
+CardIconListItemRaw.displayName = 'CardIconListItem'
+CardIconListItemRaw.defaultProps = {}
 
-CardIconListItem.displayName = 'CardIconListItem'
-CardIconListItem.defaultProps = {}
-
+export const CardIconListItem = withStyles(cardIconListItemStyles, {name: 'CardIconListItem'})(CardIconListItemRaw)
 export default CardIconListItem

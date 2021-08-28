@@ -22,6 +22,7 @@ import {
   Menu,
   SvgPathIcon,
 } from '@aglyn/shared/ui/react'
+import { createStyles, darken, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import { _isArr } from '@aglyn/shared/util/helpers'
 import AppBar from '@material-ui/core/AppBar'
 import Avatar from '@material-ui/core/Avatar'
@@ -30,7 +31,6 @@ import Button from '@material-ui/core/Button'
 import { cyan, purple } from '@material-ui/core/colors'
 import Container from '@material-ui/core/Container'
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton'
-import { createStyles, darken, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import Tab, { TabProps } from '@material-ui/core/Tab'
 import Tabs from '@material-ui/core/Tabs'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -266,8 +266,8 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
           {...item}
         >
           {avatar
-            ? (<Avatar {...avatar} className={classes.avatar} />)
-            : iconId && (<SvgPathIcon className={classes.icon} iconId={iconId} />)
+            ? (<Avatar {...avatar} className={classes.avatar}/>)
+            : iconId && (<SvgPathIcon className={classes.icon} iconId={iconId}/>)
           }
           {children}
         </IconButton>
@@ -374,7 +374,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                         color="inherit"
                         component={Link}
                         href={item.href ?? ''}
-                        icon={<SvgPathIcon className={classes.icon} iconId={iconId} />}
+                        icon={<SvgPathIcon className={classes.icon} iconId={iconId}/>}
                         label={item.label}
                         underline="none"
                         value={item.href ?? i}
@@ -404,7 +404,7 @@ const MainLayout = withCurrentUserCtx<Props & WithStyles<typeof styles>>(
                 pt={2}
               >
                 <div className={classes.left}>
-                  <Copyright />
+                  <Copyright/>
                 </div>
                 <div className={classes.right}>
                   <GridButtons

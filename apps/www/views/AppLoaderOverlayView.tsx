@@ -15,39 +15,37 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared/util/helpers'
+import { createStyles, alpha, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import MuiBackdrop, { BackdropProps as MuiBackdropProps } from '@material-ui/core/Backdrop'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import LinearProgress from '@material-ui/core/LinearProgress'
-import Slide, { SlideProps} from '@material-ui/core/Slide'
 import Typography from '@material-ui/core/Typography'
-import { createStyles, fade, Theme, WithStyles, withStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
 import { useRouter } from 'next/router'
-import { QueueResponse, withAppLoader, WithAppLoaderProps } from '../contexts/app-loader-context'
 import React, { useEffect, useState } from 'react'
+import { withAppLoader, WithAppLoaderProps } from '../contexts/app-loader-context'
 import { NextRouterEvent } from '../hooks/router-events'
+
 
 const styles = (theme: Theme) => createStyles({
   root: {
-    backgroundColor: fade(theme.palette.common.white, 0.48),
-    color: theme.palette.getContrastText(fade(theme.palette.common.white, 0.36)),
+    backgroundColor: alpha(theme.palette.common.white, 0.48),
+    color: theme.palette.getContrastText(alpha(theme.palette.common.white, 0.36)),
     zIndex: 9999999,
     flexDirection: 'column',
-    backdropFilter: 'blur(5px)'
+    backdropFilter: 'blur(5px)',
   },
   loadingBar: {
     position: 'absolute',
     top: 0, left: 0,
-    backgroundColor: fade(theme.palette.primary.main, 0.86),
+    backgroundColor: alpha(theme.palette.primary.main, 0.86),
     width: '100%',
   },
   loadingCircle: {},
   label: {marginTop: theme.spacing(2)},
 })
 
-export type Props = Partial<MuiBackdropProps> & {
-}
+export type Props = Partial<MuiBackdropProps> & {}
 
 const AppLoaderOverlayView = React.forwardRef<any, Props & WithAppLoaderProps & WithStyles<typeof styles>>(
   function RefRenderFn(props, ref) {
@@ -88,8 +86,8 @@ const AppLoaderOverlayView = React.forwardRef<any, Props & WithAppLoaderProps & 
         unmountOnExit
         {...rest}
       >
-        <LinearProgress className={classes.loadingBar} color="secondary" />
-        <CircularProgress className={classes.loadingCircle} color="secondary" />
+        <LinearProgress className={classes.loadingBar} color="secondary"/>
+        <CircularProgress className={classes.loadingCircle} color="secondary"/>
         <Typography
           children="Loading..."
           className={classes.label}
@@ -98,11 +96,11 @@ const AppLoaderOverlayView = React.forwardRef<any, Props & WithAppLoaderProps & 
         />
       </MuiBackdrop>
     )
-  }
+  },
 )
 
 AppLoaderOverlayView.displayName = 'AppLoaderOverlayView'
 
-export default withStyles(styles, { name: 'AppLoaderOverlayView' })(
-  withAppLoader(AppLoaderOverlayView)
+export default withStyles(styles, {name: 'AppLoaderOverlayView'})(
+  withAppLoader(AppLoaderOverlayView),
 )

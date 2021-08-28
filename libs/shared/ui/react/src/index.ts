@@ -55,3 +55,6 @@ export * from './lib/ddf-form'
 
 export * from './lib/higher-order/with-hoc'
 export * from './lib/higher-order/with-context'
+
+export * from './lib/utils/make-link-elements'
+export * from './lib/utils/make-meta-elements'

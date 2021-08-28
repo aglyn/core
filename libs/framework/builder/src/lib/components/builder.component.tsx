@@ -15,21 +15,20 @@
  * limitations under the License.
  */
 
-import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared/ui/react'
-import { builderTheme } from '@aglyn/shared/ui/themes'
-import { AglynComponentData } from '@aglyn/framework/sdk'
 import { CanvasRendererComponent } from '@aglyn/framework/renderer'
-import { ThemeProvider } from '@material-ui/core/styles'
-import { forwardRef } from 'react'
-import BuilderElementRendererComponent from './builder-element-renderer.component'
-import AppBarComponent from './appbar.component'
-import ElementDrawerContextProvider, { ElementDrawerContextProviderProps } from '../contexts/element-drawer-context.provider'
-import SelectionContextProvider from '../contexts/selection-context-provider'
+import { AglynComponentData } from '@aglyn/framework/sdk'
+import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared/ui/react'
+import { builderTheme, ThemeProvider } from '@aglyn/shared/ui/themes'
 import NoSsr from '@material-ui/core/NoSsr'
-import ElementsContextProvider from '../contexts/elements-context-provider'
-import ElementsContext from '../contexts/elements-context'
 import { SnackbarProvider } from 'notistack'
+import { forwardRef, Fragment } from 'react'
 import { PanZoom } from 'react-easy-panzoom'
+import ElementDrawerContextProvider, { ElementDrawerContextProviderProps } from '../contexts/element-drawer-context.provider'
+import ElementsContext from '../contexts/elements-context'
+import ElementsContextProvider from '../contexts/elements-context-provider'
+import SelectionContextProvider from '../contexts/selection-context-provider'
+import AppBarComponent from './appbar.component'
+import BuilderElementRendererComponent from './builder-element-renderer.component'
 
 
 export interface BuilderComponentProps extends OverrideableComponentProps {
@@ -46,8 +45,10 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
       ...rest
     } = props
 
+    const Wrapper = true ? NoSsr : Fragment
+
     return (
-      <NoSsr>
+      <Wrapper>
         <ThemeProvider theme={builderTheme}>
           <Component ref={ref} id="aglyn:builder" {...rest}>
             <ElementsContextProvider elements={elements}>
@@ -67,7 +68,7 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
                         </ElementsContext.Consumer>
                       </PanZoom>
 
-                      <AppBarComponent id="aglyn:toolbar" />
+                      <AppBarComponent id="aglyn:toolbar"/>
                     </ElementDrawerContextProvider>
                   </SelectionContextProvider>
                 </ConfirmationProviderComponent>
@@ -75,7 +76,7 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
             </ElementsContextProvider>
           </Component>
         </ThemeProvider>
-      </NoSsr>
+      </Wrapper>
     )
   },
 )

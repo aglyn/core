@@ -16,49 +16,110 @@
  */
 
 import {
+  alpha,
+  Breakpoint,
+  BreakpointOverrides,
+  Breakpoints,
+  BreakpointsOptions,
+  ClassNameMap,
   ColorFormat,
   ColorObject,
-  StyleRules,
-  StyledComponentProps,
-  StyledProps,
-  Theme,
-  ThemeOptions,
-  ThemeProvider,
-  Transitions,
-  TransitionsOptions,
-  WithStyles,
-  WithTheme,
-  alpha,
-  createStyles,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsPropsList,
+  ComponentsVariants,
+  CreateMUIStyled,
   createTheme,
+  CSSObject,
   darken,
   decomposeColor,
+  Direction,
+  Duration,
+  Easing,
+  easing,
   emphasize,
+  experimentalStyled,
+  ExtendPropsOfWithStyles,
   getContrastRatio,
   getLuminance,
   hexToRgb,
   hslToRgb,
   lighten,
   makeStyles,
+  Palette,
+  PaletteColor,
+  PaletteColorOptions,
+  PaletteOptions,
   recomposeColor,
   responsiveFontSizes,
   rgbToHex,
-  styled,
+  SimplePaletteColorOptions,
+  StyledComponentProps,
+  StyledEngineProvider,
+  Theme,
+  ThemedProps,
+  ThemeOptions,
+  ThemeProvider,
+  ThemeWithProps,
+  Transitions,
+  TransitionsOptions,
+  TypographyStyle,
+  TypographyVariant,
+  TypographyVariants,
+  TypographyVariantsOptions,
   useTheme,
-  withStyles,
-  withTheme,
+  useThemeProps,
 } from '@material-ui/core/styles'
+// import { Components } from '@material-ui/core/styles/components'
+// import { Mixins, MixinsOptions } from '@material-ui/core/styles/createMixins'
+// import { Typography, TypographyOptions } from '@material-ui/core/styles/createTypography'
+// import { ResponsiveFontSizesOptions } from '@material-ui/core/styles/responsiveFontSizes'
+// import { Shadows } from '@material-ui/core/styles/shadows'
+// import { ZIndex, ZIndexOptions } from '@material-ui/core/styles/zIndex'
+import {
+  BaseCreateCSSProperties,
+  BaseCSSProperties,
+  createStyles,
+  CSSProperties,
+  getThemeProps,
+  jssPreset,
+  ServerStyleSheets,
+  styled,
+  StyledComponent,
+  StyledProps,
+  StyleRules,
+  StyleRulesCallback,
+  Styles,
+  StylesContext,
+  StylesOptions,
+  StylesProvider,
+  StylesProviderProps,
+  ThemedComponentProps,
+  ThemeOfStyles,
+  ThemeProviderProps,
+  useThemeVariants,
+  WithStyles,
+  withStyles,
+  WithStylesOptions,
+  WithTheme,
+  withTheme,
+  withThemeCreator,
+  WithThemeCreatorOption,
+} from '@material-ui/styles'
+import { ClassKeyInferable } from '@material-ui/styles/withStyles'
+import { ShapeOptions, Spacing, SpacingOptions } from '@material-ui/system'
 
-import { Palette, PaletteOptions } from '@material-ui/core/styles/createPalette'
 
+export * as JSS from 'jss'
+export { default as jssRtl } from 'jss-rtl'
 
-declare module '@material-ui/core/styles/createPalette' {
+declare module '@material-ui/core/styles' {
   /**
    * START EXAMPLE – MODULE AUGMENTATION ↓
    * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
    * ```typescript
    * // Add new property ↓
-   * declare module '@material-ui/core/styles/createMuiTheme' {
+   * declare module '@material-ui/core/styles' {
    *   interface Theme {
    *     status: {
    *       danger: React.CSSProperties['color'],
@@ -77,7 +138,7 @@ declare module '@material-ui/core/styles/createPalette' {
    * })
    *
    * // Add to existing property (e.g., palette, typography) ↓
-   * declare module "@material-ui/core/styles/createPalette" {
+   * declare module "@material-ui/core/styles" {
    *   interface Palette {
    *     neutral: Palette['primary']
    *   }
@@ -100,39 +161,129 @@ declare module '@material-ui/core/styles/createPalette' {
   interface Palette {
     tertiary: Palette['primary']
     quaternary: Palette['primary']
+    svgBg?: {
+      base: string;
+      active: string;
+    };
+    svgFilled?: {
+      base: string;
+      active: string;
+    };
+    svgStroke?: {
+      base: string;
+      active: string;
+    }
   }
 
   interface PaletteOptions {
     tertiary: PaletteOptions['primary']
     quaternary: PaletteOptions['primary']
+    svgBg?: {
+      base: string;
+      active: string;
+    };
+    svgFilled?: {
+      base: string;
+      active: string;
+    };
+    svgStroke?: {
+      base: string;
+      active: string;
+    }
   }
+
+  type ExtendPropsOfWithStyles<P extends { classes?: ClassNameMap<string> },
+    StylesType extends ClassKeyInferable<any, any>,
+    IncludeTheme extends boolean | undefined = false,
+    > = P & WithStyles<StylesType, IncludeTheme>
+}
+
+declare module '@material-ui/styles' {
+  interface DefaultTheme extends Theme {}
 }
 
 export {
+  BaseCSSProperties,
+  BaseCreateCSSProperties,
+  Breakpoint,
+  BreakpointOverrides,
+  Breakpoints,
+  BreakpointsOptions,
+  CSSObject,
+  CSSProperties,
+  ClassNameMap,
   ColorFormat,
   ColorObject,
+  // Components,
+  ComponentsOverrides,
+  ComponentsProps,
+  ComponentsPropsList,
+  ComponentsVariants,
+  CreateMUIStyled,
+  Direction,
+  Duration,
+  Easing,
+  ExtendPropsOfWithStyles,
+  // MixinsOptions,
+  // Mixins,
   Palette,
+  PaletteColor,
+  PaletteColorOptions,
   PaletteOptions,
+  // ResponsiveFontSizesOptions,
+  ServerStyleSheets,
+  // Shadows,
+  SimplePaletteColorOptions,
+  ShapeOptions,
+  Spacing,
+  SpacingOptions,
   StyleRules,
+  StyleRulesCallback,
+  StyledComponent,
   StyledComponentProps,
+  StyledEngineProvider,
   StyledProps,
+  Styles,
+  StylesContext,
+  StylesOptions,
+  StylesProvider,
+  StylesProviderProps,
   Theme,
+  ThemeOfStyles,
   ThemeOptions,
   ThemeProvider,
+  ThemeProviderProps,
+  ThemeWithProps,
+  ThemedComponentProps,
+  ThemedProps,
   Transitions,
   TransitionsOptions,
+  // Typography,
+  // TypographyOptions,
+  TypographyStyle,
+  TypographyVariant,
+  TypographyVariants,
+  TypographyVariantsOptions,
   WithStyles,
+  WithStylesOptions,
   WithTheme,
+  WithThemeCreatorOption,
+  // ZIndex,
+  // ZIndexOptions,
   alpha,
   createStyles,
   createTheme,
   darken,
   decomposeColor,
+  easing,
   emphasize,
+  experimentalStyled,
   getContrastRatio,
   getLuminance,
+  getThemeProps,
   hexToRgb,
   hslToRgb,
+  jssPreset,
   lighten,
   makeStyles,
   recomposeColor,
@@ -140,6 +291,9 @@ export {
   rgbToHex,
   styled,
   useTheme,
+  useThemeProps,
+  useThemeVariants,
   withStyles,
   withTheme,
+  withThemeCreator,
 }
