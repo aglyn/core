@@ -31,7 +31,7 @@ import { Component, Ref } from 'react'
 
 export type ComponentBuilder<P = any> = (element: AglynComponentElementType<P>) => AglynComponent<P>
 
-export function elementRendererComponentBuilder<P = any>(
+export function createElementComponent<P = any>(
   componentId: SelfComponentId,
   options: AglynComponentOptions<P>,
 ): ComponentBuilder<P> {

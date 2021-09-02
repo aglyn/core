@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import { SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
-import { withStyles, WithStyles, Theme, createStyles } from '@aglyn/shared/ui/themes'
+import { AppLink, AppLinkProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
+import { createStyles, Theme, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
 import MuiBreadcrumb, { BreadcrumbsProps as MuiBreadcrumbsProps } from '@material-ui/core/Breadcrumbs'
 import Typography from '@material-ui/core/Typography'
 import clsx from 'clsx'
 import React from 'react'
-import Link, { LinkProps as LinkProps } from './Link'
 
 
 const styles = (theme: Theme) => createStyles({
@@ -47,7 +46,7 @@ const styles = (theme: Theme) => createStyles({
   },
 })
 
-export type ItemProps = LinkProps & { icon?: SvgPathIconProps, disabled?: boolean }
+export type ItemProps = AppLinkProps & { icon?: SvgPathIconProps, disabled?: boolean }
 export type Props = MuiBreadcrumbsProps & {
   items: ItemProps[]
   centerIcons?: boolean
@@ -67,7 +66,7 @@ const Breadcrumbs = React.forwardRef<any, Props & WithStyles<typeof styles>>(
             [classes.last]: Boolean(isLast),
           }, className)
 
-          const ItemComponent = isLast ? Typography : Link
+          const ItemComponent = isLast ? Typography : AppLink
 
           return (
             <ItemComponent ref={ref} className={itemClass} {...item}>

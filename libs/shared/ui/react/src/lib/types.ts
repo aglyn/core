@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { DistributiveOmit } from '@aglyn/shared/util/types'
 import {
   ComponentProps,
   ComponentPropsWithRef,
@@ -68,14 +69,6 @@ export type PropInjector<InjectedProps, AdditionalProps = {}> = <C extends JSXEl
   component: C,
 ) => JSXElementConstructor<DistributiveOmit<JSX.LibraryManagedAttributes<C, ComponentProps<C>>, keyof InjectedProps> &
   AdditionalProps>;
-
-/**
- * Remove properties `K` from `T`.
- * Distributive for union types.
- *
- * @internal
- */
-export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
 /**
  * Generate a set of string literal types with the given default record `T` and

@@ -26,8 +26,6 @@ export * from './lib/types'
 export * from './lib/version'
 
 export * from './lib/util/aglyn-is'
-export * from './lib/util/handle-resolve-props'
-export * from './lib/util/handle-prop-defaults'
 
 export * from './lib/models/aglyn-base.model'
 export * from './lib/models/aglyn-extension.model'

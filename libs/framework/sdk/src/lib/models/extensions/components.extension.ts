@@ -15,30 +15,28 @@
  * limitations under the License.
  */
 
-import { ComponentBuilder, elementRendererComponentBuilder } from '@aglyn/framework/renderer'
 import { _isArr, _isUndOrNull } from '@aglyn/shared/util/guards'
 import { getStaticField } from '@aglyn/shared/util/tools'
 import { AglynAppInstance } from '../../types'
 import { AglynExtensionModel } from '../aglyn-extension.model'
 import {
   AglynComponent,
-  AglynComponentsExtension,
   AglynComponentEventFlag,
+  AglynComponentsExtension,
   ComponentId,
   ComponentsRegistry,
-  UnregisterComponentPayload,
+  ComponentsRegistryEntries,
+  ComponentsRegistryKeys,
+  ComponentsRegistryValues,
   GetComponentPayload,
   PluginComponentIdString,
   PluginComponentIdTuple,
   PluginId,
   RegisterComponentPayload,
   RegisterPluginPayload,
-  RegistryEntries,
-  RegistryKeys,
-  RegistryValues,
   SelfComponentId,
+  UnregisterComponentPayload,
   UnregisterPluginPayload,
-  AglynComponentOptions,
 } from './components-types.extension'
 
 
@@ -108,39 +106,25 @@ export default class AglynComponentsExtensionModel extends AglynExtensionModel<C
     super(app, {autoload: true})
   }
 //end: constructor
-//start: public
-  public static componentBuilderFactory = <P>(
-    componentId: SelfComponentId,
-    options: AglynComponentOptions,
-  ): ComponentBuilder<P> => {
-    return elementRendererComponentBuilder(componentId, options)
-  }
-  public componentBuilderFactory = <P>(
-    componentId: SelfComponentId,
-    options: AglynComponentOptions,
-  ): ComponentBuilder<P> => {
-    return getStaticField('componentBuilderFactory', this).call(null, componentId, options)
-  }
-//end: public
 //start: abstract + overridden
-  public getAllComponents = (): RegistryEntries => {
+  public getAllComponents = (): ComponentsRegistryEntries => {
     return this._componentEntries()
   }
-  public getAllComponentsKeys = (): RegistryKeys => {
+  public getAllComponentsKeys = (): ComponentsRegistryKeys => {
     return this._componentKeys()
   }
-  public getAllComponentsValues = (): RegistryValues => {
+  public getAllComponentsValues = (): ComponentsRegistryValues => {
     return this._componentValues()
   }
   public getComponent = (payload: GetComponentPayload): AglynComponent => {
     const {componentId} = payload
-    return this.context?.components?.get(this._buildComponentId(componentId))
+    return this.context?.components?.get(this._decodeId(componentId))
   }
   public registerComponent = (payload: RegisterComponentPayload): this => {
     const {component} = payload
-    const [pId, cId] = this._decodeId(component?.$id)
+    const [pId, cId] = this._getDecodedId(component?.$id)
     if (cId) {
-      this.context?.components?.set(this._buildComponentId([pId, cId]), component)
+      this.context?.components?.set(this._decodeId([pId, cId]), component)
       this.context?.plugins?.get(pId)?.components?.set(cId, component)
     }
     return this
@@ -151,15 +135,15 @@ export default class AglynComponentsExtensionModel extends AglynExtensionModel<C
     this.context?.plugins?.set(pId, plugin)
     plugin?.components?.forEach(component => {
       const cId = component?.$id
-      this.context?.components?.set(this._buildComponentId([pId, cId]), component)
+      this.context?.components?.set(this._decodeId([pId, cId]), component)
     })
     return this
   }
   public unregisterComponent = (payload: UnregisterComponentPayload): this => {
     const {componentId} = payload
-    const [pId, cId] = this._decodeId(componentId)
+    const [pId, cId] = this._getDecodedId(componentId)
     if (cId) {
-      this.context?.components?.delete(this._buildComponentId([pId, cId]))
+      this.context?.components?.delete(this._decodeId([pId, cId]))
       this.context?.plugins?.get(pId)?.components?.delete(cId)
     }
     return this
@@ -167,7 +151,7 @@ export default class AglynComponentsExtensionModel extends AglynExtensionModel<C
   public unregisterComponentsPlugin = (payload: UnregisterPluginPayload): this => {
     const {pluginId} = payload
     this.context?.plugins.get(pluginId)?.components?.forEach(component => {
-      this.context?.components?.delete(this._buildComponentId([pluginId, component?.$id]))
+      this.context?.components?.delete(this._decodeId([pluginId, component?.$id]))
     })
     this.context?.plugins.delete(pluginId)
     return this
@@ -180,12 +164,12 @@ export default class AglynComponentsExtensionModel extends AglynExtensionModel<C
   ]
 //end: abstract + overridden
 //start: not public
-  protected _buildComponentId = (id: ComponentId): PluginComponentIdString | SelfComponentId => {
+  protected _decodeId = (id: ComponentId): PluginComponentIdString | SelfComponentId => {
     return !_isArr(id) ? id : id.filter(i => {
       return !_isUndOrNull(i)
     }).join(getStaticField('pluginSeparator', this))
   }
-  protected _componentEntries = (): RegistryEntries => {
+  protected _componentEntries = (): ComponentsRegistryEntries => {
     return [...this.context?.components?.entries()]
   }
   protected _componentKeys = (): ComponentId[] => {
@@ -195,14 +179,14 @@ export default class AglynComponentsExtensionModel extends AglynExtensionModel<C
     return [...this.context?.components?.values()]
   }
   protected _decodeComponentId = (id: ComponentId): SelfComponentId => {
-    const _id = this._buildComponentId(id)
+    const _id = this._decodeId(id)
     return (_id.match(getStaticField('componentIdMatcher', this)) ?? []) [0]
   }
-  protected _decodeId = (id: ComponentId): PluginComponentIdTuple => {
+  protected _getDecodedId = (id: ComponentId): PluginComponentIdTuple => {
     return [this._decodePluginId(id), this._decodeComponentId(id)]
   }
   protected _decodePluginId = (id: ComponentId): PluginId => {
-    const _id = this._buildComponentId(id)
+    const _id = this._decodeId(id)
     return (_id.match(getStaticField('pluginIdMatcher', this)) ?? [])[0]
   }
 //end: not public

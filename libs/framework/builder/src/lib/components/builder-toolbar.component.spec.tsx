@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-import React from 'react'
 import { render } from '@testing-library/react'
+import React from 'react'
 
-import AppBarComponent from './appbar.component'
+import { BuilderToolbarComponent } from './builder-toolbar.component'
 
-describe('AppBarComponent', () => {
+
+describe('BuilderToolbarComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<AppBarComponent />)
+    const {baseElement} = render(<BuilderToolbarComponent/>)
     expect(baseElement).toBeTruthy()
   })
 })

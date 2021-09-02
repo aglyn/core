@@ -40,10 +40,10 @@ export type PluginComponentId = PluginComponentIdTuple | PluginComponentIdString
 export type ComponentId = SelfComponentId | PluginComponentId
 
 export type RegistryEntry = [id: ComponentId, component: AglynComponent]
-export type RegistryEntries = RegistryEntry[]
-export type RegistryKeys = ComponentId[]
+export type ComponentsRegistryEntries = RegistryEntry[]
+export type ComponentsRegistryKeys = ComponentId[]
 export type RegistryValue = AglynComponent
-export type RegistryValues = RegistryValue[]
+export type ComponentsRegistryValues = RegistryValue[]
 export type RegistryPluginMap = Map<PluginId, AglynComponentsPlugin>
 export type RegistryComponentsMap = Map<ComponentId, AglynComponent>
 
@@ -140,9 +140,9 @@ export interface AglynComponentData extends AglynUniqueId {
 }
 
 export interface AglynComponentsExtension extends AglynExtensionInstance {
-  getAllComponentsValues(): RegistryValues
-  getAllComponentsKeys(): RegistryKeys
-  getAllComponents(): RegistryEntries
+  getAllComponentsValues(): ComponentsRegistryValues
+  getAllComponentsKeys(): ComponentsRegistryKeys
+  getAllComponents(): ComponentsRegistryEntries
   getComponent(payload: GetComponentPayload): AglynComponent
   unregisterComponent(payload: UnregisterComponentPayload): this
   registerComponent(payload: RegisterComponentPayload): this

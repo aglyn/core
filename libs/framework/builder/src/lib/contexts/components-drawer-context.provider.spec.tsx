@@ -17,12 +17,12 @@
 
 import React from 'react'
 import { render } from '@testing-library/react'
-import ElementsContextProvider from './elements-context-provider'
+import { ComponentsDrawerContextProvider } from './components-drawer-context.provider'
 
 
-describe('ElementsContextProvider', () => {
+describe('ComponentsDrawerContextProvider', () => {
   it('should render successfully', () => {
-    const {baseElement} = render(<ElementsContextProvider />)
+    const {baseElement} = render(<ComponentsDrawerContextProvider />)
     expect(baseElement).toBeTruthy()
   })
 })

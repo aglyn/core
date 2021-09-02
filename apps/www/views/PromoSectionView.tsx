@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
+import { AppLink, AppLinkProps } from '@aglyn/shared/ui/react'
 import { styled } from '@aglyn/shared/ui/themes'
 import Box from '@material-ui/core/Box'
 import Typography from '@material-ui/core/Typography'
 import React, { ElementType, forwardRef, HTMLAttributes, ReactNode } from 'react'
 import BackgroundImage from '../components/BackgroundImage'
-import Link, { LinkProps } from '../components/Link'
 
 
 const StyledPromoBackgroundImage = styled(BackgroundImage, {
-  name: 'PromoBackgroundImage'
+  name: 'PromoBackgroundImage',
 })(({theme}) => ({
   textAlign: 'center',
   marginTop: theme.spacing(4),
@@ -42,7 +42,7 @@ export interface PromoSectionViewProps extends HTMLAttributes<HTMLElement> {
   component?: ElementType
   backgroundUrl: string
   heading: ReactNode
-  link: LinkProps
+  link: AppLinkProps<'button'>
 }
 
 const PromoSectionView = forwardRef<any, PromoSectionViewProps>(
@@ -65,11 +65,11 @@ const PromoSectionView = forwardRef<any, PromoSectionViewProps>(
             children={heading}
             sx={{mb: 4}}
           />
-          <Link
-            button
+          <AppLink
             size="large"
             variant="contained"
             color="primary"
+            linkType="button"
             {...link}
           />
         </StyledPromoBackgroundImage>

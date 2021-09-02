@@ -56,6 +56,9 @@ export type OmitIndexOfType<T, U> = {
   [K in (IndexOf<T, KeyOf<T>> extends U ? never : KeyOf<T>)]: T[K]
 }
 
+/** From T, omit properties in union with 'K' "distributively" for union types */
+export type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
+
 /** Any type of object record with string index types */
 export type AnyProps = Record<string, unknown>
 
@@ -102,8 +105,14 @@ export type MutableDeep<T> = {
 /** From T, require properties whose keys are in union K (make specific keys required) */
 export type RequiredPick<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 
+/** From T, require properties whose keys are in union K and the rest as partial (make specific keys required) */
+export type RequiredPickAlt<T, K extends keyof T> = Partial<Omit<T, K>> & Required<Pick<T, K>>
+
 /** From T, make properties partial whose keys are in union K (Make specific keys optional) */
 export type PartialPick<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
+/** From T, make properties partial whose keys are in union K and the rest as required (Make specific keys optional) */
+export type PartialPickAlt<T, K extends keyof T> = Required<Omit<T, K>> & Partial<Pick<T, K>>
 
 /** From T, extract keys whose types are required (excludes optional properties) (optionally narrow keys in union by specifying K) */
 export type KeyOfPickRequired<T, K extends keyof T = keyof T> = {

@@ -15,24 +15,47 @@
  * limitations under the License.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { BuilderComponent } from '@aglyn/framework/builder'
+import { createElementComponent } from '@aglyn/framework/renderer'
 import {
-  aglynComponent, AglynComponentData,
-  getAllComponents,
+  AglynComponentData,
+  getAllComponentsValues,
   getApp,
   registerComponent,
 } from '@aglyn/framework/sdk'
-import { BuilderComponent } from '@aglyn/framework/builder'
+import { useCallback, useMemo, useState } from 'react'
 import { samplePageData } from '../constants/sample-data'
 
 
-const Root = aglynComponent('root', {
+registerComponent(getApp(), createElementComponent('root', {
   displayName: 'Root Element',
   title: 'Root element',
   icon: 'block',
-})('span')
+})('span'))
 
-registerComponent(getApp(), Root)
+registerComponent(getApp(), createElementComponent('root1', {
+  displayName: 'Root Element',
+  title: 'Root element',
+  icon: 'block',
+})('span'))
+
+registerComponent(getApp(), createElementComponent('root2', {
+  displayName: 'Root Element',
+  title: 'Root element',
+  icon: 'block',
+})('span'))
+
+registerComponent(getApp(), createElementComponent('root3', {
+  displayName: 'Root Element',
+  title: 'Root element',
+  icon: 'block',
+})('span'))
+
+registerComponent(getApp(), createElementComponent('root4', {
+  displayName: 'Root Element',
+  title: 'Root element',
+  icon: 'block',
+})('span'))
 
 function Builder(props) {
   if (typeof document !== 'undefined') {
@@ -40,17 +63,14 @@ function Builder(props) {
   }
 
   const [elements, setElements] = useState<AglynComponentData[]>(samplePageData)
-  const elementComponents = useMemo(() => {
-    return getAllComponents(getApp()).map(([, element]) => ({
-      id: element?.$id,
-      title: element?.options?.title,
-      icon: element?.options?.icon,
-    }))
-  }, [])
+  const elementComponents = useMemo(() => (
+    getAllComponentsValues(getApp())
+  ), [])
 
-  const handleUpdateElements = useCallback((elements: AglynComponentData[]) => {
+  const handleUpdateElements = useCallback((elements: AglynComponentData[], prevElements) => {
+    console.log('handleUpdateElements', elements, prevElements)
     setElements(elements)
-  }, []);
+  }, [])
 
 
   return (

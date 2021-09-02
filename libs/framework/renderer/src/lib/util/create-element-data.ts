@@ -15,15 +15,25 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import { render } from '@testing-library/react'
+import { AglynComponentData, SelfComponentId } from '@aglyn/framework/sdk'
+import { deepMergeMany } from '@aglyn/shared/util/helpers'
+import { createElementDataId } from './create-element-data-id'
 
-import ComponentDrawerComponent from './component-drawer.component'
 
+export const ELEMENT_DEFAULTS = {
+  props: {},
+}
 
-describe('ComponentDrawerComponent', () => {
-  it('should render successfully', () => {
-    const {baseElement} = render(<ComponentDrawerComponent />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export function createElementData(
+  componentId: SelfComponentId,
+  data?: Omit<AglynComponentData, '$id' | 'component'>,
+): AglynComponentData {
+  return deepMergeMany([
+    {...ELEMENT_DEFAULTS},
+    {
+      $id: createElementDataId(),
+      component: componentId,
+    },
+    {...data},
+  ])
+}

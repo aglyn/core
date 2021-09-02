@@ -15,22 +15,26 @@
  * limitations under the License.
  */
 
-import { createContext, useContext } from 'react'
 import { AglynComponentData } from '@aglyn/framework/sdk'
+import { createContext, useContext } from 'react'
 
 
 export type UseElementsContextType = () => ElementsContextType
 
 export interface ElementsContextType {
   elements: AglynComponentData[]
-  updateElements: (elements: AglynComponentData[]) => void
+  updateElements?: (
+    newElements: AglynComponentData[],
+    prevElements: AglynComponentData[],
+  ) => void
 }
 
 export const DEFAULT_ELEMENTS_CONTEXT: ElementsContextType = {
   elements: [],
-  updateElements: (prev) => prev,
+  // updateElements: ((prev) => prev),
 }
 export const ElementsContext = createContext<ElementsContextType>(DEFAULT_ELEMENTS_CONTEXT)
+ElementsContext.displayName = 'ElementsContext'
 
 export const useElementsContext: UseElementsContextType = () => {
   return useContext(ElementsContext)

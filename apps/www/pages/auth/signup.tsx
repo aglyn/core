@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-import { Theme, createStyles, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
+import { AppLink } from '@aglyn/shared/ui/react'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
 import { remap } from '@aglyn/shared/util/tools'
-import { Button, Typography, Box } from '@material-ui/core'
+import { Box, Button, Typography } from '@material-ui/core'
 import { useRouter } from 'next/router'
 import React from 'react'
 import FieldSet from '../../components/FieldSet'
-import Link from '../../components/Link'
 import { withAppContext } from '../../contexts/app-context'
-import { Fields, validateField, formIsValid } from '../../forms'
+import { Fields, formIsValid, validateField } from '../../forms'
 import AuthLayout from '../../layouts/AuthLayout'
 
 
@@ -153,7 +153,7 @@ export default withStyles(styles, {name: 'Page:SignUp'})(
           >
             <b children={'Already have an account?'}/>
             <br/>
-            <Link
+            <AppLink
               children="Sign in instead"
               color="secondary"
               href="/auth/signin"

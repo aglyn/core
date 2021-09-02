@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import { createStyles, alpha, Theme, WithStyles, withStyles, styled } from '@aglyn/shared/ui/themes'
+import { alpha, styled } from '@aglyn/shared/ui/themes'
 import MuiBackdrop, { BackdropProps as MuiBackdropProps } from '@material-ui/core/Backdrop'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import LinearProgress from '@material-ui/core/LinearProgress'
 import Typography from '@material-ui/core/Typography'
-import clsx from 'clsx'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { withAppLoader, WithAppLoaderProps } from '../contexts/app-loader-context'
@@ -28,8 +27,8 @@ import { NextRouterEvent } from '../hooks/router-events'
 
 
 const LoadingBackdrop = styled(MuiBackdrop, {
-  name: 'LoadingBackdrop'
-})(({theme})=>({
+  name: 'LoadingBackdrop',
+})(({theme}) => ({
   backgroundColor: alpha(theme.palette.common.white, 0.48),
   color: theme.palette.getContrastText(alpha(theme.palette.common.white, 0.36)),
   zIndex: 9999999,
@@ -38,8 +37,8 @@ const LoadingBackdrop = styled(MuiBackdrop, {
 }))
 
 const LoadingProgressBar = styled(LinearProgress, {
-  name: 'LoadingProgressBar'
-})(({theme})=>({
+  name: 'LoadingProgressBar',
+})(({theme}) => ({
   position: 'absolute',
   top: 0, left: 0,
   backgroundColor: alpha(theme.palette.primary.main, 0.86),
@@ -90,7 +89,7 @@ const AppLoaderOverlayView = React.forwardRef<any, AppLoaderOverlayProps>(
           children="Loading..."
           component="div"
           variant="overline"
-          sx={{mt:2}}
+          sx={{mt: 2}}
         />
       </LoadingBackdrop>
     )

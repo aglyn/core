@@ -130,14 +130,14 @@ function Contact(props) {
       centerNavigationItems={mainNavigation}
       productName={productNames.www}
       sx={{
-        pt: 56,
+        pt: theme => theme.mixins.toolbar.minHeight,
       }}
     >
       <main>
         <Box py={12} bgcolor={'background.paper'}>
           <Container
             maxWidth={'lg'}
-            sx={{py:4}}
+            sx={{py: 4}}
           >
             <GridItems
               alignItems="center"
@@ -154,7 +154,7 @@ function Contact(props) {
                         children={'Contact Us'}
                         align="center"
                         sx={{
-                          mb: 4
+                          mb: 4,
                         }}
                       />
                       <Typography
@@ -164,7 +164,7 @@ function Contact(props) {
                         align="center"
                         sx={{
                           color: 'secondary.main',
-                          mb: 4
+                          mb: 4,
                         }}
                       />
                     </>

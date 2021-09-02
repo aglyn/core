@@ -17,15 +17,17 @@
 
 import { PartialPick } from '@aglyn/shared/util/types'
 import Link, { LinkProps } from 'next/link'
-import React from 'react'
+import { AnchorHTMLAttributes, forwardRef } from 'react'
 
 
-export interface NextLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>,
-  PartialPick<LinkProps, 'as'> {
+type AnchorProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
+
+export interface NextLinkProps extends AnchorProps, PartialPick<LinkProps, 'as'> {
   hrefAs?: LinkProps['as']
+  className?: string
 }
 
-const NextLink = React.forwardRef<HTMLAnchorElement, NextLinkProps>(
+export const NextLink = forwardRef<HTMLAnchorElement, NextLinkProps>(
   function RefRenderFn(props, ref) {
     const {
       hrefAs,
@@ -38,9 +40,9 @@ const NextLink = React.forwardRef<HTMLAnchorElement, NextLinkProps>(
       prefetch,
       locale,
       as,
-      component:_,
+      component: _,
       ...rest
-    }: NextLinkProps & {component?:any} = props
+    }: NextLinkProps & { component?: any } = props
 
     return (
       <Link

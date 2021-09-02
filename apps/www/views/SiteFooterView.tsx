@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import { GridItems } from '@aglyn/shared/ui/react'
+import { AppLink, GridItems } from '@aglyn/shared/ui/react'
 import Box from '@material-ui/core/Box'
 import Container from '@material-ui/core/Container'
 import MuiLink from '@material-ui/core/Link'
 import Typography from '@material-ui/core/Typography'
 import { ElementType, forwardRef, HTMLAttributes } from 'react'
-import Link from '../components/Link'
 import { footerNavigation } from '../const'
 
 
@@ -44,7 +43,7 @@ const SiteFooterView = forwardRef<any, SiteFooterViewProps>(
         sx={{background: 'none'}}
         {...rest}
       >
-        <Box sx={{pt:4}}>
+        <Box sx={{pt: 4}}>
           {children && (
             <Container maxWidth="lg">
               {children}
@@ -93,7 +92,7 @@ const SiteFooterView = forwardRef<any, SiteFooterViewProps>(
                       <Typography component="ul">
                         {items.map((item, key) => (
                           <li key={key}>
-                            <Link {...item} />
+                            <AppLink {...item} />
                           </li>
                         ))}
                       </Typography>

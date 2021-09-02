@@ -17,13 +17,15 @@
 
 import {
   AglynSvgLogo,
+  AppLink,
+  AppLinkProps,
   GridButtons,
   GridButtonsProps,
   Menu,
   SvgPathIcon,
 } from '@aglyn/shared/ui/react'
 import { darken, styled } from '@aglyn/shared/ui/themes'
-import { _isArr } from '@aglyn/shared/util/helpers'
+import { _isArr, _isObj } from '@aglyn/shared/util/guards'
 import AppBar from '@material-ui/core/AppBar'
 import Avatar from '@material-ui/core/Avatar'
 import Box from '@material-ui/core/Box'
@@ -39,14 +41,13 @@ import { useRouter } from 'next/router'
 import { Fragment, ReactNode } from 'react'
 import { Props as BreadcrumbsProps } from '../components/Breadcrumbs'
 import Copyright from '../components/Copyright'
-import Link, { LinkProps as LinkProps } from '../components/Link'
 import { APP, tailNavigation } from '../const'
 import { CurrentUserContext, withCurrentUserCtx } from '../contexts/current-user-context'
 import { AggregatedPageMeta, withAggregatedPageMeta } from '../lib/app-pages'
 
 
 const StyledLogo = styled(AglynSvgLogo, {
-  name: 'AglynSvgLogo'
+  name: 'AglynSvgLogo',
 })(({theme}) => ({
   // color: '#36ca94', // Hulu
   color: theme.palette.secondary.light,
@@ -57,7 +58,7 @@ const StyledLogo = styled(AglynSvgLogo, {
 }))
 
 const StyledAppBar = styled(AppBar, {
-  name: 'AppBar'
+  name: 'AppBar',
 })(({theme}) => ({
   '&:after': {
     content: '" "',
@@ -72,7 +73,7 @@ const StyledAppBar = styled(AppBar, {
 }))
 
 const StyledNavBarSpacer = styled('div', {
-  name: 'NavBarSpacer'
+  name: 'NavBarSpacer',
 })({
   display: 'flex',
   width: '100%',
@@ -80,14 +81,14 @@ const StyledNavBarSpacer = styled('div', {
 })
 
 const StyledLeft = styled('div', {
-  name: 'Left'
+  name: 'Left',
 })({
   flexGrow: 1,
   display: 'flex',
 })
 
 const StyledCenter = styled('div', {
-  name: 'Center'
+  name: 'Center',
 })({
   display: 'flex',
   flexGrow: 1,
@@ -95,13 +96,13 @@ const StyledCenter = styled('div', {
 })
 
 const StyledRight = styled('div', {
-  name: 'Right'
+  name: 'Right',
 })({
   display: 'flex',
 })
 
 const StyledLogoWrapper = styled('div', {
-  name: 'StyledLogoWrapper'
+  name: 'StyledLogoWrapper',
 })(({theme}) => ({
   height: 36,
   flex: '0 0 auto',
@@ -115,14 +116,14 @@ const StyledLogoWrapper = styled('div', {
 }))
 
 const StyledLogoInner = styled('span', {
-  name: 'LogoInner'
+  name: 'LogoInner',
 })({
   display: 'flex',
   alignItems: 'center',
 })
 
 const StyledProductName = styled('span', {
-  name: 'ProductName'
+  name: 'ProductName',
 })(({theme}) => ({
   color: theme.palette.common.white,
   paddingLeft: theme.spacing(0.75),
@@ -139,7 +140,7 @@ const StyledProductName = styled('span', {
 }))
 
 const StyledTabs = styled(Tabs, {
-  name: 'Tabs'
+  name: 'Tabs',
 })(({theme}) => ({
   '& .Mui-flexContainer': {
     alignItems: 'center',
@@ -162,7 +163,7 @@ const StyledTabs = styled(Tabs, {
 }))
 
 const StyledTab = styled(Tab, {
-  name: 'Tab'
+  name: 'Tab',
 })(({theme}) => ({
   flexDirection: 'row',
   '& > *:first-child': {
@@ -182,26 +183,27 @@ const StyledTab = styled(Tab, {
 }))
 
 const StyledAvatar = styled(Avatar, {
-  name: 'Avatar'
+  name: 'Avatar',
 })({
   backgroundColor: cyan[600],
 })
 
 const StyledContent = styled('main', {
-  name: 'Content'
+  name: 'Content',
 })(({theme}) => ({
   // marginTop: theme.spacing(-6),
+  marginTop: theme.mixins.toolbar.minHeight,
 }))
 
 const StyledMenu = styled(Menu, {
-  name: 'Menu'
+  name: 'Menu',
 })(({theme}) => ({
   padding: theme.spacing(0.5, 0.25),
   '&:last-child': {paddingLeft: theme.spacing(0.75)},
 }))
 
 const StyledBreadcrumbs = styled('div', {
-  name: 'Breadcrumbs'
+  name: 'Breadcrumbs',
 })(({theme}) => ({
   marginTop: theme.spacing(1),
   color: darken(theme.palette.getContrastText(purple['600']), 0.12),
@@ -230,7 +232,7 @@ export interface MainLayoutProps {
   tabBarTitle?: string
   centerNavigationItems?: Array<any>
   breadcrumbItems?: BreadcrumbsProps['items']
-  navTabItems?: (TabProps & LinkProps & { iconId: string })[]
+  navTabItems?: (TabProps & AppLinkProps & { iconId: string })[]
   quickActionMenus?: (IconButtonProps & { iconId: string })[]
   productName?: string
   footerNavItems: GridButtonsProps['items']
@@ -257,11 +259,14 @@ const MainLayout = function RefRenderFn(props: MainLayoutProps) {
     overrideMeta,
     pageAncestors,
   } = aggregatedPageMeta
-  const tabValue = !navTabItems ? '' : navTabItems
+  const tabValue = navTabItems ? navTabItems
   .filter(i => router.asPath.includes(i.href))
-  .reduce((prev, current) =>
-    current.href.length > prev.href.length ? current : prev,
-  ).href ?? ''
+  .reduce((prev, current) => {
+    const currentHref = (_isObj(current.href) ? current.href.path : current.href) as string
+    const prevHref = (_isObj(prev.href) ? prev.href.path : prev.href) as string
+
+    return currentHref.length > prevHref.length ? current : prev
+  }).href ?? '' : ''
 
   const buildIconButton = ({avatar, iconId, children, ...item}, i) => (
     <IconButton
@@ -279,9 +284,9 @@ const MainLayout = function RefRenderFn(props: MainLayoutProps) {
   )
 
   const buildTextButton = (item, key) => (
-    <Link
+    <AppLink
       key={key}
-      button
+      linkType="button"
       color="inherit"
       sx={{p: item?.avatar ? 0.5 : undefined}}
       {...item}
@@ -317,12 +322,12 @@ const MainLayout = function RefRenderFn(props: MainLayoutProps) {
             <Toolbar>
               <StyledLeft>
                 <StyledLogoWrapper>
-                  <Link hrefAs="/" color="inherit" href="/" underline="none">
+                  <AppLink hrefAs="/" color="inherit" href="/" underline="none">
                     <StyledLogoInner>
                       <StyledLogo color="inherit"/>
                     </StyledLogoInner>
                     {productName ? (<StyledProductName children={` ${productName}`}/>) : null}
-                  </Link>
+                  </AppLink>
                 </StyledLogoWrapper>
               </StyledLeft>
               <StyledCenter>
@@ -361,7 +366,7 @@ const MainLayout = function RefRenderFn(props: MainLayoutProps) {
                     key={item.id ?? item.href ?? i}
                     // disableRipple
                     color="inherit"
-                    component={Link}
+                    component={AppLink}
                     href={item.href ?? ''}
                     icon={<SvgPathIcon iconId={iconId}/>}
                     label={item.label}
@@ -385,13 +390,13 @@ const MainLayout = function RefRenderFn(props: MainLayoutProps) {
           <Box
             component={'div'}
             sx={{
-              mt:6,
-              pb:1,
-              pt:2,
+              mt: 6,
+              pb: 1,
+              pt: 2,
               borderTop: 1,
               display: 'flex',
-              flexWrap:'wrap',
-              borderColor:'divider',
+              flexWrap: 'wrap',
+              borderColor: 'divider',
               alignItems: 'center',
             }}
           >
@@ -401,7 +406,7 @@ const MainLayout = function RefRenderFn(props: MainLayoutProps) {
             <StyledRight>
               <GridButtons
                 items={footerNavItems.map(i => ({
-                  size: 'small', component: Link, button: true, ...i,
+                  size: 'small', component: AppLink, linkType: 'button', ...i,
                 }))}
                 spacing={1}
               />

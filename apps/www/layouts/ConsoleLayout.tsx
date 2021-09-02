@@ -17,7 +17,9 @@
 
 import { GridItems, GridItemsProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
 import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
-import { _isStrT, _s, copy, getGravatarUrl } from '@aglyn/shared/util/helpers'
+import { _isStrT } from '@aglyn/shared/util/guards'
+import { _s, copy } from '@aglyn/shared/util/tools'
+import { getGravatarUrl } from '@aglyn/shared/util/helpers'
 import Container from '@material-ui/core/Container'
 import Typography from '@material-ui/core/Typography'
 import clsx from 'clsx'

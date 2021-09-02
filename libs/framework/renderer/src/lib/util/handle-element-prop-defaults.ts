@@ -18,6 +18,11 @@
 import { deepMerge } from '@aglyn/shared/util/helpers'
 
 
+export type HandlePropsOptions = {
+  clone?: boolean
+  callback?: (key: string, options?: HandlePropsOptions) => ((x: any, y: any) => any) | undefined
+}
+
 /**
  * Handle deep merging props
  * @param {Partial<T>} props
@@ -25,7 +30,7 @@ import { deepMerge } from '@aglyn/shared/util/helpers'
  * @param {HandlePropsOptions} options
  * @returns {T}
  */
-export function handlePropDefaults<T>(props: Partial<T>, defaults: Partial<T>, options?: HandlePropsOptions): T
+export function handleElementPropDefaults<T>(props: Partial<T>, defaults: Partial<T>, options?: HandlePropsOptions): T
 /**
  * Handle deep merging props
  * @param {Partial<T1>} props
@@ -33,11 +38,8 @@ export function handlePropDefaults<T>(props: Partial<T>, defaults: Partial<T>, o
  * @param {HandlePropsOptions} options
  * @returns {T1 & T2}
  */
-export function handlePropDefaults<T1, T2>(props: Partial<T1>, defaults: Partial<T2>, options?: HandlePropsOptions): T1 & T2 {
+export function handleElementPropDefaults<T1, T2>(props: Partial<T1>, defaults: Partial<T2>, options?: HandlePropsOptions): T1 & T2 {
   return deepMerge(defaults, props, options)
 }
 
-export interface HandlePropsOptions {
-  clone?: boolean
-  callback?: (key: string, options?: HandlePropsOptions) => ((x: any, y: any) => any) | undefined
-}
+export default handleElementPropDefaults

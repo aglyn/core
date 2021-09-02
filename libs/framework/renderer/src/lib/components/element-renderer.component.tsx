@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-import { AglynComponentData, getApp, getComponent, handleResolveProps } from '@aglyn/framework/sdk'
+import { AglynComponentData, getApp, getComponent } from '@aglyn/framework/sdk'
 import { ReactIs } from '@aglyn/shared/ui/react'
-import { _isArr, _isArrEmpty, _s, yes } from '@aglyn/shared/util/helpers'
+import { _isArr, _isArrEmpty } from '@aglyn/shared/util/guards'
+import { _s, yes } from '@aglyn/shared/util/tools'
 import { AnyProps } from '@aglyn/shared/util/types'
 import { ComponentType, ElementType, forwardRef } from 'react'
+import { handleElementResolveProps } from '../util/handle-element-resolve-props'
 import { ElementsRendererComponent } from './elements-renderer.component'
 
 
@@ -41,7 +43,7 @@ export const ElementRendererComponent = forwardRef<any, ElementRendererComponent
     const component = getComponent(getApp(), {componentId: _s(elementData?.component)})
     const ctor = component
     const options = component?.options
-    const resolvedProps = handleResolveProps(elementData?.props, options, ctor)
+    const resolvedProps = handleElementResolveProps(elementData?.props, options, ctor)
     const {children: content = null, ...ctorProps} = resolvedProps
     const ComponentCtor = (ReactIs.isValidElementType(ctor) ? ctor : 'div') as ElementType
     const haveChildren = yes(!_isArr(elementData?.children) || _isArrEmpty(elementData?.children))
@@ -64,6 +66,5 @@ export const ElementRendererComponent = forwardRef<any, ElementRendererComponent
 )
 
 ElementRendererComponent.displayName = 'ElementRendererComponent'
-ElementRendererComponent.defaultProps = {}
 
 export default ElementRendererComponent

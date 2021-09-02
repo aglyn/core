@@ -19,10 +19,12 @@ import { NormalizedData, NormalizedModel } from '../interfaces/normalized'
 import {
   _isNum,
   _isObj,
+} from '@aglyn/shared/util/guards'
+import {
   arrayRemoveItem,
   arrayReorder,
   deleteProperty,
-} from '@aglyn/shared/util/helpers'
+} from '@aglyn/shared/util/tools'
 
 
 type ID = string

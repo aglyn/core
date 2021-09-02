@@ -15,28 +15,34 @@
  * limitations under the License.
  */
 
-import ElementDrawerContext, {
+import { ElementType, Fragment, ReactNode, useCallback, useState } from 'react'
+import { ElementComponentsContext } from '../../../../renderer/src/lib/contexts/element-components-context'
+import {
+  BuilderComponentsDrawerComponent,
+  ComponentsDrawerComponentProps,
+} from '../components/builder-components-drawer.component'
+import {
   buildOptions,
   DEFAULT_OPTIONS,
+  ElementDrawerContext,
   ElementDrawerOptions,
 } from './element-drawer-context'
-import { ElementType, Fragment, ReactNode, useCallback, useState } from 'react'
-import ElementDrawerComponent, { ElementDrawerComponentProps } from '../components/component-drawer.component'
 
 
-export interface ElementDrawerContextProviderProps extends Partial<ElementDrawerComponentProps> {
+export interface ElementDrawerContextProviderProps extends Partial<ComponentsDrawerComponentProps> {
   defaultOptions?: ElementDrawerOptions
   children?: ReactNode
-  component: ElementType<ElementDrawerComponentProps>
+  component?: ElementType<ComponentsDrawerComponentProps>
 }
 
-function ElementDrawerContextProvider(props: ElementDrawerContextProviderProps) {
+export function ComponentsDrawerContextProvider(props: ElementDrawerContextProviderProps) {
   const {
     children,
     defaultOptions = {},
-    component: Component,
+    component,
     ...rest
   } = props
+  const Component = component || BuilderComponentsDrawerComponent
   const [options, setOptions] = useState({...DEFAULT_OPTIONS, ...defaultOptions})
   const [resolveReject, setResolveReject] = useState([])
   const [resolve, reject] = resolveReject
@@ -68,19 +74,22 @@ function ElementDrawerContextProvider(props: ElementDrawerContextProviderProps) 
       <ElementDrawerContext.Provider value={{elementDrawer}}>
         {children}
       </ElementDrawerContext.Provider>
-      <Component
-        open={open}
-        options={options}
-        onClose={handleClose}
-        onCancel={handleCancel}
-        onConfirm={handleConfirm}
-        {...rest}
-      />
+      <ElementComponentsContext.Consumer>
+        {({elementComponents}) => (
+          <Component
+            open={open}
+            options={options}
+            onClose={handleClose}
+            onCancel={handleCancel}
+            onConfirm={handleConfirm}
+            elementComponents={elementComponents}
+            {...rest}
+          />
+        )}
+      </ElementComponentsContext.Consumer>
     </Fragment>
   )
 }
-ElementDrawerContextProvider.displayName = 'ElementDrawerContextProvider'
-ElementDrawerContextProvider.defaultProps = {
-  component: ElementDrawerComponent,
-}
-export default ElementDrawerContextProvider
+ComponentsDrawerContextProvider.displayName = 'ComponentsDrawerContextProvider'
+ComponentsDrawerContextProvider.defaultProps = {}
+export default ComponentsDrawerContextProvider

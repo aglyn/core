@@ -16,7 +16,7 @@
  */
 
 import { getIcon, Icon, IconKeys } from '@aglyn/shared/data/mdi'
-import { _isStrT } from '@aglyn/shared/util/helpers'
+import { _isStrT } from '@aglyn/shared/util/guards'
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@material-ui/core/SvgIcon'
 import { createSvgIcon } from '@material-ui/core/utils'
 import { forwardRef, useMemo } from 'react'

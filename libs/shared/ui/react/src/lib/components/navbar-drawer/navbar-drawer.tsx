@@ -20,27 +20,29 @@ import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@material-ui/core/AppBar'
 import MuiDrawer, { DrawerProps as MuiDrawerProps } from '@material-ui/core/Drawer'
 import Toolbar, { ToolbarProps as MuiToolbarProps } from '@material-ui/core/Toolbar'
+import clsx from 'clsx'
 import { forwardRef, ReactNode, Ref, useRef } from 'react'
 import useCombinedRefs from '../../hooks/use-combined-refs'
 import ElevationScroll from '../elevation-scroll/elevation-scroll'
 
 
-const navbarDrawerClasses = generateUtilityClasses('AglynNavbarDrawer', [
+const classKeys = generateUtilityClasses('AglynNavbarDrawer', [
   'appBar',
   'toolbar',
   'left',
   'right',
   'content',
+  'paper',
 ])
 
 const StyledDrawer = styled(MuiDrawer, {
-  name: 'Drawer',
-})({
+  name: 'NavbarDrawer',
+})(({theme}) => ({
   '& .MuiDrawer-paper': {
-    width: 620,
+    width: theme.breakpoints.values.sm,
     maxWidth: '100%',
   },
-})
+}))
 
 const StyledAppBar = styled(MuiAppBar, {
   name: 'AppBar',
@@ -49,7 +51,7 @@ const StyledAppBar = styled(MuiAppBar, {
 }))
 
 const Left = styled('div', {
-  name: 'Left',
+  name: 'AppbarLeft',
 })({
   flexGrow: 1,
   display: 'flex',
@@ -58,7 +60,7 @@ const Left = styled('div', {
 })
 
 const Right = styled('div', {
-  name: 'Right',
+  name: 'AppbarRight',
 })({
   display: 'flex',
   alignItems: 'center',
@@ -66,7 +68,7 @@ const Right = styled('div', {
 })
 
 const Content = styled('div', {
-  name: 'Content',
+  name: 'AppbarContent',
 })({
   height: '100%',
   width: '100%',
@@ -91,16 +93,23 @@ export const NavbarDrawer = forwardRef<any, NavbarDrawerProps>(
       appBarRight,
       AppBarProps,
       ToolbarProps,
+      classes,
       ...rest
     } = props
 
     const localContentRef = useRef<HTMLDivElement>()
     const contentRef = useCombinedRefs(localContentRef, innerContentRef)
+    const toolbarClassName = clsx(classKeys.toolbar, ToolbarProps?.className)
+    const elemClasses = {
+      ...classes,
+      paper: clsx(classes?.paper, classKeys.paper),
+    }
 
     return (
       <StyledDrawer
         ref={ref}
         anchor="right"
+        classes={elemClasses}
         {...rest}
       >
         <ElevationScroll target={localContentRef.current}>
@@ -108,16 +117,16 @@ export const NavbarDrawer = forwardRef<any, NavbarDrawerProps>(
             color="default"
             position="relative"
             variant="elevation"
-            className={navbarDrawerClasses.appBar}
+            className={classKeys.appBar}
             {...AppBarProps}
           >
-            <Toolbar {...ToolbarProps} className={navbarDrawerClasses.toolbar}>
-              <Left className={navbarDrawerClasses.left}>{appBarLeft}</Left>
-              <Right className={navbarDrawerClasses.right}>{appBarRight}</Right>
+            <Toolbar {...ToolbarProps} className={toolbarClassName}>
+              <Left className={classKeys.left}>{appBarLeft}</Left>
+              <Right className={classKeys.right}>{appBarRight}</Right>
             </Toolbar>
           </StyledAppBar>
         </ElevationScroll>
-        <Content ref={contentRef} className={navbarDrawerClasses.content}>
+        <Content ref={contentRef} className={classKeys.content}>
           {children}
         </Content>
       </StyledDrawer>

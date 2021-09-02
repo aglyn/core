@@ -18,27 +18,35 @@
 import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
 import Card from '@material-ui/core/Card'
 import Grid, { GridProps as MuiGridProps } from '@material-ui/core/Grid'
-
 import clsx from 'clsx'
-import { forwardRef, HTMLProps, ReactNode, useCallback, useMemo } from 'react'
+import {
+  forwardRef,
+  HTMLAttributes,
+  HTMLProps,
+  PropsWithChildren,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from 'react'
 import { VirtuosoGrid, VirtuosoGridHandle, VirtuosoGridProps } from 'react-virtuoso'
 
 
-const gridListClasses = generateUtilityClasses('AglynGridList', [
-  'listRoot',
+const classKey = generateUtilityClasses('AglynGridList', [
   'itemWrapper',
   'itemContent',
+  'gridContainer',
+  'gridItem',
 ])
 
-const GridItemWrapper = styled(Grid, {
-  name:'GridItemWrapper'
+const ItemWrapper = styled('div', {
+  name: 'ItemWrapper',
 })({
   height: 0,
   position: 'relative',
   paddingTop: `${(3 / 4) * 100}%`, // 16:9
 })
-const CardItemContent = styled(Card, {
-  name: 'CardItemContent'
+const ItemContent = styled(Card, {
+  name: 'ItemContent',
 })({
   position: 'absolute',
   left: 0,
@@ -79,38 +87,61 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
 
     const GridContainer = useMemo(() => forwardRef<any, MuiGridProps>(
       function RefRenderFn(props, ref) {
+        const {className: gridClassName, ...restGridProps} = GridContainerProps
+        const {className, ...rest} = props
+        const elemClassName = clsx(classKey.gridContainer, gridClassName, className)
         return (
-          <div
-            {...ListWrapperProps}
-            className={clsx(
-              gridListClasses.listRoot,
-              ListWrapperProps?.className
-            )}
-          >
-            <Grid ref={ref} container {...GridContainerProps} {...props} />
+          <div {...ListWrapperProps}>
+            <Grid
+              ref={ref}
+              container
+              className={elemClassName}
+              {...restGridProps}
+              {...rest}
+            />
           </div>
         )
       },
     ), [ListWrapperProps, GridContainerProps])
 
-    const GridItem = useMemo(() => forwardRef<any, MuiGridProps>(
-      function RefRenderFn(itemProps, ref) {
-        return <Grid ref={ref} item {...GridItemProps} {...itemProps} />
-      },
-    ), [GridItemProps])
+    const GridItem = useMemo(() => {
+      const Component = forwardRef<any, MuiGridProps>(
+        function RefRenderFn(itemProps, ref) {
+          const {className: gridClassName, ...restGridProps} = GridItemProps
+          const {className, ...rest} = itemProps
+          const elemClassName = clsx(classKey.gridItem, gridClassName, className)
+          return (
+            <Grid
+              ref={ref}
+              item
+              className={elemClassName}
+              {...restGridProps}
+              {...rest}
+            />
+          )
+        },
+      )
+      Component.displayName = 'GridItem'
+      return Component
+    }, [GridItemProps])
 
-    const MemoizedItemContent = useMemo(() => forwardRef<any, MuiGridProps>(
-      function RefRenderFn(props, ref) {
-        const {children, ...rest} = props
-        return (
-          <GridItemWrapper ref={ref} className={gridListClasses.itemWrapper}{...rest}>
-            <CardItemContent className={gridListClasses.itemContent}>
-              {children}
-            </CardItemContent>
-          </GridItemWrapper>
-        )
-      },
-    ), [])
+    const MemoizedItemContent = useMemo(() => {
+      const Component = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
+        function RefRenderFn(props, ref) {
+          const {children, className, ...rest} = props
+          const elemClassName = clsx(classKey.itemWrapper, className)
+          return (
+            <ItemWrapper ref={ref} className={elemClassName} {...rest}>
+              <ItemContent className={classKey.itemContent}>
+                {children}
+              </ItemContent>
+            </ItemWrapper>
+          )
+        },
+      )
+      Component.displayName = 'MemoizedItemContent'
+      return Component
+    }, [classKey])
 
     const itemContent = useCallback((index) => (
       <MemoizedItemContent>

@@ -16,30 +16,28 @@
  */
 
 import { AglynComponentData } from '@aglyn/framework/sdk'
-import ElementsContext, { ElementsContextType } from './elements-context'
 import { ReactNode, useState } from 'react'
+import { ElementsContext, ElementsContextType } from './elements-context'
+
 
 export interface ElementsContextProviderProps {
   children?: ReactNode
   elements?: AglynComponentData[]
   onUpdateElements?: (
     newElements: AglynComponentData[],
-    prevElements: AglynComponentData[]
+    prevElements: AglynComponentData[],
   ) => void
 }
 
-function ElementsContextProvider(props: ElementsContextProviderProps) {
-  const { children, elements, onUpdateElements } = props
-  const [ctx, setElement] = useState<ElementsContextType>({
+export function ElementsContextProvider(props: ElementsContextProviderProps) {
+  const {children, elements, onUpdateElements} = props
+  const [ctx, setCtx] = useState<ElementsContextType>(({
     elements,
-    updateElements: (elements) => {
-      setElement(prev => {
-        const prevElements = Array.from(prev.elements)
-        onUpdateElements?.call(null, elements, prevElements)
-        return {...prev, elements}
-      })
+    updateElements: (elements, prev) => {
+      onUpdateElements && onUpdateElements(elements, prev)
+      setCtx(prev=>({...prev, elements}))
     }
-  })
+  }))
 
   return (
     <ElementsContext.Provider value={ctx}>
@@ -47,7 +45,7 @@ function ElementsContextProvider(props: ElementsContextProviderProps) {
     </ElementsContext.Provider>
   )
 }
-
+ElementsContextProvider.displayName = 'ElementsContextProvider'
 ElementsContextProvider.defaultProps = {
   elements: [],
 }

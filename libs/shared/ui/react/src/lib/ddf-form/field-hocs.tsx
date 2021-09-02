@@ -16,14 +16,14 @@
  */
 
 import { styled } from '@aglyn/shared/ui/themes'
-import { getDisplayName } from '@aglyn/shared/util/helpers'
+import { getDisplayName } from '@aglyn/shared/util/tools'
 import MuiGrid, { GridProps as MuiGridProps } from '@material-ui/core/Grid'
 import {
   ComponentType,
+  forwardRef,
   ForwardRefExoticComponent,
   PropsWithoutRef,
   RefAttributes,
-  forwardRef,
 } from 'react'
 
 

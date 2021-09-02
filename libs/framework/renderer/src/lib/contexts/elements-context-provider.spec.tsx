@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-export * from './lib/gravatar'
+import React from 'react'
+import { render } from '@testing-library/react'
+import { ElementsContextProvider } from './elements-context-provider'
 
-export * from './vendor/change-case'
-export * from './vendor/deep-equal'
-export * from './vendor/deep-merge'
-export * from './vendor/flatten-object'
-export * from './vendor/mitt-emitter'
-export * from './vendor/platform-identification'
-export * from './vendor/search-fuzzy'
-export * from './vendor/unique-identification'
+
+describe('ElementsContextProvider', () => {
+  it('should render successfully', () => {
+    const {baseElement} = render(<ElementsContextProvider />)
+    expect(baseElement).toBeTruthy()
+  })
+})

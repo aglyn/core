@@ -75,6 +75,7 @@ export const buildOptions = (defaultOptions, options) => {
 }
 
 export const ConfirmationContext = createContext<ConfirmationContextType>(null)
+ConfirmationContext.displayName = 'ConfirmationContext'
 export const useConfirmationContext: UseConfirmationType = () => {
   return useContext(ConfirmationContext)
 }

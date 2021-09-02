@@ -31,6 +31,9 @@ export * from './lib/components/svg-path-icon/svg-path'
 export * from './lib/components/svg-path-icon/svg-path-icon'
 export * from './lib/components/confirmation-provider/confirmation-provider.component'
 
+export * from './lib/components/app-link'
+export * from './lib/components/next-link'
+
 export * from './lib/contexts/confirmation.context'
 
 export * from './lib/hooks/use-client-rect'

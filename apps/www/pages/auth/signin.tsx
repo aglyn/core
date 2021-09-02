@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-import { Theme, createStyles, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
-import { remap } from '@aglyn/shared/util/helpers'
-import { Button, Typography, Box } from '@material-ui/core'
+import { AppLink } from '@aglyn/shared/ui/react'
+import { createStyles, Theme, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
+import { remap } from '@aglyn/shared/util/tools'
+import { Box, Button, Typography } from '@material-ui/core'
 import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'
 import FieldSet from '../../components/FieldSet'
-import Link from '../../components/Link'
 import { withAppContext } from '../../contexts/app-context'
-import { Fields, validateField, formIsValid } from '../../forms'
+import { Fields, formIsValid, validateField } from '../../forms'
 import AuthLayout from '../../layouts/AuthLayout'
 
 
@@ -111,7 +111,7 @@ export default withStyles(styles, {name: 'Page:SignIn'})(
                 gutterBottom
               />
               <FieldSet fields={fields} loading={submitting} onUpdate={handleUpdate}/>
-              <Link
+              <AppLink
                 children="Forgot password?"
                 color="primary"
                 href="/auth/recovery"
@@ -153,7 +153,7 @@ export default withStyles(styles, {name: 'Page:SignIn'})(
           >
             <b children={'Don\'t have an account?'}/>
             <br/>
-            <Link
+            <AppLink
               children="Create an account"
               color="secondary"
               href="/auth/signup"

@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-export * from './lib/gravatar'
+import { createUid } from '@aglyn/shared/util/helpers'
 
-export * from './vendor/change-case'
-export * from './vendor/deep-equal'
-export * from './vendor/deep-merge'
-export * from './vendor/flatten-object'
-export * from './vendor/mitt-emitter'
-export * from './vendor/platform-identification'
-export * from './vendor/search-fuzzy'
-export * from './vendor/unique-identification'
+
+export const ELEMENT_ID_LENGTH = 10
+
+export function createElementDataId() {
+  return createUid(ELEMENT_ID_LENGTH)
+}
+export default createElementDataId

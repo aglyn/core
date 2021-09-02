@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
+import { createElementData, useElementsContext } from '@aglyn/framework/renderer'
 import { SvgPathIcon } from '@aglyn/shared/ui/react'
-import { createStyles, withStyles, ExtendPropsOfWithStyles, styled } from '@aglyn/shared/ui/themes'
+import { styled } from '@aglyn/shared/ui/themes'
 import AppBar, { AppBarProps } from '@material-ui/core/AppBar'
 import Box from '@material-ui/core/Box'
 import Fab from '@material-ui/core/Fab'
 import IconButton from '@material-ui/core/IconButton'
 import Toolbar from '@material-ui/core/Toolbar'
-import clsx from 'clsx'
 import { forwardRef, useCallback } from 'react'
 import { useElementDrawerContext } from '../contexts/element-drawer-context'
 
 
 const StyledFab = styled(Fab, {
-  name: 'FabButton'
+  name: 'FabButton',
 })({
   position: 'absolute',
   zIndex: 1,
@@ -39,33 +39,46 @@ const StyledFab = styled(Fab, {
 })
 
 const StyledAppBar = styled(AppBar, {
-  name: 'AppBar'
+  name: 'AppBar',
 })({
   top: 'auto',
   bottom: 0,
 })
 
-export interface AppBarComponentProps extends Partial<AppBarProps> {}
+export interface BuilderToolbarComponentProps extends Partial<AppBarProps> {}
 
-export const AppbarComponent = forwardRef<any, AppBarComponentProps>(
+export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentProps>(
   function RefRenderFn(props, ref) {
     const {className, ...rest} = props
 
     const {elementDrawer} = useElementDrawerContext()
+    const {elements, updateElements} = useElementsContext()
     const handleFabClick = useCallback(async () => {
-      const choice = await elementDrawer({title: 'Add New Elements'})
-      .then((res) => {
-        console.log('res', res)
-        return res
+      const option = await elementDrawer({
+        title: 'Add New Elements',
+      })
+      .then((res: any) => {
+        if (res?.option?.type === 'selection') {
+          return res?.option?.data
+        }
+      })
+      .then((data: any) => {
+        if (data) {
+          const {id: componentId} = data
+          const prevElements = Array.from(elements)
+          const newElements = [...elements, createElementData(componentId)]
+          console.log('prev newElement', newElements, prevElements)
+          updateElements && updateElements(newElements, prevElements)
+        }
       })
       .catch((error) => {
         if (error instanceof Error) {
+          console.log('errror', error)
         }
-        console.log('errror', error)
       })
 
-      console.warn('async choice', choice)
-    }, [elementDrawer])
+      console.warn('async choice', option)
+    }, [elementDrawer, elements, updateElements])
 
     return (
       <StyledAppBar
@@ -98,7 +111,7 @@ export const AppbarComponent = forwardRef<any, AppBarComponentProps>(
   },
 )
 
-AppbarComponent.displayName = 'AppbarComponent'
-AppbarComponent.defaultProps = {}
+BuilderToolbarComponent.displayName = 'BuilderToolbarComponent'
+BuilderToolbarComponent.defaultProps = {}
 
-export default AppbarComponent
+export default BuilderToolbarComponent

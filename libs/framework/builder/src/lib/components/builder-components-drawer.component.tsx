@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { AglynComponent } from '@aglyn/framework/sdk'
 import {
   CardIconListItem,
   componentMapper,
@@ -26,21 +27,25 @@ import {
   SvgPathIcon,
 } from '@aglyn/shared/ui/react'
 import { styled } from '@aglyn/shared/ui/themes'
-import { _isStrT } from '@aglyn/shared/util/helpers'
+import { _isStrT } from '@aglyn/shared/util/guards'
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
 import FormControl from '@material-ui/core/FormControl'
 import IconButton from '@material-ui/core/IconButton'
 import Typography from '@material-ui/core/Typography'
-import { forwardRef, Fragment, MouseEvent, useCallback } from 'react'
+import { forwardRef, Fragment, MouseEvent, useCallback, useMemo } from 'react'
 import { ElementDrawerOptions } from '../contexts/element-drawer-context'
 
 
 const StyledGridList = styled(GridList, {
   name: 'GridList',
 })(({theme}) => ({
-  padding: theme.spacing(2, 2, 2, 2),
   overflowX: 'hidden',
+  '& .AglynGridList-gridContainer': {
+    padding: theme.spacing(0, 2),
+    marginTop: theme.spacing(0),
+    marginLeft: theme.spacing(-2),
+  },
   '& .AglynGridList-itemContent': {
     width: '100%',
     height: '100%',
@@ -50,36 +55,36 @@ const StyledGridList = styled(GridList, {
     justifyContent: 'space-evenly',
   },
 }))
+
 const StyledNavbarDrawer = styled(NavbarDrawer, {
   name: 'NavbarDrawer',
 })(({theme}) => ({
-  '& .MuiDrawer-content': {
+  '& .AglynNavbarDrawer-content': {
     backgroundColor: theme.palette.background.default,
-    // padding: theme.spacing(2, 2, 2, 2),
     overflow: 'auto',
   },
-  '& .MuiDrawer-paper': {
+  '& > .AglynNavbarDrawer-paper': {
     margin: '0 auto',
     height: '100%',
     maxHeight: '100vh',
     [theme.breakpoints.up('sm')]: {height: theme.breakpoints.values.sm},
   },
-  '& > .MuiDrawer-paper': {
-    width: theme.breakpoints.values.sm,
+  '& .AglynNavbarDrawer-paper': {
     height: 480,
+    width: 480,
     margin: '0 auto',
   },
 }))
 
-export interface ElementDrawerComponentProps extends Partial<NavbarDrawerProps> {
+export interface ComponentsDrawerComponentProps extends Partial<NavbarDrawerProps> {
   options?: ElementDrawerOptions
-  elementComponents?: { id: string, title: string, icon: unknown }[]
+  elementComponents?: AglynComponent[]
   onCancel?: { bivarianceHack<T>(event: MouseEvent<T>, reason: 'canceled'): void }['bivarianceHack']
   onConfirm?: { bivarianceHack<T>(event: null | MouseEvent<T>, data: unknown): void }['bivarianceHack']
   onDelete?: { bivarianceHack<T>(event: MouseEvent<T>, data: unknown): void }['bivarianceHack']
 }
 
-export const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentProps>(
+export const BuilderComponentsDrawerComponent = forwardRef<any, ComponentsDrawerComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       className,
@@ -112,11 +117,11 @@ export const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentPr
       onConfirm?.call(null, e, {type: 'selection', data: item})
     }, [onConfirm])
 
-    const items = (elementComponents ?? []).map((element) => ({
-      id: element?.id,
-      title: element?.title,
-      icon: element?.icon,
-    }))
+    const items = useMemo(() => (elementComponents ?? []).map((component) => ({
+      id: component?.$id,
+      title: component?.options?.title || component?.options?.displayName || 'No title',
+      icon: component?.options?.icon,
+    })), [elementComponents])
 
     const appBarLeft = (
       <Fragment>
@@ -147,13 +152,19 @@ export const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentPr
         item={item}
         label={item.title}
         onActionClick={handleItemClick}
-        preview={
-          (_isStrT(item.icon) ? (
-            <Box fontSize={'4.17em'} component={SvgPathIcon} {...{iconId: item.icon}} />
-          ) : (
-            <Fragment>{item.icon}</Fragment>
-          )) as unknown as any
-        }
+        preview={(
+          <Fragment>
+            {_isStrT(item.icon) || !item.icon ? (
+              <Box
+                fontSize={'4.17em'}
+                component={SvgPathIcon}
+                iconId={item.icon}
+              />
+            ) : (
+              item.icon
+            )}
+          </Fragment>
+        )}
       />
     ), [handleItemClick])
 
@@ -207,9 +218,9 @@ export const ComponentDrawerComponent = forwardRef<any, ElementDrawerComponentPr
   },
 )
 
-ComponentDrawerComponent.displayName = 'ComponentDrawerComponent'
-ComponentDrawerComponent.defaultProps = {
+BuilderComponentsDrawerComponent.displayName = 'BuilderComponentsDrawerComponent'
+BuilderComponentsDrawerComponent.defaultProps = {
   elementComponents: [],
 }
 
-export default ComponentDrawerComponent
+export default BuilderComponentsDrawerComponent

@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 
-import React from 'react'
 import { render } from '@testing-library/react'
-import ElementDrawerContextProvider from './element-drawer-context.provider'
+import React from 'react'
+
+import { BuilderComponentsDrawerComponent } from './builder-components-drawer.component'
 
 
-describe('ElementDrawerContextProvider', () => {
+describe('BuilderComponentsDrawerComponent', () => {
   it('should render successfully', () => {
-    const {baseElement} = render(<ElementDrawerContextProvider />)
+    const {baseElement} = render(<BuilderComponentsDrawerComponent/>)
     expect(baseElement).toBeTruthy()
   })
 })

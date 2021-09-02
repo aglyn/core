@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 
-import { CanvasRendererComponent, CanvasRendererComponentProps } from '@aglyn/framework/renderer'
+import {
+  CanvasRendererComponent,
+  CanvasRendererComponentProps,
+  ElementsContext,
+} from '@aglyn/framework/renderer'
 import { ComponentType, forwardRef } from 'react'
 import { PanZoom } from 'react-easy-panzoom'
-import { ElementsContext } from '../contexts/elements-context'
 import { BuilderElementRendererComponent } from './builder-element-renderer.component'
 
 
@@ -29,9 +32,12 @@ export interface BuilderCanvasRendererComponentProps extends Partial<CanvasRende
 export const BuilderCanvasRendererComponent = forwardRef<any, BuilderCanvasRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {
-      canvasRendererComponent: CanvasComponent,
+      canvasRendererComponent,
+      elementRendererComponent: elementRendererComponentProp,
       ...rest
     } = props
+    const CanvasComponent = canvasRendererComponent || CanvasRendererComponent
+    const elementRendererComponent = elementRendererComponentProp || BuilderElementRendererComponent
 
     return (
       <PanZoom disabled>
@@ -41,6 +47,7 @@ export const BuilderCanvasRendererComponent = forwardRef<any, BuilderCanvasRende
               ref={ref}
               id="aglyn:canvas"
               elements={elements}
+              elementRendererComponent={elementRendererComponent}
               {...rest}
             />
           )}
@@ -52,8 +59,6 @@ export const BuilderCanvasRendererComponent = forwardRef<any, BuilderCanvasRende
 
 BuilderCanvasRendererComponent.displayName = 'BuilderCanvasRendererComponent'
 BuilderCanvasRendererComponent.defaultProps = {
-  canvasRendererComponent: CanvasRendererComponent,
-  elementRendererComponent: BuilderElementRendererComponent,
 }
 
 export default BuilderCanvasRendererComponent

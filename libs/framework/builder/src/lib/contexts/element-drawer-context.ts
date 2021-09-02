@@ -76,6 +76,7 @@ export const buildOptions = (defaultOptions, options) => {
 }
 
 export const ElementDrawerContext = createContext<ElementDrawerContextType>(null)
+ElementDrawerContext.displayName = 'ElementDrawerContext'
 export const useElementDrawerContext: UseElementDrawerType = () => {
   return useContext(ElementDrawerContext)
 }

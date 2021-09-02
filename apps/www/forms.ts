@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { _hasKey, _isStrT, len } from '@aglyn/shared/util/helpers'
+import { _hasKey, _isStrT } from '@aglyn/shared/util/guards'
+import { len } from '@aglyn/shared/util/tools'
 import { Schema as DdfSchema } from '@data-driven-forms/react-form-renderer'
 import validation from '@data-driven-forms/react-form-renderer/validation'
 import { ValidationOptions } from '@data-driven-forms/react-form-renderer/validation/validation'

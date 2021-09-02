@@ -15,26 +15,30 @@
  * limitations under the License.
  */
 
-import { AglynComponentData } from '@aglyn/framework/sdk'
+import {
+  ElementComponentsContextProvider,
+  ElementsContextProvider,
+  ElementsContextProviderProps,
+} from '@aglyn/framework/renderer'
+import { AglynComponent, AglynComponentData } from '@aglyn/framework/sdk'
 import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared/ui/react'
 import { builderTheme, withThemeProvider } from '@aglyn/shared/ui/themes'
 import NoSsr from '@material-ui/core/NoSsr'
 import { forwardRef, Fragment } from 'react'
-import ElementDrawerContextProvider, { ElementDrawerContextProviderProps } from '../contexts/element-drawer-context.provider'
-import ElementsContextProvider, { ElementsContextProviderProps } from '../contexts/elements-context-provider'
-import SelectionContextProvider from '../contexts/selection-context-provider'
-import { AppbarComponent } from './appbar.component'
+import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
+import { SelectionContextProvider } from '../contexts/selection-context-provider'
 import { BuilderCanvasRendererComponent } from './builder-canvas-renderer.component'
+import { BuilderToolbarComponent } from './builder-toolbar.component'
 
 
 export interface BuilderComponentProps extends OverrideableComponentProps {
   noSsr?: boolean
   elements?: AglynComponentData[]
   onUpdateElements?: ElementsContextProviderProps['onUpdateElements']
-  elementComponents: ElementDrawerContextProviderProps['elementComponents']
+  elementComponents: AglynComponent[]
 }
 
-export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
+const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(
   function RefRenderFn(props, ref) {
     const {
       component: Component,
@@ -53,17 +57,21 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
             elements={elements}
             onUpdateElements={onUpdateElements}
           >
-            {/*<SnackbarProvider maxSnack={3}>*/}
-            <ConfirmationProviderComponent>
-              <SelectionContextProvider>
-                <ElementDrawerContextProvider elementComponents={elementComponents}>
+            <ElementComponentsContextProvider
+              elementComponents={elementComponents}
+            >
+              {/*<SnackbarProvider maxSnack={3}>*/}
+              <ConfirmationProviderComponent>
+                <SelectionContextProvider>
                   <BuilderCanvasRendererComponent/>
 
-                  <AppbarComponent id="aglyn:toolbar"/>
-                </ElementDrawerContextProvider>
-              </SelectionContextProvider>
-            </ConfirmationProviderComponent>
-            {/*</SnackbarProvider>*/}
+                  <ComponentsDrawerContextProvider>
+                    <BuilderToolbarComponent id="aglyn:toolbar"/>
+                  </ComponentsDrawerContextProvider>
+                </SelectionContextProvider>
+              </ConfirmationProviderComponent>
+              {/*</SnackbarProvider>*/}
+            </ElementComponentsContextProvider>
           </ElementsContextProvider>
         </Component>
       </Wrapper>
@@ -71,10 +79,12 @@ export const BuilderComponent = forwardRef<any, BuilderComponentProps>(
   },
 )
 
-BuilderComponent.displayName = 'BuilderComponent'
-BuilderComponent.defaultProps = {
+BuilderComponentRaw.displayName = 'BuilderComponent'
+BuilderComponentRaw.defaultProps = {
   component: 'div',
   elements: [],
 }
 
-export default withThemeProvider(builderTheme)(BuilderComponent)
+export const BuilderComponent = withThemeProvider(builderTheme)(BuilderComponentRaw)
+
+export default BuilderComponent
