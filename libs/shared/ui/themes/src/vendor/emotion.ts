@@ -30,10 +30,8 @@ export {
 }
 
 export function createEmotionCache(options?: CreateEmotionCacheOptions) {
-  // TODO remove prepend: true once JSS is out
   return createCache({
     key: 'css',
-    // prepend: true,
     ...options,
   }) as unknown as EmotionCache
 }
