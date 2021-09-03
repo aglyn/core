@@ -15,39 +15,55 @@
  * limitations under the License.
  */
 
+import { _validateAppArg, getExtension } from '../../api'
+import { AglynExtension } from '../../constants'
+import { AglynAppInstance } from '../../types'
 import {
   AglynComponent,
-  AglynComponentOptions,
   AglynComponentsExtension,
-  PayloadParams, RegistryEntries,
-  RegistryValues,
+  AglynComponentsPlugin,
+  ComponentsRegistryEntries,
+  ComponentsRegistryKeys,
+  ComponentsRegistryValues,
+  GetComponentPayload,
+  UnregisterComponentPayload,
+  UnregisterPluginPayload,
 } from './components-types.extension'
-import { AglynAppInstance } from '../../types'
-import { AglynExtension } from '../../constants'
-import { _validateAppArg, getExtension } from '../../api'
 
-
-export function aglynComponent($id: string, options: Partial<AglynComponentOptions>) {
-  return function(target) {
-    target.$id = $id
-    target.options = {...options}
-    return target
-  }
-}
 
 export function _getComponentsExtension(app: AglynAppInstance): AglynComponentsExtension {
   _validateAppArg(app)
   return getExtension<AglynComponentsExtension>(app, {name: AglynExtension.COMPONENTS})
 }
 
-export function getAllComponents(app: AglynAppInstance): RegistryEntries {
+export function getAllComponents(app: AglynAppInstance): ComponentsRegistryEntries {
   return _getComponentsExtension(app)?.getAllComponents() ?? []
 }
 
-export function getComponent(app: AglynAppInstance, options: PayloadParams.Get): AglynComponent {
+export function getAllComponentsValues(app: AglynAppInstance): ComponentsRegistryValues {
+  return _getComponentsExtension(app)?.getAllComponentsValues() ?? []
+}
+
+export function getAllComponentsKeys(app: AglynAppInstance): ComponentsRegistryKeys {
+  return _getComponentsExtension(app)?.getAllComponentsKeys() ?? []
+}
+
+export function getComponent<P>(app: AglynAppInstance, options: GetComponentPayload): AglynComponent<P> {
   return _getComponentsExtension(app)?.getComponent(options)
 }
 
-export function registerComponent(app: AglynAppInstance, options: PayloadParams.Register): void {
-  _getComponentsExtension(app)?.registerComponent(options)
+export function registerComponent<P>(app: AglynAppInstance, component: AglynComponent<P>): void {
+  _getComponentsExtension(app)?.registerComponent({component})
+}
+
+export function unregisterComponent(app: AglynAppInstance, options: UnregisterComponentPayload): void {
+  _getComponentsExtension(app)?.unregisterComponent(options)
+}
+
+export function registerComponentsPlugin(app: AglynAppInstance, plugin: AglynComponentsPlugin): void {
+  _getComponentsExtension(app)?.registerComponentsPlugin({plugin})
+}
+
+export function unregisterComponentsPlugin(app: AglynAppInstance, options: UnregisterPluginPayload): void {
+  _getComponentsExtension(app)?.unregisterComponentsPlugin(options)
 }

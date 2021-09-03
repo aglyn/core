@@ -16,7 +16,7 @@
  */
 
 import React from 'react'
-import { createStyles, WithStyles, withStyles, Theme } from '@material-ui/core/styles'
+import { createStyles, WithStyles, withStyles, Theme } from '@aglyn/shared/ui/themes'
 import clsx from 'clsx'
 import Card, { CardProps } from '@material-ui/core/Card'
 import CardHeader, { CardHeaderProps } from '@material-ui/core/CardHeader'
@@ -56,7 +56,7 @@ const styles = (theme: Theme) => createStyles({
   },
 })
 
-export type Props = CardProps & {
+export interface Props extends CardProps {
   header?: string
   actions?: CardActionsProps
   guttersX?: boolean
@@ -65,9 +65,10 @@ export type Props = CardProps & {
   HeaderProps?: CardHeaderProps
   ContentProps?: CardContentProps
   ActionProps?: CardActionsProps
+  classes?: CardProps['classes'] & WithStyles<typeof styles>['classes']
 }
 
-const WidgetCard = React.forwardRef<typeof Card, Props & WithStyles<typeof styles>>(
+const WidgetCard = React.forwardRef<any, Props & >(
   function WidgetCard(props, ref) {
     const {
       actions,

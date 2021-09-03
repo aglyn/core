@@ -87,10 +87,10 @@ name), followed by its _new_ directory
 
 #### Nx build framework
 
-1. Run `nx migrate latest` to pull the most recent version of Nx, it will generate a new files named `migrations.json`
-   in the root directory. Double check the contents and make sure changes are ok.
-2. Next apply the migrations by running the following command `nx migrate --run-migrations=migrations.json`
-3. If everything succeeded, stage the changes and remove the `migrations.json` file.
+1. Run `nx migrate latest` to pull the most recent version of Nx, it will generate a new files named `migrations.json`in the root directory. Double check the contents and make sure changes are ok.
+1. Double check changes are ok in `package.json` then run `npm install` 
+1. Next apply the migrations by running the following command `nx migrate --run-migrations`
+1. If everything succeeded, stage the changes and make sure to commit the `migrations.json` file for versioning.
 
 _@See More info detailed on the [Nx documentation](https://nx.dev/latest/react/core-concepts/updating-nx)_
 

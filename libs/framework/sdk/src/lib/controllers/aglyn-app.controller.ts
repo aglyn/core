@@ -23,18 +23,18 @@ import {
   AglynCommandControllerInstance,
   AglynEffectType,
   AglynExtensionControllerInstance,
-  AglynModuleTriggerFlag,
+  AglynModuleEventFlag,
   AglynPlatform,
   AglynVersion,
   APP_TYPE,
   DEFAULT_ENTRY_NAME,
-  TypeOf,
+  TYPE_OF,
 } from '@aglyn/framework/sdk'
 import { AglynExtensionController } from './aglyn-extension.controller'
 import { AglynCommandController } from './aglyn-command.controller'
 import { getStaticField } from '@aglyn/shared/util/tools'
 import { AglynBaseModel } from '../models/aglyn-base.model'
-import { _commandControllers, _extensionControllers } from '../internal'
+import { _commandControllers, _extensionControllers } from '../_internal'
 import { AGLYN_LOGGER } from '../logger'
 import { AGLYN_EMITTER } from '../emitter'
 import { AGLYN_PLATFORM } from '../platform'
@@ -46,7 +46,7 @@ const TAG = 'AglynApp'
 export class AglynAppController extends AglynBaseModel implements AglynAppInstance {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly [TypeOf]: number | symbol = APP_TYPE
+  public static readonly [TYPE_OF]: number | symbol = APP_TYPE
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly version: AglynVersion = SDK_VERSION
   public readonly AglynAppCommandController = AglynCommandController
@@ -56,8 +56,8 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
   #deleted = false
   #commandController: AglynCommandControllerInstance = null
   #extensionController: AglynExtensionControllerInstance = null
-  public get [TypeOf]() {
-    return getStaticField(TypeOf, this)
+  public get [TYPE_OF]() {
+    return getStaticField(TYPE_OF, this)
   }
   public get platform(): AglynExtensionControllerInstance {
     return getStaticField('platform', this)
@@ -67,6 +67,9 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
   }
   public get commands(): AglynCommandControllerInstance {
     return this.#commandController
+  }
+  public get extensions(): AglynExtensionControllerInstance {
+    return this.#extensionController
   }
   constructor(options: AglynAppOptions) {
     super()
@@ -129,7 +132,7 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
     this.#deleted = Boolean(value)
     return this
   }
-  public effect = (data: AglynEffectType<AglynModuleTriggerFlag>) => {
+  public effect = (data: AglynEffectType<AglynModuleEventFlag>) => {
     const {type, payload} = data
     this.getEmitter().emit(type, payload as any)
   }

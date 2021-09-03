@@ -18,41 +18,9 @@
 
 export const DEFAULT_ENTRY_NAME = '[DEFAULT]'
 
-export enum RestrictFlag {
+export const enum RestrictFlag {
   LIMIT = 'limit',
   DISALLOW = 'disallow',
-}
-
-export enum AglynAppEventFlag {
-  APP_CREATED = 'event:app-created',
-  BEFORE_DELETE_APP = 'event:before-delete-app',
-  APP_LOADED = 'event:app-loaded',
-  APP_UNLOADED = 'event:app-unloaded',
-  APP_DELETED = 'event:app-deleted',
-  REGISTERED_EXTENSION = 'event:registered-extension',
-  UNREGISTERED_EXTENSION = 'event:unregistered-extension',
-  LOADED_EXTENSION = 'event:loaded-extension',
-  UNLOADED_EXTENSION = 'event:unloaded-extension',
-  REGISTERED_COMMAND = 'event:registered-command',
-  UNREGISTERED_COMMAND = 'event:unregistered-command',
-  TRIGGERED_COMMAND = 'event:triggered-command',
-  SET_COMPONENT = 'event:set-component',
-}
-
-export enum AglynModuleTriggerFlag {
-  COMMAND_ACTION_REGISTER = 'module:command:register',
-  COMMAND_ACTION_UNREGISTER = 'module:command:unregister',
-  COMMAND_TRIGGER = 'module:command:trigger',
-
-  EXTENSION_REGISTER = 'module:extension:register',
-  EXTENSION_UNREGISTER = 'module:extension:unregister',
-  EXTENSION_LOAD = 'module:extension:load',
-  EXTENSION_UNLOAD = 'module:extension:unload',
-
-  EXTENSION_COMPONENT_REGISTER = 'module:extension:component:register',
-  EXTENSION_COMPONENT_UNREGISTER = 'module:extension:component:unregister',
-  EXTENSION_COMPONENT_GET = 'module:extension:component:get',
-  EXTENSION_COMPONENTS_GET = 'module:extension:all-component-entries:get',
 }
 
 export enum AglynCommandFlag {

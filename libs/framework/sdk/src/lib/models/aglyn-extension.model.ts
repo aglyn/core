@@ -21,7 +21,7 @@ import {
   AglynExtensionOptions,
 } from '@aglyn/framework/sdk'
 import { LifecycleFlag } from '@aglyn/shared/util/types'
-import { EXTENSION_TYPE, MODULE_TYPE, TypeKind, TypeOf } from '../aglyn-symbol'
+import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../symbol'
 import { getStaticField } from '@aglyn/shared/util/tools'
 import { AglynBaseModel } from './aglyn-base.model'
 
@@ -31,8 +31,8 @@ const TAG = 'AglynExtensionModel'
 export abstract class AglynExtensionModel<T = any> extends AglynBaseModel implements AglynExtensionInstance {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly [TypeOf]: number | symbol = MODULE_TYPE
-  public static readonly [TypeKind]: number | symbol = EXTENSION_TYPE
+  public static readonly [TYPE_OF]: number | symbol = MODULE_TYPE
+  public static readonly [TYPE_KIND]: number | symbol = EXTENSION_TYPE
   public static readonly $id: string = null
   readonly #options: AglynExtensionOptions = null
   protected app: AglynAppInstance
@@ -41,11 +41,11 @@ export abstract class AglynExtensionModel<T = any> extends AglynBaseModel implem
   public get $id() {
     return getStaticField('$id', this)
   }
-  public get [TypeOf]() {
-    return getStaticField(TypeOf, this)
+  public get [TYPE_OF]() {
+    return getStaticField(TYPE_OF, this)
   }
-  public get [TypeKind]() {
-    return getStaticField(TypeKind, this)
+  public get [TYPE_KIND]() {
+    return getStaticField(TYPE_KIND, this)
   }
   public get lifecycle() {
     return this.#lifecycle
@@ -85,8 +85,8 @@ export abstract class AglynExtensionModel<T = any> extends AglynBaseModel implem
     return {
       ...super.toJSON(),
       name: this.$id,
-      [TypeOf]: getStaticField(TypeOf, this),
-      [TypeKind]: getStaticField(TypeKind, this),
+      [TYPE_OF]: getStaticField(TYPE_OF, this),
+      [TYPE_KIND]: getStaticField(TYPE_KIND, this),
     }
   }
 }

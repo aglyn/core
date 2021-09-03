@@ -15,85 +15,179 @@
  * limitations under the License.
  */
 
+import { _isArr, _isUndOrNull } from '@aglyn/shared/util/guards'
+import { getStaticField } from '@aglyn/shared/util/tools'
 import { AglynAppInstance } from '../../types'
-import { AglynModuleTriggerFlag } from '../../constants'
+import { AglynExtensionModel } from '../aglyn-extension.model'
 import {
   AglynComponent,
+  AglynComponentEventFlag,
   AglynComponentsExtension,
+  ComponentId,
   ComponentsRegistry,
-  PayloadParams,
-  RegistryEntries, RegistryKeys, RegistryValues,
+  ComponentsRegistryEntries,
+  ComponentsRegistryKeys,
+  ComponentsRegistryValues,
+  GetComponentPayload,
+  PluginComponentIdString,
+  PluginComponentIdTuple,
+  PluginId,
+  RegisterComponentPayload,
+  RegisterPluginPayload,
+  SelfComponentId,
+  UnregisterComponentPayload,
+  UnregisterPluginPayload,
 } from './components-types.extension'
-import { AglynExtensionModel } from '../aglyn-extension.model'
 
 
 const TAG = 'AglynComponentsExtensionModel'
 
 export default class AglynComponentsExtensionModel extends AglynExtensionModel<ComponentsRegistry> implements AglynComponentsExtension {
-  public static readonly [Symbol.toStringTag]: string = TAG
+//start: overrides
   public static readonly $id: string = 'components'
-  protected context: ComponentsRegistry = new Map()
-  constructor(app: AglynAppInstance) {
-    super(app, {autoload: true})
-  }
-  public onInit = (app: AglynAppInstance): this => {
-    app.getEmitter().on(
-      AglynModuleTriggerFlag.EXTENSION_COMPONENT_REGISTER,
-      this.registerComponent,
-    )
-    app.getEmitter().on(
-      AglynModuleTriggerFlag.EXTENSION_COMPONENT_UNREGISTER,
-      this.deleteComponent,
-    )
-    return this
+  public static readonly [Symbol.toStringTag]: string = TAG
+  protected context: ComponentsRegistry = {
+    plugins: new Map(),
+    components: new Map(),
   }
   public onDestroy = (app: AglynAppInstance): this => {
-    app.getEmitter().off(
-      AglynModuleTriggerFlag.EXTENSION_COMPONENT_REGISTER,
-      this.registerComponent,
-    )
-    app.getEmitter().off(
-      AglynModuleTriggerFlag.EXTENSION_COMPONENT_UNREGISTER,
-      this.deleteComponent,
-    )
+    this.listeners.forEach(([flag, method]) => app.getEmitter().off(flag, method))
+    return this
+  }
+  public onInit = (app: AglynAppInstance): this => {
+    this.listeners.forEach(([flag, method]) => app.getEmitter().on(flag, method))
     return this
   }
   public toJSON = () => {
     return {
       ...super.toJSON(),
-      componentIds: this.context.keys(),
+      componentIds: this.context?.components?.keys(),
     }
   }
-  public _componentEntries = (): RegistryEntries => {
-    return [...this.context.entries()]
+//end: overrides
+//start: not private (readonly)
+  /**
+   * Match any text possibly following a plugin ID
+   * TRUE:
+   *  `aa:bb::cc:dd` -> match = "cc:dd"
+   *  `aa::cc:dd` -> match = "cc:dd"
+   *  `aa::cc` -> match = "cc"
+   *  `cc` -> match = "cc"
+   *
+   * FALSE:
+   *  `aa:bb::cc::dd`
+   *  `::cc:dd`
+   *  `::cc`
+   *  `aa::`
+   *
+   * @type {RegExp}
+   */
+  public static readonly componentIdMatcher = /^(?:(?:(?:[^:]+:)+)?[^:]+)(?::{2})?((?:(?:[^:]+:)+)?[^:]+)$/g
+  /**
+   * Match any text always prefixing a plugin ID
+   * TRUE:
+   *  `aa:bb::cc:dd` -> match = "aa:bb"
+   *  `aa::cc:dd` -> match = "aa"
+   *  `aa::cc` -> match = "aa"
+   *
+   * FALSE:
+   *  `aa:bb::cc::dd`
+   *  `::cc:dd`
+   *  `::cc`
+   *  `aa::`
+   *
+   * @type {RegExp}
+   */
+  public static readonly pluginIdMatcher = /^((?:(?:[^:]+:)+)?[^:]+)(?::{2})(?:(?:[^:]+:)+)?[^:]+$/g
+  public static readonly pluginSeparator = '::'
+//end: not private (readonly)
+//start: constructor
+  constructor(app: AglynAppInstance) {
+    super(app, {autoload: true})
   }
-  public _componentKeys = (): string[] => {
-    return [...this.context.keys()]
-  }
-  public _componentValues = (): AglynComponent[] => {
-    return [...this.context.values()]
-  }
-  public getAllComponentsValues = (): RegistryValues => {
-    return this._componentValues()
-  }
-  public getAllComponentsKeys = (): RegistryKeys => {
-    return this._componentKeys()
-  }
-  public getAllComponents = (): RegistryEntries => {
+//end: constructor
+//start: abstract + overridden
+  public getAllComponents = (): ComponentsRegistryEntries => {
     return this._componentEntries()
   }
-  public getComponent = (payload: PayloadParams.Get): AglynComponent => {
-    const {componentId} = payload
-    return this.context.get(componentId)
+  public getAllComponentsKeys = (): ComponentsRegistryKeys => {
+    return this._componentKeys()
   }
-  public registerComponent = (payload: PayloadParams.Register): this => {
+  public getAllComponentsValues = (): ComponentsRegistryValues => {
+    return this._componentValues()
+  }
+  public getComponent = (payload: GetComponentPayload): AglynComponent => {
+    const {componentId} = payload
+    return this.context?.components?.get(this._decodeId(componentId))
+  }
+  public registerComponent = (payload: RegisterComponentPayload): this => {
     const {component} = payload
-    this.context.set(component?.$id, component)
+    const [pId, cId] = this._getDecodedId(component?.$id)
+    if (cId) {
+      this.context?.components?.set(this._decodeId([pId, cId]), component)
+      this.context?.plugins?.get(pId)?.components?.set(cId, component)
+    }
     return this
   }
-  public deleteComponent = (payload: PayloadParams.Delete): this => {
+  public registerComponentsPlugin = (payload: RegisterPluginPayload): this => {
+    const {plugin} = payload
+    const pId = plugin?.$id
+    this.context?.plugins?.set(pId, plugin)
+    plugin?.components?.forEach(component => {
+      const cId = component?.$id
+      this.context?.components?.set(this._decodeId([pId, cId]), component)
+    })
+    return this
+  }
+  public unregisterComponent = (payload: UnregisterComponentPayload): this => {
     const {componentId} = payload
-    this.getContext().delete(componentId)
+    const [pId, cId] = this._getDecodedId(componentId)
+    if (cId) {
+      this.context?.components?.delete(this._decodeId([pId, cId]))
+      this.context?.plugins?.get(pId)?.components?.delete(cId)
+    }
     return this
   }
+  public unregisterComponentsPlugin = (payload: UnregisterPluginPayload): this => {
+    const {pluginId} = payload
+    this.context?.plugins.get(pluginId)?.components?.forEach(component => {
+      this.context?.components?.delete(this._decodeId([pluginId, component?.$id]))
+    })
+    this.context?.plugins.delete(pluginId)
+    return this
+  }
+  private listeners: [AglynComponentEventFlag, (...args: unknown[]) => unknown][] = [
+    [AglynComponentEventFlag.COMPONENT_REGISTER, this.registerComponent],
+    [AglynComponentEventFlag.COMPONENT_UNREGISTER, this.unregisterComponent],
+    [AglynComponentEventFlag.COMPONENTS_PLUGIN_REGISTER, this.registerComponentsPlugin],
+    [AglynComponentEventFlag.COMPONENTS_PLUGIN_UNREGISTER, this.unregisterComponentsPlugin],
+  ]
+//end: abstract + overridden
+//start: not public
+  protected _decodeId = (id: ComponentId): PluginComponentIdString | SelfComponentId => {
+    return !_isArr(id) ? id : id.filter(i => {
+      return !_isUndOrNull(i)
+    }).join(getStaticField('pluginSeparator', this))
+  }
+  protected _componentEntries = (): ComponentsRegistryEntries => {
+    return [...this.context?.components?.entries()]
+  }
+  protected _componentKeys = (): ComponentId[] => {
+    return [...this.context?.components.keys()]
+  }
+  protected _componentValues = (): AglynComponent[] => {
+    return [...this.context?.components?.values()]
+  }
+  protected _decodeComponentId = (id: ComponentId): SelfComponentId => {
+    const _id = this._decodeId(id)
+    return (_id.match(getStaticField('componentIdMatcher', this)) ?? []) [0]
+  }
+  protected _getDecodedId = (id: ComponentId): PluginComponentIdTuple => {
+    return [this._decodePluginId(id), this._decodeComponentId(id)]
+  }
+  protected _decodePluginId = (id: ComponentId): PluginId => {
+    const _id = this._decodeId(id)
+    return (_id.match(getStaticField('pluginIdMatcher', this)) ?? [])[0]
+  }
+//end: not public
 }
