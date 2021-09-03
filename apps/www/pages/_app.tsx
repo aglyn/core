@@ -63,11 +63,7 @@ const metaElements: MakeMetaElementsConfig = [
 ]
 const linkElements: MakeLinkElementsConfig = []
 
-export interface _AppProps extends NextAppProps {
-  emotionCache?: EmotionCache
-}
-
-const AppWrapper = withTheme({theme: consoleTheme})(function AppWrapper(props) {
+function AppWrapperRaw(props) {
   const {children} = props
 
   useEffect(() => {
@@ -107,10 +103,16 @@ const AppWrapper = withTheme({theme: consoleTheme})(function AppWrapper(props) {
       </AppContextProvider>
     </Wrapper>
   )
-})
+}
+AppWrapperRaw.displayName = 'AppWrapper'
+const AppWrapper = withTheme({theme: consoleTheme})(AppWrapperRaw)
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
+
+export interface _AppProps extends NextAppProps {
+  emotionCache?: EmotionCache
+}
 
 /**
  *

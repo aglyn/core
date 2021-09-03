@@ -55,7 +55,7 @@ catch (e) {
   console.error(e, 'initialize aglyn app')
 }
 
-const AppWrapper = withTheme({theme:consoleTheme})(function AppWrapper(props) {
+function AppWrapperRaw(props) {
   const {children} = props
   const Wrapper = isProduction ? Fragment : Fragment // StrictMode
 
@@ -80,7 +80,9 @@ const AppWrapper = withTheme({theme:consoleTheme})(function AppWrapper(props) {
       </div>
     </Wrapper>
   )
-})
+}
+AppWrapperRaw.displayName = 'AppWrapper'
+const AppWrapper = withTheme({theme: consoleTheme})(AppWrapperRaw)
 
 const previewProduction = false
 const isProduction = process.env.NODE_ENV === 'production' || previewProduction

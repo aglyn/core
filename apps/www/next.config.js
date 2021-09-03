@@ -8,6 +8,7 @@ const isProduction = Boolean(process.env.NODE_ENV === 'production')
 const securityPolicy = isProduction
   ? 'default-src \'self\' aglyn.com *.aglyn.com'
   : 'default-src \'self\''
+
 console.log('JSON.stringify(process.env.NODE_ENV)', JSON.stringify(process.env.NODE_ENV))
 
 /**
@@ -29,12 +30,12 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: isProduction,
   },
-  headers: [
-    // {
-    //   key: 'Content-Security-Policy',
-    //   value: securityPolicy,
-    // },
-  ],
+  // headers: [
+  //   {
+  //     key: 'Content-Security-Policy',
+  //     value: securityPolicy,
+  //   },
+  // ],
   webpack: (config, options) => {
     const { webpack, buildId } = options
     config.plugins.push(

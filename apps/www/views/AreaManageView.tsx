@@ -21,10 +21,10 @@ import { _s, remap } from '@aglyn/shared/util/tools'
 import IconButton from '@material-ui/core/IconButton'
 import { useRouter } from 'next/router'
 import { useSnackbar } from 'notistack'
-import React from 'react'
-import DataTable, { Props as DataTableProps } from '../components/DataTable'
+import { ChangeEvent, Fragment, useCallback, useEffect, useState } from 'react'
+import DataTable, { DataTableProps } from '../components/DataTable'
 import WidgetCard from '../components/WidgetCard'
-import { withAppContext } from '../contexts/app-context'
+import { AppContextType, withAppContext } from '../contexts/app-context'
 import { useAppLoader } from '../contexts/app-loader-context'
 import { Fields } from '../forms'
 import ConsoleLayout from '../layouts/ConsoleLayout'
@@ -34,7 +34,7 @@ import DrawerFormView from './DrawerFormView'
 
 const pageLen = 25
 
-type Props = {
+export interface AreaManageViewProps {
   collectionId: string
   documentName: {
     singular: string
@@ -46,227 +46,229 @@ type Props = {
 
   onSaveSuccess?: (document: any) => void
   onSaveError?: (error: any) => void
+  app: AppContextType
 }
 
 
-export const AreaManageView = withAppContext<Props>(
-  function AreaManageView(props) {
-    const {
-      app,
-      columns,
-      documentName,
-      documentId,
-      collectionId,
-      fields,
-      onSaveSuccess,
-      onSaveError,
-    } = props
-    const router = useRouter()
-    const {enqueueSnackbar} = useSnackbar()
-    const {queueLoading, isLoading} = useAppLoader()
-    const [loadingDocuments, setLoadingDocuments] = React.useState(false)
-    const [error, setError] = React.useState<any>(null)
-    const [documents, setDocuments] = React.useState<{ [id: string]: any }>(null)
-    const [formOpen, setFormOpen] = React.useState(false)
-    const [activeDocument, setActiveDocument] = React.useState<{ type: 'updating' | 'creating', data: any }>(null)
-    const query = app.getCollectionRef(collectionId)
-    const rows = Object.entries(documents ?? {}).map(([id, v]) => ({id, ...v}))
-    const openForm = () => setFormOpen(true)
-    const closeForm = () => setFormOpen(false)
-    const clearActiveDocument = () => setActiveDocument(null)
+function AreaManageViewRaw(props: AreaManageViewProps) {
+  const {
+    app,
+    columns,
+    documentName,
+    documentId,
+    collectionId,
+    fields,
+    onSaveSuccess,
+    onSaveError,
+  } = props
+  const router = useRouter()
+  const {enqueueSnackbar} = useSnackbar()
+  const {queueLoading, isLoading} = useAppLoader()
+  const [loadingDocuments, setLoadingDocuments] = useState(false)
+  const [error, setError] = useState<any>(null)
+  const [documents, setDocuments] = useState<{ [id: string]: any }>(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [activeDocument, setActiveDocument] = useState<{ type: 'updating' | 'creating', data: any }>(null)
+  const query = app.getCollectionRef(collectionId)
+  const rows = Object.entries(documents ?? {}).map(([id, v]) => ({id, ...v}))
+  const openForm = () => setFormOpen(true)
+  const closeForm = () => setFormOpen(false)
+  const clearActiveDocument = () => setActiveDocument(null)
 
-    // Open document
-    const handleDocumentOpen = async (documentId) => {
-      await router.push(`${router.asPath}/${documentId}`)
+  // Open document
+  const handleDocumentOpen = async (documentId) => {
+    await router.push(`${router.asPath}/${documentId}`)
+  }
+  // Handle table data row click
+  const handleRowClick = (p) => {
+    handleDocumentOpen(_s(p.row.id))
+  }
+  // Close Document
+  const removeDocumentIdFromUrl = useCallback(async () => {
+    if (documentId) {
+      await router.push(router.asPath.replace(`/${documentId}`, ''))
     }
-    // Handle table data row click
-    const handleRowClick = (p) => {
-      handleDocumentOpen(_s(p.row.id))
-    }
-    // Close Document
-    const removeDocumentIdFromUrl = React.useCallback(async () => {
-      if (documentId) {
-        await router.push(router.asPath.replace(`/${documentId}`, ''))
-      }
-    }, [documentId])
+  }, [documentId])
 
-    // Close form
-    const handleCloseForm = async () => {
-      const dequeueLoader = queueLoading()
-      closeForm()
-      clearActiveDocument()
-      await removeDocumentIdFromUrl()
-      dequeueLoader()
-    }
+  // Close form
+  const handleCloseForm = async () => {
+    const dequeueLoader = queueLoading()
+    closeForm()
+    clearActiveDocument()
+    await removeDocumentIdFromUrl()
+    dequeueLoader()
+  }
 
-    // Update field on active document
-    const handleFieldUpdate = (fieldId: string) => (
-      event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-    ) => {
-      const value = event.target.value
-      setActiveDocument(prev => ({...prev, data: {...prev.data, [fieldId]: value}}))
-    }
+  // Update field on active document
+  const handleFieldUpdate = (fieldId: string) => (
+    event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
+    const value = event.target.value
+    setActiveDocument(prev => ({...prev, data: {...prev.data, [fieldId]: value}}))
+  }
 
-    // Open create form
-    const handleCreateDocumentFormOpen = async () => {
-      const dequeueLoader = queueLoading()
-      setActiveDocument({type: 'creating', data: {id: createUid()}})
-      openForm()
-      dequeueLoader()
-    }
+  // Open create form
+  const handleCreateDocumentFormOpen = async () => {
+    const dequeueLoader = queueLoading()
+    setActiveDocument({type: 'creating', data: {id: createUid()}})
+    openForm()
+    dequeueLoader()
+  }
 
-    // Update/set remote document with active document
-    const setRemoteDocument = React.useCallback(async () => {
-      console.debug('Saving active document', activeDocument)
-      const dequeueLoader = queueLoading()
-      const {type, data} = activeDocument
-      const {id: dataId, ...allExceptId} = data
-      const id = dataId ?? createUid()
-      await query.doc(id).set(allExceptId)
-      .then((res) => {
-        const actionMsg = type === 'creating' ? 'Created' : 'Updated'
-        enqueueSnackbar(`${actionMsg} successfully`, {variant: 'success'})
-        onSaveSuccess && onSaveSuccess(activeDocument)
-      })
-      .catch((error) => {
-        setError(error.message)
-        enqueueSnackbar(error?.message, {variant: 'error'})
-        onSaveError && onSaveError(error)
-      })
-      handleCloseForm()
-      dequeueLoader()
-    }, [query, activeDocument])
+  // Update/set remote document with active document
+  const setRemoteDocument = useCallback(async () => {
+    console.debug('Saving active document', activeDocument)
+    const dequeueLoader = queueLoading()
+    const {type, data} = activeDocument
+    const {id: dataId, ...allExceptId} = data
+    const id = dataId ?? createUid()
+    await query.doc(id).set(allExceptId)
+    .then((res) => {
+      const actionMsg = type === 'creating' ? 'Created' : 'Updated'
+      enqueueSnackbar(`${actionMsg} successfully`, {variant: 'success'})
+      onSaveSuccess && onSaveSuccess(activeDocument)
+    })
+    .catch((error) => {
+      setError(error.message)
+      enqueueSnackbar(error?.message, {variant: 'error'})
+      onSaveError && onSaveError(error)
+    })
+    handleCloseForm()
+    dequeueLoader()
+  }, [query, activeDocument])
 
-    // Load initial documents
-    // React.useEffect(() => {
-    //   setLoadingDocuments(true)
-    //   query.get()
-    //     .then(querySnapshot => {
-    //       setDocuments(prev => {
-    //         const items = { ...prev }
-    //         querySnapshot.docs.forEach(doc => {
-    //           items[doc.id] = { id: doc.id, ...doc.data() }
-    //         })
-    //         return items
-    //       })
-    //     })
-    //     .catch(error => {
-    //       console.error('Error loading initial items', error)
-    //       enqueueSnackbar(error?.message, { variant: 'error' })
-    //     })
-    //     .finally(() => {
-    //       setLoadingDocuments(false)
-    //     })
-    // }, [])
+  // Load initial documents
+  // React.useEffect(() => {
+  //   setLoadingDocuments(true)
+  //   query.get()
+  //     .then(querySnapshot => {
+  //       setDocuments(prev => {
+  //         const items = { ...prev }
+  //         querySnapshot.docs.forEach(doc => {
+  //           items[doc.id] = { id: doc.id, ...doc.data() }
+  //         })
+  //         return items
+  //       })
+  //     })
+  //     .catch(error => {
+  //       console.error('Error loading initial items', error)
+  //       enqueueSnackbar(error?.message, { variant: 'error' })
+  //     })
+  //     .finally(() => {
+  //       setLoadingDocuments(false)
+  //     })
+  // }, [])
 
-    // Listen for realtime updates
-    React.useEffect(() => {
-      const cancelListener = query.onSnapshot((querySnapshot) => {
-        setLoadingDocuments(true)
-        setDocuments(prev => {
-          const items = {...prev}
-          querySnapshot.docChanges().forEach(change => {
-            if (change.type === 'removed') {
-              console.debug('Removed document update: ', change.doc.data())
-              delete items[change.doc.id]
-            } else {
-              console.debug('Updated document update: ', change.doc.data())
-              items[change.doc.id] = {id: change.doc.id, ...change.doc.data()}
-            }
-          })
-          return items
+  // Listen for realtime updates
+  useEffect(() => {
+    const cancelListener = query.onSnapshot((querySnapshot) => {
+      setLoadingDocuments(true)
+      setDocuments(prev => {
+        const items = {...prev}
+        querySnapshot.docChanges().forEach(change => {
+          if (change.type === 'removed') {
+            console.debug('Removed document update: ', change.doc.data())
+            delete items[change.doc.id]
+          }
+          else {
+            console.debug('Updated document update: ', change.doc.data())
+            items[change.doc.id] = {id: change.doc.id, ...change.doc.data()}
+          }
         })
-        setLoadingDocuments(false)
-      }, (error) => {
-        enqueueSnackbar(error?.message, {variant: 'error'})
+        return items
       })
-      return () => {
-        cancelListener()
+      setLoadingDocuments(false)
+    }, (error) => {
+      enqueueSnackbar(error?.message, {variant: 'error'})
+    })
+    return () => {
+      cancelListener()
+    }
+  }, [])
+
+  // Setup the active document
+  useEffect(() => {
+    if (documentId && documents) {
+      const document = documents[documentId]
+      if (document) {
+        setActiveDocument({type: 'updating', data: document})
+        setError(null)
       }
-    }, [])
-
-    // Setup the active document
-    React.useEffect(() => {
-      if (documentId && documents) {
-        const document = documents[documentId]
-        if (document) {
-          setActiveDocument({type: 'updating', data: document})
-          setError(null)
-        } else {
-          setError('Item does not exist!')
-          setActiveDocument(null)
-          enqueueSnackbar('Error loading item', {variant: 'error'})
-        }
+      else {
+        setError('Item does not exist!')
+        setActiveDocument(null)
+        enqueueSnackbar('Error loading item', {variant: 'error'})
       }
-    }, [documentId, documents])
+    }
+  }, [documentId, documents])
 
-    const mappedFields = remap(fields, (value => ({
-      ...value, value: activeDocument?.data[value.id] ?? value.value,
-    })))
+  const mappedFields = remap(fields, (value => ({
+    ...value, value: activeDocument?.data[value.id] ?? value.value,
+  })))
 
-    return (
-      <React.Fragment>
-        <ConsoleLayout
-          items={[
-            {
-              xs: 12, md: 3,
-              children: (<AreaManageNavigationListWidgetView/>),
-            },
-            {
-              xs: 12, md: 9,
-              children: (
-                <WidgetCard
-                  header={{
-                    title: `All ${documentName.plural}`,
-                    action: (
-                      <React.Fragment>
-                        <IconButton
-                          children={<SvgPathIcon iconId="filter-variant"/>}
-                          title="Filter list"
-                          disabled
-                        />
-                        <IconButton
-                          children={<SvgPathIcon iconId="plus"/>}
-                          title="Add item"
-                          onClick={handleCreateDocumentFormOpen}
-                        />
-                      </React.Fragment>
-                    ),
+  return (
+    <Fragment>
+      <ConsoleLayout
+        items={[
+          {
+            xs: 12, md: 3,
+            children: (<AreaManageNavigationListWidgetView/>),
+          },
+          {
+            xs: 12, md: 9,
+            children: (
+              <WidgetCard
+                header={{
+                  title: `All ${documentName.plural}`,
+                  action: (
+                    <Fragment>
+                      <IconButton
+                        children={<SvgPathIcon iconId="filter-variant"/>}
+                        title="Filter list"
+                        disabled
+                      />
+                      <IconButton
+                        children={<SvgPathIcon iconId="plus"/>}
+                        title="Add item"
+                        onClick={handleCreateDocumentFormOpen}
+                      />
+                    </Fragment>
+                  ),
+                }}
+              >
+                <DataTable
+                  DataGridProps={{
+                    loading: loadingDocuments,
+                    onRowClick: handleRowClick,
                   }}
-                >
-                  <DataTable
-                    DataGridProps={{
-                      loading: loadingDocuments,
-                      onRowClick: handleRowClick,
-                    }}
-                    columns={columns}
-                    label={documentName.plural}
-                    rows={rows}
-                  />
-                </WidgetCard>
-              ),
-            },
-          ]}
-        />
+                  columns={columns}
+                  label={documentName.plural}
+                  rows={rows}
+                />
+              </WidgetCard>
+            ),
+          },
+        ]}
+      />
 
-        <DrawerFormView
-          error={error || Boolean(documentId && !activeDocument)}
-          fields={mappedFields}
-          id={activeDocument?.data?.id}
-          label={documentName.singular}
-          loading={isLoading}
-          open={Boolean(documentId || formOpen)}
-          formVariant={activeDocument?.type}
-          onClose={handleCloseForm}
-          onSave={setRemoteDocument}
-          onUpdate={handleFieldUpdate}
-        />
-      </React.Fragment>
-    )
-  },
-)
+      <DrawerFormView
+        error={error || Boolean(documentId && !activeDocument)}
+        fields={mappedFields}
+        id={activeDocument?.data?.id}
+        label={documentName.singular}
+        loading={isLoading}
+        open={Boolean(documentId || formOpen)}
+        formVariant={activeDocument?.type}
+        onClose={handleCloseForm}
+        onSave={setRemoteDocument}
+        onUpdate={handleFieldUpdate}
+      />
+    </Fragment>
+  )
+}
 
-AreaManageView.displayName = 'AreaManageView'
-AreaManageView.defaultProps = {}
+AreaManageViewRaw.displayName = 'AreaManageView'
+AreaManageViewRaw.defaultProps = {}
 
+export const AreaManageView = withAppContext(AreaManageViewRaw)
 export default AreaManageView

@@ -20,10 +20,10 @@ import {
   InjectedContextProp,
   withContext,
 } from '@aglyn/shared/ui/react'
+import { _ln } from '@aglyn/shared/util/guards'
 import { createUid } from '@aglyn/shared/util/helpers'
-import { _ln } from '@aglyn/shared/util/tools'
 import { ConditionalNonDist } from '@aglyn/shared/util/types'
-import React, { createContext, useContext, useState } from 'react'
+import { createContext, PropsWithChildren, useContext, useState } from 'react'
 
 
 export type QueueId = string
@@ -52,7 +52,11 @@ export const {
 export const useAppLoader = () => useContext(AppLoader)
 const createQueueId = () => createUid(5)
 
-export function AppLoaderProviderComponent(props: React.PropsWithChildren<unknown>) {
+export interface AppLoaderProviderComponentProps extends PropsWithChildren<{}> {
+
+}
+
+export function AppLoaderProviderComponent(props: AppLoaderProviderComponentProps) {
   const {children} = props
   const [state, setState] = useState<AppLoaderContextType>({
     queues: [],
@@ -72,7 +76,7 @@ export function AppLoaderProviderComponent(props: React.PropsWithChildren<unknow
         setState(prevState => {
           const queues = prevState.queues.filter(i => i !== queueId)
           return {
-            ...prevState, queues, isLoading: _ln(queues),
+            ...prevState, queues, isLoading: _ln(queues, 0, '>'),
           }
         })
       }

@@ -39,10 +39,10 @@ import Typography from '@material-ui/core/Typography'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Fragment, ReactNode } from 'react'
-import { Props as BreadcrumbsProps } from '../components/Breadcrumbs'
+import { Breadcrumbs, BreadcrumbsProps } from '../components/Breadcrumbs'
 import Copyright from '../components/Copyright'
 import { APP, tailNavigation } from '../const'
-import { CurrentUserContext, withCurrentUserCtx } from '../contexts/current-user-context'
+import { CurrentUserContextType, withCurrentUserContext } from '../contexts/current-user-context'
 import { AggregatedPageMeta, withAggregatedPageMeta } from '../lib/app-pages'
 
 
@@ -71,14 +71,6 @@ const StyledAppBar = styled(AppBar, {
     backgroundColor: theme.palette.divider,
   },
 }))
-
-const StyledNavBarSpacer = styled('div', {
-  name: 'NavBarSpacer',
-})({
-  display: 'flex',
-  width: '100%',
-  height: 96,
-})
 
 const StyledLeft = styled('div', {
   name: 'Left',
@@ -202,18 +194,19 @@ const StyledMenu = styled(Menu, {
   '&:last-child': {paddingLeft: theme.spacing(0.75)},
 }))
 
-const StyledBreadcrumbs = styled('div', {
+const StyledBreadcrumbs = styled(Breadcrumbs, {
   name: 'Breadcrumbs',
 })(({theme}) => ({
   marginTop: theme.spacing(1),
   color: darken(theme.palette.getContrastText(purple['600']), 0.12),
 
-  // TODO: Item class name
-  // color: 'inherit',
-
-  // TODO: Last item class name
-  // color: theme.palette.getContrastText(purple['600']),
-  // fontWeight: theme.typography.fontWeightMedium,
+  ['& .AglynBreadcrumbs-item']: {
+    color: 'inherit',
+    ['&.AglynBreadcrumbs-last']: {
+      color: theme.palette.getContrastText(purple['600']),
+      fontWeight: theme.typography.fontWeightMedium,
+    },
+  },
 }))
 
 function a11yProps(index) {
@@ -226,18 +219,26 @@ function a11yProps(index) {
 export const NAVIGATION_MAX_WIDTH = 'lg'
 export const FOOTER_MAX_WIDTH = 'lg'
 
+export interface QuickActionsMenuItem extends IconButtonProps {
+  iconId?: string,
+  avatar?: any
+  dense?: boolean
+  href?: any
+  items?: QuickActionsMenuItem[]
+}
+
 export interface MainLayoutProps {
   children?: ReactNode | undefined
   title?: string
   tabBarTitle?: string
   centerNavigationItems?: Array<any>
   breadcrumbItems?: BreadcrumbsProps['items']
-  navTabItems?: (TabProps & AppLinkProps & { iconId: string })[]
-  quickActionMenus?: (IconButtonProps & { iconId: string })[]
+  navTabItems?: (TabProps & AppLinkProps<'text'> & { iconId: string })[]
+  quickActionMenus?: QuickActionsMenuItem[]
   productName?: string
   footerNavItems: GridButtonsProps['items']
   aggregatedPageMeta: AggregatedPageMeta
-  currentUserContext: CurrentUserContext
+  currentUserContext: CurrentUserContextType
 }
 
 const MainLayout = function RefRenderFn(props: MainLayoutProps) {
@@ -363,7 +364,7 @@ const MainLayout = function RefRenderFn(props: MainLayoutProps) {
                 )}
                 {navTabItems && navTabItems.map(({iconId, ...item}, i) => (
                   <StyledTab
-                    key={item.id ?? item.href ?? i}
+                    key={item.id ?? item['key'] ?? i}
                     // disableRipple
                     color="inherit"
                     component={AppLink}
@@ -443,6 +444,6 @@ MainLayout.defaultProps = {
   currentUserContext: {} as any,
 }
 
-export default withCurrentUserCtx(withAggregatedPageMeta(
+export default withCurrentUserContext(withAggregatedPageMeta(
   MainLayout,
 ))
