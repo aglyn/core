@@ -15,16 +15,9 @@
  * limitations under the License.
  */
 
+import { _isNum, _isObj } from '@aglyn/shared-util-guards'
+import { arrayRemoveItem, arrayReorder, objectDeleteProperty } from '@aglyn/shared-util-tools'
 import { NormalizedData, NormalizedModel } from '../interfaces/normalized'
-import {
-  _isNum,
-  _isObj,
-} from '@aglyn/shared/util/guards'
-import {
-  arrayRemoveItem,
-  arrayReorder,
-  objectDeleteProperty,
-} from '@aglyn/shared/util/tools'
 
 
 type ID = string
@@ -155,7 +148,8 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
 
     if (!isUpdate) {
       model.allIds.push(id)
-    } else if (_isNum(index) && currentIndex !== index) {
+    }
+    else if (_isNum(index) && currentIndex !== index) {
       model.allIds = arrayReorder(model.allIds, currentIndex, index)
     }
 

@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { AglynSvgLogo } from '@aglyn/shared/ui/react'
-import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
+import { AglynSvgLogo } from '@aglyn/shared-ui-react'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared-ui-themes'
 import Box, { BoxProps } from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Slide from '@mui/material/Slide'

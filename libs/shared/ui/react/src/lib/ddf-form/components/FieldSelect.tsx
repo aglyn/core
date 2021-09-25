@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { styled } from '@aglyn/shared/ui/themes'
+import { styled } from '@aglyn/shared-ui-themes'
 import useFieldApi, { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-field-api'
 import MuiFormControl, { FormControlProps as MuiFormControlProps } from '@mui/material/FormControl'
 import MuiFormHelperText from '@mui/material/FormHelperText'

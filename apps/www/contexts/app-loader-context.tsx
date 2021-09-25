@@ -19,11 +19,11 @@ import {
   ComponentWithInjectedProp,
   InjectedContextProp,
   withContext,
-} from '@aglyn/shared/ui/react'
-import { _isLength } from '@aglyn/shared/util/guards'
-import { createUid } from '@aglyn/shared/util/helpers'
-import { noop } from '@aglyn/shared/util/tools'
-import { ConditionalNonDist } from '@aglyn/shared/util/types'
+} from '@aglyn/shared-ui-react'
+import { _isLength } from '@aglyn/shared-util-guards'
+import { createUid } from '@aglyn/shared-util-helpers'
+import { noop } from '@aglyn/shared-util-tools'
+import { ConditionalNonDist } from '@aglyn/shared-util-types'
 import { createContext, PropsWithChildren, useContext, useState } from 'react'
 
 

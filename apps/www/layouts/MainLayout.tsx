@@ -23,10 +23,10 @@ import {
   GridButtonsProps,
   Menu,
   SvgPathIcon,
-} from '@aglyn/shared/ui/react'
-import { darken, styled } from '@aglyn/shared/ui/themes'
-import { _isArr, _isArrEmpty, _isObj } from '@aglyn/shared/util/guards'
-import AppBar, {AppBarProps} from '@mui/material/AppBar'
+} from '@aglyn/shared-ui-react'
+import { darken, styled } from '@aglyn/shared-ui-themes'
+import { _isArr, _isArrEmpty, _isObj } from '@aglyn/shared-util-guards'
+import AppBar, { AppBarProps } from '@mui/material/AppBar'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import { cyan, purple } from '@mui/material/colors'

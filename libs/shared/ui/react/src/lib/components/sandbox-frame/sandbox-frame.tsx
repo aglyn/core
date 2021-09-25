@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-import { jssPreset, StylesProvider, useTheme } from '@aglyn/shared/ui/themes'
+import { jssPreset, StylesProvider, useTheme } from '@aglyn/shared-ui-themes'
 
 import { create, Jss, JssOptions } from 'jss'
 import rtl from 'jss-rtl'
 import React, {
   Children,
-  Fragment,
+  cloneElement,
   forwardRef,
+  Fragment,
+  isValidElement,
   useCallback,
-  useState,
   useMemo,
   useRef,
-  cloneElement,
-  isValidElement,
+  useState,
 } from 'react'
 import ReactFrameComponent, { FrameComponentProps } from 'react-frame-component'
 

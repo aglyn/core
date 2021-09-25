@@ -16,13 +16,14 @@
  */
 
 import { AglynComponentData, getApp, getComponent } from '@aglyn/data-framework'
-import { ReactIs } from '@aglyn/shared/ui/react'
-import { _isArr, _isArrEmpty } from '@aglyn/shared/util/guards'
-import { _s, yes } from '@aglyn/shared/util/tools'
-import { AnyProps } from '@aglyn/shared/util/types'
+import { ReactIs } from '@aglyn/shared-ui-react'
+import { _s, yes } from '@aglyn/shared-util-tools'
+import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
+import { AnyProps } from '@aglyn/shared-util-types'
 import { ComponentType, ElementType, forwardRef } from 'react'
 import { handleElementResolveProps } from '../util/handle-element-resolve-props'
 import { ElementsRendererComponent } from './elements-renderer.component'
+
 
 export interface ElementRendererComponentProps extends AnyProps {
   elementData: AglynComponentData
@@ -31,18 +32,18 @@ export interface ElementRendererComponentProps extends AnyProps {
 
 export const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const { elementData, elementRendererComponent: elementRendererComponentProp, ...rest } = props
+    const {elementData, elementRendererComponent: elementRendererComponentProp, ...rest} = props
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
 
     // TODO: move to context consumer
-    const component = getComponent(getApp(), { componentId: _s(elementData?.component) })
+    const component = getComponent(getApp(), {componentId: _s(elementData?.component)})
     const ctor = component
     const options = component?.options
     const resolvedProps = handleElementResolveProps(elementData?.props, options, ctor)
-    const { children: content = null, ...ctorProps } = resolvedProps
+    const {children: content = null, ...ctorProps} = resolvedProps
     const ComponentCtor = (ReactIs.isValidElementType(ctor) ? ctor : 'div') as ElementType
     const haveChildren = yes(!_isArr(elementData?.children) || _isArrEmpty(elementData?.children))
-    const refProps = options?.disableRef ? {} : options?.innerRef ? { innerRef: ref } : { ref: ref }
+    const refProps = options?.disableRef ? {} : options?.innerRef ? {innerRef: ref} : {ref: ref}
 
     return (
       <ComponentCtor {...refProps} {...ctorProps} {...rest}>
@@ -56,7 +57,7 @@ export const ElementRendererComponent = forwardRef<any, ElementRendererComponent
         )}
       </ComponentCtor>
     )
-  }
+  },
 )
 
 ElementRendererComponent.displayName = 'ElementRendererComponent'

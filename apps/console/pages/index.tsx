@@ -16,7 +16,7 @@
  */
 
 import { getApp } from '@aglyn/sdk/framework'
-import { GridButtons, SvgPathIcon } from '@aglyn/shared/ui/react'
+import { GridButtons, SvgPathIcon } from '@aglyn/shared-ui-react'
 import styled from '@emotion/styled'
 import React from 'react'
 

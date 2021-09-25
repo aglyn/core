@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { AppLink, SvgPathIcon } from '@aglyn/shared/ui/react'
-import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
+import { AppLink, SvgPathIcon } from '@aglyn/shared-ui-react'
+import { generateUtilityClasses, styled } from '@aglyn/shared-ui-themes'
 import {
   Collapse,
   IconButton,

@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import { OverrideableComponentProps } from '@aglyn/shared/ui/react'
-import { styled } from '@aglyn/shared/ui/themes'
+import { OverrideableComponentProps } from '@aglyn/shared-ui-react'
+import { styled } from '@aglyn/shared-ui-themes'
 import { forwardRef, HTMLAttributes } from 'react'
 
 
 const BackgroundImageRoot = styled('div', {
-  name: 'BackgroundImage'
+  name: 'BackgroundImage',
 })(({
   backgroundColor: 'inherit',
   backgroundRepeat: 'no-repeat',
@@ -31,6 +31,7 @@ const BackgroundImageRoot = styled('div', {
 }))
 
 type BaseProps = HTMLAttributes<HTMLDivElement>
+
 export interface BackgroundImageProps extends BaseProps, OverrideableComponentProps {
   url: string
   parallax?: boolean

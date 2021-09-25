@@ -15,15 +15,8 @@
  * limitations under the License.
  */
 
-import { ComponentWithInjectedProp, withContext } from '@aglyn/shared/ui/react'
-import {
-  ComponentType,
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { ComponentWithInjectedProp, withContext } from '@aglyn/shared-ui-react'
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
 import { FbUser } from '../lib/aglyn-deprecated'
 import { AppContextType, withAppContext } from './app-context'
 
@@ -98,7 +91,7 @@ export const CurrentUserProviderComponent = withAppContext(CurrentUserProviderCo
  * @return {*}
  */
 export function withCurrentUserContext<P>(
-  Component: ComponentWithInjectedProp<P, CurrentUserContextConsumer, 'currentUserContext'>
+  Component: ComponentWithInjectedProp<P, CurrentUserContextConsumer, 'currentUserContext'>,
 ) {
   return withContext(CurrentUserContextConsumer, 'currentUserContext')(Component)
 }

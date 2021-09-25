@@ -1,9 +1,10 @@
 import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { getStaticField } from '@aglyn/shared/util/tools'
-import { Dictionary } from '@aglyn/shared/util/types'
+import { getStaticField } from '@aglyn/shared-util-tools'
+import { Dictionary } from '@aglyn/shared-util-types'
 import { AglynEmitter } from '../emitter'
 import { AglynError } from '../error'
 import { AglynBaseModelInstance, AglynLogger } from '../types'
+
 
 /**
  * @license

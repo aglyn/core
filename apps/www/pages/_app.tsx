@@ -20,17 +20,17 @@ import {
   MakeLinkElementsConfig,
   makeMetaElements,
   MakeMetaElementsConfig,
-} from '@aglyn/shared/ui/react'
+} from '@aglyn/shared-ui-react'
 import {
   CacheProvider,
   consoleTheme,
   createEmotionCache,
   EmotionCache,
   withTheme,
-} from '@aglyn/shared/ui/themes'
+} from '@aglyn/shared-ui-themes'
 import { AppProps as NextAppProps } from 'next/app'
 import Head from 'next/head'
-import { Fragment, PropsWithChildren, useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import { APP } from '../const'
 import { AppContextProvider } from '../contexts/app-context'
 import { AppLoaderProviderComponent } from '../contexts/app-loader-context'

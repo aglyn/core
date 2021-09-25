@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { createStyles, makeStyles, Theme } from '@aglyn/shared/ui/themes'
-import { _isArr } from '@aglyn/shared/util/guards'
+import { createStyles, makeStyles, Theme } from '@aglyn/shared-ui-themes'
+import { _isArr } from '@aglyn/shared-util-guards'
 import { MenuItem, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import ListItem from '@mui/material/ListItem'

@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { AppLink, AppLinkProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
-import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
-import { _isLength } from '@aglyn/shared/util/guards'
-import { yes } from '@aglyn/shared/util/tools'
+import { AppLink, AppLinkProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared-ui-react'
+import { generateUtilityClasses, styled } from '@aglyn/shared-ui-themes'
+import { _isLength } from '@aglyn/shared-util-guards'
+import { yes } from '@aglyn/shared-util-tools'
 import MuiBreadcrumbs, { BreadcrumbsProps as MuiBreadcrumbsProps } from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'

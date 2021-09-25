@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+import { Platform } from '@aglyn/shared-util-helpers'
+import { Logger } from '@aglyn/shared-util-logger'
+import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
   Dictionary,
   Implements,
@@ -23,11 +26,11 @@ import {
   LoadableObserver,
   Serializable,
   StringLike,
-} from '@aglyn/shared/util/types'
-import { AglynCommandFlag, AglynExtension } from './constants'
+} from '@aglyn/shared-util-types'
 import { Emitter } from 'mitt'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { Logger } from '@aglyn/shared-util-logger'
+import { AglynCommandFlag, AglynExtension } from './constants'
+import { AglynEmitter, AglynModuleEventFlag, AglynModuleEventPayload } from './emitter'
+import { AglynError } from './error'
 import {
   APP_TYPE,
   COMMAND_TYPE,
@@ -37,9 +40,7 @@ import {
   TYPE_KIND,
   TYPE_OF,
 } from './symbol'
-import { AglynError } from './error'
-import { Platform } from '@aglyn/shared/util/helpers'
-import { AglynEmitter, AglynModuleEventFlag, AglynModuleEventPayload } from './emitter'
+
 
 export type Payload<T = any> = { payload: T }
 export type PayloadData<T extends Dictionary = any> = T
@@ -69,25 +70,19 @@ export interface AglynNamed {
   name?: string
 }
 
-export type AglynLoads<K extends string, T extends AglynUniqueId> = Implements<
-  'load',
+export type AglynLoads<K extends string, T extends AglynUniqueId> = Implements<'load',
   K,
-  (...data: T[]) => void
-> &
+  (...data: T[]) => void> &
   Implements<'unload', K, (...data: T[]) => void>
 
-export type AglynRegistersType<K extends string, T extends AglynUniqueId> = Implements<
-  'register',
+export type AglynRegistersType<K extends string, T extends AglynUniqueId> = Implements<'register',
   '',
-  (type: K, data: T) => void
-> &
+  (type: K, data: T) => void> &
   Implements<'unregister', '', (type: K, id: T['$id']) => void>
 
-export type AglynRegisters<K extends string, T1 extends any, T2 extends any = T1> = Implements<
-  'register',
+export type AglynRegisters<K extends string, T1 extends any, T2 extends any = T1> = Implements<'register',
   K,
-  (...data: T1[]) => void
-> &
+  (...data: T1[]) => void> &
   Implements<'unregister', K, (...data: T2[]) => void>
 
 export type AglynTypeFields<T extends SYMBOL_TYPE, U extends SYMBOL_TYPE = never> = {
@@ -133,11 +128,9 @@ export interface AglynAppInstance extends AglynBaseModelInstance, AglynAppTypeFi
 
 export interface AglynCommandControllerInstance
   extends AglynBaseModelInstance,
-    AglynRegisters<
-      'action',
+    AglynRegisters<'action',
       AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_REGISTER],
-      AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER]
-    > {
+      AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER]> {
   executeCommand(data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_TRIGGER]): void
 }
 
@@ -147,11 +140,9 @@ export interface AglynCommandHandler extends AglynUniqueId, AglynCommandTypeFiel
 
 export interface AglynExtensionControllerInstance
   extends AglynBaseModelInstance,
-    AglynRegisters<
-      'extension',
+    AglynRegisters<'extension',
       AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_REGISTER],
-      AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNREGISTER]
-    >,
+      AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNREGISTER]>,
     AglynLoads<'extension', AglynAppModule> {
   getExtensionByName(name: string): AglynExtensionInstance
   getAllExtensions(): AglynExtensionInstance[]

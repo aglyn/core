@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { alpha, styled } from '@aglyn/shared/ui/themes'
+import { alpha, styled } from '@aglyn/shared-ui-themes'
 import MuiBackdrop, { BackdropProps as MuiBackdropProps } from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import LinearProgress from '@mui/material/LinearProgress'

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import { AppLink } from '@aglyn/shared/ui/react'
-import { createStyles, Theme, withStyles, WithStyles } from '@aglyn/shared/ui/themes'
-import { objectRemap } from '@aglyn/shared/util/tools'
+import { AppLink } from '@aglyn/shared-ui-react'
+import { createStyles, Theme, withStyles, WithStyles } from '@aglyn/shared-ui-themes'
+import { objectRemap } from '@aglyn/shared-util-tools'
 import { Box, Button, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'

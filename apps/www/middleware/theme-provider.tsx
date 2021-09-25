@@ -19,7 +19,7 @@ import {
   Theme,
   ThemeProvider as MuiThemeProvider,
   ThemeProviderProps as MuiThemeProviderProps,
-} from '@aglyn/shared/ui/themes'
+} from '@aglyn/shared-ui-themes'
 import React from 'react'
 import { NextAppMiddleware } from '../lib/next-app'
 

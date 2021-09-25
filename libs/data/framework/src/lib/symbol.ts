@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared/util/guards'
+import { _isFnT } from '@aglyn/shared-util-guards'
 
 // The Symbol used to tag the AglynObject-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.

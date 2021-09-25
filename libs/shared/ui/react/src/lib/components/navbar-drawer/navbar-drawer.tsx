@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
+import { generateUtilityClasses, styled } from '@aglyn/shared-ui-themes'
 
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import MuiDrawer, { DrawerProps as MuiDrawerProps } from '@mui/material/Drawer'

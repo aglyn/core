@@ -26,10 +26,11 @@ import {
   RestrictFlag,
 } from '@aglyn/data-framework'
 import '@aglyn/data-framework'
-import { IconId as MdiIconId } from '@aglyn/shared/data/mdi'
-import { FormSchema, InnerRefProp } from '@aglyn/shared/ui/react'
-import { AnyProps, JSXIntrinsicElement, JSXNode, ResolveProps } from '@aglyn/shared/util/types'
+import { IconId as MdiIconId } from '@aglyn/shared-data-mdi'
+import { FormSchema, InnerRefProp } from '@aglyn/shared-ui-react'
+import { AnyProps, JSXIntrinsicElement, JSXNode, ResolveProps } from '@aglyn/shared-util-types'
 import { ComponentClass, FunctionComponent } from 'react'
+
 
 export type AglynComponentTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof EXTENSION_TYPE>
 

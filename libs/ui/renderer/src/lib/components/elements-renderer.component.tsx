@@ -16,7 +16,7 @@
  */
 
 import { AglynComponentData } from '@aglyn/data-framework'
-import { OverrideableComponentProps } from '@aglyn/shared/ui/react'
+import { OverrideableComponentProps } from '@aglyn/shared-ui-react'
 import { forwardRef, Fragment } from 'react'
 import {
   ElementRendererComponent,

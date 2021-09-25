@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
+import { _isFnT } from '@aglyn/shared-util-guards'
+import { getDisplayName } from '@aglyn/shared-util-tools'
+import { MKey } from '@aglyn/shared-util-types'
 import { ComponentType, createElement } from 'react'
-
-import { getDisplayName } from '@aglyn/shared/util/tools'
-import { _isFnT } from '@aglyn/shared/util/guards'
-import { MKey } from '@aglyn/shared/util/types'
 
 
 /** Merge props for WithHoc utility functions */
@@ -45,7 +44,7 @@ function withHocFactoryBuilderImpl<P, T, U extends MKey>(value: T | { (props: P)
 
   return function withHocFactory(
     Component: WithHocComponent<P, U, T>,
-    overrideInjectedPropName?: U
+    overrideInjectedPropName?: U,
   ): ComponentType<P> {
     let propName = overrideInjectedPropName ?? injectedPropName
     function WithHocFactory(props: P) {

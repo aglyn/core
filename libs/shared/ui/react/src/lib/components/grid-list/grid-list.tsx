@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
+import { generateUtilityClasses, styled } from '@aglyn/shared-ui-themes'
 import Card from '@mui/material/Card'
 import Grid, { GridProps as MuiGridProps } from '@mui/material/Grid'
 import clsx from 'clsx'

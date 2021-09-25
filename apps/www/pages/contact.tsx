@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { componentMapper, GridItems } from '@aglyn/shared/ui/react'
+import { componentMapper, GridItems } from '@aglyn/shared-ui-react'
 import FormTemplateRenderProps
   from '@data-driven-forms/react-form-renderer/common-types/form-template-render-props'
 import FormRenderer from '@data-driven-forms/react-form-renderer/form-renderer'

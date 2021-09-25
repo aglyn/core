@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getDisplayName } from '@aglyn/shared/util/tools'
+import { getDisplayName } from '@aglyn/shared-util-tools'
 import { ComponentType, Consumer, createElement } from 'react'
 
 

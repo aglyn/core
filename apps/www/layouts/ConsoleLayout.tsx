@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { GridItems, GridItemsProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared/ui/react'
-import { styled } from '@aglyn/shared/ui/themes'
-import { _isStrT } from '@aglyn/shared/util/guards'
-import { _s, copy } from '@aglyn/shared/util/tools'
+import { GridItems, GridItemsProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared-ui-react'
+import { styled } from '@aglyn/shared-ui-themes'
+import { _isStrT } from '@aglyn/shared-util-guards'
+import { _s, copy } from '@aglyn/shared-util-tools'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'

@@ -17,7 +17,7 @@
 
 //TODO: FIX ALL TYPINGS AND REFACTOR OPTIONS/PROPS
 
-import { jssPreset, StylesProvider } from '@aglyn/shared/ui/themes'
+import { jssPreset, StylesProvider } from '@aglyn/shared-ui-themes'
 
 import { create } from 'jss'
 import rtl from 'jss-rtl'

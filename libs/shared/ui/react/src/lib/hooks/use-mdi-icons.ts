@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { icons as mdiIcons, IconsNormalized } from '@aglyn/shared/data/mdi'
+import { icons as mdiIcons, IconsNormalized } from '@aglyn/shared-data-mdi'
 
-import { _isArr } from '@aglyn/shared/util/guards'
-import { FindWithFuzzy } from '@aglyn/shared/util/helpers'
+import { _isArr } from '@aglyn/shared-util-guards'
+import { FindWithFuzzy } from '@aglyn/shared-util-helpers'
 import { useCallback, useMemo, useState } from 'react'
 
 

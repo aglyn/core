@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
+import { generateUtilityClasses, styled } from '@aglyn/shared-ui-themes'
 import Card, { CardProps as MuiCardProps } from '@mui/material/Card'
 import CardActionArea from '@mui/material/CardActionArea'
 import Typography from '@mui/material/Typography'

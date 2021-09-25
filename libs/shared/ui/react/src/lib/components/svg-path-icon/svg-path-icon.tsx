@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { getIcon, IconData, IconId } from '@aglyn/shared/data/mdi'
-import { _isStrT } from '@aglyn/shared/util/guards'
+import { getIcon, IconData, IconId } from '@aglyn/shared-data-mdi'
+import { _isStrT } from '@aglyn/shared-util-guards'
 import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@mui/material/SvgIcon'
 import { createSvgIcon } from '@mui/material/utils'
 import { forwardRef, useMemo } from 'react'

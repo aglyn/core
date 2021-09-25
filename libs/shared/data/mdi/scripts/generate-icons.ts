@@ -16,7 +16,7 @@
  */
 
 import util from '@mdi/util'
-import { capitalCase, paramCase } from '@aglyn/shared/util/helpers'
+import { capitalCase, paramCase } from '@aglyn/shared-util-helpers'
 import fs from 'fs'
 import path from 'path'
 import { Normal } from '../src/types'

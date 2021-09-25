@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { GridButtons, SvgPathIcon } from '@aglyn/shared/ui/react'
-import { makeStyles, Theme } from '@aglyn/shared/ui/themes'
+import { GridButtons, SvgPathIcon } from '@aglyn/shared-ui-react'
+import { makeStyles, Theme } from '@aglyn/shared-ui-themes'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import MuiTab from '@mui/material/Tab'

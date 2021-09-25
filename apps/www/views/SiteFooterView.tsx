@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { AppLink, GridItems } from '@aglyn/shared/ui/react'
-import { styled } from '@aglyn/shared/ui/themes'
+import { AppLink, GridItems } from '@aglyn/shared-ui-react'
+import { styled } from '@aglyn/shared-ui-themes'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import MuiLink from '@mui/material/Link'

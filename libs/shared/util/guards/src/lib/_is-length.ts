@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { length } from '@aglyn/shared/util/tools'
+import { length } from '@aglyn/shared-util-tools'
 import { _isNum } from './_is-num'
 
 

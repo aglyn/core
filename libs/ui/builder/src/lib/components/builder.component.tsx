@@ -16,19 +16,20 @@
  */
 
 import { AglynComponent, AglynComponentData } from '@aglyn/data-framework'
+import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared-ui-react'
+import { builderTheme, withTheme } from '@aglyn/shared-ui-themes'
 import {
   ElementComponentsContextProvider,
   ElementsContextProvider,
   ElementsContextProviderProps,
 } from '@aglyn/ui-renderer'
-import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared/ui/react'
-import { builderTheme, withTheme } from '@aglyn/shared/ui/themes'
 import NoSsr from '@mui/material/NoSsr'
 import { forwardRef, Fragment } from 'react'
 import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
 import { SelectionContextProvider } from '../contexts/selection-context-provider'
 import { BuilderCanvasRendererComponent } from './builder-canvas-renderer.component'
 import { BuilderToolbarComponent } from './builder-toolbar.component'
+
 
 export interface BuilderComponentProps extends OverrideableComponentProps {
   noSsr?: boolean
@@ -39,7 +40,7 @@ export interface BuilderComponentProps extends OverrideableComponentProps {
 
 const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
   const {
     component: Component,
@@ -59,10 +60,10 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
             {/*<SnackbarProvider maxSnack={3}>*/}
             <ConfirmationProviderComponent>
               <SelectionContextProvider>
-                <BuilderCanvasRendererComponent />
+                <BuilderCanvasRendererComponent/>
 
                 <ComponentsDrawerContextProvider>
-                  <BuilderToolbarComponent id="aglyn:toolbar" />
+                  <BuilderToolbarComponent id="aglyn:toolbar"/>
                 </ComponentsDrawerContextProvider>
               </SelectionContextProvider>
             </ConfirmationProviderComponent>
@@ -80,6 +81,6 @@ BuilderComponentRaw.defaultProps = {
   elements: [],
 }
 
-export const BuilderComponent = withTheme({ theme: builderTheme })(BuilderComponentRaw)
+export const BuilderComponent = withTheme({theme: builderTheme})(BuilderComponentRaw)
 
 export default BuilderComponent

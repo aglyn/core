@@ -21,7 +21,7 @@ import {
   ElementRendererComponent,
   ElementRendererComponentProps,
 } from './element-renderer.component'
-import { OverrideableComponentProps } from '@aglyn/shared/ui/react'
+import { OverrideableComponentProps } from '@aglyn/shared-ui-react'
 import { ElementsRendererComponent } from './elements-renderer.component'
 
 export interface CanvasRendererComponentProps

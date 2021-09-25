@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getStaticField } from '@aglyn/shared/util/tools'
+import { getStaticField } from '@aglyn/shared-util-tools'
 import { _commandControllers, _extensionControllers } from '../_internal'
 import { DEFAULT_ENTRY_NAME } from '../constants'
 import { AGLYN_EMITTER, AglynAppEventFlag, AglynModuleEventFlag } from '../emitter'
@@ -36,6 +36,7 @@ import {
 import { SDK_VERSION } from '../version'
 import { AglynCommandController } from './aglyn-command.controller'
 import { AglynExtensionController } from './aglyn-extension.controller'
+
 
 const TAG = 'AglynApp'
 
@@ -68,7 +69,7 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
   }
   constructor(options: AglynAppOptions) {
     super()
-    this.#options = { ...options }
+    this.#options = {...options}
     this.#name = this.#options.name ?? DEFAULT_ENTRY_NAME
     this.#initialize()
   }
@@ -77,13 +78,13 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
     this.setEmitter(AGLYN_EMITTER)
     this.setLogger(AGLYN_LOGGER)
 
-    this.#commandController = new this.AglynAppCommandController({ app: this })
-    this.#extensionController = new this.AglynAppExtensionController({ app: this })
+    this.#commandController = new this.AglynAppCommandController({app: this})
+    this.#extensionController = new this.AglynAppExtensionController({app: this})
     _commandControllers.set(this.#name, this.#commandController)
     _extensionControllers.set(this.#name, this.#extensionController)
 
-    this.getLogger().debug(AglynAppEventFlag.APP_CREATED, { app: this })
-    this.getEmitter().emit(AglynAppEventFlag.APP_CREATED, { app: this })
+    this.getLogger().debug(AglynAppEventFlag.APP_CREATED, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_CREATED, {app: this})
   }
   public toString = (): string => {
     return `${TAG}(name: '${name}')`
@@ -98,15 +99,15 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
   public onInit = (): void => {
     this.#commandController.onInit()
     this.#extensionController.onInit()
-    this.getLogger().debug(AglynAppEventFlag.APP_LOADED, { appName: this.#name })
-    this.getEmitter().emit(AglynAppEventFlag.APP_LOADED, { appName: this.#name })
+    this.getLogger().debug(AglynAppEventFlag.APP_LOADED, {appName: this.#name})
+    this.getEmitter().emit(AglynAppEventFlag.APP_LOADED, {appName: this.#name})
   }
   public onDestroy = (): void => {
     this.#extensionController.unloadAllExtensions()
     this.#commandController.onDestroy()
     this.#extensionController.onDestroy()
-    this.getLogger().debug(AglynAppEventFlag.APP_UNLOADED, { appName: this.#name })
-    this.getEmitter().emit(AglynAppEventFlag.APP_UNLOADED, { appName: this.#name })
+    this.getLogger().debug(AglynAppEventFlag.APP_UNLOADED, {appName: this.#name})
+    this.getEmitter().emit(AglynAppEventFlag.APP_UNLOADED, {appName: this.#name})
   }
   public getName = (): string => {
     return this.#name
@@ -128,7 +129,7 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
     return this
   }
   public effect = (data: AglynEffectType<AglynModuleEventFlag>) => {
-    const { type, payload } = data
+    const {type, payload} = data
     this.getEmitter().emit(type, payload as any)
   }
 }

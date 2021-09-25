@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { DistributiveOmit } from '@aglyn/shared/util/types'
+import { DistributiveOmit } from '@aglyn/shared-util-types'
 import {
   ComponentProps,
   ComponentPropsWithRef,

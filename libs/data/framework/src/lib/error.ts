@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { ErrorTagMessages, NsErrorFactory } from '@aglyn/shared/util/errors'
+import { ErrorTagMessages, NsErrorFactory } from '@aglyn/shared-util-errors'
+import { IndexOf } from '@aglyn/shared-util-types'
 import { PayloadData, PayloadParams } from './types'
-import { IndexOf } from '@aglyn/shared/util/types'
+
 
 export enum AglynErrorEventFlag {
   NO_APP = 'error:no-app',
@@ -43,22 +44,20 @@ export interface AglynErrorEventParams extends Record<AglynErrorEventType, unkno
   [AglynErrorEventFlag.INVALID_MODULE_ARG]: PayloadData<{ moduleName: string; appName: string }>
 }
 
-export const AglynErrorEventMessageTemplates: ErrorTagMessages<
-  IndexOf<typeof AglynErrorEventFlag>
-> = {
+export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof AglynErrorEventFlag>> = {
   [AglynErrorEventFlag.NO_APP]:
-    "No AglynApp '{$appName}' has been created - call Web initializeApp()",
-  [AglynErrorEventFlag.BAD_APP_NAME]: "Illegal App name: '{$appName}'",
-  [AglynErrorEventFlag.DUPLICATE_APP]: "AglynApp named '{$appName}' already exists",
-  [AglynErrorEventFlag.APP_DELETED]: "AglynApp named '{$appName}' already deleted",
+    'No AglynApp \'{$appName}\' has been created - call Web initializeApp()',
+  [AglynErrorEventFlag.BAD_APP_NAME]: 'Illegal App name: \'{$appName}\'',
+  [AglynErrorEventFlag.DUPLICATE_APP]: 'AglynApp named \'{$appName}\' already exists',
+  [AglynErrorEventFlag.APP_DELETED]: 'AglynApp named \'{$appName}\' already deleted',
   [AglynErrorEventFlag.INVALID_APP_ARG]:
     'AglynApp.{$appName}() takes either no argument or a AglynApp instance.',
-  [AglynErrorEventFlag.INVALID_LOG_ARG]: "First argument to 'onLog' must be null or a function.",
+  [AglynErrorEventFlag.INVALID_LOG_ARG]: 'First argument to \'onLog\' must be null or a function.',
   [AglynErrorEventFlag.NO_APP_EXTENSION]:
-    "No AppExtension '{$extensionName}' has been created on AglynApp '{$appName}'",
+    'No AppExtension \'{$extensionName}\' has been created on AglynApp \'{$appName}\'',
   [AglynErrorEventFlag.NO_MODULE]: 'No module has been provided for loading',
   [AglynErrorEventFlag.INVALID_MODULE_ARG]:
-    "An invalid AppModule '{$moduleName}' has been provided on AglynApp '{$appName}'",
+    'An invalid AppModule \'{$moduleName}\' has been provided on AglynApp \'{$appName}\'',
 }
 
 export type AglynErrorParams = PayloadParams<AglynErrorEventParams>
@@ -68,6 +67,6 @@ export type AglynError = NsErrorFactory<AglynErrorEventFlag, AglynErrorParams>
 export const AGLYN_ERROR: AglynError = new NsErrorFactory(
   'sdk',
   'AglynApp',
-  AglynErrorEventMessageTemplates
+  AglynErrorEventMessageTemplates,
 )
 export default AGLYN_ERROR

@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { OverrideableComponentProps } from '@aglyn/shared/ui/react'
-import { generateUtilityClasses, styled } from '@aglyn/shared/ui/themes'
+import { OverrideableComponentProps } from '@aglyn/shared-ui-react'
+import { generateUtilityClasses, styled } from '@aglyn/shared-ui-themes'
 import {
   DataGrid,
   DataGridProps as MuiDataGridProps,

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Conditional, NUN, OmitIndexOfType, PKey } from '@aglyn/shared/util/types'
+import { Conditional, NUN, OmitIndexOfType, PKey } from '@aglyn/shared-util-types'
 
 
 export type RemapOptions = { deleteUndefined?: boolean }

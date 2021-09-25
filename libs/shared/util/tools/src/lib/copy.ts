@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { PKey } from '@aglyn/shared/util/types'
+import { PKey } from '@aglyn/shared-util-types'
 
 
 export type CopyTarget<T, U, K, V, X> = T extends ReadonlyArray<U>

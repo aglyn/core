@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isArr, _isFnT, _isNum, _isNumPos, _isObj } from '@aglyn/shared/util/guards'
+import { _isArr, _isFnT, _isNum, _isNumPos, _isObj } from '@aglyn/shared-util-guards'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 

@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { generateUtilityClasses } from '@aglyn/shared/ui/themes'
-import { _isObj } from '@aglyn/shared/util/guards'
-import { yes } from '@aglyn/shared/util/tools'
-import { Conditional } from '@aglyn/shared/util/types'
+import { generateUtilityClasses } from '@aglyn/shared-ui-themes'
+import { _isObj } from '@aglyn/shared-util-guards'
+import { yes } from '@aglyn/shared-util-tools'
+import { Conditional } from '@aglyn/shared-util-types'
 import MuiButton, { ButtonProps as MuiButtonProps } from '@mui/material/Button'
 import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link'
 import clsx from 'clsx'

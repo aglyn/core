@@ -72,7 +72,7 @@ organizations. Easing maintenance and minimizing work required by expensive engi
   * NodeJS import: `@aglyn/framework`
   * Workspace name: `framework`
   * Directory: [libs/framework](`libs/framework`)
-  
+
 * Extension: Components
   * NodeJS import: `@aglyn/extension-components`
   * Workspace name: `extension-components`
@@ -81,7 +81,7 @@ organizations. Easing maintenance and minimizing work required by expensive engi
   * NodeJS import: `@aglyn/extension-mui`
   * Workspace name: `extension-mui`
   * Directory: [libs/extension/mui](`libs/extension/mui`)
-  
+
 * UI: Builder
   * NodeJS import: `@aglyn/ui-builder`
   * Workspace name: `ui-builder`
@@ -97,60 +97,60 @@ organizations. Easing maintenance and minimizing work required by expensive engi
 #### Type: data
 
 * MDI
-  * NodeJS import: `@aglyn/shared/data/mdi`
+  * NodeJS import: `@aglyn/shared-data-mdi`
   * Workspace name: `shared-data-mdi`
   * Directory: [libs/shared/data/mdi](`libs/shared/data/mdi`)
 
 #### Type: feature
 
 * Emitter
-  * NodeJS import: `@aglyn/shared/feature/emitter`
+  * NodeJS import: `@aglyn/shared-feature-emitter`
   * Workspace name: `shared-feature-emitter`
   * Directory: [libs/shared/feature/emitter](`libs/shared/feature/emitter`)
 * Logger
-  * NodeJS import: `@aglyn/shared/feature/logger`
+  * NodeJS import: `@aglyn/shared-feature-logger`
   * Workspace name: `shared-feature-logger`
   * Directory: [libs/shared/feature/logger](`libs/shared/feature/logger`)
 * Timestamp
-  * NodeJS import: `@aglyn/shared/feature/timestamp`
+  * NodeJS import: `@aglyn/shared-feature-timestamp`
   * Workspace name: `shared-feature-timestamp`
   * Directory: [libs/shared/feature/timestamp](`libs/shared/feature/timestamp`)
 
 #### Type: ui
 
 * React components
-  * NodeJS import: `@aglyn/shared/ui/react`
+  * NodeJS import: `@aglyn/shared-ui-react`
   * Workspace name: `shared-ui-react`
   * Directory: [libs/shared/ui/react](`libs/shared/ui/react`)
 * Themes
-  * NodeJS import: `@aglyn/shared/ui/themes`
+  * NodeJS import: `@aglyn/shared-ui-themes`
   * Workspace name: `shared-ui-themes`
   * Directory: [libs/shared/ui/themes](`libs/shared/ui/themes`)
 
 #### Type: util
 
 * Dom
-  * NodeJS import: `@aglyn/shared/util/dom`
+  * NodeJS import: `@aglyn/shared-util-dom`
   * Workspace name: `shared-util-dom`
   * Directory: [libs/shared/util/dom](`libs/shared/util/dom`)
 * Errors
-  * NodeJS import: `@aglyn/shared/util/errors`
+  * NodeJS import: `@aglyn/shared-util-errors`
   * Workspace name: `shared-util-errors`
   * Directory: [libs/shared/util/errors](`libs/shared/util/errors`)
 * Guards
-  * NodeJS import: `@aglyn/shared/util/guards`
+  * NodeJS import: `@aglyn/shared-util-guards`
   * Workspace name: `shared-util-guards`
   * Directory: [libs/shared/util/guards](`libs/shared/util/guards`)
 * Helpers
-  * NodeJS import: `@aglyn/shared/util/helpers`
+  * NodeJS import: `@aglyn/shared-util-helpers`
   * Workspace name: `shared-util-helpers`
   * Directory: [libs/shared/util/helpers](`libs/shared/util/helpers`)
 * Tools
-  * NodeJS import: `@aglyn/shared/util/tools`
+  * NodeJS import: `@aglyn/shared-util-tools`
   * Workspace name: `shared-util-tools`
   * Directory: [libs/shared/util/tools](`libs/shared/util/tools`)
 * Types
-  * NodeJS import: `@aglyn/shared/util/types`
+  * NodeJS import: `@aglyn/shared-util-types`
   * Workspace name: `shared-util-types`
   * Directory: [libs/shared/util/types](`libs/shared/util/types`)
 

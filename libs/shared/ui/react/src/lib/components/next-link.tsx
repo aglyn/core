@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { PartialPick } from '@aglyn/shared/util/types'
+import { PartialPick } from '@aglyn/shared-util-types'
 import Link, { LinkProps } from 'next/link'
 import { AnchorHTMLAttributes, forwardRef } from 'react'
 

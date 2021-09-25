@@ -16,14 +16,14 @@
  */
 
 import {
-  SvgPathIcon,
-  GridList,
   CardIconListItem,
-  useMdiIcons,
+  GridList,
   MdiIcon,
-} from '@aglyn/shared/ui/react'
+  SvgPathIcon,
+  useMdiIcons,
+} from '@aglyn/shared-ui-react'
 
-import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared/ui/themes'
+import { createStyles, Theme, WithStyles, withStyles } from '@aglyn/shared-ui-themes'
 
 import useFieldApi from '@data-driven-forms/react-form-renderer/use-field-api'
 import Button from '@mui/material/Button'

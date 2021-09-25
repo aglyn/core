@@ -16,9 +16,10 @@
  */
 
 import { AglynComponentOptions } from '@aglyn/data-framework'
-import { _isFnT } from '@aglyn/shared/util/guards'
-import { copy } from '@aglyn/shared/util/tools'
+import { _isFnT } from '@aglyn/shared-util-guards'
+import { copy } from '@aglyn/shared-util-tools'
 import { handleElementPropDefaults } from './handle-element-prop-defaults'
+
 
 /**
  * Merges properties of a resolving function with currents
@@ -30,11 +31,11 @@ import { handleElementPropDefaults } from './handle-element-prop-defaults'
 export function handleElementResolveProps<P = any>(
   elementDataProps: P,
   componentOptions: AglynComponentOptions<P>,
-  thisArg?: ThisType<unknown>
+  thisArg?: ThisType<unknown>,
 ): P {
-  const { propsResolver, propsDefaults = {} } = { ...componentOptions }
-  const _props = copy({ ...elementDataProps } as unknown) as P
-  const _defaults = copy({ ...propsDefaults }) as P
+  const {propsResolver, propsDefaults = {}} = {...componentOptions}
+  const _props = copy({...elementDataProps} as unknown) as P
+  const _defaults = copy({...propsDefaults}) as P
   const propsMergedDefaults = handleElementPropDefaults(_props, _defaults) as P
   if (_isFnT(propsResolver)) return propsResolver.call(thisArg, propsMergedDefaults)
   return propsMergedDefaults

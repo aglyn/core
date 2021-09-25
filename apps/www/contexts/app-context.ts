@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { AppController } from '../lib/aglyn-deprecated'
+import { ComponentWithInjectedProp, withContext } from '@aglyn/shared-ui-react'
 import { createContext, useContext } from 'react'
-import { ComponentWithInjectedProp, withContext } from '@aglyn/shared/ui/react'
+import { AppController } from '../lib/aglyn-deprecated'
+
 
 export type AppContextType = AppController
 
@@ -40,7 +41,7 @@ export type AppContextConsumer = typeof AppContextConsumer
  * @return {*}
  */
 export function withAppContext<P>(
-  Component: ComponentWithInjectedProp<P, AppContextConsumer, 'app'>
+  Component: ComponentWithInjectedProp<P, AppContextConsumer, 'app'>,
 ) {
   return withContext(AppContextConsumer, 'app')(Component)
 }

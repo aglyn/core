@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import { SvgPathIcon } from '@aglyn/shared/ui/react'
-import { createUid } from '@aglyn/shared/util/helpers'
-import { _s, objectRemap } from '@aglyn/shared/util/tools'
+import { SvgPathIcon } from '@aglyn/shared-ui-react'
+import { createUid } from '@aglyn/shared-util-helpers'
+import { _s, objectRemap } from '@aglyn/shared-util-tools'
 import IconButton from '@mui/material/IconButton'
 import { useRouter } from 'next/router'
 import { useSnackbar } from 'notistack'

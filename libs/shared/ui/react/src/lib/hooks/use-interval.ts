@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared/util/guards'
+import { _isFnT } from '@aglyn/shared-util-guards'
 import { useEffect, useRef } from 'react'
 
 

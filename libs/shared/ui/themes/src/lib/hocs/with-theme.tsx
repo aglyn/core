@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getDisplayName } from '@aglyn/shared/util/tools'
+import { getDisplayName } from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ComponentType } from 'react'
 import { Theme, ThemeProvider } from '../../vendor/mui'

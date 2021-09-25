@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
+import { GridItems, GridItemsProps } from '@aglyn/shared-ui-react'
 import React from 'react'
-import { GridItems, GridItemsProps } from '@aglyn/shared/ui/react'
 import { GridField } from '../lib/input-fields'
 
 
@@ -25,11 +25,11 @@ export type Props = GridItemsProps & {
 }
 
 function FormFields(props: Props) {
-  const { items = [], ...rest } = props
+  const {items = [], ...rest} = props
 
   const itemMapper = (item: GridField) => {
-    const { GridItemProps, component: Component, props } = item
-    return ({ children: (<Component {...props} />), ...GridItemProps })
+    const {GridItemProps, component: Component, props} = item
+    return ({children: (<Component {...props} />), ...GridItemProps})
   }
 
   return (

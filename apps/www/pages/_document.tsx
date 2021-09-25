@@ -20,13 +20,13 @@ import {
   MakeLinkElementsConfig,
   makeMetaElements,
   MakeMetaElementsConfig,
-} from '@aglyn/shared/ui/react'
+} from '@aglyn/shared-ui-react'
 import {
   createEmotionCache,
   createEmotionServer,
   EmotionCache,
   getConsoleMetaThemeColor,
-} from '@aglyn/shared/ui/themes'
+} from '@aglyn/shared-ui-themes'
 import Document from 'next/document'
 import NextDocument, {
   DocumentContext,
@@ -150,7 +150,7 @@ class _Document<P extends _DocumentProps> extends Document<P> {
   }
 
   public render(): JSX.Element {
-    const { lang } = this.props
+    const {lang} = this.props
     return (
       <Html lang={lang}>
         <Head>

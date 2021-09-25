@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { _isFnT, _isObj } from '@aglyn/shared/util/guards'
+import { _isFnT, _isObj } from '@aglyn/shared-util-guards'
 import { APP_TYPE, COMMAND_TYPE, EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../symbol'
 import {
   AglynAppInstance,
@@ -22,6 +22,7 @@ import {
   AglynCommandHandler,
   AglynExtensionInstance,
 } from '../types'
+
 
 export function typeOf(object: unknown) {
   if (_isFnT(object) || _isObj(object)) {

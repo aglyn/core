@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { NavbarDrawer, NavbarDrawerProps, SvgPathIcon } from '@aglyn/shared/ui/react'
-import { alpha, createStyles, ExtendPropsOfWithStyles, withStyles } from '@aglyn/shared/ui/themes'
-import { _isStrT } from '@aglyn/shared/util/guards'
-import { objectRemap } from '@aglyn/shared/util/tools'
+import { NavbarDrawer, NavbarDrawerProps, SvgPathIcon } from '@aglyn/shared-ui-react'
+import { alpha, createStyles, ExtendPropsOfWithStyles, withStyles } from '@aglyn/shared-ui-themes'
+import { _isStrT } from '@aglyn/shared-util-guards'
+import { objectRemap } from '@aglyn/shared-util-tools'
 import { Box, Button } from '@mui/material'
 import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
