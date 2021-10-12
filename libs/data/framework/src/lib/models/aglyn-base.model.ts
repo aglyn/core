@@ -15,16 +15,17 @@
  * limitations under the License.
  */
 
+import { Dictionary } from '@aglyn/shared-data-types'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { getStaticField } from '@aglyn/shared-util-tools'
-import { Dictionary } from '@aglyn/shared-data-types'
 import { AglynEmitter } from '../emitter'
 import { AglynError } from '../error'
-import { AglynBaseModelInstance, AglynLogger } from '../types'
+import { AglynLogger, IAglynBaseModel } from '../types'
+
 
 const TAG = 'AglynBaseModel'
 
-export abstract class AglynBaseModel implements AglynBaseModelInstance {
+export abstract class AglynBaseModel implements IAglynBaseModel {
   public static readonly [Symbol.toStringTag]: string = TAG
   readonly #created: Timestamp
   #errorFactory: AglynError

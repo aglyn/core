@@ -15,33 +15,28 @@
  * limitations under the License.
  */
 
+import { LifecycleFlag, MutableShallow } from '@aglyn/shared-data-types'
 import { _isEqualitySameType } from '@aglyn/shared-util-guards'
 import { getStaticField } from '@aglyn/shared-util-tools'
-import { LifecycleFlag, MutableShallow } from '@aglyn/shared-data-types'
 import { AglynAppEventFlag, AglynModuleEventFlag, AglynModuleEventPayload } from '../emitter'
 import { AglynBaseModel } from '../models/aglyn-base.model'
-import {
-  AglynAppInstance,
-  AglynExtensionControllerInstance,
-  AglynExtensionInstance,
-  AglynExtensionMap,
-} from '../types'
+import { AglynExtensionMap, IAglynApp, IAglynExtension, IAglynExtensionController } from '../types'
+
 
 const TAG = 'AglynExtensionController'
 
 export class AglynExtensionController
   extends AglynBaseModel
-  implements AglynExtensionControllerInstance
-{
+  implements IAglynExtensionController {
   public static readonly [Symbol.toStringTag]: string = TAG
-  protected app: AglynAppInstance
+  protected app: IAglynApp
   protected extensions: AglynExtensionMap = new Map()
   public get [Symbol.toStringTag](): string {
     return getStaticField(Symbol.toStringTag, this)
   }
-  constructor(props: { app: AglynAppInstance }) {
+  constructor(props: { app: IAglynApp }) {
     super()
-    const { app } = props
+    const {app} = props
     this.app = app
     this.#initialize()
   }
@@ -50,77 +45,77 @@ export class AglynExtensionController
     this.setEmitter(this.app.getEmitter())
     this.setLogger(this.app.getLogger())
   }
-  public getExtensionByName = (id: string): AglynExtensionInstance => {
+  public getExtensionByName = (id: string): IAglynExtension => {
     const extension = this.extensions.get(id)
     const current = extension?.lifecycle
     const autoload = extension?.getOptions?.()?.autoload
     if (current === LifecycleFlag.INITIALIZED && autoload) {
-      this.loadExtension({ name: id })
+      this.loadExtension({name: id})
     }
     return extension
   }
-  public getAllExtensions = (): AglynExtensionInstance[] => {
+  public getAllExtensions = (): IAglynExtension[] => {
     return [...this.extensions.values()]
   }
   public registerExtension = (
-    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_REGISTER]
+    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_REGISTER],
   ): void => {
-    const extension = data.extension as MutableShallow<AglynExtensionInstance>
+    const extension = data.extension as MutableShallow<IAglynExtension>
     const name = extension.getName()
     this.extensions.set(name, extension)
     extension.lifecycle = LifecycleFlag.INITIALIZED
-    this.getLogger().debug(AglynAppEventFlag.REGISTERED_EXTENSION, { name })
-    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_EXTENSION, { extension })
+    this.getLogger().debug(AglynAppEventFlag.REGISTERED_EXTENSION, {name})
+    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_EXTENSION, {extension})
   }
   public unregisterExtension = (
-    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNREGISTER]
+    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNREGISTER],
   ): void => {
-    const { name } = data
-    const extension = this.extensions.get(name) as MutableShallow<AglynExtensionInstance>
+    const {name} = data
+    const extension = this.extensions.get(name) as MutableShallow<IAglynExtension>
     if (extension) {
       const isLoaded = _isEqualitySameType(
         extension.lifecycle,
         LifecycleFlag.INITIALIZED,
         LifecycleFlag.LOADING,
-        LifecycleFlag.LOADED
+        LifecycleFlag.LOADED,
       )
       if (isLoaded) {
-        this.unloadExtension({ name })
+        this.unloadExtension({name})
       }
       this.extensions.delete(name)
       extension.lifecycle = LifecycleFlag.DESTROYED
-      this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_EXTENSION, { name })
-      this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_EXTENSION, { name })
+      this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_EXTENSION, {name})
+      this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_EXTENSION, {name})
     }
   }
   public loadExtension = (
-    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_LOAD]
+    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_LOAD],
   ): void => {
-    const { name } = data
-    const extension = this.extensions.get(name) as MutableShallow<AglynExtensionInstance>
+    const {name} = data
+    const extension = this.extensions.get(name) as MutableShallow<IAglynExtension>
     if (extension) {
       extension.lifecycle = LifecycleFlag.LOADING
       extension.onInit?.(this.app)
       extension.lifecycle = LifecycleFlag.LOADED
-      this.getLogger().debug(AglynAppEventFlag.LOADED_EXTENSION, { name })
-      this.getEmitter().emit(AglynAppEventFlag.LOADED_EXTENSION, { name })
+      this.getLogger().debug(AglynAppEventFlag.LOADED_EXTENSION, {name})
+      this.getEmitter().emit(AglynAppEventFlag.LOADED_EXTENSION, {name})
     }
   }
   public unloadExtension = (
-    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNLOAD]
+    data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNLOAD],
   ): void => {
-    const { name } = data
-    const extension = this.extensions.get(name) as MutableShallow<AglynExtensionInstance>
+    const {name} = data
+    const extension = this.extensions.get(name) as MutableShallow<IAglynExtension>
     if (extension) {
       extension.onDestroy?.(this.app)
       extension.lifecycle = LifecycleFlag.UNLOADED
-      this.getLogger().debug(AglynAppEventFlag.UNLOADED_EXTENSION, { name })
-      this.getEmitter().emit(AglynAppEventFlag.UNLOADED_EXTENSION, { name })
+      this.getLogger().debug(AglynAppEventFlag.UNLOADED_EXTENSION, {name})
+      this.getEmitter().emit(AglynAppEventFlag.UNLOADED_EXTENSION, {name})
     }
   }
   public unloadAllExtensions = (): void => {
     this.extensions.forEach((_, name) => {
-      this.unloadExtension({ name })
+      this.unloadExtension({name})
     })
   }
   public toString = (): string => {

@@ -15,24 +15,23 @@
  * limitations under the License.
  */
 
-import { ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/ui-renderer'
 import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/ui-renderer'
 import { forwardRef, useCallback, useRef, useState } from 'react'
 import { useSelectionContext } from '../contexts/selection-context'
+
 
 export interface BuilderElementRendererComponentProps extends ElementRendererComponentProps {
   [prop: string]: any
 }
 
-export const BuilderElementRendererComponent = forwardRef<
-  any,
-  BuilderElementRendererComponentProps
->(function RefRenderFn(props, ref) {
-  const { elementData, elementRendererComponent, ...rest } = props
-  const { confirm } = useConfirmationContext()
+export const BuilderElementRendererComponent = forwardRef<any,
+  BuilderElementRendererComponentProps>(function RefRenderFn(props, ref) {
+  const {elementData, elementRendererComponent, ...rest} = props
+  const {confirm} = useConfirmationContext()
   const localRef = useRef(ref)
   const elemRef = useCombinedRefs(localRef, ref)
-  const { select } = useSelectionContext()
+  const {select} = useSelectionContext()
   const [entered, setEntered] = useState(null)
   const [clientRect, setRect] = useState(null)
 
@@ -50,10 +49,10 @@ export const BuilderElementRendererComponent = forwardRef<
   const handleClick = useCallback(
     (e) => {
       e.stopPropagation()
-      select({ clientRect, elementData })
-      confirm({ title: 'clicked' })
+      select({clientRect, elementData})
+      confirm({title: 'clicked'})
     },
-    [clientRect, elementData]
+    [clientRect, elementData],
   )
 
   return (
@@ -61,8 +60,9 @@ export const BuilderElementRendererComponent = forwardRef<
       ref={elemRef}
       elementRendererComponent={elementRendererComponent ?? BuilderElementRendererComponent}
       elementData={elementData}
-      data-aglyn-element-component={elementData?.component}
       data-aglyn-element-id={elementData?.$id}
+      data-aglyn-component-id={elementData?.componentId}
+      data-aglyn-bundle-id={elementData?.bundleId}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

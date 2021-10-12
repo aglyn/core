@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AglynComponentData } from '@aglyn/data-components'
+import { AglynComponentElementData } from '@aglyn/data-components'
 import { OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
 import { forwardRef, Fragment } from 'react'
 import {
@@ -26,7 +26,7 @@ import {
 
 export interface ElementsComponentProps extends OverrideableComponentProps {
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
-  children?: AglynComponentData[]
+  children?: AglynComponentElementData[]
 }
 
 export const ElementsRendererComponent = forwardRef<any, ElementsComponentProps>(

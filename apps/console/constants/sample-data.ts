@@ -18,28 +18,26 @@
 export const samplePageData = [
   {
     $id: 'root1',
-    component: 'root',
-    props: {
-      children: 'hello',
-    },
-    children: [
+    componentId: 'root',
+    props: {},
+    elements: [
       {
-        $id: 'root1',
-        component: 'root',
+        $id: 'root12',
+        componentId: 'root1',
         props: {
           children: 'hello',
         },
       },
       {
-        $id: 'root2',
-        component: 'root',
+        $id: 'root22',
+        componentId: 'root2',
         props: {
           children: 'hello',
         },
       },
       {
-        $id: 'root3',
-        component: 'root',
+        $id: 'root32',
+        componentId: 'root3',
         props: {
           children: 'hello',
         },
@@ -48,29 +46,27 @@ export const samplePageData = [
   },
   {
     $id: 'root2',
-    component: 'root',
-    props: {
-      children: 'hello',
-    },
-    children: [
+    componentId: 'root4',
+    props: {},
+    elements: [
       {
-        $id: 'root1',
-        component: 'root',
+        $id: 'root13',
+        componentId: 'root1',
         props: {
           sx: {fontWeight: 'fontWeightBold'},
           children: 'hello',
         },
       },
       {
-        $id: 'root2',
-        component: 'root',
+        $id: 'root23',
+        componentId: 'root2',
         props: {
           children: 'hello',
         },
       },
       {
-        $id: 'root3',
-        component: 'root',
+        $id: 'root33',
+        componentId: 'root3',
         props: {
           children: 'hello',
         },
@@ -79,28 +75,26 @@ export const samplePageData = [
   },
   {
     $id: 'root3',
-    component: 'root',
-    props: {
-      children: 'hello',
-    },
-    children: [
+    componentId: 'root4',
+    props: {},
+    elements: [
       {
-        $id: 'root1',
-        component: 'root',
+        $id: 'root14',
+        componentId: 'root1',
         props: {
           children: 'hello',
         },
       },
       {
-        $id: 'root2',
-        component: 'root',
+        $id: 'root24',
+        componentId: 'root2',
         props: {
           children: 'hello',
         },
       },
       {
-        $id: 'root3',
-        component: 'root',
+        $id: 'root34',
+        componentId: 'root3',
         props: {
           children: 'hello',
         },

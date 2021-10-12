@@ -16,71 +16,26 @@
  */
 
 import {
-  AglynComponentData,
+  AglynComponentElementData,
   getAllComponentsValues,
-  registerComponent,
 } from '@aglyn/data-components'
 import { getApp } from '@aglyn/data-framework'
 import { BuilderComponent } from '@aglyn/ui-builder'
-import { createElementComponent } from '@aglyn/ui-renderer'
 import { useCallback, useMemo, useState } from 'react'
 import { samplePageData } from '../constants/sample-data'
 
 
-registerComponent(
-  getApp(),
-  createElementComponent('root', {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  })('span'),
-)
-
-registerComponent(
-  getApp(),
-  createElementComponent('root1', {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  })('span'),
-)
-
-registerComponent(
-  getApp(),
-  createElementComponent('root2', {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  })('span'),
-)
-
-registerComponent(
-  getApp(),
-  createElementComponent('root3', {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  })('span'),
-)
-
-registerComponent(
-  getApp(),
-  createElementComponent('root4', {
-    displayName: 'Root Element',
-    title: 'Root element',
-    icon: 'block',
-  })('span'),
-)
 
 function Builder(props) {
+  const appCallback = useCallback(() => getApp(), [])
   if (typeof document !== 'undefined') {
-    console.log('page:/builder app', getApp())
+    console.log('page:/builder app', appCallback())
   }
 
-  const [elements, setElements] = useState<AglynComponentData[]>(samplePageData)
+  const [elements, setElements] = useState<AglynComponentElementData[]>(samplePageData)
   const elementComponents = useMemo(() => getAllComponentsValues(getApp()), [])
 
-  const handleUpdateElements = useCallback((elements: AglynComponentData[], prevElements) => {
+  const handleUpdateElements = useCallback((elements: AglynComponentElementData[], prevElements) => {
     console.log('handleUpdateElements', elements, prevElements)
     setElements(elements)
   }, [])
@@ -90,6 +45,7 @@ function Builder(props) {
       elements={elements}
       onUpdateElements={handleUpdateElements}
       elementComponents={elementComponents}
+      appCallback={appCallback}
     />
   )
 }

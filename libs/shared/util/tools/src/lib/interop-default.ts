@@ -15,4 +15,7 @@
  * limitations under the License.
  */
 
-export * from './lib/material'
+
+export function interopDefault(mod) {
+  return mod.default || mod;
+}

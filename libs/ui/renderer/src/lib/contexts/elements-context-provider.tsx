@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-import { AglynComponentData } from '@aglyn/data-components'
+import { AglynComponentElementData } from '@aglyn/data-components'
 import { ReactNode, useState } from 'react'
 import { ElementsContext, ElementsContextType } from './elements-context'
 
 
 export interface ElementsContextProviderProps {
   children?: ReactNode
-  elements?: AglynComponentData[]
-  onUpdateElements?: (newElements: AglynComponentData[], prevElements: AglynComponentData[]) => void
+  elements?: AglynComponentElementData[]
+  onUpdateElements?: (newElements: AglynComponentElementData[], prevElements: AglynComponentElementData[]) => void
 }
 
 export function ElementsContextProvider(props: ElementsContextProviderProps) {

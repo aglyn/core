@@ -15,25 +15,14 @@
  * limitations under the License.
  */
 
-import { AglynComponentElementData, ComponentId } from '@aglyn/data-components'
-import { objectDeepMergeMany } from '@aglyn/shared-util-vendor'
-import { createElementDataId } from './create-element-data-id'
+import { IAglynApp } from '@aglyn/data-framework'
+import { createContext, useContext } from 'react'
 
 
-export const ELEMENT_DEFAULTS = {
-  props: {},
-}
-
-export function createElementData(
-  componentId: ComponentId,
-  data?: Omit<AglynComponentElementData, '$id' | 'componentId'>,
-): AglynComponentElementData {
-  return objectDeepMergeMany([
-    {...ELEMENT_DEFAULTS},
-    {
-      $id: createElementDataId(),
-      component: componentId,
-    },
-    {...data},
-  ]) as AglynComponentElementData
+export type IAglynAppContext = { getApp(): IAglynApp }
+export const AglynAppContext = createContext<IAglynAppContext>({
+  getApp: () => undefined
+})
+export const useAglynAppContext = () => {
+  return useContext(AglynAppContext)
 }

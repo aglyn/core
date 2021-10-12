@@ -15,15 +15,15 @@
  * limitations under the License.
  */
 
-import { AglynComponentData } from '@aglyn/data-components'
+import { AglynComponentElementData } from '@aglyn/data-components'
 import { createContext, useContext } from 'react'
 
 
 export type UseElementsContextType = () => ElementsContextType
 
 export interface ElementsContextType {
-  elements: AglynComponentData[]
-  updateElements?: (newElements: AglynComponentData[], prevElements: AglynComponentData[]) => void
+  elements: AglynComponentElementData[]
+  updateElements?: (newElements: AglynComponentElementData[], prevElements: AglynComponentElementData[]) => void
 }
 
 export const DEFAULT_ELEMENTS_CONTEXT: ElementsContextType = {

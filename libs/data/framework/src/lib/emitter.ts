@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
+import { Dictionary } from '@aglyn/shared-data-types'
 import { EmitterFn } from '@aglyn/shared-util-emitter'
 import { Emitter } from 'mitt'
-import { AglynAppInstance, AglynCommandHandler, AglynExtensionInstance, PayloadData } from './types'
-import { Dictionary } from '@aglyn/shared-data-types'
+import { AglynCommandHandler, IAglynApp, IAglynExtension, PayloadData } from './types'
+
 
 export enum AglynAppEventFlag {
   APP_CREATED = 'event:app-created',
@@ -50,12 +51,12 @@ export enum AglynModuleEventFlag {
 export type EventPayload<T, K extends keyof T = keyof T> = Record<K, T[K]>
 
 export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmitterPayload> {
-  [AglynAppEventFlag.APP_CREATED]: PayloadData<{ app: AglynAppInstance }>
-  [AglynAppEventFlag.BEFORE_DELETE_APP]: PayloadData<{ app: AglynAppInstance }>
+  [AglynAppEventFlag.APP_CREATED]: PayloadData<{ app: IAglynApp }>
+  [AglynAppEventFlag.BEFORE_DELETE_APP]: PayloadData<{ app: IAglynApp }>
   [AglynAppEventFlag.APP_LOADED]: PayloadData<{ appName: string }>
   [AglynAppEventFlag.APP_UNLOADED]: PayloadData<{ appName: string }>
   [AglynAppEventFlag.APP_DELETED]: PayloadData<{ appName: string }>
-  [AglynAppEventFlag.REGISTERED_EXTENSION]: PayloadData<{ extension: AglynExtensionInstance }>
+  [AglynAppEventFlag.REGISTERED_EXTENSION]: PayloadData<{ extension: IAglynExtension }>
   [AglynAppEventFlag.UNREGISTERED_EXTENSION]: PayloadData<{ name: string }>
   [AglynAppEventFlag.LOADED_EXTENSION]: PayloadData<{ name: string }>
   [AglynAppEventFlag.UNLOADED_EXTENSION]: PayloadData<{ name: string }>
@@ -65,7 +66,7 @@ export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmi
 }
 
 export interface AglynModuleEventPayload extends Record<AglynModuleEventFlag, AglynEmitterPayload> {
-  [AglynModuleEventFlag.EXTENSION_REGISTER]: PayloadData<{ extension: AglynExtensionInstance }>
+  [AglynModuleEventFlag.EXTENSION_REGISTER]: PayloadData<{ extension: IAglynExtension }>
   [AglynModuleEventFlag.EXTENSION_UNREGISTER]: PayloadData<{ name: string }>
   [AglynModuleEventFlag.EXTENSION_LOAD]: PayloadData<{ name: string }>
   [AglynModuleEventFlag.EXTENSION_UNLOAD]: PayloadData<{ name: string }>

@@ -16,46 +16,60 @@
  */
 
 import {
-  AglynComponent,
   AglynComponentElementType,
-  AglynComponentOptions,
-  SelfComponentId,
+  BundleId,
+  ComponentId,
+  IAglynComponentSchema,
+  RegisterComponentPayload,
 } from '@aglyn/data-components'
 import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '@aglyn/data-framework'
-import { JSXElementFunctionComponent, JSXElementType } from '@aglyn/shared-data-types'
-import { styled } from '@aglyn/shared-feature-themes'
-import { Component, ElementType, Ref } from 'react'
+import { JSXElementType } from '@aglyn/shared-data-types'
+import { styled as hocStyled } from '@aglyn/shared-feature-themes'
+import { _isArr } from '@aglyn/shared-util-guards'
+import { getDisplayName } from '@aglyn/shared-util-tools'
+import { Component, Ref } from 'react'
 
-
-export type ComponentBuilder<P = any> = (element: AglynComponentElementType<P>) => AglynComponent<P>
 
 export function createElementComponent<P = any>(
-  componentId: SelfComponentId,
-  options: AglynComponentOptions<P>,
-): ComponentBuilder<P> {
-  return function(element: AglynComponentElementType<P>): AglynComponent<P> {
-    const displayName = `AglynComponent($id: ${componentId})`
-    const Element: JSXElementType = options?.styled?.disable
-      ? element
-      : styled(element as any, {name: displayName})({})
+  componentId: ComponentId,
+  schema: IAglynComponentSchema<P>,
+  component: AglynComponentElementType<P>
+): RegisterComponentPayload<P>
+export function createElementComponent<P = any>(
+  identifiers: ComponentId | [ComponentId, BundleId],
+  schema: IAglynComponentSchema<P>,
+  component: AglynComponentElementType<P>
+): RegisterComponentPayload<P> {
+  const [componentId, bundleId] = _isArr(identifiers) ? identifiers : [identifiers]
+  const {renderFlags} = schema
+  const {styled} = {...renderFlags}
+  const displayName = getDisplayName(component, componentId)
+  const ComponentElement: JSXElementType = styled?.disable
+    ? component
+    : hocStyled(component as any, {name: displayName})({})
 
-    return class AglynComponent extends Component<P> {
-      static readonly [TYPE_OF] = MODULE_TYPE
-      static readonly [TYPE_KIND] = EXTENSION_TYPE
-      static readonly $id = componentId
-      static readonly displayName = displayName
-      static readonly options = {displayName: componentId, ...options}
-      static readonly defaultProps: Partial<P> = {...options?.propsDefaults}
-      public innerRef: Ref<any>
+  class AglynComponent extends Component<P> {
+    public static readonly displayName = displayName
 
-      constructor(props) {
-        super(props)
-        this.innerRef = props?.innerRef
-      }
+    public static readonly componentId = componentId
+    public static readonly bundleId = bundleId
+    public static readonly [TYPE_OF] = MODULE_TYPE
+    public static readonly [TYPE_KIND] = EXTENSION_TYPE
 
-      public render() {
-        return <Element {...this.props} />
-      }
+    public elemRef: Ref<any>
+
+    constructor(props) {
+      super(props)
+      this.elemRef = props.innerRef
     }
+
+    public render() {
+      return <ComponentElement {...this.props} />
+    }
+  }
+
+  return {
+    schema,
+    component: AglynComponent,
   }
 }

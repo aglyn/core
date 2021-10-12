@@ -48,16 +48,16 @@ export type PayloadParams<T extends any> = { [K in keyof T]: T[K] }
 
 export type AglynPlatform = Platform
 export type AglynVersion = string
-export type AglynAppsMap = Map<string, AglynAppInstance>
-export type AglynExtensionsControllersMap = Map<string, AglynExtensionControllerInstance>
-export type AglynCommandsControllersMap = Map<string, AglynCommandControllerInstance>
-export type AglynExtensionMap = Map<string, AglynExtensionInstance>
+export type AglynAppsMap = Map<string, IAglynApp>
+export type AglynExtensionsControllersMap = Map<string, IAglynExtensionController>
+export type AglynCommandsControllersMap = Map<string, IAglynCommandController>
+export type AglynExtensionMap = Map<string, IAglynExtension>
 export type AglynAppModule<T extends AglynUniqueId = any> = T
 export type AglynLogger = Logger
 export type AglynCommander = Emitter<AglynCommandParams>
 
 export type AglynCommandParams = {
-  [P in string | '*' | keyof AglynCommandFlag]: PayloadData<{ app: AglynAppInstance }>
+  [P in string | '*' | keyof AglynCommandFlag]: PayloadData<{ app: IAglynApp }>
 }
 
 export type AglynUniqueId<T extends boolean = false> = T extends boolean
@@ -99,13 +99,13 @@ export interface AglynEffectType<T, U = unknown> extends Payload<U> {
 }
 
 export type AglynAppOptions = AglynNamed & {
-  extensions?: [() => Promise<IAglynExtension>]
+  extensions?: [() => Promise<AglynExtensionCtor>]
 }
 export type AglynExtensionOptions = {
   autoload?: boolean
 }
 
-export interface AglynBaseModelInstance extends StringLike, Serializable, LifecycleObserver {
+export interface IAglynBaseModel extends StringLike, Serializable, LifecycleObserver {
   getCreatedAt(): Timestamp
   getErrorFactory(): AglynError
   setErrorFactory(value: AglynError): this
@@ -115,19 +115,19 @@ export interface AglynBaseModelInstance extends StringLike, Serializable, Lifecy
   setLogger(value: AglynLogger): this
 }
 
-export interface AglynAppInstance extends AglynBaseModelInstance, AglynAppTypeFields {
+export interface IAglynApp extends IAglynBaseModel, AglynAppTypeFields {
   getName(): string
   getOptions(): AglynAppOptions
   getDeleted(): boolean
   setDeleted(deleted: boolean): void
-  getCommandsController(): AglynCommandControllerInstance
-  getExtensionsController(): AglynExtensionControllerInstance
+  getCommandsController(): IAglynCommandController
+  getExtensionsController(): IAglynExtensionController
 
   effect(data: AglynEffectType<AglynModuleEventFlag>): void
 }
 
-export interface AglynCommandControllerInstance
-  extends AglynBaseModelInstance,
+export interface IAglynCommandController
+  extends IAglynBaseModel,
     AglynRegisters<'action',
       AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_REGISTER],
       AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER]> {
@@ -138,19 +138,19 @@ export interface AglynCommandHandler extends AglynUniqueId, AglynCommandTypeFiel
   (data: AglynCommandParams['*']): void
 }
 
-export interface AglynExtensionControllerInstance
-  extends AglynBaseModelInstance,
+export interface IAglynExtensionController
+  extends IAglynBaseModel,
     AglynRegisters<'extension',
       AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_REGISTER],
       AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNREGISTER]>,
     AglynLoads<'extension', AglynAppModule> {
-  getExtensionByName(name: string): AglynExtensionInstance
-  getAllExtensions(): AglynExtensionInstance[]
+  getExtensionByName(name: string): IAglynExtension
+  getAllExtensions(): IAglynExtension[]
   unloadAllExtensions(): void
 }
 
-export interface AglynExtensionInstance<T = any>
-  extends AglynBaseModelInstance,
+export interface IAglynExtension<T = any>
+  extends IAglynBaseModel,
     LoadableObserver,
     AglynExtensionTypeFields {
   readonly lifecycle?: LifecycleFlag | null
@@ -158,15 +158,15 @@ export interface AglynExtensionInstance<T = any>
   getOptions(): AglynExtensionOptions
   getContext(): T
   setContext(value: T): this
-  onInit(app: AglynAppInstance): void
-  onDestroy(app: AglynAppInstance): void
+  onInit(app: IAglynApp): void
+  onDestroy(app: IAglynApp): void
 }
 
-export interface IAglynExtension<T = any> {
+export interface AglynExtensionCtor<T = any> {
   readonly [Symbol.toStringTag]: string
   readonly [TYPE_OF]: number | symbol
   readonly [TYPE_KIND]: number | symbol
-  $id: string
+  readonly $id: string
   getName(): string
-  new(app: AglynAppInstance): AglynExtensionInstance<T>
+  new(app: IAglynApp): IAglynExtension<T>
 }

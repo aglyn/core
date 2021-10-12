@@ -153,23 +153,23 @@
         }
       }
     },
-    "feature-mui-plugin": {
-      "root": "libs/feature/mui-plugin",
-      "sourceRoot": "libs/feature/mui-plugin/src",
+    "feature-mui-bundle": {
+      "root": "libs/feature/mui-bundle",
+      "sourceRoot": "libs/feature/mui-bundle/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/feature/mui-plugin/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["libs/feature/mui-bundle/**/*.{ts,tsx,js,jsx}"]
           },
           "outputs": ["{options.outputFile}"]
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/feature/mui-plugin"],
+          "outputs": ["coverage/libs/feature/mui-bundle"],
           "options": {
-            "jestConfig": "libs/feature/mui-plugin/jest.config.js",
+            "jestConfig": "libs/feature/mui-bundle/jest.config.js",
             "passWithNoTests": true
           }
         }

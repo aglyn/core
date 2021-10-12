@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
-import { AglynComponent } from '@aglyn/data-components'
+import { IAglynComponentElement } from '@aglyn/data-components'
 import { createContext, useContext } from 'react'
 
 
 export type UseElementComponentsContextType = () => ElementComponentsContextType
 
 export interface ElementComponentsContextType {
-  elementComponents: AglynComponent[]
+  elementComponents: IAglynComponentElement[]
 }
 
 export const DEFAULT_ELEMENT_COMPONENTS_CONTEXT: ElementComponentsContextType = {
   elementComponents: [],
 }
 export const ElementComponentsContext = createContext<ElementComponentsContextType>(
-  DEFAULT_ELEMENT_COMPONENTS_CONTEXT,
+ DEFAULT_ELEMENT_COMPONENTS_CONTEXT,
 )
 ElementComponentsContext.displayName = 'ElementComponentsContext'
 

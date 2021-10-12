@@ -92,7 +92,7 @@ A utility library contains low-level utilities used by many libraries and applic
 │  │  └─ 📚 framework
 │  │
 │  ├─ feature/
-│  │  ├─ 📚 mui-plugin
+│  │  ├─ 📚 mui-bundle
 │  │
 │  ├─ ui/
 │  │  ├─ 📚 builder
@@ -173,9 +173,9 @@ root
   * Workspace name: `data-components`
   * Directory: [libs/data/components](libs/data/components)
 * **Feature: Components Extensions Mui Plugin**
-  * NodeJS import: `@aglyn/feature-mui-plugin`
-  * Workspace name: `feature-mui-plugin`
-  * Directory: [libs/feature/mui-plugin](libs/feature/mui-plugin)
+  * NodeJS import: `@aglyn/feature-mui-bundle`
+  * Workspace name: `feature-mui-bundle`
+  * Directory: [libs/feature/mui-bundle](libs/feature/mui-plugin)
 
 #### UI
 
@@ -375,7 +375,7 @@ and [ConventionalCommits](https://www.conventionalcommits.org/en/v1.0.0/)
 - Run `nx run <lib-name>:version [...options]` for independent project app or lib version and
   generation of CHANGELOG
 
-_**@See** [`@jscutlery/semver`](https://github.com/jscutlery/semver) Nx plugin repository for full
+_**@See** [`@jscutlery/semver`](https://github.com/jscutlery/semver) Nx bundle repository for full
 list of commands and options._
 
 ## Visualizing dependencies

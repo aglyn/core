@@ -18,21 +18,21 @@
 import { Mitt } from '@aglyn/shared-util-vendor'
 import { AglynAppEventFlag, AglynModuleEventFlag, AglynModuleEventPayload } from '../emitter'
 import { AglynBaseModel } from '../models/aglyn-base.model'
-import { AglynAppInstance, AglynCommandControllerInstance, AglynCommander } from '../types'
+import { AglynCommander, IAglynApp, IAglynCommandController } from '../types'
+
 
 const TAG = 'AglynCommandController'
 
 export class AglynCommandController
   extends AglynBaseModel
-  implements AglynCommandControllerInstance
-{
+  implements IAglynCommandController {
   public static readonly [Symbol.toStringTag]: string = TAG
-  protected app: AglynAppInstance
+  protected app: IAglynApp
   #commander: AglynCommander = Mitt()
 
-  constructor(props: { app: AglynAppInstance }) {
+  constructor(props: { app: IAglynApp }) {
     super()
-    const { app } = props
+    const {app} = props
     this.app = app
     this.#initialize()
   }
@@ -64,29 +64,29 @@ export class AglynCommandController
     return this.#commander
   }
   public registerAction = (
-    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_REGISTER]
+    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_REGISTER],
   ): void => {
-    const { handler } = data
+    const {handler} = data
     const commandId = handler?.$id
     this.#commander.on(commandId, handler)
-    this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMMAND, { commandId })
-    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMMAND, { commandId })
+    this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMMAND, {commandId})
+    this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMMAND, {commandId})
   }
   public unregisterAction = (
-    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER]
+    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER],
   ): void => {
-    const { handler } = data
+    const {handler} = data
     const commandId = handler?.$id
     this.#commander.off(commandId, handler)
-    this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMMAND, { commandId })
-    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMMAND, { commandId })
+    this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMMAND, {commandId})
+    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMMAND, {commandId})
   }
   public executeCommand = (
-    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_TRIGGER]
+    data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_TRIGGER],
   ): void => {
-    const { commandId } = data
-    this.#commander.emit(commandId, { app: this.app })
-    this.getLogger().debug(AglynAppEventFlag.TRIGGERED_COMMAND, { commandId })
-    this.getEmitter().emit(AglynAppEventFlag.TRIGGERED_COMMAND, { commandId })
+    const {commandId} = data
+    this.#commander.emit(commandId, {app: this.app})
+    this.getLogger().debug(AglynAppEventFlag.TRIGGERED_COMMAND, {commandId})
+    this.getEmitter().emit(AglynAppEventFlag.TRIGGERED_COMMAND, {commandId})
   }
 }

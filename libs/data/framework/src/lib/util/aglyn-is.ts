@@ -16,12 +16,7 @@
  */
 import { _isFnT, _isObj } from '@aglyn/shared-util-guards'
 import { APP_TYPE, COMMAND_TYPE, EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../symbol'
-import {
-  AglynAppInstance,
-  AglynAppModule,
-  AglynCommandHandler,
-  AglynExtensionInstance,
-} from '../types'
+import { AglynAppModule, AglynCommandHandler, IAglynApp, IAglynExtension } from '../types'
 
 
 export function typeOf(object: unknown) {
@@ -55,7 +50,7 @@ export function kindOf(object: unknown) {
   return undefined
 }
 
-export function isApp<T>(object: unknown): object is AglynAppInstance {
+export function isApp<T>(object: unknown): object is IAglynApp {
   return typeOf(object) === APP_TYPE
 }
 export function isAppModule<T>(object: unknown): object is AglynAppModule {
@@ -64,6 +59,6 @@ export function isAppModule<T>(object: unknown): object is AglynAppModule {
 export function isCommand<T>(object: unknown): object is AglynCommandHandler {
   return kindOf(object) === COMMAND_TYPE
 }
-export function isExtension<T>(object: unknown): object is AglynExtensionInstance {
+export function isExtension<T>(object: unknown): object is IAglynExtension {
   return kindOf(object) === EXTENSION_TYPE
 }

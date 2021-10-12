@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { AglynComponent, AglynComponentData } from '@aglyn/data-components'
+import { AglynComponentElementData, IAglynComponentElement } from '@aglyn/data-components'
+import { IAglynApp } from '@aglyn/data-framework'
 import { builderTheme, withTheme } from '@aglyn/shared-feature-themes'
 import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
 import {
@@ -24,7 +25,8 @@ import {
   ElementsContextProviderProps,
 } from '@aglyn/ui-renderer'
 import NoSsr from '@mui/material/NoSsr'
-import { forwardRef, Fragment } from 'react'
+import { forwardRef, Fragment, createContext, useCallback, useContext } from 'react'
+import { AglynAppContext } from '../../../../renderer/src/lib/contexts/aglyn-app-context'
 import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
 import { SelectionContextProvider } from '../contexts/selection-context-provider'
 import { BuilderCanvasRendererComponent } from './builder-canvas-renderer.component'
@@ -33,47 +35,52 @@ import { BuilderToolbarComponent } from './builder-toolbar.component'
 
 export interface BuilderComponentProps extends OverrideableComponentProps {
   noSsr?: boolean
-  elements?: AglynComponentData[]
+  elements?: AglynComponentElementData[]
   onUpdateElements?: ElementsContextProviderProps['onUpdateElements']
-  elementComponents: AglynComponent[]
+  elementComponents: IAglynComponentElement[]
+  appCallback: () => IAglynApp
 }
 
-const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefRenderFn(
-  props,
-  ref,
-) {
-  const {
-    component: Component,
-    elements,
-    onUpdateElements,
-    elementComponents,
-    noSsr,
-    ...rest
-  } = props
-  const Wrapper = noSsr ? NoSsr : Fragment
 
-  return (
-    <Wrapper>
-      <Component ref={ref} id="aglyn:builder" {...rest}>
-        <ElementsContextProvider elements={elements} onUpdateElements={onUpdateElements}>
-          <ElementComponentsContextProvider elementComponents={elementComponents}>
-            {/*<SnackbarProvider maxSnack={3}>*/}
-            <ConfirmationProviderComponent>
-              <SelectionContextProvider>
-                <BuilderCanvasRendererComponent/>
 
-                <ComponentsDrawerContextProvider>
-                  <BuilderToolbarComponent id="aglyn:toolbar"/>
-                </ComponentsDrawerContextProvider>
-              </SelectionContextProvider>
-            </ConfirmationProviderComponent>
-            {/*</SnackbarProvider>*/}
-          </ElementComponentsContextProvider>
-        </ElementsContextProvider>
-      </Component>
-    </Wrapper>
-  )
-})
+const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {
+      component: Component,
+      elements,
+      onUpdateElements,
+      elementComponents,
+      noSsr,
+      appCallback: getApp,
+      ...rest
+    } = props
+    const Wrapper = noSsr ? NoSsr : Fragment
+
+    return (
+     <Wrapper>
+       <AglynAppContext.Provider value={{getApp}}>
+         <Component ref={ref} id="aglyn:builder" {...rest}>
+           <ElementsContextProvider elements={elements} onUpdateElements={onUpdateElements}>
+             <ElementComponentsContextProvider elementComponents={elementComponents}>
+               {/*<SnackbarProvider maxSnack={3}>*/}
+               <ConfirmationProviderComponent>
+                 <SelectionContextProvider>
+                   <BuilderCanvasRendererComponent/>
+
+                   <ComponentsDrawerContextProvider>
+                     <BuilderToolbarComponent id="aglyn:toolbar"/>
+                   </ComponentsDrawerContextProvider>
+                 </SelectionContextProvider>
+               </ConfirmationProviderComponent>
+               {/*</SnackbarProvider>*/}
+             </ElementComponentsContextProvider>
+           </ElementsContextProvider>
+         </Component>
+       </AglynAppContext.Provider>
+     </Wrapper>
+    )
+  }
+)
 
 BuilderComponentRaw.displayName = 'BuilderComponent'
 BuilderComponentRaw.defaultProps = {

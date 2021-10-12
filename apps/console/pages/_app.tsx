@@ -15,14 +15,8 @@
  * limitations under the License.
  */
 
-import { ComponentsExtension } from '@aglyn/data-components'
-import { initializeApp } from '@aglyn/data-framework'
-import {
-  makeLinkElements,
-  MakeLinkElementsConfig,
-  makeMetaElements,
-  MakeMetaElementsConfig,
-} from '@aglyn/shared-ui-jsx'
+import { loader as components, registerComponent } from '@aglyn/data-components'
+import { getApp, initializeApp } from '@aglyn/data-framework'
 import {
   CacheProvider,
   consoleTheme,
@@ -30,6 +24,13 @@ import {
   EmotionCache,
   withTheme,
 } from '@aglyn/shared-feature-themes'
+import {
+  makeLinkElements,
+  MakeLinkElementsConfig,
+  makeMetaElements,
+  MakeMetaElementsConfig,
+} from '@aglyn/shared-ui-jsx'
+import { createElementComponent } from '@aglyn/ui-renderer'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AppProps as NextAppProps } from 'next/app'
 import Head from 'next/head'
@@ -45,15 +46,92 @@ const metaElements: MakeMetaElementsConfig = [
 const linkElements: MakeLinkElementsConfig = []
 
 try {
-  initializeApp({
-    extensions: [ComponentsExtension],
+  const app = initializeApp({
+    extensions: [components],
   })
-} catch (e) {
+
+
+  registerComponent(
+    app,
+    createElementComponent(
+      'root',
+      {
+        metadata: {
+          displayName: 'Root Element',
+          title: 'Root element',
+          icon: 'block'
+        }
+      },
+      'span'
+    )
+  )
+
+  registerComponent(
+    app,
+    createElementComponent(
+      'root1',
+      {
+        metadata: {
+          displayName: 'Root Element',
+          title: 'Root element',
+          icon: 'block'
+        }
+      },
+      'span'
+    )
+  )
+
+  registerComponent(
+    app,
+    createElementComponent(
+      'root2',
+      {
+        metadata: {
+          displayName: 'Root Element',
+          title: 'Root element',
+          icon: 'block'
+        }
+      },
+      'span'
+    )
+  )
+
+  registerComponent(
+    app,
+    createElementComponent(
+      'root3',
+      {
+        metadata: {
+          displayName: 'Root Element',
+          title: 'Root element',
+          icon: 'block'
+        }
+      },
+      'span'
+    )
+  )
+
+  registerComponent(
+    app,
+    createElementComponent(
+      'root4',
+      {
+        metadata: {
+          displayName: 'Root Element',
+          title: 'Root element',
+          icon: 'block'
+        }
+      },
+      'span'
+    )
+  )
+}
+catch (e) {
   console.error(e, 'initialize aglyn app')
 }
 
 function AppWrapperRaw(props) {
-  const { children } = props
+  const {children} = props
   const Wrapper = isProduction ? Fragment : Fragment // StrictMode
 
   useEffect(() => {
@@ -69,7 +147,7 @@ function AppWrapperRaw(props) {
         {makeMetaElements(metaElements)}
         {makeLinkElements(linkElements)}
       </Head>
-      <CssBaseline />
+      <CssBaseline/>
       <div className="app">
         <main>{children}</main>
       </div>
@@ -77,7 +155,7 @@ function AppWrapperRaw(props) {
   )
 }
 AppWrapperRaw.displayName = 'AppWrapper'
-const AppWrapper = withTheme({ theme: consoleTheme })(AppWrapperRaw)
+const AppWrapper = withTheme({theme: consoleTheme})(AppWrapperRaw)
 
 const previewProduction = false
 const isProduction = process.env.NODE_ENV === 'production' || previewProduction
@@ -119,7 +197,7 @@ export interface _AppProps extends NextAppProps {
  * @returns {JSX.Element}
  */
 function _App(props: _AppProps) {
-  const { Component, emotionCache = clientSideEmotionCache, pageProps } = props
+  const {Component, emotionCache = clientSideEmotionCache, pageProps} = props
 
   return (
     <CacheProvider value={emotionCache}>
@@ -130,7 +208,7 @@ function _App(props: _AppProps) {
   )
 }
 _App.displayName = '_App'
-_App.getInitialProps = async ({ ctx, Component }) => {
+_App.getInitialProps = async ({ctx, Component}) => {
   let pageProps = {}
 
   if (Component.getInitialProps) {
@@ -169,6 +247,6 @@ For detailed information please visit 'https://aglyn.com' or you may send an
 email to 'info@aglyn.com'.
 – Aglyn Engineering Team
 `,
-    'font-family:monospace;color:#E040FB;font-size:12px;'
+    'font-family:monospace;color:#E040FB;font-size:12px;',
   )
 }

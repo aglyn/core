@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { MutableShallow, OrUndef } from '@aglyn/shared-data-types'
+import { MutableShallow } from '@aglyn/shared-data-types'
 import { _isCtor, _isFnT, _isNull, _isStrEmpty } from '@aglyn/shared-util-guards'
 import { LogCallback, Logger, LogLevelString, LogOptions } from '@aglyn/shared-util-logger'
 import { trim } from '@aglyn/shared-util-tools'
@@ -31,16 +31,16 @@ import {
 import { AGLYN_ERROR, AglynErrorEventFlag } from './error'
 import { AGLYN_LOGGER } from './logger'
 import {
-  AglynAppInstance,
   AglynAppOptions,
-  AglynCommandControllerInstance,
-  AglynExtensionControllerInstance,
-  AglynExtensionInstance, IAglynExtension,
+  IAglynApp,
+  IAglynCommandController,
+  IAglynExtension,
+  IAglynExtensionController,
 } from './types'
 import { isAppModule, isExtension } from './util/aglyn-is'
 
 
-export function initializeApp(options: AglynAppOptions = {}): AglynAppInstance {
+export function initializeApp(options: AglynAppOptions = {}): IAglynApp {
   const opts: AglynAppOptions = {...options}
   const name: string = trim(opts.name || DEFAULT_ENTRY_NAME)
   const extensions = opts.extensions || []
@@ -50,45 +50,40 @@ export function initializeApp(options: AglynAppOptions = {}): AglynAppInstance {
   if (_apps.has(name)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.DUPLICATE_APP, {appName: name})
   }
-  const app: AglynAppInstance = new AglynAppController(opts)
+  const app: IAglynApp = new AglynAppController(opts)
   _apps.set(name, app)
 
   app.onInit()
 
-  extensions.forEach((loader: () => Promise<IAglynExtension>) => {
-    loader()
-      .then(module => {
-        if (!module) {
-          throw AGLYN_ERROR.create(AglynErrorEventFlag.NO_MODULE, undefined)
-        }
-        if (!isAppModule(module) || !isExtension(module) || !_isCtor(module)) {
-          throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_MODULE_ARG, {
-            moduleName: module?.getName?.() ?? module?.['name'] ?? 'unknown',
-            appName: app.getName() ?? DEFAULT_ENTRY_NAME,
-          })
-        }
-
-        const extensionModel = new module(app)
-        app.effect({
-          type: AglynModuleEventFlag.EXTENSION_REGISTER,
-          payload: {extension: extensionModel},
-        })
-
+  extensions.map((loader) => {
+    console.log('loader', loader(), extensions)
+    const module  = loader()
+    if (!module) {
+      throw AGLYN_ERROR.create(AglynErrorEventFlag.NO_MODULE, undefined)
+    }
+    if (!isAppModule(module) || !isExtension(module) || !_isCtor(module)) {
+      throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_MODULE_ARG, {
+        moduleName: module?.getName?.() ?? module?.['name'] ?? 'unknown',
+        appName: app.getName() ?? DEFAULT_ENTRY_NAME,
       })
-      .catch((err) => {
-        throw err
-      })
+    }
+
+    const extensionModel = new module(app)
+    app.effect({
+      type: AglynModuleEventFlag.EXTENSION_REGISTER,
+      payload: {extension: extensionModel},
+    })
     return module
   })
 
   return app
 }
 
-export function getApps(): AglynAppInstance[] {
+export function getApps(): IAglynApp[] {
   return [..._apps.values()]
 }
 
-export function getApp(name: string = DEFAULT_ENTRY_NAME): AglynAppInstance {
+export function getApp(name: string = DEFAULT_ENTRY_NAME): IAglynApp {
   const app = _apps.get(name)
   if (!app) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.NO_APP, {appName: name})
@@ -96,20 +91,20 @@ export function getApp(name: string = DEFAULT_ENTRY_NAME): AglynAppInstance {
   return _apps.get(name)
 }
 
-export function deleteApp(app: AglynAppInstance): void {
+export function deleteApp(app: IAglynApp): void {
   validateAppArg(app)
   const name = app.getName()
   AGLYN_LOGGER.debug(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
   AGLYN_EMITTER.emit(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
   app.onDestroy?.()
   _apps.delete(name)
-  ;(app as MutableShallow<AglynAppInstance>)['deleted'] = true
+  ;(app as MutableShallow<IAglynApp>)['deleted'] = true
   AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETED, {appName: name})
   AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETED, {appName: name})
 }
 
-export function validateAppArg(app: AglynAppInstance): void {
-  if (!(app as AglynAppInstance)) {
+export function validateAppArg(app: IAglynApp): void {
+  if (!(app as IAglynApp)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_APP_ARG, {appName: app?.getName?.()})
   }
   if (app['deleted']) {
@@ -117,12 +112,12 @@ export function validateAppArg(app: AglynAppInstance): void {
   }
 }
 
-export function _getExtensionController(app: AglynAppInstance): AglynExtensionControllerInstance {
+export function _getExtensionController(app: IAglynApp): IAglynExtensionController {
   validateAppArg(app)
   return _extensionControllers.get(app.getName())
 }
 
-export function _getCommandController(app: AglynAppInstance): AglynCommandControllerInstance {
+export function _getCommandController(app: IAglynApp): IAglynCommandController {
   validateAppArg(app)
   return _commandControllers.get(app.getName())
 }
@@ -151,8 +146,8 @@ export function setLogLevel(logLevel: LogLevelString): void {
   Logger.setLogLevel(logLevel)
 }
 
-export function getExtension<T extends AglynExtensionInstance>(
-  app: AglynAppInstance,
+export function getExtension<T extends IAglynExtension>(
+  app: IAglynApp,
   data: { name: string },
 ): T {
   const {name} = data
@@ -160,13 +155,13 @@ export function getExtension<T extends AglynExtensionInstance>(
   return extensionController.getExtensionByName(name) as T
 }
 
-export function getExtensions(app: AglynAppInstance): AglynExtensionInstance[] {
+export function getExtensions(app: IAglynApp): IAglynExtension[] {
   const extensionController = _getExtensionController(app)
   return extensionController.getAllExtensions()
 }
 
 export function registerExtension(
-  app: AglynAppInstance,
+  app: IAglynApp,
   data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_REGISTER],
 ): void {
   const extensionController = _getExtensionController(app)
@@ -174,7 +169,7 @@ export function registerExtension(
 }
 
 export function unregisterExtension(
-  app: AglynAppInstance,
+  app: IAglynApp,
   data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNREGISTER],
 ): void {
   const extensionController = _getExtensionController(app)
@@ -182,7 +177,7 @@ export function unregisterExtension(
 }
 
 export function loadExtension(
-  app: AglynAppInstance,
+  app: IAglynApp,
   data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_LOAD],
 ) {
   const extensionController = _getExtensionController(app)
@@ -190,7 +185,7 @@ export function loadExtension(
 }
 
 export function unloadExtension(
-  app: AglynAppInstance,
+  app: IAglynApp,
   data: AglynModuleEventPayload[AglynModuleEventFlag.EXTENSION_UNLOAD],
 ) {
   const extensionController = _getExtensionController(app)
@@ -198,7 +193,7 @@ export function unloadExtension(
 }
 
 export function registerCommand(
-  app: AglynAppInstance,
+  app: IAglynApp,
   data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_REGISTER],
 ): void {
   const commandController = _getCommandController(app)
@@ -206,7 +201,7 @@ export function registerCommand(
 }
 
 export function unregisterAction(
-  app: AglynAppInstance,
+  app: IAglynApp,
   data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_ACTION_UNREGISTER],
 ): void {
   const commandController = _getCommandController(app)
@@ -214,7 +209,7 @@ export function unregisterAction(
 }
 
 export function triggerCommand(
-  app: AglynAppInstance,
+  app: IAglynApp,
   data: AglynModuleEventPayload[AglynModuleEventFlag.COMMAND_TRIGGER],
 ): void {
   const commandController = _getCommandController(app)

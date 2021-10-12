@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { AglynComponent } from '@aglyn/data-components'
+import { IAglynComponentElement } from '@aglyn/data-components'
+import { styled } from '@aglyn/shared-feature-themes'
 import {
   CardIconListItem,
   componentMapper,
@@ -26,7 +27,6 @@ import {
   NavbarDrawerProps,
   SvgPathIcon,
 } from '@aglyn/shared-ui-jsx'
-import { styled } from '@aglyn/shared-feature-themes'
 import { _isStrT } from '@aglyn/shared-util-guards'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -36,9 +36,10 @@ import Typography from '@mui/material/Typography'
 import { forwardRef, Fragment, MouseEvent, useCallback, useMemo } from 'react'
 import { ElementDrawerOptions } from '../contexts/element-drawer-context'
 
+
 const StyledGridList = styled(GridList, {
   name: 'GridList',
-})(({ theme }) => ({
+})(({theme}) => ({
   overflowX: 'hidden',
   '& .AglynGridList-gridContainer': {
     padding: theme.spacing(0, 2),
@@ -57,7 +58,7 @@ const StyledGridList = styled(GridList, {
 
 const StyledNavbarDrawer = styled(NavbarDrawer, {
   name: 'NavbarDrawer',
-})(({ theme }) => ({
+})(({theme}) => ({
   '& .AglynNavbarDrawer-content': {
     backgroundColor: theme.palette.background.default,
     overflow: 'auto',
@@ -66,7 +67,7 @@ const StyledNavbarDrawer = styled(NavbarDrawer, {
     margin: '0 auto',
     height: '100%',
     maxHeight: '100vh',
-    [theme.breakpoints.up('sm')]: { height: theme.breakpoints.values.sm },
+    [theme.breakpoints.up('sm')]: {height: theme.breakpoints.values.sm},
   },
   '& .AglynNavbarDrawer-paper': {
     height: 480,
@@ -77,7 +78,7 @@ const StyledNavbarDrawer = styled(NavbarDrawer, {
 
 export interface ComponentsDrawerComponentProps extends Partial<NavbarDrawerProps> {
   options?: ElementDrawerOptions
-  elementComponents?: AglynComponent[]
+  elementComponents?: IAglynComponentElement[]
   onCancel?: { bivarianceHack<T>(event: MouseEvent<T>, reason: 'canceled'): void }['bivarianceHack']
   onConfirm?: {
     bivarianceHack<T>(event: null | MouseEvent<T>, data: unknown): void
@@ -86,151 +87,151 @@ export interface ComponentsDrawerComponentProps extends Partial<NavbarDrawerProp
 }
 
 export const BuilderComponentsDrawerComponent = forwardRef<any, ComponentsDrawerComponentProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      className,
-      options,
-      onConfirm,
-      onClose,
-      onCancel,
-      onDelete,
-      elementComponents,
-      ...rest
-    } = props
+ function RefRenderFn(props, ref) {
+   const {
+     className,
+     options,
+     onConfirm,
+     onClose,
+     onCancel,
+     onDelete,
+     elementComponents,
+     ...rest
+   } = props
 
-    const { title, type = 'browse-site-components' } = { ...options }
+   const {title, type = 'browse-site-components'} = {...options}
 
-    const selectedElementProps: any = {}
-    const propsSchema: any = {}
-    const handleElementSave = useCallback(
-      (values) => {
-        onConfirm?.call(null, null, { type: 'save', data: values })
-      },
-      [onConfirm]
-    )
-    const handleDrawerClose = useCallback(
-      (e, reason) => {
-        onClose?.call(null, e, reason)
-      },
-      [onClose]
-    )
-    const handleDrawerCancel = useCallback(
-      (e) => {
-        onCancel?.call(null, e, 'canceled')
-      },
-      [onCancel]
-    )
-    const handleDeleteButtonClick = useCallback(
-      (e) => {
-        onDelete?.call(null, e, { type: 'delete' })
-      },
-      [onDelete]
-    )
-    const handleItemClick = useCallback(
-      (e, item) => {
-        onConfirm?.call(null, e, { type: 'selection', data: item })
-      },
-      [onConfirm]
-    )
+   const selectedElementProps: any = {}
+   const propsSchema: any = {}
+   const handleElementSave = useCallback(
+    (values) => {
+      onConfirm?.call(null, null, {type: 'save', data: values})
+    },
+    [onConfirm],
+   )
+   const handleDrawerClose = useCallback(
+    (e, reason) => {
+      onClose?.call(null, e, reason)
+    },
+    [onClose],
+   )
+   const handleDrawerCancel = useCallback(
+    (e) => {
+      onCancel?.call(null, e, 'canceled')
+    },
+    [onCancel],
+   )
+   const handleDeleteButtonClick = useCallback(
+    (e) => {
+      onDelete?.call(null, e, {type: 'delete'})
+    },
+    [onDelete],
+   )
+   const handleItemClick = useCallback(
+    (e, item) => {
+      onConfirm?.call(null, e, {type: 'selection', data: item})
+    },
+    [onConfirm],
+   )
 
-    const items = useMemo(
-      () =>
-        (elementComponents ?? []).map((component) => ({
-          id: component?.$id,
-          title: component?.options?.title || component?.options?.displayName || 'No title',
-          icon: component?.options?.icon,
-        })),
-      [elementComponents]
-    )
+   const items = useMemo(
+    () =>
+     (elementComponents ?? []).map((component) => ({
+       id: component?.componentId,
+       title: component?.options?.title || component?.options?.displayName || 'No title',
+       icon: component?.options?.icon,
+     })),
+    [elementComponents],
+   )
 
-    const appBarLeft = (
-      <Fragment>
-        <IconButton
-          children={<SvgPathIcon iconId="close" />}
-          color="inherit"
-          edge="start"
-          onClick={handleDrawerCancel}
-          sx={{ mr: 2 }}
+   const appBarLeft = (
+    <Fragment>
+      <IconButton
+       children={<SvgPathIcon iconId="close"/>}
+       color="inherit"
+       edge="start"
+       onClick={handleDrawerCancel}
+       sx={{mr: 2}}
+      />
+      <Typography
+       children={title}
+       color="inherit"
+       variant="h6"
+       sx={{fontSize: (theme) => theme.typography.pxToRem(20)}}
+      />
+    </Fragment>
+   )
+
+   const appBarRight = {
+     'edit-element-traits': (
+      <Button color="inherit" onClick={handleDrawerCancel} children="Cancel"/>
+     ),
+   }
+
+   const renderItemContent = useCallback(
+    (item) => (
+     <CardIconListItem
+      item={item}
+      label={item.title}
+      onActionClick={handleItemClick}
+      preview={
+        <Fragment>
+          {_isStrT(item.icon) || !item.icon ? (
+           <Box fontSize={'4.17em'} component={SvgPathIcon} iconId={item.icon}/>
+          ) : (
+           item.icon
+          )}
+        </Fragment>
+      }
+     />
+    ),
+    [handleItemClick],
+   )
+
+   const views = {
+     'browse-site-components': (
+      <StyledGridList
+       GridContainerProps={{spacing: 2}}
+       GridItemProps={{xs: 6, sm: 4}}
+       renderItemContent={renderItemContent}
+       items={items}
+      />
+     ),
+     'edit-element-traits': (
+      <Box px={[2, 3]} py={4} width={1}>
+        <FormRenderer
+         FormTemplate={GridFormTemplate}
+         componentMapper={componentMapper}
+         initialValues={selectedElementProps}
+         onCancel={handleDrawerClose}
+         onSubmit={handleElementSave}
+         schema={propsSchema}
         />
-        <Typography
-          children={title}
-          color="inherit"
-          variant="h6"
-          sx={{ fontSize: (theme) => theme.typography.pxToRem(20) }}
-        />
-      </Fragment>
-    )
 
-    const appBarRight = {
-      'edit-element-traits': (
-        <Button color="inherit" onClick={handleDrawerCancel} children="Cancel" />
-      ),
-    }
+        <FormControl margin="none" fullWidth>
+          <Button onClick={handleDeleteButtonClick} sx={{mt: 2, color: 'error.main'}} fullWidth>
+            Delete Element
+          </Button>
+        </FormControl>
+      </Box>
+     ),
+   }
 
-    const renderItemContent = useCallback(
-      (item) => (
-        <CardIconListItem
-          item={item}
-          label={item.title}
-          onActionClick={handleItemClick}
-          preview={
-            <Fragment>
-              {_isStrT(item.icon) || !item.icon ? (
-                <Box fontSize={'4.17em'} component={SvgPathIcon} iconId={item.icon} />
-              ) : (
-                item.icon
-              )}
-            </Fragment>
-          }
-        />
-      ),
-      [handleItemClick]
-    )
-
-    const views = {
-      'browse-site-components': (
-        <StyledGridList
-          GridContainerProps={{ spacing: 2 }}
-          GridItemProps={{ xs: 6, sm: 4 }}
-          renderItemContent={renderItemContent}
-          items={items}
-        />
-      ),
-      'edit-element-traits': (
-        <Box px={[2, 3]} py={4} width={1}>
-          <FormRenderer
-            FormTemplate={GridFormTemplate}
-            componentMapper={componentMapper}
-            initialValues={selectedElementProps}
-            onCancel={handleDrawerClose}
-            onSubmit={handleElementSave}
-            schema={propsSchema}
-          />
-
-          <FormControl margin="none" fullWidth>
-            <Button onClick={handleDeleteButtonClick} sx={{ mt: 2, color: 'error.main' }} fullWidth>
-              Delete Element
-            </Button>
-          </FormControl>
-        </Box>
-      ),
-    }
-
-    return (
-      <StyledNavbarDrawer
-        ref={ref}
-        AppBarProps={{ color: 'primary' }}
-        anchor="bottom"
-        appBarLeft={appBarLeft}
-        appBarRight={appBarRight[type]}
-        variant="temporary"
-        onClose={handleDrawerCancel}
-        {...rest}
-      >
-        {views[type]}
-      </StyledNavbarDrawer>
-    )
-  }
+   return (
+    <StyledNavbarDrawer
+     ref={ref}
+     AppBarProps={{color: 'primary'}}
+     anchor="bottom"
+     appBarLeft={appBarLeft}
+     appBarRight={appBarRight[type]}
+     variant="temporary"
+     onClose={handleDrawerCancel}
+     {...rest}
+    >
+      {views[type]}
+    </StyledNavbarDrawer>
+   )
+ },
 )
 
 BuilderComponentsDrawerComponent.displayName = 'BuilderComponentsDrawerComponent'

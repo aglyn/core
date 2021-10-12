@@ -69,9 +69,13 @@ export const TYPE_OF = 'ßßtypeof'
 export const TYPE_KIND = 'ßßkind'
 
 export let APP_TYPE: SYMBOL_TYPE = HexTag.x60103
+export type APP_TYPE = typeof APP_TYPE
 export let MODULE_TYPE: SYMBOL_TYPE = HexTag.x60106
+export type MODULE_TYPE = typeof MODULE_TYPE
 export let COMMAND_TYPE: SYMBOL_TYPE = HexTag.x60109
+export type COMMAND_TYPE = typeof COMMAND_TYPE
 export let EXTENSION_TYPE: SYMBOL_TYPE = HexTag.x60107
+export type EXTENSION_TYPE = typeof EXTENSION_TYPE
 
 if (symAvail) {
   APP_TYPE = symFor(APP_TYPE)

@@ -15,50 +15,55 @@
  * limitations under the License.
  */
 
-import { AglynComponentData, getComponent } from '@aglyn/data-components'
-import { getApp } from '@aglyn/data-framework'
+import { AglynComponentElementData, getComponent, getComponentSchema } from '@aglyn/data-components'
 import { AnyProps } from '@aglyn/shared-data-types'
 import { ReactIs } from '@aglyn/shared-ui-jsx'
-import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
+import { _isArr, _isArrEmpty, _isFnT } from '@aglyn/shared-util-guards'
 import { _s, yes } from '@aglyn/shared-util-tools'
 import { ComponentType, ElementType, forwardRef } from 'react'
-import { handleElementResolveProps } from '../util/handle-element-resolve-props'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
 import { ElementsRendererComponent } from './elements-renderer.component'
 
 
 export interface ElementRendererComponentProps extends AnyProps {
-  elementData: AglynComponentData
+  elementData: AglynComponentElementData
   elementRendererComponent?: ComponentType<ElementRendererComponentProps>
 }
 
 export const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const {elementData, elementRendererComponent: elementRendererComponentProp, ...rest} = props
-    const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
+    const {
+      elementData,
+      elementRendererComponent: elementRendererComponentProp,
+      ...rest
+    } = props
 
-    // TODO: move to context consumer
-    const component = getComponent(getApp(), {componentId: _s(elementData?.component)})
-    const ctor = component
-    const options = {...component?.options}
-    const resolvedProps = handleElementResolveProps(elementData?.props, options, ctor)
-    const {children: content = null, ...ctorProps} = resolvedProps
-    const ComponentCtor = (ReactIs.isValidElementType(ctor) ? ctor : 'div') as ElementType
-    const haveChildren = yes(!_isArr(elementData?.children) || _isArrEmpty(elementData?.children))
-    const refProps = !options.elementRef?.disable
-      ? options.elementRef?.innerRef ? {innerRef: ref} : {ref: ref}
-      : undefined
+    const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
+    const { getApp } = useAglynAppContext()
+    const { $id, componentId, bundleId, elements, props: dataProps } = elementData
+    const component = getComponent(getApp(), {componentId, bundleId})
+    const schema = getComponentSchema(getApp(), {componentId, bundleId})
+    const Component = ReactIs.isValidElementType(component) ? component : 'div'
+    const resolveProps = schema?.renderFlags?.resolveProps
+    const noRef = yes(schema?.renderFlags?.elementRef?.disable)
+    const refKey = yes(schema?.renderFlags?.elementRef?.innerRef) ? 'innerRef': 'ref'
+    const refProps = !noRef ? { [refKey]: ref } : undefined
+    const {children, ...elemProps}: AnyProps = {
+      ...(_isFnT(resolveProps)
+        ? resolveProps.call(elementData, dataProps) as AnyProps
+        : dataProps)
+    }
 
     return (
-      <ComponentCtor {...refProps} {...ctorProps} {...rest}>
-        {!haveChildren ? (
+      <Component {...refProps} {...elemProps} {...rest} key={$id}>
+        {_isArr(elements) && !_isArrEmpty(elements) ? (
           <ElementsRendererComponent
             elementRendererComponent={elementRendererComponent}
-            children={elementData?.children}
+            children={elements}
           />
-        ) : (
-          content
-        )}
-      </ComponentCtor>
+        ) : null}
+        {children}
+      </Component>
     )
   },
 )

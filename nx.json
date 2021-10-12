@@ -39,7 +39,7 @@
       "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:framework"],
       "implicitDependencies": []
     },
-    "feature-mui-plugin": {
+    "feature-mui-bundle": {
       "tags": ["scope:lib", "scope:lib:sdk", "scope:lib:sdk:extension"],
       "implicitDependencies": []
     },

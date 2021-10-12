@@ -25,13 +25,13 @@ import { AglynBaseModel } from '../models/aglyn-base.model'
 import { AGLYN_PLATFORM } from '../platform'
 import { APP_TYPE, TYPE_OF } from '../symbol'
 import {
-  AglynAppInstance,
   AglynAppOptions,
-  AglynCommandControllerInstance,
   AglynEffectType,
-  AglynExtensionControllerInstance,
   AglynPlatform,
   AglynVersion,
+  IAglynApp,
+  IAglynCommandController,
+  IAglynExtensionController,
 } from '../types'
 import { SDK_VERSION } from '../version'
 import { AglynCommandController } from './aglyn-command.controller'
@@ -40,7 +40,7 @@ import { AglynExtensionController } from './aglyn-extension.controller'
 
 const TAG = 'AglynApp'
 
-export class AglynAppController extends AglynBaseModel implements AglynAppInstance {
+export class AglynAppController extends AglynBaseModel implements IAglynApp {
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly [TYPE_OF]: number | symbol = APP_TYPE
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
@@ -50,21 +50,21 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
   readonly #options: AglynAppOptions = null
   readonly #name: string = null
   #deleted = false
-  #commandController: AglynCommandControllerInstance = null
-  #extensionController: AglynExtensionControllerInstance = null
+  #commandController: IAglynCommandController = null
+  #extensionController: IAglynExtensionController = null
   public get [TYPE_OF]() {
     return getStaticField(TYPE_OF, this)
   }
-  public get platform(): AglynExtensionControllerInstance {
+  public get platform(): IAglynExtensionController {
     return getStaticField('platform', this)
   }
-  public get version(): AglynExtensionControllerInstance {
+  public get version(): IAglynExtensionController {
     return getStaticField('version', this)
   }
-  public get commands(): AglynCommandControllerInstance {
+  public get commands(): IAglynCommandController {
     return this.#commandController
   }
-  public get extensions(): AglynExtensionControllerInstance {
+  public get extensions(): IAglynExtensionController {
     return this.#extensionController
   }
   constructor(options: AglynAppOptions) {
@@ -115,10 +115,10 @@ export class AglynAppController extends AglynBaseModel implements AglynAppInstan
   public getOptions = (): AglynAppOptions => {
     return this.#options
   }
-  public getExtensionsController = (): AglynExtensionControllerInstance => {
+  public getExtensionsController = (): IAglynExtensionController => {
     return this.#extensionController
   }
-  public getCommandsController = (): AglynCommandControllerInstance => {
+  public getCommandsController = (): IAglynCommandController => {
     return this.#commandController
   }
   public getDeleted = (): boolean => {

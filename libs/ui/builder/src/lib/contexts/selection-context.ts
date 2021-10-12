@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import { AglynComponentData } from '@aglyn/data-components'
+import { AglynComponentElementData } from '@aglyn/data-components'
 import { createContext, useContext } from 'react'
 
 
 export interface SelectionOptions {
   clientRect?: DOMRect
-  elementData: AglynComponentData
+  elementData: AglynComponentElementData
 }
 
 export type SelectFn = (options?: SelectionOptions) => Promise<unknown>

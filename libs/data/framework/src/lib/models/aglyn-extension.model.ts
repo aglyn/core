@@ -15,24 +15,25 @@
  * limitations under the License.
  */
 
-import { getStaticField } from '@aglyn/shared-util-tools'
 import { LifecycleFlag } from '@aglyn/shared-data-types'
+import { getStaticField } from '@aglyn/shared-util-tools'
 import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../symbol'
-import { AglynAppInstance, AglynExtensionInstance, AglynExtensionOptions } from '../types'
+import { AglynExtensionOptions, IAglynApp, IAglynExtension } from '../types'
 import { AglynBaseModel } from './aglyn-base.model'
+
 
 const TAG = 'AglynExtensionModel'
 
 export abstract class AglynExtensionModel<T = any>
   extends AglynBaseModel
-  implements AglynExtensionInstance {
+  implements IAglynExtension {
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly [TYPE_OF]: number | symbol = MODULE_TYPE
   public static readonly [TYPE_KIND]: number | symbol = EXTENSION_TYPE
   public static readonly $id: string = null
   readonly #options: AglynExtensionOptions = null
-  protected app: AglynAppInstance
+  protected app: IAglynApp
   protected context?: T = null
   #lifecycle?: LifecycleFlag = null
   public get $id() {
@@ -51,9 +52,9 @@ export abstract class AglynExtensionModel<T = any>
     this.#lifecycle = value
   }
 
-  protected constructor(app: AglynAppInstance, options: AglynExtensionOptions) {
+  protected constructor(app: IAglynApp, options: AglynExtensionOptions) {
     super()
-    this.#options = { ...options }
+    this.#options = {...options}
     this.app = app
     this.#initialize()
   }
@@ -89,6 +90,6 @@ export abstract class AglynExtensionModel<T = any>
       [TYPE_KIND]: getStaticField(TYPE_KIND, this),
     }
   }
-  public abstract onInit(app: AglynAppInstance): void
-  public abstract onDestroy(app: AglynAppInstance): void
+  public abstract onInit(app: IAglynApp): void
+  public abstract onDestroy(app: IAglynApp): void
 }
