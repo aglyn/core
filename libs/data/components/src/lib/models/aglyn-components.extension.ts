@@ -93,14 +93,14 @@ export default class AglynComponentsExtension
   public getComponent = (payload: GetComponentPayload): OrUndef<IAglynComponentElement> => {
     const {componentId, bundleId = undefined} = payload
     if (bundleId) {
-      return this.context.components?.get([componentId, bundleId])
+      return this.context.components?.get(`${componentId}:${bundleId}`)
     }
     return this.context.components?.get(componentId)
   }
   public getComponentSchema = (payload: GetComponentPayload): OrUndef<IAglynComponentSchema> => {
     const {componentId, bundleId} = payload
     if (bundleId) {
-      return this.context.schemas?.get([componentId, bundleId])
+      return this.context.schemas?.get(`${componentId}:${bundleId}`)
     }
     return this.context.schemas?.get(componentId)
   }
@@ -119,8 +119,8 @@ export default class AglynComponentsExtension
       if (!bundle) {
         throw new Error(`No bundle exists with ID ${bundleId}.`)
       }
-      this.context.components.set([componentId, bundleId], component)
-      this.context.schemas.set([componentId, bundleId], schema)
+      this.context.components.set(`${componentId}:${bundleId}`, component)
+      this.context.schemas.set(`${componentId}:${bundleId}`, schema)
       bundle.components.push(componentId)
     }
     else {
@@ -129,15 +129,19 @@ export default class AglynComponentsExtension
     }
     if (_isArr(schema.templates)) {
       schema.templates.forEach((i) => {
-        this.context.templates.set([i.id, componentId, bundleId], i)
+        this.context.templates.set(i.id, i)
       })
       return this
     }
     return this
   }
   public registerBundle = (payload: RegisterBundlePayload): this => {
-    const {bundle} = payload
-    this.context.bundles.set(bundle.bundleId, bundle)
+    const {bundle, components} = payload
+    const bundleId = bundle.bundleId
+    this.context.bundles.set(bundleId, bundle)
+    components.forEach(({schema, component}) => {
+      this.registerComponent({schema, component})
+    })
     return this
   }
 
@@ -148,26 +152,20 @@ export default class AglynComponentsExtension
       if (!bundle) {
         throw new Error(`No bundle exists with ID ${bundleId}.`)
       }
+      this.context.schemas.get(`${componentId}:${bundleId}`)?.templates?.forEach((i) => {
+        this.context.templates.delete(i.id)
+      })
+      this.context.components.delete(`${componentId}:${bundleId}`)
+      this.context.schemas.delete(`${componentId}:${bundleId}`)
       bundle.components = bundle.components.filter(i => i !== componentId)
       this.context.bundles.set(bundleId, bundle)
-      this.context.components.delete([componentId, bundleId])
-      this.context.schemas.delete([componentId, bundleId])
-
-      for (const [id, cid, bid] of this.context.templates.keys()) {
-        if ((!bundleId || bundleId === bid) && componentId === cid) {
-          this.context.templates.delete([id, cid, bid])
-        }
-      }
     }
     else {
-      this.context.components.delete(componentId)
+      this.context.schemas.get(componentId)?.templates?.forEach((i) => {
+        this.context.templates.delete(i.id)
+      })
       this.context.schemas.delete(componentId)
-
-      for (const [id, cid] of this.context.templates.keys()) {
-        if (componentId === cid) {
-          this.context.templates.delete([id, cid])
-        }
-      }
+      this.context.components.delete(componentId)
     }
     return this
   }

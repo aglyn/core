@@ -1,1 +1,1 @@
-export * from './lib/mui-bundle'
+export * from './lib'

@@ -19,8 +19,8 @@ import { AglynComponentElementData, getComponent, getComponentSchema } from '@ag
 import { AnyProps } from '@aglyn/shared-data-types'
 import { ReactIs } from '@aglyn/shared-ui-jsx'
 import { _isArr, _isArrEmpty, _isFnT } from '@aglyn/shared-util-guards'
-import { _s, yes } from '@aglyn/shared-util-tools'
-import { ComponentType, ElementType, forwardRef } from 'react'
+import { yes } from '@aglyn/shared-util-tools'
+import { ComponentType, forwardRef } from 'react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 import { ElementsRendererComponent } from './elements-renderer.component'
 
@@ -39,19 +39,19 @@ export const ElementRendererComponent = forwardRef<any, ElementRendererComponent
     } = props
 
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
-    const { getApp } = useAglynAppContext()
-    const { $id, componentId, bundleId, elements, props: dataProps } = elementData
+    const {getApp} = useAglynAppContext()
+    const {$id, componentId, bundleId, elements, props: dataProps} = elementData
     const component = getComponent(getApp(), {componentId, bundleId})
     const schema = getComponentSchema(getApp(), {componentId, bundleId})
     const Component = ReactIs.isValidElementType(component) ? component : 'div'
     const resolveProps = schema?.renderFlags?.resolveProps
     const noRef = yes(schema?.renderFlags?.elementRef?.disable)
-    const refKey = yes(schema?.renderFlags?.elementRef?.innerRef) ? 'innerRef': 'ref'
-    const refProps = !noRef ? { [refKey]: ref } : undefined
+    const refKey = yes(schema?.renderFlags?.elementRef?.innerRef) ? 'innerRef' : 'ref'
+    const refProps = !noRef ? {[refKey]: ref} : undefined
     const {children, ...elemProps}: AnyProps = {
       ...(_isFnT(resolveProps)
         ? resolveProps.call(elementData, dataProps) as AnyProps
-        : dataProps)
+        : dataProps),
     }
 
     return (

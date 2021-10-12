@@ -99,7 +99,8 @@ export type RegisterComponentPayload<P = any> = PayloadData<{
   component: IAglynComponentElement<P>
 }>
 export type RegisterBundlePayload = PayloadData<{
-  bundle: IAglynComponentsBundle
+  bundle: IAglynComponentsBundle,
+  components: RegisterComponentPayload[]
 }>
 
 export type UnregisterComponentPayload = PayloadData<{
@@ -132,12 +133,12 @@ export interface ComponentsRegistry {
   bundles: Map<BundleId, IAglynComponentsBundle>
   components: Map<ComponentId | [ComponentId, BundleId], IAglynComponentElement>
   schemas: Map<ComponentId | [ComponentId, BundleId], IAglynComponentSchema>
-  templates: Map<[string, ComponentId, BundleId?], AglynComponentElementTemplateData>
+  templates: Map<string, AglynComponentElementTemplateData>
 }
 
 export interface IAglynComponentsBundle {
   readonly bundleId: BundleId
-  options?: {
+  metadata?: {
     displayName: string
     description?: string
     icon?: string

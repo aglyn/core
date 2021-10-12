@@ -38,20 +38,38 @@ export const BuilderCanvasRendererComponent = forwardRef<any, BuilderCanvasRende
     const CanvasComponent = canvasRendererComponent || CanvasRendererComponent
     const elementRendererComponent = elementRendererComponentProp || BuilderElementRendererComponent
 
+    const aa = false
+
+    if (aa) {
+      return (
+        <PanZoom disabled>
+          <ElementsContext.Consumer>
+            {({elements}) => (
+              <CanvasComponent
+                ref={ref}
+                id="aglyn:canvas"
+                elements={elements}
+                elementRendererComponent={elementRendererComponent}
+                {...rest}
+              />
+            )}
+          </ElementsContext.Consumer>
+        </PanZoom>
+      )
+    }
+
     return (
-      <PanZoom disabled>
-        <ElementsContext.Consumer>
-          {({ elements }) => (
-            <CanvasComponent
-              ref={ref}
-              id="aglyn:canvas"
-              elements={elements}
-              elementRendererComponent={elementRendererComponent}
-              {...rest}
-            />
-          )}
-        </ElementsContext.Consumer>
-      </PanZoom>
+      <ElementsContext.Consumer>
+        {({elements}) => (
+          <CanvasComponent
+            ref={ref}
+            id="aglyn:canvas"
+            elements={elements}
+            elementRendererComponent={elementRendererComponent}
+            {...rest}
+          />
+        )}
+      </ElementsContext.Consumer>
     )
   }
 )

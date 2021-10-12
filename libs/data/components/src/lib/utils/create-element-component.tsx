@@ -27,14 +27,10 @@ import { getDisplayName } from '@aglyn/shared-util-tools'
 import { Component, Ref } from 'react'
 
 
-export function createElementComponent<P = any>(
-  schema: IAglynComponentSchema<P>,
-  component: AglynComponentElementType<P>,
-): RegisterComponentPayload<P>
-export function createElementComponent<P = any>(
-  schema: IAglynComponentSchema<P>,
-  component: AglynComponentElementType<P>,
-): RegisterComponentPayload<P> {
+export function createElementComponent(
+  schema: IAglynComponentSchema,
+  component: AglynComponentElementType,
+): RegisterComponentPayload {
   const {componentId, bundleId, renderFlags} = schema
   const {styled} = {...renderFlags}
   const displayName = getDisplayName(component, componentId)
@@ -42,7 +38,7 @@ export function createElementComponent<P = any>(
     ? component
     : hocStyled(component as any, {name: displayName})({})
 
-  class AglynComponent extends Component<P> {
+  class AglynComponent extends Component<any> {
     public static readonly displayName = displayName
 
     public static readonly componentId = componentId
@@ -52,7 +48,7 @@ export function createElementComponent<P = any>(
 
     public elemRef: Ref<any>
 
-    constructor(props) {
+    constructor(props: any) {
       super(props)
       this.elemRef = props.innerRef
     }

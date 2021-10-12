@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { registerComponent, loader as componentsExtension } from '@aglyn/data-components'
+import {
+  createElementComponent,
+  loader as componentsExtension, registerBundle,
+  registerComponent,
+} from '@aglyn/data-components'
 import { initializeApp } from '@aglyn/data-framework'
 import {
   CacheProvider,
@@ -30,11 +34,11 @@ import {
   makeMetaElements,
   MakeMetaElementsConfig,
 } from '@aglyn/shared-ui-jsx'
-import { createElementComponent } from '@aglyn/ui-renderer'
 import CssBaseline from '@mui/material/CssBaseline'
 import { AppProps as NextAppProps } from 'next/app'
 import Head from 'next/head'
 import { Fragment, useEffect } from 'react'
+import { bundle as muiBundle } from '@aglyn/feature-mui-bundle'
 import { APP } from '../const'
 
 // Client-side cache, shared for the whole session of the user in the browser.
@@ -95,10 +99,10 @@ const c5 = createElementComponent({
       componentId: 'root4',
       title: 'Root 4',
       props: {
-        children: 'First Root4'
-      }
-    }
-  ]
+        children: 'First Root4',
+      },
+    },
+  ],
 }, 'span')
 const components = [c1, c2, c3, c4, c5]
 
@@ -108,6 +112,7 @@ try {
   })
 
   components.forEach((i) => registerComponent(app, i))
+  registerBundle(app, muiBundle)
 }
 catch (e) {
   console.error(e, 'initialize aglyn app')

@@ -15,4 +15,29 @@
  * limitations under the License.
  */
 
-const TAG = 'mui'
+import {
+  BundleId,
+  createComponentsBundle,
+  IAglynComponentsBundle,
+  RegisterBundlePayload,
+  RegisterComponentPayload,
+} from '@aglyn/data-components'
+
+import button from './button'
+
+
+export const bundleId: BundleId = 'mui'
+export const metadata: IAglynComponentsBundle['metadata'] = {
+  displayName: 'Mui Components',
+  description: 'Material-UI view components',
+  icon: 'view-array',
+}
+export const components: RegisterComponentPayload[] = [
+  button,
+]
+
+export const bundle: RegisterBundlePayload = createComponentsBundle({
+  bundleId,
+  metadata,
+}, components)
+export default bundle
