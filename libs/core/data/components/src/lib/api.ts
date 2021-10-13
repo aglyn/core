@@ -40,7 +40,7 @@ import {
   RegisterComponentPayload,
   UnregisterBundlePayload,
   UnregisterComponentPayload,
-} from '../types'
+} from './types'
 
 
 export function _getComponentsExtension(app: IAglynApp): IAglynComponentsExtension {
@@ -100,4 +100,19 @@ export function unregisterComponent(app: IAglynApp, payload: UnregisterComponent
 
 export function unregisterBundle(app: IAglynApp, payload: UnregisterBundlePayload): void {
   _getComponentsExtension(app)?.unregisterBundle(payload)
+}
+
+export default {
+  getAllComponents,
+  getAllComponentsValues,
+  getAllComponentsKeys,
+  getTemplateBlocks,
+  getComponent,
+  getComponentSchema,
+  getBundle,
+  registerComponent,
+  registerBundle,
+  unregisterComponent,
+  unregisterBundle,
+
 }

@@ -15,4 +15,5 @@
  * limitations under the License.
  */
 
-export * from './main'
+export const loader = () => require('./lib/extension/components.extension').ComponentsExtension
+export default loader

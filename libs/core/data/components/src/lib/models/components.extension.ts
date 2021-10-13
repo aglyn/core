@@ -41,7 +41,7 @@ import {
 
 const TAG = 'ComponentsExtension'
 
-export default class ComponentsExtension
+class ComponentsExtension
   extends AglynExtensionModel<ComponentsRegistry>
   implements IAglynComponentsExtension {
   //start: overrides
@@ -207,3 +207,4 @@ export default class ComponentsExtension
 }
 
 export { ComponentsExtension }
+export default ComponentsExtension

@@ -15,4 +15,14 @@
  * limitations under the License.
  */
 
-export * from './main'
+export * from './components/element-renderer.component'
+export * from './components/elements-renderer.component'
+export * from './components/canvas-renderer.component'
+
+export * from './contexts/element-components-context'
+export * from './contexts/element-components-context-provider'
+export * from './contexts/elements-context-provider'
+export * from './contexts/elements-context'
+
+export * from './util/create-element-data'
+export * from './util/create-element-data-id'
