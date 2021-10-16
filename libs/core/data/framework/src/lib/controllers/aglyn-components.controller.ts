@@ -103,7 +103,7 @@ export interface AglynComponentElement<P = any>
   bundleId?: BundleId
 }
 
-export interface AglynComponentSchema<P = any> {
+export interface AglynComponentSchema<P extends AnyProps = any> {
   componentId: ComponentId
   bundleId?: BundleId
 
@@ -138,34 +138,34 @@ export interface AglynComponentSchema<P = any> {
     styled?: { disable?: boolean }
     elementRef?: { disable?: boolean; innerRef?: boolean }
     propsSchema?: FormSchema
-    resolveProps?: ResolveProps<P>
+    resolveProps?: ResolveProps<AglynComponentElementData<P>>
   }
 
-  templates?: AglynComponentElementTemplateData[]
+  templates?: AglynComponentElementTemplateData<P>[]
 }
 
-export interface AglynComponentElementData {
+export interface AglynComponentElementData<P extends AnyProps = any> {
   readonly $id: string
   readonly componentId: ComponentId
   readonly bundleId?: BundleId
   displayName?: string
   description?: string
-  props?: AnyProps
-  elements?: AglynComponentElementData[]
+  props?: P
+  elements?: AglynComponentElementData<P>[]
 }
 
-export interface AglynComponentElementTemplateData {
+export interface AglynComponentElementTemplateData<P extends AnyProps = any> {
   readonly id: string
   title: string
   description?: string
   icon?: string
-  data: TemplateSubElementData
+  data: TemplateSubElementData<P>
 }
 
-export interface TemplateSubElementData {
+export interface TemplateSubElementData<P extends AnyProps = any> {
   readonly componentId: ComponentId
   readonly bundleId?: BundleId
-  elements?: TemplateSubElementData[]
+  elements?: TemplateSubElementData<P>[]
   props?: AnyProps
 }
 
@@ -203,9 +203,9 @@ export class AglynComponentsController extends AglynBaseModel {
     super()
     const {app} = props
     this.app = app
-    this.#initialize()
+    this.#setup()
   }
-  #initialize() {
+  #setup() {
     this.setErrorFactory(this.app.getErrorFactory())
     this.setEmitter(this.app.getEmitter())
     this.setLogger(this.app.getLogger())

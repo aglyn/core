@@ -51,13 +51,13 @@ export const templates: AglynComponentSchema['templates'] = [
 ]
 
 export const component = createElementComponent(
-  {
-    componentId,
-    bundleId,
-    metadata,
-    templates,
-  },
-  ListItem,
+ {
+   componentId,
+   bundleId,
+   metadata,
+   templates,
+ },
+ ListItem,
 )
 
 export default component

@@ -19,21 +19,21 @@ import { AglynComponentElementData } from '@aglyn/core-data-framework'
 import { createContext, useContext } from 'react'
 
 
-export interface SelectionOptions {
+export interface HoverOptions {
   clientRect?: DOMRect
   elementData?: AglynComponentElementData
 }
 
-export type SelectFn = (options?: SelectionOptions) => Promise<unknown>
+export type HoverFn = (options?: HoverOptions) => Promise<unknown>
 
-export interface SelectionContextType {
-  select: SelectFn
+export interface HoverContextType {
+  hover: HoverFn
   close: () => void
 }
 
-export type UseSelectionType = () => SelectionContextType
+export type UseHoverType = () => HoverContextType
 
-export const DEFAULT_OPTIONS: SelectionOptions = {
+export const DEFAULT_OPTIONS: HoverOptions = {
   clientRect: null,
   elementData: null,
 }
@@ -46,11 +46,11 @@ export const buildOptions = (defaultOptions, options) => {
   }
 }
 
-export const SelectionContext = createContext<SelectionContextType>(null)
-SelectionContext.displayName = 'SelectionContext'
+export const HoverContext = createContext<HoverContextType>(null)
+HoverContext.displayName = 'HoverContext'
 
-export const useSelectionContext: UseSelectionType = () => {
-  return useContext(SelectionContext)
+export const useHoverContext: UseHoverType = () => {
+  return useContext(HoverContext)
 }
 
-export default SelectionContext
+export default HoverContext

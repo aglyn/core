@@ -160,7 +160,11 @@ export const BuilderComponentsDrawerComponent = forwardRef<any, ComponentsDrawer
           preview={
             <Fragment>
               {_isStrT(item.icon) || !item.icon ? (
-                <Box fontSize={'4.17em'} component={SvgPathIcon} iconId={item.icon}/>
+                <SvgPathIcon
+                  sx={{fontSize: '4.17em'}}
+                  color="primary"
+                  iconId={item.icon}
+                />
               ) : (
                 item.icon
               )}
@@ -203,7 +207,7 @@ export const BuilderComponentsDrawerComponent = forwardRef<any, ComponentsDrawer
     return (
       <StyledNavbarDrawer
         ref={ref}
-        AppBarProps={{color: 'primary'}}
+        AppBarProps={{color: 'secondary'}}
         anchor="bottom"
         appBarLeft={appBarLeft}
         appBarRight={appBarRight[type]}

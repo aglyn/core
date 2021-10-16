@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { LogLevel, LogLevelString } from '@aglyn/shared-util-logger'
+import { LogLevelString } from '@aglyn/shared-util-logger'
 import { getStaticField, yes } from '@aglyn/shared-util-tools'
 import {
   _commandControllers,
@@ -48,10 +48,10 @@ export interface AglynEffectOptions<T, U = unknown> extends Payload<U> {
 export interface AglynAppController extends AglynBaseModel {
   getName(): string
   getOptions(): AglynAppOptions
-  getDeleted(): boolean
-  setDeleted(deleted: boolean): this
-  getCommandsController(): AglynCommandController
+  isDeleted(): boolean
   getExtensionsController(): AglynExtensionController
+  getCommandsController(): AglynCommandController
+  getComponentsController(): AglynComponentsController
 
   effect(data: AglynEffectOptions<AglynModuleActionFlag>): this
 }
@@ -89,13 +89,12 @@ export class AglynAppController extends AglynBaseModel {
     super()
     this.#options = {...options}
     this.#name = this.#options.name ?? DEFAULT_ENTRY_NAME
-    this.#initialize()
-  }
-  #initialize() {
     this.setErrorFactory(AGLYN_ERROR)
     this.setEmitter(AGLYN_EMITTER)
     this.setLogger(AGLYN_LOGGER)
-
+    this.#setup()
+  }
+  #setup() {
     this.#commandController = new this.AglynAppCommandController({app: this})
     this.#componentsController = new this.AglynAppComponentsController({app: this})
 
@@ -111,23 +110,29 @@ export class AglynAppController extends AglynBaseModel {
   }
 
   public onInit = (): void => {
+    this.getLogger().debug(AglynAppEventFlag.APP_PRE_INIT, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_PRE_INIT, {app: this})
+
     this.#commandController.onInit()
     this.#componentsController.onInit()
 
     this.#extensionController.onInit()
 
-    this.getLogger().debug(AglynAppEventFlag.APP_LOADED, {appName: this.#name})
-    this.getEmitter().emit(AglynAppEventFlag.APP_LOADED, {appName: this.#name})
+    this.getLogger().debug(AglynAppEventFlag.APP_INITIALIZED, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_INITIALIZED, {app: this})
   }
   public onDestroy = (): void => {
+    this.getLogger().debug(AglynAppEventFlag.APP_PRE_DESTROY, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_PRE_DESTROY, {app: this})
+
     this.#extensionController.unloadAllExtensions()
     this.#extensionController.onDestroy()
 
     this.#commandController.onDestroy()
     this.#componentsController.onDestroy()
 
-    this.getLogger().debug(AglynAppEventFlag.APP_UNLOADED, {appName: this.#name})
-    this.getEmitter().emit(AglynAppEventFlag.APP_UNLOADED, {appName: this.#name})
+    this.getLogger().debug(AglynAppEventFlag.APP_DESTROYED, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_DESTROYED, {app: this})
   }
 
   public toString = (): string => {

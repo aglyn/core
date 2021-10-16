@@ -112,6 +112,30 @@ import { ShapeOptions, Spacing, SpacingOptions } from '@mui/system'
 export * as JSS from 'jss'
 export { default as jssRtl } from 'jss-rtl'
 
+interface ColorPropOverrides {
+  quaternary: true
+  tertiary: true
+}
+
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/ButtonGroup' {
+  interface ButtonGroupPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/ToggleButtonGroup' {
+  interface ToggleButtonGroupPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/Fab' {
+  interface FabPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/SvgIcon' {
+  interface SvgIconPropsColorOverrides extends ColorPropOverrides {}
+}
+declare module '@mui/material/AppBar' {
+  interface AppBarPropsColorOverrides extends ColorPropOverrides {}
+}
+
 declare module '@mui/material/styles' {
   /**
    * START EXAMPLE – MODULE AUGMENTATION ↓

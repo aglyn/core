@@ -54,5 +54,10 @@ export const consoleOverrides: ThemeOptions['components'] = {
       },
     },
   },
+  MuiTooltip: {
+    defaultProps: {
+      arrow: true
+    }
+  }
 }
 export default consoleOverrides

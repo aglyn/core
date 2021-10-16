@@ -60,9 +60,9 @@ export abstract class AglynBaseModel {
 
   protected constructor() {
     this.#created = Timestamp.now()
-    this.#initialize()
+    this.#setup()
   }
-  #initialize() {
+  #setup() {
   }
 
   public toString = (): string => {

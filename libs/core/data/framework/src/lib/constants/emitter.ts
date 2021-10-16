@@ -34,9 +34,11 @@ import { PayloadData } from '../types'
 
 export enum AglynAppEventFlag {
   APP_CREATED = 'event:app-created',
+  APP_PRE_INIT = 'event:app-pre-init',
+  APP_INITIALIZED = 'event:app-initialized',
+  APP_PRE_DESTROY = 'event:app-pre-destroy',
+  APP_DESTROYED = 'event:app-destroyed',
   BEFORE_DELETE_APP = 'event:before-delete-app',
-  APP_LOADED = 'event:app-loaded',
-  APP_UNLOADED = 'event:app-unloaded',
   APP_DELETED = 'event:app-deleted',
 
   REGISTERED_EXTENSION = 'event:registered-extension',
@@ -111,8 +113,10 @@ export type UnregisterBundlePayload = PayloadData<{
 
 export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmitterPayload> {
   [AglynAppEventFlag.APP_CREATED]: PayloadData<{ app: AglynAppController }>
-  [AglynAppEventFlag.APP_LOADED]: PayloadData<{ app: AglynAppController }>
-  [AglynAppEventFlag.APP_UNLOADED]: PayloadData<{ app: AglynAppController }>
+  [AglynAppEventFlag.APP_PRE_INIT]: PayloadData<{ app: AglynAppController }>
+  [AglynAppEventFlag.APP_INITIALIZED]: PayloadData<{ app: AglynAppController }>
+  [AglynAppEventFlag.APP_PRE_DESTROY]: PayloadData<{ app: AglynAppController }>
+  [AglynAppEventFlag.APP_DESTROYED]: PayloadData<{ app: AglynAppController }>
   [AglynAppEventFlag.BEFORE_DELETE_APP]: PayloadData<{ app: AglynAppController }>
   [AglynAppEventFlag.APP_DELETED]: PayloadData<{ appName: string }>
 

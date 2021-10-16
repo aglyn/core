@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-export * from './components/element-renderer.component'
-export * from './components/elements-renderer.component'
-export * from './components/canvas-renderer.component'
+import { getComponentSchema } from '@aglyn/core-data-framework'
+import type { AglynComponentSchema, GetComponentSchemaPayload } from '@aglyn/core-data-framework'
+import { useAglynAppContext } from '@aglyn/feature-renderer'
+import { useMemo } from 'react'
 
-export * from './contexts/aglyn-app-context'
-export * from './contexts/element-components-context'
-export * from './contexts/element-components-context-provider'
-export * from './contexts/elements-context-provider'
-export * from './contexts/elements-context'
-
-export { useAglynComponent } from './hooks/use-aglyn-component'
-export { useAglynComponentSchema } from './hooks/use-aglyn-component-schema'
+export function useAglynComponentSchema(payload: GetComponentSchemaPayload): AglynComponentSchema {
+  const {getApp} = useAglynAppContext()
+  const schema = getComponentSchema(getApp(), payload)
+  return useMemo(() => {
+    return schema
+  }, [schema])
+}
+export default useAglynComponentSchema

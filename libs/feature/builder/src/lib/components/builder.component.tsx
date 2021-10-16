@@ -22,13 +22,14 @@ import {
   ElementsContextProvider,
   ElementsContextProviderProps,
 } from '@aglyn/feature-renderer'
-import { builderTheme, consoleTheme, withTheme } from '@aglyn/shared-feature-themes'
+import { consoleTheme, withTheme } from '@aglyn/shared-feature-themes'
 import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
 import Box from '@mui/material/Box'
 import NoSsr from '@mui/material/NoSsr'
 import { forwardRef, Fragment } from 'react'
 import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
-import { SelectionContextProvider } from '../contexts/selection-context-provider'
+import HoverContextProvider from '../contexts/hover-context-provider'
+import SelectionContextProvider from '../contexts/selection-context-provider'
 import { BuilderCanvasRendererComponent } from './builder-canvas-renderer.component'
 import { BuilderToolbarComponent } from './builder-toolbar.component'
 
@@ -45,7 +46,6 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
   ref,
 ) {
   const {
-    component,
     elements,
     onUpdateElements,
     noSsr,
@@ -61,21 +61,18 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
           <ElementsContextProvider elements={elements} onUpdateElements={onUpdateElements}>
             {/*<SnackbarProvider maxSnack={3}>*/}
             <ConfirmationProviderComponent>
-              <SelectionContextProvider>
-                <ComponentsDrawerContextProvider>
-                  <Box
-                    ref={ref}
-                    component={component}
-                    id="aglyn:builder"
-                    {...rest}
-                  >
-                    <BuilderToolbarComponent id="aglyn:builder-toolbar">
-                      <BuilderCanvasRendererComponent/>
-                    </BuilderToolbarComponent>
+              <HoverContextProvider>
+                <SelectionContextProvider>
+                  <ComponentsDrawerContextProvider>
+                    <Box ref={ref} id="aglyn:builder" {...rest}>
+                      <BuilderToolbarComponent id="aglyn:builder-toolbar">
+                        <BuilderCanvasRendererComponent/>
+                      </BuilderToolbarComponent>
 
-                  </Box>
-                </ComponentsDrawerContextProvider>
-              </SelectionContextProvider>
+                    </Box>
+                  </ComponentsDrawerContextProvider>
+                </SelectionContextProvider>
+              </HoverContextProvider>
             </ConfirmationProviderComponent>
             {/*</SnackbarProvider>*/}
           </ElementsContextProvider>

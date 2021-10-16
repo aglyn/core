@@ -15,43 +15,42 @@
  * limitations under the License.
  */
 
-import { ElementType, Fragment, MouseEventHandler, ReactNode, useCallback, useState } from 'react'
-import { SelectionComponent } from '../components/selection.component'
 import {
   buildOptions,
   DEFAULT_OPTIONS,
-  SelectionContext,
-  SelectionOptions,
-} from './selection-context'
+  HoverContext,
+  HoverOptions,
+} from './hover-context'
+import { ElementType, Fragment, MouseEventHandler, ReactNode, useCallback, useState } from 'react'
+import { HoverComponent } from '../components/hover.component'
 
-
-export interface SelectionContextProviderProps {
-  defaultOptions?: SelectionOptions
+export interface HoverContextProviderProps {
+  defaultOptions?: HoverOptions
   children?: ReactNode
   component: ElementType<{
     open: boolean
-    options: SelectionOptions
+    options: HoverOptions
     onClose: MouseEventHandler<unknown>
     onCancel: MouseEventHandler<unknown>
     onConfirm: MouseEventHandler<unknown>
   }>
 }
 
-export function SelectionContextProvider(props: SelectionContextProviderProps) {
-  const {children, defaultOptions = {}, component: Component} = props
-  const [options, setOptions] = useState({...DEFAULT_OPTIONS, ...defaultOptions})
-  const [resolveReject, setResolveReject] = useState([])
-  const [resolve, reject] = resolveReject
+export function HoverContextProvider(props: HoverContextProviderProps) {
+  const { children, defaultOptions = {}, component: Component } = props
+  const [options, setOptions] = useState(()=>({ ...DEFAULT_OPTIONS, ...defaultOptions }))
+  const [resolveReject, setResolveReject] = useState(()=>[])
+  const open = resolveReject.length === 2
 
-  const select = useCallback(
-    (options: SelectionOptions) => {
-      const opts = {...options}
+  const hover = useCallback(
+    (options: HoverOptions) => {
+      const opts = { ...options }
       return new Promise((resolve, reject) => {
         setOptions(buildOptions(defaultOptions, opts))
         setResolveReject([resolve, reject])
       })
     },
-    [defaultOptions],
+    [defaultOptions]
   )
 
   const close = useCallback(() => {
@@ -59,22 +58,24 @@ export function SelectionContextProvider(props: SelectionContextProviderProps) {
   }, [])
 
   const cancel = useCallback(() => {
+    const [, reject] = resolveReject
     reject()
     close()
-  }, [reject, close])
+  }, [resolveReject])
 
   const confirm = useCallback(() => {
+    const [resolve] = resolveReject
     resolve()
     close()
-  }, [resolve, close])
+  }, [resolveReject])
 
   return (
     <Fragment>
-      <SelectionContext.Provider value={{select, close}}>
+      <HoverContext.Provider value={{ hover, close }}>
         {children}
-      </SelectionContext.Provider>
+      </HoverContext.Provider>
       <Component
-        open={resolveReject.length === 2}
+        open={open}
         options={options}
         onClose={close}
         onCancel={cancel}
@@ -83,8 +84,8 @@ export function SelectionContextProvider(props: SelectionContextProviderProps) {
     </Fragment>
   )
 }
-SelectionContextProvider.displayName = 'SelectionContextProvider'
-SelectionContextProvider.defaultProps = {
-  component: SelectionComponent,
+HoverContextProvider.displayName = 'HoverContextProvider'
+HoverContextProvider.defaultProps = {
+  component: HoverComponent,
 }
-export default SelectionContextProvider
+export default HoverContextProvider

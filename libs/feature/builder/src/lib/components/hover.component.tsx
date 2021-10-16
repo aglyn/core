@@ -23,7 +23,8 @@ import { DialogContentTextProps } from '@mui/material/DialogContentText'
 import { DialogTitleProps } from '@mui/material/DialogTitle'
 import { forwardRef, Fragment, HTMLAttributes } from 'react'
 
-export interface SelectionComponentOptions {
+
+export interface HoverComponentOptions {
   cancellationText?: ButtonProps['children']
   confirmationText?: ButtonProps['children']
   cancellationButtonProps?: Partial<ButtonProps>
@@ -35,42 +36,46 @@ export interface SelectionComponentOptions {
   elementData?: AglynComponentElementData
 }
 
-export interface SelectionComponentProps extends HTMLAttributes<HTMLDivElement> {
-  options?: SelectionComponentOptions
+export interface HoverComponentProps extends HTMLAttributes<HTMLDivElement> {
+  options?: HoverComponentOptions
   open?: boolean
   onConfirm?: ButtonProps['onClick']
   onCancel?: ButtonProps['onClick']
   onClose?: ButtonProps['onClick']
 }
 
-const SelectionRoot = styled('div', {name: 'SelectionRoot'})(({ theme }) => ({
+const HoverRoot = styled('div', {name: 'HoverRoot'})(({theme}) => ({
   outlineWidth: 2,
-  outlineOffset: -2,
-  outlineColor: theme.palette.quaternary.main,
-  outlineStyle: 'solid',
-  pointerEvents: 'none',
+  outlineOffset: 0,
+  outlineColor: theme.palette.secondary.light,
+  outlineStyle: 'dashed',
   position: 'absolute',
+  pointerEvents: 'none',
+  transition: theme.transitions.create(['width', 'height', 'left', 'right', 'top', 'bottom'], {
+    duration: theme.transitions.duration.short,
+    easing: theme.transitions.easing.easeInOut,
+  }),
 }))
 
-export const SelectionComponent = forwardRef<any, SelectionComponentProps>(function RefRenderFn(
+export const HoverComponent = forwardRef<any, HoverComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { open, options, onCancel, onConfirm, onClose, children, ...rest } = props
+  const {open, options, onCancel, onConfirm, onClose, children, ...rest} = props
   return (
     <Fragment>
       {open ? (
-        <SelectionRoot ref={ref} {...rest} style={{ ...options.clientRect }}>
+        <HoverRoot ref={ref} {...rest} style={{...options.clientRect}}>
           {children}
-        </SelectionRoot>
+        </HoverRoot>
       ) : null}
     </Fragment>
   )
 })
 
-SelectionComponent.displayName = 'SelectionComponent'
-SelectionComponent.defaultProps = {
+HoverComponent.displayName = 'HoverComponent'
+HoverComponent.defaultProps = {
   options: {},
 }
 
-export default SelectionComponent
+export default HoverComponent

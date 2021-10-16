@@ -25,32 +25,25 @@ import AppBar, { AppBarProps } from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import Drawer from '@mui/material/Drawer'
-import Fab from '@mui/material/Fab'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Toolbar from '@mui/material/Toolbar'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { forwardRef, useCallback } from 'react'
 import { useElementDrawerContext } from '../contexts/element-drawer-context'
 
 
-const StyledFab = styled(Fab, {
-  name: 'FabButton',
-})({
-  position: 'absolute',
-  zIndex: 1,
-  bottom: -30,
-  left: 0,
-  right: 0,
-  margin: '0 auto',
+const StyledAppBar = styled(AppBar, {name: 'AppBar'})({
+  top: 0,
 })
 
-const StyledAppBar = styled(AppBar, {
-  name: 'AppBar',
-})({
-  top: 0,
+const StyledWrapper = styled('div', {name: 'StyledWrapper'})({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100vh',
 })
 
 const drawerWidth = 240
@@ -65,7 +58,7 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
     const {elements, updateElements} = useElementsContext()
     const handleFabClick = useCallback(async () => {
       const option = await elementDrawer({
-        title: 'Add New Elements',
+        title: 'Add New Element',
       })
       .then((res: any) => {
         if (res?.option?.type === 'selection') {
@@ -88,15 +81,12 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
     }, [elementDrawer, elements, updateElements])
 
     return (
-      <Box sx={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
+      <StyledWrapper ref={ref} {...rest}>
 
         <StyledAppBar
-          ref={ref}
           position="static"
-          color="primary"
+          color="secondary"
           elevation={0}
-          sx={{zIndex: (theme) => theme.zIndex.drawer + 1}}
-          {...rest}
         >
           <Toolbar>
             <Typography variant="h4">
@@ -107,63 +97,60 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
         </StyledAppBar>
 
         <StyledAppBar
-          ref={ref}
           position="static"
           color="default"
           elevation={0}
-          sx={{zIndex: (theme) => theme.zIndex.drawer + 1}}
-          {...rest}
         >
           <Toolbar variant="dense">
 
-            <IconButton
-              aria-haspopup="menu"
-              aria-label="add"
-              edge="start"
-              onClick={handleFabClick}
-            >
-              <SvgPathIcon iconId={'add'}/>
-            </IconButton>
+            <Tooltip title={'Add element'}>
+              <IconButton
+                aria-haspopup="menu"
+                aria-label="add"
+                edge="start"
+                onClick={handleFabClick}
+              >
+                <SvgPathIcon fontSize="small" iconId={'add'}/>
+              </IconButton>
+            </Tooltip>
 
             <Box sx={{mx: 0.25}}/>
 
             <Stack direction="row" spacing={0.25}>
-              <IconButton
-                aria-label="undo action"
-              >
-                <SvgPathIcon iconId={'undo'}/>
-              </IconButton>
-              <IconButton
-                aria-label="redo action"
-              >
-                <SvgPathIcon iconId={'redo'}/>
-              </IconButton>
-              <IconButton
-                aria-label="delete element"
-              >
-                <SvgPathIcon iconId={'delete'}/>
-              </IconButton>
-              <IconButton
-                aria-label="paste element"
-              >
-                <SvgPathIcon iconId={'content-paste'}/>
-              </IconButton>
-              <IconButton
-                aria-label="copy element"
-              >
-                <SvgPathIcon iconId={'content-copy'}/>
-              </IconButton>
+              <Tooltip title={'Undo (⌘Z)'}>
+                <span>
+                <IconButton
+                  aria-label="undo action"
+                >
+                  <SvgPathIcon fontSize="small" iconId={'undo'}/>
+                </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip title={'Redo (⌘Y)'}>
+                <span>
+                <IconButton
+                  aria-label="redo action"
+                  disabled
+                >
+                  <SvgPathIcon fontSize="small" iconId={'redo'}/>
+                </IconButton>
+                </span>
+              </Tooltip>
             </Stack>
 
             <Box sx={{flexGrow: 1}}/>
 
             <Stack direction="row" spacing={1}>
-              <ToggleButtonGroup size="small" value="1" exclusive>
+              <ToggleButtonGroup size="small" value={['1']} exclusive>
                 <ToggleButton value="1">
-                  <SvgPathIcon iconId={'cursor-default'}/>
+                  <Tooltip title={'Direct selection'}>
+                    <SvgPathIcon fontSize="inherit" iconId={'cursor-default'}/>
+                  </Tooltip>
                 </ToggleButton>
                 <ToggleButton value="2">
-                  <SvgPathIcon iconId={'cursor-move'}/>
+                  <Tooltip title={'Rearrange'}>
+                    <SvgPathIcon fontSize="inherit" iconId={'cursor-move'}/>
+                  </Tooltip>
                 </ToggleButton>
               </ToggleButtonGroup>
             </Stack>
@@ -172,15 +159,21 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
 
             <Stack direction="row" spacing={1}>
               <ToggleButtonGroup size="small" value={['1']}>
-                <ToggleButton value="1">
-                  <SvgPathIcon iconId={'dock-left'}/>
-                </ToggleButton>
-                <ToggleButton value="2">
-                  <SvgPathIcon iconId={'dock-bottom'}/>
-                </ToggleButton>
-                <ToggleButton value="3">
-                  <SvgPathIcon iconId={'dock-right'}/>
-                </ToggleButton>
+                <Tooltip title={'Left panel'}>
+                  <ToggleButton value="1">
+                    <SvgPathIcon fontSize="inherit" iconId={'dock-left'}/>
+                  </ToggleButton>
+                </Tooltip>
+                <Tooltip title={'Bottom panel'}>
+                  <ToggleButton value="2">
+                    <SvgPathIcon fontSize="inherit" iconId={'dock-bottom'}/>
+                  </ToggleButton>
+                </Tooltip>
+                <Tooltip title={'Right panel'}>
+                  <ToggleButton value="3">
+                    <SvgPathIcon fontSize="inherit" iconId={'dock-right'}/>
+                  </ToggleButton>
+                </Tooltip>
               </ToggleButtonGroup>
             </Stack>
 
@@ -195,6 +188,7 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
             sx={{
               width: drawerWidth,
               flexShrink: 0,
+              zIndex: (theme) => theme.zIndex.appBar,
               [`& .MuiDrawer-paper`]: {
                 width: drawerWidth,
                 boxSizing: 'border-box',
@@ -226,14 +220,9 @@ export const BuilderToolbarComponent = forwardRef<any, BuilderToolbarComponentPr
             </Box>
           </Drawer>
 
-          <Box sx={{flexGrow: 1, p: 3}}>
-            <Box sx={{bgcolor: 'backgrounds.paper'}}>
-
-            </Box>
-            {children}
-          </Box>
+          {children}
         </Box>
-      </Box>
+      </StyledWrapper>
     )
   },
 )

@@ -64,9 +64,9 @@ export class AglynExtensionController extends AglynBaseModel {
     super()
     const {app} = props
     this.app = app
-    this.#initialize()
+    this.#setup()
   }
-  #initialize() {
+  #setup() {
     this.setErrorFactory(this.app.getErrorFactory())
     this.setEmitter(this.app.getEmitter())
     this.setLogger(this.app.getLogger())

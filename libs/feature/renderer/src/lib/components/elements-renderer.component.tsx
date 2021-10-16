@@ -17,7 +17,7 @@
 
 import { AglynComponentElementData } from '@aglyn/core-data-framework'
 import { OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
-import { forwardRef, Fragment } from 'react'
+import { forwardRef, Fragment, memo } from 'react'
 import {
   ElementRendererComponent,
   ElementRendererComponentProps,
@@ -26,31 +26,39 @@ import {
 
 export interface ElementsComponentProps extends OverrideableComponentProps {
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
-  children?: AglynComponentElementData[]
+  elements?: AglynComponentElementData[]
 }
 
-export const ElementsRendererComponent = forwardRef<any, ElementsComponentProps>(
+const ElementsRendererComponentRaw = forwardRef<any, ElementsComponentProps>(
   function RefRenderFn(props, ref) {
-    const {component: Component, elementRendererComponent, children, ...rest} = props
+    const {
+      component: Component,
+      elementRendererComponent,
+      elements,
+      children,
+      ...rest
+    } = props
     const ElementRendererComponentProp = elementRendererComponent || ElementRendererComponent
     return (
       <Component ref={ref} {...rest}>
-        {children.map((data, i) => (
+        {elements.map((data, i) => (
           <ElementRendererComponentProp
             key={data?.$id ?? i}
             elementData={data}
             elementRendererComponent={ElementRendererComponentProp}
           />
         ))}
+        {children}
       </Component>
     )
   },
 )
 
-ElementsRendererComponent.displayName = 'ElementsComponent'
-ElementsRendererComponent.defaultProps = {
+ElementsRendererComponentRaw.displayName = 'ElementsComponent'
+ElementsRendererComponentRaw.defaultProps = {
   component: Fragment,
   children: [],
 }
 
+export const ElementsRendererComponent = memo(ElementsRendererComponentRaw)
 export default ElementsRendererComponent

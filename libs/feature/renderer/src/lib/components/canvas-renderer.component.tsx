@@ -18,6 +18,7 @@
 import { AglynComponentElementData } from '@aglyn/core-data-framework'
 import { OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
 import { forwardRef, HTMLAttributes } from 'react'
+import Box from '@mui/material/Box'
 import {
   ElementRendererComponent,
   ElementRendererComponentProps,
@@ -32,22 +33,23 @@ export interface CanvasRendererComponentProps
   elementRendererComponent?: ElementRendererComponentProps['elementRendererComponent']
 }
 
-export const CanvasRendererComponent = forwardRef<HTMLElement, CanvasRendererComponentProps>(
+export const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {
-      component: Component,
       elementRendererComponent: elementRendererComponentProp,
       elements,
+      children,
       ...rest
     } = props
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
     return (
-      <Component ref={ref} {...rest}>
+      <Box ref={ref} {...rest}>
         <ElementsRendererComponent
-          children={elements}
+          elements={elements}
           elementRendererComponent={elementRendererComponent}
         />
-      </Component>
+        {children}
+      </Box>
     )
   },
 )

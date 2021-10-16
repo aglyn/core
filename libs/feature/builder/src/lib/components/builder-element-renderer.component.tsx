@@ -15,64 +15,67 @@
  * limitations under the License.
  */
 
-import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { ElementRendererComponent, ElementRendererComponentProps } from '@aglyn/feature-renderer'
-import { forwardRef, useCallback, useRef, useState } from 'react'
+import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { forwardRef, memo, useCallback, useRef } from 'react'
+import { useHoverContext } from '../contexts/hover-context'
 import { useSelectionContext } from '../contexts/selection-context'
+
 
 export interface BuilderElementRendererComponentProps extends ElementRendererComponentProps {
   [prop: string]: any
 }
 
-export const BuilderElementRendererComponent = forwardRef<
-  any,
-  BuilderElementRendererComponentProps
->(function RefRenderFn(props, ref) {
-  const { elementData, elementRendererComponent, ...rest } = props
-  const { confirm } = useConfirmationContext()
-  const localRef = useRef(ref)
-  const elemRef = useCombinedRefs(localRef, ref)
-  const { select } = useSelectionContext()
-  const [entered, setEntered] = useState(null)
-  const [clientRect, setRect] = useState(null)
+const BuilderElementRendererComponentRaw = forwardRef<any,
+  BuilderElementRendererComponentProps>(function RefRenderFn(props, ref) {
+  const {elementData, elementRendererComponent, ...rest} = props
+  const {hover, close: closeHover} = useHoverContext()
+  const {select} = useSelectionContext()
+  const {confirm} = useConfirmationContext()
 
   const handleMouseEnter = useCallback((e) => {
+    e.stopPropagation()
     const target = e.target
-    if (target && target === localRef.current) setEntered(target)
-    else setEntered(null)
-    setRect(target?.getBoundingClientRect?.().toJSON?.())
-  }, [])
+    const clientRect = target?.getBoundingClientRect?.().toJSON?.()
+    if (target && clientRect) {
+      hover({clientRect, elementData})
+    }
+  }, [elementData])
 
   const handleMouseLeave = useCallback((e) => {
-    setEntered(null)
+    e.stopPropagation()
+    closeHover()
   }, [])
 
   const handleClick = useCallback(
     (e) => {
       e.stopPropagation()
-      select({ clientRect, elementData })
-      confirm({ title: 'clicked' })
+      const target = e.target
+      const clientRect = target?.getBoundingClientRect?.().toJSON?.()
+      select({clientRect, elementData})
+      confirm({title: 'clicked'})
     },
-    [clientRect, elementData]
+    [elementData],
   )
 
   return (
     <ElementRendererComponent
-      ref={elemRef}
+      ref={ref}
       elementRendererComponent={elementRendererComponent ?? BuilderElementRendererComponent}
       elementData={elementData}
       data-aglyn-element-id={elementData?.$id}
       data-aglyn-component-id={elementData?.componentId}
       data-aglyn-bundle-id={elementData?.bundleId}
+      {...rest}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      {...rest}
     />
   )
 })
 
-BuilderElementRendererComponent.displayName = 'BuilderElementRendererComponent'
-BuilderElementRendererComponent.defaultProps = {}
+BuilderElementRendererComponentRaw.displayName = 'BuilderElementRendererComponent'
+BuilderElementRendererComponentRaw.defaultProps = {}
 
+export const BuilderElementRendererComponent = memo(BuilderElementRendererComponentRaw)
 export default BuilderElementRendererComponent

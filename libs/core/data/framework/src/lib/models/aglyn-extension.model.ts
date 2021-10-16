@@ -75,9 +75,9 @@ export abstract class AglynExtension<T = any> extends AglynBaseModel {
     super()
     this.#options = {...options}
     this.app = app
-    this.#initialize()
+    this.#setup()
   }
-  #initialize() {
+  #setup() {
     this.setErrorFactory(this.app.getErrorFactory())
     this.setEmitter(this.app.getEmitter())
     this.setLogger(this.app.getLogger())

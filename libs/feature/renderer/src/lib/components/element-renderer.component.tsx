@@ -15,17 +15,15 @@
  * limitations under the License.
  */
 
-import {
-  AglynComponentElementData,
-  getComponent,
-  getComponentSchema,
-} from '@aglyn/core-data-framework'
+import { AglynComponentElementData } from '@aglyn/core-data-framework'
 import { AnyProps } from '@aglyn/shared-data-types'
 import { ReactIs } from '@aglyn/shared-ui-jsx'
-import { _isArr, _isArrEmpty, _isFnT } from '@aglyn/shared-util-guards'
+import { _isArrEmpty, _isFnT } from '@aglyn/shared-util-guards'
 import { yes } from '@aglyn/shared-util-tools'
-import { ComponentType, forwardRef } from 'react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import { deepEqual } from '@aglyn/shared-util-vendor'
+import { ComponentType, forwardRef, memo } from 'react'
+import useAglynComponent from '../hooks/use-aglyn-component'
+import useAglynComponentSchema from '../hooks/use-aglyn-component-schema'
 import { ElementsRendererComponent } from './elements-renderer.component'
 
 
@@ -34,40 +32,51 @@ export interface ElementRendererComponentProps extends AnyProps {
   elementRendererComponent?: ComponentType<ElementRendererComponentProps>
 }
 
-export const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
-  function RefRenderFn(props, ref) {
-    const {elementData, elementRendererComponent: elementRendererComponentProp, ...rest} = props
+const ElementRendererComponentRaw = forwardRef<any, ElementRendererComponentProps>(
+  function RefRenderFn(_props, ref) {
+    const {
+      elementData,
+      elementRendererComponent: elementRendererComponentProp,
+      children: childrenProp,
+      ...rest
+    } = _props
 
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
-    const {getApp} = useAglynAppContext()
-    const {$id, componentId, bundleId, elements, props: dataProps} = elementData
-    const component = getComponent(getApp(), {componentId, bundleId})
-    const schema = getComponentSchema(getApp(), {componentId, bundleId})
-    const Component = ReactIs.isValidElementType(component) ? component : 'div'
+    const {componentId, bundleId} = elementData
+    const Component = useAglynComponent({componentId, bundleId})
+    const schema = useAglynComponentSchema({componentId, bundleId})
     const resolveProps = schema?.renderFlags?.resolveProps
-    const noRef = yes(schema?.renderFlags?.elementRef?.disable)
-    const refKey = yes(schema?.renderFlags?.elementRef?.innerRef) ? 'innerRef' : 'ref'
-    const refProps = !noRef ? {[refKey]: ref} : undefined
-    const {children, ...elemProps}: AnyProps = {
-      ...(_isFnT(resolveProps)
-        ? (resolveProps.call(elementData, dataProps) as AnyProps)
-        : dataProps),
-    }
+    const {children, ...elemProps}: AnyProps = (_isFnT(resolveProps)
+      ? resolveProps.call(undefined, elementData)
+      : elementData.props) || {}
+    const innerRef = yes(
+      !schema?.renderFlags?.elementRef?.disable
+      && schema?.renderFlags?.elementRef?.innerRef,
+    ) ? {innerRef: ref} : {}
 
-    return (
-      <Component {...refProps} {...elemProps} {...rest} key={$id}>
-        {_isArr(elements) && !_isArrEmpty(elements) ? (
+    return ReactIs.isValidElementType(Component) ? (
+      <Component ref={ref} {...elemProps} {...innerRef} {...rest}>
+        {!_isArrEmpty(elementData.elements || []) ? (
           <ElementsRendererComponent
             elementRendererComponent={elementRendererComponent}
-            children={elements}
+            elements={elementData.elements}
           />
         ) : null}
         {children}
+        {childrenProp}
       </Component>
-    )
+    ) : (<>'Error loading element component'</>)
   },
 )
 
-ElementRendererComponent.displayName = 'ElementRendererComponent'
+ElementRendererComponentRaw.displayName = 'ElementRendererComponent'
+ElementRendererComponentRaw.defaultProps = {
+  elementData: {},
+  children: null,
+}
+
+export const ElementRendererComponent = memo(ElementRendererComponentRaw, (prev, next) => {
+  return deepEqual(next.elementData, prev.elementData)
+})
 
 export default ElementRendererComponent
