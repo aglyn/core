@@ -27,7 +27,7 @@ import { AGLYN_ERROR } from '../constants/error'
 import { AGLYN_LOGGER } from '../constants/logger'
 import { TYPE_OF } from '../constants/symbol'
 import { AglynBaseModel } from '../models/aglyn-base.model'
-import { AglynNamed, AglynPlatform, AglynVersion, Payload } from '../types'
+import { AglynNamed, Payload } from '../types'
 import { AglynCommandController } from './aglyn-command.controller'
 import { AglynComponentsController } from './aglyn-components.controller'
 import { AglynExtensionController, AglynExtensionLoader } from './aglyn-extension.controller'
@@ -72,12 +72,6 @@ export class AglynAppController extends AglynBaseModel {
 
   public get [TYPE_OF]() {
     return getStaticField(TYPE_OF, this)
-  }
-  public get platform(): AglynPlatform {
-    return getStaticField('platform', this)
-  }
-  public get version(): AglynVersion {
-    return getStaticField('version', this)
   }
   public get extensions(): AglynExtensionController {
     return this.#extensionController

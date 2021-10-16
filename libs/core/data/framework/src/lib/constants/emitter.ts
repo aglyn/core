@@ -20,7 +20,7 @@ import { Dictionary } from '@aglyn/shared-data-types'
 import { EmitterFn } from '@aglyn/shared-util-emitter'
 import { Emitter } from 'mitt'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import { AglynCommandHandler } from '../controllers/aglyn-command.controller'
+import { AglynCommandHandler, AglynCommandResolver } from '../controllers/aglyn-command.controller'
 import {
   BundleId,
   ComponentId,
@@ -44,9 +44,12 @@ export enum AglynAppEventFlag {
   LOADED_EXTENSION = 'event:loaded-extension',
   UNLOADED_EXTENSION = 'event:unloaded-extension',
 
-  REGISTERED_COMMAND = 'event:registered-command',
-  UNREGISTERED_COMMAND = 'event:unregistered-command',
-  TRIGGERED_COMMAND = 'event:triggered-command',
+  TRIGGERED_COMMAND_RESOLVER = 'event:trigger-command-resolver',
+  REGISTERED_COMMAND_RESOLVER = 'event:registered-command-resolver',
+  UNREGISTERED_COMMAND_RESOLVER = 'event:unregistered-command-resolver',
+  TRIGGERED_COMMAND_LISTENER = 'event:triggered-command-listener',
+  REGISTERED_COMMAND_LISTENER = 'event:registered-command-listener',
+  UNREGISTERED_COMMAND_LISTENER = 'event:unregistered-command-listener',
 
   REGISTERED_COMPONENT = 'event:registered-component',
   UNREGISTERED_COMPONENT = 'event:unregistered-component',
@@ -60,8 +63,10 @@ export enum AglynModuleActionFlag {
   EXTENSION_LOAD = 'module:extension:load',
   EXTENSION_UNLOAD = 'module:extension:unload',
 
-  COMMAND_ACTION_REGISTER = 'module:command:register',
-  COMMAND_ACTION_UNREGISTER = 'module:command:unregister',
+  COMMAND_ACTION_REGISTER_RESOLVER = 'module:command:register-resolver',
+  COMMAND_ACTION_UNREGISTER_RESOLVER = 'module:command:unregister-resolver',
+  COMMAND_ACTION_REGISTER_LISTENER = 'module:command:register-listener',
+  COMMAND_ACTION_UNREGISTER_LISTENER = 'module:command:unregister-listener',
   COMMAND_TRIGGER = 'module:command:trigger',
 
   COMPONENT_GET = 'module:components:get-component',
@@ -116,9 +121,12 @@ export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmi
   [AglynAppEventFlag.LOADED_EXTENSION]: PayloadData<{ extension: AglynExtension }>
   [AglynAppEventFlag.UNLOADED_EXTENSION]: PayloadData<{ extension: AglynExtension }>
 
-  [AglynAppEventFlag.REGISTERED_COMMAND]: PayloadData<{ commandId: string }>
-  [AglynAppEventFlag.UNREGISTERED_COMMAND]: PayloadData<{ commandId: string }>
-  [AglynAppEventFlag.TRIGGERED_COMMAND]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.TRIGGERED_COMMAND_RESOLVER]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.REGISTERED_COMMAND_RESOLVER]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.UNREGISTERED_COMMAND_RESOLVER]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.TRIGGERED_COMMAND_LISTENER]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.REGISTERED_COMMAND_LISTENER]: PayloadData<{ commandId: string }>
+  [AglynAppEventFlag.UNREGISTERED_COMMAND_LISTENER]: PayloadData<{ commandId: string }>
 
   [AglynAppEventFlag.REGISTERED_COMPONENT]: PayloadData<{ componentId: ComponentId, bundleId?: BundleId }>
   [AglynAppEventFlag.UNREGISTERED_COMPONENT]: PayloadData<{ componentId: ComponentId, bundleId?: BundleId }>
@@ -132,9 +140,11 @@ export interface AglynModuleActionPayload extends Record<AglynModuleActionFlag, 
   [AglynModuleActionFlag.EXTENSION_LOAD]: PayloadData<{ name: string }>
   [AglynModuleActionFlag.EXTENSION_UNLOAD]: PayloadData<{ name: string }>
 
-  [AglynModuleActionFlag.COMMAND_ACTION_REGISTER]: PayloadData<{ handler: AglynCommandHandler }>
-  [AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER]: PayloadData<{ handler: AglynCommandHandler }>
-  [AglynModuleActionFlag.COMMAND_TRIGGER]: PayloadData<{ commandId: string }>
+  [AglynModuleActionFlag.COMMAND_ACTION_REGISTER_RESOLVER]: PayloadData<{ handler: AglynCommandResolver }>
+  [AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_RESOLVER]: PayloadData<{ handler: AglynCommandResolver }>
+  [AglynModuleActionFlag.COMMAND_ACTION_REGISTER_LISTENER]: PayloadData<{ handler: AglynCommandHandler }>
+  [AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_LISTENER]: PayloadData<{ handler: AglynCommandHandler }>
+  [AglynModuleActionFlag.COMMAND_TRIGGER]: PayloadData<{ commandId: string } & Dictionary>
 
   [AglynModuleActionFlag.COMPONENT_GET]: GetComponentPayload
   [AglynModuleActionFlag.COMPONENTS_GET]: GetComponentsPayload

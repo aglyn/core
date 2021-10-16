@@ -16,12 +16,7 @@
  */
 
 import { Dictionary, Implements } from '@aglyn/shared-data-types'
-import { Logger } from '@aglyn/shared-util-logger'
-import { Platform } from '@aglyn/shared-util-vendor'
-import { Emitter } from 'mitt'
-import { AglynCommandFlag } from './constants/enums'
 import { SYMBOL_TYPE, TYPE_KIND, TYPE_OF } from './constants/symbol'
-import type { AglynAppController } from './controllers/aglyn-app.controller'
 import type { AglynExtension } from './models/aglyn-extension.model'
 
 
@@ -29,16 +24,8 @@ export type Payload<T = any> = { payload: T }
 export type PayloadData<T extends Dictionary = any> = T
 export type PayloadParams<T extends any> = { [K in keyof T]: T[K] }
 
-export type AglynPlatform = Platform
-export type AglynVersion = string
 export type AglynExtensionMap = Map<string, AglynExtension>
 export type AglynAppModule<T extends AglynUniqueId = any> = T
-export type AglynLogger = Logger
-export type AglynCommander = Emitter<AglynCommandParams>
-
-export type AglynCommandParams = {
-  [P in string | '*' | keyof AglynCommandFlag]: PayloadData<{ app: AglynAppController }>
-}
 
 export type AglynUniqueId<T extends boolean = false> = T extends boolean
   ? T extends true
