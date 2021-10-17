@@ -20,40 +20,48 @@ import { _isFnT } from '@aglyn/shared-util-guards'
 import { Mitt } from '@aglyn/shared-util-vendor'
 import { Emitter } from 'mitt'
 import {
+  AglynAppEffectFlag,
   AglynAppEventFlag,
-  AglynModuleActionFlag,
   AglynModuleActionPayload,
 } from '../constants/emitter'
-import { AglynCommandFlag } from '../constants/enums'
-import { COMMAND_TYPE, MODULE_TYPE } from '../constants/symbol'
+import { COMMAND_LISTENER_TYPE, COMMAND_RESOLVER_TYPE, MODULE_TYPE } from '../constants/symbol'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynBaseModel } from '../models/aglyn-base.model'
-import { AglynTypeFields, AglynUniqueId, PayloadData } from '../types'
+import { AglynTypeFields, PayloadData } from '../types'
+import { CommandUId } from './aglyn-components.controller'
 
 
 const TAG = 'AglynCommandController'
 
-export type AglynCommandTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMMAND_TYPE>
+export type AglynCommandResolverTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMMAND_RESOLVER_TYPE>
+export type AglynCommandListenerTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMMAND_LISTENER_TYPE>
 
 export type AglynCommander = Emitter<AglynCommandParams>
-export type AglynCommandParams = {
-  [P in string | '*' | keyof AglynCommandFlag]: PayloadData<Dictionary>
+
+export enum AglynCommandFlag {
+  ANY = '*',
 }
 
-export interface AglynCommandResolver extends AglynUniqueId, AglynCommandTypeFields {
+export type AglynCommandParams = {
+  [P in CommandUId | '*' | keyof AglynCommandFlag]: PayloadData<Dictionary>
+}
+
+export interface AglynCommandResolver extends AglynCommandResolverTypeFields {
+  commandId: CommandUId
   (data: Dictionary): any
 }
 
-export interface AglynCommandHandler extends AglynUniqueId, AglynCommandTypeFields {
-  (data: { data: Dictionary, resolved: Dictionary }): void
+export interface AglynCommandListener extends AglynCommandListenerTypeFields {
+  commandId: CommandUId
+  (data: { request: Dictionary, response: Dictionary }): void
 }
 
 export interface AglynCommandController extends AglynBaseModel {
-  setResolver(data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_REGISTER_RESOLVER]): void
-  onResolve(data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_REGISTER_LISTENER]): void
-  executeCommand(data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_TRIGGER]): void
-  unregisterListener(data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_LISTENER]): void
-  unregisterResolver(data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_RESOLVER]): void
+  setResolver(data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_REGISTER_RESOLVER]): void
+  onResolve(data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_REGISTER_LISTENER]): void
+  trigger(data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_TRIGGER]): void
+  unregisterListener(data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_LISTENER]): void
+  unregisterResolver(data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_RESOLVER]): void
 }
 
 export class AglynCommandController extends AglynBaseModel {
@@ -62,7 +70,14 @@ export class AglynCommandController extends AglynBaseModel {
 
   protected app: AglynAppController
   #commander: AglynCommander = Mitt()
-  #resolvers: Dictionary<AglynCommandResolver> = {}
+  #resolvers: Map<CommandUId, AglynCommandResolver> = new Map()
+
+  public get commander(): AglynCommander {
+    return this.#commander
+  }
+  public get resolvers(): Map<CommandUId, AglynCommandResolver> {
+    return this.#resolvers
+  }
 
   constructor(props: { app: AglynAppController }) {
     super()
@@ -93,29 +108,26 @@ export class AglynCommandController extends AglynBaseModel {
     }
   }
 
-  public getCommander = (): AglynCommander => {
-    return this.#commander
-  }
   public setResolver = (
-    data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_REGISTER_RESOLVER],
+    data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_REGISTER_RESOLVER],
   ): void => {
-    const {handler} = data
-    const commandId = handler?.$id
-    this.#resolvers[commandId] = handler
+    const {resolver} = data
+    const commandId = resolver?.commandId
+    this.#resolvers[commandId] = resolver
     this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMMAND_RESOLVER, {commandId})
     this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMMAND_RESOLVER, {commandId})
   }
   public onResolve = (
-    data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_REGISTER_LISTENER],
+    data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_REGISTER_LISTENER],
   ): void => {
-    const {handler} = data
-    const commandId = handler?.$id
-    this.#commander.on(commandId, handler)
+    const {listener} = data
+    const commandId = listener?.commandId
+    this.#commander.on(commandId, listener)
     this.getLogger().debug(AglynAppEventFlag.REGISTERED_COMMAND_LISTENER, {commandId})
     this.getEmitter().emit(AglynAppEventFlag.REGISTERED_COMMAND_LISTENER, {commandId})
   }
-  public executeCommand = (
-    data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_TRIGGER],
+  public trigger = (
+    data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_TRIGGER],
   ): void => {
     const {commandId} = data
     const resolver = this.#resolvers[commandId]
@@ -130,31 +142,31 @@ export class AglynCommandController extends AglynBaseModel {
     }
   }
   public unregisterListener = (
-    data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_LISTENER],
+    data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_LISTENER],
   ): void => {
-    const {handler} = data
-    const commandId = handler?.$id
-    this.#commander.off(commandId, handler)
+    const {listener} = data
+    const commandId = listener?.commandId
+    this.#commander.off(commandId, listener)
     this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMMAND_LISTENER, {commandId})
     this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMMAND_LISTENER, {commandId})
   }
   public unregisterResolver = (
-    data: AglynModuleActionPayload[AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_RESOLVER],
+    data: AglynModuleActionPayload[AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_RESOLVER],
   ): void => {
-    const {handler} = data
-    const commandId = handler?.$id
+    const {commandId: cId, resolver} = data
+    const commandId = resolver?.commandId || cId
     delete this.#resolvers[commandId]
     this.getLogger().debug(AglynAppEventFlag.UNREGISTERED_COMMAND_RESOLVER, {commandId})
     this.getEmitter().emit(AglynAppEventFlag.UNREGISTERED_COMMAND_RESOLVER, {commandId})
   }
 
 
-  private listeners: [AglynModuleActionFlag, (...args: any[]) => unknown][] = [
-    [AglynModuleActionFlag.COMMAND_ACTION_REGISTER_RESOLVER, this.setResolver],
-    [AglynModuleActionFlag.COMMAND_ACTION_REGISTER_LISTENER, this.onResolve],
-    [AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_RESOLVER, this.unregisterResolver],
-    [AglynModuleActionFlag.COMMAND_ACTION_UNREGISTER_LISTENER, this.unregisterListener],
-    [AglynModuleActionFlag.COMMAND_TRIGGER, this.executeCommand],
+  private listeners: [AglynAppEffectFlag, (...args: any[]) => unknown][] = [
+    [AglynAppEffectFlag.COMMAND_ACTION_REGISTER_RESOLVER, this.setResolver],
+    [AglynAppEffectFlag.COMMAND_ACTION_REGISTER_LISTENER, this.onResolve],
+    [AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_RESOLVER, this.unregisterResolver],
+    [AglynAppEffectFlag.COMMAND_ACTION_UNREGISTER_LISTENER, this.unregisterListener],
+    [AglynAppEffectFlag.COMMAND_TRIGGER, this.trigger],
   ]
 }
 

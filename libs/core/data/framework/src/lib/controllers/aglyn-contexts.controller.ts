@@ -14,3 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { Dictionary } from '@aglyn/shared-data-types'
+import AglynBaseModel from '../models/aglyn-base.model'
+
+
+export type AglynContextType<T = any> = Dictionary<T> | Array<T>
+
+export interface AglynContextsController extends AglynBaseModel {
+  getContext<T>(props: {name: string}): AglynContextType<T>
+  setContext<T>(props: {name: string, data: AglynContextType<T>}): this
+  deleteContext(props: {name: string}): this
+}

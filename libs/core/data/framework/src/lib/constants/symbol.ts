@@ -45,18 +45,20 @@ export enum HexTag {
 
 export enum SymTag {
   MODULE = 'module',
-
   EXTENSION = 'extension',
-  COMMAND = 'command',
-  COMPONENTS = 'components',
+
+  COMMAND_RESOLVER = 'commandResolver',
+  COMMAND_LISTENER = 'commandListener',
+  COMPONENT_ELEMENT = 'componentElement',
 }
 
 export const HexSym: Partial<Record<HexTag, SymTag>> = {
   [HexTag.x60106]: SymTag.MODULE,
-
   [HexTag.x60107]: SymTag.EXTENSION,
-  [HexTag.x60108]: SymTag.COMMAND,
-  [HexTag.x60109]: SymTag.COMPONENTS,
+
+  [HexTag.x60108]: SymTag.COMMAND_RESOLVER,
+  [HexTag.x60109]: SymTag.COMMAND_LISTENER,
+  [HexTag.x60110]: SymTag.COMPONENT_ELEMENT,
 }
 
 const symAvail = Boolean(_isFnT(Symbol) && Symbol.for)
@@ -75,15 +77,21 @@ export type MODULE_TYPE = typeof MODULE_TYPE
 
 export let EXTENSION_TYPE: SYMBOL_TYPE = HexTag.x60107
 export type EXTENSION_TYPE = typeof EXTENSION_TYPE
-export let COMMAND_TYPE: SYMBOL_TYPE = HexTag.x60108
-export type COMMAND_TYPE = typeof COMMAND_TYPE
-export let COMPONENTS_TYPE: SYMBOL_TYPE = HexTag.x60109
-export type COMPONENTS_TYPE = typeof COMPONENTS_TYPE
+
+export let COMMAND_RESOLVER_TYPE: SYMBOL_TYPE = HexTag.x60108
+export type COMMAND_RESOLVER_TYPE = typeof COMMAND_RESOLVER_TYPE
+
+export let COMMAND_LISTENER_TYPE: SYMBOL_TYPE = HexTag.x60109
+export type COMMAND_LISTENER_TYPE = typeof COMMAND_LISTENER_TYPE
+
+export let COMPONENT_ELEMENT_TYPE: SYMBOL_TYPE = HexTag.x60110
+export type COMPONENT_ELEMENT_TYPE = typeof COMPONENT_ELEMENT_TYPE
 
 if (symAvail) {
   MODULE_TYPE = symFor(MODULE_TYPE)
-
   EXTENSION_TYPE = symFor(EXTENSION_TYPE)
-  COMMAND_TYPE = symFor(COMMAND_TYPE)
-  COMPONENTS_TYPE = symFor(COMPONENTS_TYPE)
+
+  COMMAND_RESOLVER_TYPE = symFor(COMMAND_RESOLVER_TYPE)
+  COMMAND_LISTENER_TYPE = symFor(COMMAND_LISTENER_TYPE)
+  COMPONENT_ELEMENT_TYPE = symFor(COMPONENT_ELEMENT_TYPE)
 }

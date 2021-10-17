@@ -19,13 +19,13 @@ import { MutableShallow } from '@aglyn/shared-data-types'
 import { _isCtor, _isStrEmpty } from '@aglyn/shared-util-guards'
 import { trim } from '@aglyn/shared-util-tools'
 import { _apps } from '../constants/_internal'
-import { AGLYN_EMITTER, AglynAppEventFlag, AglynModuleActionFlag } from '../constants/emitter'
+import { AGLYN_EMITTER, AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
 import { DEFAULT_ENTRY_NAME } from '../constants/enums'
 import { AGLYN_ERROR, AglynErrorEventFlag } from '../constants/error'
 import { AGLYN_LOGGER } from '../constants/logger'
 import { AglynAppController, AglynAppOptions } from '../controllers/aglyn-app.controller'
 import { AglynExtensionLoader } from '../controllers/aglyn-extension.controller'
-import { isAppModule, isExtension } from '../util/aglyn-is'
+import { isAglynExtension, isAglynModule } from '../util/aglyn-is'
 import { setLogLevel } from './logger.api'
 
 
@@ -44,8 +44,8 @@ export function getApp(name: string = DEFAULT_ENTRY_NAME): AglynAppController {
 export function deleteApp(app: AglynAppController): void {
   _validateAppArg(app)
   const name = app.getName()
-  AGLYN_LOGGER.debug(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.BEFORE_DELETE_APP, {app})
+  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_ON_DELETE, {app})
+  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_ON_DELETE, {app})
   app.aglynOnDestroy?.()
   _apps.delete(name)
   ;(app as MutableShallow<AglynAppController>)['deleted'] = true
@@ -93,7 +93,7 @@ export function _loadAppExtensions(data: { app: AglynAppController, extensions: 
     if (!module) {
       throw AGLYN_ERROR.create(AglynErrorEventFlag.NO_MODULE, undefined)
     }
-    if (!isAppModule(module) || !isExtension(module) || !_isCtor(module)) {
+    if (!isAglynModule(module) || !isAglynExtension(module) || !_isCtor(module)) {
       throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_MODULE_ARG, {
         moduleName: module?.['name'] ?? 'unknown',
         appName: app.getName() ?? DEFAULT_ENTRY_NAME,
@@ -102,7 +102,7 @@ export function _loadAppExtensions(data: { app: AglynAppController, extensions: 
 
     const extensionModel = new module(app)
     app.effect({
-      type: AglynModuleActionFlag.EXTENSION_REGISTER,
+      type: AglynAppEffectFlag.EXTENSION_REGISTER,
       payload: {extension: extensionModel},
     })
     return module

@@ -17,15 +17,6 @@
 
 export const DEFAULT_ENTRY_NAME = '[DEFAULT]'
 
-export const enum RestrictFlag {
-  LIMIT = 'limit',
-  DISALLOW = 'disallow',
-}
-
-export enum AglynCommandFlag {
-  ANY = '*',
-}
-
 export enum AglynExtensionFlag {
   COMPONENTS = 'components',
 }

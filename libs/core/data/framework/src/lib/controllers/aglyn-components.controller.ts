@@ -28,8 +28,8 @@ import { FormSchema, InnerRefProp } from '@aglyn/shared-ui-jsx'
 import { _isArr } from '@aglyn/shared-util-guards'
 import { ComponentClass, FunctionComponent } from 'react'
 import {
+  AglynAppEffectFlag,
   AglynAppEventFlag,
-  AglynModuleActionFlag,
   GetBundlePayload,
   GetComponentPayload,
   GetComponentSchemaPayload,
@@ -38,9 +38,8 @@ import {
   UnregisterBundlePayload,
   UnregisterComponentPayload,
 } from '../constants/emitter'
-import { RestrictFlag } from '../constants/enums'
 import {
-  COMPONENTS_TYPE,
+  COMPONENT_ELEMENT_TYPE,
   EXTENSION_TYPE,
   MODULE_TYPE,
   TYPE_KIND,
@@ -49,11 +48,12 @@ import {
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import { AglynBaseModel } from '../models/aglyn-base.model'
 import { AglynTypeFields } from '../types'
+import { isAglynComponentElement } from '../util/aglyn-is'
 
 
 const TAG = 'ComponentsExtension'
 
-export type AglynComponentsTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMPONENTS_TYPE>
+export type AglynComponentsTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMPONENT_ELEMENT_TYPE>
 
 export type AglynComponentClassElement<P extends AnyProps = any> = ComponentClass<P>
 export type AglynComponentFunctionElement<P extends AnyProps = any> = FunctionComponent<P>
@@ -63,30 +63,43 @@ export type AglynComponentElementType<P extends AnyProps = any> =
   | AglynComponentFunctionElement<P>
   | AglynComponentIntrinsicElement<P>
 
-export type BundleId = string
+export type AppUUN = string
+export type ExtensionUUN = string
+export type BundleUId = string
 export type ComponentId = string
+export type CommandUId = string
 
-export type HierarchyRestriction = [
-  type: RestrictFlag,
-  componentIds: (ComponentId | [ComponentId, BundleId])[]
+
+export const enum LinealDirectiveFlag {
+  LIMIT_TO = 16,
+  DISALLOW = 24,
+}
+
+export type LinealComponent = ComponentId
+export type LinealComponentOfBundle = [bundleId: BundleUId, componentId: ComponentId]
+export type LinealBundle = [bundleId: BundleUId]
+
+export type LinealOrder<T extends LinealDirectiveFlag = LinealDirectiveFlag> = [
+  type: T,
+  definition: (LinealComponent | LinealComponentOfBundle | LinealBundle)[]
 ]
 
-export type ComponentsRegistryKeys = (ComponentId | [ComponentId, BundleId])[]
+export type ComponentsRegistryKeys = (ComponentId | [ComponentId, BundleUId])[]
 export type ComponentsRegistryValues = AglynComponentElement[]
 export type ComponentsRegistryEntry = [
-  cId: ComponentId | [ComponentId, BundleId],
+  cId: ComponentId | [ComponentId, BundleUId],
   cmp: AglynComponentElement
 ]
 
 export interface ComponentsRegistry {
-  bundles: Map<BundleId, AglynComponentsBundle>
-  components: Map<ComponentId | [ComponentId, BundleId], AglynComponentElement>
-  schemas: Map<ComponentId | [ComponentId, BundleId], AglynComponentSchema>
+  bundles: Map<BundleUId, AglynComponentsBundle>
+  components: Map<ComponentId | [ComponentId, BundleUId], AglynComponentElement>
+  schemas: Map<ComponentId | [ComponentId, BundleUId], AglynComponentSchema>
   templates: Map<string, AglynComponentElementTemplateData>
 }
 
 export interface AglynComponentsBundle {
-  readonly bundleId: BundleId
+  readonly bundleId: BundleUId
   metadata?: {
     displayName: string
     description?: string
@@ -100,57 +113,66 @@ export interface AglynComponentElement<P extends AnyProps = any>
   readonly [TYPE_OF]: typeof MODULE_TYPE
   readonly [TYPE_KIND]: typeof EXTENSION_TYPE
   componentId: ComponentId
-  bundleId?: BundleId
+  bundleId?: BundleUId
+}
+
+export interface AglynComponentMetadata {
+  // Metadata
+  displayName: string
+  title?: string
+  subtitle?: string
+  description?: string
+  icon?: MdiIconId | JSXNode
+}
+
+export interface AglynComponentBuilderFlags {
+  // Builder feature flags
+  actions?: { disable?: boolean }
+  badge?: { disable?: boolean }
+  copying?: { disable?: boolean }
+  dragging?: { disable?: boolean }
+  dropping?: { disable?: boolean }
+  editing?: { disable?: boolean }
+  outline?: { disable?: boolean }
+  removing?: { disable?: boolean }
+  selecting?: { disable?: boolean }
+}
+
+export interface AglynComponentRenderFlags<P extends AnyProps = any> {
+  hierarchy?: {
+    restrictChildren?: LinealOrder
+    restrictParent?: LinealOrder
+  }
+  elementRef?: { disable?: boolean; innerRef?: boolean }
+  propsSchema?: FormSchema
+  resolveProps?: ResolveProps<AglynComponentElementData<P>>
+  emotionStyled?: {
+    disable?: boolean
+    options?: StyledOptions<P>
+  }
 }
 
 export interface AglynComponentSchema<P extends AnyProps = any> {
   componentId: ComponentId
-  bundleId?: BundleId
+  bundleId?: BundleUId
 
   // Metadata
-  metadata: {
-    displayName: string
-    title?: string
-    subtitle?: string
-    description?: string
-    icon?: MdiIconId | JSXNode
-  }
+  metadata: AglynComponentMetadata
 
   // Builder feature flags
-  builderFlags?: {
-    actions?: { disable?: boolean }
-    badge?: { disable?: boolean }
-    copying?: { disable?: boolean }
-    dragging?: { disable?: boolean }
-    dropping?: { disable?: boolean }
-    editing?: { disable?: boolean }
-    outline?: { disable?: boolean }
-    removing?: { disable?: boolean }
-    selecting?: { disable?: boolean }
-  }
+  builderFlags?: AglynComponentBuilderFlags
 
   // Render feature flags
-  renderFlags?: {
-    hierarchy?: {
-      restrictChildren?: HierarchyRestriction
-      restrictParent?: HierarchyRestriction
-    }
-    elementRef?: { disable?: boolean; innerRef?: boolean }
-    propsSchema?: FormSchema
-    resolveProps?: ResolveProps<AglynComponentElementData<P>>
-    emotionStyled?: {
-      disable?: boolean
-      options?: StyledOptions<P>
-    }
-  }
+  renderFlags?: AglynComponentRenderFlags<P>
 
+  // Builder templates for modeling new elements
   templates?: AglynComponentElementTemplateData<P>[]
 }
 
 export interface AglynComponentElementData<P extends AnyProps = any> {
   readonly $id: string
   readonly componentId: ComponentId
-  readonly bundleId?: BundleId
+  readonly bundleId?: BundleUId
   displayName?: string
   description?: string
   props?: P
@@ -167,7 +189,7 @@ export interface AglynComponentElementTemplateData<P extends AnyProps = any> {
 
 export interface TemplateSubElementData<P extends AnyProps = any> {
   readonly componentId: ComponentId
-  readonly bundleId?: BundleId
+  readonly bundleId?: BundleUId
   elements?: TemplateSubElementData<P>[]
   props?: AnyProps
 }
@@ -176,8 +198,7 @@ export interface AglynComponentsController extends AglynBaseModel {
   getAllComponents(): ComponentsRegistryEntry[]
   getAllComponentsKeys(): ComponentsRegistryKeys
   getAllComponentsValues(): ComponentsRegistryValues
-
-  getTemplateBlocks(): AglynComponentElementTemplateData[]
+  getAllComponentsTemplateValues(): AglynComponentElementTemplateData[]
 
   getComponent(payload: GetComponentPayload): OrUndef<AglynComponentElement>
   getComponentSchema(payload: GetComponentSchemaPayload): OrUndef<AglynComponentSchema>
@@ -255,42 +276,60 @@ export class AglynComponentsController extends AglynBaseModel {
   public getAllComponentsValues = (): ComponentsRegistryValues => {
     return this._componentValues()
   }
-  public getTemplateBlocks = (): AglynComponentElementTemplateData[] => {
+  public getAllComponentsTemplateValues = (): AglynComponentElementTemplateData[] => {
     return this._templateValues()
   }
 
   public getComponent = (payload: GetComponentPayload): OrUndef<AglynComponentElement> => {
     const {componentId, bundleId = undefined} = payload
+    const key = this.buildMapKey({bundleId, componentId})
     if (bundleId) {
-      return this.context.components?.get(`${bundleId}:${componentId}`)
+      return this.context.components?.get(key)
     }
-    return this.context.components?.get(componentId)
+    return this.context.components?.get(key)
   }
   public getComponentSchema = (payload: GetComponentPayload): OrUndef<AglynComponentSchema> => {
     const {componentId, bundleId} = payload
+    const key = this.buildMapKey({bundleId, componentId})
     if (bundleId) {
-      return this.context.schemas?.get(`${bundleId}:${componentId}`)
+      return this.context.schemas?.get(key)
     }
-    return this.context.schemas?.get(componentId)
+    return this.context.schemas?.get(key)
   }
   public getBundle(payload: GetBundlePayload): OrUndef<AglynComponentsBundle> {
     const {bundleId} = payload
     return this.context.bundles.get(bundleId)
+  }
+  public buildMapKey(data: { componentId: ComponentId, bundleId: BundleUId }): string {
+    const {componentId, bundleId} = data
+    return bundleId ? `${bundleId}:${componentId}` : componentId
   }
 
   public registerComponent = (payload: RegisterComponentPayload): this => {
     const {component, schema} = payload
     const componentId = schema.componentId
     const bundleId = schema.bundleId || undefined
+    const key = this.buildMapKey({bundleId, componentId})
+
+    if (!isAglynComponentElement(component)) {
+      throw new Error(`Invalid component #'${key}' supplied to register.`)
+      // TODO: throw errorFactory error
+    }
+
+    this.getLogger().debug(AglynAppEventFlag.REGISTERING_COMPONENT, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.REGISTERING_COMPONENT, {componentId, bundleId})
 
     if (bundleId) {
       const bundle = this.context.bundles.get(bundleId)
-      if (!bundle) {
-        throw new Error(`No bundle exists with ID ${bundleId}.`)
+      if (bundle) {
+        this.context.components.set(key, component)
+        this.context.schemas.set(key, schema)
+        bundle.componentIds.push(componentId)
       }
-      this.context.components.set(`${bundleId}:${componentId}`, component)
-      this.context.schemas.set(`${bundleId}:${componentId}`, schema)
-      bundle.componentIds.push(componentId)
+      else {
+        throw new Error(`No bundle exists with ID ${bundleId}.`)
+        // TODO: throw errorFactory error
+      }
     }
     else {
       this.context.components.set(componentId, component)
@@ -308,7 +347,9 @@ export class AglynComponentsController extends AglynBaseModel {
   public registerBundle = (payload: RegisterBundlePayload): this => {
     const {bundle, components} = payload
     const _bundle: AglynComponentsBundle = {...bundle, componentIds: []}
-    const bundleId: BundleId = _bundle.bundleId
+    const bundleId: BundleUId = _bundle.bundleId
+    this.getLogger().debug(AglynAppEventFlag.REGISTERING_COMPONENT_BUNDLE, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.REGISTERING_COMPONENT_BUNDLE, {bundleId})
     this.context.bundles.set(bundleId, _bundle)
     ;([...components]).forEach(({schema, component}) => {
       schema.bundleId = bundleId
@@ -321,16 +362,21 @@ export class AglynComponentsController extends AglynBaseModel {
 
   public unregisterComponent = (payload: UnregisterComponentPayload): this => {
     const {componentId, bundleId = undefined} = payload
+    const key = this.buildMapKey({bundleId, componentId})
+
+    this.getLogger().debug(AglynAppEventFlag.UNREGISTERING_COMPONENT, {componentId, bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERING_COMPONENT, {componentId, bundleId})
+
     if (bundleId) {
       const bundle = this.context.bundles.get(bundleId)
       if (!bundle) {
         throw new Error(`No bundle exists with ID ${bundleId}.`)
       }
-      this.context.schemas.get(`${bundleId}:${componentId}`)?.templates?.forEach((i) => {
+      this.context.schemas.get(key)?.templates?.forEach((i) => {
         this.context.templates.delete(i.id)
       })
-      this.context.components.delete(`${componentId}:${bundleId}`)
-      this.context.schemas.delete(`${componentId}:${bundleId}`)
+      this.context.components.delete(key)
+      this.context.schemas.delete(key)
       bundle.componentIds = bundle.componentIds.filter((i) => i !== componentId)
       this.context.bundles.set(bundleId, bundle)
     }
@@ -351,6 +397,10 @@ export class AglynComponentsController extends AglynBaseModel {
     if (!bundle) {
       throw new Error(`No bundle exists with ID ${bundleId}.`)
     }
+
+    this.getLogger().debug(AglynAppEventFlag.UNREGISTERING_COMPONENT_BUNDLE, {bundleId})
+    this.getEmitter().emit(AglynAppEventFlag.UNREGISTERING_COMPONENT_BUNDLE, {bundleId})
+
     bundle.componentIds.forEach((componentId) => {
       this.unregisterComponent({componentId, bundleId})
     })
@@ -361,11 +411,11 @@ export class AglynComponentsController extends AglynBaseModel {
   }
 
 
-  private listeners: [AglynModuleActionFlag, (...args: any[]) => unknown][] = [
-    [AglynModuleActionFlag.COMPONENT_REGISTER, this.registerComponent],
-    [AglynModuleActionFlag.COMPONENT_UNREGISTER, this.unregisterComponent],
-    [AglynModuleActionFlag.COMPONENTS_BUNDLE_REGISTER, this.registerBundle],
-    [AglynModuleActionFlag.COMPONENTS_BUNDLE_UNREGISTER, this.unregisterBundle],
+  private listeners: [AglynAppEffectFlag, (...args: any[]) => unknown][] = [
+    [AglynAppEffectFlag.COMPONENT_REGISTER, this.registerComponent],
+    [AglynAppEffectFlag.COMPONENT_UNREGISTER, this.unregisterComponent],
+    [AglynAppEffectFlag.COMPONENTS_BUNDLE_REGISTER, this.registerBundle],
+    [AglynAppEffectFlag.COMPONENTS_BUNDLE_UNREGISTER, this.unregisterBundle],
   ]
 }
 

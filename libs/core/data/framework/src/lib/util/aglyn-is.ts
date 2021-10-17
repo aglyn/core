@@ -16,13 +16,19 @@
  */
 import { _isFnT, _isObj } from '@aglyn/shared-util-guards'
 import {
-  COMMAND_TYPE, COMPONENTS_TYPE,
+  COMMAND_LISTENER_TYPE,
+  COMMAND_RESOLVER_TYPE,
+  COMPONENT_ELEMENT_TYPE,
   EXTENSION_TYPE,
   MODULE_TYPE,
   TYPE_KIND,
   TYPE_OF,
 } from '../constants/symbol'
-import type { AglynCommandHandler } from '../controllers/aglyn-command.controller'
+import type {
+  AglynCommandListener,
+  AglynCommandResolver,
+} from '../controllers/aglyn-command.controller'
+import { AglynComponentElement } from '../controllers/aglyn-components.controller'
 import type { AglynExtension } from '../models/aglyn-extension.model'
 import type { AglynAppModule } from '../types'
 
@@ -48,10 +54,11 @@ export function kindOf(object: unknown) {
 
     switch (kind) {
       case MODULE_TYPE:
-
       case EXTENSION_TYPE:
-      case COMMAND_TYPE:
-      case COMPONENTS_TYPE:
+
+      case COMMAND_RESOLVER_TYPE:
+      case COMMAND_LISTENER_TYPE:
+      case COMPONENT_ELEMENT_TYPE:
       default:
         return kind
     }
@@ -60,12 +67,19 @@ export function kindOf(object: unknown) {
   return undefined
 }
 
-export function isAppModule<T>(object: unknown): object is AglynAppModule {
+export function isAglynModule<T>(object: unknown): object is AglynAppModule {
   return typeOf(object) === MODULE_TYPE
 }
-export function isCommand<T>(object: unknown): object is AglynCommandHandler {
-  return kindOf(object) === COMMAND_TYPE
-}
-export function isExtension<T>(object: unknown): object is AglynExtension {
+export function isAglynExtension<T>(object: unknown): object is AglynExtension {
   return kindOf(object) === EXTENSION_TYPE
+}
+
+export function isAglynCommandResolver<T>(object: unknown): object is AglynCommandResolver {
+  return kindOf(object) === COMMAND_RESOLVER_TYPE
+}
+export function isAglynCommandListener<T>(object: unknown): object is AglynCommandListener {
+  return kindOf(object) === COMMAND_LISTENER_TYPE
+}
+export function isAglynComponentElement<T>(object: unknown): object is AglynComponentElement {
+  return kindOf(object) === COMPONENT_ELEMENT_TYPE
 }

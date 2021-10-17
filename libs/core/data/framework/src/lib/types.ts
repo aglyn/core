@@ -68,24 +68,24 @@ export enum AglynLifecycleFlag {
 }
 
 /** Observers to handle life cycle onInit/onDestroy events */
-export interface AglynLifecycleObserver {
+export interface AglynLifecycleObserver<T = any> {
   /**
    * Should be invoked once immediately after instantiation
    */
-  aglynOnInit?(props?: any): unknown
+  aglynOnInit?(props?: T): void
   /**
    * Should be invoked once as last step before garbage collection
    */
-  aglynOnDestroy?(props?: any): unknown
+  aglynOnDestroy?(props?: T): void
 }
 
-export interface AglynLoadableObserver extends AglynLifecycleObserver {
+export interface AglynLoadableObserver<T1 = any, T2 = any> extends AglynLifecycleObserver<T1> {
   /**
    * Should be invoked each time the object is loaded
    */
-  aglynOnLoad?(props?: any): unknown
+  aglynOnLoad?(props?: T2): void
   /**
    * Should be invoked each time the object is unloaded
    */
-  aglynOnUnload?(props?: any): unknown
+  aglynOnUnload?(props?: T2): void
 }

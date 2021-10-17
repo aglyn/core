@@ -58,8 +58,8 @@ export function getAllComponentsKeys(app: AglynAppController): ComponentsRegistr
   return _getComponentsController(app)?.getAllComponentsKeys()
 }
 
-export function getTemplateBlocks(app: AglynAppController): AglynComponentElementTemplateData[] {
-  return _getComponentsController(app)?.getTemplateBlocks()
+export function getAllComponentsTemplateValues(app: AglynAppController): AglynComponentElementTemplateData[] {
+  return _getComponentsController(app)?.getAllComponentsTemplateValues()
 }
 
 export function getComponent<P>(

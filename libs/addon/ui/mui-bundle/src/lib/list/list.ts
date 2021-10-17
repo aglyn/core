@@ -16,9 +16,10 @@
  */
 
 import {
+  AglynComponentElementTemplateData,
   AglynComponentSchema,
   ComponentId,
-  createAglynComponent,
+  createAglynComponentElement,
 } from '@aglyn/core-data-framework'
 import { List } from '@mui/material'
 
@@ -30,7 +31,7 @@ export const metadata: AglynComponentSchema['metadata'] = {
   displayName: 'List',
   icon: 'format-list-text',
 }
-export const templates: AglynComponentSchema['templates'] = [
+export const templates: AglynComponentElementTemplateData[] = [
   {
     id: 'mui:list',
     title: 'List',
@@ -72,14 +73,14 @@ export const templates: AglynComponentSchema['templates'] = [
   },
 ]
 
-export const component = createAglynComponent(
- {
-   componentId,
-   bundleId,
-   metadata,
-   templates,
- },
- List,
+export const component = createAglynComponentElement(
+  {
+    componentId,
+    bundleId,
+    metadata,
+    templates,
+  },
+  List,
 )
 
 export default component

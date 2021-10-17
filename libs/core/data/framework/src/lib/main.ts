@@ -26,7 +26,7 @@ export * from './constants/symbol'
 export * from './constants/version'
 
 export * from './util/aglyn-is'
-export * from './util/create-aglyn-component'
+export * from './util/create-aglyn-component-element'
 export * from './util/create-component-element-data'
 export * from './util/create-component-element-id'
 export * from './util/create-components-bundle'
@@ -52,14 +52,18 @@ export type {
 } from './controllers/aglyn-extension.controller'
 
 export type {
-  AglynCommandTypeFields,
+  AglynCommandResolver,
+  AglynCommandListener,
+  AglynCommandResolverTypeFields,
+  AglynCommandListenerTypeFields,
+  AglynCommandParams,
   AglynCommandController,
-  AglynCommandHandler,
 } from './controllers/aglyn-command.controller'
+export { AglynCommandFlag } from './controllers/aglyn-command.controller'
 export type {
   AglynComponentsBundle,
   AglynComponentSchema,
-  BundleId,
+  BundleUId,
   ComponentId,
   AglynComponentsTypeFields,
   AglynComponentElement,
@@ -72,7 +76,8 @@ export type {
   AglynComponentElementType,
   AglynComponentFunctionElement,
   AglynComponentIntrinsicElement,
-  HierarchyRestriction,
+  LinealOrder,
   TemplateSubElementData,
   AglynComponentsController,
 } from './controllers/aglyn-components.controller'
+export { LinealDirectiveFlag } from './controllers/aglyn-components.controller'

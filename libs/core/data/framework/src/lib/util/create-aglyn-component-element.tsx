@@ -19,14 +19,14 @@ import { styled } from '@aglyn/shared-feature-themes'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { Component, Ref } from 'react'
 import { RegisterComponentPayload } from '../constants/emitter'
-import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
+import { COMPONENT_ELEMENT_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
 import {
   AglynComponentElementType,
   AglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
 
 
-export function createAglynComponent(
+export function createAglynComponentElement(
   schema: AglynComponentSchema,
   component: AglynComponentElementType,
 ): RegisterComponentPayload {
@@ -50,7 +50,7 @@ export function createAglynComponent(
     public static readonly componentId = componentId
     public static readonly bundleId = bundleId
     public static readonly [TYPE_OF] = MODULE_TYPE
-    public static readonly [TYPE_KIND] = EXTENSION_TYPE
+    public static readonly [TYPE_KIND] = COMPONENT_ELEMENT_TYPE
 
     public innerRef?: Ref<any>
 

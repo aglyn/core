@@ -17,7 +17,7 @@
 
 import { bundle as muiBundle } from '@aglyn/addon-ui-mui-bundle'
 import {
-  createAglynComponent,
+  createAglynComponentElement,
   initializeApp,
   registerBundle,
   registerComponent,
@@ -49,7 +49,7 @@ const metaElements: MakeMetaElementsConfig = [
 ]
 const linkElements: MakeLinkElementsConfig = []
 
-const c1 = createAglynComponent(
+const c1 = createAglynComponentElement(
   {
     componentId: 'root',
     metadata: {
@@ -61,7 +61,7 @@ const c1 = createAglynComponent(
   'span',
 )
 
-const c2 = createAglynComponent(
+const c2 = createAglynComponentElement(
   {
     componentId: 'root1',
     metadata: {
@@ -73,7 +73,7 @@ const c2 = createAglynComponent(
   'span',
 )
 
-const c3 = createAglynComponent(
+const c3 = createAglynComponentElement(
   {
     componentId: 'root2',
     metadata: {
@@ -85,7 +85,7 @@ const c3 = createAglynComponent(
   'span',
 )
 
-const c4 = createAglynComponent(
+const c4 = createAglynComponentElement(
   {
     componentId: 'root3',
     metadata: {
@@ -97,7 +97,7 @@ const c4 = createAglynComponent(
   'span',
 )
 
-const c5 = createAglynComponent(
+const c5 = createAglynComponentElement(
   {
     componentId: 'root4',
     metadata: {
@@ -232,6 +232,7 @@ export default _App
 if (process.browser) {
   console.log(
     `%c
+
        d8888          888                         888      888       .d8888b.
       d88888          888                         888      888      d88P  Y88b
      d88P888          888                         888      888      888    888
@@ -251,6 +252,7 @@ Hello there, Friend! 👋
 For detailed information please visit 'https://aglyn.com' or you may send an
 email to 'info@aglyn.com'.
 – Aglyn Engineering Team
+
 `,
     'font-family:monospace;color:#E040FB;font-size:12px;',
   )

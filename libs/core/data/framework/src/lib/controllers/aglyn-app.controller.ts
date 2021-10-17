@@ -22,7 +22,7 @@ import {
   _componentsControllers,
   _extensionControllers,
 } from '../constants/_internal'
-import { AGLYN_EMITTER, AglynAppEventFlag, AglynModuleActionFlag } from '../constants/emitter'
+import { AGLYN_EMITTER, AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
 import { DEFAULT_ENTRY_NAME } from '../constants/enums'
 import { AGLYN_ERROR } from '../constants/error'
 import { AGLYN_LOGGER } from '../constants/logger'
@@ -53,7 +53,7 @@ export interface AglynAppController extends AglynBaseModel {
   getCommandsController(): AglynCommandController
   getComponentsController(): AglynComponentsController
 
-  effect(data: AglynEffectOptions<AglynModuleActionFlag>): this
+  effect(data: AglynEffectOptions<AglynAppEffectFlag>): this
 }
 
 export class AglynAppController extends AglynBaseModel {
@@ -110,8 +110,8 @@ export class AglynAppController extends AglynBaseModel {
   }
 
   public aglynOnInit = (): void => {
-    this.getLogger().debug(AglynAppEventFlag.APP_PRE_INIT, {app: this})
-    this.getEmitter().emit(AglynAppEventFlag.APP_PRE_INIT, {app: this})
+    this.getLogger().debug(AglynAppEventFlag.APP_ON_INIT, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_ON_INIT, {app: this})
 
     this.#commandController.aglynOnInit()
     this.#componentsController.aglynOnInit()
@@ -122,8 +122,8 @@ export class AglynAppController extends AglynBaseModel {
     this.getEmitter().emit(AglynAppEventFlag.APP_INITIALIZED, {app: this})
   }
   public aglynOnDestroy = (): void => {
-    this.getLogger().debug(AglynAppEventFlag.APP_PRE_DESTROY, {app: this})
-    this.getEmitter().emit(AglynAppEventFlag.APP_PRE_DESTROY, {app: this})
+    this.getLogger().debug(AglynAppEventFlag.APP_ON_DESTROY, {app: this})
+    this.getEmitter().emit(AglynAppEventFlag.APP_ON_DESTROY, {app: this})
 
     this.#extensionController.unloadAllExtensions()
     this.#extensionController.aglynOnDestroy()
@@ -168,7 +168,7 @@ export class AglynAppController extends AglynBaseModel {
     this.#isDeleted = Boolean(value)
     return this
   }
-  public effect = (data: AglynEffectOptions<AglynModuleActionFlag>) => {
+  public effect = (data: AglynEffectOptions<AglynAppEffectFlag>) => {
     const {type, payload} = data
     this.getEmitter().emit(type, payload as any)
     return this

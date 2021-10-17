@@ -17,7 +17,7 @@
 
 import {
   AglynComponentsBundle,
-  BundleId,
+  BundleUId,
   createComponentsBundle,
   RegisterBundlePayload,
   RegisterComponentPayload,
@@ -29,7 +29,7 @@ import listItem from './list-item'
 import listItemText from './list-item-text'
 
 
-export const bundleId: BundleId = 'mui'
+export const bundleId: BundleUId = 'mui'
 export const metadata: AglynComponentsBundle['metadata'] = {
   displayName: 'Mui Components',
   description: 'Material-UI view components',
