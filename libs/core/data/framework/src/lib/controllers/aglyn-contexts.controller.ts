@@ -74,12 +74,13 @@ export interface AglynContextsControllerOptions extends AglynModuleModelOptions 
 }
 
 const TAG = 'AglynContexts'
+const MODULE_NAME = 'contexts'
 
 export class AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
-  public readonly moduleName: string = TAG
+  public readonly moduleName: string = MODULE_NAME
 
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()

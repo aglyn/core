@@ -210,12 +210,13 @@ export interface AglynComponentsController extends AglynModuleModel {
 }
 
 const TAG = 'AglynComponents'
+const MODULE_NAME = 'components'
 
 export class AglynComponentsController extends AglynModuleModel {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
-  public readonly moduleName: string = TAG
+  public readonly moduleName: string = MODULE_NAME
 
   protected context: ComponentsRegistry = {
     bundles: new Map(),

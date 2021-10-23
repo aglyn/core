@@ -40,6 +40,7 @@ export interface AglynModuleModel<O extends AglynModuleModelOptions = AglynModul
 }
 
 const TAG = 'AglynModule'
+const MODULE_NAME = 'module'
 
 export abstract class AglynModuleModel<O extends AglynModuleModelOptions = AglynModuleModelOptions> extends AglynBaseModel<O> {
 
@@ -48,7 +49,7 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
   public static readonly [TYPE_OF]: number | symbol = MODULE_TYPE
   public static readonly [TYPE_KIND]: number | symbol = undefined
 
-  public readonly moduleName: string = TAG
+  public readonly moduleName: string = MODULE_NAME
 
   protected app: AglynAppController
 

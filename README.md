@@ -87,12 +87,14 @@ A utility library contains low-level utilities used by many libraries and applic
 │  └─ 🌐 www
 │
 ├─ libs/
-│  ├─ data/
-│  │  ├─ 📚 components
-│  │  └─ 📚 framework
+│  ├─ addon/
+│  │  ├─ ui/
+│  │  │  └─ 📚 mui-bundle
 │  │
-│  ├─ feature/
-│  │  ├─ 📚 mui-bundle
+│  ├─ core/
+│  │  ├─ data/
+│  │  │  └─ 📚 components
+│  │  │  └─ 📚 framework
 │  │
 │  ├─ feature/
 │  │  ├─ 📚 builder
@@ -121,27 +123,6 @@ A utility library contains low-level utilities used by many libraries and applic
 │  │  │
 └──┴──┴────────────────────
 ```
-
-<!--
-```
-root
-│   README.md
-│   file001.txt    
-│
-└───folder1
-│   │   file011.txt
-│   │   file012.txt
-│   │
-│   └───subfolder1
-│       │   file111.txt
-│       │   file112.txt
-│       │   ...
-│   
-└───folder2
-   │   file021.txt
-   │   file022.txt
-```
--->
 
 
 ### Apps

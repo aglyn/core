@@ -41,6 +41,7 @@ export interface AglynExtension<T = any, O extends AglynExtensionOptions = Aglyn
 }
 
 const TAG = 'AglynExtension'
+const MODULE_NAME = 'extension'
 
 export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModel<O> {
 
@@ -51,7 +52,7 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
 
   public static readonly extensionName: string = null
 
-  public readonly moduleName: string = `${TAG}:${this.extensionName || 'unknown'}`
+  public readonly moduleName: string = `${MODULE_NAME}:${this.extensionName || 'unknown'}`
 
   protected context?: T = null
   #lifecycle?: OrNull<AglynLifecycleFlag> = AglynLifecycleFlag.UNREGISTERED

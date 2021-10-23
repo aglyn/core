@@ -40,8 +40,6 @@ import {
 } from './aglyn-extensions.controller'
 
 
-const TAG = 'AglynAppController'
-
 export interface AglynAppOptions extends AglynNamed, AglynBaseModelOptions {
   extensions?: AglynExtensionLoader[]
 }
@@ -61,6 +59,8 @@ export interface AglynAppController extends AglynBaseModel<AglynAppOptions> {
 
   effect(data: AglynEffectOptions<AglynAppEffectFlag>): this
 }
+
+const TAG = 'AglynApp'
 
 export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
 
@@ -93,6 +93,9 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   }
   public get components(): AglynComponentsController {
     return this.#componentsController
+  }
+  public get deleted(): boolean {
+    return this.#isDeleted
   }
 
   constructor(options: AglynAppOptions) {

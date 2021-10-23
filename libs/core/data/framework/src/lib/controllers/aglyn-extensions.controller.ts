@@ -51,12 +51,13 @@ export interface AglynExtensionsController extends AglynModuleModel {
 }
 
 const TAG = 'AglynExtensions'
+const MODULE_NAME = 'extensions'
 
 export class AglynExtensionsController extends AglynModuleModel {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
-  public readonly moduleName: string = TAG
+  public readonly moduleName: string = MODULE_NAME
 
   protected extensions: AglynExtensionMap = new Map()
 
@@ -141,6 +142,7 @@ export class AglynExtensionsController extends AglynModuleModel {
     const {extensionName} = payload
     const extension = this.extensions.get(extensionName) as MutableShallow<AglynExtension>
     if (extension) {
+      extension.lifecycle = AglynLifecycleFlag.UNLOADING
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_UNLOADING, {extensionName})
       this.getEmitter().emit(AglynAppEventFlag.EXTENSION_UNLOADING, {extensionName})
       extension.aglynOnUnload?.(this.app)
@@ -165,6 +167,7 @@ export class AglynExtensionsController extends AglynModuleModel {
       if (isLoaded) {
         this.unloadExtension({extensionName})
       }
+      extension.lifecycle = AglynLifecycleFlag.DESTROYING
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
       this.getEmitter().emit(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
       extension.aglynOnDestroy?.(this.app)

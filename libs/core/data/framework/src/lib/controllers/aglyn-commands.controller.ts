@@ -66,12 +66,13 @@ export interface AglynCommandsController extends AglynModuleModel {
 }
 
 const TAG = 'AglynCommands'
+const MODULE_NAME = 'commands'
 
 export class AglynCommandsController extends AglynModuleModel {
 
   public static readonly [Symbol.toStringTag]: string = TAG
 
-  public readonly moduleName: string = TAG
+  public readonly moduleName: string = MODULE_NAME
 
   #commander: AglynCommander = Mitt()
   #resolvers: Map<CommandUId, AglynCommandResolver> = new Map()
