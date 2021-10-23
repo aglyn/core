@@ -34,7 +34,7 @@ export abstract class AglynModuleBaseModel extends AglynBaseModel {
   readonly #options: AglynModuleBaseModelOptions = null
   protected app: AglynAppController
 
-  public get options(): AglynBaseModelOptions {
+  public get options(): AglynModuleBaseModelOptions {
     return this.#options
   }
 

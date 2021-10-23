@@ -26,7 +26,6 @@ import { AGLYN_LOGGER } from '../constants/logger'
 import { AglynAppController, AglynAppOptions } from '../controllers/aglyn-app.controller'
 import { AglynExtensionLoader } from '../controllers/aglyn-extension.controller'
 import { isAglynExtension, isAglynModule } from '../util/aglyn-is'
-import { setLogLevel } from './logger.api'
 
 
 export function getAllApps(): AglynAppController[] {
@@ -43,31 +42,28 @@ export function getApp(name: string = DEFAULT_ENTRY_NAME): AglynAppController {
 
 export function deleteApp(app: AglynAppController): void {
   _validateAppArg(app)
-  const name = app.getName()
-  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETING, {app})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETING, {app})
+  const appName = app.getName()
+  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETING, {appName})
+  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETING, {appName})
   app.aglynOnDestroy?.()
-  _apps.delete(name)
+  _apps.delete(appName)
   ;(app as MutableShallow<AglynAppController>)['deleted'] = true
-  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETED, {appName: name})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETED, {appName: name})
+  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETED, {appName})
+  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETED, {appName})
 }
 
 export function initializeApp(options: AglynAppOptions = {}): AglynAppController {
   const opts: AglynAppOptions = {...options}
-  const name: string = trim(opts.name || DEFAULT_ENTRY_NAME)
+  const appName: string = trim(opts.name || DEFAULT_ENTRY_NAME)
   const extensions = opts.extensions || []
-  if (_isStrEmpty(name)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.BAD_APP_NAME, {appName: name})
+  if (_isStrEmpty(appName)) {
+    throw AGLYN_ERROR.create(AglynErrorEventFlag.BAD_APP_NAME, {appName})
   }
-  if (_apps.has(name)) {
-    throw AGLYN_ERROR.create(AglynErrorEventFlag.DUPLICATE_APP, {appName: name})
-  }
-  if (opts.logLevel) {
-    setLogLevel(opts.logLevel)
+  if (_apps.has(appName)) {
+    throw AGLYN_ERROR.create(AglynErrorEventFlag.DUPLICATE_APP, {appName})
   }
   const app: AglynAppController = new AglynAppController(opts)
-  _apps.set(name, app)
+  _apps.set(appName, app)
 
   app.aglynOnInit()
   _loadAppExtensions({app, extensions})

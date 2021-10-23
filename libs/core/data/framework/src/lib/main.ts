@@ -38,16 +38,16 @@ export {
   AglynBaseModel,
 } from './models/aglyn-base.model'
 export {
-  AglynExtensionOptions,
-  AglynExtensionT,
-  AglynExtension,
-} from './models/aglyn-extension.model'
-export {
   AglynModuleBaseModelOptions,
   AglynAppModuleEffectListener,
   AglynModuleBaseModelT,
   AglynModuleBaseModel,
 } from './models/aglyn-module-base.model'
+export {
+  AglynExtensionOptions,
+  AglynExtensionT,
+  AglynExtension,
+} from './models/aglyn-extension.model'
 
 export type {
   AglynAppOptions,
@@ -63,10 +63,10 @@ export type {
 } from './controllers/aglyn-extension.controller'
 export type {
   ContextStore,
-  CreateStoreOptions,
-  DeleteStoreOptions,
-  GetStoreOptions,
-  SetStoreOptions,
+  ContextDomain,
+  CreateEffect,
+  CreateEvent,
+  ContextStoreOptions,
   AglynContextsControllerT,
   AglynContextsController,
 } from './controllers/aglyn-contexts.controller'
@@ -79,7 +79,6 @@ export type {
   AglynCommandControllerT,
   AglynCommandController,
 } from './controllers/aglyn-command.controller'
-export { AglynCommandFlag } from './controllers/aglyn-command.controller'
 export type {
   AglynComponentsBundle,
   AglynComponentSchema,
@@ -101,4 +100,5 @@ export type {
   AglynComponentsControllerT,
   AglynComponentsController,
 } from './controllers/aglyn-components.controller'
+export { AglynCommandFlag } from './controllers/aglyn-command.controller'
 export { LinealDirectiveFlag } from './controllers/aglyn-components.controller'

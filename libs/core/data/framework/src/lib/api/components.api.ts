@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { OrUndef } from '@aglyn/shared-data-types'
+import { AnyProps, OrUndef } from '@aglyn/shared-data-types'
 import { _componentsControllers } from '../constants/_internal'
 import {
   ComponentGetPayload,
@@ -62,7 +62,7 @@ export function getAllComponentsTemplateValues(app: AglynAppController): AglynCo
   return _getComponentsController(app)?.getAllComponentsTemplateValues()
 }
 
-export function getComponent<P>(
+export function getComponent<P extends AnyProps>(
   app: AglynAppController,
   payload: ComponentGetPayload,
 ): OrUndef<AglynComponentElement<P>> {

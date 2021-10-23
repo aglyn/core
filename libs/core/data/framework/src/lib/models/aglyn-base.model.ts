@@ -68,6 +68,9 @@ export abstract class AglynBaseModel {
   public get sdkVersion(): AglynVersion {
     return getStaticField('sdkVersion', this)
   }
+  public get options(): AglynBaseModelOptions {
+    return this.#options
+  }
   public get logger(): AglynLogger {
     return this.#logger
   }
@@ -77,10 +80,17 @@ export abstract class AglynBaseModel {
 
   protected constructor(options: AglynBaseModelOptions) {
     this.#options = {...options}
+    this.#created = Timestamp.now()
+    this.#setup()
+  }
+  #setup() {
     this.#errorFactory = this.#options.errorFactory || AGLYN_ERROR
     this.#emitter = this.#options.emitter || AGLYN_EMITTER
     this.#logger = this.#options.logger || AGLYN_LOGGER
-    this.#created = Timestamp.now()
+
+    if (this.#options.logLevel) {
+      this.#logger.setLogLevel(this.#options.logLevel)
+    }
   }
 
   public toString(): string {

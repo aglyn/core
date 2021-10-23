@@ -16,29 +16,84 @@
  */
 
 import { _isFnT, _isNull } from '@aglyn/shared-util-guards'
-import { LogCallback, Logger, LogLevelString, LogOptions } from '@aglyn/shared-util-logger'
+import { Logger, LogHandler, LogLevelString } from '@aglyn/shared-util-logger'
 import { AGLYN_ERROR, AglynErrorEventFlag } from '../constants/error'
+import { AGLYN_LOGGER, AglynLogger } from '../constants/logger'
+import { AglynAppController } from '../controllers/aglyn-app.controller'
+import { _validateAppArg } from './app.api'
 
 
 /**
  * Sets log handler for all SDKs components
- * @param callbackFn - An optional custom log handler that executes user code whenever
- *   the SDK makes a logging call.
- * @param options - the logger options to pass to `Logger.setUserLogHandler()`
+ * @param app - the Aglyn instance
+ * @param logHandler - An custom log handler to execute whenever the SDK makes a logging call.
  */
-export function setUserLogHandler(callbackFn: LogCallback | null, options?: LogOptions): void {
-  if (!_isNull(callbackFn) && !_isFnT(callbackFn)) {
+export function setUserLogHandler(
+  app: AglynAppController,
+  logHandler: LogHandler,
+): void
+/**
+ * Sets log handler for all SDKs components
+ * @param ctx - the Logger instance otherwise will set global
+ * @param logHandler - An custom log handler to execute whenever the SDK makes a logging call.
+ */
+export function setUserLogHandler(
+  ctx: AglynAppController | AglynLogger | null,
+  logHandler: LogHandler,
+): void {
+  if (!_isNull(logHandler) && !_isFnT(logHandler)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.INVALID_LOG_ARG, undefined)
   }
-  Logger.setUserLogHandler(callbackFn, options)
+  if (ctx instanceof AglynAppController) {
+    _validateAppArg(ctx)
+    ctx.getLogger().userLogHandler = logHandler
+    return
+  }
+  if (ctx instanceof Logger) {
+    ctx.userLogHandler = logHandler
+    return
+  }
+  AGLYN_LOGGER.userLogHandler = logHandler
 }
+
 /**
  * Sets log level for all SDK components
  *
  * All of the log types above the current log level are captured (i.e. if
  * you set the log level to `info`, errors are logged, but `debug` and
  * `verbose` logs are not).
+ *
+ * @param app - the Aglyn instance
+ * @param options - the options to pass to `setLogLevel()`
  */
-export function setLogLevel(logLevel: LogLevelString): void {
-  Logger.setLogLevel(logLevel)
+export function setLogLevel(
+  app: AglynAppController,
+  options: { logLevel: LogLevelString },
+): void
+
+/**
+ * Sets log level for all SDK components
+ *
+ * All of the log types above the current log level are captured (i.e. if
+ * you set the log level to `info`, errors are logged, but `debug` and
+ * `verbose` logs are not).
+ *
+ * @param ctx - the Logger instance otherwise will set global
+ * @param options - the options to pass to `setLogLevel()`
+ */
+export function setLogLevel(
+  ctx: AglynAppController | AglynLogger | null,
+  options: { logLevel: LogLevelString },
+): void {
+  const {logLevel} = options
+  if (ctx instanceof AglynAppController) {
+    _validateAppArg(ctx)
+    ctx.getLogger().setLogLevel(logLevel)
+    return
+  }
+  if (ctx instanceof Logger) {
+    ctx.setLogLevel(logLevel)
+    return
+  }
+  AGLYN_LOGGER.setLogLevel(logLevel)
 }
