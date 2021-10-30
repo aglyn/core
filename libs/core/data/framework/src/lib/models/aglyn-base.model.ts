@@ -27,8 +27,6 @@ import { AglynVersion, SDK_VERSION } from '../constants/version'
 import { AglynLifecycleObserver } from '../types'
 
 
-const TAG = 'AglynBaseModel'
-
 export interface AglynBaseModelOptions {
   logLevel?: LogLevelString
   errorFactory?: AglynErrorFactory
@@ -47,9 +45,12 @@ export interface AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModel
   setLogger(value: AglynLogger): this
 }
 
+const TAG = 'AglynBaseModel'
+
 export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
+  public static readonly childNs: string = null
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly sdkVersion: AglynVersion = SDK_VERSION
 
@@ -61,6 +62,9 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
 
   public get [Symbol.toStringTag](): string {
     return getStaticField(Symbol.toStringTag, this)
+  }
+  public get childNs(): string {
+    return getStaticField('childNs', this)
   }
   public get platform(): AglynPlatform {
     return getStaticField('platform', this)
@@ -87,13 +91,16 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
     this.#setup()
   }
   #setup() {
-    this.#errorFactory = this.#options.errorFactory || AGLYN_ERROR
-    this.#emitter = this.#options.emitter || AGLYN_EMITTER
-    this.#logger = this.#options.logger || AGLYN_LOGGER
+    const childNs = this.childNs
 
-    if (this.#options.logLevel) {
-      this.#logger.setLogLevel(this.#options.logLevel)
-    }
+    const errorFactory = this.#options.errorFactory || AGLYN_ERROR
+    this.#errorFactory = !childNs ? errorFactory : errorFactory.childFactory(childNs)
+
+    this.#emitter = this.#options.emitter || AGLYN_EMITTER
+
+    const logger = this.#options.logger || AGLYN_LOGGER
+    const logLevel = this.#options.logLevel
+    this.#logger = !logLevel ? logger : logger.setLogLevel(logLevel)
   }
 
   public toString(): string {
@@ -101,7 +108,10 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   }
   public toJSON(): Dictionary {
     return {
+      childNs: this.childNs,
       created: this.#created,
+      sdkVersion: this.sdkVersion,
+      platform: this.platform,
     }
   }
 

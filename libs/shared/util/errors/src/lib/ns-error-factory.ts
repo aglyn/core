@@ -89,7 +89,7 @@ export class NsErrorFactory<T extends string = EventFlag, U extends ErrorTagPayl
   }
   protected makeFullMessage(shortCode: string, shortMessage: string): string {
     // Scope - Error message (namespace/flag).
-    return `${this.scope} - ${shortMessage} (${shortCode}).`
+    return `[${this.scope}] - ${shortMessage} (${shortCode}).`
   }
 
   /**

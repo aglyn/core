@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { bitwiseHasOnlyAttributes } from '@aglyn/shared-util-tools'
+import { bitwiseHasAttribute, bitwiseHasOnlyAttributes } from '@aglyn/shared-util-tools'
 
 
 export enum LifecycleFlag {
@@ -28,19 +28,22 @@ export enum LifecycleFlag {
   INITIALIZE = 0x01 << 0x0B,
   LOAD = 0x01 << 0x0C,
   DESTROY = 0x01 << 0x0D,
+
+  SPINNING_UP = SPIN | UP,
+  SPINNING_DOWN = SPIN | DOWN,
 }
 
 export enum AglynLifecycleFlag {
   UNREGISTERED = LifecycleFlag.NONE,
-  REGISTERING = LifecycleFlag.REGISTER | LifecycleFlag.UP | LifecycleFlag.SPIN,
+  REGISTERING = LifecycleFlag.REGISTER | LifecycleFlag.SPINNING_UP,
   REGISTERED = LifecycleFlag.REGISTER | LifecycleFlag.UP,
-  INITIALIZING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.UP | LifecycleFlag.SPIN,
+  INITIALIZING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.SPINNING_UP,
   INITIALIZED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.UP,
-  LOADING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.UP | LifecycleFlag.SPIN,
+  LOADING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.SPINNING_UP,
   LOADED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.UP,
-  UNLOADING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.DOWN | LifecycleFlag.SPIN,
+  UNLOADING = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.SPINNING_DOWN,
   UNLOADED = LifecycleFlag.REGISTER | LifecycleFlag.INITIALIZE | LifecycleFlag.LOAD | LifecycleFlag.DOWN,
-  DESTROYING = LifecycleFlag.DESTROY | LifecycleFlag.DOWN | LifecycleFlag.SPIN,
+  DESTROYING = LifecycleFlag.DESTROY | LifecycleFlag.SPINNING_DOWN,
   DESTROYED = LifecycleFlag.DESTROY | LifecycleFlag.DOWN,
 }
 
@@ -101,9 +104,9 @@ export function nextLifecycleIsValid(current: AglynLifecycleFlag, next: AglynLif
 
     // DESTROYED
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
-    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.REGISTERED):
-    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.INITIALIZED):
+    case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
+    && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.LOADED):
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)
     && bitwiseHasOnlyAttributes(current, AglynLifecycleFlag.UNLOADED):
     case bitwiseHasOnlyAttributes(next, AglynLifecycleFlag.DESTROYED)

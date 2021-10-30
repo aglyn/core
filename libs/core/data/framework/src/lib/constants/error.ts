@@ -17,33 +17,35 @@
 
 import { IndexOf } from '@aglyn/shared-data-types'
 import { ErrorTagMessages, NsErrorFactory } from '@aglyn/shared-util-errors'
-import { PayloadData, PayloadParams } from '../types'
+import { AppUUN, ExtensionUUN, PayloadData, PayloadParams } from '../types'
 
 
 export enum AglynErrorEventFlag {
-  APP_NONE = 'app:none',
-  APP_EXISTS = 'app:exists',
-  APP_DELETED = 'app:deleted',
-  APP_BAD_NAME = 'app:bad-name',
-  APP_BAD_INSTANCE = 'app:bad-instance',
+  APP_NONE = 'error:app:none',
+  APP_EXISTS = 'error:app:exists',
+  APP_DELETED = 'error:app:deleted',
+  APP_BAD_NAME = 'error:app:bad-name',
+  APP_BAD_INSTANCE = 'error:app:bad-instance',
 
-  MODULE_MISSING_MEMBER = 'module:missing-member',
+  MODULE_MISSING_MEMBER = 'error:app:module:missing-member',
 
-  EXTENSION_NONE = 'module:extensions:no-extension',
-  EXTENSION_BAD_MODULE_LOADER = 'module:extensions:bad-module-loader',
-  EXTENSION_BAD_MODULE = 'module:extensions:bad-module-argument',
+  EXTENSION_NONE = 'error:module:extensions:no-extension',
+  EXTENSION_BAD_MODULE_LOADER = 'error:module:extensions:bad-loader',
+  EXTENSION_BAD_MODULE = 'error:module:extensions:bad-module',
 }
 
 export interface AglynErrorEventParams extends Record<AglynErrorEventType, unknown> {
-  [AglynErrorEventFlag.APP_NONE]: PayloadData<{ appName: string }>
-  [AglynErrorEventFlag.APP_BAD_NAME]: PayloadData<{ appName: string }>
-  [AglynErrorEventFlag.APP_EXISTS]: PayloadData<{ appName: string }>
-  [AglynErrorEventFlag.APP_DELETED]: PayloadData<{ appName: string }>
-  [AglynErrorEventFlag.APP_BAD_INSTANCE]: PayloadData<{ appName: string }>
-  [AglynErrorEventFlag.EXTENSION_NONE]: PayloadData<{ name: string }>
-  [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: undefined
-  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: PayloadData<{ moduleName: string, appName: string }>
-  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: PayloadData<{ extensionName: string, memberMethod: string }>
+  [AglynErrorEventFlag.APP_NONE]: PayloadData<{ appName: AppUUN }>
+  [AglynErrorEventFlag.APP_BAD_NAME]: PayloadData<{ appName: AppUUN }>
+  [AglynErrorEventFlag.APP_EXISTS]: PayloadData<{ appName: AppUUN }>
+  [AglynErrorEventFlag.APP_DELETED]: PayloadData<{ appName: AppUUN }>
+  [AglynErrorEventFlag.APP_BAD_INSTANCE]: PayloadData<{ appName: AppUUN }>
+
+  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: PayloadData<{ extensionName: ExtensionUUN, memberMethod: string }>
+
+  [AglynErrorEventFlag.EXTENSION_NONE]: PayloadData<{ extensionName: ExtensionUUN }>
+  [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: PayloadData<{ appName: AppUUN }>
+  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: PayloadData<{ extensionName?: ExtensionUUN, appName: AppUUN }>
 }
 
 export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof AglynErrorEventFlag>> = {
@@ -56,7 +58,7 @@ export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof Ag
   [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: 'Module \'{$moduleName}\' must implement member method AglynModule.{$memberMethod}()',
 
   [AglynErrorEventFlag.EXTENSION_NONE]: 'No AppExtension \'{$extensionName}\' has been registered on AglynApp \'{$appName}\'',
-  [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: 'No module has been provided for loading',
+  [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: 'Invalid module loader has been provided',
   [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: 'Bad AglynExtension module \'{$moduleName}\' provided on AglynApp \'{$appName}\'',
 }
 

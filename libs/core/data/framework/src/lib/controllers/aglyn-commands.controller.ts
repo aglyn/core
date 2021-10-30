@@ -25,10 +25,14 @@ import {
   CommandRemoveResolverPayload,
   CommandsSetResolverPayload,
   CommandTriggerPayload,
-  CommandUnregisterListenerPayload,
+  CommandUnregisterListenerPayload, ExtensionHandleLoaderPayload,
 } from '../constants/emitter'
 import type { COMMAND_LISTENER_TYPE, COMMAND_RESOLVER_TYPE, MODULE_TYPE } from '../constants/symbol'
-import { AglynModuleEffectListener, AglynModuleModel } from '../models/aglyn-module.model'
+import {
+  AglynModuleEffectListener,
+  AglynModuleModel,
+  AglynModuleModelOptions,
+} from '../models/aglyn-module.model'
 import type { AglynTypeFields, CommandUId } from '../types'
 
 
@@ -49,7 +53,11 @@ export interface AglynCommandListener extends AglynCommandListenerTypeFields {
   (data: TriggerListenerPayload<any, any>): void
 }
 
-export interface AglynCommandsController extends AglynModuleModel {
+export interface AglynCommandsControllerOptions extends AglynModuleModelOptions {
+  handlers?: CommandsSetResolverPayload
+}
+
+export interface AglynCommandsController extends AglynModuleModel<AglynCommandsControllerOptions> {
   setResolver(data: CommandsSetResolverPayload): void
   registerListener(data: CommandRegisterListenerPayload): void
   removeResolver(data: CommandRemoveResolverPayload): void
@@ -60,11 +68,11 @@ export interface AglynCommandsController extends AglynModuleModel {
 const TAG = 'AglynCommands'
 const MODULE_NAME = 'commands'
 
-export class AglynCommandsController extends AglynModuleModel {
+export class AglynCommandsController extends AglynModuleModel<AglynCommandsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-
-  public readonly moduleName: string = MODULE_NAME
+  public static readonly childNs: string = MODULE_NAME
+  public static readonly moduleName: string = MODULE_NAME
 
   #commander: AglynCommander = EmitterFn()
   #resolvers: Map<CommandUId, AglynCommandResolver> = new Map()
@@ -78,9 +86,6 @@ export class AglynCommandsController extends AglynModuleModel {
 
   constructor(options) {super(options)}
 
-  public toString(): string {
-    return `${TAG}(app: '${this.app.getName()}')`
-  }
   public toJSON() {
     return {
       ...super.toJSON(),

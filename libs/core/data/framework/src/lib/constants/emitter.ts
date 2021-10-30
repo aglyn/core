@@ -31,7 +31,8 @@ import type {
   AglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
 import type { ContextStore, ContextStoreOptions } from '../controllers/aglyn-contexts.controller'
-import type { AglynExtension } from '../models/aglyn-extension.model'
+import { AglynExtensionLoader } from '../controllers/aglyn-extensions.controller'
+import type { AglynExtension, AglynExtensionOptions } from '../models/aglyn-extension.model'
 import type {
   AppUUN,
   BundleUId,
@@ -132,6 +133,7 @@ export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmi
 
 export enum AglynAppEffectFlag {
   EXTENSION_REGISTER = 'effect:extension:register',
+  EXTENSION_INITIALIZE = 'effect:extension:initialize',
   EXTENSION_LOAD = 'effect:extension:load',
   EXTENSION_UNLOAD = 'effect:extension:unload',
   EXTENSION_DESTROY = 'effect:extension:destroy',
@@ -159,17 +161,16 @@ export enum AglynAppEffectFlag {
   COMPONENTS_BUNDLE_UNREGISTER = 'effect:components:unregister-components-bundle',
 }
 
+export type ExtensionHandleLoaderPayload = PayloadData<{ loader: AglynExtensionLoader, options?: Partial<AglynExtensionOptions> }>
 export type ExtensionRegisterPayload = PayloadData<{ extension: AglynExtension }>
 export type ExtensionInitializePayload = PayloadData<{ extension: AglynExtension }>
 export type ExtensionDestroyPayload = PayloadData<{ extensionName: ExtensionUUN }>
 export type ExtensionLoadPayload = PayloadData<{ extensionName: ExtensionUUN }>
 export type ExtensionUnloadPayload = PayloadData<{ extensionName: ExtensionUUN }>
 
-export type CreateEventOptions = { options: Parameters<typeof createEffectorEvent> }
-export type CreateEffectOptions = { options: Parameters<typeof createEffectorEffect> }
 export type ContextsCreateStorePayload<T = any> = PayloadData<{ defaultState: T, options?: ContextStoreOptions<T> }>
-export type ContextsCreateEventPayload = PayloadData<CreateEventOptions>
-export type ContextsCreateEffectPayload = PayloadData<CreateEffectOptions>
+export type ContextsCreateEventPayload = PayloadData<{ options: Parameters<typeof createEffectorEvent> }>
+export type ContextsCreateEffectPayload = PayloadData<{ options: Parameters<typeof createEffectorEffect> }>
 export type ContextsGetStorePayload = PayloadData<{ storeId: ContextStoreUid }>
 export type ContextsSetStorePayload<T = any> = PayloadData<{ storeId: ContextStoreUid, store: ContextStore<T> }>
 export type ContextsDeleteStorePayload = PayloadData<{ storeId: ContextStoreUid }>
@@ -191,6 +192,7 @@ export type CommandTriggerPayload = PayloadData<{ commandId: CommandUId } & Dict
 
 export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, AglynEmitterPayload> {
   [AglynAppEffectFlag.EXTENSION_REGISTER]: ExtensionRegisterPayload
+  [AglynAppEffectFlag.EXTENSION_INITIALIZE]: ExtensionInitializePayload
   [AglynAppEffectFlag.EXTENSION_DESTROY]: ExtensionDestroyPayload
   [AglynAppEffectFlag.EXTENSION_LOAD]: ExtensionLoadPayload
   [AglynAppEffectFlag.EXTENSION_UNLOAD]: ExtensionUnloadPayload

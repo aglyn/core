@@ -26,7 +26,7 @@ import {
 import { AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
 import { TYPE_OF } from '../constants/symbol'
 import { AglynBaseModel, AglynBaseModelOptions } from '../models/aglyn-base.model'
-import { AglynNamed, Payload } from '../types'
+import { AppUUN, Payload } from '../types'
 import { AglynCommandsController, AglynCommandsControllerT } from './aglyn-commands.controller'
 import {
   AglynComponentsController,
@@ -34,14 +34,18 @@ import {
 } from './aglyn-components.controller'
 import { AglynContextsController, AglynContextsControllerT } from './aglyn-contexts.controller'
 import {
-  AglynExtensionLoader,
   AglynExtensionsController,
+  AglynExtensionsControllerOptions,
   AglynExtensionsControllerT,
 } from './aglyn-extensions.controller'
 
 
-export interface AglynAppOptions extends AglynNamed, AglynBaseModelOptions {
-  extensions?: AglynExtensionLoader[]
+export interface AglynAppOptions extends AglynBaseModelOptions {
+  appName?: AppUUN
+  modulesOptions?: {
+    extensions?: AglynExtensionsControllerOptions
+    commands?: AglynExtensionsControllerOptions
+  }
 }
 
 export interface AglynEffectOptions<T, U = unknown> extends Payload<U> {
@@ -100,7 +104,7 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
 
   constructor(options: AglynAppOptions) {
     super(options)
-    this.#name = options.name || DEFAULT_ENTRY_NAME
+    this.#name = options.appName || DEFAULT_ENTRY_NAME
     this.#setup()
   }
   #setup() {
@@ -116,7 +120,7 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
     _contextsControllers.set(
       this.#name,
       this.#contextsController = new this.ContextsController({
-        app: this,
+        ...this.options, app: this,
       }),
     )
     _commandsControllers.set(
@@ -178,6 +182,15 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
       this.getEmitter().emit(AglynAppEventFlag.APP_MODULE_DESTROYED, {moduleName})
     })
   }
+  public toString(): string {
+    return `${this[Symbol.toStringTag]}(name: '${name}')`
+  }
+  public toJSON() {
+    return {
+      ...super.toJSON(),
+      name: this.#name,
+    }
+  }
 
   public aglynOnInit(): void {
     this.getLogger().debug(AglynAppEventFlag.APP_INITIALIZING, {appName: this.#name})
@@ -196,15 +209,6 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
 
     this.getLogger().debug(AglynAppEventFlag.APP_DESTROYED, {appName: this.#name})
     this.getEmitter().emit(AglynAppEventFlag.APP_DESTROYED, {appName: this.#name})
-  }
-  public toString(): string {
-    return `${TAG}(name: '${name}')`
-  }
-  public toJSON() {
-    return {
-      ...super.toJSON(),
-      name: this.#name,
-    }
   }
 
   public getName = (): string => {

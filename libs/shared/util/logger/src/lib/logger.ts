@@ -120,8 +120,9 @@ export class Logger {
   }
 
   // Workaround for setter/getter having to be the same type.
-  setLogLevel(val: LogLevel | LogLevelString): void {
+  setLogLevel(val: LogLevel | LogLevelString): this {
     this._logLevel = typeof val === 'string' ? LogLevel.fromStr(val) : val
+    return this
   }
 
   /**
@@ -191,28 +192,34 @@ export namespace Logger {
       }
       if (logCallback === null) {
         instance.userLogHandler = null
-      } else {
+      }
+      else {
         instance.userLogHandler = (instance: Logger, level: LogLevel, ...args: unknown[]) => {
           const message = args
-            .map((arg) => {
-              if (arg == null) {
-                return null
-              } else if (typeof arg === 'string') {
-                return arg
-              } else if (typeof arg === 'number' || typeof arg === 'boolean') {
-                return arg.toString()
-              } else if (arg instanceof Error) {
-                return arg.message
-              } else {
-                try {
-                  return JSON.stringify(arg)
-                } catch (ignored) {
-                  return null
-                }
+          .map((arg) => {
+            if (arg == null) {
+              return null
+            }
+            else if (typeof arg === 'string') {
+              return arg
+            }
+            else if (typeof arg === 'number' || typeof arg === 'boolean') {
+              return arg.toString()
+            }
+            else if (arg instanceof Error) {
+              return arg.message
+            }
+            else {
+              try {
+                return JSON.stringify(arg)
               }
-            })
-            .filter((arg) => arg)
-            .join(' ')
+              catch (ignored) {
+                return null
+              }
+            }
+          })
+          .filter((arg) => arg)
+          .join(' ')
           if (level >= (customLogLevel ?? instance.logLevel)) {
             logCallback({
               level: LogLevel.toStr(level),
@@ -253,8 +260,9 @@ export const defaultLogHandler: LogHandler = (instance, logType, ...args): void 
   const now = new Date().toISOString()
   const method = ConsoleMethodKey[logType as keyof typeof ConsoleMethodKey]
   if (method) {
-    console[method as 'log' | 'info' | 'warn' | 'error'](`[${now}]  ${instance.name}`, ...args)
-  } else {
+    console[method](`[${now}]  ${instance.name}`, ...args)
+  }
+  else {
     throw new Error(`Attempted to log a message with an invalid logType (value: ${logType})`)
   }
 }

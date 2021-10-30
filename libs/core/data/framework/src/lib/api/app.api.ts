@@ -16,15 +16,13 @@
  */
 
 import { MutableShallow } from '@aglyn/shared-data-types'
-import { _isCtor, _isStrEmpty } from '@aglyn/shared-util-guards'
+import { _isStrEmpty } from '@aglyn/shared-util-guards'
 import { trim } from '@aglyn/shared-util-tools'
 import { _apps, DEFAULT_ENTRY_NAME } from '../constants/_internal'
-import { AGLYN_EMITTER, AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
+import { AGLYN_EMITTER, AglynAppEventFlag } from '../constants/emitter'
 import { AGLYN_ERROR, AglynErrorEventFlag } from '../constants/error'
 import { AGLYN_LOGGER } from '../constants/logger'
 import { AglynAppController, AglynAppOptions } from '../controllers/aglyn-app.controller'
-import { AglynExtensionLoader } from '../controllers/aglyn-extensions.controller'
-import { isAglynExtension, isAglynModule } from '../util/aglyn-is'
 
 
 export function getAllApps(): AglynAppController[] {
@@ -53,8 +51,7 @@ export function deleteApp(app: AglynAppController): void {
 
 export function initializeApp(opts: AglynAppOptions = {}): AglynAppController {
   const options: AglynAppOptions = {...opts}
-  const appName: string = trim(opts.name || DEFAULT_ENTRY_NAME)
-  const extensions = options.extensions || []
+  const appName: string = trim(opts.appName || DEFAULT_ENTRY_NAME)
   if (_isStrEmpty(appName)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_NAME, {appName})
   }
@@ -65,7 +62,6 @@ export function initializeApp(opts: AglynAppOptions = {}): AglynAppController {
   _apps.set(appName, app)
 
   app.aglynOnInit()
-  _loadAppExtensions({app, extensions})
 
   return app
 }
@@ -77,29 +73,4 @@ export function _validateAppArg(app: AglynAppController): void {
   if (app['deleted']) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_DELETED, {appName: app?.getName?.()})
   }
-}
-
-export function _loadAppExtensions(data: { app: AglynAppController, extensions: AglynExtensionLoader[] }) {
-  const {app, extensions = []} = data
-
-  extensions.map((loader) => {
-    console.log('loader', loader(), extensions)
-    const module = loader()
-    if (!module) {
-      throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER, undefined)
-    }
-    if (!isAglynModule(module) || !isAglynExtension(module) || !_isCtor(module)) {
-      throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE, {
-        moduleName: module?.['name'] ?? 'unknown',
-        appName: app.getName() ?? DEFAULT_ENTRY_NAME,
-      })
-    }
-
-    const extensionModel = new module(app)
-    app.effect({
-      type: AglynAppEffectFlag.EXTENSION_REGISTER,
-      payload: {extension: extensionModel},
-    })
-    return module
-  })
 }

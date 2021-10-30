@@ -208,8 +208,8 @@ const MODULE_NAME = 'components'
 export class AglynComponentsController extends AglynModuleModel {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-
-  public readonly moduleName: string = MODULE_NAME
+  public static readonly childNs: string = MODULE_NAME
+  public static readonly moduleName: string = MODULE_NAME
 
   protected context: ComponentsRegistry = {
     bundles: new Map(),
@@ -220,9 +220,6 @@ export class AglynComponentsController extends AglynModuleModel {
 
   constructor(options) {super(options)}
 
-  public toString(): string {
-    return `${TAG}(app: '${this.app.getName()}')`
-  }
   public toJSON() {
     return {
       ...super.toJSON(),

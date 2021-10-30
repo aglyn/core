@@ -15,31 +15,40 @@
  * limitations under the License.
  */
 
-import { MutableShallow } from '@aglyn/shared-data-types'
-import { _isEqualitySameType } from '@aglyn/shared-util-guards'
-import { getStaticField } from '@aglyn/shared-util-tools'
+import type { MutableShallow } from '@aglyn/shared-data-types'
+import { _isCtor } from '@aglyn/shared-util-guards'
+import { DEFAULT_ENTRY_NAME } from '../constants/_internal'
 import {
   AglynAppEffectFlag,
   AglynAppEventFlag,
   ExtensionDestroyPayload,
+  ExtensionHandleLoaderPayload,
   ExtensionInitializePayload,
   ExtensionLoadPayload,
   ExtensionRegisterPayload,
   ExtensionUnloadPayload,
 } from '../constants/emitter'
+import { AGLYN_ERROR, AglynErrorEventFlag } from '../constants/error'
 import { AglynLifecycleFlag } from '../constants/lifecycle'
 import { EXTENSION_TYPE, MODULE_TYPE } from '../constants/symbol'
-import type { AglynExtension } from '../models/aglyn-extension.model'
-import { AglynExtensionT } from '../models/aglyn-extension.model'
-import { AglynModuleEffectListener, AglynModuleModel } from '../models/aglyn-module.model'
-import { AglynExtensionMap, AglynTypeFields, ExtensionUUN } from '../types'
-import { isAglynExtension } from '../util/aglyn-is'
+import { AglynExtension, AglynExtensionT } from '../models/aglyn-extension.model'
+import {
+  AglynModuleEffectListener,
+  AglynModuleModel,
+  AglynModuleModelOptions,
+} from '../models/aglyn-module.model'
+import type { AglynExtensionMap, AglynTypeFields, ExtensionUUN } from '../types'
+import { isAglynExtension, isAglynModule } from '../util/aglyn-is'
 
 
 export type AglynExtensionTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof EXTENSION_TYPE>
 export type AglynExtensionLoader = () => Promise<AglynExtensionT>
 
-export interface AglynExtensionsController extends AglynModuleModel {
+export interface AglynExtensionsControllerOptions extends AglynModuleModelOptions {
+  initialExtensions?: ExtensionHandleLoaderPayload[]
+}
+
+export interface AglynExtensionsController extends AglynModuleModel<AglynExtensionsControllerOptions> {
   registerExtension(payload: ExtensionRegisterPayload): void
   loadExtension(payload: ExtensionLoadPayload): void
   unloadExtension(payload: ExtensionUnloadPayload): void
@@ -53,23 +62,27 @@ export interface AglynExtensionsController extends AglynModuleModel {
 const TAG = 'AglynExtensions'
 const MODULE_NAME = 'extensions'
 
-export class AglynExtensionsController extends AglynModuleModel {
+export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-
-  public readonly moduleName: string = MODULE_NAME
+  public static readonly childNs: string = MODULE_NAME
+  public static readonly moduleName: string = MODULE_NAME
 
   protected extensions: AglynExtensionMap = new Map()
 
-  public get [Symbol.toStringTag](): string {
-    return getStaticField(Symbol.toStringTag, this)
+  constructor(options) {
+    super(options)
+    this.#setup()
+  }
+  #setup() {
+    this.#setupInitialExtensions()
+  }
+  #setupInitialExtensions(): void {
+    this.options.initialExtensions?.forEach((payload) => {
+      this.handleLoader(payload)
+    })
   }
 
-  constructor(options) {super(options)}
-
-  public toString(): string {
-    return `${TAG}(appName: '${this.app.getName()}')`
-  }
   public toJSON() {
     return {
       ...super.toJSON(),
@@ -80,6 +93,28 @@ export class AglynExtensionsController extends AglynModuleModel {
     this.unloadAllExtensions()
     this.destroyAllExtensions()
     super.aglynOnDestroy()
+  }
+
+  public handleLoader = (payload: ExtensionHandleLoaderPayload): AglynExtension => {
+    const {loader, options} = payload
+    const module = loader()
+    const appName = this.app.getName()
+    if (!module) {
+      throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER, {appName})
+    }
+    if (!isAglynModule(module) || !isAglynExtension(module) || !_isCtor(module)) {
+      throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE, {
+        appName, extensionName: module?.['extensionName'] ?? 'unknown',
+      })
+    }
+    const instance = new module({...options, app: this.app})
+    if (!(instance instanceof AglynExtension)) {
+      throw AGLYN_ERROR.create(AglynErrorEventFlag.EXTENSION_BAD_MODULE, {
+        appName, extensionName: module?.['extensionName'] ?? 'unknown',
+      })
+    }
+    this.registerExtension({extension: instance})
+    return instance
   }
   public getExtensionByName = (extensionName: ExtensionUUN): AglynExtension => {
     const extension = this.extensions.get(extensionName)
@@ -106,7 +141,7 @@ export class AglynExtensionsController extends AglynModuleModel {
       extension.lifecycle = AglynLifecycleFlag.REGISTERING
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
       this.getEmitter().emit(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
-      this.extensions.set(extensionName, extension as AglynExtension)
+      this.extensions.set(extensionName, extension)
       extension.lifecycle = AglynLifecycleFlag.REGISTERED
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
       this.getEmitter().emit(AglynAppEventFlag.EXTENSION_REGISTERED, {extensionName})
@@ -173,21 +208,12 @@ export class AglynExtensionsController extends AglynModuleModel {
     const {extensionName} = payload
     const extension = this.extensions.get(extensionName)
     if (extension) {
-      const isLoaded = _isEqualitySameType(
-        extension.lifecycle,
-        AglynLifecycleFlag.INITIALIZED,
-        AglynLifecycleFlag.LOADING,
-        AglynLifecycleFlag.LOADED,
-      )
-      if (isLoaded) {
-        this.unloadExtension({extensionName})
-      }
       extension.lifecycle = AglynLifecycleFlag.DESTROYING
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
       this.getEmitter().emit(AglynAppEventFlag.EXTENSION_DESTROYING, {extensionName})
       extension.aglynOnDestroy?.(this.app)
-      extension.lifecycle = AglynLifecycleFlag.DESTROYED
       this.extensions.delete(extensionName)
+      extension.lifecycle = AglynLifecycleFlag.DESTROYED
       this.getLogger().debug(AglynAppEventFlag.EXTENSION_DESTROYED, {extensionName})
       this.getEmitter().emit(AglynAppEventFlag.EXTENSION_DESTROYED, {extensionName})
     }
@@ -203,14 +229,17 @@ export class AglynExtensionsController extends AglynModuleModel {
     })
   }
   public destroyAllExtensions = (): void => {
-    this.extensions.forEach((_, extensionName) => {
-      this.unloadExtension({extensionName})
+    this.extensions.forEach((extension, extensionName) => {
+      if (extension.lifecycle !== AglynLifecycleFlag.UNREGISTERED) {
+        this.destroyExtension({extensionName})
+      }
     })
   }
 
 
   protected listeners: AglynModuleEffectListener<any>[] = [
     [AglynAppEffectFlag.EXTENSION_REGISTER, this.registerExtension],
+    [AglynAppEffectFlag.EXTENSION_INITIALIZE, this.initializeExtension],
     [AglynAppEffectFlag.EXTENSION_LOAD, this.loadExtension],
     [AglynAppEffectFlag.EXTENSION_UNLOAD, this.unloadExtension],
     [AglynAppEffectFlag.EXTENSION_DESTROY, this.destroyExtension],

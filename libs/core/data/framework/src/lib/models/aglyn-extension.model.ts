@@ -18,9 +18,8 @@
 import { getStaticField } from '@aglyn/shared-util-tools'
 import { AglynErrorEventFlag } from '../constants/error'
 import { AglynLifecycleFlag, nextLifecycleIsValid } from '../constants/lifecycle'
-import { EXTENSION_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
+import { EXTENSION_TYPE, TYPE_KIND } from '../constants/symbol'
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import type { AglynExtensionTypeFields } from '../controllers/aglyn-extensions.controller'
 import type { AglynLoadableObserver, ExtensionUUN } from '../types'
 import { AglynModuleModel, AglynModuleModelOptions } from './aglyn-module.model'
 
@@ -31,7 +30,6 @@ export interface AglynExtensionOptions extends AglynModuleModelOptions {
 
 export interface AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
   extends AglynModuleModel<O>,
-    AglynExtensionTypeFields,
     AglynLoadableObserver<AglynAppController, AglynAppController> {
   getExtensionName(): string
   getContext(): T
@@ -39,28 +37,18 @@ export interface AglynExtension<T = any, O extends AglynExtensionOptions = Aglyn
 }
 
 const TAG = 'AglynExtension'
-const MODULE_NAME = 'extension'
+const MODULE_NAME = 'extensions/model'
 
 export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModel<O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-
-  public static readonly [TYPE_OF]: number | symbol = MODULE_TYPE
   public static readonly [TYPE_KIND]: number | symbol = EXTENSION_TYPE
-
-  public static readonly extensionName: string = null
-
-  public readonly moduleName: string = `${MODULE_NAME}:${this.extensionName || 'unknown'}`
+  public static readonly extensionName: string = 'unknown'
+  public static get childNs(): string {return `${MODULE_NAME}/${this.extensionName}`}
+  public static get moduleName(): string {return `${MODULE_NAME}/${this.extensionName}`}
 
   protected context?: T = null
   #lifecycle?: AglynLifecycleFlag[] = [AglynLifecycleFlag.UNREGISTERED]
-
-  public get [TYPE_OF](): number | symbol {
-    return getStaticField(TYPE_OF, this)
-  }
-  public get [TYPE_KIND](): number | symbol {
-    return getStaticField(TYPE_KIND, this)
-  }
 
   public get extensionName() {
     return getStaticField('extensionName', this)
@@ -84,14 +72,13 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
   }
 
   public toString = (): string => {
-    return `${TAG}(${this.extensionName})`
+    return `${super.toString()}[${this.extensionName}]`
   }
   public toJSON = () => {
     return {
       ...super.toJSON(),
+
       extensionName: this.extensionName,
-      [TYPE_OF]: getStaticField(TYPE_OF, this),
-      [TYPE_KIND]: getStaticField(TYPE_KIND, this),
     }
   }
 

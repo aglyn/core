@@ -30,7 +30,6 @@ export type AglynModuleEffectListener<Effect extends AglynAppEffectFlag> = [
 
 export interface AglynModuleModelOptions extends AglynBaseModelOptions {
   app: AglynAppController
-  moduleName?: string
 }
 
 export interface AglynModuleModel<O extends AglynModuleModelOptions = AglynModuleModelOptions>
@@ -45,11 +44,10 @@ const MODULE_NAME = 'module'
 export abstract class AglynModuleModel<O extends AglynModuleModelOptions = AglynModuleModelOptions> extends AglynBaseModel<O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-
   public static readonly [TYPE_OF]: number | symbol = MODULE_TYPE
   public static readonly [TYPE_KIND]: number | symbol = undefined
-
-  public readonly moduleName: string = MODULE_NAME
+  public static readonly moduleName: string = MODULE_NAME
+  public static readonly childNs: string = MODULE_NAME
 
   protected app: AglynAppController
 
@@ -59,6 +57,9 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
   public get [TYPE_KIND](): number | symbol {
     return getStaticField(TYPE_KIND, this)
   }
+  public get moduleName(): string {
+    return getStaticField('moduleName', this)
+  }
 
   protected constructor(options: O) {
     super(options)
@@ -66,12 +67,18 @@ export abstract class AglynModuleModel<O extends AglynModuleModelOptions = Aglyn
     this.#setup()
   }
   #setup() {
-    // Replace error factory with child namespace if not overridden
-    if (!this.options.errorFactory) {
-      const errorFactory = this.getErrorFactory()?.childFactory(this.moduleName)
-      if (errorFactory) {
-        this.setErrorFactory(errorFactory)
-      }
+
+  }
+
+  public toString(): string {
+    return `${super.toString()}['${this.app.getName()}']`
+  }
+  public toJSON() {
+    return {
+      ...super.toJSON(),
+      [TYPE_OF]: this[TYPE_OF],
+      [TYPE_KIND]: this[TYPE_KIND],
+      moduleName: this.moduleName,
     }
   }
 

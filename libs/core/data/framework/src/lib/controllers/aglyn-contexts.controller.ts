@@ -79,8 +79,8 @@ const MODULE_NAME = 'contexts'
 export class AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-
-  public readonly moduleName: string = MODULE_NAME
+  public static readonly moduleName: string = MODULE_NAME
+  public static readonly childNs: string = MODULE_NAME
 
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()
@@ -106,9 +106,6 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
     }
   }
 
-  public toString(): string {
-    return `${TAG}(app: '${this.app.getName()}')`
-  }
   public toJSON() {
     return {
       ...super.toJSON(),
