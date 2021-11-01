@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-import { ElementType, Fragment, MouseEventHandler, ReactNode, useCallback, useState } from 'react'
+import {
+  ElementType,
+  Fragment,
+  MouseEventHandler,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import {
   buildConfirmationContextConfig,
   ConfirmationContext,
@@ -24,6 +32,7 @@ import {
   DEFAULT_CONTEXT_CONFIG,
 } from '../../contexts/confirmation.context'
 import DialogConfirm from '../dialog-confirm/dialog-confirm'
+
 
 export interface ConfirmationProviderComponentProps {
   defaultOptions?: ConfirmationContextConfig
@@ -38,8 +47,8 @@ export interface ConfirmationProviderComponentProps {
 }
 
 export function ConfirmationProviderComponent(props: ConfirmationProviderComponentProps) {
-  const { children, defaultOptions = {}, component: Component } = props
-  const [options, setOptions] = useState({ ...DEFAULT_CONTEXT_CONFIG, ...defaultOptions })
+  const {children, defaultOptions = {}, component: Component} = props
+  const [options, setOptions] = useState({...DEFAULT_CONTEXT_CONFIG, ...defaultOptions})
   const [resolveReject, setResolveReject] = useState([])
   const [resolve, reject] = resolveReject
 
@@ -50,7 +59,7 @@ export function ConfirmationProviderComponent(props: ConfirmationProviderCompone
         setResolveReject([resolve, reject])
       })
     },
-    [defaultOptions]
+    [defaultOptions],
   )
 
   const handleClose = useCallback(() => {
@@ -67,9 +76,17 @@ export function ConfirmationProviderComponent(props: ConfirmationProviderCompone
     handleClose()
   }, [resolve, handleClose])
 
+  const child = useMemo(() => {
+    return (
+      <ConfirmationContext.Provider value={{confirm}}>
+        {children}
+      </ConfirmationContext.Provider>
+    )
+  }, [children, confirm])
+
   return (
     <Fragment>
-      <ConfirmationContext.Provider value={{ confirm }}>{children}</ConfirmationContext.Provider>
+      {child}
       <Component
         open={resolveReject.length === 2}
         options={options}
