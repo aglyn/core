@@ -15,10 +15,28 @@
  * limitations under the License.
  */
 
-import { ElementType, Fragment, memo, ReactNode, useCallback, useMemo, useState } from 'react'
-import { useDebouncedCallback } from 'use-debounce'
+import {
+  BuilderSetCanvasHoveredPayload,
+  BuilderSetCanvasSelectedPayload,
+  setBuilderCanvasHovered,
+  setBuilderCanvasSelected,
+} from '@aglyn/core-data-framework'
+import { useAglynBuilderStore, useAglynAppContext } from '@aglyn/feature-renderer'
+import { useDndMonitor } from '@dnd-kit/core'
+import { DragOverEvent } from '@dnd-kit/core/dist/types'
+import Box from '@mui/material/Box'
+import {
+  ElementType,
+  Fragment,
+  ReactNode,
+  SyntheticEvent,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { HoverComponent, HoverComponentProps } from '../components/hover.component'
-import { buildOptions, DEFAULT_OPTIONS, HoverContext, HoverOptions } from './hover-context'
+import { ActivityContext, HoverContext, HoverOptions } from './hover-context'
 
 
 export interface HoverContextProviderProps {
@@ -34,80 +52,136 @@ type ResolveReject<T = any> = [] | [
 
 function HoverContextProviderRaw(props: HoverContextProviderProps) {
   const {children, defaultOptions, component: Component} = props
-  const [selectedOptions, setSelectedOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS, ...defaultOptions})
-  const [selectedResolveReject, setSelectedResolveReject] = useState<ResolveReject>(() => [])
-  const [hoveredOptions, setHoveredOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS, ...defaultOptions})
-  const [hoveredResolveReject, setHoveredResolveReject] = useState<ResolveReject>(() => [])
 
-  const handleHover = useDebouncedCallback((opts: HoverOptions) => {
-    setHoveredOptions(buildOptions(defaultOptions, opts || {}))
-    return new Promise((resolve, reject) => {
-      setHoveredResolveReject([resolve, reject])
-    })
-  }, 200)
+  // const [selectedOptions, setSelectedOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS,
+  // ...defaultOptions})
+  // const [selectedResolveReject, setSelectedResolveReject] = useState<ResolveReject>(() => [])
 
-  const handleSelect = (opts: HoverOptions) => {
-    setSelectedOptions(buildOptions(defaultOptions, opts || {}))
-    return new Promise((resolve, reject) => {
-      setSelectedResolveReject([resolve, reject])
-    })
-  }
+  // const [hoveredOptions, setHoveredOptions] = useState<HoverOptions>({...DEFAULT_OPTIONS,
+  // ...defaultOptions})
+  // const [hoveredResolveReject, setHoveredResolveReject] = useState<ResolveReject>(() => [])
 
-  const handleUnhover = useDebouncedCallback(() => setHoveredResolveReject([]), 200)
-  const handleDeselect = () => setSelectedResolveReject([])
 
-  const hoverOpen = useCallback((opts: HoverOptions) => {
-    return handleHover(opts)
-  }, [handleHover])
+  const {getApp} = useAglynAppContext()
+  const selectedOptions = useAglynBuilderStore('canvas', 'selected')
+  const hoveredOptions = useAglynBuilderStore('canvas', 'hovered')
 
-  const hoverSelect = useCallback((event?: Element, opts?: HoverOptions) => {
-    return handleSelect(opts)
-  }, [handleSelect])
+  const hoverRef = useRef<Element>()
+  const selectedRef = useRef<Element>()
 
-  const hoverClose = useCallback((event?: Element) => {
-    handleUnhover()
-  }, [handleUnhover])
+  const selectedOpen = Boolean(selectedOptions?.$id && hoverRef.current)
+  const hoveredOpen = Boolean(hoveredOptions?.$id && selectedRef.current)
 
-  const hoverDeselect = useCallback((event?: Element) => {
-    handleDeselect()
+  const hoverOpen = useCallback((e: SyntheticEvent, opts: BuilderSetCanvasHoveredPayload) => {
+    hoverRef.current = e.currentTarget
+    setBuilderCanvasHovered(getApp(), opts)
   }, [])
+
+  const hoverSelect = useCallback((e: SyntheticEvent, opts: BuilderSetCanvasSelectedPayload) => {
+    selectedRef.current = e.currentTarget
+    setBuilderCanvasSelected(getApp(), opts)
+  }, [])
+
+  const hoverClose = useCallback((e?: SyntheticEvent) => {
+    setBuilderCanvasHovered(getApp(), {hovered: null})
+    hoverRef.current = null
+  }, [])
+  const hoverDeselect = useCallback((e?: SyntheticEvent) => {
+    setBuilderCanvasSelected(getApp(), {selected: null})
+    setBuilderCanvasHovered(getApp(), {hovered: null})
+    selectedRef.current = null
+  }, [])
+
+  const state = {
+    selectedOptions,
+    hoveredOptions,
+    hoverOpen,
+    hoverSelect,
+    hoverClose,
+    hoverDeselect,
+  }
 
   const child = useMemo(() => {
     return (
-      <HoverContext.Provider value={{hoverOpen, hoverSelect, hoverClose, hoverDeselect}}>
+      <HoverContext.Provider value={state}>
         {children}
       </HoverContext.Provider>
     )
-  }, [children, hoverOpen, hoverSelect, hoverClose, hoverDeselect])
+  }, [children, state])
 
-  const childSelected = useMemo(() => {
-    return (
-      <Component
-        open={selectedResolveReject.length === 2}
-        options={selectedOptions}
-        onClose={hoverDeselect}
-        variant={'selected'}
-      />
-    )
-  }, [selectedResolveReject, selectedOptions, hoverDeselect])
+  const [over, setOver] = useState<DragOverEvent>(null)
 
-  const childHovered = useMemo(() => {
-    return (
-      <Component
-        open={hoveredResolveReject.length === 2}
-        options={hoveredOptions}
-        onClose={hoverClose}
-        variant={'hovered'}
-      />
-    )
-  }, [hoveredResolveReject, hoveredOptions, hoverClose])
+  useDndMonitor({
+    onDragStart(event) {},
+    onDragMove(event) {},
+    onDragOver(event) {
+      setOver(event)
+      console.log('event on drag over', event)
+    },
+    onDragEnd(event) {
+      setOver(null)
+    },
+    onDragCancel(event) {},
+  })
 
+  const activityRef = useRef(null)
+
+  // console.log('selectedOptions selectedOpen', selectedOptions, selectedOpen, hoveredOpen)
 
   return (
     <Fragment>
-      {child}
-      {childSelected}
-      {childHovered}
+      <ActivityContext.Provider value={activityRef}>
+        {child}
+      </ActivityContext.Provider>
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0, top: 0,
+          width: 1, height: 1,
+          pointerEvents: 'none',
+          '&>*': {pointerEvents: 'all'},
+        }}
+        ref={activityRef}
+      >
+        <Component
+          open={hoveredOpen}
+          anchorEl={hoverRef.current}
+          options={hoveredOptions}
+          onClose={hoverClose}
+          variant={'hovered'}
+        />
+
+        <Component
+          open={selectedOpen}
+          anchorEl={selectedRef.current}
+          options={selectedOptions}
+          onClose={hoverDeselect}
+          variant={'selected'}
+        />
+
+
+        {over && (
+          <Box
+            id={`aglyn:marker:${over.active.id}`}
+            style={{
+              // ...over?.over?.rect,
+              // ...over?.delta,
+              width: over?.over?.rect?.width,
+              height: over?.over?.rect?.height,
+              left: over?.over?.rect?.offsetLeft,
+              top: over?.over?.rect?.offsetTop,
+            }}
+            sx={{
+              position: 'absolute',
+              display: 'block',
+              pointerEvents: 'none',
+              bgcolor: 'blue',
+              opacity: 0.25,
+              // mt: -11.5,
+            }}
+          />
+        )}
+      </Box>
     </Fragment>
   )
 }
@@ -118,5 +192,5 @@ HoverContextProviderRaw.defaultProps = {
   defaultOptions: {},
 }
 
-export const HoverContextProvider = memo(HoverContextProviderRaw)
+export const HoverContextProvider = HoverContextProviderRaw
 export default HoverContextProvider

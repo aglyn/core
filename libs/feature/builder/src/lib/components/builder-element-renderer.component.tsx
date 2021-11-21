@@ -15,14 +15,20 @@
  * limitations under the License.
  */
 
+import { InteractionModeFlag } from '@aglyn/core-data-framework'
 import {
   ElementRendererComponent,
   ElementRendererComponentProps,
+  useAglynBuilderStore,
   useAglynElementData,
 } from '@aglyn/feature-renderer'
-import { useCombinedRefs, useConfirmationContext } from '@aglyn/shared-ui-jsx'
-import { forwardRef, useCallback, useRef } from 'react'
-import { useHoverContext } from '../contexts/hover-context'
+import { useCombinedRefs } from '@aglyn/shared-ui-jsx'
+import { getElementClientRectBounding, getElementPosition } from '@aglyn/shared-util-dom'
+import { CSS } from '@aglyn/shared-util-tools'
+import { useDraggable, useDroppable } from '@dnd-kit/core'
+import Portal from '@mui/material/Portal'
+import { forwardRef, Fragment, MouseEvent, useCallback, useRef } from 'react'
+import { ActivityContext, useHoverContext } from '../contexts/hover-context'
 
 
 export interface BuilderElementRendererComponentProps extends ElementRendererComponentProps {
@@ -32,55 +38,114 @@ export interface BuilderElementRendererComponentProps extends ElementRendererCom
 const BuilderElementRendererComponentRaw = forwardRef<any, BuilderElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
     const {$id, ...rest} = props
-    const {hoverOpen, hoverClose, hoverSelect, hoverDeselect} = useHoverContext()
-    const {confirm} = useConfirmationContext()
     const localRef = useRef()
+    const componentId = useAglynElementData($id, 'componentId')
+    const bundleId = useAglynElementData($id, 'bundleId')
+    const {hoverOpen, hoverClose, hoverSelect, hoverDeselect} = useHoverContext()
+    const interactMode = useAglynBuilderStore('flags', 'interactMode')
+    const rearrangeEnabled = interactMode === InteractionModeFlag.REARRANGE
+    const selectEnabled = interactMode === InteractionModeFlag.SELECT
 
-    const handleMouseOver = useCallback((e) => {
+
+    const {setNodeRef: dropRef, isOver, active, over} = useDroppable({
+      id: $id,
+      data: {},
+    })
+    const {setNodeRef: dragRef, listeners, attributes, transform, isDragging} = useDraggable({
+      id: $id,
+      data: {
+        index: props.index,
+      },
+    })
+    const {onPointerDown, ...dragListeners} = listeners
+    const style = {
+      transform: CSS.Translate.toString(transform),
+    }
+
+    const handleMouseOver = useCallback((e: MouseEvent<HTMLElement>) => {
+      if (isDragging) return
       e.stopPropagation()
       const target = e.currentTarget
-      const clientRect = target?.getBoundingClientRect?.().toJSON?.()
-      if (target && clientRect) {
-        hoverOpen({clientRect, $id})
+      if (target) {
+        const clientPosition = getElementClientRectBounding(target)
+        hoverOpen(e, {
+          hovered: {
+            $id: $id,
+            position: clientPosition,
+            componentId: componentId,
+            bundleId: bundleId,
+          },
+        })
       }
       else {
-        hoverClose(e)
+        hoverClose(e as any)
       }
-    }, [hoverOpen, hoverClose, $id])
+    }, [isDragging, hoverOpen, hoverClose, $id])
+
 
     const handleMouseLeave = useCallback((e) => {
-      e.stopPropagation()
-      hoverClose(e)
-    }, [hoverClose, $id])
+      // if (isDragging) return
+      // e.stopPropagation()
+      // hoverClose(e)
+    }, [isDragging, hoverClose, $id])
 
-    const handleMouseDown = useCallback((e) => {
+
+    const handleSelect = useCallback((e) => {
       e.stopPropagation()
       const target = e.currentTarget
-      const clientRect = target?.getBoundingClientRect?.().toJSON?.()
-      if (target && clientRect) {
-        hoverSelect(e, {clientRect, $id})
+      if (target) {
+        const clientPosition = getElementClientRectBounding(target)
+        hoverSelect(e, {
+          selected: {
+            $id: $id,
+            position: clientPosition,
+            componentId: componentId,
+            bundleId: bundleId,
+          },
+        })
       }
       else {
         hoverDeselect(e)
       }
-      confirm({title: 'clicked'})
-    }, [hoverSelect, hoverDeselect, $id])
+      // confirm({title: 'clicked'})
+    }, [rearrangeEnabled, isDragging, hoverSelect, hoverDeselect, $id, componentId, bundleId])
 
-    const {componentId, bundleId} = useAglynElementData($id)
+
+    const handlePointerDown = useCallback((e) => {
+      if (selectEnabled) {
+        handleSelect(e)
+      }
+      if (rearrangeEnabled) {
+        onPointerDown(e)
+      }
+    }, [rearrangeEnabled, selectEnabled])
+
+    // console.log('setNodeRef isOver isDragging', isOver, active, over)
 
     return (
-      <ElementRendererComponent
-        ref={useCombinedRefs(ref, localRef)}
-        $id={$id}
-        data-aglyn-element-id={$id}
-        data-aglyn-component-id={componentId}
-        data-aglyn-bundle-id={bundleId}
-        onMouseOver={handleMouseOver}
-        onMouseOut={handleMouseLeave}
-        onMouseDown={handleMouseDown}
-        elementRendererComponent={BuilderElementRendererComponent}
-        {...rest}
-      />
+      <Fragment>
+        <ElementRendererComponent
+          ref={useCombinedRefs(ref, localRef, dropRef, dragRef)}
+          $id={$id}
+          data-aglyn-element-id={$id}
+          data-aglyn-component-id={componentId}
+          data-aglyn-bundle-id={bundleId}
+          elementRendererComponent={BuilderElementRendererComponent}
+          style={style}
+          onMouseOver={handleMouseOver}
+          onMouseOut={handleMouseLeave}
+          onPointerDown={handlePointerDown}
+          {...dragListeners}
+          {...rest}
+        />
+        <ActivityContext.Consumer>
+          {(activityRef) => (
+            <Portal container={activityRef.current}>
+              {/*{isOver && !isDragging}*/}
+            </Portal>
+          )}
+        </ActivityContext.Consumer>
+      </Fragment>
     )
   },
 )

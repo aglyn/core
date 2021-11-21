@@ -25,6 +25,6 @@ export * from './lib/hocs/with-emotion-styles-cache-client'
 export * from './lib/hocs/with-theme'
 
 export * from './lib/util/create-responsive-theme'
-export * from './lib/util/generate-utility-classes'
+export * from './lib/util/generate-component-class-keys'
 export * from './lib/util/create-inset-shadows'
 export * from './lib/util/use-font-family'

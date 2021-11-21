@@ -18,16 +18,17 @@
 import { styled } from '@aglyn/shared-feature-themes'
 import Stack, { StackProps } from '@mui/material/Stack'
 import { forwardRef } from 'react'
-import BuilderAppbarGlobalComponent from './builder-appbar-global.component'
+import { BuilderAppbarGlobalComponent } from './builder-appbar-global.component'
 import { BuilderAppbarModifyComponent } from './builder-appbar-modify.component'
-import BuilderToolboxLeftComponent from './builder-toolbox-left.component'
-import BuilderViewportComponent from './builder-viewport.component'
+import { BuilderToolboxLeftComponent } from './builder-toolbox-left.component'
+import { BuilderViewportComponent } from './builder-viewport.component'
 
 
 const BuilderContainer = styled(Stack, {name: 'BuilderContainer'})({
   position: 'absolute',
   left: 0, right: 0, top: 0, bottom: 0,
   height: '100%', width: '100%',
+  overflow: 'hidden',
 })
 
 export interface BuilderEditorComponentProps extends StackProps {
@@ -37,6 +38,7 @@ export interface BuilderEditorComponentProps extends StackProps {
 export const BuilderEditorComponent = forwardRef<any, BuilderEditorComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
+
 
     return (
       <BuilderContainer
@@ -71,11 +73,13 @@ export const BuilderEditorComponent = forwardRef<any, BuilderEditorComponentProp
           alignItems="stretch"
           flexGrow={1}
           spacing={0}
+          sx={{overflowY: 'auto', overflowX: 'hidden'}}
         >
           <BuilderToolboxLeftComponent
             id="aglyn:builder-toolbox-left"
             aria-label="builder toolbox left"
           />
+
           <BuilderViewportComponent
             id="aglyn:builder-viewport"
             aria-label="builder viewport"

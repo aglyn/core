@@ -54,7 +54,9 @@ a React.Ref<T> to access and invoke functions to manipulate the local component 
 
 ### Prevent panning
 
-Sometimes it can be useful to prevent the view from panning, for example if the pan start is done on a clickable element. `ZoomablePanningComponent` provides the `preventPan` prop that let you define a function to prevent panning.
+Sometimes it can be useful to prevent the view from panning, for example if the pan start is done on
+a clickable element. `ZoomablePanningComponent` provides the `preventPan` prop that let you define a
+function to prevent panning.
 
 e.g. prevent panning when starting the pan on a specific `div`
 

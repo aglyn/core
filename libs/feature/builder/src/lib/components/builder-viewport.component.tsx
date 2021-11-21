@@ -15,20 +15,35 @@
  * limitations under the License.
  */
 
-import { styled } from '@aglyn/shared-feature-themes'
+import { getBuilderStore } from '@aglyn/core-data-framework'
+import { useAglynAppContext } from '@aglyn/feature-renderer'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import { _isFnT } from '@aglyn/shared-util-guards'
-import Stack, {StackProps} from '@mui/material/Stack'
-import { ChangeEvent, forwardRef, HTMLAttributes, useCallback, useRef } from 'react'
-import BuilderCanvasComponent from './builder-canvas.component'
-import BuilderFrameComponent from './builder-frame.component'
-import BuilderZoomControlsComponent from './builder-zoom-controls.component'
+import Stack, { StackProps } from '@mui/material/Stack'
+import clsx from 'clsx'
+import { useStoreMap } from 'effector-react'
+import { ChangeEvent, forwardRef, useCallback, useRef } from 'react'
+import { BuilderCanvasComponent } from './builder-canvas.component'
+import { BuilderZoomControlsComponent } from './builder-zoom-controls.component'
 
 
-const StyledContainer = styled(Stack, {name: 'StyledContainer'})({
+const classKeys = generateComponentClassKeys('AglynBuilderViewport', [
+  'panelLeftOpen',
+  'panelBottomOpen',
+  'panelRightOpen',
+])
+
+const StyledContainer = styled(Stack, {
+  name: 'StyledContainer',
+  // shouldForwardProp(propName) {return propName !== 'panelLeftWidth'},
+})<BuilderViewportComponentProps>( ({
   flexGrow: 1,
   overflow: 'hidden',
-  position: 'relative',
-})
+  // position: 'relative',
+  [`&.${classKeys.panelLeftOpen}`]: {},
+  [`&.${classKeys.panelBottomOpen}`]: {},
+  [`&.${classKeys.panelRightOpen}`]: {},
+}))
 
 const CanvasShadow = styled('div', {name: 'CanvasShadow'})(({theme}) => ({
   flexGrow: 1,
@@ -36,7 +51,7 @@ const CanvasShadow = styled('div', {name: 'CanvasShadow'})(({theme}) => ({
   width: '100%',
   height: '100%',
   left: 0, right: 0, top: 0, bottom: 0,
-  position: 'absolute',
+  // position: 'absolute',
   zIndex: theme.zIndex.appBar - 1,
   boxShadow: theme.insetShadows[3],
   backgroundColor: 'transparent',
@@ -45,12 +60,12 @@ const CanvasShadow = styled('div', {name: 'CanvasShadow'})(({theme}) => ({
 
 
 export interface BuilderViewportComponentProps extends StackProps {
-
+  // drawerWidth?: number
 }
 
 export const BuilderViewportComponent = forwardRef<any, BuilderViewportComponentProps>(
   function RefRenderFn(props, ref) {
-    const {children, ...rest} = props
+    const {children, className, ...rest} = props
 
     const pannerRef = useRef<any>()
 
@@ -72,15 +87,31 @@ export const BuilderViewportComponent = forwardRef<any, BuilderViewportComponent
       }
     }, [])
 
+    const {getApp} = useAglynAppContext()
+    const {left, right, bottom} = useStoreMap(
+      getBuilderStore(getApp(), {store: 'panels'}),
+      (panels) => ({
+        left: panels?.left,
+        bottom: panels?.bottom,
+        right: panels?.right,
+      }),
+    )
+
+    const elemClassName = clsx({
+      [classKeys.panelLeftOpen]: Boolean(left?.toggled),
+      [classKeys.panelBottomOpen]: Boolean(bottom?.toggled),
+      [classKeys.panelRightOpen]: Boolean(right?.toggled),
+    }, className)
+
     return (
       <StyledContainer
         ref={ref}
+        className={elemClassName}
+        // drawerWidth={left?.drawerWidth}
         {...rest}
       >
         <CanvasShadow />
-        <BuilderCanvasComponent pannerRef={pannerRef}>
-          <BuilderFrameComponent />
-        </BuilderCanvasComponent>
+        <BuilderCanvasComponent pannerRef={pannerRef} />
         <BuilderZoomControlsComponent
           onZoomReset={handleZoomReset}
           onZoomDecrease={handleZoomDecrease}

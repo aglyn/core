@@ -20,6 +20,8 @@ import {
   BuilderFlagInteractModePayload,
   BuilderGetStorePayload,
   BuilderOpenPanelPayload,
+  BuilderSetCanvasHoveredPayload,
+  BuilderSetCanvasSelectedPayload,
   BuilderSetPanelPayload,
   BundleUId,
   ComponentId,
@@ -27,6 +29,7 @@ import {
   ElementId,
   TemplateId,
 } from '@aglyn/core-data-framework'
+import { ClientRectObject } from '@aglyn/shared-util-dom'
 import { LogLevelString } from '@aglyn/shared-util-logger'
 import { createApi } from 'effector'
 import {
@@ -65,6 +68,7 @@ export interface CommActionData {
   $id?: ElementId
   componentId?: ComponentId
   bundleId?: BundleUId
+  position?: ClientRectObject
 }
 
 export interface BuilderFlagState {
@@ -76,17 +80,20 @@ export interface BuilderFlagState {
 
 export interface BuilderCanvasState {
   selected?: CommActionData
-  focused?: CommActionData
+  hovered?: CommActionData
 }
 
 export interface BuilderPanelsState {
   left?: {
+    drawerWidth?: number
     toggled?: boolean,
   }
   bottom?: {
+    drawerHeight?: number
     toggled?: boolean,
   }
   right?: {
+    drawerWidth?: number
     toggled?: boolean,
   }
 }
@@ -132,6 +139,7 @@ const DEFAULT_CONTEXT: Partial<BuilderContextStores> = {
     logLevel: 'info',
     interactMode: InteractionModeFlag.SELECT,
   },
+
 }
 
 
@@ -164,8 +172,6 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
     events: null,
     stores: null,
   }
-
-  #api = null
 
   public get _domain(): ContextDomain {return this.#context._domain}
   public get _store(): ContextStore<BuilderContextStores> {return this.#context._store}
@@ -258,6 +264,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
           },
         }
       },
+
       closePanel: (store, payload: BuilderOpenPanelPayload) => {
         const {panel} = payload
         return {
@@ -268,6 +275,28 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
               ...store.panels[panel],
               toggled: false,
             },
+          },
+        }
+      },
+
+      setCanvasSelected: (store, payload: BuilderSetCanvasSelectedPayload) => {
+        const {selected} = payload || {}
+        return {
+          ...store,
+          canvas: {
+            ...store.canvas,
+            selected: selected,
+          },
+        }
+      },
+
+      setCanvasHovered: (store, payload: BuilderSetCanvasHoveredPayload) => {
+        const {hovered} = payload || {}
+        return {
+          ...store,
+          canvas: {
+            ...store.canvas,
+            hovered: hovered,
           },
         }
       },
@@ -301,6 +330,12 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
   }
   public closePanel(payload: BuilderClosePanelPayload) {
     return this.#context.events.setPanels(payload)
+  }
+  public setCanvasSelected(payload: BuilderSetCanvasSelectedPayload) {
+    return this.#context.events.setCanvasSelected(payload)
+  }
+  public setCanvasHovered(payload: BuilderSetCanvasHoveredPayload) {
+    return this.#context.events.setCanvasHovered(payload)
   }
 
 

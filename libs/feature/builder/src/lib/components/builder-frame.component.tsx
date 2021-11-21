@@ -18,15 +18,17 @@
 import { CanvasRendererComponent } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { forwardRef, HTMLAttributes } from 'react'
+import { HoverContextProvider } from '../contexts/hover-context-provider'
 import { BuilderElementRendererComponent } from './builder-element-renderer.component'
 
 
 const BuilderFrameContainer = styled('div', {name: 'BuilderFrameContainer'})(({theme}) => ({
   flexGrow: 1,
-  height: '100%',
+  minHeight: '100%',
   width: '100%',
   background: theme.palette.background.paper,
   border: `0.3em solid ${theme.palette.grey[200]}`,
+  // position: 'relative',
 }))
 
 export interface BuilderFrameComponentProps extends HTMLAttributes<HTMLDivElement> {
@@ -39,10 +41,12 @@ export const BuilderFrameComponent = forwardRef<any, BuilderFrameComponentProps>
 
     return (
       <BuilderFrameContainer ref={ref} {...rest}>
-        <CanvasRendererComponent
-          id="aglyn:canvas"
-          elementRendererComponent={BuilderElementRendererComponent}
-        />
+        <HoverContextProvider>
+          <CanvasRendererComponent
+            id="aglyn:canvas"
+            elementRendererComponent={BuilderElementRendererComponent}
+          />
+        </HoverContextProvider>
         {children}
       </BuilderFrameContainer>
     )

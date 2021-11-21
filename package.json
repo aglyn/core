@@ -37,6 +37,8 @@
   },
   "dependencies": {
     "@data-driven-forms/react-form-renderer": "^3.11.4",
+    "@dnd-kit/core": "^4.0.2",
+    "@dnd-kit/utilities": "^3.0.0",
     "@emotion/cache": "^11.4.0",
     "@emotion/react": "11.5.0",
     "@emotion/server": "11.4.0",
@@ -50,6 +52,7 @@
     "@mui/types": "7.0.0",
     "@mui/utils": "5.0.1",
     "@mui/x-data-grid": "5.0.0-beta.2",
+    "@tippyjs/react": "^4.2.6",
     "change-case": "~4.1.2",
     "clsx": "^1.1.1",
     "core-js": "^3.6.5",

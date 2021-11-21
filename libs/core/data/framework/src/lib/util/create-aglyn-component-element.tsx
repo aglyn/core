@@ -17,18 +17,19 @@
 
 import { styled } from '@aglyn/shared-feature-themes'
 import { getDisplayName } from '@aglyn/shared-util-tools'
-import { Component, Ref } from 'react'
+import { forwardRef } from 'react'
 import { ComponentRegisterPayload } from '../constants/emitter'
 import { COMPONENT_ELEMENT_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF } from '../constants/symbol'
 import {
+  AglynComponentElement,
   AglynComponentElementType,
   AglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
 
 
 export function createAglynComponentElement(
- schema: AglynComponentSchema,
- component: AglynComponentElementType,
+  schema: AglynComponentSchema,
+  component: AglynComponentElementType,
 ): ComponentRegisterPayload {
   const {componentId, bundleId, renderFlags} = schema
   const {emotionStyled} = {...renderFlags}
@@ -37,36 +38,29 @@ export function createAglynComponentElement(
   const displayName = `AglynComponent(${cDisplayName})`
 
   const ComponentElement =
-   !emotionStyled?.disable
-    ? styled(component as any, {
-      name: cDisplayName,
-      ...emotionStyled?.options,
-    })({})
-    : component
+    !emotionStyled?.disable
+      ? styled(component as any, {
+        name: cDisplayName,
+        ...emotionStyled?.options,
+      })({})
+      : component
 
-  class AglynComponent extends Component<any> {
-    public static readonly displayName = displayName
+  const AglynComponent = forwardRef<any, any>(
+    function RefRenderFn(props, ref) {
+      return (
+        <ComponentElement ref={ref} {...props} />
+      )
+    },
+  )
 
-    public static readonly componentId = componentId
-    public static readonly bundleId = bundleId
-    public static readonly [TYPE_OF] = MODULE_TYPE
-    public static readonly [TYPE_KIND] = COMPONENT_ELEMENT_TYPE
-
-    public innerRef?: Ref<any>
-
-    constructor(props: any) {
-      super(props)
-      this.innerRef = props.innerRef
-    }
-
-    public render() {
-      return <ComponentElement {...this.props} />
-    }
-  }
-
+  AglynComponent.displayName = displayName
+  AglynComponent['componentId'] = componentId
+  AglynComponent['bundleId'] = bundleId
+  AglynComponent[TYPE_OF] = MODULE_TYPE
+  AglynComponent[TYPE_KIND] = COMPONENT_ELEMENT_TYPE
 
   return {
     schema: {...schema},
-    component: AglynComponent,
+    component: AglynComponent as unknown as AglynComponentElement,
   }
 }

@@ -23,10 +23,10 @@ import {
 } from '@aglyn/feature-renderer'
 import { consoleTheme, withTheme } from '@aglyn/shared-feature-themes'
 import { ConfirmationProviderComponent, OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
+import { DndContext } from '@dnd-kit/core'
 import NoSsr from '@mui/material/NoSsr'
 import { forwardRef, Fragment, useCallback } from 'react'
 import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
-import HoverContextProvider from '../contexts/hover-context-provider'
 import BuilderEditorComponent from './builder-editor.component'
 
 
@@ -50,14 +50,21 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
     console.log('page:/builder app', appCallback())
   }
 
+  const handleDragStart = useCallback((...args) => {
+    console.log('drag start', ...args)
+  }, [])
+  const handleDragEnd = useCallback((...args) => {
+    console.log('drag end', ...args)
+  }, [])
+
   return (
     <Wrapper>
-      <AglynAppContext.Provider value={{getApp}}>
-        <ElementComponentsContextProvider>
-          <ElementsContextProvider>
-            {/*<SnackbarProvider maxSnack={3}>*/}
-            <ConfirmationProviderComponent>
-              <HoverContextProvider>
+      <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <AglynAppContext.Provider value={{getApp}}>
+          <ElementComponentsContextProvider>
+            <ElementsContextProvider>
+              {/*<SnackbarProvider maxSnack={3}>*/}
+              <ConfirmationProviderComponent>
                 <ComponentsDrawerContextProvider>
 
                   <BuilderEditorComponent
@@ -66,12 +73,12 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
                   />
 
                 </ComponentsDrawerContextProvider>
-              </HoverContextProvider>
-            </ConfirmationProviderComponent>
-            {/*</SnackbarProvider>*/}
-          </ElementsContextProvider>
-        </ElementComponentsContextProvider>
-      </AglynAppContext.Provider>
+              </ConfirmationProviderComponent>
+              {/*</SnackbarProvider>*/}
+            </ElementsContextProvider>
+          </ElementComponentsContextProvider>
+        </AglynAppContext.Provider>
+      </DndContext>
     </Wrapper>
   )
 })

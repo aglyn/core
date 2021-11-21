@@ -15,21 +15,20 @@
  * limitations under the License.
  */
 
+import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import { OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
-import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
 import {
   DataGrid,
   DataGridProps as MuiDataGridProps,
   GridOverlay,
   GridOverlayProps,
 } from '@material-ui/data-grid'
-import LinearProgress, {
-  LinearProgressProps as MuiLinearProgressProps,
-} from '@mui/material/LinearProgress'
+import LinearProgress, { LinearProgressProps as MuiLinearProgressProps } from '@mui/material/LinearProgress'
 import clsx from 'clsx'
 import { forwardRef, HTMLAttributes } from 'react'
 
-const classKeys = generateUtilityClasses('DataTable', [
+
+const classKeys = generateComponentClassKeys('DataTable', [
   'label',
   'antEmptyImg1',
   'antEmptyImg2',
@@ -41,7 +40,7 @@ const classKeys = generateUtilityClasses('DataTable', [
 
 const StyledGridOverlay = styled(GridOverlay, {
   name: 'AglynNoRowsOverlay',
-})(({ theme }) => ({
+})(({theme}) => ({
   flexDirection: 'column',
   [`& .${classKeys.label}`]: {
     marginTop: theme.spacing(1),
@@ -116,7 +115,7 @@ const AppLoaderOverlayView = (props: LoadingOverlayViewProps = {}) =>
   function AppLoaderOverlayView() {
     return (
       <GridOverlay>
-        <div style={{ position: 'absolute', top: 0, width: '100%' }}>
+        <div style={{position: 'absolute', top: 0, width: '100%'}}>
           <LinearProgress color="secondary" {...props.LinearProgressProps} />
         </div>
       </GridOverlay>
@@ -158,9 +157,9 @@ export const DataTable = forwardRef<HTMLElement, DataTableProps>(function RefRen
     ...rest
   } = props
   return (
-    <DataTableWrapper style={{ height: 400, width: '100%' }} {...rest}>
-      <div style={{ display: 'flex', height: '100%' }}>
-        <div style={{ flexGrow: 1 }}>
+    <DataTableWrapper style={{height: 400, width: '100%'}} {...rest}>
+      <div style={{display: 'flex', height: '100%'}}>
+        <div style={{flexGrow: 1}}>
           <DataGrid
             rows={rows}
             columns={columns}

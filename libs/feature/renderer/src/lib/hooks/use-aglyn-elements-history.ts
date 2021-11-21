@@ -15,11 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  getCanvasApiEvents,
-  getCanvasNormalizedElementsStore,
-  getCanvasStore,
-} from '@aglyn/core-data-framework'
+import { getCanvasApiEvents, getCanvasStore } from '@aglyn/core-data-framework'
 import { useStoreMap } from 'effector-react'
 import { useMemo } from 'react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
@@ -34,7 +30,7 @@ export function useAglynElementHistory() {
     return {past: state.past.length, future: state.future.length}
   })
   return useMemo(() => ({
-    undo, redo, past, future
+    undo, redo, past, future,
   }), [undo, redo, past, future])
 }
 export default useAglynElementHistory

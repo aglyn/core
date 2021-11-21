@@ -16,13 +16,13 @@
  */
 
 import type { AglynComponentSchema } from '@aglyn/core-data-framework'
-import { BundleUId, CommandUId, getComponentSchema } from '@aglyn/core-data-framework'
+import { BundleUId, ComponentId, getComponentSchema } from '@aglyn/core-data-framework'
 import { useMemo } from 'react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 
 export function useAglynComponentSchema(
-  componentId: CommandUId,
+  componentId: ComponentId,
   bundleId?: BundleUId,
 ): AglynComponentSchema {
   const {getApp} = useAglynAppContext()

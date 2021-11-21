@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
+import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import { AppLink, AppLinkProps, SvgPathIcon, SvgPathIconProps } from '@aglyn/shared-ui-jsx'
-import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
 import { _isLength } from '@aglyn/shared-util-guards'
 import { yes } from '@aglyn/shared-util-tools'
 import MuiBreadcrumbs, { BreadcrumbsProps as MuiBreadcrumbsProps } from '@mui/material/Breadcrumbs'
@@ -24,7 +24,8 @@ import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
 import React, { forwardRef, useMemo } from 'react'
 
-const classKeys = generateUtilityClasses('AglynBreadcrumbs', [
+
+const classKeys = generateComponentClassKeys('AglynBreadcrumbs', [
   'item',
   'disabled',
   'last',
@@ -34,7 +35,7 @@ const classKeys = generateUtilityClasses('AglynBreadcrumbs', [
 
 const StyledBreadcrumbs = styled(MuiBreadcrumbs, {
   name: 'Breadcrumbs',
-})(({ theme }) => ({
+})(({theme}) => ({
   display: 'flex',
   alignItems: 'center',
   minHeight: theme.spacing(4),
@@ -70,14 +71,14 @@ export interface BreadcrumbsProps extends MuiBreadcrumbsProps {
 }
 
 export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(function RefRenderFn(props, ref) {
-  const { centerIcons, children, items, ...rest } = props
+  const {centerIcons, children, items, ...rest} = props
 
   const MemoedItem = useMemo(() => {
     const Component = forwardRef<any, ItemProps & { isLast: boolean }>(function RefRenderFn(
       itemProps,
-      ref
+      ref,
     ) {
-      const { icon, className, isLast, disabled, ...item } = itemProps
+      const {icon, className, isLast, disabled, ...item} = itemProps
       const isDisabled = yes(disabled || isLast)
       const itemClass = clsx(
         classKeys.item,
@@ -86,7 +87,7 @@ export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(function RefRenderF
           [classKeys.centered]: Boolean(centerIcons),
           [classKeys.last]: Boolean(isLast),
         },
-        className
+        className,
       )
 
       const ItemComponent = isLast ? Typography : AppLink
@@ -104,7 +105,7 @@ export const Breadcrumbs = forwardRef<any, BreadcrumbsProps>(function RefRenderF
 
   return (
     <StyledBreadcrumbs ref={ref} aria-label="breadcrumb" {...rest}>
-      {items.map(({ ...item }, key) => (
+      {items.map(({...item}, key) => (
         <MemoedItem
           key={item.id || item['key'] || key}
           isLast={_isLength(key, items.length - 1)}

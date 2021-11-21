@@ -24,7 +24,7 @@ import type {
 import {
   BuilderContextStores,
   BuilderFlagState,
-  BuilderPanelsState,
+  BuilderPanelsState, CommActionData,
 } from '../controllers/aglyn-builder.controller'
 import type {
   AglynCommandListener,
@@ -36,7 +36,7 @@ import type {
   AglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
 import {
-  AglynComponentElementData,
+  AglynComponentElementData, AglynComponentElementDataNormalized,
   AglynComponentElementDataNormalizedMap,
 } from '../controllers/aglyn-components.controller'
 import type { ContextStore, ContextStoreOptions } from '../controllers/aglyn-contexts.controller'
@@ -213,6 +213,8 @@ export type BuilderFlagInteractModePayload<K extends keyof BuilderFlagState = an
 export type BuilderSetPanelPayload = PayloadData<Partial<BuilderPanelsState>>
 export type BuilderOpenPanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
 export type BuilderClosePanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
+export type BuilderSetCanvasSelectedPayload = PayloadData<{ selected: CommActionData }>
+export type BuilderSetCanvasHoveredPayload = PayloadData<{ hovered: CommActionData }>
 
 export type CanvasUndoPayload = PayloadData<any>
 export type CanvasRedoPayload = PayloadData<any>
@@ -223,6 +225,9 @@ export type CanvasGetElementsDenormalizedPayload = PayloadData<any>
 export type CanvasGetApiEventsPayload = PayloadData<any>
 export type CanvasAddElementPayload = PayloadData<{ parentId: ElementId, position: number, element: AglynComponentElementData }>
 export type CanvasGetElementPayload = PayloadData<{ $id: ElementId }>
+export type CanvasUpdateElementPayload = PayloadData<{ element: AglynComponentElementDataNormalized }>
+export type CanvasDeleteElementPayload = PayloadData<{ $id: ElementId }>
+export type CanvasMoveElementPayload = PayloadData<{ $id: ElementId, parentId: ElementId, position: number }>
 
 export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, AglynEmitterPayload> {
   [AglynAppEffectFlag.EXTENSION_REGISTER]: ExtensionRegisterPayload

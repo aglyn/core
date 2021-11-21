@@ -16,7 +16,7 @@
  */
 
 import { Conditional } from '@aglyn/shared-data-types'
-import { generateUtilityClasses } from '@aglyn/shared-feature-themes'
+import { generateComponentClassKeys } from '@aglyn/shared-feature-themes'
 import { _isObj } from '@aglyn/shared-util-guards'
 import { yes } from '@aglyn/shared-util-tools'
 import MuiButton, { ButtonProps as MuiButtonProps } from '@mui/material/Button'
@@ -48,7 +48,7 @@ export type AppLinkProps<T extends LinkType = 'default'> = CommonProps &
     NakedTruncated,
     Conditional<T, 'button', ButtonTruncated, Conditional<T, 'text', TextTruncated, TruncatedProps>>>
 
-const classKey = generateUtilityClasses('AppLink', [
+const classKey = generateComponentClassKeys('AppLink', [
   'disabled',
   'active',
   'typeNaked',

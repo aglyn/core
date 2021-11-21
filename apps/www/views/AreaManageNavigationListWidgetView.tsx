@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import { AppLink, SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import {
   Collapse,
@@ -31,7 +31,7 @@ import WidgetCard, { Props as WidgetCardProps } from '../components/WidgetCard'
 import { AggregatedPageMeta, withAggregatedPageMeta } from '../lib/app-pages'
 
 
-const classKeys = generateUtilityClasses('AreaManageNavigationListWidgetView', [
+const classKeys = generateComponentClassKeys('AreaManageNavigationListWidgetView', [
   'listItem',
   'active',
   'open',

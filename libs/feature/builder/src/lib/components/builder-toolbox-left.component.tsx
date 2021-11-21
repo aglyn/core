@@ -15,23 +15,17 @@
  * limitations under the License.
  */
 
-import { getBuilderStore } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/feature-renderer'
+import { DEFAULT_LEFT_DRAWER_WIDTH } from '@aglyn/feature-builder'
+import { useAglynAppContext, useAglynBuilderStore } from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
-import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import { _isEqualitySameType } from '@aglyn/shared-util-guards'
-import TreeItem from '@mui/lab/TreeItem'
-import TreeView from '@mui/lab/TreeView'
 import Box from '@mui/material/Box'
 import Drawer, { DrawerProps } from '@mui/material/Drawer'
-import Toolbar from '@mui/material/Toolbar'
-import { useStoreMap } from 'effector-react'
 import { forwardRef, HTMLAttributes } from 'react'
+import CanvasElementsTreeViewComponent from './canvas-elements-tree-view.component'
 
 
 type ExtraProps<P> = P & { drawerWidth?: string | number, open?: boolean }
-
-const defaultDrawerWidth = 240
 
 const BuilderToolboxContainer = styled('div', {
   name: 'BuilderToolboxContainer',
@@ -43,7 +37,7 @@ const BuilderToolboxContainer = styled('div', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  marginLeft: open ? 0 : -(drawerWidth ?? defaultDrawerWidth),
+  marginLeft: open ? 0 : -(drawerWidth ?? DEFAULT_LEFT_DRAWER_WIDTH),
   ...(open && {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
@@ -58,11 +52,11 @@ const StyledDrawer = styled(Drawer, {
     return !_isEqualitySameType(propName, 'drawerWidth')
   },
 })<ExtraProps<DrawerProps>>(({theme, drawerWidth}) => ({
-  width: drawerWidth ?? defaultDrawerWidth,
+  width: drawerWidth ?? DEFAULT_LEFT_DRAWER_WIDTH,
   flexShrink: 0,
   zIndex: theme.zIndex.appBar,
   [`& .MuiDrawer-paper`]: {
-    width: drawerWidth ?? defaultDrawerWidth,
+    width: drawerWidth ?? DEFAULT_LEFT_DRAWER_WIDTH,
     boxSizing: 'border-box',
     position: 'unset',
   },
@@ -74,13 +68,13 @@ export interface BuilderToolboxLeftComponentProps extends ExtraProps<HTMLAttribu
 
 export const BuilderToolboxLeftComponent = forwardRef<any, BuilderToolboxLeftComponentProps>(
   function RefRenderFn(props, ref) {
-    const {children, drawerWidth, DrawerProps, ...rest} = props
+    const {children, drawerWidth: drawerWidthProp, DrawerProps, ...rest} = props
 
     const {getApp} = useAglynAppContext()
-    const open = useStoreMap(
-      getBuilderStore(getApp(), {store: 'panels'}),
-      (panels) => Boolean(panels?.left?.toggled)
-    )
+    const leftPanel = useAglynBuilderStore('panels', 'left')
+    const {toggled, drawerWidth = drawerWidthProp} = leftPanel || {}
+    const open = Boolean(toggled)
+
     return (
       <BuilderToolboxContainer
         ref={ref}
@@ -92,29 +86,12 @@ export const BuilderToolboxLeftComponent = forwardRef<any, BuilderToolboxLeftCom
           drawerWidth={drawerWidth}
           variant="persistent"
           open={open}
+          sx={{height: '100%'}}
           {...DrawerProps}
         >
-          <Toolbar />
 
           <Box sx={{overflow: 'auto'}}>
-            <TreeView
-              aria-label="file system navigator"
-              defaultCollapseIcon={
-                <SvgPathIcon iconIds={'chevron-down'} />}
-              defaultExpandIcon={<SvgPathIcon iconIds={'chevron-right'} />}
-              sx={{height: 240, flexGrow: 1, maxWidth: 400, overflowY: 'auto'}}
-            >
-              <TreeItem nodeId="1" label="Applications">
-                <TreeItem nodeId="2" label="Calendar" />
-              </TreeItem>
-
-              <TreeItem nodeId="5" label="Documents">
-                <TreeItem nodeId="10" label="OSS" />
-                <TreeItem nodeId="6" label="MUI">
-                  <TreeItem nodeId="8" label="index.js" />
-                </TreeItem>
-              </TreeItem>
-            </TreeView>
+            <CanvasElementsTreeViewComponent />
           </Box>
 
         </StyledDrawer>

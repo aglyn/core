@@ -41,9 +41,9 @@ const ElementsRendererComponentRaw = forwardRef<any, ElementsComponentProps>(
     const ElementRendererComponentProp = elementRendererComponent || ElementRendererComponent
     return (
       <Component ref={ref} {...rest}>
-        {elements.map(($id, i) => (
+        {elements.map(($id) => (
           <ElementRendererComponentProp
-            key={$id ?? i}
+            key={$id}
             $id={$id}
             elementRendererComponent={ElementRendererComponentProp}
           />

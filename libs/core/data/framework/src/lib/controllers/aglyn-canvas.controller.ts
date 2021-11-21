@@ -17,14 +17,17 @@
 
 import {
   CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
   CanvasGetApiEventsPayload,
   CanvasGetElementPayload,
   CanvasGetElementsDenormalizedPayload,
   CanvasGetElementsNormalizedPayload,
   CanvasGetStorePayload,
+  CanvasMoveElementPayload,
   CanvasRedoPayload,
   CanvasSetElementsPayload,
   CanvasUndoPayload,
+  CanvasUpdateElementPayload,
   ContextDomain,
   ContextStore,
 } from '@aglyn/core-data-framework'
@@ -51,10 +54,13 @@ export type ElementsDataStore = {
 }
 
 export interface ElementsDataStoreApi {
-  addElement: EffectorEvent<CanvasAddElementPayload>
-  setElements: EffectorEvent<CanvasSetElementsPayload>
   undo: EffectorEvent<any>
   redo: EffectorEvent<any>
+  setElements: EffectorEvent<CanvasSetElementsPayload>
+  addElement: EffectorEvent<CanvasAddElementPayload>
+  updateElement: EffectorEvent<CanvasUpdateElementPayload>
+  deleteElement: EffectorEvent<CanvasDeleteElementPayload>
+  moveElement: EffectorEvent<CanvasMoveElementPayload>
 }
 
 
@@ -63,17 +69,21 @@ export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
 }
 
 export interface AglynCanvasController extends AglynModuleModel<AglynCanvasControllerOptions> {
-  undo(payload?: CanvasUndoPayload)
-  redo(payload?: CanvasRedoPayload)
-  setElements(payload: CanvasSetElementsPayload)
-  addElement(payload: CanvasAddElementPayload)
-  getElement(payload: CanvasGetElementPayload)
   getStore(payload?: CanvasGetApiEventsPayload)
   getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload)
   getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload)
+  undo(payload?: CanvasUndoPayload)
+  redo(payload?: CanvasRedoPayload)
   getApiEvents(payload?: CanvasGetApiEventsPayload)
+  setElements(payload: CanvasSetElementsPayload)
+  addElement(payload: CanvasAddElementPayload)
+  getElement(payload: CanvasGetElementPayload)
+  updateElement(payload: CanvasUpdateElementPayload)
+  deleteElement(payload: CanvasDeleteElementPayload)
+  moveElement(payload: CanvasMoveElementPayload)
 }
 
+const MAX_HISTORY = 20
 const TAG = 'AglynCanvas'
 const MODULE_NAME = 'canvas'
 
@@ -90,8 +100,8 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   #denormalizedElementsStore: ContextStore<AglynComponentElementData[]> = null
 
   public get domain(): ContextDomain {return this.#domain}
-  public get context(): ContextStore<ElementsDataStore> {return this.#context}
   public get events(): ElementsDataStoreApi {return this.#events}
+  public get context(): ContextStore<ElementsDataStore> {return this.#context}
   public get normalizedElementsStore(): ContextStore<ElementsDataStore['present']> {return this.#normalizedElementsStore}
   public get denormalizedElementsStore(): ContextStore<AglynComponentElementData[]> {return this.#denormalizedElementsStore}
 
@@ -118,29 +128,30 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
       undo: (state) => {
         if (!_isArrEmpty(state.past)) {
           return {
-            past: state.past.slice(0, state.past.length - 1),
-            present: state.past[state.past.length - 1],
-            future: [...state.future, state.present],
+            past: state.past.slice(1),
+            present: state.past.slice(0, 1)[0],
+            future: [state.present, ...state.future],
           }
         }
       },
       redo: (state) => {
         if (!_isArrEmpty(state.future)) {
           return {
-            past: [...state.past, state.present],
-            present: state.future[state.future.length - 1],
-            future: state.future.slice(0, state.future.length - 1),
+            past: [state.present, ...state.past],
+            present: state.future.slice(0, 1)[0],
+            future: state.future.slice(1),
           }
         }
       },
       setElements: (state, payload: CanvasSetElementsPayload) => {
         const {elements} = payload
-        state.past.push(state.present)
-        return {past: state.past, present: elements, future: []}
+        return {
+          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+          present: elements,
+          future: [],
+        }
       },
       addElement: (state, payload: CanvasAddElementPayload) => {
-        state.past.push(state.present)
-
         const {element, parentId, position} = payload
         const newData = normalizeComponentElementData(element, parentId)
         const present = {
@@ -157,11 +168,77 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
           },
         }
 
-        return {past: state.past, present, future: []}
+        return {
+          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+          present,
+          future: [],
+        }
       },
-      // updateElement: (state, _) => {
-      //
-      // },
+      updateElement: (state, payload: CanvasUpdateElementPayload) => {
+        const {element} = payload
+        const present = {
+          ...state.present,
+          [element.$id]: {
+            ...state.present[element.$id],
+            ...element,
+          },
+        }
+
+        return {
+          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+          present,
+          future: [],
+        }
+      },
+      deleteElement: (state, payload: CanvasDeleteElementPayload) => {
+        const {$id} = payload
+        const current = state.present[$id]
+        const present = {
+          ...state.present,
+          [current.parentId]: {
+            ...state.present[current.parentId],
+            elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
+          },
+        }
+        delete present[$id]
+
+        return {
+          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+          present,
+          future: [],
+        }
+      },
+      moveElement: (state, payload: CanvasMoveElementPayload) => {
+        const {$id, position, parentId} = payload
+        const current = state.present[$id]
+        const present = {
+          ...state.present,
+          [$id]: {
+            ...state.present[$id],
+            parentId: parentId,
+          },
+          [parentId]: {
+            ...state.present[parentId],
+            elements: arrayAddAtIndex(
+              position,
+              state.present[parentId].elements || [],
+              $id,
+              {copy: true},
+            ).items,
+          },
+          [current.parentId]: {
+            ...state.present[current.parentId],
+            elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
+          },
+        }
+        delete present[$id]
+
+        return {
+          past: [state.present, ...state.past].slice(0, MAX_HISTORY),
+          present,
+          future: [],
+        }
+      },
     })
   }
 
@@ -176,7 +253,6 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   public getDenormalizedElementsStore(payload: CanvasGetElementsDenormalizedPayload) {
     return this.#denormalizedElementsStore
   }
-
 
   public getApiEvents(payload?: CanvasGetApiEventsPayload) {
     return this.#events
@@ -196,6 +272,18 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
   public addElement(payload: CanvasAddElementPayload) {
     return this.#events.addElement(payload)
+  }
+
+  public updateElement(payload: CanvasUpdateElementPayload) {
+    return this.#events.updateElement(payload)
+  }
+
+  public deleteElement(payload: CanvasDeleteElementPayload) {
+    return this.#events.deleteElement(payload)
+  }
+
+  public moveElement(payload: CanvasMoveElementPayload) {
+    return this.#events.deleteElement(payload)
   }
 
 

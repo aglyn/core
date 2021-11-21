@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import MuiDrawer, { DrawerProps as MuiDrawerProps } from '@mui/material/Drawer'
@@ -26,7 +26,7 @@ import useCombinedRefs from '../hooks/use-combined-refs'
 import ElevationScroll from './elevation-scroll'
 
 
-const classKeys = generateUtilityClasses('AglynNavbarDrawer', [
+const classKeys = generateComponentClassKeys('AglynNavbarDrawer', [
   'appBar',
   'toolbar',
   'left',

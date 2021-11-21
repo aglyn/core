@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import { AddElementPayload } from '@aglyn/core-data-framework'
+// import {  } from '@aglyn/core-data-framework'
 import { ReactNode } from 'react'
 import { ElementsContext } from './elements-context'
 
 
 export interface ElementsContextProviderProps {
   children?: ReactNode
-  addElement?: (payload: AddElementPayload) => void
+  // addElement?: (payload: AddElementPayload) => void
 }
 
 

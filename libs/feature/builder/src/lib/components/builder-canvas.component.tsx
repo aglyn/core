@@ -18,13 +18,15 @@
 import { alpha, styled } from '@aglyn/shared-feature-themes'
 import { ZoomablePanningComponent } from '@aglyn/shared-ui-jsx'
 import { forwardRef, HTMLAttributes, Ref } from 'react'
+import { BuilderFrameComponent } from './builder-frame.component'
 
 
 const BuilderCanvasContainer = styled('div', {name: 'BuilderCanvasContainer'})(({theme}) => ({
   flexGrow: 1,
-  height: '100%',
+  minHeight: '100%',
   width: '100%',
   backgroundColor: theme.palette.background.default,
+  // position: 'relative',
   backgroundImage: [
     `radial-gradient(circle, ${alpha(theme.palette.tertiary.main, 0.28)} 0.086em, rgba(0,0,0,0) 1px)`,
     // `linear-gradient(to bottom, ${alpha(theme.palette.divider, 0.07)} 1px, transparent 1px)`,
@@ -33,8 +35,20 @@ const BuilderCanvasContainer = styled('div', {name: 'BuilderCanvasContainer'})((
     '30px',
     '30px',
   ].join(' '),
-  overflowY: 'hidden',
+  overflowY: 'auto',
   overflowX: 'auto',
+}))
+
+const BuilderArtboard = styled('div', {name: 'BuilderArtboard'})(({theme}) => ({
+  overflow: 'hidden',
+  minHeight: '100%',
+  width: theme.breakpoints.values.lg,
+  padding: theme.spacing(3),
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  // overflow: 'hidden',
 }))
 
 const BuilderCanvasPanner = styled(ZoomablePanningComponent, {name: 'BuilderCanvasPanner'})(({theme}) => ({
@@ -62,17 +76,20 @@ export const BuilderCanvasComponent = forwardRef<any, BuilderCanvasComponentProp
 
     return (
       <BuilderCanvasContainer ref={ref} {...rest}>
-        <BuilderCanvasPanner
-          {...{ref: pannerRef} as any}
-          disableScrollZoom
-          disableDoubleClickZoom
-          // autoCenter
-          enableBoundingBox
-          noStateUpdate
-          disabled
-        >
+        <BuilderArtboard>
+          {/*<BuilderCanvasPanner*/}
+          {/*  {...{ref: pannerRef} as any}*/}
+          {/*  disableScrollZoom*/}
+          {/*  disableDoubleClickZoom*/}
+          {/*  // autoCenter*/}
+          {/*  enableBoundingBox*/}
+          {/*  noStateUpdate*/}
+          {/*  disabled*/}
+          {/*>*/}
+          <BuilderFrameComponent />
           {children}
-        </BuilderCanvasPanner>
+          {/*</BuilderCanvasPanner>*/}
+        </BuilderArtboard>
       </BuilderCanvasContainer>
     )
   },

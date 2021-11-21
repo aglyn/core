@@ -22,7 +22,11 @@ import {
   setBuilderFlag,
   setBuilderPanels,
 } from '@aglyn/core-data-framework'
-import { useAglynAppContext, useAglynElementsStoreWithApi } from '@aglyn/feature-renderer'
+import {
+  useAglynAppContext,
+  useAglynElementParentPosition,
+  useAglynElementsStoreWithApi,
+} from '@aglyn/feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import AppBar, { AppBarProps } from '@mui/material/AppBar'
@@ -36,9 +40,10 @@ import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import { useStoreMap } from 'effector-react'
 import { forwardRef, memo, MouseEvent, useCallback } from 'react'
+import { useAglynBuilderStore } from '../../../../renderer/src/lib/hooks/use-aglyn-builder-store'
 import useAglynElementHistory from '../../../../renderer/src/lib/hooks/use-aglyn-elements-history'
 import { useElementDrawerContext } from '../contexts/element-drawer-context'
-import { useSelectionContext } from '../contexts/selection-context'
+import { useHoverContext } from '../contexts/hover-context'
 
 
 const StyledModifyAppBar = styled(AppBar, {name: 'StyledModifyAppBar'})({
@@ -89,9 +94,16 @@ export const BuilderAppbarModifyComponent = forwardRef<any, BuilderToolbarCompon
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
 
+    const {getApp} = useAglynAppContext()
     const {elementDrawer} = useElementDrawerContext()
     const {elements, api: {addElement}} = useAglynElementsStoreWithApi()
-    const {$id: selectedId}: any = useSelectionContext() || {}
+    const {$id: selectedId} = useAglynBuilderStore('canvas', 'selected') || {}
+    const {
+      parentId: selectedParentId,
+      index: selectedIndex,
+      parentElements: selectedParentElements
+    } = useAglynElementParentPosition(selectedId) || {}
+
     const handleFabClick = useCallback(async () => {
       const option = await elementDrawer({
         title: 'Add New Element',
@@ -103,10 +115,11 @@ export const BuilderAppbarModifyComponent = forwardRef<any, BuilderToolbarCompon
       })
       .then((data: any) => {
         if (data) {
-          console.log('then newElement', data)
-          addElement?.({
-            position: 0,
-            parentId: selectedId || '__root__',
+          const pos = (selectedIndex === -1 ? selectedParentElements.length : selectedIndex + 1)
+          console.log('then newElement', selectedIndex, pos, selectedParentElements)
+          addElement({
+            position: pos,
+            parentId: selectedParentId || '__root__',
 
             element: createComponentElementData(data),
           })
@@ -117,14 +130,11 @@ export const BuilderAppbarModifyComponent = forwardRef<any, BuilderToolbarCompon
       })
 
       console.warn('async choice', option)
-    }, [selectedId, elementDrawer, elements, addElement])
+    }, [selectedId, elementDrawer, elements, addElement, selectedParentElements, selectedParentId, selectedIndex])
 
-    const {getApp} = useAglynAppContext()
     const interactMode = useStoreMap(
       getBuilderStore(getApp(), {store: 'flags'}),
-      (flags) => {
-        return flags.interactMode
-      },
+      (flags) => flags.interactMode,
     )
     const handleInteractModeClick = useCallback((event: MouseEvent<HTMLElement>, value: any) => {
       setBuilderFlag(getApp(), {

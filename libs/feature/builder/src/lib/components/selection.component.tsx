@@ -16,13 +16,13 @@
  */
 
 import { AglynComponentElementData } from '@aglyn/core-data-framework'
-import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import { ButtonProps } from '@mui/material/Button'
 import { DialogProps } from '@mui/material/Dialog'
 import { DialogContentTextProps } from '@mui/material/DialogContentText'
 import { DialogTitleProps } from '@mui/material/DialogTitle'
 import clsx from 'clsx'
-import { forwardRef, Fragment, HTMLAttributes } from 'react'
+import { forwardRef, HTMLAttributes } from 'react'
 
 
 export interface SelectionComponentOptions {
@@ -45,7 +45,7 @@ export interface SelectionComponentProps extends HTMLAttributes<HTMLDivElement> 
   onClose?: ButtonProps['onClick']
 }
 
-const classKeys = generateUtilityClasses('SelectionRoot', [
+const classKeys = generateComponentClassKeys('SelectionRoot', [
   'selected',
 ])
 
@@ -62,15 +62,15 @@ const SelectionRoot = styled('div', {name: 'SelectionRoot'})(({theme}) => ({
     easing: theme.transitions.easing.easeInOut,
   }),
   [`&.${classKeys.selected}`]: {
-    visibility: 'visible'
-  }
+    visibility: 'visible',
+  },
 }))
 
 export const SelectionComponent = forwardRef<any, SelectionComponentProps>(
   function RefRenderFn(props, ref) {
     const {open, options, onCancel, onConfirm, onClose, children, ...rest} = props
     const className = clsx({
-      [classKeys.selected]: Boolean(open)
+      [classKeys.selected]: Boolean(open),
     })
     return (
       <SelectionRoot
@@ -82,7 +82,7 @@ export const SelectionComponent = forwardRef<any, SelectionComponentProps>(
         {children}
       </SelectionRoot>
     )
-  }
+  },
 )
 
 SelectionComponent.displayName = 'SelectionComponent'

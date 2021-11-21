@@ -19,12 +19,17 @@ import { _builderControllers } from '../constants/_internal'
 import type {
   BuilderClosePanelPayload,
   BuilderFlagInteractModePayload,
-  BuilderGetStorePayload, BuilderOpenPanelPayload,
+  BuilderGetStorePayload,
+  BuilderOpenPanelPayload,
   BuilderSetPanelPayload,
+} from '../constants/emitter'
+import {
+  BuilderSetCanvasHoveredPayload,
+  BuilderSetCanvasSelectedPayload,
 } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import type { AglynBuilderController } from '../controllers/aglyn-builder.controller'
-import { BuilderContextStores, BuilderPanelsState } from '../controllers/aglyn-builder.controller'
+import { BuilderContextStores } from '../controllers/aglyn-builder.controller'
 import type { ContextStore } from '../controllers/aglyn-contexts.controller'
 import { _validateAppArg } from './app.api'
 
@@ -79,4 +84,20 @@ export function closeBuilderPanel(
 ) {
   const builderController = _getBuilderController(app)
   return builderController.closePanel(payload)
+}
+
+export function setBuilderCanvasSelected(
+  app: AglynAppController,
+  payload?: BuilderSetCanvasSelectedPayload,
+) {
+  const builderController = _getBuilderController(app)
+  return builderController.setCanvasSelected(payload)
+}
+
+export function setBuilderCanvasHovered(
+  app: AglynAppController,
+  payload?: BuilderSetCanvasHoveredPayload,
+) {
+  const builderController = _getBuilderController(app)
+  return builderController.setCanvasHovered(payload)
 }

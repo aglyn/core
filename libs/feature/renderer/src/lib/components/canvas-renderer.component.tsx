@@ -15,12 +15,9 @@
  * limitations under the License.
  */
 
-import { getContextStore } from '@aglyn/core-data-framework'
 import { OverrideableComponentProps } from '@aglyn/shared-ui-jsx'
 import Box from '@mui/material/Box'
-import { useStoreMap } from 'effector-react'
 import { forwardRef, HTMLAttributes } from 'react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
 import { useAglynElementData } from '../hooks/use-aglyn-element-data'
 import {
   ElementRendererComponent,
@@ -43,11 +40,11 @@ export const CanvasRendererComponent = forwardRef<any, CanvasRendererComponentPr
       ...rest
     } = props
     const elementRendererComponent = elementRendererComponentProp || ElementRendererComponent
-    const element = useAglynElementData('__root__')
+    const elements = useAglynElementData('__root__', 'elements')
     return (
       <Box ref={ref} {...rest}>
         <ElementsRendererComponent
-          elements={element.elements}
+          elements={elements}
           elementRendererComponent={elementRendererComponent}
         />
         {children}

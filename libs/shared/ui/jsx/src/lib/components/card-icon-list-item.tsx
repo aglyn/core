@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { generateUtilityClasses, styled } from '@aglyn/shared-feature-themes'
+import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import Card, { CardProps as MuiCardProps } from '@mui/material/Card'
 import CardActionArea from '@mui/material/CardActionArea'
 import Typography from '@mui/material/Typography'
@@ -24,7 +24,7 @@ import { forwardRef, MouseEvent, ReactNode, useCallback } from 'react'
 import { Item } from './grid-list'
 
 
-const cardClasses = generateUtilityClasses('AglynCardIconListItem', ['actionArea', 'selected'])
+const cardClasses = generateComponentClassKeys('AglynCardIconListItem', ['actionArea', 'selected'])
 
 const StyledCard = styled(Card, {
   name: 'Card',

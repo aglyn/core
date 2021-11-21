@@ -17,7 +17,7 @@
 
 import {
   createStyles,
-  generateUtilityClasses,
+  generateComponentClassKeys,
   makeStyles,
   Theme,
 } from '@aglyn/shared-feature-themes'
@@ -42,7 +42,7 @@ import { withGridItem } from '../field-hocs'
 import { validationMessage } from '../utils'
 
 
-const classKeys = generateUtilityClasses('AglynFieldIconSelect', [
+const classKeys = generateComponentClassKeys('AglynFieldIconSelect', [
   'root',
   'button',
   'icon',
@@ -144,7 +144,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
             item={item}
             label={item.name}
             onActionClick={handleItemClick}
-            preview={<SvgPathIcon iconIds={item.id}/>}
+            preview={<SvgPathIcon iconIds={item.id} />}
             selected={isSelected}
           />
         )
@@ -158,7 +158,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
           <Grid spacing={2} container item>
             <Grid className={classes.preview} item>
               <ButtonBase className={classes.button} onClick={handleButtonClick} disableRipple>
-                <SvgPathIcon className={classes.icon} fontSize="inherit" iconIds={value}/>
+                <SvgPathIcon className={classes.icon} fontSize="inherit" iconIds={value} />
               </ButtonBase>
             </Grid>
             <Grid item sm>

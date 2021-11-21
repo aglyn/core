@@ -15,15 +15,18 @@
  * limitations under the License.
  */
 
+export * from './lib/components/app-link'
+export * from './lib/components/card-icon-list-item'
 export * from './lib/components/dialog-confirm'
 export * from './lib/components/elevation-scroll'
 export * from './lib/components/grid-buttons'
 export * from './lib/components/grid-items'
 export * from './lib/components/grid-list'
-export * from './lib/components/card-icon-list-item'
 export * from './lib/components/menu'
 export * from './lib/components/mui-shadow-dom'
 export * from './lib/components/navbar-drawer'
+export * from './lib/components/next-link'
+export * from './lib/components/popper-arrow.component'
 export * from './lib/components/ruler-guides'
 export * from './lib/components/sandbox-frame'
 export * from './lib/components/shadow-dom'
@@ -33,11 +36,10 @@ export * from './lib/components/svg-path-icon'
 export * from './lib/components/confirmation-provider.component'
 export * from './lib/components/zoomable-panning-component'
 
-export * from './lib/components/app-link'
-export * from './lib/components/next-link'
 
 export * from './lib/contexts/confirmation.context'
 
+export * from './lib/hooks/use-element-position'
 export * from './lib/hooks/use-client-rect'
 export * from './lib/hooks/use-combined-refs'
 export * from './lib/hooks/use-effect-post-mount'

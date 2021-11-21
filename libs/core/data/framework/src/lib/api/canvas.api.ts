@@ -17,14 +17,14 @@
 
 import { _canvasControllers } from '../constants/_internal'
 import {
-  CanvasAddElementPayload,
+  CanvasAddElementPayload, CanvasDeleteElementPayload,
   CanvasGetApiEventsPayload,
   CanvasGetElementsDenormalizedPayload,
   CanvasGetElementsNormalizedPayload,
-  CanvasGetStorePayload,
+  CanvasGetStorePayload, CanvasMoveElementPayload,
   CanvasRedoPayload,
   CanvasSetElementsPayload,
-  CanvasUndoPayload,
+  CanvasUndoPayload, CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 import type { AglynCanvasController } from '../controllers/aglyn-canvas.controller'
@@ -107,6 +107,30 @@ export function addCanvasElement(
 ) {
   const canvasController = _getCanvasController(app)
   return canvasController.addElement(payload)
+}
+
+export function updateCanvasElement(
+  app: AglynAppController,
+  payload: CanvasUpdateElementPayload,
+) {
+  const canvasController = _getCanvasController(app)
+  return canvasController.updateElement(payload)
+}
+
+export function deleteCanvasElement(
+  app: AglynAppController,
+  payload: CanvasDeleteElementPayload,
+) {
+  const canvasController = _getCanvasController(app)
+  return canvasController.deleteElement(payload)
+}
+
+export function moveCanvasElement(
+  app: AglynAppController,
+  payload: CanvasMoveElementPayload,
+) {
+  const canvasController = _getCanvasController(app)
+  return canvasController.moveElement(payload)
 }
 
 // export function getCanvasElement(

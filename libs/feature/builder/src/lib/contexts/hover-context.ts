@@ -15,25 +15,30 @@
  * limitations under the License.
  */
 
-import { createContext, useContext } from 'react'
+
+import {
+  BuilderSetCanvasHoveredPayload,
+  BuilderSetCanvasSelectedPayload,
+  CommActionData,
+} from '@aglyn/core-data-framework'
+import { createContext, RefObject, SyntheticEvent, useContext } from 'react'
 
 
-export interface HoverOptions {
-  $id: string
-  clientRect: DOMRect
+export interface HoverOptions extends CommActionData {
 }
 
 export interface HoverContextType {
-  hoverOpen: (options?: HoverOptions) => Promise<unknown>
-  hoverSelect: (event?: Element, options?: HoverOptions) => Promise<unknown>
-  hoverClose: (event?: Element) => void
-  hoverDeselect: (event?: Element) => void
+  selectedOptions?: HoverOptions
+  hoveredOptions?: HoverOptions
+  hoverOpen: (event: SyntheticEvent, opts: BuilderSetCanvasHoveredPayload) => void
+  hoverSelect: (event: SyntheticEvent, opts: BuilderSetCanvasSelectedPayload) => void
+  hoverClose: (event: SyntheticEvent) => void
+  hoverDeselect: (event: SyntheticEvent) => void
 }
 
 export type UseHoverType = () => HoverContextType
 
 export const DEFAULT_OPTIONS: HoverOptions = {
-  clientRect: null,
   $id: null,
 }
 
@@ -45,6 +50,8 @@ export const buildOptions = (defaultOptions, options) => {
   }
 }
 
+export const ActivityContext = createContext<RefObject<any>>(null)
+ActivityContext.displayName = 'ActivityContext'
 export const HoverContext = createContext<HoverContextType>(null)
 HoverContext.displayName = 'HoverContext'
 
