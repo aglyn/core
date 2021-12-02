@@ -16,4 +16,4 @@
  */
 
 export * from './constants'
-export * from './components/builder.component'
+export * from './components/besigner.component'

@@ -16,10 +16,10 @@
  */
 
 import {
-  getBuilderStore,
+  getBesignerStore,
   InteractionModeFlag,
-  setBuilderFlag,
-  setBuilderPanels,
+  setBesignerFlag,
+  setBesignerPanels,
 } from '@aglyn/core-data-framework'
 import { useAglynAppContext, useAglynElementHistory } from '@aglyn/core-feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
@@ -37,12 +37,13 @@ import { useStoreMap } from 'effector-react'
 import { forwardRef, memo, MouseEvent, useCallback } from 'react'
 import { useAddElementCallback } from '../hooks/use-add-element-callback'
 
-const AglynAppBarModify = styled(MuiAppBar, { name: 'AglynAppBarModify' })({
+
+const AglynAppBarModify = styled(MuiAppBar, {name: 'AglynAppBarModify'})({
   top: 0,
 })
 
 const HistoryControls = memo(() => {
-  const { undo, redo, past, future } = useAglynElementHistory()
+  const {undo, redo, past, future} = useAglynElementHistory()
 
   const handleUndoClick = useCallback(() => {
     undo()
@@ -75,34 +76,34 @@ export interface AppBarModifyComponentProps extends Partial<MuiAppBarProps> {}
 
 export const AppBarModifyComponent = forwardRef<any, AppBarModifyComponentProps>(
   function RefRenderFn(props, ref) {
-    const { children, ...rest } = props
+    const {children, ...rest} = props
 
-    const { getApp } = useAglynAppContext()
+    const {getApp} = useAglynAppContext()
     const handleAddElementClick = useAddElementCallback()
 
     const interactMode = useStoreMap(
-      getBuilderStore(getApp(), { store: 'flags' }),
-      (flags) => flags.interactMode
+      getBesignerStore(getApp(), {store: 'flags'}),
+      (flags) => flags.interactMode,
     )
     const handleInteractModeClick = useCallback((event: MouseEvent<HTMLElement>, value: any) => {
-      setBuilderFlag(getApp(), {
+      setBesignerFlag(getApp(), {
         flag: 'interactMode',
         value: InteractionModeFlag[InteractionModeFlag[value]],
       })
     }, [])
 
-    const openPanels = useStoreMap(getBuilderStore(getApp(), { store: 'panels' }), (panels) => {
+    const openPanels = useStoreMap(getBesignerStore(getApp(), {store: 'panels'}), (panels) => {
       return ['left', 'bottom', 'right'].filter((i) => Boolean(panels[i]?.toggled))
     })
     const handlePanelToggle = useCallback(
       (event: MouseEvent<HTMLElement>, value: ('left' | 'bottom' | 'right')[]) => {
-        setBuilderPanels(getApp(), {
-          left: { toggled: value.indexOf('left') >= 0 },
-          bottom: { toggled: value.indexOf('bottom') >= 0 },
-          right: { toggled: value.indexOf('right') >= 0 },
+        setBesignerPanels(getApp(), {
+          left: {toggled: value.indexOf('left') >= 0},
+          bottom: {toggled: value.indexOf('bottom') >= 0},
+          right: {toggled: value.indexOf('right') >= 0},
         })
       },
-      []
+      [],
     )
 
     return (
@@ -119,11 +120,11 @@ export const AppBarModifyComponent = forwardRef<any, AppBarModifyComponentProps>
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ mx: 0.25 }} />
+          <Box sx={{mx: 0.25}} />
 
           <HistoryControls />
 
-          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{flexGrow: 1}} />
 
           <Stack direction="row" spacing={1}>
             <ToggleButtonGroup
@@ -145,7 +146,7 @@ export const AppBarModifyComponent = forwardRef<any, AppBarModifyComponentProps>
             </ToggleButtonGroup>
           </Stack>
 
-          <Box sx={{ mx: 1 }} />
+          <Box sx={{mx: 1}} />
 
           <Stack direction="row" spacing={1}>
             <ToggleButtonGroup size="small" value={openPanels} onChange={handlePanelToggle}>
@@ -172,7 +173,7 @@ export const AppBarModifyComponent = forwardRef<any, AppBarModifyComponentProps>
         <Divider />
       </AglynAppBarModify>
     )
-  }
+  },
 )
 
 AppBarModifyComponent.displayName = 'AppBarModifyComponent'

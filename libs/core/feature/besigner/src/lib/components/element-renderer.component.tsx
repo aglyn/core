@@ -17,14 +17,14 @@
 
 import {
   InteractionModeFlag,
-  setBuilderCanvasHovered,
-  setBuilderCanvasSelected,
+  setBesignerCanvasHovered,
+  setBesignerCanvasSelected,
 } from '@aglyn/core-data-framework'
 import {
   ElementRendererComponent as DefaultElementRendererComponent,
   ElementRendererComponentProps as DefaultElementRendererComponentProps,
   useAglynAppContext,
-  useAglynBuilderStore,
+  useAglynBesignerStore,
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
@@ -35,13 +35,14 @@ import { useDraggable, useDroppable } from '@dnd-kit/core'
 import Box, { BoxProps } from '@mui/material/Box'
 import { forwardRef, MouseEvent, useCallback, useRef } from 'react'
 import { useCanvasRenderedElementRefs } from '../contexts/canvas-rendered-element-refs'
-import { useBuilderElementAttributes } from '../hooks/use-builder-element-attributes'
+import { useBesignerElementAttributes } from '../hooks/use-besigner-element-attributes'
+
 
 interface ElementBoxProps extends BoxProps {}
 
 const ElementBox = styled(Box, {
   name: 'ElementBox',
-})<ElementBoxProps>(({ theme }) => ({
+})<ElementBoxProps>(({theme}) => ({
   // [`&.[${ElementAttribute.HOVERED}]`]: {
   //   visibility: 'visible',
   // },
@@ -65,15 +66,15 @@ export interface ElementRendererComponentProps extends DefaultElementRendererCom
 
 const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
   function RefRenderFn(props, ref) {
-    const { $id, ...rest } = props
+    const {$id, ...rest} = props
     const localRef = useRef<Element>()
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const componentSchema = useAglynComponentSchema(componentId, bundleId)
-    const elementAttributes = useBuilderElementAttributes({ $id, componentId, bundleId })
-    const { getApp } = useAglynAppContext()
+    const elementAttributes = useBesignerElementAttributes({$id, componentId, bundleId})
+    const {getApp} = useAglynAppContext()
     // const {hoverOpen, hoverClose, hoverSelect, hoverDeselect} = useHoverContext()
-    const interactMode = useAglynBuilderStore('flags', 'interactMode')
+    const interactMode = useAglynBesignerStore('flags', 'interactMode')
     const rearrangeEnabled = interactMode === InteractionModeFlag.REARRANGE
     const selectEnabled = interactMode === InteractionModeFlag.SELECT
 
@@ -104,7 +105,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         hierarchy: componentSchema?.renderFlags?.hierarchy,
       },
     })
-    const { onPointerDown, ...dragListeners } = listeners
+    const {onPointerDown, ...dragListeners} = listeners
     const style = {
       transform: CSS.Translate.toString(transform),
     }
@@ -115,7 +116,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         e.stopPropagation()
         const target = e.currentTarget
         if (target) {
-          setBuilderCanvasHovered(getApp(), { hovered: { $id } })
+          setBesignerCanvasHovered(getApp(), {hovered: {$id}})
           // const clientPosition = getElementClientRectBounding(target)
           // hoverOpen(e, {
           //   hovered: {
@@ -125,17 +126,18 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
           //     // bundleId: bundleId,
           //   },
           // })
-        } else {
+        }
+        else {
           // hoverClose(e as any)
         }
       },
-      [$id]
+      [$id],
     )
 
     const handleMouseLeave = useCallback((e) => {
       if (isDragging) return
       e.stopPropagation()
-      setBuilderCanvasHovered(getApp(), { hovered: undefined })
+      setBesignerCanvasHovered(getApp(), {hovered: undefined})
       // hoverClose(e)
     }, [])
 
@@ -144,7 +146,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         e.stopPropagation()
         const target = e.currentTarget
         if (target) {
-          setBuilderCanvasSelected(getApp(), { selected: { $id } })
+          setBesignerCanvasSelected(getApp(), {selected: {$id}})
           // const clientPosition = getElementClientRectBounding(target)
           // hoverSelect(e, {
           //   selected: {
@@ -154,12 +156,13 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
           //     // bundleId: bundleId,
           //   },
           // })
-        } else {
+        }
+        else {
           // hoverDeselect(e)
         }
         // confirm({title: 'clicked'})
       },
-      [$id]
+      [$id],
     )
 
     const handlePointerDown = useCallback(
@@ -171,10 +174,10 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
           onPointerDown(e)
         }
       },
-      [rearrangeEnabled, selectEnabled]
+      [rearrangeEnabled, selectEnabled],
     )
 
-    const { setElementRef, deleteElementRef } = useCanvasRenderedElementRefs()
+    const {setElementRef, deleteElementRef} = useCanvasRenderedElementRefs()
 
     useDynamicEffect(() => {
       setElementRef($id, localRef)
@@ -201,7 +204,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
         {...rest}
       />
     )
-  }
+  },
 )
 
 ElementRendererComponent.displayName = 'ElementRendererComponent'

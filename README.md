@@ -108,7 +108,7 @@ A utility library contains low-level utilities used by many libraries and applic
 │  │  │  └─ 📚 framework
 │  │
 │  ├─ feature/
-│  │  ├─ 📚 builder
+│  │  ├─ 📚 besigner
 │  │  └─ 📚 renderer
 │  │
 │  ├─ shared/
@@ -169,7 +169,7 @@ A utility library contains low-level utilities used by many libraries and applic
 * **Besigner**
   * NodeJS import: `@aglyn/core-feature-besigner`
   * Workspace name: `core-feature-besigner`
-  * Directory: [libs/core/feature/builder](libs/core/feature/besigner)
+  * Directory: [libs/core/feature/besigner](libs/core/feature/besigner)
 * **Renderer**
   * NodeJS import: `@aglyn/core-feature-renderer`
   * Workspace name: `core-feature-renderer`

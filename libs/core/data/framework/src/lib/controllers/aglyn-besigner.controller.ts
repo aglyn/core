@@ -17,13 +17,13 @@
 
 import {
   AglynAppController,
-  BuilderClosePanelPayload,
-  BuilderFlagInteractModePayload,
-  BuilderGetStorePayload,
-  BuilderOpenPanelPayload,
-  BuilderSetCanvasHoveredPayload,
-  BuilderSetCanvasSelectedPayload,
-  BuilderSetPanelPayload,
+  BesignerClosePanelPayload,
+  BesignerFlagInteractModePayload,
+  BesignerGetStorePayload,
+  BesignerOpenPanelPayload,
+  BesignerSetCanvasHoveredPayload,
+  BesignerSetCanvasSelectedPayload,
+  BesignerSetPanelPayload,
   BundleUId,
   ComponentId,
   ContextDomain,
@@ -33,11 +33,11 @@ import {
 import { LogLevelString } from '@aglyn/shared-util-logger'
 import { createApi } from 'effector'
 import {
-  BuilderActiveViewFlag,
+  BesignerActiveViewFlag,
   DndDragSourceTypeFlag,
   DndDropLinealTypeFlag,
   InteractionModeFlag,
-} from '../constants/builder'
+} from '../constants/besigner'
 import {
   AglynModuleEffectListener,
   AglynModuleModel,
@@ -53,27 +53,27 @@ export interface CommActionData {
   // position?: ClientRectObject
 }
 
-export interface BuilderFlagState {
+export interface BesignerFlagState {
   debug?: boolean
   logLevel?: LogLevelString
   interactMode?: InteractionModeFlag
-  activeView?: BuilderActiveViewFlag
+  activeView?: BesignerActiveViewFlag
 }
 
-export interface BuilderCanvasSelectedElement extends CommActionData {
+export interface BesignerCanvasSelectedElement extends CommActionData {
   hierarchy?: ElementId[]
 }
 
-export interface BuilderCanvasHoveredElement extends CommActionData {
+export interface BesignerCanvasHoveredElement extends CommActionData {
   hierarchy?: ElementId[]
 }
 
-export interface BuilderCanvasState {
-  selected?: BuilderCanvasSelectedElement
-  hovered?: BuilderCanvasHoveredElement
+export interface BesignerCanvasState {
+  selected?: BesignerCanvasSelectedElement
+  hovered?: BesignerCanvasHoveredElement
 }
 
-export interface BuilderPanelsState {
+export interface BesignerPanelsState {
   left?: {
     drawerWidth?: number
     toggled?: boolean,
@@ -89,7 +89,7 @@ export interface BuilderPanelsState {
   }
 }
 
-export interface BuilderDndState {
+export interface BesignerDndState {
   disallowed?: boolean
   dragging?: boolean
   dragActivity?: {
@@ -113,18 +113,18 @@ export interface BuilderDndState {
   }
 }
 
-export interface BuilderContextStores {
-  flags: BuilderFlagState
-  canvas: BuilderCanvasState
-  panels: BuilderPanelsState
-  dnd: BuilderDndState
+export interface BesignerContextStores {
+  flags: BesignerFlagState
+  canvas: BesignerCanvasState
+  panels: BesignerPanelsState
+  dnd: BesignerDndState
 }
 
-type BuilderNestedStores<K extends keyof BuilderContextStores = keyof BuilderContextStores> = {
-  [P in K]: ContextStore<BuilderContextStores[P]>
+type BesignerNestedStores<K extends keyof BesignerContextStores = keyof BesignerContextStores> = {
+  [P in K]: ContextStore<BesignerContextStores[P]>
 }
 
-const DEFAULT_CONTEXT: Partial<BuilderContextStores> = {
+const DEFAULT_CONTEXT: Partial<BesignerContextStores> = {
   flags: {
     debug: true,
     logLevel: 'info',
@@ -134,30 +134,30 @@ const DEFAULT_CONTEXT: Partial<BuilderContextStores> = {
 }
 
 
-export interface AglynBuilderControllerOptions extends AglynModuleModelOptions {
-  defaults?: Partial<BuilderContextStores>
+export interface AglynBesignerControllerOptions extends AglynModuleModelOptions {
+  defaults?: Partial<BesignerContextStores>
 }
 
-interface BuilderContext {
+interface BesignerContext {
   _domain: ContextDomain
-  _store: ContextStore<BuilderContextStores>
-  stores: BuilderNestedStores
+  _store: ContextStore<BesignerContextStores>
+  stores: BesignerNestedStores
   events: any
 }
 
-export interface AglynBuilderController extends AglynModuleModel<AglynBuilderControllerOptions> {
+export interface AglynBesignerController extends AglynModuleModel<AglynBesignerControllerOptions> {
 }
 
-const TAG = 'AglynBuilder'
-const MODULE_NAME = 'builder'
+const TAG = 'AglynBesigner'
+const MODULE_NAME = 'besigner'
 
-export class AglynBuilderController extends AglynModuleModel<AglynBuilderControllerOptions> {
+export class AglynBesignerController extends AglynModuleModel<AglynBesignerControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly namespace: string = MODULE_NAME
   public static readonly moduleName: string = MODULE_NAME
 
-  #context: BuilderContext = {
+  #context: BesignerContext = {
     _domain: null,
     _store: null,
     events: null,
@@ -165,23 +165,23 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
   }
 
   public get _domain(): ContextDomain {return this.#context._domain}
-  public get _store(): ContextStore<BuilderContextStores> {return this.#context._store}
-  public get stores(): BuilderNestedStores {return this.#context.stores}
+  public get _store(): ContextStore<BesignerContextStores> {return this.#context._store}
+  public get stores(): BesignerNestedStores {return this.#context.stores}
   public get events(): any {return this.#context.events}
 
-  public get flags(): ContextStore<BuilderFlagState> {return this.#context.stores.flags}
-  public get canvas(): ContextStore<BuilderCanvasState> {return this.#context.stores.canvas}
-  public get panels(): ContextStore<BuilderPanelsState> {return this.#context.stores.panels}
-  public get dnd(): ContextStore<BuilderDndState> {return this.#context.stores.dnd}
+  public get flags(): ContextStore<BesignerFlagState> {return this.#context.stores.flags}
+  public get canvas(): ContextStore<BesignerCanvasState> {return this.#context.stores.canvas}
+  public get panels(): ContextStore<BesignerPanelsState> {return this.#context.stores.panels}
+  public get dnd(): ContextStore<BesignerDndState> {return this.#context.stores.dnd}
 
-  constructor(app: AglynAppController, options: AglynBuilderControllerOptions) {
+  constructor(app: AglynAppController, options: AglynBesignerControllerOptions) {
     super(app, options)
     this.#setup()
   }
   #setup() {
     this.#context._domain = this.app.contexts.domain.domain(this.moduleName)
 
-    this.#context._store = this.#context._domain.createStore<BuilderContextStores>({
+    this.#context._store = this.#context._domain.createStore<BesignerContextStores>({
       flags: {
         ...DEFAULT_CONTEXT.flags,
         ...this.options.defaults?.flags,
@@ -198,7 +198,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
         ...DEFAULT_CONTEXT.dnd,
         ...this.options.defaults?.dnd,
       },
-    }, {name: 'builder'})
+    }, {name: 'besigner'})
 
     this.#context.stores = {
       flags: this.#context._store.map((state) => state.flags),
@@ -209,7 +209,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
 
     this.#context.events = createApi(this.#context._store, {
 
-      setFlag: (store, payload: BuilderFlagInteractModePayload) => {
+      setFlag: (store, payload: BesignerFlagInteractModePayload) => {
         const {flag, value} = payload
         return {
           ...store,
@@ -220,7 +220,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
         }
       },
 
-      setPanels: <K extends keyof BuilderSetPanelPayload>(store, payload: BuilderSetPanelPayload) => {
+      setPanels: <K extends keyof BesignerSetPanelPayload>(store, payload: BesignerSetPanelPayload) => {
         const {left, bottom, right} = payload
         return {
           ...store,
@@ -242,7 +242,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
         }
       },
 
-      openPanel: (store, payload: BuilderOpenPanelPayload) => {
+      openPanel: (store, payload: BesignerOpenPanelPayload) => {
         const {panel} = payload
         return {
           ...store,
@@ -256,7 +256,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
         }
       },
 
-      closePanel: (store, payload: BuilderOpenPanelPayload) => {
+      closePanel: (store, payload: BesignerOpenPanelPayload) => {
         const {panel} = payload
         return {
           ...store,
@@ -270,7 +270,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
         }
       },
 
-      setCanvasSelected: (store, payload: BuilderSetCanvasSelectedPayload) => {
+      setCanvasSelected: (store, payload: BesignerSetCanvasSelectedPayload) => {
         const {selected} = payload || {}
         return {
           ...store,
@@ -281,7 +281,7 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
         }
       },
 
-      setCanvasHovered: (store, payload: BuilderSetCanvasHoveredPayload) => {
+      setCanvasHovered: (store, payload: BesignerSetCanvasHoveredPayload) => {
         const {hovered} = payload || {}
         return {
           ...store,
@@ -302,30 +302,30 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
   }
 
 
-  public getStore<K extends keyof BuilderContextStores>(
-    payload: BuilderGetStorePayload<K>,
-  ): ContextStore<BuilderContextStores[K]> {
+  public getStore<K extends keyof BesignerContextStores>(
+    payload: BesignerGetStorePayload<K>,
+  ): ContextStore<BesignerContextStores[K]> {
     const {store} = payload
     return this.#context.stores[store]
   }
 
-  public setFlag(payload: BuilderFlagInteractModePayload) {
+  public setFlag(payload: BesignerFlagInteractModePayload) {
     return this.#context.events.setFlag(payload)
   }
 
-  public setPanels(payload: BuilderSetPanelPayload) {
+  public setPanels(payload: BesignerSetPanelPayload) {
     return this.#context.events.setPanels(payload)
   }
-  public openPanel(payload: BuilderOpenPanelPayload) {
+  public openPanel(payload: BesignerOpenPanelPayload) {
     return this.#context.events.setPanels(payload)
   }
-  public closePanel(payload: BuilderClosePanelPayload) {
+  public closePanel(payload: BesignerClosePanelPayload) {
     return this.#context.events.setPanels(payload)
   }
-  public setCanvasSelected(payload: BuilderSetCanvasSelectedPayload) {
+  public setCanvasSelected(payload: BesignerSetCanvasSelectedPayload) {
     return this.#context.events.setCanvasSelected(payload)
   }
-  public setCanvasHovered(payload: BuilderSetCanvasHoveredPayload) {
+  public setCanvasHovered(payload: BesignerSetCanvasHoveredPayload) {
     return this.#context.events.setCanvasHovered(payload)
   }
 
@@ -339,5 +339,5 @@ export class AglynBuilderController extends AglynModuleModel<AglynBuilderControl
   ]
 }
 
-export type AglynBuilderControllerT = typeof AglynBuilderController
-export default AglynBuilderController
+export type AglynBesignerControllerT = typeof AglynBesignerController
+export default AglynBesignerController

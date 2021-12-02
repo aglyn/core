@@ -24,7 +24,8 @@ import { ToolboxLeftComponent } from './toolbox-left.component'
 import { ToolboxRightComponent } from './toolbox-right.component'
 import { ViewportRootComponent } from './viewport-root.component'
 
-const Editor = styled(Stack, { name: 'AglynEditor' })({
+
+const Editor = styled(Stack, {name: 'AglynEditor'})({
   position: 'absolute',
   left: 0,
   right: 0,
@@ -38,12 +39,12 @@ const Editor = styled(Stack, { name: 'AglynEditor' })({
 export interface EditorComponentProps extends StackProps {}
 
 const EditorComponentRaw = forwardRef<any, EditorComponentProps>(function RefRenderFn(props, ref) {
-  const { children, ...rest } = props
+  const {children, ...rest} = props
 
   return (
     <Editor
       ref={ref}
-      id="aglyn:builder"
+      id="aglyn:besigner"
       direction="column"
       alignContent="stretch"
       alignItems="stretch"
@@ -60,12 +61,12 @@ const EditorComponentRaw = forwardRef<any, EditorComponentProps>(function RefRen
         }}
       >
         <AppBarGlobalComponent
-          id="aglyn:builder-appbar-global"
-          aria-label="builder application toolbar global"
+          id="aglyn:besigner-appbar-global"
+          aria-label="besigner application toolbar global"
         />
         <AppBarModifyComponent
-          id="aglyn:builder-appbar-modify"
-          aria-label="builder application modifier toolbar"
+          id="aglyn:besigner-appbar-modify"
+          aria-label="besigner application modifier toolbar"
         />
       </Stack>
 
@@ -79,19 +80,19 @@ const EditorComponentRaw = forwardRef<any, EditorComponentProps>(function RefRen
           zIndex: 0,
         }}
       >
-        <ToolboxLeftComponent id="aglyn:builder-toolbox-left" aria-label="builder toolbox left" />
+        <ToolboxLeftComponent id="aglyn:besigner-toolbox-left" aria-label="besigner toolbox left" />
 
         <ViewportRootComponent
-          id="aglyn:builder-viewport"
-          aria-label="builder viewport"
+          id="aglyn:besigner-viewport"
+          aria-label="besigner viewport"
           direction="column"
           alignItems="center"
           spacing={0}
         />
 
         <ToolboxRightComponent
-          id="aglyn:builder-toolbox-right"
-          aria-label="builder toolbox right"
+          id="aglyn:besigner-toolbox-right"
+          aria-label="besigner toolbox right"
         />
       </Stack>
 

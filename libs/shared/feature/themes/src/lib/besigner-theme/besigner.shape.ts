@@ -14,17 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { ShapeOptions } from '../../vendor/mui'
 
-import { getApp } from '@aglyn/core-data-framework'
-import { BuilderComponent } from '@aglyn/core-feature-besigner'
 
-function Builder(props) {
-  if (typeof document !== 'undefined') {
-    console.log('page:/builder app', getApp())
-  }
-  return <BuilderComponent />
+export const besignerShape: ShapeOptions = {
+  borderRadius: 10,
 }
-
-Builder.displayName = 'Page-Builder'
-
-export default Builder
+export default besignerShape

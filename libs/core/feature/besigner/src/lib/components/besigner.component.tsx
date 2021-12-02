@@ -29,16 +29,17 @@ import { forwardRef, Fragment, useCallback } from 'react'
 import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
 import { EditorComponent, EditorComponentProps } from './editor.component'
 
-export interface BuilderComponentProps extends EditorComponentProps {
+
+export interface BesignerComponentProps extends EditorComponentProps {
   noSsr?: boolean
   appName?: AppUUN
 }
 
-const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefRenderFn(
+const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { noSsr, appName, ...rest } = props
+  const {noSsr, appName, ...rest} = props
   const Wrapper = noSsr ? NoSsr : Fragment
 
   const handleDragStart = useCallback((...args) => {
@@ -69,10 +70,10 @@ const BuilderComponentRaw = forwardRef<any, BuilderComponentProps>(function RefR
   )
 })
 
-BuilderComponentRaw.displayName = 'BuilderComponent'
-BuilderComponentRaw.defaultProps = {}
+BesignerComponentRaw.displayName = 'BesignerComponent'
+BesignerComponentRaw.defaultProps = {}
 
-export const BuilderComponent = withTheme({
+export const BesignerComponent = withTheme({
   theme: [consoleThemeLight, consoleThemeDark],
-})(BuilderComponentRaw)
-export default BuilderComponent
+})(BesignerComponentRaw)
+export default BesignerComponent

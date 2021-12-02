@@ -19,7 +19,7 @@ export * from './vendor/emotion'
 export * from './vendor/jss'
 export * from './vendor/mui'
 
-export * from './lib/builder-theme'
+export * from './lib/besigner-theme'
 export * from './lib/console-theme'
 
 export * from './lib/hocs/with-emotion-styles-cache-client'

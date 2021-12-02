@@ -16,18 +16,10 @@
  */
 
 import { ThemeOptions } from '../../vendor/mui'
-import { builderOverrides } from './builder.overrides'
-import { builderPalette } from './builder.palette'
-import { builderTypography } from './builder.typography'
+import { consoleTypography } from '../console-theme/console.typography'
 
-export const builderOptions: ThemeOptions = {
-  palette: builderPalette.LIGHT,
-  typography: builderTypography,
-  components: builderOverrides,
+
+export const besignerTypography: ThemeOptions['typography'] = {
+  ...consoleTypography,
 }
-export const builderOptionsDark: ThemeOptions = {
-  palette: builderPalette.DARK,
-  typography: builderTypography,
-  components: builderOverrides,
-}
-export default builderOptions
+export default besignerTypography

@@ -25,7 +25,7 @@ export * from './contexts/element-components-context-provider'
 export * from './contexts/elements-context-provider'
 export * from './contexts/elements-context'
 
-export * from './hooks/use-aglyn-builder-store'
+export * from './hooks/use-aglyn-besigner-store'
 export * from './hooks/use-aglyn-canvas-api-events'
 export * from './hooks/use-aglyn-canvas-element-hierarchy'
 export * from './hooks/use-aglyn-canvas-elements-denormalized'

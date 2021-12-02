@@ -122,8 +122,8 @@ export interface AglynComponentMetadata {
   iconIds?: MdiIconId
 }
 
-export interface AglynComponentBuilderFlags {
-  // Builder feature flags
+export interface AglynComponentBesignerFlags {
+  // Besigner feature flags
   actions?: { disable?: boolean }
   badge?: { disable?: boolean }
   copying?: { disable?: boolean }
@@ -160,13 +160,13 @@ export interface AglynComponentSchema<P extends AnyProps = any> {
   // Metadata
   metadata: AglynComponentMetadata
 
-  // Builder feature flags
-  builderFlags?: AglynComponentBuilderFlags
+  // Besigner feature flags
+  besignerFlags?: AglynComponentBesignerFlags
 
   // Render feature flags
   renderFlags?: AglynComponentRenderFlags<P>
 
-  // Builder templates for modeling new elements
+  // Besigner templates for modeling new elements
   templates?: AglynComponentElementTemplateData<P>[]
 }
 

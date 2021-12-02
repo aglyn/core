@@ -15,13 +15,9 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
+import { SpacingOptions } from '../../vendor/mui'
 
-import BuilderComponent from './builder.component'
 
-describe('BuilderComponent', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<BuilderComponent elementComponents={[]} />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+export const besignerSpacing: SpacingOptions = 10
+
+export default besignerSpacing

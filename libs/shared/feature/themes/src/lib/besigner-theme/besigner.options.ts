@@ -15,10 +15,20 @@
  * limitations under the License.
  */
 
-export * from './builder.options'
-export * from './builder.overrides'
-export * from './builder.palette'
-export * from './builder.shape'
-export * from './builder.spacing'
-export * from './builder.typography'
-export * from './builder.theme'
+import { ThemeOptions } from '../../vendor/mui'
+import { besignerOverrides } from './besigner.overrides'
+import { besignerPalette } from './besigner.palette'
+import { besignerTypography } from './besigner.typography'
+
+
+export const besignerOptions: ThemeOptions = {
+  palette: besignerPalette.LIGHT,
+  typography: besignerTypography,
+  components: besignerOverrides,
+}
+export const besignerOptionsDark: ThemeOptions = {
+  palette: besignerPalette.DARK,
+  typography: besignerTypography,
+  components: besignerOverrides,
+}
+export default besignerOptions

@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-import { ElementId, getBuilderStore } from '@aglyn/core-data-framework'
+import { ElementId, getBesignerStore } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { deepEqual } from '@aglyn/shared-util-vendor'
 import { useStoreMap } from 'effector-react'
 
-export interface UseBuilderElementInteractionActivity {
+
+export interface UseBesignerElementInteractionActivity {
   isSelfSelected: boolean
   isSelfHovered: boolean
   isChildSelected: boolean
@@ -30,11 +31,11 @@ export interface UseBuilderElementInteractionActivity {
 const checkHierarchy = (v: string[], $id: ElementId) =>
   (v || [])?.some((id, i, a) => id === $id && i !== a.length - 1)
 
-export const useBuilderElementInteractionActivity = (
-  $id: ElementId
-): UseBuilderElementInteractionActivity => {
-  const { getApp } = useAglynAppContext(),
-    store = getBuilderStore(getApp(), { store: 'canvas' })
+export const useBesignerElementInteractionActivity = (
+  $id: ElementId,
+): UseBesignerElementInteractionActivity => {
+  const {getApp} = useAglynAppContext(),
+    store = getBesignerStore(getApp(), {store: 'canvas'})
 
   return useStoreMap({
     store,
@@ -56,9 +57,9 @@ export const useBuilderElementInteractionActivity = (
       }
     },
     updateFilter(newValue, prevValue) {
-      return !deepEqual(newValue, prevValue, { strict: true })
+      return !deepEqual(newValue, prevValue, {strict: true})
     },
   })
 }
 
-export default useBuilderElementInteractionActivity
+export default useBesignerElementInteractionActivity

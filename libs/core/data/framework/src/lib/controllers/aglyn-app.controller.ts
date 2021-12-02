@@ -17,7 +17,7 @@
 
 import { yes } from '@aglyn/shared-util-tools'
 import {
-  _INTERNAL_BUILDERS_,
+  _INTERNAL_BESIGNERS_,
   _INTERNAL_CANVAS_,
   _INTERNAL_COMMANDS_,
   _INTERNAL_COMPONENTS_,
@@ -28,7 +28,10 @@ import {
 import { AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
 import { AglynBaseModel, AglynBaseModelOptions } from '../models/aglyn-base.model'
 import { AppUUN, Payload } from '../types'
-import { AglynBuilderController, AglynBuilderControllerOptions } from './aglyn-builder.controller'
+import {
+  AglynBesignerController,
+  AglynBesignerControllerOptions,
+} from './aglyn-besigner.controller'
 import { AglynCanvasController, AglynCanvasControllerOptions } from './aglyn-canvas.controller'
 import { AglynCommandsController } from './aglyn-commands.controller'
 import {
@@ -53,7 +56,7 @@ export interface AglynAppOptions extends AglynBaseModelOptions {
     commands?: AglynExtensionsControllerOptions
     components?: AglynComponentsControllerOptions
     canvas?: AglynCanvasControllerOptions
-    builder?: AglynBuilderControllerOptions
+    besigner?: AglynBesignerControllerOptions
   }
 }
 
@@ -86,7 +89,7 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   #commandsController: AglynCommandsController = null
   #componentsController: AglynComponentsController = null
   #canvasController: AglynCanvasController = null
-  #builderController: AglynBuilderController = null
+  #besignerController: AglynBesignerController = null
   #isDeleted = false
 
   public get extensions(): AglynExtensionsController {
@@ -104,8 +107,8 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
   public get canvas(): AglynCanvasController {
     return this.#canvasController
   }
-  public get builder(): AglynBuilderController {
-    return this.#builderController
+  public get besigner(): AglynBesignerController {
+    return this.#besignerController
   }
   public get deleted(): boolean {
     return this.#isDeleted
@@ -150,10 +153,10 @@ export class AglynAppController extends AglynBaseModel<AglynAppOptions> {
         ...this.options.modulesOptions?.canvas,
       }),
     )
-    _INTERNAL_BUILDERS_.set(
+    _INTERNAL_BESIGNERS_.set(
       this.#name,
-      this.#builderController = new AglynBuilderController(this, {
-        ...this.options.modulesOptions?.builder,
+      this.#besignerController = new AglynBesignerController(this, {
+        ...this.options.modulesOptions?.besigner,
       }),
     )
     _INTERNAL_EXTENSIONS_.set(

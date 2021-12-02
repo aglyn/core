@@ -15,10 +15,17 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../../vendor/mui'
-import { consoleOverrides } from '../console-theme/console.overrides'
+import { getApp } from '@aglyn/core-data-framework'
+import { BesignerComponent } from '@aglyn/core-feature-besigner'
 
-export const builderOverrides: ThemeOptions['components'] = {
-  ...consoleOverrides,
+
+function Besigner(props) {
+  if (typeof document !== 'undefined') {
+    console.log('page:/besigner app', getApp())
+  }
+  return <BesignerComponent />
 }
-export default builderOverrides
+
+Besigner.displayName = 'Page-Besigner'
+
+export default Besigner

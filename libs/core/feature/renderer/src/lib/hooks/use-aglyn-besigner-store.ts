@@ -15,33 +15,28 @@
  * limitations under the License.
  */
 
-import { BuilderContextStores, getBuilderStore } from '@aglyn/core-data-framework'
+import { BesignerContextStores, getBesignerStore } from '@aglyn/core-data-framework'
 import { Conditional } from '@aglyn/shared-data-types'
 import { useStoreMap } from 'effector-react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
-export function useAglynBuilderStore<K1 extends keyof BuilderContextStores>(
-  store: K1
-): BuilderContextStores[K1]
-export function useAglynBuilderStore<
-  K1 extends keyof BuilderContextStores,
-  K2 extends keyof BuilderContextStores[K1] = null
->(store: K1, key: K2): BuilderContextStores[K1][K2]
-export function useAglynBuilderStore<
-  K1 extends keyof BuilderContextStores,
-  K2 extends keyof BuilderContextStores[K1] = null
->(
+
+export function useAglynBesignerStore<K1 extends keyof BesignerContextStores>(
+  store: K1,
+): BesignerContextStores[K1]
+export function useAglynBesignerStore<K1 extends keyof BesignerContextStores,
+  K2 extends keyof BesignerContextStores[K1] = null>(store: K1, key: K2): BesignerContextStores[K1][K2]
+export function useAglynBesignerStore<K1 extends keyof BesignerContextStores,
+  K2 extends keyof BesignerContextStores[K1] = null>(
   storeName: K1,
-  key?: K2
-): Conditional<
-  K2,
-  keyof BuilderContextStores[K1],
-  BuilderContextStores[K1][K2],
-  keyof BuilderContextStores[K1]
-> {
-  const { getApp } = useAglynAppContext()
+  key?: K2,
+): Conditional<K2,
+  keyof BesignerContextStores[K1],
+  BesignerContextStores[K1][K2],
+  keyof BesignerContextStores[K1]> {
+  const {getApp} = useAglynAppContext()
   const app = getApp()
-  const store = getBuilderStore(app, { store: storeName })
+  const store = getBesignerStore(app, {store: storeName})
   return useStoreMap({
     store,
     keys: [storeName, key],
@@ -51,11 +46,9 @@ export function useAglynBuilderStore<
       }
       return store
     },
-  }) as Conditional<
-    K2,
-    keyof BuilderContextStores[K1],
-    BuilderContextStores[K1][K2],
-    keyof BuilderContextStores[K1]
-  >
+  }) as Conditional<K2,
+    keyof BesignerContextStores[K1],
+    BesignerContextStores[K1][K2],
+    keyof BesignerContextStores[K1]>
 }
-export default useAglynBuilderStore
+export default useAglynBesignerStore

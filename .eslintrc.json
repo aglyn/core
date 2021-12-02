@@ -64,9 +64,9 @@
                 ]
               },
               {
-                "sourceTag": "scope:lib:sdk:ui-builder",
+                "sourceTag": "scope:lib:sdk:ui-besigner",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:sdk:ui-builder",
+                  "scope:lib:sdk:ui-besigner",
                   "scope:lib:sdk:framework",
                   "scope:lib:sdk:ui-renderer",
                   "scope:lib:shared"

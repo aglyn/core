@@ -15,8 +15,11 @@
  * limitations under the License.
  */
 
-import { SpacingOptions } from '../../vendor/mui'
+import { ThemeOptions } from '../../vendor/mui'
+import { consoleOverrides } from '../console-theme/console.overrides'
 
-export const builderSpacing: SpacingOptions = 10
 
-export default builderSpacing
+export const besignerOverrides: ThemeOptions['components'] = {
+  ...consoleOverrides,
+}
+export default besignerOverrides

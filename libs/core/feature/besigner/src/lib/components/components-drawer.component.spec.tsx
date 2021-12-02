@@ -20,9 +20,10 @@ import React from 'react'
 
 import { ComponentsDrawerComponent } from './components-drawer.component'
 
-describe('BuilderComponentsDrawerComponent', () => {
+
+describe('BesignerComponentsDrawerComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<ComponentsDrawerComponent />)
+    const {baseElement} = render(<ComponentsDrawerComponent />)
     expect(baseElement).toBeTruthy()
   })
 })

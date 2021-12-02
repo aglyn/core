@@ -15,25 +15,22 @@
  * limitations under the License.
  */
 
-export enum InteractionModeFlag {
-  SELECT = 0x1,
-  REARRANGE = 0x2,
-  PREVIEW = 0x3,
-}
+import { PaletteOptions } from '../../vendor/mui'
+import { ConsolePalette, consolePalette } from '../console-theme/console.palette'
 
-export enum BuilderActiveViewFlag {
-  PANEL_LEFT = 0x1,
-  PANEL_RIGHT = 0x2,
-  PANEL_BOTTOM = 0x3,
-}
 
-export enum DndDragSourceTypeFlag {
-  CANVAS_ELEMENT = 0x1,
-  COMPONENT_TEMPLATE = 0x2,
+export const besignerPalette: Record<Uppercase<ConsolePalette.ColorVariant>, PaletteOptions> = {
+  LIGHT: {
+    ...consolePalette.LIGHT,
+    primary: {main: '#0091EA'},
+    secondary: {main: '#E040FB'},
+    tertiary: {main: '#37474F'},
+  },
+  DARK: {
+    ...consolePalette.DARK,
+    primary: {main: '#37474F'},
+    secondary: {main: '#E040FB'},
+    tertiary: {main: '#0091EA'},
+  },
 }
-
-export enum DndDropLinealTypeFlag {
-  ACTIVITY_ELEMENT_BEFORE = 0x1,
-  ACTIVITY_ELEMENT_INSIDE = 0x2,
-  ACTIVITY_ELEMENT_AFTER = 0x3,
-}
+export default besignerPalette

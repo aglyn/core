@@ -49,6 +49,6 @@
   - libs/core/feature/renderer/*
   - libs/core/feature/renderer/**/*
 
-'View: Builder':
-  - libs/core/feature/builder/*
-  - libs/core/feature/builder/**/*
+'View: Besigner':
+  - libs/core/feature/besigner/*
+  - libs/core/feature/besigner/**/*

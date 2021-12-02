@@ -20,9 +20,10 @@ import React from 'react'
 
 import { AppBarModifyComponent } from './app-bar-modify.component'
 
-describe('BuilderToolbarComponent', () => {
+
+describe('BesignerToolbarComponent', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<AppBarModifyComponent />)
+    const {baseElement} = render(<AppBarModifyComponent />)
     expect(baseElement).toBeTruthy()
   })
 })

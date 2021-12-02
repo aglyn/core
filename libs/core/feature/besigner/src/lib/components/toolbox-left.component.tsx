@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { useAglynBuilderStore } from '@aglyn/core-feature-renderer'
+import { useAglynBesignerStore } from '@aglyn/core-feature-renderer'
 import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import MuiTabContext from '@mui/lab/TabContext'
 import MuiTabList from '@mui/lab/TabList'
@@ -28,11 +28,12 @@ import { useAddElementCallback } from '../hooks/use-add-element-callback'
 import { ElementsTreeViewComponent } from './elements-tree-view.component'
 import ToolboxDrawerComponent, { ToolboxDrawerComponentProps } from './toolbox-drawer.component'
 
+
 const ElementsTree = () => {
   const handleAddElementClick = useAddElementCallback()
   return (
     <>
-      <Box sx={{ px: 0.5, pb: 1, pt: 1 }}>
+      <Box sx={{px: 0.5, pb: 1, pt: 1}}>
         <Button
           color="secondary"
           startIcon={<SvgPathIcon fontSize="inherit" iconIds="plus" />}
@@ -50,12 +51,12 @@ export interface ToolboxLeftComponentProps extends ToolboxDrawerComponentProps {
 
 export const ToolboxLeftComponent = forwardRef<any, ToolboxLeftComponentProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { children, drawerWidth: drawerWidthProp, ...rest } = props
+  const {children, drawerWidth: drawerWidthProp, ...rest} = props
 
-  const panel = useAglynBuilderStore('panels', 'left')
-  const { toggled, drawerWidth = drawerWidthProp } = panel || {}
+  const panel = useAglynBesignerStore('panels', 'left')
+  const {toggled, drawerWidth = drawerWidthProp} = panel || {}
   const open = Boolean(toggled)
   const [activeView, setActiveView] = useState(() => 'elements-tree')
   const handleTabChange = useCallback((e, newValue) => setActiveView(newValue), [])
@@ -71,20 +72,20 @@ export const ToolboxLeftComponent = forwardRef<any, ToolboxLeftComponentProps>(f
   return (
     <ToolboxDrawerComponent ref={ref} drawerWidth={drawerWidth} open={open} anchor="left" {...rest}>
       <MuiTabContext value={activeView}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
           <MuiTabList
             onChange={handleTabChange}
             variant="fullWidth"
             indicatorColor="secondary"
             textColor="primary"
           >
-            {panels.map(({ $id, iconIds }) => (
+            {panels.map(({$id, iconIds}) => (
               <MuiTab key={$id} value={$id} icon={<SvgPathIcon iconIds={iconIds} />} />
             ))}
           </MuiTabList>
         </Box>
-        {panels.map(({ $id, component: Component }) => (
-          <MuiTabPanel key={$id} value={$id} sx={{ p: 0, overflow: 'auto' }}>
+        {panels.map(({$id, component: Component}) => (
+          <MuiTabPanel key={$id} value={$id} sx={{p: 0, overflow: 'auto'}}>
             <Component />
           </MuiTabPanel>
         ))}

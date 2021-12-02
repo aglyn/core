@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getBuilderStore } from '@aglyn/core-data-framework'
+import { getBesignerStore } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import { _isFnT } from '@aglyn/shared-util-guards'
@@ -25,6 +25,7 @@ import { useStoreMap } from 'effector-react'
 import { ChangeEvent, forwardRef, useCallback, useRef } from 'react'
 import { ViewportCanvasComponent } from './viewport-canvas.component'
 import { ZoomControlsComponent } from './zoom-controls.component'
+
 
 const classKeys = generateComponentClassKeys('AglynViewport', [
   'panelLeftOpen',
@@ -44,7 +45,7 @@ const AglynViewport = styled(Stack, {
   [`&.${classKeys.panelRightOpen}`]: {},
 })
 
-const CanvasShadow = styled('div', { name: 'CanvasShadow' })(({ theme }) => ({
+const CanvasShadow = styled('div', {name: 'CanvasShadow'})(({theme}) => ({
   flexGrow: 1,
   overflow: 'hidden',
   width: '100%',
@@ -66,7 +67,7 @@ export interface ViewportRootComponentProps extends StackProps {
 
 export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
   function RefRenderFn(props, ref) {
-    const { children, className, ...rest } = props
+    const {children, className, ...rest} = props
 
     const pannerRef = useRef<any>()
 
@@ -88,14 +89,14 @@ export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>
       }
     }, [])
 
-    const { getApp } = useAglynAppContext()
-    const { left, right, bottom } = useStoreMap(
-      getBuilderStore(getApp(), { store: 'panels' }),
+    const {getApp} = useAglynAppContext()
+    const {left, right, bottom} = useStoreMap(
+      getBesignerStore(getApp(), {store: 'panels'}),
       (panels) => ({
         left: panels?.left,
         bottom: panels?.bottom,
         right: panels?.right,
-      })
+      }),
     )
 
     const elemClassName = clsx(
@@ -104,7 +105,7 @@ export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>
         [classKeys.panelBottomOpen]: Boolean(bottom?.toggled),
         [classKeys.panelRightOpen]: Boolean(right?.toggled),
       },
-      className
+      className,
     )
 
     return (
@@ -124,7 +125,7 @@ export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>
         {children}
       </AglynViewport>
     )
-  }
+  },
 )
 
 ViewportRootComponent.displayName = 'ViewportRootComponent'

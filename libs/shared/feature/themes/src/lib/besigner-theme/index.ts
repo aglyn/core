@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../../vendor/mui'
-import { consoleTypography } from '../console-theme/console.typography'
-
-export const builderTypography: ThemeOptions['typography'] = {
-  ...consoleTypography,
-}
-export default builderTypography
+export * from './besigner.options'
+export * from './besigner.overrides'
+export * from './besigner.palette'
+export * from './besigner.shape'
+export * from './besigner.spacing'
+export * from './besigner.typography'
+export * from './besigner.theme'

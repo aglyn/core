@@ -16,7 +16,7 @@
  */
 
 import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import type { AglynBuilderController } from '../controllers/aglyn-builder.controller'
+import type { AglynBesignerController } from '../controllers/aglyn-besigner.controller'
 import type { AglynCanvasController } from '../controllers/aglyn-canvas.controller'
 import type { AglynCommandsController } from '../controllers/aglyn-commands.controller'
 import type { AglynComponentsController } from '../controllers/aglyn-components.controller'
@@ -35,7 +35,7 @@ export const _INTERNAL_APPS_: Map<AppUUN, AglynAppController> = new Map()
 export const _INTERNAL_EXTENSIONS_: Map<AppUUN, AglynExtensionsController> = new Map()
 export const _INTERNAL_COMMANDS_: Map<AppUUN, AglynCommandsController> = new Map()
 export const _INTERNAL_COMPONENTS_: Map<AppUUN, AglynComponentsController> = new Map()
-export const _INTERNAL_BUILDERS_: Map<AppUUN, AglynBuilderController> = new Map()
+export const _INTERNAL_BESIGNERS_: Map<AppUUN, AglynBesignerController> = new Map()
 export const _INTERNAL_CANVAS_: Map<AppUUN, AglynCanvasController> = new Map()
 export const _INTERNAL_CONTEXTS_: Map<AppUUN, AglynContextsController> = new Map()
 

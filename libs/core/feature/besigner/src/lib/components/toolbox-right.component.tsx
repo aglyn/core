@@ -16,7 +16,7 @@
  */
 
 import {
-  useAglynBuilderStore,
+  useAglynBesignerStore,
   useAglynCanvasApiEvents,
   useAglynComponentSchema,
   useAglynElementData,
@@ -32,69 +32,80 @@ import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import MuiTab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
-import { forwardRef, useCallback, useState } from 'react'
+import { forwardRef, Fragment, useCallback, useState } from 'react'
 import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
 import { useComponentFormSchema } from '../hooks/use-component-form-schema'
 import { ToolboxDrawerComponent, ToolboxDrawerComponentProps } from './toolbox-drawer.component'
 
+
 const TabPanelInner = styled('div', {
   name: 'AglynTabPanelInner',
-})(({ theme }) => ({
+})(({theme}) => ({
   padding: theme.spacing(2),
   width: '100%',
 }))
 const DividerSpacer = styled(Divider, {
   name: 'AglynDividerSpacer',
-})(({ theme }) => ({
+})(({theme}) => ({
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(2),
 }))
 
 const ElementInfo = (props) => {
-  const { $id } = useAglynCanvasSelected() || {}
-  const { componentId, bundleId, parentId } = useAglynElementData($id) || {}
-  const { metadata } = useAglynComponentSchema(componentId, bundleId) || {}
-  const { displayName, title, subtitle, description } = metadata || {}
+  const {$id} = useAglynCanvasSelected() || {}
+  const {componentId, bundleId, parentId} = useAglynElementData($id) || {}
+  const {metadata} = useAglynComponentSchema(componentId, bundleId) || {}
+  const {displayName, title, subtitle, description} = metadata || {}
   const failoverText = '(undefined)'
   const details = [
     {
-      title: 'Element Overview',
-      data: [
+      id: 'element-overview',
+      label: 'Element Overview',
+      items: [
         {
-          subtitle: 'Type',
+          id: 'component-display-name',
+          label: 'Type',
           value: displayName,
         },
         {
-          subtitle: 'Title',
+          id: 'component-title',
+          label: 'Title',
           value: title,
         },
         {
-          subtitle: 'Subtitle',
+          id: 'component-subtitle',
+          label: 'Subtitle',
           value: subtitle,
         },
         {
-          subtitle: 'Description',
+          id: 'component-description',
+          label: 'Description',
           value: description,
         },
       ],
     },
     {
-      title: 'Unique Identifiers',
-      data: [
+      id: 'unique-identifiers',
+      label: 'Unique Identifiers',
+      items: [
         {
-          subtitle: 'Element ID',
+          id: 'element-id',
+          label: 'Element ID',
           value: $id,
         },
         {
-          subtitle: 'Parent Element ID',
+          id: 'parent-id',
+          label: 'Parent Element ID',
           value: parentId,
         },
         {
-          subtitle: 'Component ID',
+          id: 'component-id',
+          label: 'Component ID',
           value: componentId,
         },
         {
-          subtitle: 'Bundle ID',
+          id: 'bundle-id',
+          label: 'Bundle ID',
           value: bundleId,
         },
       ],
@@ -104,23 +115,23 @@ const ElementInfo = (props) => {
     <TabPanelInner {...props}>
       {$id ? (
         <>
-          {details.map(({ title, data }) => (
-            <>
-              <Typography variant="subtitle1" component="div" sx={{ mb: 2 }}>
-                {title}
+          {details.map(({id, label, items}) => (
+            <Fragment key={id}>
+              <Typography variant="subtitle1" component="div" sx={{mb: 2}}>
+                {label}
               </Typography>
-              {data.map((i) => (
-                <>
-                  <Typography variant="caption" component="div" sx={{ textTransform: 'uppercase' }}>
-                    <b>{i.subtitle}:</b>
+              {items.map(({id, label, value}) => (
+                <Fragment key={id}>
+                  <Typography variant="caption" component="div" sx={{textTransform: 'uppercase'}}>
+                    <b>{label}:</b>
                   </Typography>
                   <Typography variant="body1" component="div" gutterBottom>
-                    {i.value || <i>{failoverText}</i>}
+                    {value || <i>{failoverText}</i>}
                   </Typography>
-                </>
+                </Fragment>
               ))}
               <DividerSpacer variant="middle" />
-            </>
+            </Fragment>
           ))}
         </>
       ) : (
@@ -133,16 +144,16 @@ const ElementInfo = (props) => {
 }
 
 const PropsForm = (props) => {
-  const { addElement, updateElement } = useAglynCanvasApiEvents()
-  const { $id } = useAglynCanvasSelected() || {}
-  const { props: elemProps, componentId, bundleId } = useAglynElementData($id) || {}
-  const formSchema = useComponentFormSchema({ componentId, bundleId })
+  const {addElement, updateElement} = useAglynCanvasApiEvents()
+  const {$id} = useAglynCanvasSelected() || {}
+  const {props: elemProps, componentId, bundleId} = useAglynElementData($id) || {}
+  const formSchema = useComponentFormSchema({componentId, bundleId})
 
   const handleElementSave = useCallback(
     (values) => {
-      updateElement({ element: { $id, props: { ...values } } })
+      updateElement({element: {$id, props: {...values}}})
     },
-    [$id]
+    [$id],
   )
   const handleDrawerClose = useCallback((e, reason) => {}, [])
   const handleDeleteButtonClick = useCallback((e) => {}, [])
@@ -159,7 +170,7 @@ const PropsForm = (props) => {
       />
 
       <FormControl margin="none" fullWidth>
-        <Button onClick={handleDeleteButtonClick} sx={{ mt: 2, color: 'error.main' }} fullWidth>
+        <Button onClick={handleDeleteButtonClick} sx={{mt: 2, color: 'error.main'}} fullWidth>
           Delete Element
         </Button>
       </FormControl>
@@ -171,10 +182,10 @@ export interface ToolboxRightComponentProps extends ToolboxDrawerComponentProps 
 
 export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>(
   function RefRenderFn(props, ref) {
-    const { children, drawerWidth: drawerWidthProp, ...rest } = props
+    const {children, drawerWidth: drawerWidthProp, ...rest} = props
 
-    const panel = useAglynBuilderStore('panels', 'right')
-    const { toggled, tab, drawerWidth = drawerWidthProp } = panel || {}
+    const panel = useAglynBesignerStore('panels', 'right')
+    const {toggled, tab, drawerWidth = drawerWidthProp} = panel || {}
     const open = Boolean(toggled)
     const [activeView, setActiveView] = useState(() => tab ?? 'element-props-form')
     const handleTabChange = useCallback((e, val) => setActiveView(val), [])
@@ -201,20 +212,20 @@ export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>
         {...rest}
       >
         <MuiTabContext value={activeView}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
             <MuiTabList
               onChange={handleTabChange}
               variant="fullWidth"
               indicatorColor="secondary"
               textColor="primary"
             >
-              {panels.map(({ $id, iconIds }) => (
+              {panels.map(({$id, iconIds}) => (
                 <MuiTab key={$id} value={$id} icon={<SvgPathIcon iconIds={iconIds} />} />
               ))}
             </MuiTabList>
           </Box>
-          {panels.map(({ $id, component: Component }) => (
-            <MuiTabPanel key={$id} value={$id} sx={{ p: 0, overflow: 'auto' }}>
+          {panels.map(({$id, component: Component}) => (
+            <MuiTabPanel key={$id} value={$id} sx={{p: 0, overflow: 'auto'}}>
               <Component />
             </MuiTabPanel>
           ))}
@@ -223,7 +234,7 @@ export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>
         {children}
       </ToolboxDrawerComponent>
     )
-  }
+  },
 )
 
 ToolboxRightComponent.displayName = 'ToolboxRightComponent'

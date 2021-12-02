@@ -26,7 +26,7 @@ export * from './types'
 // 👇
 
 export * from './api/app.api'
-export * from './api/builder.api'
+export * from './api/besigner.api'
 export * from './api/canvas.api'
 export * from './api/commands.api'
 export * from './api/components.api'
@@ -44,7 +44,7 @@ export * from './api/logger.api'
 
 export * from './constants/_internal'
 export * from './constants/components'
-export * from './constants/builder'
+export * from './constants/besigner'
 export * from './constants/emitter'
 export * from './constants/error'
 export * from './constants/lifecycle'
@@ -142,7 +142,7 @@ export type {
   AglynCommandsControllerT,
 } from './controllers/aglyn-commands.controller'
 export type {
-  AglynComponentBuilderFlags,
+  AglynComponentBesignerFlags,
   AglynComponentClassElement,
   AglynComponentElement,
   AglynComponentElementData,
@@ -181,15 +181,15 @@ export type {
   ElementsDataStoreApi,
 } from './controllers/aglyn-canvas.controller'
 export type {
-  AglynBuilderController,
-  AglynBuilderControllerOptions,
-  AglynBuilderControllerT,
-  BuilderCanvasHoveredElement,
-  BuilderCanvasSelectedElement,
-  BuilderCanvasState,
-  BuilderContextStores,
-  BuilderDndState,
-  BuilderFlagState,
-  BuilderPanelsState,
+  AglynBesignerController,
+  AglynBesignerControllerOptions,
+  AglynBesignerControllerT,
+  BesignerCanvasHoveredElement,
+  BesignerCanvasSelectedElement,
+  BesignerCanvasState,
+  BesignerContextStores,
+  BesignerDndState,
+  BesignerFlagState,
+  BesignerPanelsState,
   CommActionData,
-} from './controllers/aglyn-builder.controller'
+} from './controllers/aglyn-besigner.controller'

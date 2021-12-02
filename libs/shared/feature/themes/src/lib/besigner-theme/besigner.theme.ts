@@ -17,26 +17,27 @@
 
 import { Theme } from '../../vendor/mui'
 import createResponsiveTheme from '../util/create-responsive-theme'
-import builderOptions, { builderOptionsDark } from './builder.options'
+import besignerOptions, { besignerOptionsDark } from './besigner.options'
 
-export const builderTheme: Theme = createResponsiveTheme({
-  themeOptions: builderOptions,
+
+export const besignerTheme: Theme = createResponsiveTheme({
+  themeOptions: besignerOptions,
 })
-export const builderThemeDark: Theme = createResponsiveTheme({
-  themeOptions: builderOptionsDark,
+export const besignerThemeDark: Theme = createResponsiveTheme({
+  themeOptions: besignerOptionsDark,
 })
-export const getBuilderTheme = (mode: 'light' | 'dark' = 'light') => {
+export const getBesignerTheme = (mode: 'light' | 'dark' = 'light') => {
   const theme = {
-    light: builderTheme,
-    dark: builderThemeDark,
+    light: besignerTheme,
+    dark: besignerThemeDark,
   }
   return theme[mode]
 }
-export const getBuilderMetaThemeColor = (mode: 'light' | 'dark' = 'light') => {
+export const getBesignerMetaThemeColor = (mode: 'light' | 'dark' = 'light') => {
   const themeColor = {
-    light: builderTheme.palette.primary.main,
-    dark: builderThemeDark.palette.primary.main,
+    light: besignerTheme.palette.primary.main,
+    dark: besignerThemeDark.palette.primary.main,
   }
   return themeColor[mode]
 }
-export default builderTheme
+export default besignerTheme

@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-import { getBuilderStore } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/feature-renderer'
+import { getBesignerStore } from '@aglyn/core-data-framework'
+import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { useStoreMap } from 'effector-react'
+
 
 export interface UseAglynCanvasHovered {}
 
 export const useAglynCanvasHovered = (opts?: UseAglynCanvasHovered) => {
-  const { getApp } = useAglynAppContext(),
-    store = getBuilderStore(getApp(), { store: 'canvas' })
+  const {getApp} = useAglynAppContext(),
+    store = getBesignerStore(getApp(), {store: 'canvas'})
 
   return useStoreMap(store, (store) => store?.hovered)
 }

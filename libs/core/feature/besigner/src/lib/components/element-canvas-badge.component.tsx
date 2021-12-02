@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { duplicateCanvasElement, ElementId, setBuilderPanels } from '@aglyn/core-data-framework'
+import { duplicateCanvasElement, ElementId, setBesignerPanels } from '@aglyn/core-data-framework'
 import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import {
   PopperStyledArrowComponent,
@@ -32,37 +32,38 @@ import Zoom from '@mui/material/Zoom'
 import { ChangeEvent, forwardRef, memo, useCallback, useState } from 'react'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
+
 interface ElementBadgeButtonGroupProps extends ButtonGroupProps {
   $id: ElementId
 }
 
 const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(function RefRenderFn(
   props,
-  ref
+  ref,
 ) {
-  const { $id, ...rest } = props
+  const {$id, ...rest} = props
 
-  const { getApp } = useAglynAppContext()
-  const deleteElementCallback = useDeleteElementCallback({ $id })
+  const {getApp} = useAglynAppContext()
+  const deleteElementCallback = useDeleteElementCallback({$id})
 
   const handleDeleteButtonClick = useCallback(
     (e: ChangeEvent<unknown>) => {
       deleteElementCallback(e)
     },
-    [deleteElementCallback]
+    [deleteElementCallback],
   )
 
   const handleDuplicateButtonClick = useCallback(
     (e: ChangeEvent<unknown>) => {
-      duplicateCanvasElement(getApp(), { $id })
+      duplicateCanvasElement(getApp(), {$id})
     },
-    [$id]
+    [$id],
   )
   const handleModifyButtonClick = useCallback(
     (e: ChangeEvent<unknown>) => {
-      setBuilderPanels(getApp(), { right: { toggled: true, tab: 'element-modify' } })
+      setBesignerPanels(getApp(), {right: {toggled: true, tab: 'element-modify'}})
     },
-    [$id]
+    [$id],
   )
 
   const buttons = [
@@ -125,7 +126,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(fu
       aria-label="element controls"
       {...rest}
     >
-      {buttons.map(({ id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps }) => (
+      {buttons.map(({id, tooltipProps, srOnlyProps, buttonProps, svgPathIconProps}) => (
         <Tooltip key={id} {...tooltipProps}>
           <Button {...buttonProps}>
             <SvgPathIcon fontSize="small" {...svgPathIconProps} />
@@ -143,7 +144,7 @@ export interface ElementCanvasBadgeComponentProps extends PopperStyledComponentP
 
 const ElementCanvasBadgeComponentRaw = forwardRef<any, ElementCanvasBadgeComponentProps>(
   function RefRenderFn(props, ref) {
-    const { $id, disableArrow, ...rest } = props
+    const {$id, disableArrow, ...rest} = props
 
     const [arrowRef, setArrowRef] = useState(null)
 
@@ -189,7 +190,7 @@ const ElementCanvasBadgeComponentRaw = forwardRef<any, ElementCanvasBadgeCompone
         arrowGap={8}
         {...rest}
       >
-        {({ TransitionProps }) => (
+        {({TransitionProps}) => (
           <Zoom {...TransitionProps}>
             <div>
               {!disableArrow && <PopperStyledArrowComponent ref={setArrowRef} />}
@@ -199,7 +200,7 @@ const ElementCanvasBadgeComponentRaw = forwardRef<any, ElementCanvasBadgeCompone
         )}
       </PopperStyledComponent>
     )
-  }
+  },
 )
 
 ElementCanvasBadgeComponentRaw.displayName = 'ElementCanvasBadgeComponent'

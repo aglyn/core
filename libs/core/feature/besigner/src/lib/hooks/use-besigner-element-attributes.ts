@@ -17,7 +17,8 @@
 
 import { BundleUId, ComponentId, ElementId } from '@aglyn/core-data-framework'
 import { ElementAttribute } from '@aglyn/core-feature-besigner'
-import { useBuilderElementInteractionActivity } from './use-builder-element-interaction-activity'
+import { useBesignerElementInteractionActivity } from './use-besigner-element-interaction-activity'
+
 
 function computeActivityValue(self: boolean, child: boolean) {
   if (child) return 'child'
@@ -25,17 +26,17 @@ function computeActivityValue(self: boolean, child: boolean) {
   return 'false'
 }
 
-export interface UseBuilderElementAttributesOptions {
+export interface UseBesignerElementAttributesOptions {
   $id: ElementId
   componentId: ComponentId
   bundleId?: BundleUId
 }
 
-export const useBuilderElementAttributes = (opts: UseBuilderElementAttributesOptions) => {
-  const { $id, componentId, bundleId } = opts
+export const useBesignerElementAttributes = (opts: UseBesignerElementAttributesOptions) => {
+  const {$id, componentId, bundleId} = opts
 
-  const { isSelfSelected, isSelfHovered, isChildSelected, isChildHovered } =
-    useBuilderElementInteractionActivity($id)
+  const {isSelfSelected, isSelfHovered, isChildSelected, isChildHovered} =
+    useBesignerElementInteractionActivity($id)
   const selected = computeActivityValue(isSelfSelected, isChildSelected)
   const hovered = computeActivityValue(isSelfHovered, isChildHovered)
 
@@ -50,4 +51,4 @@ export const useBuilderElementAttributes = (opts: UseBuilderElementAttributesOpt
   return attributes
 }
 
-export default useBuilderElementAttributes
+export default useBesignerElementAttributes

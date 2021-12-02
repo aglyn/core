@@ -21,28 +21,26 @@ import type {
   createEffect as createEffectorEffect,
   createEvent as createEffectorEvent,
 } from 'effector'
-import {
-  BuilderCanvasHoveredElement,
-  BuilderCanvasSelectedElement,
-  BuilderContextStores,
-  BuilderFlagState,
-  BuilderPanelsState,
-} from '../controllers/aglyn-builder.controller'
+import type {
+  BesignerCanvasHoveredElement,
+  BesignerCanvasSelectedElement,
+  BesignerContextStores,
+  BesignerFlagState,
+  BesignerPanelsState,
+} from '../controllers/aglyn-besigner.controller'
 import type {
   AglynCommandListener,
   AglynCommandResolver,
 } from '../controllers/aglyn-commands.controller'
 import type {
   AglynComponentElement,
+  AglynComponentElementDataDenormalized,
+  AglynComponentElementDataNormalized,
   AglynComponentsBundle,
   AglynComponentSchema,
 } from '../controllers/aglyn-components.controller'
-import {
-  AglynComponentElementDataDenormalized,
-  AglynComponentElementDataNormalized,
-} from '../controllers/aglyn-components.controller'
 import type { ContextStore, ContextStoreOptions } from '../controllers/aglyn-contexts.controller'
-import { AglynExtensionLoader } from '../controllers/aglyn-extensions.controller'
+import type { AglynExtensionLoader } from '../controllers/aglyn-extensions.controller'
 import type { AglynExtension, AglynExtensionOptions } from '../models/aglyn-extension.model'
 import type {
   AglynComponentElementDataNormalizedMap,
@@ -51,10 +49,10 @@ import type {
   CommandUId,
   ComponentId,
   ContextStoreUid,
+  ElementId,
   ExtensionUUN,
   PayloadData,
 } from '../types'
-import { ElementId } from '../types'
 
 
 export enum AglynAppEventFlag {
@@ -174,11 +172,11 @@ export enum AglynAppEffectFlag {
   COMPONENTS_BUNDLE_REGISTER = 'effect:components:register-components-bundle',
   COMPONENTS_BUNDLE_UNREGISTER = 'effect:components:unregister-components-bundle',
 
-  BUILDER_GET_STORE = 'effect:builder:get-store',
-  BUILDER_SET_FLAG = 'effect:builder:set-flag',
-  BUILDER_SET_PANEL = 'effect:builder:set-panel',
-  BUILDER_OPEN_PANEL = 'effect:builder:open-panel',
-  BUILDER_CLOSE_PANEL = 'effect:builder:close-panel',
+  BESIGNER_GET_STORE = 'effect:besigner:get-store',
+  BESIGNER_SET_FLAG = 'effect:besigner:set-flag',
+  BESIGNER_SET_PANEL = 'effect:besigner:set-panel',
+  BESIGNER_OPEN_PANEL = 'effect:besigner:open-panel',
+  BESIGNER_CLOSE_PANEL = 'effect:besigner:close-panel',
 }
 
 export type ExtensionHandleLoaderPayload = PayloadData<{ loader: AglynExtensionLoader, options?: Partial<AglynExtensionOptions> }>
@@ -211,13 +209,13 @@ export type CommandRegisterListenerPayload = PayloadData<{ commandId?: CommandUI
 export type CommandUnregisterListenerPayload = PayloadData<{ commandId?: CommandUId, listener: AglynCommandListener }>
 export type CommandTriggerPayload = PayloadData<{ commandId: CommandUId } & Dictionary>
 
-export type BuilderGetStorePayload<K extends keyof BuilderContextStores = any> = PayloadData<{ store: K }>
-export type BuilderFlagInteractModePayload<K extends keyof BuilderFlagState = any> = PayloadData<{ flag: K, value: BuilderFlagState[K] }>
-export type BuilderSetPanelPayload = PayloadData<Partial<BuilderPanelsState>>
-export type BuilderOpenPanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
-export type BuilderClosePanelPayload = PayloadData<{ panel: keyof BuilderPanelsState }>
-export type BuilderSetCanvasSelectedPayload = PayloadData<{ selected: BuilderCanvasSelectedElement }>
-export type BuilderSetCanvasHoveredPayload = PayloadData<{ hovered: BuilderCanvasHoveredElement }>
+export type BesignerGetStorePayload<K extends keyof BesignerContextStores = any> = PayloadData<{ store: K }>
+export type BesignerFlagInteractModePayload<K extends keyof BesignerFlagState = any> = PayloadData<{ flag: K, value: BesignerFlagState[K] }>
+export type BesignerSetPanelPayload = PayloadData<Partial<BesignerPanelsState>>
+export type BesignerOpenPanelPayload = PayloadData<{ panel: keyof BesignerPanelsState }>
+export type BesignerClosePanelPayload = PayloadData<{ panel: keyof BesignerPanelsState }>
+export type BesignerSetCanvasSelectedPayload = PayloadData<{ selected: BesignerCanvasSelectedElement }>
+export type BesignerSetCanvasHoveredPayload = PayloadData<{ hovered: BesignerCanvasHoveredElement }>
 
 export type CanvasUndoPayload = PayloadData<any>
 export type CanvasRedoPayload = PayloadData<any>
@@ -263,11 +261,11 @@ export interface AglynModuleEffectPayload extends Record<AglynAppEffectFlag, Agl
   [AglynAppEffectFlag.COMPONENTS_BUNDLE_REGISTER]: ComponentsBundleRegisterPayload
   [AglynAppEffectFlag.COMPONENTS_BUNDLE_UNREGISTER]: ComponentsBundleUnregisterPayload
 
-  [AglynAppEffectFlag.BUILDER_GET_STORE]: BuilderGetStorePayload
-  [AglynAppEffectFlag.BUILDER_SET_FLAG]: BuilderFlagInteractModePayload
-  [AglynAppEffectFlag.BUILDER_SET_PANEL]: BuilderSetPanelPayload
-  [AglynAppEffectFlag.BUILDER_OPEN_PANEL]: BuilderOpenPanelPayload
-  [AglynAppEffectFlag.BUILDER_CLOSE_PANEL]: BuilderClosePanelPayload
+  [AglynAppEffectFlag.BESIGNER_GET_STORE]: BesignerGetStorePayload
+  [AglynAppEffectFlag.BESIGNER_SET_FLAG]: BesignerFlagInteractModePayload
+  [AglynAppEffectFlag.BESIGNER_SET_PANEL]: BesignerSetPanelPayload
+  [AglynAppEffectFlag.BESIGNER_OPEN_PANEL]: BesignerOpenPanelPayload
+  [AglynAppEffectFlag.BESIGNER_CLOSE_PANEL]: BesignerClosePanelPayload
 }
 
 export type EventPayload<T, K extends keyof T = keyof T> = Record<K, T[K]>

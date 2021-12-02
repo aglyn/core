@@ -18,12 +18,13 @@
 import {
   deleteCanvasElement,
   ElementId,
-  setBuilderCanvasHovered,
-  setBuilderCanvasSelected,
+  setBesignerCanvasHovered,
+  setBesignerCanvasSelected,
 } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/feature-renderer'
+import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { ChangeEvent, useCallback } from 'react'
+
 
 export interface UseDeleteElementCallbackOptions {
   $id?: ElementId
@@ -37,11 +38,11 @@ export type UseDeleteElementCallback = {
 }
 
 export const useDeleteElementCallback = (
-  options?: UseDeleteElementCallbackOptions
+  options?: UseDeleteElementCallbackOptions,
 ): UseDeleteElementCallback => {
-  const { $id, onfulfilled, onrejected, oncatch } = { ...options }
-  const { confirm } = useConfirmationContext()
-  const { getApp } = useAglynAppContext()
+  const {$id, onfulfilled, onrejected, oncatch} = {...options}
+  const {confirm} = useConfirmationContext()
+  const {getApp} = useAglynAppContext()
   return useCallback(
     (e: ChangeEvent<unknown>, clbkOpts?: UseDeleteElementCallbackOptions) => {
       const app = getApp()
@@ -49,33 +50,33 @@ export const useDeleteElementCallback = (
       confirm({
         title: 'Are you sure?',
         description:
-          "You are about to delete an element from the canvas, please confirm the desired option. Press 'Delete' to confirm and delete the item. Press 'Cancel' to void the operation and close this dialog.",
+          'You are about to delete an element from the canvas, please confirm the desired option. Press \'Delete\' to confirm and delete the item. Press \'Cancel\' to void the operation and close this dialog.',
         confirmationText: 'Delete',
         confirmationButtonProps: {
           color: 'error',
         },
       })
-        .then(
-          (res) => {
-            setBuilderCanvasSelected(app, { selected: null })
-            setBuilderCanvasHovered(app, { hovered: null })
-            deleteCanvasElement(app, { $id: clbkOpts?.$id ?? $id })
-            clbkOpts?.onfulfilled && clbkOpts?.onfulfilled(res)
-            onfulfilled && onfulfilled(res)
-          },
-          (reason) => {
-            console.warn('rejected', reason)
-            clbkOpts?.onrejected && clbkOpts?.onrejected(reason)
-            onrejected && onrejected(reason)
-          }
-        )
-        .catch((e) => {
-          console.error('caught error', e)
-          clbkOpts?.oncatch && clbkOpts?.oncatch(e)
-          oncatch && oncatch(e)
-        })
+      .then(
+        (res) => {
+          setBesignerCanvasSelected(app, {selected: null})
+          setBesignerCanvasHovered(app, {hovered: null})
+          deleteCanvasElement(app, {$id: clbkOpts?.$id ?? $id})
+          clbkOpts?.onfulfilled && clbkOpts?.onfulfilled(res)
+          onfulfilled && onfulfilled(res)
+        },
+        (reason) => {
+          console.warn('rejected', reason)
+          clbkOpts?.onrejected && clbkOpts?.onrejected(reason)
+          onrejected && onrejected(reason)
+        },
+      )
+      .catch((e) => {
+        console.error('caught error', e)
+        clbkOpts?.oncatch && clbkOpts?.oncatch(e)
+        oncatch && oncatch(e)
+      })
     },
-    [$id, onfulfilled, onrejected, oncatch, confirm]
+    [$id, onfulfilled, onrejected, oncatch, confirm],
   )
 }
 

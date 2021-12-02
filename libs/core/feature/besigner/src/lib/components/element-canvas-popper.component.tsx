@@ -18,9 +18,10 @@
 import { ElementId } from '@aglyn/core-data-framework'
 import MuiPopper, { PopperProps as MuiPopperProps } from '@mui/material/Popper'
 import { forwardRef, RefObject } from 'react'
-import { useBuilderElementInteractionActivity } from '../hooks/use-builder-element-interaction-activity'
+import { useBesignerElementInteractionActivity } from '../hooks/use-besigner-element-interaction-activity'
 import { ElementCanvasBadgeComponent } from './element-canvas-badge.component'
 import { AglynElementOutlineProps, ElementOutlineComponent } from './element-outline.component'
+
 
 export interface ElementCanvasPopperComponentProps extends Partial<MuiPopperProps> {
   $id: ElementId
@@ -33,10 +34,10 @@ export interface ElementCanvasPopperComponentProps extends Partial<MuiPopperProp
 
 const ElementCanvasPopperComponent = forwardRef<any, ElementCanvasPopperComponentProps>(
   function RefRenderFn(props, ref) {
-    const { $id, isOver, isDragging, variant, badgeable, onGetElementRef, ...rest } = props
+    const {$id, isOver, isDragging, variant, badgeable, onGetElementRef, ...rest} = props
 
     const anchorRef = onGetElementRef($id)
-    const { isSelfHovered, isSelfSelected } = useBuilderElementInteractionActivity($id)
+    const {isSelfHovered, isSelfSelected} = useBesignerElementInteractionActivity($id)
 
     const isTypeSelect = variant === 'selected'
     const outlineType = (isDragging || isSelfSelected) && isTypeSelect ? 'selected' : 'hovered'
@@ -97,7 +98,7 @@ const ElementCanvasPopperComponent = forwardRef<any, ElementCanvasPopperComponen
         )}
       </MuiPopper>
     )
-  }
+  },
 )
 ElementCanvasPopperComponent.displayName = 'ElementCanvasPopperComponent'
 ElementCanvasPopperComponent.defaultProps = {
