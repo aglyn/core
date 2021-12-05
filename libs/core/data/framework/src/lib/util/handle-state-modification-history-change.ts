@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import { ModificationHistoryState } from '../types'
+import type { ModificationHistoryState } from '../types'
 
 
 const MAX_HISTORY = 25
 
-export const handleModificationHistoryChange = <S, T extends ModificationHistoryState<S> = ModificationHistoryState<S>>(
+export const handleStateModificationHistoryChange = <S, T extends ModificationHistoryState<S> = ModificationHistoryState<S>>(
   state: T,
   newState: S,
   maxHistory = MAX_HISTORY,
@@ -32,4 +32,4 @@ export const handleModificationHistoryChange = <S, T extends ModificationHistory
   }
 }
 
-export default handleModificationHistoryChange
+export default handleStateModificationHistoryChange

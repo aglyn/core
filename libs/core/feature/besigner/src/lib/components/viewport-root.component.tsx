@@ -15,14 +15,12 @@
  * limitations under the License.
  */
 
-import { getBesignerStore } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
 import { _isFnT } from '@aglyn/shared-util-guards'
 import Stack, { StackProps } from '@mui/material/Stack'
 import clsx from 'clsx'
-import { useStoreMap } from 'effector-react'
 import { ChangeEvent, forwardRef, useCallback, useRef } from 'react'
+import { useAglynBesignerPanelValue } from '../hooks/use-aglyn-besigner-panel-value'
 import { ViewportCanvasComponent } from './viewport-canvas.component'
 import { ZoomControlsComponent } from './zoom-controls.component'
 
@@ -45,7 +43,9 @@ const AglynViewport = styled(Stack, {
   [`&.${classKeys.panelRightOpen}`]: {},
 })
 
-const CanvasShadow = styled('div', {name: 'CanvasShadow'})(({theme}) => ({
+const CanvasShadow = styled('div', {
+  name: 'AglynCanvasShadow'
+})(({theme}) => ({
   flexGrow: 1,
   overflow: 'hidden',
   width: '100%',
@@ -89,21 +89,15 @@ export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>
       }
     }, [])
 
-    const {getApp} = useAglynAppContext()
-    const {left, right, bottom} = useStoreMap(
-      getBesignerStore(getApp(), {store: 'panels'}),
-      (panels) => ({
-        left: panels?.left,
-        bottom: panels?.bottom,
-        right: panels?.right,
-      }),
-    )
+    const leftToggled = useAglynBesignerPanelValue('panelLeft', 'toggled')
+    const rightToggled = useAglynBesignerPanelValue('panelRight', 'toggled')
+    const bottomToggled = useAglynBesignerPanelValue('panelBottom', 'toggled')
 
     const elemClassName = clsx(
       {
-        [classKeys.panelLeftOpen]: Boolean(left?.toggled),
-        [classKeys.panelBottomOpen]: Boolean(bottom?.toggled),
-        [classKeys.panelRightOpen]: Boolean(right?.toggled),
+        [classKeys.panelLeftOpen]: Boolean(leftToggled),
+        [classKeys.panelRightOpen]: Boolean(rightToggled),
+        [classKeys.panelBottomOpen]: Boolean(bottomToggled),
       },
       className,
     )

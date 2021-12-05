@@ -15,15 +15,19 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react'
-import React from 'react'
+import { BesignerContextStores } from '@aglyn/core-data-framework'
+import { useMemo } from 'react'
+import { useAglynBesignerStoreState } from './use-aglyn-besigner-store-state'
 
-import { AppBarModifyComponent } from './app-bar-modify.component'
 
+export const useAglynBesignerPanelValue = <P extends keyof BesignerContextStores['panels']>(
+  item: P,
+  key: keyof BesignerContextStores['panels'][P]
+) => {
+  const panel = useAglynBesignerStoreState('panels', item)
+  const {[key]: value} = {...panel}
 
-describe('BesignerToolbarComponent', () => {
-  it('should render successfully', () => {
-    const {baseElement} = render(<AppBarModifyComponent />)
-    expect(baseElement).toBeTruthy()
-  })
-})
+  return useMemo(() => value, [value, item, key])
+}
+
+export default useAglynBesignerPanelValue

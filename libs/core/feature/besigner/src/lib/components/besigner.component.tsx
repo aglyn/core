@@ -27,10 +27,10 @@ import { DndContext } from '@dnd-kit/core'
 import NoSsr from '@mui/material/NoSsr'
 import { forwardRef, Fragment, useCallback } from 'react'
 import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
-import { EditorComponent, EditorComponentProps } from './editor.component'
+import { WorkspaceEditorComponent, WorkspaceEditorComponentProps } from './workspace-editor.component'
 
 
-export interface BesignerComponentProps extends EditorComponentProps {
+export interface BesignerComponentProps extends WorkspaceEditorComponentProps {
   noSsr?: boolean
   appName?: AppUUN
 }
@@ -58,7 +58,7 @@ const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(function Re
               <ConfirmationProviderComponent>
                 <ComponentsDrawerContextProvider>
                   {/*<SnackbarProvider maxSnack={3}>*/}
-                  <EditorComponent ref={ref} {...rest} />
+                  <WorkspaceEditorComponent ref={ref} {...rest} />
                   {/*</SnackbarProvider>*/}
                 </ComponentsDrawerContextProvider>
               </ConfirmationProviderComponent>

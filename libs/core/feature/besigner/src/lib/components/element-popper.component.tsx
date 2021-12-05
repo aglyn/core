@@ -19,11 +19,11 @@ import { ElementId } from '@aglyn/core-data-framework'
 import MuiPopper, { PopperProps as MuiPopperProps } from '@mui/material/Popper'
 import { forwardRef, RefObject } from 'react'
 import { useBesignerElementInteractionActivity } from '../hooks/use-besigner-element-interaction-activity'
-import { ElementCanvasBadgeComponent } from './element-canvas-badge.component'
+import { ElementBadgeComponent } from './element-badge.component'
 import { AglynElementOutlineProps, ElementOutlineComponent } from './element-outline.component'
 
 
-export interface ElementCanvasPopperComponentProps extends Partial<MuiPopperProps> {
+export interface ElementPopperComponentProps extends Partial<MuiPopperProps> {
   $id: ElementId
   isOver?: boolean
   isDragging?: boolean
@@ -32,7 +32,7 @@ export interface ElementCanvasPopperComponentProps extends Partial<MuiPopperProp
   onGetElementRef: ($id: ElementId) => RefObject<Element>
 }
 
-const ElementCanvasPopperComponent = forwardRef<any, ElementCanvasPopperComponentProps>(
+const ElementPopperComponent = forwardRef<any, ElementPopperComponentProps>(
   function RefRenderFn(props, ref) {
     const {$id, isOver, isDragging, variant, badgeable, onGetElementRef, ...rest} = props
 
@@ -89,7 +89,7 @@ const ElementCanvasPopperComponent = forwardRef<any, ElementCanvasPopperComponen
         />
 
         {badgeable && (
-          <ElementCanvasBadgeComponent
+          <ElementBadgeComponent
             data-aglyn-element-badge={variant}
             anchorEl={anchorRef?.current}
             open={badgeOpen}
@@ -100,10 +100,10 @@ const ElementCanvasPopperComponent = forwardRef<any, ElementCanvasPopperComponen
     )
   },
 )
-ElementCanvasPopperComponent.displayName = 'ElementCanvasPopperComponent'
-ElementCanvasPopperComponent.defaultProps = {
+ElementPopperComponent.displayName = 'ElementPopperComponent'
+ElementPopperComponent.defaultProps = {
   variant: 'hovered',
 }
 
-export { ElementCanvasPopperComponent }
-export default ElementCanvasPopperComponent
+export { ElementPopperComponent }
+export default ElementPopperComponent

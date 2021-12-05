@@ -147,7 +147,7 @@ export default withStyles(styles, {name: 'Page:SignUp'})(
           </form>
           <Typography
             align="center"
-            className={classes.bottom}
+            className={classes.panelBottom}
             color="primary"
             component="div"
             variant="overline"

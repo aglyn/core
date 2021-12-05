@@ -17,13 +17,13 @@
 
 import type { AglynComponentElementDataNormalized, ElementId } from '@aglyn/core-data-framework'
 import { getCanvasNormalizedElementsStore } from '@aglyn/core-data-framework'
-import type { AnyProps, Conditional } from '@aglyn/shared-data-types'
+import type { AnyProps, Conditional, EmptyObj } from '@aglyn/shared-data-types'
 import { useStoreMap } from 'effector-react'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 export type UseAglynElementData<
-  P extends AnyProps,
-  K extends keyof AglynComponentElementDataNormalized<P>
+  P = AnyProps,
+  K extends keyof AglynComponentElementDataNormalized<P> = null
 > = Conditional<
   K,
   keyof AglynComponentElementDataNormalized<P>,
@@ -31,17 +31,19 @@ export type UseAglynElementData<
   AglynComponentElementDataNormalized<P>
 >
 
-export function useAglynElementData<P extends AnyProps>(
+export function useAglynElementData<P = EmptyObj>(
   $id: ElementId
 ): AglynComponentElementDataNormalized<P>
+
 export function useAglynElementData<
-  P extends AnyProps,
-  K extends keyof AglynComponentElementDataNormalized<P> = null
+  P = EmptyObj,
+  K extends keyof AglynComponentElementDataNormalized<P> = null,
 >($id: ElementId, key: K): AglynComponentElementDataNormalized<P>[K]
+
 export function useAglynElementData<
-  P extends AnyProps,
+  P = EmptyObj,
   K extends keyof AglynComponentElementDataNormalized<P> = null
->($id: ElementId, key?: K): UseAglynElementData<P, K> {
+>($id: ElementId, key?: K)/*: UseAglynElementData<P, K>*/ {
   const { getApp } = useAglynAppContext()
   const store = getCanvasNormalizedElementsStore(getApp())
 
@@ -54,6 +56,6 @@ export function useAglynElementData<
       }
       return store[$id]?.[key]
     },
-  }) as UseAglynElementData<P, K>
+  }) //as UseAglynElementData<P, K>
 }
 export default useAglynElementData

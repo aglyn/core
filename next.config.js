@@ -31,9 +31,6 @@ const PRODUCTION = NODE_ENV === 'production'
 const PREVIEW = NODE_ENV === 'preview'
 const READY = PRODUCTION || PREVIEW
 
-const MAX_BUFF_AGE = 5
-const MAX_BUFF_LEN = 1
-
 const DEFAULT_HEADERS = [
   { key: 'x-frame-options', value: 'SAMEORIGIN' },
   { key: 'x-content-type-options', value: 'nosniff' },
@@ -51,13 +48,6 @@ const aglynOptions = ({
   swcMinify: PRODUCTION,
   // Disable production source maps
   productionBrowserSourceMaps: false,
-  // Development mode buffer cache
-  onDemandEntries: {
-    // period (in ms) where the server will keep pages in the buffer
-    maxInactiveAge: MAX_BUFF_AGE * 1000,
-    // number of pages that should be kept simultaneously without being disposed
-    pagesBufferLength: MAX_BUFF_LEN,
-  },
 
   // Disable compression only in production
   compress: READY,
@@ -89,8 +79,8 @@ const aglynOptions = ({
  * Base configuration for NextJS Apps next.config.js
  * @param opts {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
-const withAglyn = (opts = {}) => {
-  const withAglynOptions = deepmerge(opts, withAglyn.options)
+const withAglynNxNext = (opts = {}) => {
+  const withAglynOptions = deepmerge(opts, withAglynNxNext.options)
 
   withAglynOptions.headers = async () => {
     const userHeaders = typeof opts.headers === 'function'
@@ -131,6 +121,6 @@ const withAglyn = (opts = {}) => {
   return withNx(withAglynOptions)
 }
 
-withAglyn.options = aglynOptions
+withAglynNxNext.options = aglynOptions
 
-module.exports = withAglyn
+module.exports = withAglynNxNext

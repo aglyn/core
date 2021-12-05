@@ -15,18 +15,11 @@
  * limitations under the License.
  */
 
-import { getBesignerStore } from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
-import { useStoreMap } from 'effector-react'
 
+import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
 
-export interface UseAglynCanvasSelected {}
-
-export const useAglynCanvasSelected = (opts?: UseAglynCanvasSelected) => {
-  const {getApp} = useAglynAppContext(),
-    store = getBesignerStore(getApp(), {store: 'canvas'})
-
-  return useStoreMap(store, (store) => store?.selected)
+export const useAglynCanvasSelected = () => {
+  return useAglynBesignerStoreState('canvas', 'selected')
 }
 
 export default useAglynCanvasSelected

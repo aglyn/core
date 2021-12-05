@@ -22,6 +22,7 @@ import {
 } from '@aglyn/core-feature-renderer'
 import { SyntheticEvent, useCallback } from 'react'
 import { ElementDrawerOptions, useElementDrawerContext } from '../contexts/element-drawer-context'
+import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
 import useAglynCanvasSelected from './use-aglyn-canvas-selected'
 
 export interface UseAddElementCallbackOptions<E extends SyntheticEvent<any> = SyntheticEvent<any>> {
@@ -40,7 +41,7 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
   const { onComplete, onError, drawerOptions } = { ...options }
   const { elementDrawer } = useElementDrawerContext()
   const { addElement } = useAglynCanvasApiEvents()
-  const { $id } = useAglynCanvasSelected() || {}
+  const { $id } = useAglynBesignerStoreState('canvas', 'selected') || {}
   const { parentId, index, parentElements } = useAglynElementParentPosition($id) || {}
   const siblingCount = parentElements.length
 

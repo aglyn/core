@@ -26,9 +26,12 @@ import { forwardRef, memo, useState } from 'react'
 
 export interface ElementOutlineComponentPropsVariantOverrides {}
 
-const classKeys = generateComponentClassKeys('AglynElementOutline', ['hovered', 'selected'])
+const classKeys = generateComponentClassKeys('AglynElementOutline', [
+  'hovered',
+  'selected'
+])
 
-const AglynElementOutline = styled(Box, {
+const ElementOutline = styled(Box, {
   name: 'AglynElementOutline',
 })(({ theme }) => ({
   pointerEvents: 'none',
@@ -64,34 +67,37 @@ export interface AglynElementOutlineProps extends BoxProps {
   anchorEl?: null | VirtualElement | (() => VirtualElement)
 }
 
-const ElementOutlineComponentRaw = forwardRef<any, AglynElementOutlineProps>(function RefRenderFn(
-  props,
-  ref
-) {
-  const { className: classNameProp, variant, anchorEl, ...rest } = props
-  const className = clsx(
-    {
+const ElementOutlineComponentRaw = forwardRef<any, AglynElementOutlineProps>(
+  function RefRenderFn(props, ref) {
+    const { className: classNameProp, variant, anchorEl, ...rest } = props
+    const className = clsx({
       [classKeys[variant]]: Boolean(classKeys[variant]),
-    },
-    classNameProp
-  )
+    }, classNameProp)
 
-  const [{ width, height }, setDimensions] = useState(() => ({
-    width: 0,
-    height: 0,
-  }))
+    const [{ width, height }, setDimensions] = useState(() => ({
+      width: 0,
+      height: 0,
+    }))
 
-  useDynamicEffect(() => {
-    const element = _isFnT(anchorEl) ? anchorEl() : anchorEl
-    const rect = element && getElementClientRectBounding(element)
-    setDimensions({
-      width: rect?.width ?? 0,
-      height: rect?.height ?? 0,
-    })
-  }, [anchorEl])
+    useDynamicEffect(() => {
+      const element = _isFnT(anchorEl) ? anchorEl() : anchorEl
+      const rect = element && getElementClientRectBounding(element)
+      setDimensions({
+        width: rect?.width ?? 0,
+        height: rect?.height ?? 0,
+      })
+    }, [anchorEl])
 
-  return <AglynElementOutline ref={ref} className={className} style={{ width, height }} {...rest} />
-})
+    return (
+      <ElementOutline
+        ref={ref}
+        className={className}
+        style={{width, height}}
+        {...rest}
+      />
+    )
+  }
+)
 
 ElementOutlineComponentRaw.displayName = 'ElementOutlineComponent'
 ElementOutlineComponentRaw.defaultProps = {

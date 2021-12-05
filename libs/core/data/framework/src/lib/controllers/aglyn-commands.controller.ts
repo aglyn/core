@@ -72,7 +72,7 @@ const MODULE_NAME = 'commands'
 export class AglynCommandsController extends AglynModuleModel<AglynCommandsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = MODULE_NAME
+  public static readonly namespace: string = `aglyn:${MODULE_NAME}`
   public static readonly moduleName: string = MODULE_NAME
 
   #commander: AglynCommander = EmitterFn()

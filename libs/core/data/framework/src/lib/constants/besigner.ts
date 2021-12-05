@@ -21,10 +21,16 @@ export enum InteractionModeFlag {
   PREVIEW = 0x3,
 }
 
-export enum BesignerActiveViewFlag {
+export enum BesignerPanelViewFlag {
   PANEL_LEFT = 0x1,
   PANEL_RIGHT = 0x2,
   PANEL_BOTTOM = 0x3,
+}
+
+export enum BesignerPanelTabFlag {
+  ELEMENT_INFO = 0x1,
+  ELEMENT_PROPS_FORM = 0x2,
+  ELEMENTS_TREE = 0x3
 }
 
 export enum DndDragSourceTypeFlag {

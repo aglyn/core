@@ -18,15 +18,19 @@
 import { BesignerContextStores, getBesignerStore } from '@aglyn/core-data-framework'
 import { Conditional } from '@aglyn/shared-data-types'
 import { useStoreMap } from 'effector-react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 
 
-export function useAglynBesignerStore<K1 extends keyof BesignerContextStores>(
+export function useAglynBesignerStoreState<K1 extends keyof BesignerContextStores>(
   store: K1,
 ): BesignerContextStores[K1]
-export function useAglynBesignerStore<K1 extends keyof BesignerContextStores,
-  K2 extends keyof BesignerContextStores[K1] = null>(store: K1, key: K2): BesignerContextStores[K1][K2]
-export function useAglynBesignerStore<K1 extends keyof BesignerContextStores,
+
+export function useAglynBesignerStoreState<K1 extends keyof BesignerContextStores, K2 extends keyof BesignerContextStores[K1] = null>(
+  store: K1,
+  key: K2
+): BesignerContextStores[K1][K2]
+
+export function useAglynBesignerStoreState<K1 extends keyof BesignerContextStores,
   K2 extends keyof BesignerContextStores[K1] = null>(
   storeName: K1,
   key?: K2,
@@ -34,6 +38,7 @@ export function useAglynBesignerStore<K1 extends keyof BesignerContextStores,
   keyof BesignerContextStores[K1],
   BesignerContextStores[K1][K2],
   keyof BesignerContextStores[K1]> {
+
   const {getApp} = useAglynAppContext()
   const app = getApp()
   const store = getBesignerStore(app, {store: storeName})
@@ -51,4 +56,4 @@ export function useAglynBesignerStore<K1 extends keyof BesignerContextStores,
     BesignerContextStores[K1][K2],
     keyof BesignerContextStores[K1]>
 }
-export default useAglynBesignerStore
+export default useAglynBesignerStoreState

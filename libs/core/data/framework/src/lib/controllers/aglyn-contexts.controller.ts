@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { KeyValueMap } from '@aglyn/shared-data-types'
+import type { KeyValueMap } from '@aglyn/shared-data-types'
 import { _hasProperty, _isObj } from '@aglyn/shared-util-guards'
 import { getProperty } from '@aglyn/shared-util-tools'
 import {
@@ -25,8 +25,7 @@ import {
   Domain as EffectorDomain,
   Store as EffectorStore,
 } from 'effector'
-import {
-  AglynAppEffectFlag,
+import type {
   ContextsCreateEffectPayload,
   ContextsCreateEventPayload,
   ContextsCreateStorePayload,
@@ -35,13 +34,14 @@ import {
   ContextsGetStorePayload,
   ContextsSetStorePayload,
 } from '../constants/emitter'
-import {
+import { AglynAppEffectFlag } from '../constants/emitter'
+import type {
   AglynModuleEffectListener,
-  AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import { ContextStoreUid } from '../types'
-import { AglynAppController } from './aglyn-app.controller'
+import { AglynModuleModel } from '../models/aglyn-module.model'
+import type { ContextStoreUid } from '../types'
+import type { AglynAppController } from './aglyn-app.controller'
 
 
 export interface ContextDomain extends EffectorDomain {
@@ -82,8 +82,8 @@ const MODULE_NAME = 'contexts'
 export class AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
+  public static readonly namespace: string = `aglyn:${MODULE_NAME}`
   public static readonly moduleName: string = MODULE_NAME
-  public static readonly namespace: string = MODULE_NAME
 
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()

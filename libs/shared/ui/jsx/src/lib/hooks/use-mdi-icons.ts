@@ -20,6 +20,7 @@ import { icons as mdiIcons, IconsNormalized } from '@aglyn/shared-data-mdi'
 import { _isArr } from '@aglyn/shared-util-guards'
 import { FindWithFuzzy } from '@aglyn/shared-util-vendor'
 import { useCallback, useMemo, useState } from 'react'
+import { arraySortBy } from '@aglyn/shared-util-tools'
 
 
 export type MdiIcon = {
@@ -51,7 +52,7 @@ export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
           : {
             id,
             name: icon.name,
-            path: icon.paths,
+            path: icon.path,
             aliases: Object.keys(icon.alias).filter((i) => icon.alias[i] === true),
           }
       }),
@@ -59,26 +60,30 @@ export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | null)[] {
   )
 }
 
-const defaultKeys = ['id', 'name', 'aliases']
-const searchItems = (fuzzy, query: string) => fuzzy.search(query ?? '').map((i) => i.item)
+const defaultKeys = ['name', 'aliases']
 
 export function useMdiIcons(initialQuery?: string, opts?: FilterOpts): UseMdiIconsReturn {
   const allIcons = useMemoizedMdiIcons()
-  const options = {keys: defaultKeys, ...opts}
-  const icons = useMemo(() => mdiIcons, [])
-  const [query, setQuery] = useState(() => initialQuery ?? '')
+  const fuzzy = new FindWithFuzzy(allIcons, {
+    keys: opts?.keys || defaultKeys,
+    includeScore: true,
+    shouldSort: true,
+    // sortFn: ({score:a}, {score:b}) => a > b ? 1 : a < b ? -1 : 0,
+    threshold: 0.45,
+    minMatchCharLength: 2,
+  })
+  const searchItems = (query: string) => {
+    return fuzzy.search(query ?? '').map((i) => i.item)
+  }
+  const [query, setQuery] = useState(initialQuery ?? '')
+  const filteredIcons = useMemo<MdiIcon[]>(() => {
+    return query ? searchItems(query) : allIcons
+  }, [query, allIcons])
+
   const applyFilter: ApplyFilterFn = useCallback((query: string) => setQuery(query), [])
   const clearFilter: ClearFilterFn = useCallback(() => setQuery(''), [])
-  const helpers = useMemo(() => ({applyFilter, clearFilter}), [applyFilter, clearFilter])
-  const filteredIcons = useMemo<MdiIcon[]>(() => {
-    const fuzzy = new FindWithFuzzy(allIcons, options)
-    return query ? searchItems(fuzzy, query) : allIcons
-  }, [query, options, allIcons])
 
-  return useMemo(
-    () => [filteredIcons, helpers, icons],
-    [filteredIcons, helpers, icons]
-  )
+  return useMemo(() => [filteredIcons, {applyFilter, clearFilter}, mdiIcons], [filteredIcons])
 }
 
 export default useMdiIcons

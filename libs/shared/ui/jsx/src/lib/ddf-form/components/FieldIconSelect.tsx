@@ -17,10 +17,8 @@
 
 import { getIcon, defaultIconFailover } from '@aglyn/shared-data-mdi'
 import {
-  createStyles,
   generateComponentClassKeys,
-  makeStyles, styled,
-  Theme,
+  styled,
 } from '@aglyn/shared-feature-themes'
 
 import useFieldApi from '@data-driven-forms/react-form-renderer/use-field-api'
@@ -28,12 +26,12 @@ import { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-fi
 import { Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
+import MuiLink from '@mui/material/Link'
 import Collapse from '@mui/material/Collapse'
 import Grid from '@mui/material/Grid'
 import MuiTextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-import clsx from 'clsx'
 import { forwardRef, Fragment, HTMLProps, useCallback, useMemo, useState } from 'react'
 import { CardIconListItem } from '../../components/card-icon-list-item'
 import { GridList } from '../../components/grid-list'
@@ -109,11 +107,12 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
     } = useFieldApi(props as UseFieldApiConfig)
 
     const invalidMessage = validationMessage(meta, validateOnMount)
-    const helpText =
-      invalidMessage ||
-      ((meta.touched || validateOnMount) && meta.warning) ||
-      helperText ||
+    const helperContent = [
+      invalidMessage,
+      ((meta.touched || validateOnMount) && meta.warning),
+      helperText,
       description
+    ].find((i) => Boolean(i))
     const currentValue = input.value
     const currentIcon = useMemo(() => {
       console.log('currentValue', currentValue)
@@ -130,7 +129,6 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
         ? getIcon(selected, {failoverIcon: iconUnset})
         : iconUnset
     }, [selected])
-    const selectedIsSame = (item) => item.id === selected
 
 
     const handleButtonClick = useCallback(() => {
@@ -154,11 +152,11 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
             item={item}
             onActionClick={handleItemClick}
             preview={<SvgPathIcon iconIds={item.id} />}
-            selected={selectedIsSame(item)}
+            selected={selected && selected === item.id}
           />
         </Tooltip>
       )
-    }, [handleItemClick])
+    }, [selected])
 
     return (
       <Fragment>
@@ -175,20 +173,22 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
               </ButtonBase>
             </Grid>
             <Grid item sm>
-              {/*<Typography component="div" variant="body1">*/}
-              {/*  {label}*/}
-              {/*</Typography>*/}
-              <Button
+              <Typography component="div" variant="caption">
+                {label}
+              </Typography>
+              <MuiLink
                 onClick={handleButtonClick}
-                variant="outlined"
-                color="inherit"
-                size="small"
-                endIcon={<SvgPathIcon iconIds={open ? 'chevron-up' : 'chevron-down'} />}
-                fullWidth
-                disableRipple
+                variant="button"
+                color="secondary"
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'flex-start',
+                }}
               >
-                {currentValue ? label : `${label}: ${currentIcon.name}`}
-              </Button>
+                <span><SvgPathIcon iconIds={open ? 'chevron-up' : 'chevron-down'} /></span>
+                <span>{currentIcon.name}</span>
+              </MuiLink>
             </Grid>
           </Grid>
           <Grid xs={12} item>
@@ -199,7 +199,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
                     onChange={handleFilterChange}
                     placeholder="Search icons..."
                     size="small"
-                    fullWidth
+                    helperText={helperContent}
                   />
                 </Grid>
                 <Grid item xs>
@@ -217,7 +217,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
               <GridListWrapper>
                 <GridList
                   GridContainerProps={{spacing: 2}}
-                  GridItemProps={{xs: 6, sm: 3}}
+                  GridItemProps={{xs: 6, sm: 4}}
                   ListWrapperProps={{className: classKeys.gridList}}
                   items={icons}
                   renderItemContent={renderItemContent}

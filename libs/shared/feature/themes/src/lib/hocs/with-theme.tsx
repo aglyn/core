@@ -18,7 +18,7 @@
 import { _isArr } from '@aglyn/shared-util-guards'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
-import { ComponentType } from 'react'
+import { ComponentType, memo } from 'react'
 import { Theme, ThemeProvider } from '../../vendor/mui'
 
 
@@ -45,7 +45,7 @@ export function withTheme(options: WithThemeOptions) {
       )
     }
     WithTheme.displayName = displayName
-    return WithTheme
+    return memo(WithTheme)
   }
 }
 export default withTheme

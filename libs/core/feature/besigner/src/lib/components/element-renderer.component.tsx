@@ -24,7 +24,6 @@ import {
   ElementRendererComponent as DefaultElementRendererComponent,
   ElementRendererComponentProps as DefaultElementRendererComponentProps,
   useAglynAppContext,
-  useAglynBesignerStore,
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
@@ -36,6 +35,7 @@ import Box, { BoxProps } from '@mui/material/Box'
 import { forwardRef, MouseEvent, useCallback, useRef } from 'react'
 import { useCanvasRenderedElementRefs } from '../contexts/canvas-rendered-element-refs'
 import { useBesignerElementAttributes } from '../hooks/use-besigner-element-attributes'
+import { useAglynBesignerStoreState } from '../hooks/use-aglyn-besigner-store-state'
 
 
 interface ElementBoxProps extends BoxProps {}
@@ -73,7 +73,7 @@ const ElementRendererComponent = forwardRef<any, ElementRendererComponentProps>(
     const componentSchema = useAglynComponentSchema(componentId, bundleId)
     const elementAttributes = useBesignerElementAttributes({$id, componentId, bundleId})
     const {getApp} = useAglynAppContext()
-    const interactMode = useAglynBesignerStore('flags', 'interactMode')
+    const interactMode = useAglynBesignerStoreState('flags', 'interactMode')
     const rearrangeEnabled = interactMode === InteractionModeFlag.REARRANGE
     const selectEnabled = interactMode === InteractionModeFlag.SELECT
 

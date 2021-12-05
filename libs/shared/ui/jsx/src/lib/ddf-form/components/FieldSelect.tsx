@@ -76,7 +76,7 @@ const FieldSelect = forwardRef<any, FieldSelectProps>(function RefRenderFn(props
     description
 
   return (
-    <SelectFormControl ref={ref} variant={variant} {...FormControlProps}>
+    <SelectFormControl ref={ref} variant={variant} size="small" {...FormControlProps}>
       <MuiInputLabel id={`field-select-${input.name}`}>{label}</MuiInputLabel>
       <MuiSelect
         {...input}
@@ -84,7 +84,6 @@ const FieldSelect = forwardRef<any, FieldSelectProps>(function RefRenderFn(props
         error={Boolean(invalidMessage)}
         inputProps={{
           readOnly: isReadOnly,
-          size: 'small',
           ...inputProps
         }}
         label={label}

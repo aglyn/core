@@ -27,7 +27,9 @@ import {
 } from 'react'
 
 
-const FieldGridItem = styled(MuiGrid)({position: 'relative'}, {name: 'FieldGridItem'})
+const FieldGridItem = styled(MuiGrid, {
+  name: 'AglynFieldGridItem'
+})({position: 'relative'})
 
 export type WithGridItemProps = {
   FormFieldGridProps?: MuiGridProps
@@ -36,6 +38,7 @@ export type WithGridItemProps = {
 export function withGridItem<P>(
   WrappedComponent: ComponentType<P>,
 ): ForwardRefExoticComponent<PropsWithoutRef<P & WithGridItemProps> & RefAttributes<any>> {
+  const displayName = getDisplayName(WrappedComponent)
   const WithFieldGrid = forwardRef<any, P & WithGridItemProps>(function RefRenderFn(props, ref) {
     const {FormFieldGridProps, ...rest} = props
 
@@ -45,6 +48,6 @@ export function withGridItem<P>(
       </FieldGridItem>
     )
   })
-  WithFieldGrid.displayName = `WithFieldGrid(${getDisplayName(WrappedComponent)})`
+  WithFieldGrid.displayName = `WithFieldGrid(${displayName})`
   return WithFieldGrid
 }

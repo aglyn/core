@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-import { setBesignerPanels } from '@aglyn/core-data-framework'
+import {
+  BesignerPanelTabFlag,
+  setBesignerPanels,
+} from '@aglyn/core-data-framework'
 import {
   useAglynAppContext,
-  useAglynBesignerStore,
   useAglynCanvasApiEvents,
   useAglynComponentSchema,
   useAglynElementData,
@@ -26,6 +28,7 @@ import {
 import { styled } from '@aglyn/shared-feature-themes'
 import { componentMapper, FormRenderer, GridFormTemplate, SvgPathIcon } from '@aglyn/shared-ui-jsx'
 import { _isEqualitySameType } from '@aglyn/shared-util-guards'
+import { hexadecimalFromNumber, hexadecimalToNumber } from '@aglyn/shared-util-tools'
 import MuiTabContext from '@mui/lab/TabContext'
 import MuiTabList from '@mui/lab/TabList'
 import MuiTabPanel from '@mui/lab/TabPanel'
@@ -36,9 +39,9 @@ import FormControl from '@mui/material/FormControl'
 import MuiTab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
 import { forwardRef, Fragment, memo, useCallback, useState } from 'react'
-import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
+import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
 import { useComponentFormSchema } from '../hooks/use-component-form-schema'
-import { ToolboxDrawerComponent, ToolboxDrawerComponentProps } from './toolbox-drawer.component'
+import { WorkspacePanelComponent, WorkspacePanelComponentProps } from './workspace-panel.component'
 
 
 const TabPanelInner = styled('div', {
@@ -53,23 +56,8 @@ const DividerSpacer = styled(Divider, {
   marginTop: theme.spacing(2),
   marginBottom: theme.spacing(2),
 }))
-const TabPanel = memo(({panel: {component: Component, value}}: any) => {
-  const {$id} = useAglynCanvasSelected() || {}
 
-  return (
-    <MuiTabPanel value={value} sx={{p: 0, overflow: 'auto'}}>
-      {$id ? (<Component $id={$id} />) : (
-        <TabPanelInner>
-          <Typography variant="subtitle1" component="div" align="center">
-            No element selected...
-          </Typography>
-        </TabPanelInner>
-      )}
-    </MuiTabPanel>
-  )
-})
-
-const ElementInfo = memo(({$id, ...props}: any) => {
+const ElementInfo = memo(function ElementInfo({$id, ...props}: any) {
   const {componentId, bundleId, parentId} = useAglynElementData($id) || {}
   const {metadata} = useAglynComponentSchema(componentId, bundleId) || {}
   const {displayName, title, subtitle, description} = metadata || {}
@@ -151,7 +139,9 @@ const ElementInfo = memo(({$id, ...props}: any) => {
     </TabPanelInner>
   )
 })
-const PropsForm = memo(({$id, ...props}: any) => {
+
+
+const PropsForm = memo(function PropsForm({$id, ...props}: any) {
   const {updateElement, deleteElement} = useAglynCanvasApiEvents()
   const {props: elemProps, componentId, bundleId} = useAglynElementData($id) || {}
   const formSchema = useComponentFormSchema({componentId, bundleId})
@@ -184,43 +174,45 @@ const PropsForm = memo(({$id, ...props}: any) => {
   )
 })
 
-const panels = [
+const tabs = [
   {
-    value: 'element-information',
+    id: BesignerPanelTabFlag.ELEMENT_INFO,
     iconIds: 'information-variant',
     component: ElementInfo,
   },
   {
-    value: 'element-props-form',
+    id: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
     iconIds: 'order-bool-descending-variant',
     component: PropsForm,
   },
 ]
 
-export interface ToolboxRightComponentProps extends ToolboxDrawerComponentProps {}
+export interface PanelRightComponentProps extends WorkspacePanelComponentProps {}
 
-export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>(
+export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
   function RefRenderFn(props, ref) {
-    const {children, drawerWidth: drawerWidthProp, ...rest} = props
+    const {children, ...rest} = props
 
     const {getApp} = useAglynAppContext()
-    const panel = useAglynBesignerStore('panels', 'right')
-    const {toggled, tab, drawerWidth = drawerWidthProp} = panel || {}
-    const value = tab && _isEqualitySameType(tab, ...panels.map((i) => i.value))
-      ? tab : 'element-information'
+    const {$id} = useAglynBesignerStoreState('canvas', 'selected') || {}
+    const {toggled, tab, size} = useAglynBesignerStoreState('panels', 'panelRight') || {}
+    const value = tab && _isEqualitySameType(tab, ...tabs.map((i) => i.id))
+      ? tab : BesignerPanelTabFlag.ELEMENT_INFO
     const handleTabChange = useCallback((e, val) => {
-      setBesignerPanels(getApp(), {right: {tab: val}})
+      setBesignerPanels(getApp(), {panelRight: {tab: hexadecimalToNumber(val)}})
     }, [])
 
+    console.log('panel toggled, tab, size', toggled, tab, size)
+
     return (
-      <ToolboxDrawerComponent
+      <WorkspacePanelComponent
         ref={ref}
-        drawerWidth={drawerWidth}
+        size={size}
         open={toggled}
         anchor="right"
         {...rest}
       >
-        <MuiTabContext value={value}>
+        <MuiTabContext value={hexadecimalFromNumber(value)}>
           <Box sx={{borderBottom: 1, borderColor: 'divider'}}>
             <MuiTabList
               onChange={handleTabChange}
@@ -228,21 +220,39 @@ export const ToolboxRightComponent = forwardRef<any, ToolboxRightComponentProps>
               indicatorColor="secondary"
               textColor="primary"
             >
-              {panels.map(({value, iconIds}) => (
-                <MuiTab key={value} value={value} icon={<SvgPathIcon iconIds={iconIds} />} />
+              {tabs.map(({id, iconIds}) => (
+                <MuiTab
+                  key={id}
+                  value={hexadecimalFromNumber(id)}
+                  icon={<SvgPathIcon iconIds={iconIds} />}
+                />
               ))}
             </MuiTabList>
           </Box>
-          {panels.map((panel) => <TabPanel key={panel.value} panel={panel} />)}
+          {tabs.map(({component: Component, id}) => (
+            <MuiTabPanel
+              key={id}
+              value={hexadecimalFromNumber(id)}
+              sx={{p: 0, overflow: 'auto'}}
+            >
+              {$id ? (<Component $id={$id} />) : (
+                <TabPanelInner>
+                  <Typography variant="subtitle1" component="div" align="center">
+                    No element selected...
+                  </Typography>
+                </TabPanelInner>
+              )}
+            </MuiTabPanel>
+          ))}
         </MuiTabContext>
 
         {children}
-      </ToolboxDrawerComponent>
+      </WorkspacePanelComponent>
     )
   },
 )
 
-ToolboxRightComponent.displayName = 'ToolboxRightComponent'
-ToolboxRightComponent.defaultProps = {}
+PanelRightComponent.displayName = 'PanelRightComponent'
+PanelRightComponent.defaultProps = {}
 
-export default ToolboxRightComponent
+export default PanelRightComponent

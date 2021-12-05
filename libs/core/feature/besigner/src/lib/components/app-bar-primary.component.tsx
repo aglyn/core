@@ -16,37 +16,55 @@
  */
 
 import { styled } from '@aglyn/shared-feature-themes'
-import { AglynSvgAppIcon, BesignerSvgLogo } from '@aglyn/shared-ui-jsx'
+import { AglynSvgIcon, BesignerSvgLogo } from '@aglyn/shared-ui-jsx'
 import AppBar, { AppBarProps } from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
-import Typography from '@mui/material/Typography'
 import { forwardRef } from 'react'
 
-const GlobalAppBar = styled(AppBar, { name: 'AglynGlobalAppBar' })(({ theme }) => ({
+const AppBarPrimary = styled(AppBar, {
+  name: 'AglynAppBarPrimary'
+})(({ theme }) => ({
   top: 0,
   // backgroundColor: theme.palette.background.paper,
   borderBottom: `1px solid ${theme.palette.divider}`,
 }))
 
-export interface AppBarGlobalComponentProps extends Partial<AppBarProps> {}
+export interface AppBarPrimaryComponentProps extends Partial<AppBarProps> {}
 
-export const AppBarGlobalComponent = forwardRef<any, AppBarGlobalComponentProps>(
+export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProps>(
   function RefRenderFn(props, ref) {
     const { children, ...rest } = props
 
     return (
-      <GlobalAppBar ref={ref} position="static" color="inherit" elevation={0} {...rest}>
+      <AppBarPrimary
+        ref={ref}
+        position="static"
+        color="inherit"
+        elevation={0}
+        {...rest}
+      >
         <Toolbar>
-          <AglynSvgAppIcon sx={{ml: -1.5, mr: 0.5}} fontSize="large" />
-          <BesignerSvgLogo sx={{width:'auto'}} fontSize="medium" />
+          <AglynSvgIcon
+            sx={(theme) => ({
+              borderRadius: theme.shape.appIconBorderRadius,
+              // boxShadow: theme.shadows[1],
+              ml: -1.5, mr: 0.5,
+              fontSize: `1.75em`
+            })}
+          />
+          <BesignerSvgLogo
+            sx={{width:'auto'}}
+            fontSize="medium"
+            color="primary"
+          />
           {children}
         </Toolbar>
-      </GlobalAppBar>
+      </AppBarPrimary>
     )
   }
 )
 
-AppBarGlobalComponent.displayName = 'AppBarGlobalComponent'
-AppBarGlobalComponent.defaultProps = {}
+AppBarPrimaryComponent.displayName = 'AppBarPrimaryComponent'
+AppBarPrimaryComponent.defaultProps = {}
 
-export default AppBarGlobalComponent
+export default AppBarPrimaryComponent

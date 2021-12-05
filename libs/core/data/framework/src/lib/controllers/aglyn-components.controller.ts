@@ -155,7 +155,7 @@ export interface AglynComponentRenderFlags<P = EmptyObj> {
   resolveProps?: ResolveProps<AglynComponentElementDataNormalized<P>>
   emotionStyled?: {
     disable?: boolean
-    options?: StyledOptions<P>
+    options?: StyledOptions
   }
 }
 

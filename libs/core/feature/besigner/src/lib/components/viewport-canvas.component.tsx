@@ -21,7 +21,9 @@ import { forwardRef, HTMLAttributes, Ref } from 'react'
 import { ViewportFrameComponent } from './viewport-frame.component'
 
 
-const ViewportCanvas = styled('div', {name: 'AglynViewportCanvas'})(({theme}) => ({
+const ViewportCanvas = styled('div', {
+  name: 'AglynViewportCanvas'
+})(({theme}) => ({
   flexGrow: 1,
   minHeight: '100%',
   width: '100%',
@@ -47,7 +49,9 @@ const canvasArtboardClassKeys = generateComponentClassKeys('AglynCanvasArtboard'
   'deviceSm',
   'deviceXs',
 ])
-const CanvasArtboard = styled('div', {name: 'AglynCanvasArtboard'})(({theme}) => ({
+const CanvasArtboard = styled('div', {
+  name: 'AglynCanvasArtboard'
+})(({theme}) => ({
   overflow: 'hidden',
   minHeight: '100%',
   padding: theme.spacing(3),
@@ -84,7 +88,7 @@ export interface ViewportCanvasComponentProps extends HTMLAttributes<HTMLDivElem
   pannerRef?: Ref<any>
 }
 
-export const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
+const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, pannerRef, ...rest} = props
 
@@ -101,7 +105,6 @@ export const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentPr
           {/*  disabled*/}
           {/*>*/}
           <ViewportFrameComponent />
-          {children}
           {/*</ViewportCanvasPanner>*/}
         </CanvasArtboard>
 
@@ -113,6 +116,7 @@ export const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentPr
         {/*  variant="horizontal"*/}
         {/*  sx={{position: 'relative', ml: '-11px', mt: '-20px'}}*/}
         {/*/>*/}
+        {children}
       </ViewportCanvas>
     )
   },
@@ -121,4 +125,5 @@ export const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentPr
 ViewportCanvasComponent.displayName = 'ViewportCanvasComponent'
 ViewportCanvasComponent.defaultProps = {}
 
+export { ViewportCanvasComponent }
 export default ViewportCanvasComponent

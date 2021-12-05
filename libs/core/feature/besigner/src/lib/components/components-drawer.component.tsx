@@ -33,46 +33,13 @@ import {
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import { forwardRef, MouseEvent, useCallback } from 'react'
+import { forwardRef, MouseEvent, useCallback, useMemo } from 'react'
 import { ElementDrawerOptions } from '../contexts/element-drawer-context'
 
-const ItemSvgIcon = styled(SvgPathIcon, {
-  name: 'AglynItemSvgIcon',
-})(({ theme }) => ({
-  fontSize: theme.typography.pxToRem(64),
-  padding: theme.spacing(1.5),
-  borderRadius: '50%',
-  backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
-  color: theme.palette.quaternary.main,
-  overflow: 'visible'
-}))
-const AppBarTitle = styled(Typography, {
-  name: 'AppBarTitle',
-})(({ theme }) => ({ fontSize: theme.typography.pxToRem(20) }))
 
-const ComponentDrawerGridList = styled(JsxGridList, {
-  name: 'ComponentDrawerGridList',
-})(({ theme }) => ({
-  overflowX: 'hidden',
-  '& .AglynGridList-gridContainer': {
-    padding: theme.spacing(0, 2),
-    marginTop: theme.spacing(0),
-    marginLeft: theme.spacing(-2),
-  },
-  '& .AglynGridList-itemContent': {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    textAlign: 'center',
-    flexDirection: 'column',
-    justifyContent: 'space-evenly',
-  },
-}))
-
-const ComponentsDrawerNavbarDrawer = styled(JsxNavbarDrawer, {
-  name: 'ComponentsDrawerNavbarDrawer',
-})<NavigationDrawerProps>(({ theme }) => ({
+const ComponentsDrawer = styled(JsxNavbarDrawer, {
+  name: 'AglynComponentsDrawer',
+})<NavigationDrawerProps>(({theme}) => ({
   '& .AglynNavigationDrawer-content': {
     backgroundColor: theme.palette.background.default,
     overflow: 'auto',
@@ -91,6 +58,47 @@ const ComponentsDrawerNavbarDrawer = styled(JsxNavbarDrawer, {
     margin: '0 auto',
   },
 }))
+
+
+const ComponentsDrawerGridList = styled(JsxGridList, {
+  name: 'AglynComponentsDrawerGridList',
+})(({theme}) => ({
+  overflowX: 'hidden',
+  '& .AglynGridList-gridContainer': {
+    padding: theme.spacing(0, 2),
+    marginTop: theme.spacing(0),
+    marginLeft: theme.spacing(-2),
+  },
+  '& .AglynGridList-itemContent': {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    textAlign: 'center',
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
+  },
+}))
+
+
+const AppBarTitle = styled(Typography, {
+  name: 'AglynAppBarTitle',
+})(({theme}) => ({
+  fontSize: theme.typography.pxToRem(20)
+}))
+
+
+const ItemSvgIcon = styled(SvgPathIcon, {
+  name: 'AglynItemSvgIcon',
+})(({ theme }) => ({
+  fontSize: theme.typography.pxToRem(64),
+  padding: theme.spacing(1.5),
+  borderRadius: '50%',
+  backgroundColor: theme.palette.background.default,
+  border: `1px solid ${theme.palette.divider}`,
+  color: theme.palette.quaternary.main,
+  overflow: 'visible'
+}))
+
 
 export interface ComponentsDrawerOptionsProps extends ElementDrawerOptions {
   type?: 'browse-site-components' | 'edit-element-traits'
@@ -132,9 +140,9 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
       [onConfirm]
     )
 
-    const appBarLeft = (
+    const appBarLeft = useMemo(() => (
       <>
-        <IconButton color="inherit" edge="start" onClick={handleDrawerCancel} sx={{ mr: 2 }}>
+        <IconButton color="inherit" edge="start" onClick={handleDrawerCancel} sx={{mr: 2}}>
           <SvgPathIcon iconIds="close" />
           <SrOnlyComponent>close drawer</SrOnlyComponent>
         </IconButton>
@@ -142,15 +150,13 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
           {title}
         </AppBarTitle>
       </>
-    )
+    ), [handleDrawerCancel, title])
 
-    const appBarRight = (
-      <>
-        <Button color="inherit" onClick={handleDrawerCancel} sx={{ mr: -1.2 }}>
-          Cancel
-        </Button>
-      </>
-    )
+    const appBarRight = useMemo(() => (
+      <Button color="inherit" onClick={handleDrawerCancel} sx={{mr: -1.2}}>
+        Cancel
+      </Button>
+    ), [handleDrawerCancel])
 
     const renderItemContent = useCallback(
       (item) => (
@@ -173,7 +179,7 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
     )
 
     return (
-      <ComponentsDrawerNavbarDrawer
+      <ComponentsDrawer
         ref={ref}
         anchor="bottom"
         variant="temporary"
@@ -183,13 +189,13 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
         AppBarProps={{ color: 'inherit' }}
         {...rest}
       >
-        <ComponentDrawerGridList
+        <ComponentsDrawerGridList
           GridContainerProps={{ spacing: 2 }}
           GridItemProps={{ xs: 6, sm: 4 }}
           renderItemContent={renderItemContent}
           items={items}
         />
-      </ComponentsDrawerNavbarDrawer>
+      </ComponentsDrawer>
     )
   }
 )

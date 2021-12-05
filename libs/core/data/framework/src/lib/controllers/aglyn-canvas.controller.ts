@@ -15,12 +15,10 @@
  * limitations under the License.
  */
 
-import { _isArrEmpty } from '@aglyn/shared-util-guards'
-import { arrayAddAtIndex } from '@aglyn/shared-util-tools'
-import { objectDeepMerge } from '@aglyn/shared-util-vendor'
 import { createApi, Event as EffectorEvent } from 'effector'
+import { persist } from 'effector-storage/local'
 import { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
-import {
+import type {
   CanvasAddElementPayload,
   CanvasDeleteElementPayload,
   CanvasDuplicateElementPayload,
@@ -35,25 +33,30 @@ import {
   CanvasUndoPayload,
   CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {
+import type {
   AglynModuleEffectListener,
-  AglynModuleModel,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import {
+import { AglynModuleModel } from '../models/aglyn-module.model'
+import type {
   AglynComponentElementDataNormalizedArray,
   AglynComponentElementDataNormalizedMap,
 } from '../types'
-import { createComponentElementDataCopy } from '../util/create-component-element-data-copy'
-import { deleteComponentElement } from '../util/delete-component-element'
 import { denormalizeComponentElementData } from '../util/denormalize-component-element-data'
-import handleModificationHistoryChange from '../util/handle-modification-history-change'
-import handleModificationHistoryRedo from '../util/handle-modification-history-redo'
-import handleModificationHistoryUndo from '../util/handle-modification-history-undo'
+import { handleRedoEvent } from '../util/handle-state-modification-history-redo'
+import { handleUndoEvent } from '../util/handle-state-modification-history-undo'
 import { normalizeComponentElementData } from '../util/normalize-component-element-data'
-import { AglynAppController } from './aglyn-app.controller'
-import { AglynComponentElementDataDenormalized } from './aglyn-components.controller'
-import { ContextDomain, ContextStore } from './aglyn-contexts.controller'
+import {
+  handleCanvasAddElement, handleCanvasApiEvent,
+  handleCanvasDeleteElement,
+  handleCanvasDuplicateElement,
+  handleCanvasMoveElement,
+  handleCanvasSetElements,
+  handleCanvasUpdateElement,
+} from '../util/utils.canvas'
+import type { AglynAppController } from './aglyn-app.controller'
+import type { AglynComponentElementDataDenormalized } from './aglyn-components.controller'
+import type { ContextDomain, ContextStore } from './aglyn-contexts.controller'
 
 
 export type ElementsDataStore = {
@@ -101,8 +104,8 @@ const MODULE_NAME = 'canvas'
 export class AglynCanvasController extends AglynModuleModel<AglynCanvasControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
+  public static readonly namespace: string = `aglyn:${MODULE_NAME}`
   public static readonly moduleName: string = MODULE_NAME
-  public static readonly namespace: string = MODULE_NAME
 
   #domain: ContextDomain = null
   #context: ContextStore<ElementsDataStore> = null
@@ -127,7 +130,8 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
       past: [] as AglynComponentElementDataNormalizedMap[],
       present: normalizeComponentElementData(this.options.initialElements || [], CANVAS_ROOT_ELEMENT_ID),
       future: [] as AglynComponentElementDataNormalizedMap[],
-    })
+    }, {name: `${this.namespace}:canvas-elements`})
+    persist({store: this.#context})
     this.#normalizedElementsStore = this.#context.map((elements) => {
       return elements.present
     })
@@ -135,122 +139,27 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
       return denormalizeComponentElementData(elements.present, CANVAS_ROOT_ELEMENT_ID)
     })
 
-    const undo = (state: ElementsDataStore) => {
-      if (!_isArrEmpty(state.past)) {
-        return handleModificationHistoryUndo(state)
-      }
-    }
-
-    const redo = (state: ElementsDataStore) => {
-      if (!_isArrEmpty(state.future)) {
-        return handleModificationHistoryRedo(state)
-      }
-    }
-
-    const setElements = (state: ElementsDataStore, payload: CanvasSetElementsPayload) => {
-      const {elements} = payload
-      return handleModificationHistoryChange(state, elements)
-    }
-
-    const addElement = (state: ElementsDataStore, payload: CanvasAddElementPayload) => {
-      const {element, parentId, index} = payload
-      const newData = normalizeComponentElementData(element, parentId)
-      const present = {
-        ...state.present,
-        ...newData,
-        [parentId]: {
-          ...state.present[parentId],
-          elements: arrayAddAtIndex(
-            index,
-            state.present[parentId]?.elements || [],
-            newData[parentId]?.elements || [],
-            {copy: true},
-          ).items,
-        },
-      }
-
-      return handleModificationHistoryChange(state, present)
-    }
-
-    const updateElement = (state: ElementsDataStore, payload: CanvasUpdateElementPayload) => {
-      const {element: {props, ...element}} = payload
-      const present = {
-        ...state.present,
-        [element.$id]: {
-          ...objectDeepMerge(state.present[element.$id], element),
-          props,
-        },
-      }
-
-      return handleModificationHistoryChange(state, present)
-    }
-
-    const moveElement = (state: ElementsDataStore, payload: CanvasMoveElementPayload) => {
-      const {$id, index, parentId} = payload
-      const current = state.present[$id]
-      const present = {
-        ...state.present,
-        [$id]: {
-          ...state.present[$id],
-          parentId: parentId,
-        },
-        [parentId]: {
-          ...state.present[parentId],
-          elements: arrayAddAtIndex(
-            index,
-            state.present[parentId].elements || [],
-            $id,
-            {copy: true},
-          ).items,
-        },
-        [current.parentId]: {
-          ...state.present[current.parentId],
-          elements: (state.present[current.parentId].elements || []).filter(i => i !== $id),
-        },
-      }
-
-      return handleModificationHistoryChange(state, present)
-    }
-
-    const duplicateElement = (state: ElementsDataStore, payload: CanvasDuplicateElementPayload) => {
-      const {$id} = payload
-      const element = state.present[$id]
-      const parent = state.present[element?.parentId]
-      const position = (parent?.elements ?? []).indexOf($id)
-      const elementCopy = createComponentElementDataCopy($id, state.present)
-      return addElement(state, {
-        element: elementCopy,
-        parentId: elementCopy.parentId,
-        index: position + 1,
-      })
-    }
-
-    const deleteElement = (state: ElementsDataStore, payload: CanvasDeleteElementPayload) => {
-      const {$id} = payload
-      return handleModificationHistoryChange(state, deleteComponentElement($id, state.present))
-    }
-
     this.#events = createApi(this.#context, {
-      undo,
-      redo,
-      setElements,
-      addElement,
-      updateElement,
-      deleteElement,
-      moveElement,
-      duplicateElement,
+      undo: handleUndoEvent,
+      redo: handleRedoEvent,
+      setElements: handleCanvasApiEvent(handleCanvasSetElements),
+      addElement: handleCanvasApiEvent(handleCanvasAddElement),
+      updateElement: handleCanvasApiEvent(handleCanvasUpdateElement),
+      moveElement: handleCanvasApiEvent(handleCanvasMoveElement),
+      duplicateElement: handleCanvasApiEvent(handleCanvasDuplicateElement),
+      deleteElement: handleCanvasApiEvent(handleCanvasDeleteElement),
     })
   }
 
-  public getStore(payload: CanvasGetStorePayload) {
+  public getStore(payload?: CanvasGetStorePayload) {
     return this.#context
   }
 
-  public getNormalizedElementsStore(payload: CanvasGetElementsNormalizedPayload) {
+  public getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload) {
     return this.#normalizedElementsStore
   }
 
-  public getDenormalizedElementsStore(payload: CanvasGetElementsDenormalizedPayload) {
+  public getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload) {
     return this.#denormalizedElementsStore
   }
 

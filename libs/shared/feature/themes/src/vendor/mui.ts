@@ -17,27 +17,12 @@
 
 import type { Theme } from '@mui/material/styles'
 
-
-import type {
-  PaletteColor,
-  PaletteColorOptions,
-  TypeBackground,
-  TypeText,
-} from '@mui/material/styles/createPalette'
-
 import type { Shadows } from '@mui/material/styles/shadows'
 import type { WithStyles } from '@mui/styles'
 
 import type { ClassKeyInferable } from '@mui/styles/withStyles'
-import type {
-  FilteringStyledOptions,
-  MuiStyledOptions,
-  StyledComponent,
-  SxProps,
-} from '@mui/system'
 
 import type { Shape } from '@mui/system/createTheme/shape'
-import type { ElementType } from 'react'
 import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
 
 
@@ -70,6 +55,14 @@ declare module '@mui/material/AppBar' {
 declare module '@mui/material/styles/createPalette' {
   interface TypeBackground {
     secondary: string
+  }
+  interface Palette {
+    tertiary: Palette['primary']
+    quaternary: Palette['primary']
+  }
+  interface PaletteOptions {
+    tertiary?: PaletteOptions['primary']
+    quaternary?: PaletteOptions['primary']
   }
 }
 declare module '@mui/material/styles' {
@@ -117,10 +110,16 @@ declare module '@mui/material/styles' {
    * END EXAMPLE – MODULE AUGMENTATION ↑
    */
 
+
+  interface Theme {
+    insetShadows: Shadows
+    shape: Shape & { appIconBorderRadius: number | string }
+  }
+
   interface Palette {
     background: Palette['background']
-    tertiary: PaletteColor
-    quaternary: PaletteColor
+    tertiary: Palette['primary']
+    quaternary: Palette['primary']
     svgBackground: IActionStates
     svgFilled: IActionStates
     svgStroke: IActionStates
@@ -129,17 +128,12 @@ declare module '@mui/material/styles' {
 
   interface PaletteOptions {
     background?: PaletteOptions['background']
-    tertiary?: PaletteColorOptions
-    quaternary?: PaletteColorOptions
+    tertiary?: PaletteOptions['primary']
+    quaternary?: PaletteOptions['primary']
     svgBackground?: IActionStates
     svgFilled?: IActionStates
     svgStroke?: IActionStates
     text?: PaletteOptions['text']
-  }
-
-  interface Theme {
-    insetShadows: Shadows
-    shape: Shape & { appIconBorderRadius: number | string }
   }
 
   type ExtendPropsOfWithStyles<P extends { classes?: ClassNameMap<string> },
@@ -159,10 +153,6 @@ declare module '@mui/styles' {
 //  |_____/_/\_\_|    \___/|_| \_\|_| |____/
 
 
-export type StyledOptions<P = any, FP extends keyof P = keyof P> = FilteringStyledOptions<P, FP> & MuiStyledOptions
-export type StyledElement = StyledComponent<Pick<any, string | number | symbol> & { theme?: Theme; as?: ElementType<any>; sx?: SxProps<Theme>; }, any, Theme>
-
-
 export type {
   Overwrite,
 } from '@mui/types'
@@ -171,9 +161,8 @@ export type {
   ShapeOptions,
   Spacing,
   SpacingOptions,
-  FilteringStyledOptions,
+  MuiStyledOptions as StyledOptions,
   MuiStyledOptions,
-  StyledComponent,
   SxProps,
 } from '@mui/system'
 

@@ -18,43 +18,14 @@
 import { CanvasRendererComponent } from '@aglyn/core-feature-renderer'
 import { styled } from '@aglyn/shared-feature-themes'
 import { forwardRef, HTMLAttributes } from 'react'
-import { CanvasRenderedElementRefsConsumer } from '../contexts/canvas-rendered-element-refs'
 import { HoverContextProvider } from '../contexts/hover-context-provider'
-import { useAglynCanvasHovered } from '../hooks/use-aglyn-canvas-hovered'
-import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
-import { ElementCanvasPopperComponent } from './element-canvas-popper.component'
 import { ElementRendererComponent } from './element-renderer.component'
+import { ViewportPoppersComponent } from './viewport-poppers.component'
 
-const Toolbox = (props) => {
-  const selected = useAglynCanvasSelected()
-  const selectedId = selected?.$id
-  const hovered = useAglynCanvasHovered()
-  const hoveredId = hovered?.$id
 
-  return (
-    <CanvasRenderedElementRefsConsumer>
-      {({ getElementRef }) => (
-        <>
-          <ElementCanvasPopperComponent
-            key="hovered"
-            variant="hovered"
-            onGetElementRef={getElementRef}
-            $id={hoveredId}
-          />
-          <ElementCanvasPopperComponent
-            key="selected"
-            variant="selected"
-            onGetElementRef={getElementRef}
-            $id={selectedId}
-            badgeable
-          />
-        </>
-      )}
-    </CanvasRenderedElementRefsConsumer>
-  )
-}
-
-const ViewportFrame = styled('div', { name: 'AglynViewportFrame' })(({ theme }) => ({
+const ViewportFrame = styled('div', {
+  name: 'AglynViewportFrame'
+})(({ theme }) => ({
   flexGrow: 1,
   minHeight: '100%',
   width: '100%',
@@ -65,7 +36,7 @@ const ViewportFrame = styled('div', { name: 'AglynViewportFrame' })(({ theme }) 
 
 export interface ViewportFrameComponentProps extends HTMLAttributes<HTMLDivElement> {}
 
-export const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
+const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
   function RefRenderFn(props, ref) {
     const { children, ...rest } = props
 
@@ -76,7 +47,7 @@ export const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProp
             id="aglyn:canvas"
             elementRendererComponent={ElementRendererComponent}
           />
-          <Toolbox />
+          <ViewportPoppersComponent />
         </HoverContextProvider>
         {children}
       </ViewportFrame>
@@ -87,4 +58,5 @@ export const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProp
 ViewportFrameComponent.displayName = 'ViewportFrameComponent'
 ViewportFrameComponent.defaultProps = {}
 
+export { ViewportFrameComponent }
 export default ViewportFrameComponent

@@ -65,7 +65,7 @@ const MODULE_NAME = 'extensions'
 export class AglynExtensionsController extends AglynModuleModel<AglynExtensionsControllerOptions> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = MODULE_NAME
+  public static readonly namespace: string = `aglyn:${MODULE_NAME}`
   public static readonly moduleName: string = MODULE_NAME
 
   protected extensions: AglynExtensionMap = new Map()

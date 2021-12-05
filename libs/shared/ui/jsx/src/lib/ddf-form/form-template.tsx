@@ -44,12 +44,13 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(function 
         {formFields}
       </Grid>
       <FormSpy>
-        {({}) => (
+        {({submitting, validating, pristine, valid}) => (
           <Box mt={2}>
             <FormControl margin="normal" fullWidth>
               <Button
                 variant="outlined"
                 onClick={onCancel}
+                disabled={submitting || validating}
                 fullWidth
               >
                 Cancel
@@ -58,7 +59,7 @@ export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(function 
             <FormControl margin="normal" fullWidth>
               <Button
                 color="secondary"
-                disabled={submitting || !valid}
+                disabled={submitting || !valid || pristine}
                 startIcon={<SvgPathIcon iconIds="content-save" />}
                 style={{marginRight: 8}}
                 type="submit"

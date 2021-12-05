@@ -15,20 +15,15 @@
  * limitations under the License.
  */
 
-import { _isArrEmpty } from '@aglyn/shared-util-guards'
-import { ModificationHistoryState } from '../types'
+import { render } from '@testing-library/react'
+import React from 'react'
+
+import { AppBarSecondaryComponent } from './app-bar-secondary.component'
 
 
-export const handleModificationHistoryRedo = <S>(
-  state: ModificationHistoryState<S>
-): ModificationHistoryState<S> => {
-  if (!_isArrEmpty(state.future)) {
-    return {
-      past: [state.present, ...state.past],
-      present: state.future.slice(0, 1)[0],
-      future: state.future.slice(1),
-    }
-  }
-  return state
-}
-export default handleModificationHistoryRedo
+describe('BesignerToolbarComponent', () => {
+  it('should render successfully', () => {
+    const {baseElement} = render(<AppBarSecondaryComponent />)
+    expect(baseElement).toBeTruthy()
+  })
+})
