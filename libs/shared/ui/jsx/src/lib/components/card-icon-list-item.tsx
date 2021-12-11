@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
-import Card, { CardProps as MuiCardProps } from '@mui/material/Card'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import Card, {CardProps as MuiCardProps} from '@mui/material/Card'
 import CardActionArea from '@mui/material/CardActionArea'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
-import { forwardRef, MouseEvent, ReactNode, useCallback } from 'react'
-import { GridListItemData } from './grid-list'
+import {forwardRef, MouseEvent, ReactNode, useCallback} from 'react'
+import {GridListItemData} from './grid-list'
 
 
 const cardClasses = generateComponentClassKeys('AglynCardIconListItem', ['actionArea', 'selected'])
@@ -33,7 +33,8 @@ const StyledCard = styled(Card, {
   [`&.${cardClasses.selected}`]: {
     [`& .${cardClasses.actionArea}`]: {
       // backgroundColor: theme.palette.action.selected,
-      backgroundColor: theme.palette.error.main,
+      backgroundColor: theme.palette.secondary.main,
+      color: theme.palette.secondary.contrastText,
       // backgroundColor: emphasize(theme.palette.action.selected, 0.12),
       // color: theme.palette.getContrastText(emphasize(theme.palette.action.selected, 0.12))
     },
@@ -42,21 +43,21 @@ const StyledCard = styled(Card, {
 
 const StyledActionArea = styled(CardActionArea, {
   name: 'ActionArea',
-})(({theme}) => ({
+})({
   height: 0,
   position: 'relative',
   paddingTop: `${(3 / 4) * 100}%`, // 16:9
-}))
+})
 
 const StyledWrapper = styled('div', {
   name: 'Wrapper',
-})(({theme}) => ({
+})({
   position: 'absolute',
   left: 0,
   top: 0,
   width: '100%',
   height: '100%',
-}))
+})
 
 const StyledContent = styled('div', {
   name: 'Content',

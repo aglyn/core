@@ -150,8 +150,8 @@ class _Document<P extends _DocumentProps> extends Document<P> {
           {makeLinkElements(LINK_PREF)}
         </Head>
         <body>
-        <Main />
-        <NextScript />
+          <Main />
+          <NextScript />
         </body>
       </Html>
     )

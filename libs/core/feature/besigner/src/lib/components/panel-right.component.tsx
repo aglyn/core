@@ -15,20 +15,18 @@
  * limitations under the License.
  */
 
-import {
-  BesignerPanelTabFlag,
-  setBesignerPanels,
-} from '@aglyn/core-data-framework'
+import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-framework'
 import {
   useAglynAppContext,
   useAglynCanvasApiEvents,
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import { styled } from '@aglyn/shared-feature-themes'
-import { componentMapper, FormRenderer, GridFormTemplate, SvgPathIcon } from '@aglyn/shared-ui-jsx'
-import { _isEqualitySameType } from '@aglyn/shared-util-guards'
-import { hexadecimalFromNumber, hexadecimalToNumber } from '@aglyn/shared-util-tools'
+import {IconVariant} from '@aglyn/shared-data-brand'
+import {styled} from '@aglyn/shared-feature-themes'
+import {componentMapper, FormRenderer, GridFormTemplate, SvgPathIcon} from '@aglyn/shared-ui-jsx'
+import {_isEqualitySameType} from '@aglyn/shared-util-guards'
+import {hexadecimalFromNumber, hexadecimalToNumber} from '@aglyn/shared-util-tools'
 import MuiTabContext from '@mui/lab/TabContext'
 import MuiTabList from '@mui/lab/TabList'
 import MuiTabPanel from '@mui/lab/TabPanel'
@@ -38,10 +36,10 @@ import Divider from '@mui/material/Divider'
 import FormControl from '@mui/material/FormControl'
 import MuiTab from '@mui/material/Tab'
 import Typography from '@mui/material/Typography'
-import { forwardRef, Fragment, memo, useCallback, useState } from 'react'
+import {forwardRef, Fragment, memo, useCallback} from 'react'
 import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
-import { useComponentFormSchema } from '../hooks/use-component-form-schema'
-import { WorkspacePanelComponent, WorkspacePanelComponentProps } from './workspace-panel.component'
+import {useComponentFormSchema} from '../hooks/use-component-form-schema'
+import {WorkspacePanelComponent, WorkspacePanelComponentProps} from './workspace-panel.component'
 
 
 const TabPanelInner = styled('div', {
@@ -177,12 +175,12 @@ const PropsForm = memo(function PropsForm({$id, ...props}: any) {
 const tabs = [
   {
     id: BesignerPanelTabFlag.ELEMENT_INFO,
-    iconIds: 'information-variant',
+    iconIds: IconVariant.DETAILS,
     component: ElementInfo,
   },
   {
     id: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
-    iconIds: 'order-bool-descending-variant',
+    iconIds: IconVariant.PROPERTIES,
     component: PropsForm,
   },
 ]

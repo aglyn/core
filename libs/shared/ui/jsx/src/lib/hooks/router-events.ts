@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/router'
+import {useRouter} from 'next/router'
+import {useEffect} from 'react'
 
 
 export type RouteProperties = {
@@ -32,7 +32,11 @@ export type HashChangeStartCallback = (asPath: string, routeProps: RouteProperti
 export type HashChangeCompleteCallback = (asPath: string, routeProps: RouteProperties) => void
 export type RouterChangeStartCallback = (asPath: string, routeProps: RouteProperties) => void
 export type RouterChangeCompleteCallback = (asPath: string, routeProps: RouteProperties) => void
-export type RouterChangeErrorCallback = (error: ChangeError, asPath: string, routeProps: RouteProperties) => void
+export type RouterChangeErrorCallback = (
+  error: ChangeError,
+  asPath: string,
+  routeProps: RouteProperties,
+) => void
 
 export enum NextRouterEvent {
   HASH_CHANGE_START = 'hashChangeStart',
@@ -57,9 +61,9 @@ type EventParamType = [id: keyof EventCallbacks, callback: EventCallbacks[keyof 
 export const useRouterEvent = (events: EventParamType[]) => {
   const router = useRouter()
   useEffect(() => {
-    events.map(([id, callback]) => router.events.on(id as string, callback))
+    events.map(([id, callback]) => router.events.on(id as any, callback))
     return () => {
-      events.map(([id, callback]) => router.events.off(id as string, callback))
+      events.map(([id, callback]) => router.events.off(id as any, callback))
     }
   }, [router.events])
 }

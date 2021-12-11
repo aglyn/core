@@ -16,15 +16,21 @@
  */
 
 import {getApp} from '@aglyn/core-data-framework'
-import {BesignerComponent} from '@aglyn/core-feature-besigner'
-import {HAS_WINDOW} from '@aglyn/shared-data-brand'
+import {HAS_DOCUMENT} from '@aglyn/shared-data-brand'
+import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
+import dynamic from 'next/dynamic'
 
+
+const AglynBesigner = dynamic(
+  () => import('@aglyn/core-feature-besigner').then((mod) => mod.BesignerComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
 
 function Besigner(props) {
-  if (HAS_WINDOW) {
+  if (HAS_DOCUMENT) {
     console.log('page:/besigner app', getApp())
   }
-  return <BesignerComponent />
+  return <AglynBesigner />
 }
 
 Besigner.displayName = 'Page-Besigner'

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
+import { SvgPathIcon, useAppLoader } from '@aglyn/shared-ui-jsx'
 import { createUid } from '@aglyn/shared-util-vendor'
 import { _s, objectRemap } from '@aglyn/shared-util-tools'
 import IconButton from '@mui/material/IconButton'
@@ -25,7 +25,6 @@ import { ChangeEvent, Fragment, useCallback, useEffect, useState } from 'react'
 import DataTable, { DataTableProps } from '../components/DataTable'
 import WidgetCard from '../components/WidgetCard'
 import { AppContextType, withAppContext } from '../contexts/app-context'
-import { useAppLoader } from '../contexts/app-loader-context'
 import { Fields } from '../forms'
 import ConsoleLayout from '../layouts/ConsoleLayout'
 import AreaManageNavigationListWidgetView from './AreaManageNavigationListWidgetView'

@@ -18,11 +18,13 @@
 import {
   BesignerPanelTabFlag,
   duplicateCanvasElement,
-  ElementId, isRootElementId,
+  ElementId,
+  isRootElementId,
   setBesignerCanvasSelected,
   setBesignerPanels,
 } from '@aglyn/core-data-framework'
-import { useAglynAppContext, useAglynElementData } from '@aglyn/core-feature-renderer'
+import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
+import {IconVariant} from '@aglyn/shared-data-brand'
 import {
   PopperStyledArrowComponent,
   PopperStyledComponent,
@@ -31,12 +33,12 @@ import {
   SvgPathIcon,
   SvgPathIconProps,
 } from '@aglyn/shared-ui-jsx'
-import Button, { ButtonProps } from '@mui/material/Button'
-import ButtonGroup, { ButtonGroupProps } from '@mui/material/ButtonGroup'
+import Button, {ButtonProps} from '@mui/material/Button'
+import ButtonGroup, {ButtonGroupProps} from '@mui/material/ButtonGroup'
 import Tooltip from '@mui/material/Tooltip'
 import Zoom from '@mui/material/Zoom'
-import { ChangeEvent, forwardRef, memo, useCallback, useState } from 'react'
-import { useDeleteElementCallback } from '../hooks/use-delete-element-callback'
+import {ChangeEvent, forwardRef, memo, useCallback, useState} from 'react'
+import {useDeleteElementCallback} from '../hooks/use-delete-element-callback'
 
 
 interface ElementBadgeButtonGroupProps extends ButtonGroupProps {
@@ -56,11 +58,11 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
     }, [deleteElementCallback])
 
     const handleDuplicateClick = useCallback((e: ChangeEvent<unknown>) => {
-        duplicateCanvasElement(getApp(), {$id})
-      }, [$id])
+      duplicateCanvasElement(getApp(), {$id})
+    }, [$id])
     const handleModifyClick = useCallback((e: ChangeEvent<unknown>) => {
       setBesignerPanels(getApp(), {
-        panelRight: {toggled: true, tab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM}
+        panelRight: {toggled: true, tab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM},
       })
     }, [$id])
     const handleSelectParentClick = useCallback((e: ChangeEvent<unknown>) => {
@@ -81,7 +83,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
           onClick: handleDeleteClick,
         } as ButtonProps,
         svgPathIconProps: {
-          iconIds: 'delete-outline',
+          iconIds: IconVariant.MODIFY_DELETE,
           color: 'error',
         } as SvgPathIconProps,
       },
@@ -98,7 +100,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
           onClick: handleDuplicateClick,
         },
         svgPathIconProps: {
-          iconIds: 'content-duplicate',
+          iconIds: IconVariant.MODIFY_DUPLICATE,
         },
       },
       {
@@ -114,7 +116,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
           onClick: handleModifyClick,
         },
         svgPathIconProps: {
-          iconIds: 'pencil',
+          iconIds: IconVariant.MODIFY_EDIT,
         },
       },
       (parentId && !isRootElementId(parentId)) ? ({
@@ -130,9 +132,9 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
           onClick: handleSelectParentClick,
         },
         svgPathIconProps: {
-          iconIds: 'arrow-up-left',
+          iconIds: IconVariant.SELECT_PARENT,
         },
-      }) : null
+      }) : null,
     ].filter(i => i && !i.buttonProps.disabled)
 
     return (
@@ -153,7 +155,7 @@ const ElementBadgeButtonGroup = forwardRef<any, ElementBadgeButtonGroupProps>(
         ))}
       </ButtonGroup>
     )
-  }
+  },
 )
 
 export interface ElementBadgeComponentProps extends PopperStyledComponentProps {

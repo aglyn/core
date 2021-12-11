@@ -148,12 +148,12 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
     }, [setSelected])
     const renderItemContent = useCallback(function RenderItemContent(item) {
       return (
-        <Tooltip key={item.id} title={item.name}>
+        <Tooltip key={item.id} title={item.name} disableInteractive enterDelay={375} enterNextDelay={745}>
           <CardIconListItem
             item={item}
             onActionClick={handleItemClick}
             selected={selected && selected === item.id}
-            preview={<SvgPathIcon fontSize="large" iconIds={item.id} />}
+            preview={<SvgPathIcon fontSize="medium" iconIds={item.id} />}
           />
         </Tooltip>
       )
@@ -219,8 +219,8 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
 
               <GridListWrapper>
                 <GridList
-                  GridContainerProps={{spacing: 2}}
-                  GridItemProps={{xs: 6, sm: 4}}
+                  GridContainerProps={{spacing: 1}}
+                  GridItemProps={{xs: 2}}
                   ListWrapperProps={{className: classKeys.gridList}}
                   items={icons}
                   renderItemContent={renderItemContent}

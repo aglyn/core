@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
-import { ConditionalNonDist } from '@aglyn/shared-data-types'
-import { InjectedContextConsumerProps, createHocWithContextConsumer } from '@aglyn/shared-ui-jsx'
-import { _isLength } from '@aglyn/shared-util-guards'
-import { noop } from '@aglyn/shared-util-tools'
-import { createUid } from '@aglyn/shared-util-vendor'
-import { createContext, PropsWithChildren, useContext, useState } from 'react'
+import {ConditionalNonDist} from '@aglyn/shared-data-types'
+import {_isLength} from '@aglyn/shared-util-guards'
+import {noop} from '@aglyn/shared-util-tools'
+import {createUid} from '@aglyn/shared-util-vendor'
+import {createContext, ReactNode, useContext, useState} from 'react'
+import {
+  createHocWithContextConsumer,
+  InjectedContextConsumerProps,
+} from '../hocs/create-hoc-with-context-consumer'
 
 
 export type QueueId = string
@@ -51,16 +54,21 @@ export const APP_LOADER_CONTEXT_DEFAULT_VALUE: AppLoaderContextType = {
 export const AppLoader = createContext<AppLoaderContextType>(APP_LOADER_CONTEXT_DEFAULT_VALUE)
 AppLoader.displayName = 'AppLoader'
 
-export const {Provider: AppLoaderProvider, Consumer: AppLoaderConsumer} = AppLoader
+export const {
+  Provider: AppLoaderProvider,
+  Consumer: AppLoaderConsumer,
+} = AppLoader
 
 export const useAppLoader = () => useContext(AppLoader)
 const createQueueId = () => createUid(5)
 
-export interface AppLoaderProviderComponentProps extends PropsWithChildren<{}> {}
+export interface AppLoaderProviderComponentProps {
+  children?: ReactNode
+}
 
 export function AppLoaderProviderComponent(props: AppLoaderProviderComponentProps) {
   const {children} = props
-  const [state, setState] = useState<AppLoaderContextType>({
+  const [state, setState] = useState<AppLoaderContextType>(() => ({
     queues: [],
     isLoading: false,
     queueLoading: <T extends boolean>(asTuple?: T): QueueResponse<T> => {
@@ -88,7 +96,7 @@ export function AppLoaderProviderComponent(props: AppLoaderProviderComponentProp
       return (asTuple === true ? [queueId, dequeue] : dequeue) as QueueResponse<T>
     },
     checkLoading: () => Boolean(state.queues.length),
-  })
+  }))
 
   // TODO fix loss of dequeue instance on async overwrite
   // const routeQueue = React.useRef<{[id: string]: [fn: DequeueLoading]}>({})
@@ -108,7 +116,11 @@ export function AppLoaderProviderComponent(props: AppLoaderProviderComponentProp
   //   routeQueue.current = null
   // })
 
-  return <AppLoaderProvider value={state}>{children}</AppLoaderProvider>
+  return (
+    <AppLoaderProvider value={state}>
+      {children}
+    </AppLoaderProvider>
+  )
 }
 
 const WithN = 'appLoader'

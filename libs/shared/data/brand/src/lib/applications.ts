@@ -27,10 +27,22 @@ export enum IconVariant {
   DOCUMENT = 'book-variant',
   COLLECTION = 'book-variant-multiple',
 
+  // Data-sets
+  PROPERTIES = 'form-dropdown',
+  DETAILS = 'information-variant',
+  TREE_VIEW = 'file-tree',
+
+
   // Data-Type
   STRING = 'code-string',
   ARRAY = 'code-array',
   OBJECT = 'code-braces-box',
+
+  // Modification
+  MODIFY_DUPLICATE = 'content-duplicate',
+  MODIFY_DELETE = 'delete-outline',
+  MODIFY_EDIT = 'pencil',
+  SELECT_PARENT = 'arrow-top-left',
 
   // User
   LOGIN = 'login-variant',

@@ -18,6 +18,8 @@
 import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-brand'
 import {consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
 import {
+  AppLoaderOverlayView,
+  AppLoaderProviderComponent,
   makeLinkElements,
   MakeLinkElementsConfig,
   makeMetaElements,
@@ -26,10 +28,8 @@ import {
 import Head from 'next/head'
 import {Fragment, ReactNode, useEffect} from 'react'
 import {AppContextProvider} from '../contexts/app-context'
-import {AppLoaderProviderComponent} from '../contexts/app-loader-context'
 import {CurrentUserProviderComponent} from '../contexts/current-user-context'
 import {AppController} from '../lib/aglyn-deprecated'
-import AppLoaderOverlayView from '../views/AppLoaderOverlayView'
 import HsEmbedScript from './hs-embed-script'
 
 
@@ -64,7 +64,7 @@ function AppWrapperRaw(props: AppWrapperProps) {
   return (
     <Wrapper>
       <Head>
-        <title>{META_TITLE}</title>
+        <title>{APP_WWW.META_TITLE}</title>
         {makeMetaElements(metaElements)}
         {makeLinkElements(linkElements)}
       </Head>

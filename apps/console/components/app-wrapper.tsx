@@ -16,17 +16,22 @@
  */
 
 import {bundle as muiBundle} from '@aglyn/addons-ui-mui-bundle'
-import {initializeApp, registerBundle, registerComponent} from '@aglyn/core-data-framework'
+import {
+  doesAppExist,
+  initializeApp,
+  registerBundle,
+  registerComponent,
+} from '@aglyn/core-data-framework'
 import {aglynElementComponent} from '@aglyn/core-feature-renderer'
 import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-brand'
 import {consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
 import {
+  AppLoaderProviderComponent,
   makeLinkElements,
   MakeLinkElementsConfig,
   makeMetaElements,
   MakeMetaElementsConfig,
 } from '@aglyn/shared-ui-jsx'
-import CssBaseline from '@mui/material/CssBaseline'
 import Head from 'next/head'
 import {Fragment, useEffect} from 'react'
 import {samplePageData} from '../constants/sample-data'
@@ -101,17 +106,19 @@ const c5 = aglynElementComponent(
 const components = [c1, c2, c3, c4, c5]
 
 try {
-  const app = initializeApp({
-    logLevel: 'debug',
-    modulesOptions: {
-      canvas: {
-        initialElements: samplePageData,
+  if (!doesAppExist()) {
+    const app = initializeApp({
+      logLevel: 'debug',
+      modulesOptions: {
+        canvas: {
+          initialElements: samplePageData,
+        },
       },
-    },
-  })
+    })
 
-  components.forEach((i) => registerComponent(app, i))
-  registerBundle(app, muiBundle)
+    components.forEach((i) => registerComponent(app, i))
+    registerBundle(app, muiBundle)
+  }
 }
 catch (e) {
   console.error(e, 'initialize aglyn app')
@@ -140,13 +147,15 @@ function AppWrapperRaw(props) {
         {makeMetaElements(metaElements)}
         {makeLinkElements(linkElements)}
       </Head>
-      <CssBaseline />
       <div className="app">
-        <main>{children}</main>
+        <AppLoaderProviderComponent>
+          <main>{children}</main>
+        </AppLoaderProviderComponent>
       </div>
     </Wrapper>
   )
 }
 AppWrapperRaw.displayName = 'AppWrapper'
-const AppWrapper = withTheme({theme: consoleThemeLight})(AppWrapperRaw)
+
+export const AppWrapper = withTheme({theme: consoleThemeLight})(AppWrapperRaw)
 export default AppWrapper

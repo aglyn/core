@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import type { IconData } from '@aglyn/shared-data-mdi'
-import { FindWithFuzzy } from '@aglyn/shared-util-vendor'
-import { useCallback, useMemo, useState } from 'react'
+import type {IconData} from '@aglyn/shared-data-mdi'
+import {FindWithFuzzy} from '@aglyn/shared-util-vendor'
+import {useCallback, useMemo, useState} from 'react'
 
 
 export type MdiIcon = IconData
@@ -42,23 +42,21 @@ export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | undefined)[]
   }, [iconIds])
 }
 
-export const findMdiIconsFuzzy = new FindWithFuzzy<MdiIcon>([], {
-  keys: [
-    {name: 'name', weight: 0.7},
-    {name: 'alias', weight: 0.3},
-  ],
-  includeScore: true,
-  shouldSort: true,
-  // threshold: 0.25,
-  // minMatchCharLength: 3
-})
 
 export function useMdiIcons(): UseMdiIconsReturn {
   const allIcons = useMemoizedMdiIcons()
 
   const fuzzy = useMemo(() => {
-    findMdiIconsFuzzy.setCollection(allIcons)
-    return findMdiIconsFuzzy
+    return new FindWithFuzzy<MdiIcon>(allIcons, {
+      keys: [
+        {name: 'name', weight: 0.7},
+        {name: 'alias', weight: 0.3},
+      ],
+      includeScore: true,
+      shouldSort: true,
+      // threshold: 0.25,
+      // minMatchCharLength: 3
+    })
   }, [allIcons])
 
   const [iconResults, setIconResults] = useState(() => allIcons)

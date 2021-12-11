@@ -16,6 +16,7 @@
  */
 
 export * from './lib/components/app-link'
+export * from './lib/components/app-loader-overlay-view'
 export * from './lib/components/card-icon-list-item'
 export * from './lib/components/dialog-confirm'
 export * from './lib/components/elevation-scroll'
@@ -37,8 +38,10 @@ export * from './lib/components/confirmation-provider.component'
 export * from './lib/components/zoomable-panning-component'
 
 
+export * from './lib/contexts/app-loader-context'
 export * from './lib/contexts/confirmation.context'
 
+export * from './lib/hooks/router-events'
 export * from './lib/hooks/use-client-rect'
 export * from './lib/hooks/use-combined-refs'
 export * from './lib/hooks/use-dynamic-effect'
