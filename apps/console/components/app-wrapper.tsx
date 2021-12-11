@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { bundle as muiBundle } from '@aglyn/addons-ui-mui-bundle'
-import { initializeApp, registerBundle, registerComponent } from '@aglyn/core-data-framework'
-import { aglynElementComponent } from '@aglyn/core-feature-renderer'
-import { APP } from '@aglyn/shared-data-brand'
-import { consoleThemeLight, withTheme } from '@aglyn/shared-feature-themes'
+import {bundle as muiBundle} from '@aglyn/addons-ui-mui-bundle'
+import {initializeApp, registerBundle, registerComponent} from '@aglyn/core-data-framework'
+import {aglynElementComponent} from '@aglyn/core-feature-renderer'
+import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-brand'
+import {consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
 import {
   makeLinkElements,
   MakeLinkElementsConfig,
@@ -28,8 +28,8 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import CssBaseline from '@mui/material/CssBaseline'
 import Head from 'next/head'
-import { Fragment, useEffect } from 'react'
-import { samplePageData } from '../constants/sample-data'
+import {Fragment, useEffect} from 'react'
+import {samplePageData} from '../constants/sample-data'
 
 
 const c1 = aglynElementComponent(
@@ -119,13 +119,13 @@ catch (e) {
 
 const metaElements: MakeMetaElementsConfig = [
   ['viewport', 'width=device-width, initial-scale=1'],
-  ['description', APP.META_DESCRIPTION],
+  ['description', APP_WWW.META_DESCRIPTION],
 ]
 const linkElements: MakeLinkElementsConfig = []
 
 function AppWrapperRaw(props) {
   const {children} = props
-  const Wrapper = APP.IS_PRODUCTION ? Fragment : Fragment // StrictMode
+  const Wrapper = IS_PRODUCTION ? Fragment : Fragment // StrictMode
 
   useEffect(() => {
     // Remove the server-side injected CSS.
@@ -136,7 +136,7 @@ function AppWrapperRaw(props) {
   return (
     <Wrapper>
       <Head>
-        <title>{APP.META_TITLE}</title>
+        <title>{APP_WWW.META_TITLE}</title>
         {makeMetaElements(metaElements)}
         {makeLinkElements(linkElements)}
       </Head>
