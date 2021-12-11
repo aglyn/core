@@ -64,26 +64,26 @@
                 ]
               },
               {
-                "sourceTag": "scope:lib:sdk:builder",
+                "sourceTag": "scope:lib:sdk:ui-besigner",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:sdk:builder",
+                  "scope:lib:sdk:ui-besigner",
                   "scope:lib:sdk:framework",
-                  "scope:lib:sdk:renderer",
+                  "scope:lib:sdk:ui-renderer",
                   "scope:lib:shared"
                 ]
               },
               {
-                "sourceTag": "scope:lib:sdk:renderer",
+                "sourceTag": "scope:lib:sdk:ui-renderer",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:sdk:renderer",
+                  "scope:lib:sdk:ui-renderer",
                   "scope:lib:sdk:framework",
                   "scope:lib:shared"
                 ]
               },
               {
-                "sourceTag": "scope:lib:sdk:plugin",
+                "sourceTag": "scope:lib:sdk:extension",
                 "onlyDependOnLibsWithTags": [
-                  "scope:lib:sdk:plugin",
+                  "scope:lib:sdk:extension",
                   "scope:lib"
                 ]
               },
@@ -106,12 +106,12 @@
         "@typescript-eslint/no-empty-interface": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-namespace": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/no-var-requires": "off",
         "no-fallthrough": "off",
-        "react/no-children-prop": "off",
         "react-hooks/rules-of-hooks": "off",
-        "tsdoc/syntax": "warn"
+        "tsdoc/syntax": ["warn", {}]
       }
     },
     {
@@ -129,7 +129,8 @@
               "!@mui/material/test-utils/*"
             ]
           }
-        ]
+        ],
+        "react/no-children-prop": "off"
       }
     }
   ]
