@@ -15,42 +15,52 @@
  * limitations under the License.
  */
 
-import type {IconData} from '@aglyn/shared-data-mdi'
+import type {Icon, IconId} from '@aglyn/shared-data-mdi'
+import {getMdiAllIcons, getMdiIconFromId} from '@aglyn/shared-data-mdi'
 import {FindWithFuzzy} from '@aglyn/shared-util-vendor'
-import {useCallback, useMemo, useState} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 
 
-export type MdiIcon = IconData
+export type MdiIcon = Icon
 export type ApplyFilterFn = (query: string) => void
 export type ClearFilterFn = () => void
 export type UseMdiIconsReturn = [MdiIcon[], ApplyFilterFn, ClearFilterFn]
 
-export function useMemoizedMdiIcons(iconIds?: string[]): (MdiIcon | undefined)[] {
-  return useMemo(() => {
-    const mdi = require('@aglyn/shared-data-mdi')
-    const mdiIds = mdi?.icons?.iconIds || []
-    const mdiIcons = mdi?.icons?.byIconId || {}
+export function useMemoizedMdiIcons(iconIds?: IconId[]): (MdiIcon | undefined)[] {
+  const [icons, setIcons] = useState([])
 
-    return (iconIds || mdiIds).map((id) => {
-      const icon = mdiIcons[id]
-      return !icon ? undefined : ({
-        ...icon,
-        id: id,
-        alias: Object.keys(icon.alias || {}),
+  useEffect(() => {
+    console.log('useMemoizedMdiIcons useeffect', icons)
+    let unloaded = false
+    if (Array.isArray(iconIds) && iconIds.length > 0) {
+      getMdiIconFromId(iconIds).then((icons: MdiIcon[]) => {
+        if (unloaded) return
+        setIcons([...icons])
       })
-    })
+    }
+    else if (!Array.isArray(iconIds)) {
+      getMdiAllIcons().then((icons) => {
+        if (unloaded) return
+        setIcons([...icons])
+      })
+    }
+    return () => {unloaded = true}
   }, [iconIds])
+
+  return icons
 }
 
 
 export function useMdiIcons(): UseMdiIconsReturn {
-  const allIcons = useMemoizedMdiIcons()
+  const allIcons = useMemoizedMdiIcons() || []
+  const [iconResults, setIconResults] = useState(() => allIcons)
 
   const fuzzy = useMemo(() => {
     return new FindWithFuzzy<MdiIcon>(allIcons, {
       keys: [
-        {name: 'name', weight: 0.7},
-        {name: 'alias', weight: 0.3},
+        {name: 'name', weight: 0.5},
+        {name: 'as', weight: 0.25},
+        {name: 'tags', weight: 0.25},
       ],
       includeScore: true,
       shouldSort: true,
@@ -58,8 +68,6 @@ export function useMdiIcons(): UseMdiIconsReturn {
       // minMatchCharLength: 3
     })
   }, [allIcons])
-
-  const [iconResults, setIconResults] = useState(() => allIcons)
 
   const clearFilter: ClearFilterFn = useCallback(() => {
     setIconResults(allIcons)

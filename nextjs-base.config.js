@@ -19,11 +19,11 @@
 const withNx = require('@nrwl/next/plugins/with-nx')
 const pkg = require('./package.json')
 
-const PKG_VERSION = String(pkg?.version ?? 'UNDEFINED')
-const PROCESS_VERSION = String(process.version ?? 'UNDEFINED')
-const PROCESS_VERSIONS = String(process.versions ?? 'UNDEFINED')
+const PKG_VERSION = String(pkg?.version ?? 'NULL')
+const PROCESS_VERSION = String(process.version ?? 'NULL')
+const PROCESS_VERSIONS = String(process.versions ?? 'NULL')
 
-const COMMIT_REF = JSON.stringify(process.env.COMMIT_REF)
+const COMMIT_REF = String(process.env.COMMIT_REF ?? 'NULL')
 
 const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 const IS_PRODUCTION = process.env.NODE_ENV === 'production'
@@ -112,6 +112,8 @@ const withAglynNxNext = (opts = {}) => {
     swcMinify: false,
 
     target: 'experimental-serverless-trace',
+
+    outputStandalone: true,
 
     reactStrictMode: !IS_PRODUCTION,
 

@@ -15,34 +15,31 @@
  * limitations under the License.
  */
 
-import { getIcon, defaultIconFailover } from '@aglyn/shared-data-mdi'
-import {
-  generateComponentClassKeys,
-  styled,
-} from '@aglyn/shared-feature-themes'
+import {DEFAULT_ICON} from '@aglyn/shared-data-mdi'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 
 import useFieldApi from '@data-driven-forms/react-form-renderer/use-field-api'
-import { UseFieldApiConfig } from '@data-driven-forms/react-form-renderer/use-field-api/use-field-api'
-import { Tooltip } from '@mui/material'
+import {UseFieldApiConfig} from '@data-driven-forms/react-form-renderer/use-field-api/use-field-api'
+import {Tooltip} from '@mui/material'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
-import MuiLink from '@mui/material/Link'
 import Collapse from '@mui/material/Collapse'
 import Grid from '@mui/material/Grid'
+import MuiLink from '@mui/material/Link'
 import MuiTextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-import { forwardRef, Fragment, HTMLProps, useCallback, useMemo, useState } from 'react'
-import { CardIconListItem } from '../../components/card-icon-list-item'
-import { GridList } from '../../components/grid-list'
-import { SvgPathIcon } from '../../components/svg-path-icon'
-import { MdiIcon, useMdiIcons } from '../../hooks/use-mdi-icons'
+import {forwardRef, Fragment, HTMLProps, useCallback, useState} from 'react'
+import {CardIconListItem} from '../../components/card-icon-list-item'
+import {GridList} from '../../components/grid-list'
+import {SvgPathIcon} from '../../components/svg-path-icon'
+import {MdiIcon, useMdiIcons, useMemoizedMdiIcons} from '../../hooks/use-mdi-icons'
 
-import { withGridItem } from '../field-hocs'
-import { validationMessage } from '../utils'
+import {withGridItem} from '../field-hocs'
+import {validationMessage} from '../utils'
 
 
-const iconUnset = {...defaultIconFailover, id: '', name: '(none)'}
+const iconUnset = {...DEFAULT_ICON, id: '', name: '(none)'}
 const classKeys = generateComponentClassKeys('AglynFieldIconSelect', [
   'root',
   'button',
@@ -59,7 +56,7 @@ const classKeys = generateComponentClassKeys('AglynFieldIconSelect', [
 
 const StyledCollapse = styled(Collapse)(({theme}) => ({
   ['& .MuiCollapse-wrapper']: {
-    height: 412
+    height: 412,
   },
   ['& .MuiCollapse-wrapperInner']: {
     paddingTop: theme.spacing(1),
@@ -79,7 +76,7 @@ const GridListWrapper = styled('div')(({theme}) => ({
   [`& .${classKeys.gridList}`]: {
     padding: theme.spacing(1),
     // overflowX: 'hidden',
-  }
+  },
 }))
 
 export interface FieldIconSelectProps extends HTMLProps<HTMLDivElement> {
@@ -111,24 +108,17 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
       invalidMessage,
       ((meta.touched || validateOnMount) && meta.warning),
       helperText,
-      description
+      description,
     ].find((i) => Boolean(i))
+
     const currentValue = input.value
-    const currentIcon = useMemo(() => {
-      console.log('currentValue', currentValue)
-      return currentValue
-        ? getIcon(currentValue, {failoverIcon: iconUnset})
-        : iconUnset
-    }, [currentValue])
     const [open, setOpen] = useState(false)
     const [icons, applyFilter, clearFilter] = useMdiIcons()
     const [selected, setSelected] = useState(() => currentValue)
-    const selectedIcon = useMemo(() => {
-      console.log('selected', selected)
-      return selected
-        ? getIcon(selected, {failoverIcon: iconUnset})
-        : iconUnset
-    }, [selected, getIcon])
+
+    const [currentIcon = iconUnset, selectedIcon = iconUnset] = useMemoizedMdiIcons([
+      currentValue, selected,
+    ].filter(Boolean))
 
 
     const handleButtonClick = useCallback(() => {
@@ -148,7 +138,13 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
     }, [setSelected])
     const renderItemContent = useCallback(function RenderItemContent(item) {
       return (
-        <Tooltip key={item.id} title={item.name} disableInteractive enterDelay={375} enterNextDelay={745}>
+        <Tooltip
+          key={item.id}
+          title={item.name}
+          disableInteractive
+          enterDelay={375}
+          enterNextDelay={745}
+        >
           <CardIconListItem
             item={item}
             onActionClick={handleItemClick}
@@ -162,7 +158,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
     return (
       <Fragment>
         <Grid ref={ref} container>
-          <Grid spacing={2} alignItems={"center"} container item>
+          <Grid spacing={2} alignItems={'center'} container item>
             <Grid item>
               <ButtonBase
                 onClick={handleButtonClick}

@@ -15,8 +15,14 @@
  * limitations under the License.
  */
 
-export * from './types'
 
-export * from './lib/authors'
+export * from './types/icon'
+
 export * from './lib/icons'
-export * from './lib/tags'
+
+export * from './lib/utils/convert-id-to-module-name'
+export * from './lib/utils/get-mdi-all-icons'
+export * from './lib/utils/get-mdi-all-icons-json'
+export * from './lib/utils/get-mdi-icon-from-id'
+export * from './lib/utils/handle-icon-not-found'
+export * from './lib/icons'

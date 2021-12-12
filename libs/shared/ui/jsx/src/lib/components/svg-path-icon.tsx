@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-import { GetIconDataOptions, getIconPathData, IconId as MdiIconId } from '@aglyn/shared-data-mdi'
-import { _isArr, _isStrT } from '@aglyn/shared-util-guards'
-import MuiSvgIcon, { SvgIconProps as MuiSvgIconProps } from '@mui/material/SvgIcon'
-import { createSvgIcon } from '@mui/material/utils'
-import { forwardRef, useMemo } from 'react'
-import { SvgPath, SvgPathData } from './svg-path'
+import type {IconId as MdiIconId} from '@aglyn/shared-data-mdi'
+import {_isArr, _isStrT} from '@aglyn/shared-util-guards'
+import MuiSvgIcon, {SvgIconProps as MuiSvgIconProps} from '@mui/material/SvgIcon'
+import {createSvgIcon} from '@mui/material/utils'
+import {forwardRef, useMemo} from 'react'
+import {useMemoizedMdiIcons} from '../hooks/use-mdi-icons'
+import {SvgPath, SvgPathData} from './svg-path'
 
 
-export { createSvgIcon }
+export {createSvgIcon}
 
 export type IconId = MdiIconId
 export type Path = SvgPathData | JSX.Element
@@ -40,9 +41,11 @@ export function createSvgPathIcon(
   passProps?: SvgPathIconProps,
 ) {
 
-  const CreateSvgPathIcon = forwardRef<any, SvgPathIconProps>(function RefRenderFn(props, ref) {
-    return <SvgPathIcon ref={ref} paths={path} {...passProps} {...props} />
-  })
+  const CreateSvgPathIcon = forwardRef<any, SvgPathIconProps>(
+    function RefRenderFn(props, ref) {
+      return <SvgPathIcon ref={ref} paths={path} {...passProps} {...props} />
+    },
+  )
   CreateSvgPathIcon.displayName = `CreateSvgPathIcon(${displayName})`
   return CreateSvgPathIcon
 }
@@ -50,22 +53,26 @@ export function createSvgPathIcon(
 export interface SvgPathIconProps extends Partial<Omit<MuiSvgIconProps, 'path'>> {
   iconIds?: IconId | (IconId[])
   paths?: Path | (Path[])
-  mdiIconOptions?: GetIconDataOptions
+  mdiIconOptions?
 }
 
 export const SvgPathIcon = forwardRef<any, SvgPathIconProps>(function RefRenderFn(props, ref) {
   const {iconIds, paths: pathsProp, children, mdiIconOptions, ...rest} = props
 
-  const iconIdsPaths = useMemo(() => {
-    const iconIdArray: IconId[] = _isStrT(iconIds) || _isArr(iconIds)
+  const ids = useMemo(() => {
+    return _isStrT(iconIds) || _isArr(iconIds)
       ? _isStrT(iconIds) ? [iconIds] : iconIds
-      : null
-    return (iconIdArray || (!pathsProp && !children))
-      ? getIconPathData(iconIdArray ?? [null], mdiIconOptions).map((iconPath, index) => (
-        <SvgPath key={index} d={iconPath as string} />
-      ))
-      : null
-  }, [iconIds, pathsProp, mdiIconOptions])
+      : []
+  }, [iconIds])
+  const icons = useMemoizedMdiIcons(ids)
+
+  const iconIdsPaths = useMemo(() => {
+    const buildMdi = (!pathsProp && !children)
+
+    return !buildMdi ? null : (icons || []).map((icon, index) => (
+      <SvgPath key={index} d={icon?.path} />
+    ))
+  }, [icons, pathsProp, children])
 
   const pathsPaths = useMemo(() => {
     const pathsArray = _isStrT(pathsProp) || _isArr(pathsProp)
