@@ -16,23 +16,17 @@
  */
 
 import type {
-  AglynComponentElementType,
   AglynComponentSchema,
+  AglynElementType,
   ComponentRegisterPayload,
   IAglynComponent,
 } from '@aglyn/core-data-framework'
-import {
-  COMPONENT_ELEMENT_TYPE,
-  EXTENSION_TYPE,
-  MODULE_TYPE,
-  TYPE_KIND,
-  TYPE_OF,
-} from '@aglyn/core-data-framework'
-import { AnyProps } from '@aglyn/shared-data-types'
-import { styled } from '@aglyn/shared-feature-themes'
-import { copy, getDisplayName } from '@aglyn/shared-util-tools'
-import { ChangeCase} from '@aglyn/shared-util-vendor'
-import { forwardRef } from 'react'
+import {COMPONENT_ELEMENT_TYPE, MODULE_TYPE, TYPE_KIND, TYPE_OF} from '@aglyn/core-data-framework'
+import type {AnyProps} from '@aglyn/shared-data-types'
+import {styled} from '@aglyn/shared-feature-themes'
+import {copy, getDisplayName} from '@aglyn/shared-util-tools'
+import {ChangeCase} from '@aglyn/shared-util-vendor'
+import {forwardRef} from 'react'
 import {
   ElementErrorBoundaryComponent,
   ElementErrorBoundaryComponentProps,
@@ -41,7 +35,7 @@ import {
 
 export function aglynElementComponent<P extends AnyProps>(
   schema: AglynComponentSchema<P>,
-  component: AglynComponentElementType<P>,
+  component: AglynElementType<P>,
   errorComponent?: ElementErrorBoundaryComponentProps<P>['errorComponent'],
 ): ComponentRegisterPayload<P> {
   const {componentId, bundleId, renderFlags} = schema
@@ -57,7 +51,7 @@ export function aglynElementComponent<P extends AnyProps>(
       })({})
       : component
 
-  const AglynComponent: IAglynComponent<P> = forwardRef<any, any>(
+  const AglynComponent = forwardRef<any, any>(
     function RefRenderFn(props, ref) {
       return (
         <ElementErrorBoundaryComponent
@@ -68,7 +62,7 @@ export function aglynElementComponent<P extends AnyProps>(
         />
       )
     },
-  )
+  ) as IAglynComponent<P>
 
   AglynComponent.displayName = `AglynComponent(${displayName})`
   AglynComponent.componentId = componentId

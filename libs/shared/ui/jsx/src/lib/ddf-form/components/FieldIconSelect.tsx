@@ -29,17 +29,17 @@ import MuiLink from '@mui/material/Link'
 import MuiTextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-import {forwardRef, Fragment, HTMLProps, useCallback, useState} from 'react'
+import {forwardRef, Fragment, HTMLProps, useCallback, useMemo, useState} from 'react'
 import {CardIconListItem} from '../../components/card-icon-list-item'
 import {GridList} from '../../components/grid-list'
 import {SvgPathIcon} from '../../components/svg-path-icon'
-import {MdiIcon, useMdiIcons, useMemoizedMdiIcons} from '../../hooks/use-mdi-icons'
+import {Icon, useMdiIconsFuzzy} from '../../hooks/use-mdi-icons-fuzzy'
 
 import {withGridItem} from '../field-hocs'
 import {validationMessage} from '../utils'
 
 
-const iconUnset = {...DEFAULT_ICON, id: '', name: '(none)'}
+const iconUnset = {...DEFAULT_ICON, id: null, name: '(none)'}
 const classKeys = generateComponentClassKeys('AglynFieldIconSelect', [
   'root',
   'button',
@@ -113,12 +113,15 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
 
     const currentValue = input.value
     const [open, setOpen] = useState(false)
-    const [icons, applyFilter, clearFilter] = useMdiIcons()
+    const [icons, allIcons, applyFilter, clearFilter] = useMdiIconsFuzzy()
     const [selected, setSelected] = useState(() => currentValue)
 
-    const [currentIcon = iconUnset, selectedIcon = iconUnset] = useMemoizedMdiIcons([
-      currentValue, selected,
-    ].filter(Boolean))
+    const [currentIcon, selectedIcon] = useMemo(() => {
+      const findIcon = (id) => allIcons.find((icon) => icon.id === id)
+      const currentIcon = (currentValue && findIcon(currentValue)) || iconUnset
+      const selectedIcon = (selected && findIcon(selected)) || iconUnset
+      return [currentIcon, selectedIcon]
+    }, [currentValue, selected])
 
 
     const handleButtonClick = useCallback(() => {
@@ -133,7 +136,7 @@ const FieldIconSelect = forwardRef<any, FieldIconSelectProps>(
       if (target && target.value) {applyFilter(target.value)}
       else {clearFilter()}
     }, [applyFilter, clearFilter])
-    const handleItemClick = useCallback((e, item: MdiIcon) => {
+    const handleItemClick = useCallback((e, item: Icon) => {
       setSelected(item.id)
     }, [setSelected])
     const renderItemContent = useCallback(function RenderItemContent(item) {

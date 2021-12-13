@@ -27,7 +27,6 @@ export const DEFAULT_ICON: Icon = {
 }
 export function handleIconNotFound(id: IconId, icon: Icon) {
   if (!icon) {
-    console.warn(`icon not found with id(${id})`)
     return DEFAULT_ICON
   }
   return icon

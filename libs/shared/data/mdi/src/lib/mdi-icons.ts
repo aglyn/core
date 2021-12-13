@@ -15,30 +15,5 @@
  * limitations under the License.
  */
 
-const ChangeCase = require('change-case')
-
-
-interface IconData {
-  name: string,
-  path: string,
-  aliases: string[],
-  tags: string[],
-  author: string[]
-}
-
-
-module.exports = function mapIconData(data: IconData) {
-  const id = ChangeCase.paramCase(data.name),
-    name = ChangeCase.capitalCase(data.name),
-    path = data.path,
-    as = [...data.aliases],
-    tags = [...data.tags]
-
-  return {
-    id,
-    name,
-    path,
-    as,
-    tags,
-  }
-}
+export {default as MdiIcons} from '../generated/6.5.95/mdi-icons-array'
+export * from '../generated/6.5.95/mdi-icons-named'

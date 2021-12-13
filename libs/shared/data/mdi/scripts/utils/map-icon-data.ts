@@ -15,11 +15,30 @@
  * limitations under the License.
  */
 
-import type {Icon} from '../../types/icon'
+import {capitalCase, paramCase} from 'change-case'
 
 
-export async function getMdiAllIconsJson(): Promise<Icon[]> {
-  return await import('../../generated/6.5.95/json/mdi-icons.min.json')
-    .then(mod => mod.data)
+interface IconData {
+  name: string,
+  path: string,
+  aliases: string[],
+  tags: string[],
+  author: string[]
 }
-export default getMdiAllIconsJson
+
+export function mapIconData(data: IconData) {
+  const id = paramCase(data.name),
+    name = capitalCase(data.name),
+    path = data.path,
+    as = [...data.aliases],
+    tags = [...data.tags]
+
+  return {
+    id,
+    name,
+    path,
+    as,
+    tags,
+  }
+}
+export default mapIconData

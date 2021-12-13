@@ -16,12 +16,12 @@
  */
 
 import type {IconId} from '../../types/icon'
-const changeCase = require('change-case')
+import {camelCase, camelCaseTransformMerge} from 'change-case'
 
 
 export function convertIdToModuleName(id: IconId) {
-  return changeCase.camelCase(`mdi-${id}`, {
-    transform: changeCase.camelCaseTransformMerge,
+  return camelCase(`mdi-${id}`, {
+    transform: camelCaseTransformMerge,
   })
 }
 export default convertIdToModuleName

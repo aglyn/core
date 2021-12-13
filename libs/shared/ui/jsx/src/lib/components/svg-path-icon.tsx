@@ -15,19 +15,17 @@
  * limitations under the License.
  */
 
-import type {IconId as MdiIconId} from '@aglyn/shared-data-mdi'
 import {_isArr, _isStrT} from '@aglyn/shared-util-guards'
 import MuiSvgIcon, {SvgIconProps as MuiSvgIconProps} from '@mui/material/SvgIcon'
 import {createSvgIcon} from '@mui/material/utils'
 import {forwardRef, useMemo} from 'react'
-import {useMemoizedMdiIcons} from '../hooks/use-mdi-icons'
+import {IconId, useMdiIcons} from '../hooks/use-mdi-icons'
 import {SvgPath, SvgPathData} from './svg-path'
 
 
 export {createSvgIcon}
 
-export type IconId = MdiIconId
-export type Path = SvgPathData | JSX.Element
+type Path = SvgPathData | JSX.Element
 
 /**
  * Create a memoized component to be exported
@@ -64,7 +62,8 @@ export const SvgPathIcon = forwardRef<any, SvgPathIconProps>(function RefRenderF
       ? _isStrT(iconIds) ? [iconIds] : iconIds
       : []
   }, [iconIds])
-  const icons = useMemoizedMdiIcons(ids)
+  
+  const icons = useMdiIcons(ids)
 
   const iconIdsPaths = useMemo(() => {
     const buildMdi = (!pathsProp && !children)

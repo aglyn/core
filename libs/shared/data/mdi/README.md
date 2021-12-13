@@ -9,5 +9,5 @@ Run TS file `./src/scripts/generate-icons.ts`
 Example:
 
 ```sh
-cd ./src/scripts/ && npx ts-node ./generate-icons.ts 
+cd ./src/scripts/ && npx ts-node --module commonjs ./generate-icons.ts 
 ```

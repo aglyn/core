@@ -16,21 +16,23 @@
  */
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type { IconId as MdiIconId } from '@aglyn/shared-data-mdi'
+import type {IconId} from '@aglyn/shared-data-mdi'
 import type {
-  AnyProps, EmptyObj,
-  JSXIntrinsicElement,
+  AnyProps,
+  EmptyObj,
+  JSXForwardRefExoticComponent,
+  JSXPropsWithoutRef,
+  JSXRefAttributes,
   OrUndef,
   ResolveProps,
 } from '@aglyn/shared-data-types'
+import {JSXElementType} from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type { StyledOptions, SxProps } from '@aglyn/shared-feature-themes'
+import type {StyledOptions, SxProps} from '@aglyn/shared-feature-themes'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import type { FormSchema } from '@aglyn/shared-ui-jsx'
-import { _isArr } from '@aglyn/shared-util-guards'
-import type { ComponentClass, FunctionComponent } from 'react'
-import { ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from 'react'
-import type { ComponentsLinealDirectiveFlag } from '../constants/components'
+import type {FormSchema} from '@aglyn/shared-ui-jsx'
+import {_isArr} from '@aglyn/shared-util-guards'
+import type {ComponentsLinealDirectiveFlag} from '../constants/components'
 import type {
   ComponentGetPayload,
   ComponentRegisterPayload,
@@ -40,7 +42,7 @@ import type {
   ComponentSchemaGetPayload,
   ComponentUnregisterPayload,
 } from '../constants/emitter'
-import { AglynAppEffectFlag, AglynAppEventFlag } from '../constants/emitter'
+import {AglynAppEffectFlag, AglynAppEventFlag} from '../constants/emitter'
 import {
   COMPONENT_ELEMENT_TYPE,
   EXTENSION_TYPE,
@@ -52,28 +54,17 @@ import type {
   AglynModuleEffectListener,
   AglynModuleModelOptions,
 } from '../models/aglyn-module.model'
-import {
-  AglynModuleModel,
-} from '../models/aglyn-module.model'
-import type { AglynTypeFields, BundleUId, ComponentId, ElementId, TemplateId } from '../types'
-import { isAglynComponentElement } from '../util/aglyn-is'
-import type { AglynAppController } from './aglyn-app.controller'
+import {AglynModuleModel} from '../models/aglyn-module.model'
+import type {AglynTypeFields, BundleUId, ComponentId, ElementId, TemplateId} from '../types'
+import {isAglynComponentElement} from '../util/aglyn-is'
+import type {AglynAppController} from './aglyn-app.controller'
 
 
 export type AglynComponentsTypeFields = AglynTypeFields<typeof MODULE_TYPE, typeof COMPONENT_ELEMENT_TYPE>
 
-export type AglynComponentClassElement<P = EmptyObj> = ComponentClass<P>
-export type AglynComponentFunctionElement<P = EmptyObj> = FunctionComponent<P>
-export type AglynComponentIntrinsicElement<P = EmptyObj> = JSXIntrinsicElement<P>
-export type AglynComponentElementType<P = EmptyObj> =
-  | AglynComponentClassElement<P>
-  | AglynComponentFunctionElement<P>
-  | AglynComponentIntrinsicElement<P>
-
-
 export type LinealDefinition = ComponentId[]
-  | { bundles?: BundleUId[], components: ComponentId[] }
-  | { bundles: BundleUId[], components?: ComponentId[] }
+  | {bundles?: BundleUId[], components: ComponentId[]}
+  | {bundles: BundleUId[], components?: ComponentId[]}
 
 export type ComponentsLinealOrder<T extends ComponentsLinealDirectiveFlag = ComponentsLinealDirectiveFlag> = [
   directiveType: T,
@@ -92,6 +83,17 @@ export type InstanceComponents = Map<ComponentId | [ComponentId, BundleUId], IAg
 export type InstanceSchemas = Map<ComponentId | [ComponentId, BundleUId], AglynComponentSchema>
 export type InstanceTemplates = Map<TemplateId, AglynComponentElementTemplateData>
 
+
+export type AglynElementType<P = any> = JSXElementType<P>
+
+export interface IAglynComponent<P = EmptyObj, T = any> extends JSXForwardRefExoticComponent<JSXPropsWithoutRef<P> & JSXRefAttributes<T>> {
+
+  readonly [TYPE_OF]?: MODULE_TYPE
+  readonly [TYPE_KIND]?: EXTENSION_TYPE
+  componentId?: ComponentId
+  bundleId?: BundleUId
+}
+
 export interface ComponentsRegistryContext {
   bundles: InstanceBundles
   components: InstanceComponents
@@ -109,36 +111,27 @@ export interface AglynComponentsBundle {
   componentIds: ComponentId[]
 }
 
-export interface IAglynComponent<P = EmptyObj, T = any>
-  extends ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<T>> {
-
-  readonly [TYPE_OF]?: MODULE_TYPE
-  readonly [TYPE_KIND]?: EXTENSION_TYPE
-  componentId?: ComponentId
-  bundleId?: BundleUId
-}
-
 export interface AglynComponentMetadata {
   // Metadata
   displayName: string
   title?: string
   subtitle?: string
   description?: string
-  iconIds?: MdiIconId
+  iconIds?: IconId
   iconColor?: string,
 }
 
 export interface AglynComponentBesignerFlags {
   // Besigner feature flags
-  actions?: { disable?: boolean }
-  badge?: { disable?: boolean }
-  copying?: { disable?: boolean }
-  dragging?: { disable?: boolean }
-  dropping?: { disable?: boolean }
-  editing?: { disable?: boolean }
-  outline?: { disable?: boolean }
-  removing?: { disable?: boolean }
-  selecting?: { disable?: boolean }
+  actions?: {disable?: boolean}
+  badge?: {disable?: boolean}
+  copying?: {disable?: boolean}
+  dragging?: {disable?: boolean}
+  dropping?: {disable?: boolean}
+  editing?: {disable?: boolean}
+  outline?: {disable?: boolean}
+  removing?: {disable?: boolean}
+  selecting?: {disable?: boolean}
 }
 
 export interface AglynComponentPropsFormSchema extends FormSchema {
@@ -150,7 +143,7 @@ export interface AglynComponentRenderFlags<P = EmptyObj> {
     restrictChildren?: ComponentsLinealOrder
     restrictParent?: ComponentsLinealOrder
   }
-  elementRef?: { disable?: boolean; innerRef?: boolean }
+  elementRef?: {disable?: boolean; innerRef?: boolean}
   propsSchema?: AglynComponentPropsFormSchema
   resolveProps?: ResolveProps<AglynComponentElementDataNormalized<P>>
   emotionStyled?: {
@@ -180,7 +173,7 @@ export interface AglynComponentElementTemplateData<P = EmptyObj> {
   readonly id: TemplateId
   label: string
   description?: string
-  iconIds?: MdiIconId
+  iconIds?: IconId
   iconColor?: string,
   data: TemplateSubElementData<P>
 }
@@ -199,12 +192,11 @@ export interface AglynComponentElementData<P = EmptyObj> {
   parentId?: ElementId
   displayName?: string
   description?: string
-  props?: { sx?: SxProps } & P
-  elements?: (AglynComponentElementDataDenormalized<P>[]) | (ElementId[])
+  props?: {sx?: SxProps} & P
 }
 
 export interface AglynComponentElementDataDenormalized<P = any> extends AglynComponentElementData<P> {
-  elements?: AglynComponentElementDataDenormalized<P>[]
+  elements?: AglynComponentElementDataDenormalized<unknown>[]
 }
 
 export interface AglynComponentElementDataNormalized<P = any> extends AglynComponentElementData<P> {
@@ -267,16 +259,16 @@ export class AglynComponentsController extends AglynModuleModel<AglynComponentsC
   }
 
   protected _componentEntries = (): ComponentsRegistryEntry[] => {
-    return [...this.components?.entries()]
+    return [...this.components.entries()]
   }
   protected _componentKeys = (): ComponentsRegistryKeys => {
     return [...this.components.keys()]
   }
   protected _componentValues = (): ComponentsRegistryValues => {
-    return [...this.components?.values()]
+    return [...this.components.values()]
   }
   protected _templateValues = (): AglynComponentElementTemplateData[] => {
-    return [...this.templates?.values()]
+    return [...this.templates.values()]
   }
 
   public getAllComponents = (): ComponentsRegistryEntry[] => {
@@ -312,7 +304,7 @@ export class AglynComponentsController extends AglynModuleModel<AglynComponentsC
     const {bundleId} = payload
     return this.bundles.get(bundleId)
   }
-  public buildMapKey(data: { componentId: ComponentId, bundleId: BundleUId }): string {
+  public buildMapKey(data: {componentId: ComponentId, bundleId: BundleUId}): string {
     const {componentId, bundleId} = data
     return bundleId ? `${bundleId}:${componentId}` : componentId
   }

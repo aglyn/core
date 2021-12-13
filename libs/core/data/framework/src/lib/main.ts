@@ -131,15 +131,11 @@ export type {
 } from './controllers/aglyn-commands.controller'
 export type {
   AglynComponentBesignerFlags,
-  AglynComponentClassElement,
   IAglynComponent,
   AglynComponentElementData,
   AglynComponentElementDataDenormalized,
   AglynComponentElementDataNormalized,
   AglynComponentElementTemplateData,
-  AglynComponentElementType,
-  AglynComponentFunctionElement,
-  AglynComponentIntrinsicElement,
   AglynComponentMetadata,
   AglynComponentPropsFormSchema,
   AglynComponentRenderFlags,
@@ -149,6 +145,7 @@ export type {
   AglynComponentsControllerOptions,
   AglynComponentsControllerT,
   AglynComponentsTypeFields,
+  AglynElementType,
   ComponentsLinealOrder,
   ComponentsRegistryContext,
   ComponentsRegistryEntry,

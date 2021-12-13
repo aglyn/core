@@ -1,0 +1,62 @@
+/**
+ * @license
+ * Copyright 2021 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import Fuse from 'fuse.js'
+import {useCallback, useMemo, useState} from 'react'
+import type {Icon as MdiIcon} from './use-mdi-icons'
+import {useMdiIcons} from './use-mdi-icons'
+
+
+export type Icon = MdiIcon
+export type ApplyFilterFn = (query: string) => void
+export type ClearFilterFn = () => void
+export type UseMdiIconsReturn = [
+  filteredIcons: Icon[],
+  allIcons: Icon[],
+  applyFilter: ApplyFilterFn,
+  clearFilter: ClearFilterFn
+]
+export const useMdiIconsFuzzy = (): UseMdiIconsReturn => {
+  const allIcons = useMdiIcons()
+  const [filteredIcons, setFilteredIcons] = useState(() => allIcons)
+
+  const fuzzy = useMemo(() => {
+    return new Fuse(allIcons, {
+      keys: [
+        {name: 'name', weight: 0.5},
+        {name: 'as', weight: 0.25},
+        {name: 'tags', weight: 0.25},
+      ],
+      includeScore: true,
+      shouldSort: true,
+      // threshold: 0.25,
+      // minMatchCharLength: 3
+    })
+  }, [allIcons])
+
+  const clearFilter: ClearFilterFn = useCallback(() => {
+    setFilteredIcons(allIcons)
+  }, [allIcons, setFilteredIcons])
+
+  const applyFilter: ApplyFilterFn = useCallback(async (query: string) => {
+    const results = fuzzy.search(query)
+    setFilteredIcons(results.map((i) => i.item))
+  }, [fuzzy, setFilteredIcons])
+
+  return [filteredIcons, allIcons, applyFilter, clearFilter]
+}
+export default useMdiIconsFuzzy

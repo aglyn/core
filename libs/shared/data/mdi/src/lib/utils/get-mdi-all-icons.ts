@@ -18,8 +18,8 @@
 import type {Icon} from '../../types/icon'
 
 
-export async function getMdiAllIcons(): Promise<Icon[]> {
-  return await import('../../generated/6.5.95/modules/mdi-icons-array')
+export const getMdiAllIcons = async (): Promise<Icon[]> => {
+  return await import('../../generated/6.5.95/mdi-icons-array')
     .then((mod) => mod.default)
 }
 export default getMdiAllIcons
