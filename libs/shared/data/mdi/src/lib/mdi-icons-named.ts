@@ -15,5 +15,4 @@
  * limitations under the License.
  */
 
-
-export * from './lib/mdi-icons'
+export * from '../../generated/6.5.95/mdi-icons-named'

@@ -110,11 +110,9 @@ const withAglynNxNext = (opts = {}) => {
     optimizeFonts: IS_PRODUCTION,
 
     // Opt-in to using the Next.js compiler for minification. This is 7x faster than Terser.
-    swcMinify: true,
+    // swcMinify: true,
 
     // target: 'experimental-serverless-trace',
-
-    outputStandalone: true,
 
     reactStrictMode: !IS_PRODUCTION,
 
@@ -159,7 +157,7 @@ const withAglynNxNext = (opts = {}) => {
 
     experimental: {
       // ssr and displayName are configured by default
-      styledComponents: true,
+      // styledComponents: true,
       // Next.js can automatically create a standalone folder which copies only the necessary files
       // for a production deployment including select files in node_modules.
       // outputStandalone: true,

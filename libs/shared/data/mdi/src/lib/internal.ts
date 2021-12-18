@@ -23,8 +23,8 @@ declare function require(moduleNames: string[], onLoad: (...args: any[]) => void
 
 const MdiIcons: Map<IconId, Icon> = new Map<IconId, Icon>()
 
-if (typeof window !== 'undefined') {
-  require(['./mdi-icons'], (module) => {
+if (typeof window !== 'undefined' && process['browser']) {
+  require(['./mdi-icons-named'], (module) => {
     module && Object.values(module).forEach((value) => {
       if (_isObj(value) && _hasProperty('path', value) && _hasProperty('id', value)) {
         MdiIcons.set(value.id as string, value as Icon)

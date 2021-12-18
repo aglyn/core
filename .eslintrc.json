@@ -40,8 +40,15 @@
                 ]
               },
               {
+                "sourceTag": "sc:lib:shared:data",
+                "onlyDependOnLibsWithTags": [
+                  "sc:lib:shared"
+                ]
+              },
+              {
                 "sourceTag": "sc:lib:shared:util",
                 "onlyDependOnLibsWithTags": [
+                  "sc:lib:shared"
                 ]
               },
               {

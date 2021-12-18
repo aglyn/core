@@ -15,4 +15,11 @@
  * limitations under the License.
  */
 
-export * from '../../generated/6.5.95/mdi-icons-named'
+export * from './types/icon'
+
+export * from './mdi-icons-named'
+export * from './constants'
+
+export * from './utils/convert-id-to-module-name'
+export * from './utils/get-mdi-all-icons'
+export * from './utils/get-mdi-icon-from-id'
