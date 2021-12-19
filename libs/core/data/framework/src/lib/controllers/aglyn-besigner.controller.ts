@@ -15,18 +15,11 @@
  * limitations under the License.
  */
 
-import type {LogLevelString} from '@aglyn/shared-util-logger'
 import {copy} from '@aglyn/shared-util-tools'
 import {objectDeepMerge} from '@aglyn/shared-util-vendor'
 import {createApi} from 'effector'
 import {persist} from 'effector-storage/local'
-import {
-  BesignerPanelTabFlag,
-  BesignerPanelViewFlag,
-  DndDragSourceTypeFlag,
-  DndDropLinealTypeFlag,
-  InteractionModeFlag,
-} from '../constants/besigner'
+import {BesignerPanelViewFlag, InteractionModeFlag} from '../constants/besigner'
 import type {
   BesignerClosePanelPayload,
   BesignerFlagInteractModePayload,
@@ -36,86 +29,22 @@ import type {
   BesignerSetCanvasSelectedPayload,
   BesignerSetPanelPayload,
 } from '../constants/emitter'
-import type {AglynAppController} from '../controllers/aglyn-app.controller'
-import type {ContextDomain} from '../controllers/aglyn-contexts.controller'
+import AglynModuleModel from '../models/aglyn-module.model'
+import type {AglynModuleEffectListener} from '../models/aglyn-module.types'
+import type {IAglynAppController} from './aglyn-app.types'
 import type {
-  AglynModuleEffectListener,
-  AglynModuleModelOptions,
-} from '../models/aglyn-module.model'
-import {AglynModuleModel} from '../models/aglyn-module.model'
-import type {BundleUId, ComponentId, ElementId, TemplateId} from '../types'
-import type {ContextStore} from './aglyn-contexts.controller'
+  AglynBesignerControllerOptions,
+  BesignerCanvasState,
+  BesignerContext,
+  BesignerContextStores,
+  BesignerDndState,
+  BesignerFlagState,
+  BesignerNestedStores,
+  BesignerPanelsState,
+  IAglynBesignerController,
+} from './aglyn-besigner.types'
+import type {ContextDomain, ContextStore} from './aglyn-contexts.types'
 
-
-export type BesignerFlagState = {
-  debug?: boolean
-  logLevel?: LogLevelString
-  interactMode?: InteractionModeFlag
-  activeView?: BesignerPanelViewFlag
-}
-
-export type BesignerCanvasSelectedElement = {
-  $id?: ElementId
-  hierarchy?: ElementId[]
-}
-
-export type BesignerCanvasHoveredElement = {
-  $id?: ElementId
-  hierarchy?: ElementId[]
-}
-
-export type BesignerCanvasState = {
-  selected?: BesignerCanvasSelectedElement
-  hovered?: BesignerCanvasHoveredElement
-}
-
-export type BesignerPanelItem = {
-  id?: BesignerPanelViewFlag
-  size?: number | string
-  toggled?: boolean
-  tab?: BesignerPanelTabFlag
-}
-
-export type BesignerPanelsState = {
-  panelLeft?: BesignerPanelItem
-  panelRight?: BesignerPanelItem
-  panelBottom?: BesignerPanelItem
-}
-
-export type BesignerDndState = {
-  disallowed?: boolean
-  dragging?: boolean
-  dragActivity?: {
-    type?: DndDragSourceTypeFlag
-    $id?: ElementId | TemplateId
-    componentId?: ComponentId
-    bundleUId?: BundleUId
-  }
-  dropActivity?: {
-    type?: DndDropLinealTypeFlag
-    item?: {
-      $id?: ElementId
-      componentId?: ComponentId
-      bundleUId?: BundleUId
-    }
-    parent?: {
-      $id?: ElementId
-      componentId?: ComponentId
-      bundleUId?: BundleUId
-    }
-  }
-}
-
-export type BesignerContextStores = {
-  flags: BesignerFlagState
-  canvas: BesignerCanvasState
-  panels: BesignerPanelsState
-  dnd: BesignerDndState
-}
-
-type BesignerNestedStores<K extends keyof BesignerContextStores = keyof BesignerContextStores> = {
-  [P in K]: ContextStore<BesignerContextStores[P]>
-}
 
 const DEFAULT_CONTEXT: Partial<BesignerContextStores> = {
   flags: {
@@ -144,24 +73,10 @@ const DEFAULT_CONTEXT: Partial<BesignerContextStores> = {
 }
 
 
-export interface AglynBesignerControllerOptions extends AglynModuleModelOptions {
-  defaults?: Partial<BesignerContextStores>
-}
-
-interface BesignerContext {
-  _domain: ContextDomain
-  _store: ContextStore<BesignerContextStores>
-  stores: BesignerNestedStores
-  events: any
-}
-
-export interface AglynBesignerController extends AglynModuleModel<AglynBesignerControllerOptions> {
-}
-
 const TAG = 'AglynBesigner'
 const MODULE_NAME = 'besigner'
 
-export class AglynBesignerController extends AglynModuleModel<AglynBesignerControllerOptions> {
+export class AglynBesignerController extends AglynModuleModel<AglynBesignerControllerOptions> implements IAglynBesignerController {
 
   public static readonly [Symbol.toStringTag]: string = TAG
   public static readonly namespace: string = `aglyn:${MODULE_NAME}`
@@ -184,14 +99,12 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
   public get panels(): ContextStore<BesignerPanelsState> {return this.#context.stores.panels}
   public get dnd(): ContextStore<BesignerDndState> {return this.#context.stores.dnd}
 
-  constructor(app: AglynAppController, options: AglynBesignerControllerOptions) {
+  constructor(app: IAglynAppController, options: AglynBesignerControllerOptions) {
     super(app, options)
     this.#setup()
   }
   #setup() {
     this.#context._domain = this.app.contexts.domain.domain(this.moduleName)
-
-    console.log('objectDeepMerge(copy(DEFAULT_CONTEXT), {...this.options.defaults})', objectDeepMerge(copy(DEFAULT_CONTEXT), {...this.options.defaults}))
 
     this.#context._store = this.#context._domain.createStore<BesignerContextStores>(
       objectDeepMerge(copy(DEFAULT_CONTEXT), {...this.options.defaults}),
@@ -341,5 +254,4 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
   ]
 }
 
-export type AglynBesignerControllerT = typeof AglynBesignerController
 export default AglynBesignerController

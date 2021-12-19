@@ -20,7 +20,7 @@ import {
   AglynComponentElementDataDenormalized,
   AglynComponentElementTemplate,
   AglynComponentTemplateData,
-} from '../controllers/aglyn-components.controller'
+} from '../controllers/aglyn-components.types'
 import {createComponentElementId} from './create-component-element-id'
 
 

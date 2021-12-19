@@ -22,15 +22,6 @@ export const BUNDLE_ID = 'mui'
 
 export const IS_OPTION_EQUAL_TO_VALUE = ((option: any, value: any) => option.value === value)
 
-export const FIELD_CHILDREN: AglynComponentField = {
-  name: 'children',
-  description: 'The content of the component.',
-  component: PropertyEditorFieldFlag.TEXT_FIELD,
-  label: 'Content',
-  variant: 'outlined',
-  size: 'small',
-}
-
 export const FIELD_COLOR: AglynComponentField = {
   name: 'color',
   description: 'The color of the component. It supports those theme colors that make sense for this component.',

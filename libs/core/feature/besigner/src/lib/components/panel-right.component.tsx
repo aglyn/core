@@ -163,7 +163,14 @@ const PropsForm = function PropsForm({$id, ...props}: any) {
         onSubmit={handleElementSave}
         initialValues={elemProps}
         schema={formSchema}
-      />
+        clearOnUnmount
+        ssss={true}
+      >
+        {(props) => {
+          console.log('[[[[[[[props', props)
+          return <span></span>
+        }}
+      </FormRenderer>
 
       <FormControl margin="none" fullWidth>
         <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
@@ -203,8 +210,6 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
     const handleTabChange = useCallback((e, val) => {
       setBesignerPanels(getApp(), {panelRight: {tab: hexadecimalToNumber(val)}})
     }, [])
-
-    console.log('panel toggled, tab, size', toggled, tab, size)
 
     return (
       <WorkspacePanelComponent

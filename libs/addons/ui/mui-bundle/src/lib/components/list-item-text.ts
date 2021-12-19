@@ -17,6 +17,7 @@
 
 import type {AglynComponentSchema, ComponentId} from '@aglyn/core-data-framework'
 import {createAglynComponent, dynamicLoader} from '@aglyn/core-feature-renderer'
+import {mdiFormatListChecks} from '@aglyn/shared-ui-mdi-jsx'
 import ListItemText, {ListItemTextProps} from '@mui/material/ListItemText'
 import {BUNDLE_ID} from '../constants'
 import {generateTemplateId} from '../utils/generate-template-id'
@@ -30,13 +31,13 @@ export const schema: AglynComponentSchema<ListItemTextProps> = {
   bundleId: BUNDLE_ID,
   metadata: {
     displayName: 'List Item Text',
-    iconPath: 'format-list-checks',
+    iconPath: mdiFormatListChecks.path,
   },
   templates: [
     {
       id: generateTemplateId(ID),
       label: 'List Item Text',
-      iconPath: 'format-list-checks',
+      iconPath: mdiFormatListChecks.path,
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,

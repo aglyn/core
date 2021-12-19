@@ -21,6 +21,7 @@ import {
   ComponentsLinealDirectiveFlag,
 } from '@aglyn/core-data-framework'
 import {createAglynComponent, dynamicLoader} from '@aglyn/core-feature-renderer'
+import {mdiFormatListText} from '@aglyn/shared-ui-mdi-jsx'
 
 import ListItem, {ListItemProps} from '@mui/material/ListItem'
 import {BUNDLE_ID} from '../constants'
@@ -36,8 +37,7 @@ export const schema: AglynComponentSchema<ListItemProps> = {
   bundleId: BUNDLE_ID,
   metadata: {
     displayName: 'List Item',
-    iconPath: 'format-list-text',
-    iconColor: '#2196f3',
+    iconPath: mdiFormatListText.path,
   },
   renderFlags: {
     hierarchy: {
@@ -52,8 +52,7 @@ export const schema: AglynComponentSchema<ListItemProps> = {
     {
       id: generateTemplateId(ID),
       label: 'List Item',
-      iconPath: 'format-list-text',
-      iconColor: '#2196f3',
+      iconPath: mdiFormatListText.path,
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,

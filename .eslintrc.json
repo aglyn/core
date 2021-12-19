@@ -32,34 +32,20 @@
               {
                 "sourceTag": "sc:lib",
                 "onlyDependOnLibsWithTags": [
+                  "sc:lib"
                 ]
               },
               {
-                "sourceTag": "sc:lib:shared",
+                "sourceTag": "sc:lib:addon",
                 "onlyDependOnLibsWithTags": [
-                ]
-              },
-              {
-                "sourceTag": "sc:lib:shared:data",
-                "onlyDependOnLibsWithTags": [
-                  "sc:lib:shared"
-                ]
-              },
-              {
-                "sourceTag": "sc:lib:shared:util",
-                "onlyDependOnLibsWithTags": [
-                  "sc:lib:shared"
-                ]
-              },
-              {
-                "sourceTag": "sc:lib:shared:feature",
-                "onlyDependOnLibsWithTags": [
+                  "sc:lib:core",
                   "sc:lib:shared"
                 ]
               },
               {
                 "sourceTag": "sc:lib:core",
                 "onlyDependOnLibsWithTags": [
+                  "sc:lib:core",
                   "sc:lib:shared"
                 ]
               },
@@ -93,9 +79,26 @@
                 ]
               },
               {
-                "sourceTag": "sc:lib:addon",
+                "sourceTag": "sc:lib:shared",
                 "onlyDependOnLibsWithTags": [
-                  "sc:lib:core",
+                  "sc:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "sc:lib:shared:data",
+                "onlyDependOnLibsWithTags": [
+                  "sc:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "sc:lib:shared:util",
+                "onlyDependOnLibsWithTags": [
+                  "sc:lib:shared"
+                ]
+              },
+              {
+                "sourceTag": "sc:lib:shared:feature",
+                "onlyDependOnLibsWithTags": [
                   "sc:lib:shared"
                 ]
               },

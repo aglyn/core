@@ -22,7 +22,6 @@ import {mdiGestureTapButton} from '@aglyn/shared-ui-mdi-jsx'
 import Button, {ButtonProps} from '@mui/material/Button'
 import {
   BUNDLE_ID,
-  FIELD_CHILDREN,
   FIELD_COLOR,
   FIELD_DISABLED,
   FIELD_FULL_WIDTH,
@@ -42,7 +41,7 @@ export const schema: AglynComponentSchema<ButtonProps> = {
   metadata: {
     displayName: 'Button',
     iconPath: mdiGestureTapButton.path,
-    iconColor: '#4caf50',
+    iconColor: '#2196f3',
   },
   renderFlags: {
     hierarchy: {
@@ -54,7 +53,6 @@ export const schema: AglynComponentSchema<ButtonProps> = {
     },
     propsSchema: {
       fields: [
-        FIELD_CHILDREN,
         FIELD_COLOR,
         FIELD_DISABLED,
         FIELD_FULL_WIDTH,
@@ -83,7 +81,7 @@ export const schema: AglynComponentSchema<ButtonProps> = {
       id: generateTemplateId(ID),
       label: 'Outlined Button',
       iconPath: mdiGestureTapButton.path,
-      iconColor: '#4caf50',
+      iconColor: '#2196f3',
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,

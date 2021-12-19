@@ -33,9 +33,10 @@ export interface GridFormTemplateProps extends FormTemplateRenderProps {}
 
 export const GridFormTemplate = forwardRef<any, GridFormTemplateProps>(
   function RefRenderFn(props, ref) {
-    const {formFields, schema} = props
+    const {formFields, schema, ...rest} = props
     const {handleSubmit, onReset, onCancel, getState} = useFormApi()
     const {submitting, valid, pristine} = getState()
+    console.log('rest grid form template', rest)
     return (
       <form ref={ref} onSubmit={handleSubmit} noValidate>
         {schema.title}

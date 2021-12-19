@@ -16,6 +16,7 @@
  */
 
 import {ComponentRegisterPayload, createComponentsBundle} from '@aglyn/core-data-framework'
+import {mdiViewArray} from '@aglyn/shared-ui-mdi-jsx'
 
 import button from './components/button'
 import list from './components/list'
@@ -29,7 +30,7 @@ export const schema = {
   metadata: {
     displayName: 'Mui Components',
     description: 'Material-UI view components',
-    icon: 'view-array',
+    iconPath: mdiViewArray.path,
   },
 }
 export const components: ComponentRegisterPayload[] = [

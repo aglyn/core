@@ -16,7 +16,9 @@
  */
 
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {PropertyEditorFieldFlag} from '@aglyn/shared-ui-jsx'
+import {AglynComponentPropsFormSchema} from '../controllers/aglyn-components.types'
 
 
 export enum ComponentsLinealDirectiveFlag {
@@ -26,19 +28,27 @@ export enum ComponentsLinealDirectiveFlag {
 
 export {PropertyEditorFieldFlag}
 
-export const DEFAULT_PROPS_FORM_SCHEMA = {
+export const DEFAULT_PROPS_FORM_SCHEMA: AglynComponentPropsFormSchema = {
   fields: [
+    // {
+    //   name: 'iconId',
+    //   component: PropertyEditorFieldFlag.ICON_SELECT,
+    //   label: 'Icon',
+    //   // variant: 'outlined',
+    // },
+    // {
+    //   name: 'displayName',
+    //   component: PropertyEditorFieldFlag.TEXT_FIELD,
+    //   label: 'Display name',
+    //   // variant: 'outlined',
+    // },
     {
-      name: 'iconId',
-      component: PropertyEditorFieldFlag.ICON_SELECT,
-      label: 'Icon',
-      // variant: 'outlined',
-    },
-    {
-      name: 'displayName',
+      name: 'children',
+      description: 'The content of the component.',
       component: PropertyEditorFieldFlag.TEXT_FIELD,
-      label: 'Display name',
-      // variant: 'outlined',
+      label: 'Content',
+      variant: 'outlined',
+      size: 'small',
     },
   ],
 }

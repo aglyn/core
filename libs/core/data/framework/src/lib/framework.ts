@@ -87,8 +87,11 @@ export * from './util/normalize-component-element-data'
 // 👇
 
 export * from './models/aglyn-base.model'
+export * from './models/aglyn-base.types'
 export * from './models/aglyn-module.model'
+export * from './models/aglyn-module.types'
 export * from './models/aglyn-extension.model'
+export * from './models/aglyn-extension.types'
 
 
 //    __________  _   ____________  ____  __    __    __________ _____
@@ -98,83 +101,10 @@ export * from './models/aglyn-extension.model'
 // \____/\____/_/ |_/ /_/ /_/ |_|\____/_____/_____/_____/_/ |_/____/
 // 👇 TYPES ONLY
 
-export type {
-  AglynAppController,
-  AglynAppControllerT,
-  AglynAppOptions,
-  AglynEffectOptions,
-} from './controllers/aglyn-app.controller'
-export type {
-  AglynExtensionLoader,
-  AglynExtensionTypeFields,
-  AglynExtensionsController,
-  AglynExtensionsControllerT,
-} from './controllers/aglyn-extensions.controller'
-export type {
-  AglynContextsController,
-  AglynContextsControllerOptions,
-  AglynContextsControllerT,
-  ContextDomain,
-  ContextEffect,
-  ContextEvent,
-  ContextStore,
-  ContextStoreOptions,
-} from './controllers/aglyn-contexts.controller'
-export type {
-  AglynCommandListener,
-  AglynCommandListenerTypeFields,
-  AglynCommandResolver,
-  AglynCommandResolverTypeFields,
-  AglynCommandsController,
-  AglynCommandsControllerOptions,
-  AglynCommandsControllerT,
-} from './controllers/aglyn-commands.controller'
-export type {
-  AglynComponentBesignerFlags,
-  IAglynComponent,
-  AglynComponentElementData,
-  AglynComponentElementDataDenormalized,
-  AglynComponentElementDataNormalized,
-  AglynComponentElementTemplate,
-  AglynComponentField,
-  AglynComponentPropsFormSchema,
-  AglynComponentRenderFlags,
-  AglynComponentSchema,
-  AglynComponentsBundle,
-  AglynComponentsController,
-  AglynComponentsControllerOptions,
-  AglynComponentsControllerT,
-  AglynComponentsTypeFields,
-  AglynElementType,
-  ComponentsLinealOrder,
-  ComponentsRegistryContext,
-  ComponentsRegistryEntry,
-  ComponentsRegistryEntryMetadata,
-  ComponentsRegistryKeys,
-  ComponentsRegistryValues,
-  InstanceBundles,
-  InstanceComponents,
-  InstanceSchemas,
-  InstanceTemplates,
-  LinealDefinition,
-  AglynComponentTemplateData,
-} from './controllers/aglyn-components.controller'
-export type {
-  AglynCanvasController,
-  AglynCanvasControllerOptions,
-  AglynCanvasControllerT,
-  ElementsDataStore,
-  ElementsDataStoreApi,
-} from './controllers/aglyn-canvas.controller'
-export type {
-  AglynBesignerController,
-  AglynBesignerControllerOptions,
-  AglynBesignerControllerT,
-  BesignerCanvasHoveredElement,
-  BesignerCanvasSelectedElement,
-  BesignerCanvasState,
-  BesignerContextStores,
-  BesignerDndState,
-  BesignerFlagState,
-  BesignerPanelsState,
-} from './controllers/aglyn-besigner.controller'
+export * from './controllers/aglyn-app.types'
+export * from './controllers/aglyn-besigner.types'
+export * from './controllers/aglyn-canvas.types'
+export * from './controllers/aglyn-commands.types'
+export * from './controllers/aglyn-components.types'
+export * from './controllers/aglyn-contexts.types'
+export * from './controllers/aglyn-extensions.types'

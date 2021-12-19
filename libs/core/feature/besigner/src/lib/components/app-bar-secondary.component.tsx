@@ -159,12 +159,7 @@ const PanelControls = function PanelControls() {
   const panels = useAglynBesignerStoreState('panels')
   const openPanels = Object.values(panels)
     .filter((i) => Boolean(i?.toggled))
-    .map((i) => {
-      console.log('openPanels ~~~~i', i)
-      return i?.id
-    })
-
-  console.log('opens panels', panels, openPanels)
+    .map((i) => i?.id)
 
   const handlePanelToggle = useCallback(
     (event: MouseEvent<HTMLElement>, value: BesignerPanelViewFlag[]) => {
