@@ -16,11 +16,7 @@
  */
 
 import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-brand'
-import {
-  AppLoaderProviderComponent,
-  type MakeLinkElementsConfig,
-  type MakeMetaElementsConfig,
-} from '@aglyn/shared-ui-jsx'
+import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
 import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
 import {useEffect} from 'react'
 import {withAppController} from '../lib/aglyn-deprecated/lib/controllers/app-controller'
@@ -61,7 +57,6 @@ function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
         ...NextAppWrapperProps,
         metaElements,
         linkElements,
-        mainWrapper: AppLoaderProviderComponent,
       }}
       {...rest}
     />
