@@ -203,6 +203,7 @@ const withAglyn = (nextConfig = {}) => {
  * @param nextConfig {import('@nrwl/next/plugins/with-nx').WithNxOptions}
  **/
 module.exports = (nextConfig = {}) => {
+  return withBundleAnalyzer(withNx(withAglyn(nextConfig)))
   return nextComposePlugins([
     withAglyn, withNx, withBundleAnalyzer,
   ], nextConfig)
