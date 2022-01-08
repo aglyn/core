@@ -197,7 +197,7 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
               onChange={handleTabChange}
               variant="fullWidth"
               indicatorColor="secondary"
-              textColor="primary"
+              textColor="secondary"
             >
               <MuiTab
                 value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENT_INFO)}

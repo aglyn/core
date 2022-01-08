@@ -37,7 +37,7 @@ const TreeItem = styled(MuiTreeItem, {name: 'AglynTreeItem'})(({theme}) => ({
     borderTopLeftRadius: `50px`,
     borderBottomLeftRadius: `50px`,
     '&.Mui-focused': {
-      backgroundColor: alpha(theme.palette.grey['A400'], theme.palette.action.focusOpacity),
+      backgroundColor: alpha(theme.palette.secondary.dark, theme.palette.action.focusOpacity),
     },
     '&.Mui-selected': {
       backgroundColor: alpha(theme.palette.quaternary.main, theme.palette.action.selectedOpacity),

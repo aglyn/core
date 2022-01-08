@@ -63,19 +63,19 @@ const ElementOverlayOutline = styled(Box, {
     outlineColor: theme.palette.quaternary.main,
   },
   [`&.${classKeys.hoveringSelf}`]: {
-    outlineColor: theme.palette.grey['A400'],
-    backgroundColor: alpha(theme.palette.grey['A400'], 0.12),
+    outlineColor: theme.palette.secondary.main,
+    backgroundColor: alpha(theme.palette.secondary.main, 0.12),
   },
   [`&.${classKeys.draggingSelf}`]: {
     outlineColor: 'transparent',
-    backgroundColor: alpha(theme.palette.grey['300'], 0.76),
+    backgroundColor: alpha(theme.palette.secondary.light, 0.76),
   },
   [`&.${classKeys.draggingOver}`]: {
     outlineColor: theme.palette.quaternary.main,
     backgroundColor: alpha(theme.palette.quaternary.dark, 0.76),
     [`&.${classKeys.draggingSelf}`]: {
       outlineColor: 'transparent',
-      backgroundColor: alpha(theme.palette.grey['300'], 0.76),
+      backgroundColor: alpha(theme.palette.secondary.light, 0.76),
       cursor: 'no-drop',
     },
   },

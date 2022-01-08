@@ -51,14 +51,14 @@ export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProp
             sx={(theme) => ({
               borderRadius: theme.shape.appIconBorderRadius,
               // boxShadow: theme.shadows[1],
-              ml: -1.5, mr: 0.5,
+              ml: -1.5, mr: 0.75,
               fontSize: `1.75em`,
             })}
           />
           <BesignerSvgLogo
             sx={{width: 'auto'}}
             fontSize="medium"
-            color="primary"
+            color="inherit"
           />
           {children}
         </Toolbar>

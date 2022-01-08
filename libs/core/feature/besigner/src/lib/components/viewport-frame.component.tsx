@@ -33,7 +33,9 @@ const ViewportFrame = styled('div', {
   minHeight: '100%',
   width: '100%',
   background: theme.palette.background.paper,
-  border: `0.3em solid ${theme.palette.grey[200]}`,
+  borderColor: theme.palette.divider,
+  borderWidth: `0.3em`,
+  borderStyle: 'solid',
   display: 'flex',
   // position: 'relative',
 }))
