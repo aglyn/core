@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ export const COMMIT_REF = String(process.env.COMMIT_REF || 'NULL')
 export const IS_PRODUCTION = process.env.NODE_ENV === 'production'
 export const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
 export const IS_TEST = process.env.NODE_ENV === 'test'
+export const IS_BROWSER = Boolean(process['browser'])
 
 export const HAS_WINDOW = typeof window !== undefined
 export const HAS_DOCUMENT = typeof document !== undefined
-export const IS_BROWSER = Boolean(process['browser'])
 
 export const CURRENT_YEAR = new Date().getFullYear()

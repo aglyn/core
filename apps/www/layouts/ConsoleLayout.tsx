@@ -18,11 +18,11 @@
 import {styled} from '@aglyn/shared-feature-themes'
 import {GridItems, type GridItemsProps} from '@aglyn/shared-ui-jsx'
 import {mdiCogOutline, MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {_isStrT} from '@aglyn/shared-util-guards'
 import {_s, copy} from '@aglyn/shared-util-tools'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import {type ReactNode} from 'react'
+import {isElement} from 'react-is'
 import Breadcrumbs from '../components/Breadcrumbs'
 import {type CurrentUserContextType, withCurrentUserContext} from '../contexts/current-user-context'
 import {type AggregatedPageMeta, withAggregatedPageMeta} from '../lib/app-pages'
@@ -49,7 +49,7 @@ export interface ConsoleLayoutProps extends MainLayoutProps {
   ContentGridItemsProps?: GridItemsProps
   items?: GridItemsProps['items']
   header?: {
-    icon?: MdiIconProps['path'] | ReactNode
+    icon?: MdiIconProps | ReactNode
     children?: ReactNode
   }
   aggregatedPageMeta: AggregatedPageMeta
@@ -62,7 +62,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
     aggregatedPageMeta,
     title: titleProp,
     items,
-    breadcrumbItems: breadcrumbItemsProp,
+    // breadcrumbItems: breadcrumbItemsProp,
     ContentGridItemsProps,
     children,
     currentUserContext,
@@ -72,14 +72,14 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
   const title = titleProp ?? (overrideMeta ?? pageMeta)?.title
   const [rootArea, mainArea, subArea] = pageAncestors
   const header = {
-    icon: mainArea?.icon,
+    icon: {path: mainArea?.icon},
     children: getHeader(
       mainArea ? mainArea.name.default : rootArea?.name.default,
       subArea ? subArea.name.plural : (overrideMeta ?? pageMeta)?.name.default,
     ),
     ...headerProp,
   }
-  const breadcrumbItems = (breadcrumbItemsProp ?? (copy(pageAncestors) as any[]))
+  const breadcrumbItems = (/*breadcrumbItemsProp ??*/ (copy(pageAncestors) as any[]))
     .concat(overrideMeta ?? pageMeta)
     .map((item: any) => ({
       href: _s(item?.id),
@@ -114,7 +114,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
 
   return (
     <MainLayout
-      navTabItems={tabItems}
+      navTabItems={tabItems as any}
       title={title}
       productName={'console'}
       quickActionMenus={quickActionMenus}
@@ -124,13 +124,13 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
         <StyledNavBarSpacer />
         <Container maxWidth={CONTENT_MAX_WIDTH}>
           <Typography component="h1" variant="h4">
-            {_isStrT(header?.icon) ? (
+            {!header?.icon || isElement(header.icon) ? header.icon : (
               <MdiIcon
                 color="secondary"
                 fontSize="inherit"
-                path={header.icon}
+                {...header.icon}
               />
-            ) : header?.icon}
+            )}
             {header?.children ?? title}
           </Typography>
           <Breadcrumbs items={breadcrumbItems} />

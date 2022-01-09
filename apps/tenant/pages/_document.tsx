@@ -20,7 +20,6 @@ import {
   type NextEmotionDocumentComponentProps,
 } from '@aglyn/shared-ui-next'
 
-
 export interface _DocumentProps extends NextEmotionDocumentComponentProps {}
 
 /**

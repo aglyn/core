@@ -16,6 +16,8 @@
  */
 
 import {type AglynAppEffectFlag} from '../constants/emitter'
+import {type AglynPlatform} from '../constants/platform'
+import {type AglynVersion} from '../constants/version'
 import {
   type AglynBaseModelOptions,
   type AglynBaseModelT,
@@ -54,13 +56,15 @@ export interface AglynAppOptions extends AglynBaseModelOptions {
 }
 
 export interface IAglynAppController<Options extends AglynAppOptions = AglynAppOptions> extends IAglynBaseModel<Options> {
+  readonly platform: AglynPlatform
+  readonly version: AglynVersion
+  readonly deleted: boolean
+  readonly appName: AppUUN
   readonly extensions: IAglynExtensionsController
   readonly contexts: IAglynContextsController
   readonly commands: IAglynCommandsController
   readonly components: IAglynComponentsController
   readonly canvas: IAglynCanvasController
-  readonly deleted: boolean
-  readonly appName: AppUUN
 
   setupModules(): this
   setupExtensions(): this
@@ -77,5 +81,8 @@ export interface IAglynAppController<Options extends AglynAppOptions = AglynAppO
 }
 
 export interface AglynAppControllerT<Options extends AglynAppOptions = AglynAppOptions> extends AglynBaseModelT<Options> {
-  new(options: AglynAppOptions): IAglynAppController<Options>
+  readonly platform: AglynPlatform
+  readonly version: AglynVersion
+
+  new(options: Options): IAglynAppController<Options>
 }

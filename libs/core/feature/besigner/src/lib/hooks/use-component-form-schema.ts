@@ -36,7 +36,7 @@ export const useComponentFormSchema = (
 ): UseComponentFormSchema => {
   const {componentId, bundleId} = opts
   const componentSchema = useAglynComponentSchema(componentId, bundleId)
-  const formSchema = componentSchema?.propsSchema
+  const formSchema = componentSchema?.formSchema
 
   return buildComponentPropsFormSchema(formSchema)
 }

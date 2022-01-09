@@ -97,12 +97,12 @@ export interface AglynAppEventPayload extends Record<AglynAppEventFlag, AglynEmi
   [AglynAppEventFlag.APP_CREATING]: PayloadData<{appName: AppUUN}>
   [AglynAppEventFlag.APP_CREATED]: PayloadData<{appName: AppUUN}>
   [AglynAppEventFlag.APP_INITIALIZING]: PayloadData<{appName: AppUUN}>
-  [AglynAppEventFlag.APP_MODULE_INITIALIZING]: PayloadData<{moduleName: string}>
-  [AglynAppEventFlag.APP_MODULE_INITIALIZED]: PayloadData<{moduleName: string}>
+  [AglynAppEventFlag.APP_MODULE_INITIALIZING]: PayloadData<{namespace: string}>
+  [AglynAppEventFlag.APP_MODULE_INITIALIZED]: PayloadData<{namespace: string}>
   [AglynAppEventFlag.APP_INITIALIZED]: PayloadData<{appName: AppUUN}>
   [AglynAppEventFlag.APP_DESTROYING]: PayloadData<{appName: AppUUN}>
-  [AglynAppEventFlag.APP_MODULE_DESTROYING]: PayloadData<{moduleName: string}>
-  [AglynAppEventFlag.APP_MODULE_DESTROYED]: PayloadData<{moduleName: string}>
+  [AglynAppEventFlag.APP_MODULE_DESTROYING]: PayloadData<{namespace: string}>
+  [AglynAppEventFlag.APP_MODULE_DESTROYED]: PayloadData<{namespace: string}>
   [AglynAppEventFlag.APP_DESTROYED]: PayloadData<{appName: AppUUN}>
   [AglynAppEventFlag.APP_DELETING]: PayloadData<{appName: AppUUN}>
   [AglynAppEventFlag.APP_DELETED]: PayloadData<{appName: AppUUN}>

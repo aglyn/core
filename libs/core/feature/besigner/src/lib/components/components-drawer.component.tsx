@@ -100,7 +100,7 @@ const ItemIcon = styled(MdiIcon, {
 
 export interface ComponentsDrawerOptionsProps extends ElementDrawerOptions {
   type?: 'browse-site-components' | 'edit-element-traits'
-  propsSchema?: FormSchema
+  formSchema?: FormSchema
   selectedElementProps?: AnyProps
 }
 
@@ -157,7 +157,7 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
     )
 
     const renderItemContent = useCallback(
-      (item) => (
+      (item: AglynComponentElementTemplate) => (
         <CardIconListItem
           item={item}
           label={item.label}
@@ -166,8 +166,8 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
             <>
               <ItemIcon
                 color="primary"
-                path={icon?.path || IconVariant.ENTITY_BLOCK}
-                sx={{color: icon.color}}
+                {...item.icon}
+                path={item.icon?.path || IconVariant.ENTITY_BLOCK}
               />
             </>
           }

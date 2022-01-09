@@ -25,6 +25,7 @@ import {
 import {IconVariant} from '@aglyn/shared-data-brand'
 import {alpha, styled} from '@aglyn/shared-feature-themes'
 import {mdiChevronDown, mdiChevronRight, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {_isArr} from '@aglyn/shared-util-guards'
 import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeItem'
 import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
 import {forwardRef, Fragment, useCallback, useMemo, useState} from 'react'
@@ -75,20 +76,24 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
           <Fragment>
             <MdiIcon
               color="quaternary"
+              {...icon}
               path={icon?.path || IconVariant.ENTITY_BLOCK}
-              sx={{
-                fontSize: 20,
-                marginLeft: -0.25,
-                marginRight: 0.5,
-                marginBottom: -0.5,
-                padding: 0.26,
-                borderRadius: '0.25em',
-                backgroundColor: 'background.default',
-                border: 1,
-                borderColor: 'divider',
-                boxShadow: 1,
-                color: icon?.color || 'quaternary',
-              }}
+              sx={[
+                {
+                  fontSize: 20,
+                  marginLeft: -0.25,
+                  marginRight: 0.5,
+                  marginBottom: -0.5,
+                  padding: 0.26,
+                  borderRadius: '0.25em',
+                  backgroundColor: 'background.default',
+                  border: 1,
+                  borderColor: 'divider',
+                  boxShadow: 1,
+                  color: 'quaternary',
+                },
+                ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
+              ]}
             />
             {label}
           </Fragment>

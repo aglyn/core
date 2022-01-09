@@ -40,9 +40,9 @@ export const schema: AglynComponentSchema<ButtonProps> = {
   displayName: 'Button',
   icon: {
     path: mdiGestureTapButton.path,
-    color: '#2196f3',
+    sx: {color: '#2196f3'},
   },
-  propsSchema: {
+  formSchema: {
     fields: [
       FIELD_COLOR,
       FIELD_DISABLED,
@@ -68,7 +68,7 @@ export const schema: AglynComponentSchema<ButtonProps> = {
       label: 'Outlined Button',
       icon: {
         path: mdiGestureTapButton.path,
-        color: '#2196f3',
+        sx: {color: '#2196f3'},
       },
       data: {
         componentId: ID,

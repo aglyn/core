@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 
 import {type AglynAppEffectFlag, type AglynModuleEffectPayload} from '../constants/emitter'
-import {type TYPE_KIND, type TYPE_OF} from '../constants/symbol'
+import {type OF_KIND, type OF_TYPE} from '../constants/symbol'
 import {type IAglynAppController} from '../controllers/aglyn-app.types'
 import {type AglynBaseModelOptions, AglynBaseModelT, IAglynBaseModel} from './aglyn-base.types'
 
@@ -31,16 +31,15 @@ export interface AglynModuleModelOptions extends AglynBaseModelOptions {
 }
 
 export interface IAglynModuleModel<O extends AglynModuleModelOptions = AglynModuleModelOptions> extends IAglynBaseModel<O, IAglynAppController> {
-  readonly [TYPE_OF]: number | symbol
-  readonly [TYPE_KIND]: number | symbol
-  readonly moduleName: string
+  readonly [OF_TYPE]: number | symbol
+  readonly [OF_KIND]: number | symbol
+  readonly namespace: string
 }
 
 export interface AglynModuleModelT<O extends AglynModuleModelOptions = AglynModuleModelOptions> extends AglynBaseModelT<O, IAglynAppController> {
   new(app: IAglynAppController, options: O): IAglynModuleModel<O>
   readonly [Symbol.toStringTag]: string
-  readonly [TYPE_OF]: number | symbol
-  readonly [TYPE_KIND]: number | symbol
-  readonly moduleName: string
+  readonly [OF_TYPE]: number | symbol
+  readonly [OF_KIND]: number | symbol
   readonly namespace: string
 }

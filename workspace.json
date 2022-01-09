@@ -556,9 +556,9 @@
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
     },
-    "site": {
-      "root": "apps/site",
-      "sourceRoot": "apps/site",
+    "tenant": {
+      "root": "apps/tenant",
+      "sourceRoot": "apps/tenant",
       "projectType": "application",
       "targets": {
         "build": {
@@ -566,8 +566,8 @@
           "outputs": ["{options.outputPath}"],
           "defaultConfiguration": "production",
           "options": {
-            "root": "apps/site",
-            "outputPath": "dist/apps/site"
+            "root": "apps/tenant",
+            "outputPath": "dist/apps/tenant"
           },
           "configurations": {
             "production": {}
@@ -576,13 +576,13 @@
         "serve": {
           "executor": "@nrwl/next:server",
           "options": {
-            "buildTarget": "site:build",
+            "buildTarget": "tenant:build",
             "dev": true,
             "port": 4500
           },
           "configurations": {
             "production": {
-              "buildTarget": "site:build:production",
+              "buildTarget": "tenant:build:production",
               "dev": false
             }
           }
@@ -590,14 +590,14 @@
         "export": {
           "executor": "@nrwl/next:export",
           "options": {
-            "buildTarget": "site:build:production"
+            "buildTarget": "tenant:build:production"
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/site"],
+          "outputs": ["coverage/apps/tenant"],
           "options": {
-            "jestConfig": "apps/site/jest.config.js",
+            "jestConfig": "apps/tenant/jest.config.js",
             "passWithNoTests": true
           }
         },
@@ -605,26 +605,26 @@
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["apps/site/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["apps/tenant/**/*.{ts,tsx,js,jsx}"]
           }
         }
       },
-      "tags": ["sc:app\"", "\"sc:app:site"]
+      "tags": ["sc:app", "sc:app:tenant"]
     },
-    "site-e2e": {
-      "root": "apps/site-e2e",
-      "sourceRoot": "apps/site-e2e/src",
+    "tenant-e2e": {
+      "root": "apps/tenant-e2e",
+      "sourceRoot": "apps/tenant-e2e/src",
       "projectType": "application",
       "targets": {
         "e2e": {
           "executor": "@nrwl/cypress:cypress",
           "options": {
-            "cypressConfig": "apps/site-e2e/cypress.json",
-            "devServerTarget": "site:serve"
+            "cypressConfig": "apps/tenant-e2e/cypress.json",
+            "devServerTarget": "tenant:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "site:serve:production"
+              "devServerTarget": "tenant:serve:production"
             }
           }
         },
@@ -632,12 +632,12 @@
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["apps/site-e2e/**/*.{js,ts}"]
+            "lintFilePatterns": ["apps/tenant-e2e/**/*.{js,ts}"]
           }
         }
       },
       "tags": [],
-      "implicitDependencies": ["site"]
+      "implicitDependencies": ["tenant"]
     },
     "www": {
       "root": "apps/www",

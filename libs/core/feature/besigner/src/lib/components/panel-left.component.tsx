@@ -103,6 +103,7 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
         size={size}
         open={toggled}
         anchor="left"
+        component="aside"
         {...rest}
       >
         <MuiTabContext value={hexadecimalFromNumber(value)}>

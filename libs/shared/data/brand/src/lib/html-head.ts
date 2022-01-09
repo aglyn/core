@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,5 @@ export const LINK_PRIORITY: MakeLinkElementsConfig = [
   ['preconnect', 'https://adservice.google.com', {id: 'preconnect-adservice-google'}],
   ['preconnect', 'https://static.doubleclick.net', {id: 'preconnect-static-doubleclick'}],
   ['preconnect', 'https://googleads.g.doubleclick.net', {id: 'preconnect-googleads-g'}],
-  ['preconnect', 'https://fonts.googleapis.com', {id: 'preconnect-fonts-googleapis'}],
   ['preconnect', 'https://fonts.gstatic.com', {crossOrigin: 'anonymous', id: 'preconnect-fonts-gstatic'}],
 ]

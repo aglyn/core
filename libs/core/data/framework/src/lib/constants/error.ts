@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,11 @@ export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof Ag
   [AglynErrorEventFlag.APP_DELETED]: 'AglynApp named \'{$appName}\' already deleted',
   [AglynErrorEventFlag.APP_BAD_INSTANCE]: 'AglynApp.{$appName}() takes either no argument or a AglynApp instance.',
 
-  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: 'Module \'{$moduleName}\' must implement member method AglynModule.{$memberMethod}()',
+  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: 'Module \'{$namespace}\' must implement member method AglynModule.{$memberMethod}()',
 
   [AglynErrorEventFlag.EXTENSION_NONE]: 'No AppExtension \'{$extensionName}\' has been registered on AglynApp \'{$appName}\'',
   [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: 'Invalid module loader has been provided',
-  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: 'Bad AglynExtension module \'{$moduleName}\' provided on AglynApp \'{$appName}\'',
+  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: 'Bad AglynExtension module \'{$namespace}\' provided on AglynApp \'{$appName}\'',
 }
 
 export type AglynErrorParams = PayloadParams<AglynErrorEventParams>

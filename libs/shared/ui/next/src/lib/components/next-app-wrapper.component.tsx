@@ -36,7 +36,6 @@ export interface NextAppWrapperComponentProps {
   metaElements?: MakeMetaElementsConfig
   linkElements?: MakeLinkElementsConfig
   mainWrapper?: JSXElementType<{children?: ReactNode}>
-  disableMainElement?: boolean
 }
 
 function NextAppWrapperComponentRaw(props: NextAppWrapperComponentProps) {
@@ -47,7 +46,6 @@ function NextAppWrapperComponentRaw(props: NextAppWrapperComponentProps) {
     metaElements,
     linkElements,
     mainWrapper,
-    disableMainElement,
   } = props
   const Wrapper = IS_PRODUCTION ? Fragment : Fragment // StrictMode
   const MainWrapper = mainWrapper || Fragment
@@ -68,13 +66,9 @@ function NextAppWrapperComponentRaw(props: NextAppWrapperComponentProps) {
         {makeLinkElements(linkElements || [])}
         {headChildren}
       </Head>
-      <div className="app">
-        <MainWrapper>
-          {disableMainElement ? children : (
-            <main>{children}</main>
-          )}
-        </MainWrapper>
-      </div>
+      <MainWrapper>
+        {children}
+      </MainWrapper>
     </Wrapper>
   )
 }

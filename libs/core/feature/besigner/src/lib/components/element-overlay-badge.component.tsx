@@ -28,9 +28,8 @@ import {type DragElementWrapper} from 'react-dnd'
 
 export interface BadgeButtonProps extends Omit<TooltipProps, 'children'> {
   children?: SrOnlyComponentProps['children']
-  icon: {path: MdiIconProps['path']}
+  icon: MdiIconProps
   ButtonProps?: ButtonProps
-  IconProps?: MdiIconProps
   SrOnlyProps?: SrOnlyComponentProps
 }
 
@@ -40,7 +39,6 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>(
       children,
       ButtonProps,
       icon,
-      IconProps,
       SrOnlyProps,
       ...rest
     } = props
@@ -48,7 +46,7 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>(
     return (
       <MuiTooltip ref={ref} {...rest}>
         <MuiButton {...ButtonProps}>
-          <MdiIcon fontSize="small" path={icon?.path} {...IconProps} />
+          <MdiIcon fontSize="small" {...icon} />
           <SrOnlyComponent component="span" {...SrOnlyProps}>
             {children}
           </SrOnlyComponent>
@@ -123,8 +121,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
             title="Drag"
             children="drag"
             ButtonProps={{ref: dragHandleRef}}
-            icon={{path: IconVariant.MODIFY_DRAG}}
-            IconProps={{color: 'secondary'}}
+            icon={{path: IconVariant.MODIFY_DRAG, color: 'secondary'}}
           />
         )}
 

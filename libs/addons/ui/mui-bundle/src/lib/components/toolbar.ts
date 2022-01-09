@@ -35,9 +35,9 @@ export const schema: AglynComponentSchema<ToolbarProps> = {
   displayName: 'Toolbar Content',
   icon: {
     path: mdiBorderInside.path,
-    color: '#2196f3',
+    sx: {color: '#2196f3'},
   },
-  propsSchema: {
+  formSchema: {
     fields: [
       FIELD_DISABLE_GUTTERS,
       {
@@ -59,7 +59,7 @@ export const schema: AglynComponentSchema<ToolbarProps> = {
       label: 'Toolbar Content',
       icon: {
         path: mdiBorderInside.path,
-        color: '#2196f3',
+        sx: {color: '#2196f3'},
       },
       data: {
         componentId: ID,

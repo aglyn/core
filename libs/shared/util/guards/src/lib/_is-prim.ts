@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
-import { _isBig } from './_is-big'
-import { _isBool } from './_is-bool'
-import { _isFnT } from './_is-fn-t'
-import { _isNumT } from './_is-num-t'
-import { _isObjT } from './_is-obj-t'
-import { _isStrT } from './_is-str-t'
-import { _isSymT } from './_is-sym-t'
-import { _isUndT } from './_is-und-t'
+import {_isBig} from './_is-big'
+import {_isBool} from './_is-bool'
+import {_isFnT} from './_is-fn-t'
+import {_isNumT} from './_is-num-t'
+import {_isObjT} from './_is-obj-t'
+import {_isStrT} from './_is-str-t'
+import {_isSymT} from './_is-sym-t'
+import {_isUndT} from './_is-und-t'
 
 
-export type Primitive = symbol | bigint | boolean | number | string | undefined
-export type PrimitiveBasic = number | string | boolean
+export type Primitive = string | number | bigint | boolean | undefined | symbol | null
+export type PrimitiveBasic = string | number | boolean | undefined | null
 /**
  * Is literal type of primitive type
  *

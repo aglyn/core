@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-import {APP_SITE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
-import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
-import {Fragment, useEffect, useMemo} from 'react'
+import { APP_SITE, IS_PRODUCTION } from '@aglyn/shared-data-brand'
+import { NextEmotionAppComponent, type NextEmotionAppComponentProps } from '@aglyn/shared-ui-next'
+import { Fragment, useEffect, useMemo } from 'react'
 
-
-export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentProps<Props, InitialProps> {}
-
+export interface _AppProps<Props, InitialProps>
+  extends NextEmotionAppComponentProps<Props, InitialProps> {}
 
 function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
-  const {NextAppWrapperProps, ...rest} = props
+  const { NextAppWrapperProps, ...rest } = props
   const {
     metaElements: wrapperMetaElements,
     linkElements: wrapperLinkElements,
@@ -32,31 +31,30 @@ function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
     documentTitle: wrapperDocumentTitle,
     ...nextAppWrapperProps
   } = NextAppWrapperProps || {}
-  const documentTitle = useMemo(() => (
-    wrapperDocumentTitle || APP_SITE.META_TITLE
-  ), [wrapperDocumentTitle])
-  const headChildren = useMemo(() => (
-    <Fragment>
-      {!IS_PRODUCTION ? null : (
-        <Fragment>
-        </Fragment>
-      )}
-      {wrapperHeadChildren}
-    </Fragment>
-  ), [wrapperHeadChildren])
-  const metaElements: any = useMemo(() => ([
-    ['viewport', 'width=device-width, initial-scale=1'],
-    ['description', APP_SITE.META_DESCRIPTION],
-    ...wrapperMetaElements || [],
-  ]), [wrapperMetaElements])
-  const linkElements = useMemo(() => ([
-    ...wrapperLinkElements || [],
-  ]), [wrapperLinkElements])
+  const documentTitle = useMemo(
+    () => wrapperDocumentTitle || APP_SITE.META_TITLE,
+    [wrapperDocumentTitle]
+  )
+  const headChildren = useMemo(
+    () => (
+      <Fragment>
+        {!IS_PRODUCTION ? null : <Fragment></Fragment>}
+        {wrapperHeadChildren}
+      </Fragment>
+    ),
+    [wrapperHeadChildren]
+  )
+  const metaElements: any = useMemo(
+    () => [
+      ['viewport', 'width=device-width, initial-scale=1'],
+      ['description', APP_SITE.META_DESCRIPTION],
+      ...(wrapperMetaElements || []),
+    ],
+    [wrapperMetaElements]
+  )
+  const linkElements = useMemo(() => [...(wrapperLinkElements || [])], [wrapperLinkElements])
 
-  useEffect(() => {
-
-  }, [])
-
+  useEffect(() => {}, [])
 
   return (
     <NextEmotionAppComponent

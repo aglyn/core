@@ -16,13 +16,15 @@
  */
 
 
-function CatchAllPage(props) {
-
-  return (
-    <>
-      {JSON.stringify(props, null, 2)}
-    </>
-  )
-}
-
-export default CatchAllPage
+export * from './groups/basic'
+export * from './groups/crud'
+export * as DoD from './groups/dod'
+export * from './groups/fallback'
+export * from './groups/initializable'
+export * from './groups/jsx'
+export * from './groups/lifecycle'
+export * from './groups/normalized'
+export * from './groups/operators'
+export * from './groups/semantic'
+export * from './groups/serializable'
+export * from './groups/string-like'

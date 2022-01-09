@@ -22,8 +22,8 @@ import {
   type ComponentRegisterPayload,
   type IAglynComponent,
   MODULE_TYPE,
-  TYPE_KIND,
-  TYPE_OF,
+  OF_KIND,
+  OF_TYPE,
 } from '@aglyn/core-data-framework'
 import {styled} from '@aglyn/shared-feature-themes'
 import {copy, getDisplayName} from '@aglyn/shared-util-tools'
@@ -68,8 +68,8 @@ export function createAglynComponent<P>(
   AglynComponent.displayName = `AglynComponent(${displayName})`
   AglynComponent.componentId = componentId
   AglynComponent.bundleId = bundleId
-  ;(AglynComponent as any)[TYPE_OF] = MODULE_TYPE
-  ;(AglynComponent as any)[TYPE_KIND] = COMPONENT_ELEMENT_TYPE
+  ;(AglynComponent as any)[OF_TYPE] = MODULE_TYPE
+  ;(AglynComponent as any)[OF_KIND] = COMPONENT_ELEMENT_TYPE
 
   return {
     schema: copy(schema),

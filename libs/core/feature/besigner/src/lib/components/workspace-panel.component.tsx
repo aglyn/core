@@ -17,9 +17,10 @@
 
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 import {_isEqualitySameType} from '@aglyn/shared-util-guards'
+import Box, {type BoxProps as MuiBoxProps} from '@mui/material/Box'
 import MuiDrawer, {type DrawerProps as MuiDrawerProps} from '@mui/material/Drawer'
 import clsx from 'clsx'
-import {forwardRef, type HTMLAttributes} from 'react'
+import {forwardRef} from 'react'
 import {DEFAULT_LEFT_DRAWER_WIDTH} from '../constants'
 
 
@@ -32,11 +33,11 @@ const classKeys = generateComponentClassKeys('AglynWorkspacePanel', [
   'anchorBottom',
 ])
 
-interface WorkspacePanelProps extends HTMLAttributes<HTMLDivElement> {
+interface WorkspacePanelProps extends MuiBoxProps {
   size?: string | number
 }
 
-const WorkspacePanel = styled('div', {
+const WorkspacePanel = styled(Box, {
   name: 'AglynWorkspacePanel',
   shouldForwardProp(propName: any) {
     return !_isEqualitySameType(propName, 'size')

@@ -75,7 +75,7 @@ function NextEmotionAppComponent<Props, InitialProps>(props: NextEmotionAppCompo
 
   return (
     <CacheProvider value={emotionCache}>
-      <NextAppWrapperComponent {...NextAppWrapperComponent}>
+      <NextAppWrapperComponent {...NextAppWrapperProps}>
         <NextPageDecoratedLayoutComponent {...rest} />
       </NextAppWrapperComponent>
     </CacheProvider>

@@ -121,13 +121,13 @@ export interface IAglynBesignerController extends IAglynModuleModel<AglynBesigne
   readonly dnd: ContextStore<BesignerDndState>
 
   getStore<K extends keyof BesignerContextStores>(payload: BesignerGetStorePayload<K>): ContextStore<BesignerContextStores[K]>
-  setFlag(payload: BesignerFlagInteractModePayload)
-  setPanels(payload: BesignerSetPanelPayload)
-  openPanel(payload: BesignerOpenPanelPayload)
-  closePanel(payload: BesignerClosePanelPayload)
-  setDndState(payload: BesignerSetDndStatePayload)
-  setCanvasSelected(payload: BesignerSetCanvasSelectedPayload)
-  setCanvasHovered(payload: BesignerSetCanvasHoveredPayload)
+  setFlag(payload: BesignerFlagInteractModePayload): this
+  setPanels(payload: BesignerSetPanelPayload): this
+  openPanel(payload: BesignerOpenPanelPayload): this
+  closePanel(payload: BesignerClosePanelPayload): this
+  setDndState(payload: BesignerSetDndStatePayload): this
+  setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this
+  setCanvasHovered(payload: BesignerSetCanvasHoveredPayload): this
 }
 
 export interface AglynBesignerControllerT extends AglynModuleModelT<AglynBesignerControllerOptions> {

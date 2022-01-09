@@ -43,9 +43,7 @@ export const schema = {
   bundleId: BUNDLE_ID,
   displayName: 'Mui Components',
   description: 'Material-UI view components',
-  icon: {
-    path: mdiViewArray.path,
-  },
+  icon: {path: mdiViewArray.path},
 }
 
 export const bundle = createComponentsBundle(schema, components)

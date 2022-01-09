@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import {
   type CommandsTriggerPayload,
   type CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
-import {TYPE_KIND, TYPE_OF} from '../constants/symbol'
+import {type OF_KIND, type OF_TYPE} from '../constants/symbol'
 import {
   type AglynModuleModelOptions,
   type AglynModuleModelT,
@@ -38,15 +38,15 @@ export type TriggerListenerPayload<T, U> = {payload: T, response: U}
 export type AglynCommander = EmitterFn<Record<CommandUId, TriggerListenerPayload<any, any>>>
 
 export interface AglynCommandResolver {
-  readonly [TYPE_OF]?: number | symbol
-  readonly [TYPE_KIND]?: number | symbol
+  readonly [OF_TYPE]?: number | symbol
+  readonly [OF_KIND]?: number | symbol
   commandId: CommandUId
   (data: Dictionary): any
 }
 
 export interface AglynCommandListener {
-  readonly [TYPE_OF]?: number | symbol
-  readonly [TYPE_KIND]?: number | symbol
+  readonly [OF_TYPE]?: number | symbol
+  readonly [OF_KIND]?: number | symbol
   commandId: CommandUId
   (data: TriggerListenerPayload<any, any>): void
 }
@@ -59,11 +59,11 @@ export interface IAglynCommandsController extends IAglynModuleModel<AglynCommand
   readonly commander: AglynCommander
   readonly resolvers: Map<CommandUId, AglynCommandResolver>
 
-  setResolver(data: CommandsSetResolverPayload): void
-  registerListener(data: CommandsRegisterListenerPayload): void
-  removeResolver(data: CommandsRemoveResolverPayload): void
-  unregisterListener(data: CommandsUnregisterListenerPayload): void
-  trigger(data: CommandsTriggerPayload): void
+  setResolver(data: CommandsSetResolverPayload): this
+  registerListener(data: CommandsRegisterListenerPayload): this
+  removeResolver(data: CommandsRemoveResolverPayload): this
+  unregisterListener(data: CommandsUnregisterListenerPayload): this
+  trigger(data: CommandsTriggerPayload): this
 }
 
 export interface AglynCommandsControllerT extends AglynModuleModelT<AglynCommandsControllerOptions> {

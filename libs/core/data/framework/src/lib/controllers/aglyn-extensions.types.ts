@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,16 +41,18 @@ export interface AglynExtensionsControllerOptions extends AglynModuleModelOption
 }
 
 export interface IAglynExtensionsController extends IAglynModuleModel<AglynExtensionsControllerOptions> {
+  extensions: IAglynExtension[]
+
   handleLoader(payload: ExtensionHandleLoaderPayload): IAglynExtension
-  registerExtension(payload: ExtensionRegisterPayload): void
-  initializeExtension(payload: ExtensionInitializePayload): void
-  loadExtension(payload: ExtensionLoadPayload): void
-  unloadExtension(payload: ExtensionUnloadPayload): void
-  destroyExtension(payload: ExtensionDestroyPayload): void
+  registerExtension(payload: ExtensionRegisterPayload): this
+  initializeExtension(payload: ExtensionInitializePayload): this
+  loadExtension(payload: ExtensionLoadPayload): this
+  unloadExtension(payload: ExtensionUnloadPayload): this
+  destroyExtension(payload: ExtensionDestroyPayload): this
   getExtensionByName(name: string): IAglynExtension
   getAllExtensions(): IAglynExtension[]
-  unloadAllExtensions(): void
-  destroyAllExtensions(): void
+  unloadAllExtensions(): this
+  destroyAllExtensions(): this
 }
 
 export interface AglynExtensionsControllerT extends AglynModuleModelT<AglynExtensionsControllerOptions> {

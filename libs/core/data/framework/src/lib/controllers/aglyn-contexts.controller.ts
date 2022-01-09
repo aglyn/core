@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import {
   type ContextsGetStorePayload,
   type ContextsSetStorePayload,
 } from '../constants/emitter'
-import AglynModuleModel from '../models/aglyn-module.model'
+import {AglynModuleModel} from '../models/aglyn-module.model'
 import {type AglynModuleEffectListener} from '../models/aglyn-module.types'
 import {type IAglynAppController} from './aglyn-app.types'
 import {
@@ -43,19 +43,27 @@ import {
 
 
 const TAG = 'AglynContexts'
-const MODULE_NAME = 'contexts'
+const NS = 'aglyn.core.data.framework.module.contexts'
 
 export class AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> implements IAglynContextsController {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = `aglyn:${MODULE_NAME}`
-  public static readonly moduleName: string = MODULE_NAME
+  public static readonly namespace: string = NS
 
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()
 
-  public get domain(): ContextDomain {
-    return this.#domain
+  public get domain(): ContextDomain {return this.#domain}
+
+  protected get listeners(): AglynModuleEffectListener<any>[] {
+    return [
+      [AglynAppEffectFlag.CONTEXTS_CREATE_STORE, this.createStore],
+      [AglynAppEffectFlag.CONTEXTS_CREATE_EVENT, this.createEvent],
+      [AglynAppEffectFlag.CONTEXTS_CREATE_EFFECT, this.createEffect],
+      [AglynAppEffectFlag.CONTEXTS_GET_STORE, this.getStore],
+      [AglynAppEffectFlag.CONTEXTS_SET_STORE, this.setStore],
+      [AglynAppEffectFlag.CONTEXTS_DELETE_STORE, this.deleteStore],
+    ]
   }
 
   constructor(app: IAglynAppController, options: AglynContextsControllerOptions) {
@@ -121,15 +129,6 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
     this.#stores.delete(storeId)
     return this
   }
-
-  protected listeners: AglynModuleEffectListener<any>[] = [
-    [AglynAppEffectFlag.CONTEXTS_CREATE_STORE, this.createStore],
-    [AglynAppEffectFlag.CONTEXTS_CREATE_EVENT, this.createEvent],
-    [AglynAppEffectFlag.CONTEXTS_CREATE_EFFECT, this.createEffect],
-    [AglynAppEffectFlag.CONTEXTS_GET_STORE, this.getStore],
-    [AglynAppEffectFlag.CONTEXTS_SET_STORE, this.setStore],
-    [AglynAppEffectFlag.CONTEXTS_DELETE_STORE, this.deleteStore],
-  ]
 }
 
 export default AglynContextsController

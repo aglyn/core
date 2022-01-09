@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,9 +74,7 @@ export type IfTrueOr<TRUE, ELSE> = Conditional<TRUE, true, ELSE>
 export type IfTrueOrNonDist<TRUE, ELSE> = ConditionalNonDist<TRUE, true, ELSE>
 
 /** From T, make all top level keys mutable (removes readonly) */
-export type MutableShallow<T> = {
-  -readonly [P in keyof T]: T[P]
-}
+export type MutableShallow<T> = { -readonly [P in keyof T]: T[P] }
 
 /** From T, make all keys mutable including nested objects/arrays (removes readonly) */
 export type MutableDeep<T> = {

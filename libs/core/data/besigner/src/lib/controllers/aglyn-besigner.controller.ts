@@ -78,13 +78,12 @@ const DEFAULT_CONTEXT: Partial<BesignerContextStores> = {
 
 
 const TAG = 'AglynBesigner'
-const MODULE_NAME = 'besigner'
+const NS = 'aglyn.core.data.besigner.module.besigner'
 
 export class AglynBesignerController extends AglynModuleModel<AglynBesignerControllerOptions> implements IAglynBesignerController {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = `aglyn:${MODULE_NAME}`
-  public static readonly moduleName: string = MODULE_NAME
+  public static readonly namespace: string = NS
 
   #context: BesignerContext = {
     _domain: null,
@@ -103,12 +102,16 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
   public get panels(): ContextStore<BesignerPanelsState> {return this.#context.stores.panels}
   public get dnd(): ContextStore<BesignerDndState> {return this.#context.stores.dnd}
 
+  protected get listeners(): AglynModuleEffectListener<any>[] {
+    return []
+  }
+
   constructor(app: IAglynAppController, options: AglynBesignerControllerOptions) {
     super(app, options)
     this.#setup()
   }
   #setup() {
-    this.#context._domain = this.app.contexts.domain.domain(this.moduleName)
+    this.#context._domain = this.app.contexts.domain.domain(this.namespace)
 
     this.#context._store = this.#context._domain.createStore<BesignerContextStores>(
       objectDeepMerge(copy(DEFAULT_CONTEXT), {...this.options.defaults}),
@@ -227,36 +230,34 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
   }
 
 
-  public setFlag(payload: BesignerFlagInteractModePayload) {
-    return this.#context.events.setFlag(payload)
+  public setFlag(payload: BesignerFlagInteractModePayload): this {
+    this.#context.events.setFlag(payload)
+    return this
   }
-  public setPanels(payload: BesignerSetPanelPayload) {
-    return this.#context.events.setPanels(payload)
+  public setPanels(payload: BesignerSetPanelPayload): this {
+    this.#context.events.setPanels(payload)
+    return this
   }
-  public openPanel(payload: BesignerOpenPanelPayload) {
-    return this.#context.events.setPanels(payload)
+  public openPanel(payload: BesignerOpenPanelPayload): this {
+    this.#context.events.setPanels(payload)
+    return this
   }
-  public closePanel(payload: BesignerClosePanelPayload) {
-    return this.#context.events.setPanels(payload)
+  public closePanel(payload: BesignerClosePanelPayload): this {
+    this.#context.events.setPanels(payload)
+    return this
   }
-  public setDndState(payload: BesignerSetDndStatePayload) {
-    return this.#context.events.setDndState(payload)
+  public setDndState(payload: BesignerSetDndStatePayload): this {
+    this.#context.events.setDndState(payload)
+    return this
   }
-  public setCanvasSelected(payload: BesignerSetCanvasSelectedPayload) {
-    return this.#context.events.setCanvasSelected(payload)
+  public setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this {
+    this.#context.events.setCanvasSelected(payload)
+    return this
   }
-  public setCanvasHovered(payload: BesignerSetCanvasHoveredPayload) {
-    return this.#context.events.setCanvasHovered(payload)
+  public setCanvasHovered(payload: BesignerSetCanvasHoveredPayload): this {
+    this.#context.events.setCanvasHovered(payload)
+    return this
   }
-
-
-  protected listeners: AglynModuleEffectListener<any>[] = [
-    // [AglynAppEffectFlag.COMMANDS_RESOLVER_SET, this.setResolver],
-    // [AglynAppEffectFlag.COMMANDS_LISTENER_REGISTER, this.registerListener],
-    // [AglynAppEffectFlag.COMMANDS_RESOLVER_REMOVE, this.removeResolver],
-    // [AglynAppEffectFlag.COMMANDS_LISTENER_UNREGISTER, this.unregisterListener],
-    // [AglynAppEffectFlag.COMMANDS_TRIGGER, this.trigger],
-  ]
 }
 
 export default AglynBesignerController

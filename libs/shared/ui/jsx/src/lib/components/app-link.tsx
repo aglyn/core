@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,38 +15,37 @@
  * limitations under the License.
  */
 
-import { Conditional } from '@aglyn/shared-data-types'
-import { generateComponentClassKeys } from '@aglyn/shared-feature-themes'
-import { _isObj } from '@aglyn/shared-util-guards'
-import { yes } from '@aglyn/shared-util-tools'
-import MuiButton, { ButtonProps as MuiButtonProps } from '@mui/material/Button'
-import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link'
+import {Conditional} from '@aglyn/shared-data-types'
+import {generateComponentClassKeys} from '@aglyn/shared-feature-themes'
+import {_isObj} from '@aglyn/shared-util-guards'
+import {yes} from '@aglyn/shared-util-tools'
+import MuiButton, {ButtonProps as MuiButtonProps} from '@mui/material/Button'
+import MuiLink, {LinkProps as MuiLinkProps} from '@mui/material/Link'
 import clsx from 'clsx'
-import { useRouter } from 'next/router'
-import { ElementType, forwardRef } from 'react'
-import { NextLink, NextLinkProps } from './next-link'
+import {useRouter} from 'next/router'
+import {ElementType, forwardRef} from 'react'
+import {NextLink, NextLinkProps} from './next-link'
 
 
 type LinkType = 'naked' | 'button' | 'text' | 'default'
 
 type NakedBaseProps = NextLinkProps
-type NakedTruncated = { linkType: 'naked' } & NakedBaseProps
+type NakedTruncated = {linkType: 'naked'} & NakedBaseProps
 
-type ButtonBaseProps = MuiButtonProps<'a', { component?: ElementType<NextLinkProps> }>
-type ButtonTruncated = { linkType: 'button' } & ButtonBaseProps
+type ButtonBaseProps = MuiButtonProps<'a', {component?: ElementType<NextLinkProps>}>
+type ButtonTruncated = {linkType: 'button'} & ButtonBaseProps
 
-type TextBaseProps = MuiLinkProps<'a', { component?: ElementType<NextLinkProps> }>
-type TextTruncated = { linkType?: 'text' } & TextBaseProps
+type TextBaseProps = MuiLinkProps<'a', {component?: ElementType<NextLinkProps>}>
+type TextTruncated = {linkType?: 'text'} & TextBaseProps
 
 interface CommonProps {}
 
 type TruncatedProps = ButtonTruncated | TextTruncated | NakedTruncated
 
 export type AppLinkProps<T extends LinkType = 'default'> = CommonProps &
-  Conditional<T,
-    'naked',
-    NakedTruncated,
-    Conditional<T, 'button', ButtonTruncated, Conditional<T, 'text', TextTruncated, TruncatedProps>>>
+  Conditional<T, any,
+    Conditional<T, 'naked', NakedTruncated, Conditional<T, 'button', ButtonTruncated,
+      Conditional<T, 'text', TextTruncated, TruncatedProps>>>>
 
 const classKey = generateComponentClassKeys('AppLink', [
   'disabled',

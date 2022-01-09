@@ -17,7 +17,7 @@
 
 import {alpha, generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 import {_isFnT} from '@aglyn/shared-util-guards'
-import Stack, {type StackProps} from '@mui/material/Stack'
+import Stack, {type StackProps as MuiStackProps} from '@mui/material/Stack'
 import clsx from 'clsx'
 import {type ChangeEvent, forwardRef, useCallback, useRef} from 'react'
 import {useAglynBesignerPanelValue} from '../hooks/use-aglyn-besigner-panel-value'
@@ -78,8 +78,9 @@ const AglynViewport = styled(Stack, {
   })
 })
 
-export interface ViewportRootComponentProps extends StackProps {
+export interface ViewportRootComponentProps extends MuiStackProps {
   // drawerWidth?: number
+  component?
 }
 
 const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
@@ -125,6 +126,7 @@ const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
         direction="column"
         alignItems="center"
         spacing={0}
+        component="main"
         // drawerWidth={left?.drawerWidth}
         {...rest}
       >

@@ -33,9 +33,7 @@ export const schema: AglynComponentSchema<ListProps> = {
   componentId: ID,
   bundleId: 'mui',
   displayName: 'List',
-  icon: {
-    path: mdiFormatListBulletedSquare.path,
-  },
+  icon: {path: mdiFormatListBulletedSquare.path},
   hierarchy: {
     restrictChildren: [
       ComponentsLinealDirectiveFlag.LIMIT_TO, {
@@ -47,9 +45,7 @@ export const schema: AglynComponentSchema<ListProps> = {
     {
       id: generateTemplateId(ID),
       label: 'List',
-      icon: {
-        path: mdiFormatListBulletedSquare.path,
-      },
+      icon: {path: mdiFormatListBulletedSquare.path},
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,

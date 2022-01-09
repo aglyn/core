@@ -16,11 +16,17 @@
  */
 
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
+import dynamic from 'next/dynamic'
 // import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
 import {forwardRef, type HTMLAttributes, type Ref, useRef} from 'react'
 import {useSlider} from 'react-use'
-import {ViewportFrameComponent} from './viewport-frame.component'
 
+
+const ViewportFrameComponent = dynamic(
+  () => import('./viewport-frame.component').then((mod) => mod.ViewportFrameComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
 
 const Demo = () => {
   const ref = useRef(null)

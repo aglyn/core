@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {alpha, makeStyles, type Theme} from '@aglyn/shared-feature-themes'
+import {alpha, styled} from '@aglyn/shared-feature-themes'
 import {GridButtons} from '@aglyn/shared-ui-jsx'
 import {
   mdiChartSankeyVariant,
@@ -67,17 +67,16 @@ function a11yProps(index: any) {
   }
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    flexGrow: 1,
-    // backgroundColor: theme.palette.background.paper,
-    backgroundColor: alpha(theme.palette.primary.light, 0.12),
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
+const TabsContainer = styled(Box, {
+  name: 'AglynTabsContainer',
+})(({theme}) => ({
+  flexGrow: 1,
+  // backgroundColor: theme.palette.background.paper,
+  backgroundColor: alpha(theme.palette.primary.light, 0.12),
+  borderBottom: `1px solid ${theme.palette.divider}`,
 }))
 
 export default function Tabs() {
-  const classes = useStyles()
   const [value, setValue] = useState(0)
 
   const handleChange = useCallback((event: SyntheticEvent, newValue: any) => {
@@ -85,7 +84,7 @@ export default function Tabs() {
   }, [])
 
   return (
-    <div className={classes.root}>
+    <TabsContainer>
       <AppBar color="primary" elevation={1} position="static">
         <MuiTabs
           aria-label="simple tabs example"
@@ -174,6 +173,6 @@ export default function Tabs() {
       <TabPanel index={3} value={value}>
         Item Three
       </TabPanel>
-    </div>
+    </TabsContainer>
   )
 }

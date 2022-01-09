@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {type ElementId} from '@aglyn/core-data-framework'
 import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
+import {type ElementId} from '@aglyn/core-data-framework'
 import {
   useAglynAppContext,
   useAglynComponentSchema,
@@ -190,6 +190,7 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
         size={size}
         open={toggled}
         anchor="right"
+        component="aside"
         {...rest}
       >
         <MuiTabContext value={hexadecimalFromNumber(value)}>

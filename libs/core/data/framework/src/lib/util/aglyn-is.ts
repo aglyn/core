@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import {
   COMPONENT_ELEMENT_TYPE,
   EXTENSION_TYPE,
   MODULE_TYPE,
-  TYPE_KIND,
-  TYPE_OF,
+  OF_KIND,
+  OF_TYPE,
 } from '../constants/symbol'
 import {type AglynAppModule} from '../controllers/aglyn-app.types'
 import {
@@ -35,7 +35,7 @@ import {type IAglynExtension} from '../models/aglyn-extension.types'
 
 export function typeOf(object: unknown) {
   if (_isFnT(object) || _isObj(object)) {
-    const _typeof = object[TYPE_OF]
+    const _typeof = object[OF_TYPE]
     switch (_typeof) {
       case MODULE_TYPE:
         return _typeof
@@ -50,7 +50,7 @@ export function typeOf(object: unknown) {
 export function kindOf(object: unknown) {
   if (_isFnT(object) || _isObj(object)) {
     // eslint-disable-next-line no-case-declarations
-    const kind = object[TYPE_KIND]
+    const kind = object[OF_KIND]
 
     switch (kind) {
       case MODULE_TYPE:

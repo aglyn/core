@@ -32,9 +32,9 @@ export const schema: AglynComponentSchema<AppBarProps> = {
   displayName: 'App Toolbar',
   icon: {
     path: mdiPageLayoutHeader.path,
-    color: '#2196f3',
+    sx: {color: '#2196f3'},
   },
-  propsSchema: {
+  formSchema: {
     fields: [
       FIELD_COLOR_ALT1,
       FIELD_POSITION,
@@ -46,7 +46,7 @@ export const schema: AglynComponentSchema<AppBarProps> = {
       label: 'App Toolbar',
       icon: {
         path: mdiPageLayoutHeader.path,
-        color: '#2196f3',
+        sx: {color: '#2196f3'},
       },
       data: {
         componentId: ID,

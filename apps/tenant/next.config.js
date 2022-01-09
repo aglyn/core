@@ -16,10 +16,10 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withAglyn = require('../../nextjs-base.config')
+const withAglyn = require('../../tools/nextjs-base.config')
 
 /**
- * @type {import('@nrwl/next/plugins/with-nx').WithNxOptions}
+ * @type {import('/tools/nextjs-base.config').WithAglynOptions}
  **/
 const nextConfig = {
   nx: {

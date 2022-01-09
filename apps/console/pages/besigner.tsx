@@ -38,6 +38,6 @@ function Besigner(props) {
   return <AglynBesigner />
 }
 
-Besigner.displayName = 'Page-Besigner'
+Besigner.displayName = 'Page:Besigner'
 
 export default Besigner

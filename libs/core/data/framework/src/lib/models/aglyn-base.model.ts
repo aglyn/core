@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,16 @@ import {getStaticField} from '@aglyn/shared-util-tools'
 import {AGLYN_EMITTER, type AglynEmitter} from '../constants/emitter'
 import {AGLYN_ERROR, type AglynErrorFactory} from '../constants/error'
 import {AGLYN_LOGGER, type AglynLogger} from '../constants/logger'
-import {AGLYN_PLATFORM, type AglynPlatform} from '../constants/platform'
-import {type AglynVersion, SDK_VERSION} from '../constants/version'
 import {type AglynBaseModelOptions, type IAglynBaseModel} from './aglyn-base.types'
 
 
 const TAG = 'AglynBaseModel'
-const MODULE_NAME = 'model'
+const NS = 'aglyn.core.data.framework.model.base'
 
 export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> implements IAglynBaseModel<O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = MODULE_NAME
-  public static readonly platform: AglynPlatform = AGLYN_PLATFORM
-  public static readonly sdkVersion: AglynVersion = SDK_VERSION
+  public static readonly namespace: string = NS
 
   readonly #options: O = null
   readonly #created: Timestamp
@@ -42,30 +38,12 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   #emitter: AglynEmitter
   #logger: AglynLogger
 
-  public get [Symbol.toStringTag](): string {
-    return getStaticField(Symbol.toStringTag, this)
-  }
-  public get namespace(): string {
-    return getStaticField('namespace', this)
-  }
-  public get platform(): AglynPlatform {
-    return getStaticField('platform', this)
-  }
-  public get sdkVersion(): AglynVersion {
-    return getStaticField('sdkVersion', this)
-  }
-  public get options(): O {
-    return this.#options
-  }
-  public get errorFactory(): AglynErrorFactory {
-    return this.#errorFactory
-  }
-  public get logger(): AglynLogger {
-    return this.#logger
-  }
-  public get emitter(): AglynEmitter {
-    return this.#emitter
-  }
+  public get [Symbol.toStringTag](): string {return getStaticField(Symbol.toStringTag, this)}
+  public get namespace(): string {return getStaticField('namespace', this)}
+  public get options(): O {return this.#options}
+  public get errorFactory(): AglynErrorFactory {return this.#errorFactory}
+  public get logger(): AglynLogger {return this.#logger}
+  public get emitter(): AglynEmitter {return this.#emitter}
 
   protected constructor(options: O) {
     this.#options = {...options}
@@ -92,8 +70,6 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
     return {
       namespace: this.namespace,
       created: this.#created,
-      sdkVersion: this.sdkVersion,
-      platform: this.platform,
     }
   }
 

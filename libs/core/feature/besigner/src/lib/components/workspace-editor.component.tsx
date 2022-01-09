@@ -16,14 +16,28 @@
  */
 
 import {styled} from '@aglyn/shared-feature-themes'
+import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
 import Stack, {type StackProps} from '@mui/material/Stack'
+import dynamic from 'next/dynamic'
 import {forwardRef} from 'react'
 import AppBarPrimaryComponent from './app-bar-primary.component'
 import AppBarSecondaryComponent from './app-bar-secondary.component'
-import PanelLeftComponent from './panel-left.component'
-import PanelRightComponent from './panel-right.component'
-import ViewportRootComponent from './viewport-root.component'
 
+
+const PanelLeftComponent = dynamic(
+  () => import('./panel-left.component').then((mod) => mod.PanelLeftComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
+
+const PanelRightComponent = dynamic(
+  () => import('./panel-right.component').then((mod) => mod.PanelRightComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
+
+const ViewportRootComponent = dynamic(
+  () => import('./viewport-root.component').then((mod) => mod.ViewportRootComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
 
 const WorkspaceEditor = styled(Stack, {
   name: 'AglynWorkspaceEditor',
@@ -59,6 +73,7 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
           justifyContent="flex-start"
           alignItems="stretch"
           id="aglyn:besigner-header"
+          component="header"
           spacing={0}
           sx={{
             zIndex: 1,
@@ -71,9 +86,11 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
         <Stack
           direction="row"
           alignItems="stretch"
+          justifyContent="space-between"
+          id="aglyn:besigner-main"
+          component="main"
           flexGrow={1}
           spacing={0}
-          id="aglyn:besigner-main"
           sx={{
             overflow: 'hidden',
             zIndex: 0,

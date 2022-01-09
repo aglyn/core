@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 
 import {type Dictionary, type Implements} from '@aglyn/shared-data-types'
-import {type SYMBOL_TYPE, type TYPE_KIND, type TYPE_OF} from './constants/symbol'
+import {type OF_KIND, type OF_TYPE, type SYMBOL_TYPE} from './constants/symbol'
 
 
 export type Payload<T = any> = {payload: T}
@@ -45,8 +45,8 @@ export type AglynRegisters<K extends string, T1, T2 = T1> = Implements<'register
   Implements<'unregister', K, (...data: T2[]) => void>
 
 export type AglynTypeFields<T extends SYMBOL_TYPE, U extends SYMBOL_TYPE = never> = {
-  readonly [TYPE_OF]?: T
-  readonly [TYPE_KIND]?: U
+  readonly [OF_TYPE]?: T
+  readonly [OF_KIND]?: U
 }
 
 export interface AglynNamed {

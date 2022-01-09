@@ -37,8 +37,8 @@ export type JSXIntrinsicClassAttributes<T> = JSX.IntrinsicClassAttributes<T>
 export type JSXIntrinsicElementMap<P = any> = { [K in keyof JSXIntrinsicElements]: P extends JSXIntrinsicElements[K] ? K : never }
 export type JSXIntrinsicElement<P = any> = JSXIntrinsicElementMap<P>[keyof JSXIntrinsicElements]
 
-export type JSXElementFunctionComponent<P> = {(props: P): JSXElement | null}
-export type JSXElementClassComponent<P> = JSXComponentClass<P, any>
+export type JSXElementFunctionComponent<P = any> = {(props: P): JSX.Element | null}
+export type JSXElementClassComponent<P = any> = JSXComponentClass<P, any>
 export type JSXComponentType<P> = JSXElementFunctionComponent<P> | JSXElementClassComponent<P>
 export type JSXElementType<P = any> =
   | JSXIntrinsicElement<P>

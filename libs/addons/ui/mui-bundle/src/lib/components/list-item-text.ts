@@ -28,9 +28,7 @@ export const schema: AglynComponentSchema<ListItemTextProps> = {
   componentId: ID,
   bundleId: BUNDLE_ID,
   displayName: 'List Item Text',
-  icon: {
-    path: mdiFormatListChecks.path,
-  },
+  icon: {path: mdiFormatListChecks.path},
   templates: [
     {
       id: generateTemplateId(ID),

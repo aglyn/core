@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,15 +75,15 @@ export interface IAglynCanvasController extends IAglynModuleModel<AglynCanvasCon
   getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynComponentElementDataNormalizedMap>
   getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynComponentElementDataDenormalizedList>
 
-  undo(payload?: CanvasUndoPayload)
-  redo(payload?: CanvasRedoPayload)
+  undo(payload?: CanvasUndoPayload): this
+  redo(payload?: CanvasRedoPayload): this
 
-  setElements(payload: CanvasSetElementsPayload)
-  addElement(payload: CanvasAddElementPayload)
-  updateElement(payload: CanvasUpdateElementPayload)
-  deleteElement(payload: CanvasDeleteElementPayload)
-  moveElement(payload: CanvasMoveElementPayload)
-  duplicateElement(payload: CanvasDuplicateElementPayload)
+  setElements(payload: CanvasSetElementsPayload): this
+  addElement(payload: CanvasAddElementPayload): this
+  updateElement(payload: CanvasUpdateElementPayload): this
+  deleteElement(payload: CanvasDeleteElementPayload): this
+  moveElement(payload: CanvasMoveElementPayload): this
+  duplicateElement(payload: CanvasDuplicateElementPayload): this
 }
 
 export interface AglynCanvasControllerT extends AglynModuleModelT<AglynCanvasControllerOptions> {
