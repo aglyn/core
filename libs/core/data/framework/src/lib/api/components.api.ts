@@ -26,7 +26,7 @@ import {
   type ComponentSchemaGetPayload,
   type ComponentUnregisterPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
 import {
   type AglynComponentElementTemplate,
   type AglynComponentsBundle,
@@ -36,7 +36,7 @@ import {
   type ComponentsRegistryValues,
   type IAglynComponent,
   type IAglynComponentsController,
-} from '../controllers/aglyn-components.types'
+} from '../types/aglyn-components.types'
 import {_validateAppArg} from './app.api'
 
 

@@ -26,7 +26,7 @@ import {
   type AglynAppOptions,
   type AppUUN,
   type IAglynAppController,
-} from '../controllers/aglyn-app.types'
+} from '../types/aglyn-app.types'
 
 
 export function getAllApps(): IAglynAppController[] {

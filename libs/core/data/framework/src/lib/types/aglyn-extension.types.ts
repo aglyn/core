@@ -16,14 +16,14 @@
  */
 
 import {type AglynLifecycleFlag} from '../constants/lifecycle'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
-import {type ExtensionUUN} from '../controllers/aglyn-extensions.types'
-import {type AglynLoadableObserver} from '../types'
+import {type IAglynAppController} from './aglyn-app.types'
+import {type ExtensionUUN} from './aglyn-extensions.types'
 import {
   type AglynModuleModelOptions,
   type AglynModuleModelT,
   type IAglynModuleModel,
 } from './aglyn-module.types'
+import {type AglynLoadableObserver} from './generic.types'
 
 
 export interface AglynExtensionOptions extends AglynModuleModelOptions {

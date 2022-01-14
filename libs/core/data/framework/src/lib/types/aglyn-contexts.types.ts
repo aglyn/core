@@ -35,7 +35,7 @@ import {
   type AglynModuleModelOptions,
   type AglynModuleModelT,
   type IAglynModuleModel,
-} from '../models/aglyn-module.types'
+} from './aglyn-module.types'
 import {type IAglynAppController} from './aglyn-app.types'
 
 

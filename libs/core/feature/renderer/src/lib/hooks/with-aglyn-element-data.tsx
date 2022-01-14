@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 
 import {
-  type AglynComponentElementDataNormalized,
+  type AglynElementNormalized,
   type ElementId,
   type IAglynComponent,
 } from '@aglyn/core-data-framework'
@@ -35,7 +35,7 @@ export interface RequiredElementDataProps {
 }
 
 export interface OptionalElementDataProps extends InnerRefProp {
-  elementData: AglynComponentElementDataNormalized<any>
+  elementData: AglynElementNormalized<any>
   component: IAglynComponent<any>
   elemProps: any
 }

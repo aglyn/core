@@ -21,7 +21,7 @@ import {getStaticField} from '@aglyn/shared-util-tools'
 import {AGLYN_EMITTER, type AglynEmitter} from '../constants/emitter'
 import {AGLYN_ERROR, type AglynErrorFactory} from '../constants/error'
 import {AGLYN_LOGGER, type AglynLogger} from '../constants/logger'
-import {type AglynBaseModelOptions, type IAglynBaseModel} from './aglyn-base.types'
+import {type AglynBaseModelOptions, type IAglynBaseModel} from '../types/aglyn-base.types'
 
 
 const TAG = 'AglynBaseModel'

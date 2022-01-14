@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,17 @@
 
 import {_isArr} from '@aglyn/shared-util-guards'
 import {
-  type AglynComponentElementDataDenormalized,
-  type AglynComponentElementDataNormalizedMap,
-  type ElementId,
-} from '../controllers/aglyn-components.types'
+  AglynElementDenormalized,
+  AglynElementNormalizedMap,
+  ElementId,
+} from '../types/aglyn-elements.types'
 
 
 const normalizeData = (
-  element: AglynComponentElementDataDenormalized,
+  element: AglynElementDenormalized,
   parentId: ElementId,
-  flatMap: AglynComponentElementDataNormalizedMap = {},
-): AglynComponentElementDataNormalizedMap => {
+  flatMap: AglynElementNormalizedMap = {},
+): AglynElementNormalizedMap => {
   const {elements, ...rest} = element
   flatMap[rest.$id] = {...rest, parentId, elements: []}
   flatMap[parentId] = {
@@ -41,17 +41,17 @@ const normalizeData = (
 }
 
 export function normalizeComponentElementData(
-  element: AglynComponentElementDataDenormalized,
+  element: AglynElementDenormalized,
   parentId?: ElementId,
-): AglynComponentElementDataNormalizedMap
+): AglynElementNormalizedMap
 export function normalizeComponentElementData(
-  elements: AglynComponentElementDataDenormalized[],
+  elements: AglynElementDenormalized[],
   parentId?: ElementId,
-): AglynComponentElementDataNormalizedMap
+): AglynElementNormalizedMap
 export function normalizeComponentElementData(
-  elements: AglynComponentElementDataDenormalized | AglynComponentElementDataDenormalized[],
+  elements: AglynElementDenormalized | AglynElementDenormalized[],
   parentId?: ElementId,
-): AglynComponentElementDataNormalizedMap {
+): AglynElementNormalizedMap {
   let elemData
 
   (_isArr(elements) ? elements : [elements]).forEach((element) => {

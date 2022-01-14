@@ -22,8 +22,7 @@ import {
   type AglynBaseModelOptions,
   type AglynBaseModelT,
   type IAglynBaseModel,
-} from '../models/aglyn-base.types'
-import {type AglynUniqueId, type Payload} from '../types'
+} from './aglyn-base.types'
 import {type AglynCanvasControllerOptions, type IAglynCanvasController} from './aglyn-canvas.types'
 import {type IAglynCommandsController} from './aglyn-commands.types'
 import {
@@ -38,6 +37,7 @@ import {
   type AglynExtensionsControllerOptions,
   type IAglynExtensionsController,
 } from './aglyn-extensions.types'
+import {type AglynUniqueId, type Payload} from './generic.types'
 
 
 export type AppUUN = string

@@ -18,7 +18,7 @@
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {PropertyEditorFieldFlag} from '@aglyn/shared-ui-jsx'
-import {type AglynComponentPropsFormSchema} from '../controllers/aglyn-components.types'
+import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
 
 
 export {PropertyEditorFieldFlag}

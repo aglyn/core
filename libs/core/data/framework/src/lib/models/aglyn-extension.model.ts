@@ -19,9 +19,9 @@ import {getStaticField} from '@aglyn/shared-util-tools'
 import {AglynErrorEventFlag} from '../constants/error'
 import {AglynLifecycleFlag, nextLifecycleIsValid} from '../constants/lifecycle'
 import {EXTENSION_TYPE, OF_KIND} from '../constants/symbol'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
-import {type ExtensionUUN} from '../controllers/aglyn-extensions.types'
-import {type AglynExtensionOptions, type IAglynExtension} from './aglyn-extension.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {type ExtensionUUN} from '../types/aglyn-extensions.types'
+import {type AglynExtensionOptions, type IAglynExtension} from '../types/aglyn-extension.types'
 import {AglynModuleModel} from './aglyn-module.model'
 
 

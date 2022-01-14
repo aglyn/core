@@ -24,13 +24,13 @@ import {
   type ContextsGetStorePayload,
   type ContextsSetStorePayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
 import {
   type ContextEffect,
   type ContextEvent,
   type ContextStore,
   type IAglynContextsController,
-} from '../controllers/aglyn-contexts.types'
+} from '../types/aglyn-contexts.types'
 import {_validateAppArg} from './app.api'
 
 

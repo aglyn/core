@@ -30,8 +30,8 @@ import {
   type CanvasUndoPayload,
   type CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
-import {type IAglynCanvasController} from '../controllers/aglyn-canvas.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {type IAglynCanvasController} from '../types/aglyn-canvas.types'
 import {_validateAppArg} from './app.api'
 
 

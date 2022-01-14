@@ -28,24 +28,24 @@ import {
   type CanvasUndoPayload,
   type CanvasUpdateElementPayload,
 } from '../constants/emitter'
+import {type IAglynAppController} from './aglyn-app.types'
+import {type ContextDomain, type ContextEvent, type ContextStore} from './aglyn-contexts.types'
+import {
+  type AglynElementDenormalized,
+  type AglynElementDenormalizedList,
+  type AglynElementNormalizedMap,
+} from './aglyn-elements.types'
 import {
   type AglynModuleModelOptions,
   type AglynModuleModelT,
   type IAglynModuleModel,
-} from '../models/aglyn-module.types'
-import {type IAglynAppController} from './aglyn-app.types'
-import {
-  type AglynComponentElementDataDenormalized,
-  type AglynComponentElementDataDenormalizedList,
-  type AglynComponentElementDataNormalizedMap,
-} from './aglyn-components.types'
-import {type ContextDomain, type ContextEvent, type ContextStore} from './aglyn-contexts.types'
+} from './aglyn-module.types'
 
 
 export type ElementsDataStore = {
-  past: AglynComponentElementDataNormalizedMap[]
-  present: AglynComponentElementDataNormalizedMap
-  future: AglynComponentElementDataNormalizedMap[]
+  past: AglynElementNormalizedMap[]
+  present: AglynElementNormalizedMap
+  future: AglynElementNormalizedMap[]
 }
 
 export interface ElementsDataStoreApi {
@@ -60,20 +60,20 @@ export interface ElementsDataStoreApi {
 }
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
-  initialElements: AglynComponentElementDataDenormalized[]
+  initialElements: AglynElementDenormalized[]
 }
 
 export interface IAglynCanvasController extends IAglynModuleModel<AglynCanvasControllerOptions> {
   readonly domain: ContextDomain
   readonly events: ElementsDataStoreApi
   readonly context: ContextStore<ElementsDataStore>
-  readonly normalizedElementsStore: ContextStore<AglynComponentElementDataNormalizedMap>
-  readonly denormalizedElementsStore: ContextStore<AglynComponentElementDataDenormalizedList>
+  readonly normalizedElementsStore: ContextStore<AglynElementNormalizedMap>
+  readonly denormalizedElementsStore: ContextStore<AglynElementDenormalizedList>
 
   getStore(payload?: CanvasGetApiEventsPayload): ContextStore<ElementsDataStore>
   getApiEvents(payload?: CanvasGetApiEventsPayload): ElementsDataStoreApi
-  getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynComponentElementDataNormalizedMap>
-  getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynComponentElementDataDenormalizedList>
+  getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynElementNormalizedMap>
+  getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynElementDenormalizedList>
 
   undo(payload?: CanvasUndoPayload): this
   redo(payload?: CanvasRedoPayload): this

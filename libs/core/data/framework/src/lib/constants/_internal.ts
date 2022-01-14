@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import {type AppUUN, type IAglynAppController} from '../controllers/aglyn-app.types'
-import {type IAglynCanvasController} from '../controllers/aglyn-canvas.types'
-import {type IAglynCommandsController} from '../controllers/aglyn-commands.types'
-import {type IAglynComponentsController} from '../controllers/aglyn-components.types'
-import {type IAglynContextsController} from '../controllers/aglyn-contexts.types'
-import {type IAglynExtensionsController} from '../controllers/aglyn-extensions.types'
+import {type AppUUN, type IAglynAppController} from '../types/aglyn-app.types'
+import {type IAglynCanvasController} from '../types/aglyn-canvas.types'
+import {type IAglynCommandsController} from '../types/aglyn-commands.types'
+import {type IAglynComponentsController} from '../types/aglyn-components.types'
+import {type IAglynContextsController} from '../types/aglyn-contexts.types'
+import {type IAglynExtensionsController} from '../types/aglyn-extensions.types'
 
 
 export const _INTERNAL_APPS_: Map<AppUUN, IAglynAppController> = new Map()

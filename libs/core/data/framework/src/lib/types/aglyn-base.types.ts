@@ -21,7 +21,7 @@ import {type Timestamp} from '@aglyn/shared-util-timestamp'
 import {type AglynEmitter} from '../constants/emitter'
 import {type AglynErrorFactory} from '../constants/error'
 import {type AglynLogger} from '../constants/logger'
-import {type AglynLifecycleObserver} from '../types'
+import {type AglynLifecycleObserver} from './generic.types'
 
 
 export interface AglynBaseModelOptions {

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 
 import {
-  type AglynComponentElementDataNormalized,
+  type AglynElementNormalized,
   type ElementId,
   getCanvasNormalizedElementsStore,
 } from '@aglyn/core-data-framework'
@@ -26,23 +26,23 @@ import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
 export type UseAglynElementData<P = AnyProps,
-  K extends keyof AglynComponentElementDataNormalized<P> = null> = Conditional<K,
-  keyof AglynComponentElementDataNormalized<P>,
-  AglynComponentElementDataNormalized<P>[K],
-  AglynComponentElementDataNormalized<P>>
+  K extends keyof AglynElementNormalized<P> = null> = Conditional<K,
+  keyof AglynElementNormalized<P>,
+  AglynElementNormalized<P>[K],
+  AglynElementNormalized<P>>
 
 export function useAglynElementData<P = EmptyObj>(
   $id: ElementId,
-): AglynComponentElementDataNormalized<P>
+): AglynElementNormalized<P>
 
 export function useAglynElementData<P = EmptyObj,
-  K extends keyof AglynComponentElementDataNormalized<P> = null>(
+  K extends keyof AglynElementNormalized<P> = null>(
   $id: ElementId,
   key: K,
-): AglynComponentElementDataNormalized<P>[K]
+): AglynElementNormalized<P>[K]
 
 export function useAglynElementData<P = EmptyObj,
-  K extends keyof AglynComponentElementDataNormalized<P> = null>(
+  K extends keyof AglynElementNormalized<P> = null>(
   $id: ElementId,
   key?: K,
 ): UseAglynElementData<P, K> {

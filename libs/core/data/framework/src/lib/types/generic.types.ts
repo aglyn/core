@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import {type Dictionary, type Implements} from '@aglyn/shared-data-types'
-import {type OF_KIND, type OF_TYPE, type SYMBOL_TYPE} from './constants/symbol'
+import {type Dictionary} from '@aglyn/shared-data-types'
 
 
 export type Payload<T = any> = {payload: T}
@@ -28,30 +27,6 @@ export type AglynUniqueId<T extends boolean = false> = T extends boolean
     ? {getId(): string}
     : {readonly $id: string}
   : never
-
-export type AglynLoads<K extends string, T extends AglynUniqueId> = Implements<'load',
-  K,
-  (...data: T[]) => void> &
-  Implements<'unload', K, (...data: T[]) => void>
-
-export type AglynRegistersType<K extends string, T extends AglynUniqueId> = Implements<'register',
-  '',
-  (type: K, data: T) => void> &
-  Implements<'unregister', '', (type: K, id: T['$id']) => void>
-
-export type AglynRegisters<K extends string, T1, T2 = T1> = Implements<'register',
-  K,
-  (...data: T1[]) => void> &
-  Implements<'unregister', K, (...data: T2[]) => void>
-
-export type AglynTypeFields<T extends SYMBOL_TYPE, U extends SYMBOL_TYPE = never> = {
-  readonly [OF_TYPE]?: T
-  readonly [OF_KIND]?: U
-}
-
-export interface AglynNamed {
-  name?: string
-}
 
 /** Observers to handle life cycle onInit/onDestroy events */
 export interface AglynLifecycleObserver<T = any> {
@@ -75,7 +50,6 @@ export interface AglynLoadableObserver<T1 = any, T2 = T1> extends AglynLifecycle
    */
   aglynOnUnload?(props?: T2): void
 }
-
 
 export interface ModificationHistoryState<T> {
   past: [previous?: T, ...more: T[]],

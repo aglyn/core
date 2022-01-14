@@ -19,7 +19,7 @@ import {
   type ComponentRegisterPayload,
   type ComponentsBundleRegisterPayload,
 } from '../constants/emitter'
-import {type AglynComponentsBundleSchema} from '../controllers/aglyn-components.types'
+import {type AglynComponentsBundleSchema} from '../types/aglyn-components.types'
 
 
 export function createComponentsBundle(

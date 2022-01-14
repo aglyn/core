@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,13 @@
 
 import {_isArr} from '@aglyn/shared-util-guards'
 import {arrayRemoveItem} from '@aglyn/shared-util-tools'
-import {
-  type  AglynComponentElementDataNormalizedMap,
-  type  ElementId,
-} from '../controllers/aglyn-components.types'
+import {AglynElementNormalizedMap, ElementId} from '../types/aglyn-elements.types'
 
 
 export function deleteComponentElement(
   $id: ElementId,
-  state: AglynComponentElementDataNormalizedMap,
-): AglynComponentElementDataNormalizedMap {
+  state: AglynElementNormalizedMap,
+): AglynElementNormalizedMap {
   const {[$id]: element, ...restStore} = state
   let store = restStore
   const parent = store[element?.parentId]

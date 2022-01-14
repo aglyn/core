@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import {
   type CanvasSetElementsPayload,
   type CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {type ElementsDataStore} from '../controllers/aglyn-canvas.types'
-import {type AglynComponentElementDataNormalizedMap} from '../controllers/aglyn-components.types'
+import {type ElementsDataStore} from '../types/aglyn-canvas.types'
+import {AglynElementNormalizedMap} from '../types/aglyn-elements.types'
 import {createComponentElementDataCopy} from './create-component-element-data-copy'
 import {deleteComponentElement} from './delete-component-element'
 import {getComponentElementHierarchy} from './get-component-element-hierarchy'
@@ -49,7 +49,7 @@ export const handleCanvasApiChangeEvent = <S extends ElementsDataStore, P>(
 
 
 export const handleCanvasSetElements = (
-  state: AglynComponentElementDataNormalizedMap,
+  state: AglynElementNormalizedMap,
   payload: CanvasSetElementsPayload,
 ) => {
 
@@ -57,7 +57,7 @@ export const handleCanvasSetElements = (
   return elements
 }
 export const handleCanvasAddElement = (
-  state: AglynComponentElementDataNormalizedMap,
+  state: AglynElementNormalizedMap,
   payload: CanvasAddElementPayload,
 ) => {
 
@@ -86,7 +86,7 @@ export const handleCanvasAddElement = (
 
 
 export const handleCanvasUpdateElement = (
-  state: AglynComponentElementDataNormalizedMap,
+  state: AglynElementNormalizedMap,
   payload: CanvasUpdateElementPayload,
 ) => {
 
@@ -103,7 +103,7 @@ export const handleCanvasUpdateElement = (
 
 
 export const handleCanvasMoveElement = (
-  state: AglynComponentElementDataNormalizedMap,
+  state: AglynElementNormalizedMap,
   payload: CanvasMoveElementPayload,
 ) => {
 
@@ -161,7 +161,7 @@ export const handleCanvasMoveElement = (
 
 
 export const handleCanvasDuplicateElement = (
-  state: AglynComponentElementDataNormalizedMap,
+  state: AglynElementNormalizedMap,
   payload: CanvasDuplicateElementPayload,
 ) => {
 
@@ -177,7 +177,7 @@ export const handleCanvasDuplicateElement = (
   })
 }
 export const handleCanvasDeleteElement = (
-  state: AglynComponentElementDataNormalizedMap,
+  state: AglynElementNormalizedMap,
   payload: CanvasDeleteElementPayload,
 ) => {
 

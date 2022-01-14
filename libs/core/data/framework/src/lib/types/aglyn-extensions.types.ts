@@ -23,12 +23,12 @@ import {
   type ExtensionRegisterPayload,
   type ExtensionUnloadPayload,
 } from '../constants/emitter'
-import {type AglynExtensionT, type IAglynExtension} from '../models/aglyn-extension.types'
+import {type AglynExtensionT, type IAglynExtension} from './aglyn-extension.types'
 import {
   type AglynModuleModelOptions,
   type AglynModuleModelT,
   type IAglynModuleModel,
-} from '../models/aglyn-module.types'
+} from './aglyn-module.types'
 import {type IAglynAppController} from './aglyn-app.types'
 
 

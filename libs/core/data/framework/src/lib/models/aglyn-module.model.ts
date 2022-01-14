@@ -17,13 +17,13 @@
 
 import {getStaticField} from '@aglyn/shared-util-tools'
 import {MODULE_TYPE, OF_KIND, OF_TYPE} from '../constants/symbol'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
 import {AglynBaseModel} from './aglyn-base.model'
 import {
   type AglynModuleEffectListener,
   type AglynModuleModelOptions,
   type IAglynModuleModel,
-} from './aglyn-module.types'
+} from '../types/aglyn-module.types'
 
 
 const TAG = 'AglynModule'

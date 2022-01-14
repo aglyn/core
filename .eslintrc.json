@@ -52,6 +52,14 @@
               {
                 "sourceTag": "sc:lib:core:data",
                 "onlyDependOnLibsWithTags": [
+                  "sc:lib:core:data",
+                  "sc:lib:shared:util",
+                  "sc:lib:shared:feature"
+                ]
+              },
+              {
+                "sourceTag": "sc:lib:core:data:framework",
+                "onlyDependOnLibsWithTags": [
                   "sc:lib:shared:util",
                   "sc:lib:shared:feature"
                 ]

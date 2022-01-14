@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
  */
 
 import {
-  type AglynComponentElementDataDenormalized,
-  type AglynComponentElementDataNormalizedMap,
-  type ElementId,
-} from '../controllers/aglyn-components.types'
+  AglynElementDenormalized,
+  AglynElementNormalizedMap,
+  ElementId,
+} from '../types/aglyn-elements.types'
 import {createComponentElementData} from './create-component-element-data'
 import {denormalizeComponentElementData} from './denormalize-component-element-data'
 
 
 export const createComponentElementDataCopy = (
   $id: ElementId,
-  state: AglynComponentElementDataNormalizedMap,
-): AglynComponentElementDataDenormalized => {
+  state: AglynElementNormalizedMap,
+): AglynElementDenormalized => {
   const element = state[$id]
   const parentElements = denormalizeComponentElementData(state, element.parentId)
   const denormalizedElement = parentElements.find((i) => i.$id === $id)

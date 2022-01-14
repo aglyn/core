@@ -28,23 +28,23 @@ import {AglynAppEffectFlag, AglynAppEventFlag} from '../constants/emitter'
 import {AGLYN_PLATFORM, AglynPlatform} from '../constants/platform'
 import {AglynVersion, SDK_VERSION} from '../constants/version'
 import {AglynBaseModel} from '../models/aglyn-base.model'
-import {IAglynModuleModel} from '../models/aglyn-module.types'
+import {IAglynModuleModel} from '../types/aglyn-module.types'
 import {
   type AglynAppOptions,
   type AglynEffectOptions,
   type AppUUN,
   type IAglynAppController,
-} from './aglyn-app.types'
+} from '../types/aglyn-app.types'
 import AglynCanvasController from './aglyn-canvas.controller'
-import {type IAglynCanvasController} from './aglyn-canvas.types'
+import {type IAglynCanvasController} from '../types/aglyn-canvas.types'
 import AglynCommandsController from './aglyn-commands.controller'
-import {type IAglynCommandsController} from './aglyn-commands.types'
+import {type IAglynCommandsController} from '../types/aglyn-commands.types'
 import AglynComponentsController from './aglyn-components.controller'
-import {type IAglynComponentsController} from './aglyn-components.types'
+import {type IAglynComponentsController} from '../types/aglyn-components.types'
 import AglynContextsController from './aglyn-contexts.controller'
-import {type IAglynContextsController} from './aglyn-contexts.types'
+import {type IAglynContextsController} from '../types/aglyn-contexts.types'
 import AglynExtensionsController from './aglyn-extensions.controller'
-import {type IAglynExtensionsController} from './aglyn-extensions.types'
+import {type IAglynExtensionsController} from '../types/aglyn-extensions.types'
 
 
 const TAG = 'AglynApp'

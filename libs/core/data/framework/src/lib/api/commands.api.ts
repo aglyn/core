@@ -23,8 +23,8 @@ import {
   type CommandsTriggerPayload,
   type CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
-import {type IAglynCommandsController} from '../controllers/aglyn-commands.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {type IAglynCommandsController} from '../types/aglyn-commands.types'
 import {_validateAppArg} from './app.api'
 
 

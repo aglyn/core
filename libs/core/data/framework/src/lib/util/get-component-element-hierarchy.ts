@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,17 @@
 
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import {
-  type AglynComponentElementDataNormalizedMap,
-  type AglynComponentElementHierarchy,
-  type  ElementId,
-} from '../controllers/aglyn-components.types'
+  AglynElementHierarchy,
+  AglynElementNormalizedMap,
+  ElementId,
+} from '../types/aglyn-elements.types'
 import isRootElementId from './is-root-element-id'
 
 
 export function getComponentElementHierarchy<T extends ElementId>(
   $id: T,
-  elements: AglynComponentElementDataNormalizedMap,
-): AglynComponentElementHierarchy<T> {
+  elements: AglynElementNormalizedMap,
+): AglynElementHierarchy<T> {
   const hierarchy = [CANVAS_ROOT_ELEMENT_ID]
 
   let currentId: ElementId = $id
@@ -36,7 +36,7 @@ export function getComponentElementHierarchy<T extends ElementId>(
     currentId = elements[currentId]?.parentId
   }
 
-  return hierarchy as AglynComponentElementHierarchy<T>
+  return hierarchy as AglynElementHierarchy<T>
 }
 
 export default getComponentElementHierarchy

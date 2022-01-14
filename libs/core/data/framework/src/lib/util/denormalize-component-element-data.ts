@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,18 @@
 
 import {_isStrT} from '@aglyn/shared-util-guards'
 import {
-  type AglynComponentElementDataDenormalized,
-  type AglynComponentElementDataNormalized,
-  type AglynComponentElementDataNormalizedMap,
-  type ElementId,
-} from '../controllers/aglyn-components.types'
+  AglynElementDenormalized,
+  AglynElementNormalized,
+  AglynElementNormalizedMap,
+  ElementId,
+} from '../types/aglyn-elements.types'
 
 
 const denormalizeData = (
-  element: AglynComponentElementDataNormalized,
-  flatMap: AglynComponentElementDataNormalizedMap = {},
-  elemData: AglynComponentElementDataDenormalized[] = [],
-): AglynComponentElementDataDenormalized => {
+  element: AglynElementNormalized,
+  flatMap: AglynElementNormalizedMap = {},
+  elemData: AglynElementDenormalized[] = [],
+): AglynElementDenormalized => {
   const {elements, ...rest} = element
 
   return {
@@ -40,21 +40,21 @@ const denormalizeData = (
 }
 
 export function denormalizeComponentElementData(
-  element: AglynComponentElementDataNormalized,
+  element: AglynElementNormalized,
   parentId: ElementId,
-): AglynComponentElementDataDenormalized[]
+): AglynElementDenormalized[]
 export function denormalizeComponentElementData(
-  elements: AglynComponentElementDataNormalizedMap,
+  elements: AglynElementNormalizedMap,
   parentId: ElementId,
-): AglynComponentElementDataDenormalized[]
+): AglynElementDenormalized[]
 export function denormalizeComponentElementData(
-  elements: AglynComponentElementDataNormalized | AglynComponentElementDataNormalizedMap,
+  elements: AglynElementNormalized | AglynElementNormalizedMap,
   parentId: ElementId,
-): AglynComponentElementDataDenormalized[] {
-  const elemData: AglynComponentElementDataDenormalized[] = []
-  const elems: AglynComponentElementDataNormalizedMap = _isStrT(elements.$id)
-    ? {[elements.$id]: {...elements}} as AglynComponentElementDataNormalizedMap
-    : {...elements} as AglynComponentElementDataNormalizedMap
+): AglynElementDenormalized[] {
+  const elemData: AglynElementDenormalized[] = []
+  const elems: AglynElementNormalizedMap = _isStrT(elements.$id)
+    ? {[elements.$id]: {...elements}} as AglynElementNormalizedMap
+    : {...elements} as AglynElementNormalizedMap
 
   elemData.push(
     ...(elems[parentId].elements || []).map(($id: any) =>

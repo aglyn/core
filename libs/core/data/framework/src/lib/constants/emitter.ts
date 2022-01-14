@@ -22,31 +22,33 @@ import {
   type createEvent as createEffectorEvent,
 } from 'effector'
 
-import {type AppUUN} from '../controllers/aglyn-app.types'
+import {type AppUUN} from '../types/aglyn-app.types'
 import {
   type AglynCommandListener,
   type AglynCommandResolver,
   type CommandUId,
-} from '../controllers/aglyn-commands.types'
+} from '../types/aglyn-commands.types'
 import {
-  type AglynComponentElementDataDenormalized,
-  type AglynComponentElementDataNormalized,
-  type AglynComponentElementDataNormalizedMap,
   type AglynComponentsBundle,
   type AglynComponentSchema,
   type BundleUId,
   type ComponentId,
-  type ElementId,
   type IAglynComponent,
-} from '../controllers/aglyn-components.types'
+} from '../types/aglyn-components.types'
 import {
   type ContextStore,
   type ContextStoreOptions,
   type ContextStoreUid,
-} from '../controllers/aglyn-contexts.types'
-import {type AglynExtensionLoader, type ExtensionUUN} from '../controllers/aglyn-extensions.types'
-import {type AglynExtensionOptions, type IAglynExtension} from '../models/aglyn-extension.types'
-import {type PayloadData} from '../types'
+} from '../types/aglyn-contexts.types'
+import {
+  AglynElementDenormalized,
+  AglynElementNormalized,
+  AglynElementNormalizedMap,
+  ElementId,
+} from '../types/aglyn-elements.types'
+import {type AglynExtensionOptions, type IAglynExtension} from '../types/aglyn-extension.types'
+import {type AglynExtensionLoader, type ExtensionUUN} from '../types/aglyn-extensions.types'
+import {type PayloadData} from '../types/generic.types'
 
 
 export enum AglynAppEventFlag {
@@ -200,13 +202,13 @@ export type CommandsTriggerPayload = PayloadData<{commandId: CommandUId} & Dicti
 export type CanvasUndoPayload = PayloadData<any>
 export type CanvasRedoPayload = PayloadData<any>
 export type CanvasGetStorePayload = PayloadData<any>
-export type CanvasSetElementsPayload = PayloadData<{elements: AglynComponentElementDataNormalizedMap}>
+export type CanvasSetElementsPayload = PayloadData<{elements: AglynElementNormalizedMap}>
 export type CanvasGetElementsNormalizedPayload = PayloadData<any>
 export type CanvasGetElementsDenormalizedPayload = PayloadData<any>
 export type CanvasGetApiEventsPayload = PayloadData<any>
-export type CanvasAddElementPayload = PayloadData<{parentId: ElementId, index: number, element: AglynComponentElementDataDenormalized}>
+export type CanvasAddElementPayload = PayloadData<{parentId: ElementId, index: number, element: AglynElementDenormalized}>
 export type CanvasGetElementPayload = PayloadData<{$id: ElementId}>
-export type CanvasUpdateElementPayload = PayloadData<{element: Partial<AglynComponentElementDataNormalized>}>
+export type CanvasUpdateElementPayload = PayloadData<{element: AglynElementNormalized}>
 export type CanvasDeleteElementPayload = PayloadData<{$id: ElementId}>
 export type CanvasMoveElementPayload = PayloadData<{$id: ElementId, parentId: ElementId, index: number}>
 export type CanvasDuplicateElementPayload = PayloadData<{$id: ElementId}>

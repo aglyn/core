@@ -17,9 +17,9 @@
 
 import {type IndexOf} from '@aglyn/shared-data-types'
 import {type ErrorTagMessages, NsErrorFactory} from '@aglyn/shared-util-errors'
-import {type AppUUN} from '../controllers/aglyn-app.types'
-import {type ExtensionUUN} from '../controllers/aglyn-extensions.types'
-import {type PayloadData, type PayloadParams} from '../types'
+import {type AppUUN} from '../types/aglyn-app.types'
+import {type ExtensionUUN} from '../types/aglyn-extensions.types'
+import {type PayloadData, type PayloadParams} from '../types/generic.types'
 
 
 export enum AglynErrorEventFlag {

@@ -15,8 +15,25 @@
  * limitations under the License.
  */
 
+//   _______  ______  ___________
+//  /_  __\ \/ / __ \/ ____/ ___/
+//   / /   \  / /_/ / __/  \__ \
+//  / /    / / ____/ /___ ___/ /
+// /_/    /_/_/   /_____//____/
+// 👇
 
-export * from './types'
+export * from './types/aglyn-base.types'
+export * from './types/aglyn-module.types'
+export * from './types/aglyn-extension.types'
+export * from './types/aglyn-app.types'
+export * from './types/aglyn-canvas.types'
+export * from './types/aglyn-commands.types'
+export * from './types/aglyn-components.types'
+export * from './types/aglyn-contexts.types'
+export * from './types/aglyn-elements.types'
+export * from './types/aglyn-extensions.types'
+export * from './types/aglyn-pages.types'
+export * from './types/generic.types'
 
 //     ___    ____  ____
 //    /   |  / __ \/  _/
@@ -86,11 +103,8 @@ export * from './util/normalize-component-element-data'
 // 👇
 
 export * from './models/aglyn-base.model'
-export * from './models/aglyn-base.types'
 export * from './models/aglyn-module.model'
-export * from './models/aglyn-module.types'
 export * from './models/aglyn-extension.model'
-export * from './models/aglyn-extension.types'
 
 
 //    __________  _   ____________  ____  __    __    __________ _____
@@ -100,15 +114,9 @@ export * from './models/aglyn-extension.types'
 // \____/\____/_/ |_/ /_/ /_/ |_|\____/_____/_____/_____/_/ |_/____/
 // 👇
 
-export * from './controllers/aglyn-app.types'
 export * from './controllers/aglyn-app.controller'
-export * from './controllers/aglyn-canvas.types'
 export * from './controllers/aglyn-canvas.controller'
-export * from './controllers/aglyn-commands.types'
 export * from './controllers/aglyn-commands.controller'
-export * from './controllers/aglyn-components.types'
 export * from './controllers/aglyn-components.controller'
-export * from './controllers/aglyn-contexts.types'
 export * from './controllers/aglyn-contexts.controller'
-export * from './controllers/aglyn-extensions.types'
 export * from './controllers/aglyn-extensions.controller'

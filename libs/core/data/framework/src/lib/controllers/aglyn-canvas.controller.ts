@@ -33,7 +33,20 @@ import {
   type CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../models/aglyn-module.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {
+  type AglynCanvasControllerOptions,
+  type ElementsDataStore,
+  type ElementsDataStoreApi,
+  type IAglynCanvasController,
+} from '../types/aglyn-canvas.types'
+import {type ContextDomain, type ContextStore} from '../types/aglyn-contexts.types'
+import {
+  type AglynElementDenormalized,
+  type AglynElementDenormalizedList,
+  type AglynElementNormalizedMap,
+} from '../types/aglyn-elements.types'
+import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
 import {denormalizeComponentElementData} from '../util/denormalize-component-element-data'
 import {handleRedoEvent} from '../util/handle-state-modification-history-redo'
 import {handleUndoEvent} from '../util/handle-state-modification-history-undo'
@@ -47,19 +60,6 @@ import {
   handleCanvasSetElements,
   handleCanvasUpdateElement,
 } from '../util/utils.canvas'
-import {type IAglynAppController} from './aglyn-app.types'
-import {
-  type AglynCanvasControllerOptions,
-  type ElementsDataStore,
-  type ElementsDataStoreApi,
-  type IAglynCanvasController,
-} from './aglyn-canvas.types'
-import {
-  type AglynComponentElementDataDenormalized,
-  type AglynComponentElementDataDenormalizedList,
-  type AglynComponentElementDataNormalizedMap,
-} from './aglyn-components.types'
-import {type ContextDomain, type ContextStore} from './aglyn-contexts.types'
 
 
 const TAG = 'AglynCanvas'
@@ -73,14 +73,14 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   #domain: ContextDomain = null
   #context: ContextStore<ElementsDataStore> = null
   #events: ElementsDataStoreApi = null
-  #normalizedElementsStore: ContextStore<AglynComponentElementDataNormalizedMap> = null
-  #denormalizedElementsStore: ContextStore<AglynComponentElementDataDenormalized[]> = null
+  #normalizedElementsStore: ContextStore<AglynElementNormalizedMap> = null
+  #denormalizedElementsStore: ContextStore<AglynElementDenormalized[]> = null
 
   public get domain(): ContextDomain {return this.#domain}
   public get events(): ElementsDataStoreApi {return this.#events}
   public get context(): ContextStore<ElementsDataStore> {return this.#context}
-  public get normalizedElementsStore(): ContextStore<AglynComponentElementDataNormalizedMap> {return this.#normalizedElementsStore}
-  public get denormalizedElementsStore(): ContextStore<AglynComponentElementDataDenormalizedList> {return this.#denormalizedElementsStore}
+  public get normalizedElementsStore(): ContextStore<AglynElementNormalizedMap> {return this.#normalizedElementsStore}
+  public get denormalizedElementsStore(): ContextStore<AglynElementDenormalizedList> {return this.#denormalizedElementsStore}
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return []
@@ -94,9 +94,9 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     this.#domain = this.app.contexts.domain.domain(this.namespace)
 
     this.#context = this.#domain.createStore<ElementsDataStore>({
-      past: [] as AglynComponentElementDataNormalizedMap[],
+      past: [] as AglynElementNormalizedMap[],
       present: normalizeComponentElementData(this.options.initialElements || [], CANVAS_ROOT_ELEMENT_ID),
-      future: [] as AglynComponentElementDataNormalizedMap[],
+      future: [] as AglynElementNormalizedMap[],
     }, {name: `${this.namespace}:canvas-elements`})
     persist({store: this.#context})
     this.#normalizedElementsStore = this.#context.map((elements) => {
@@ -128,10 +128,10 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
   public getStore(payload?: CanvasGetStorePayload): ContextStore<ElementsDataStore> {
     return this.#context
   }
-  public getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynComponentElementDataNormalizedMap> {
+  public getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynElementNormalizedMap> {
     return this.#normalizedElementsStore
   }
-  public getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynComponentElementDataDenormalizedList> {
+  public getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynElementDenormalizedList> {
     return this.#denormalizedElementsStore
   }
   public getApiEvents(payload?: CanvasGetApiEventsPayload): ElementsDataStoreApi {

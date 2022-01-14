@@ -17,8 +17,12 @@
 
 import {type AglynAppEffectFlag, type AglynModuleEffectPayload} from '../constants/emitter'
 import {type OF_KIND, type OF_TYPE} from '../constants/symbol'
-import {type IAglynAppController} from '../controllers/aglyn-app.types'
-import {type AglynBaseModelOptions, AglynBaseModelT, IAglynBaseModel} from './aglyn-base.types'
+import {type IAglynAppController} from './aglyn-app.types'
+import {
+  type AglynBaseModelOptions,
+  type AglynBaseModelT,
+  type IAglynBaseModel,
+} from './aglyn-base.types'
 
 
 export type AglynModuleEffectListener<Effect extends AglynAppEffectFlag> = [

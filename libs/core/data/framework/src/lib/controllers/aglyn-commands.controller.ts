@@ -27,15 +27,15 @@ import {
   type CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../models/aglyn-module.types'
-import {type IAglynAppController} from './aglyn-app.types'
+import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
+import {type IAglynAppController} from '../types/aglyn-app.types'
 import {
   type AglynCommander,
   type AglynCommandResolver,
   type AglynCommandsControllerOptions,
   type CommandUId,
   type IAglynCommandsController,
-} from './aglyn-commands.types'
+} from '../types/aglyn-commands.types'
 
 
 const TAG = 'AglynCommands'
