@@ -19,7 +19,13 @@ import {type JSXComponentType} from '@aglyn/shared-data-types'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {getDisplayName} from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
+import {createContext, useContext} from 'react'
 import {type Theme, ThemeProvider} from '../../vendor/mui'
+import {
+  type ThemeMode,
+  useHandleThemeModes,
+  type UseThemeMode,
+} from '../hooks/use-handle-theme-modes'
 
 
 export type WithThemeOptions = {
@@ -27,7 +33,13 @@ export type WithThemeOptions = {
   disableCssBaseline?: boolean
 }
 
-export type PropsWithThemeMode<P> = P & {themeMode?: 'light' | 'dark'}
+export type PropsWithThemeMode<P> = P & {themeMode?: ThemeMode}
+
+export const ThemeContextDispatch = createContext<UseThemeMode>(null)
+
+export function useThemeModeContext() {
+  return useContext(ThemeContextDispatch)
+}
 
 function withTheme(options: WithThemeOptions) {
   const {theme, disableCssBaseline} = {...options}
@@ -38,11 +50,14 @@ function withTheme(options: WithThemeOptions) {
 
     function ThemedComponent(props: PropsWithThemeMode<P>) {
       const {themeMode, ...rest} = props
-      const activeTheme = themeMode === 'dark' ? darkTheme : lightTheme
+      const UseThemeMode = useHandleThemeModes(themeMode)
+      const [mode] = UseThemeMode
       return (
-        <ThemeProvider theme={activeTheme}>
-          {!disableCssBaseline ? <CssBaseline /> : null}
-          <Component {...rest as P} />
+        <ThemeProvider theme={mode === 'dark' ? (darkTheme || lightTheme) : lightTheme}>
+          <ThemeContextDispatch.Provider value={UseThemeMode}>
+            {!disableCssBaseline ? <CssBaseline /> : null}
+            <Component {...rest as P} />
+          </ThemeContextDispatch.Provider>
         </ThemeProvider>
       )
     }

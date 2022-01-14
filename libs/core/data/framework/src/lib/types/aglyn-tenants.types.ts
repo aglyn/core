@@ -15,26 +15,23 @@
  * limitations under the License.
  */
 
-import {type ElementId} from './aglyn-elements.types'
-import {type HostUid} from './aglyn-tenants.types'
+import {type PageUid} from '@aglyn/core-data-framework'
 
 
-export type PageUid = string
-export type LayoutUid = string
+export type TenantUid = string
+export type HostUid = string
 
-export interface AglynPage {
-  $id: PageUid
-  parentId?: PageUid
-  hostId?: HostUid
-  slug?: string
-  displayName?: string
-  title?: string
-  description?: string
-  layout?: ElementId
-  elements: ElementId[]
+export interface AglynTenant {
+  $id: TenantUid
+  hosts: HostUid[]
 }
 
-export interface AglynPageLayout {
-  $id: LayoutUid
-  elements: ElementId[]
+export interface AglynTenantHost {
+  $id: HostUid
+  tenantUid: TenantUid
+  customDomain?: string
+  displayName: string
+  name?: string
+  description?: string
+  pages: PageUid[]
 }

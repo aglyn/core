@@ -33,6 +33,7 @@ export * from './types/aglyn-contexts.types'
 export * from './types/aglyn-elements.types'
 export * from './types/aglyn-extensions.types'
 export * from './types/aglyn-pages.types'
+export * from './types/aglyn-tenants.types'
 export * from './types/generic.types'
 
 //     ___    ____  ____

@@ -15,10 +15,14 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
+import {styled, useThemeModeContext} from '@aglyn/shared-feature-themes'
 import {AglynSvgIcon, BesignerSvgLogo} from '@aglyn/shared-ui-jsx'
+import {mdiBrightness4, mdiBrightness5, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import AppBar, {type AppBarProps} from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import MuiIconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
+import MuiTooltip from '@mui/material/Tooltip'
 import {forwardRef} from 'react'
 
 
@@ -35,6 +39,7 @@ export interface AppBarPrimaryComponentProps extends Partial<AppBarProps> {}
 export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
+    const [mode, toggleThemeMode] = useThemeModeContext()
 
     return (
       <AppBarPrimary
@@ -60,6 +65,25 @@ export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProp
             fontSize="medium"
             color="inherit"
           />
+          <Box sx={{flexGrow: 1}} />
+          <MuiTooltip
+            aria-label="switch theme scheme colors"
+            title={
+              mode === 'dark'
+                ? 'Light mode'
+                : 'Dark mode'
+            }
+          >
+            <MuiIconButton onClick={toggleThemeMode as any}>
+              <MdiIcon
+                path={
+                  mode === 'dark'
+                    ? mdiBrightness4.path
+                    : mdiBrightness5.path
+                }
+              />
+            </MuiIconButton>
+          </MuiTooltip>
           {children}
         </Toolbar>
       </AppBarPrimary>
