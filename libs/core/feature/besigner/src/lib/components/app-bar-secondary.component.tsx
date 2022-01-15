@@ -16,12 +16,22 @@
  */
 
 import {
+  BesignerDeviceFlag,
   BesignerPanelViewFlag,
   InteractionModeFlag,
   setBesignerFlag,
   setBesignerPanels,
 } from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {
+  ICON_VARIANT_FLUID_RESPONSIVE,
+  ICON_VARIANT_LAPTOP,
+  ICON_VARIANT_MENU_DOWN,
+  ICON_VARIANT_MOBILE,
+  ICON_VARIANT_MONITOR_LARGE,
+  ICON_VARIANT_MONITOR_SMALL,
+  ICON_VARIANT_TABLET,
+} from '@aglyn/shared-data-brand'
 import {styled} from '@aglyn/shared-feature-themes'
 import {
   mdiCursorDefault,
@@ -36,13 +46,19 @@ import {
 } from '@aglyn/shared-ui-mdi-jsx'
 import MuiAppBar, {type AppBarProps as MuiAppBarProps} from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
-import Stack, {type StackProps} from '@mui/material/Stack'
-import ToggleButton from '@mui/material/ToggleButton'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import Toolbar from '@mui/material/Toolbar'
-import Tooltip from '@mui/material/Tooltip'
-import {forwardRef, type MouseEvent, useCallback} from 'react'
+import MuiButton from '@mui/material/Button'
+import MuiButtonGroup from '@mui/material/ButtonGroup'
+import MuiIconButton from '@mui/material/IconButton'
+import MuiMenuItemIcon from '@mui/material/ListItemIcon'
+import MuiListSubheader from '@mui/material/ListSubheader'
+import MuiMenu from '@mui/material/Menu'
+import MuiMenuItem from '@mui/material/MenuItem'
+import MuiStack, {type StackProps} from '@mui/material/Stack'
+import MuiToggleButton from '@mui/material/ToggleButton'
+import MuiToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import MuiToolbar from '@mui/material/Toolbar'
+import MuiTooltip from '@mui/material/Tooltip'
+import {forwardRef, type MouseEvent, useCallback, useMemo, useState} from 'react'
 import {useAddElementCallback} from '../hooks/use-add-element-callback'
 import {useAglynBesignerStoreState} from '../hooks/use-aglyn-besigner-store-state'
 import useAglynCanvasHistoryControls from '../hooks/use-aglyn-elements-history'
@@ -64,18 +80,18 @@ const AddControls = forwardRef<any, StackProps>(
     const handleAddElementClick = useAddElementCallback()
 
     return (
-      <Stack ref={ref} direction="row" spacing={1} {...props}>
-        <Tooltip title={'Add element'}>
-          <IconButton
+      <MuiStack ref={ref} direction="row" spacing={1} {...props}>
+        <MuiTooltip title={'Add element'}>
+          <MuiIconButton
             aria-haspopup="menu"
             aria-label="add"
             edge="start"
             onClick={handleAddElementClick}
           >
             <MdiIcon fontSize="small" path={mdiShapeSquareRoundedPlus.path} />
-          </IconButton>
-        </Tooltip>
-      </Stack>
+          </MuiIconButton>
+        </MuiTooltip>
+      </MuiStack>
     )
   },
 )
@@ -92,33 +108,157 @@ const HistoryControls = forwardRef<any, StackProps>(
     }, [redo])
 
     return (
-      <Stack ref={ref} direction="row" spacing={0.25} {...props}>
-        <Tooltip title={'Undo (⌘Z)'}>
+      <MuiStack ref={ref} direction="row" spacing={0.25} {...props}>
+        <MuiTooltip title={'Undo (⌘Z)'}>
         <span>
-          <IconButton
+          <MuiIconButton
             aria-label="undo action"
             onClick={handleUndoClick}
             disabled={!canUndo}
           >
             <MdiIcon fontSize="small" path={mdiUndo.path} />
-          </IconButton>
+          </MuiIconButton>
         </span>
-        </Tooltip>
-        <Tooltip title={'Redo (⌘Y)'}>
+        </MuiTooltip>
+        <MuiTooltip title={'Redo (⌘Y)'}>
         <span>
-          <IconButton
+          <MuiIconButton
             aria-label="redo action"
             onClick={handleRedoClick}
             disabled={!canRedo}
           >
             <MdiIcon fontSize="small" path={mdiRedo.path} />
-          </IconButton>
+          </MuiIconButton>
         </span>
-        </Tooltip>
-      </Stack>
+        </MuiTooltip>
+      </MuiStack>
     )
   },
 )
+
+const devicePreviewOptions = [
+  {
+    children: 'Fluid Responsive',
+    value: BesignerDeviceFlag.RESPONSIVE,
+    icon: {path: ICON_VARIANT_FLUID_RESPONSIVE.path},
+  },
+  {
+    children: 'XS - Mobile',
+    value: BesignerDeviceFlag.XS,
+    icon: {path: ICON_VARIANT_MOBILE.path},
+  },
+  {
+    children: 'SM - Tablet',
+    value: BesignerDeviceFlag.SM,
+    icon: {path: ICON_VARIANT_TABLET.path},
+  },
+  {
+    children: 'MD - Laptop',
+    value: BesignerDeviceFlag.MD,
+    icon: {path: ICON_VARIANT_LAPTOP.path},
+  },
+  {
+    children: 'LG - Desktop',
+    value: BesignerDeviceFlag.LG,
+    icon: {path: ICON_VARIANT_MONITOR_SMALL.path},
+  },
+  {
+    children: 'XL - Widescreen',
+    value: BesignerDeviceFlag.XL,
+    icon: {path: ICON_VARIANT_MONITOR_LARGE.path},
+  },
+]
+
+const PreviewControls = function PreviewControls() {
+  const {getApp} = useAglynAppContext()
+
+  const devicePreview = useAglynBesignerStoreState('flags', 'devicePreview')
+  const [anchorEl, setAnchorEl] = useState<Element>(null)
+  const [devicesMenuOpen, setDevicesMenuOpen] = useState(false)
+  const activeDevice = useMemo(() => (
+    devicePreviewOptions.find(i => i.value === devicePreview) || devicePreviewOptions[0]
+  ), [devicePreview])
+
+  const handleMenuClose = useCallback((event: MouseEvent<HTMLElement>) => {
+    setDevicesMenuOpen(false)
+  }, [])
+  const handleOpenMenu = useCallback((event: MouseEvent<HTMLElement>) => {
+    setDevicesMenuOpen(true)
+  }, [])
+  const handleMenuClick = (device: BesignerDeviceFlag) => (event: MouseEvent<HTMLElement>) => {
+    setBesignerFlag(getApp(), {flag: 'devicePreview', value: device})
+    setDevicesMenuOpen(false)
+  }
+
+  return (
+    <MuiStack direction="row" spacing={1}>
+      <MuiButtonGroup size="small" variant="outlined" color="inherit">
+        <MuiTooltip title={'Device preview mode'}>
+
+          <MuiButton
+            aria-label="device preview mode"
+            aria-haspopup="menu"
+            aria-controls={devicesMenuOpen ? 'aglyn:device-preview' : undefined}
+            aria-expanded={devicesMenuOpen ? 'true' : undefined}
+            ref={setAnchorEl}
+            onClick={handleOpenMenu}
+            startIcon={<MdiIcon fontSize="inherit" {...activeDevice.icon} />}
+            endIcon={<MdiIcon fontSize="inherit" path={ICON_VARIANT_MENU_DOWN.path} />}
+            sx={{borderColor: 'divider', '& .MuiButton-endIcon': {ml: 0.15}, '& .MuiButton-startIcon': {mr: 0.85}}}
+          >
+            {activeDevice.children}
+          </MuiButton>
+        </MuiTooltip>
+      </MuiButtonGroup>
+
+      <MuiMenu
+        id="aglyn:device-preview"
+        anchorEl={anchorEl}
+        open={devicesMenuOpen}
+        onClose={handleMenuClose}
+        onClick={handleMenuClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            bgcolor: 'background.secondary',
+            mt: 1.5,
+            '&:before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.secondary',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{horizontal: 'right', vertical: 'top'}}
+        anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
+      >
+        <MuiListSubheader sx={{lineHeight: theme => theme.typography.pxToRem(32)}}>Artboard preview mode</MuiListSubheader>
+        {devicePreviewOptions.map((item) => (
+          <MuiMenuItem
+            key={item.value}
+            selected={item.value === activeDevice.value}
+            disabled={item.value === activeDevice.value}
+            onClick={handleMenuClick(item.value)}
+          >
+            <MuiMenuItemIcon>
+              <MdiIcon fontSize="small" {...item.icon} />
+            </MuiMenuItemIcon>
+            {item.children}
+          </MuiMenuItem>
+        ))}
+      </MuiMenu>
+    </MuiStack>
+  )
+}
 
 const InteractControls = function InteractControls() {
   const {getApp} = useAglynAppContext()
@@ -131,31 +271,31 @@ const InteractControls = function InteractControls() {
   }, [getApp])
 
   return (
-    <Stack direction="row" spacing={1}>
-      <ToggleButtonGroup
+    <MuiStack direction="row" spacing={1}>
+      <MuiToggleButtonGroup
         size="small"
         value={interactMode}
         onChange={handleInteractModeClick}
         exclusive
       >
-        <Tooltip title={'Direct selection'}>
-          <ToggleButton
+        <MuiTooltip title={'Direct selection'}>
+          <MuiToggleButton
             selected={interactMode === InteractionModeFlag.SELECT}
             value={InteractionModeFlag.SELECT}
           >
             <MdiIcon fontSize="inherit" path={mdiCursorDefault.path} />
-          </ToggleButton>
-        </Tooltip>
-        <Tooltip title={'Rearrange'}>
-          <ToggleButton
+          </MuiToggleButton>
+        </MuiTooltip>
+        <MuiTooltip title={'Rearrange'}>
+          <MuiToggleButton
             selected={interactMode === InteractionModeFlag.REARRANGE}
             value={InteractionModeFlag.REARRANGE}
           >
             <MdiIcon fontSize="inherit" path={mdiCursorMove.path} />
-          </ToggleButton>
-        </Tooltip>
-      </ToggleButtonGroup>
-    </Stack>
+          </MuiToggleButton>
+        </MuiTooltip>
+      </MuiToggleButtonGroup>
+    </MuiStack>
   )
 }
 
@@ -190,38 +330,38 @@ const PanelControls = forwardRef<any, StackProps>(
     )
 
     return (
-      <Stack ref={ref} direction="row" spacing={1} {...ref}>
-        <ToggleButtonGroup
+      <MuiStack ref={ref} direction="row" spacing={1} {...ref}>
+        <MuiToggleButtonGroup
           size="small"
           value={openPanels}
           onChange={handlePanelToggle}
         >
-          <Tooltip title={'Left panel'}>
-            <ToggleButton
+          <MuiTooltip title={'Left panel'}>
+            <MuiToggleButton
               selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_LEFT)}
               value={BesignerPanelViewFlag.PANEL_LEFT}
             >
               <MdiIcon fontSize="inherit" path={mdiDockLeft.path} />
-            </ToggleButton>
-          </Tooltip>
-          <Tooltip title={'Bottom panel'}>
-            <ToggleButton
+            </MuiToggleButton>
+          </MuiTooltip>
+          <MuiTooltip title={'Bottom panel'}>
+            <MuiToggleButton
               selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_BOTTOM)}
               value={BesignerPanelViewFlag.PANEL_BOTTOM}
             >
               <MdiIcon fontSize="inherit" path={mdiDockBottom.path} />
-            </ToggleButton>
-          </Tooltip>
-          <Tooltip title={'Right panel'}>
-            <ToggleButton
+            </MuiToggleButton>
+          </MuiTooltip>
+          <MuiTooltip title={'Right panel'}>
+            <MuiToggleButton
               selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_RIGHT)}
               value={BesignerPanelViewFlag.PANEL_RIGHT}
             >
               <MdiIcon fontSize="inherit" path={mdiDockRight.path} />
-            </ToggleButton>
-          </Tooltip>
-        </ToggleButtonGroup>
-      </Stack>
+            </MuiToggleButton>
+          </MuiTooltip>
+        </MuiToggleButtonGroup>
+      </MuiStack>
     )
   },
 )
@@ -242,7 +382,7 @@ export const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponent
         elevation={0}
         {...rest}
       >
-        <Toolbar variant="dense">
+        <MuiToolbar variant="dense">
           <AddControls />
 
           <Box sx={{mx: 0.25}} />
@@ -251,6 +391,10 @@ export const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponent
 
           <Box sx={{flexGrow: 1}} />
 
+          <PreviewControls />
+
+          <Box sx={{mx: 1}} />
+
           <InteractControls />
 
           <Box sx={{mx: 1}} />
@@ -258,7 +402,7 @@ export const AppBarSecondaryComponent = forwardRef<any, AppBarSecondaryComponent
           <PanelControls />
 
           {children}
-        </Toolbar>
+        </MuiToolbar>
       </AppBarSecondary>
     )
   },

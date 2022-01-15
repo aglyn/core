@@ -22,8 +22,8 @@ import {
   useAglynComponentSchema,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import {IconVariant} from '@aglyn/shared-data-brand'
-import {styled} from '@aglyn/shared-feature-themes'
+import {ICON_VARIANT_DETAILS, ICON_VARIANT_PROPERTIES} from '@aglyn/shared-data-brand'
+import {alpha, handlePassSxProps, styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {hexadecimalFromNumber, hexadecimalToNumber} from '@aglyn/shared-util-tools'
 import MuiTabContext from '@mui/lab/TabContext'
@@ -146,6 +146,13 @@ const ElementInfo = function ElementInfo({$id}: {$id: ElementId}) {
                 variant="body1"
                 display="inline"
                 {...ValueTypographyProps}
+                sx={handlePassSxProps((theme) => ({
+                  bgcolor: alpha(theme.palette.secondary.light, 0.18),
+                  border: `1px solid ${alpha(theme.palette.secondary.light, 0.72)}`,
+                  borderRadius: '0.3em',
+                  px: 0.5, py: 0.15,
+                  wordBreak: 'break-word',
+                }), ValueTypographyProps?.sx)}
               >
                 {value || <i>{failoverText}</i>}
               </Typography>
@@ -203,11 +210,11 @@ export const PanelRightComponent = forwardRef<any, PanelRightComponentProps>(
             >
               <MuiTab
                 value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENT_INFO)}
-                icon={<MdiIcon path={IconVariant.DETAILS} />}
+                icon={<MdiIcon path={ICON_VARIANT_DETAILS.path} />}
               />
               <MuiTab
                 value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENT_PROPS_FORM)}
-                icon={<MdiIcon path={IconVariant.PROPERTIES} />}
+                icon={<MdiIcon path={ICON_VARIANT_PROPERTIES.path} />}
               />
             </MuiTabList>
           </Box>

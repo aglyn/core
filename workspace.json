@@ -165,6 +165,29 @@
       },
       "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:data", "sc:lib:core:data:framework"]
     },
+    "core-data-tenancy": {
+      "root": "libs/core/data/tenancy",
+      "sourceRoot": "libs/core/data/tenancy/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/core/data/tenancy/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/core/data/tenancy"],
+          "options": {
+            "jestConfig": "libs/core/data/tenancy/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:data", "sc:lib:core:data:tenancy"]
+    },
     "core-feature-besigner": {
       "root": "libs/core/feature/besigner",
       "sourceRoot": "libs/core/feature/besigner/src",

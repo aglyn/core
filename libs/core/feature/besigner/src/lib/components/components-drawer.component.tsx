@@ -16,7 +16,7 @@
  */
 
 import {type AglynComponentElementTemplate} from '@aglyn/core-data-framework'
-import {IconVariant} from '@aglyn/shared-data-brand'
+import {ICON_VARIANT_ENTITY_BLOCK} from '@aglyn/shared-data-brand'
 import {type AnyProps} from '@aglyn/shared-data-types'
 import {styled} from '@aglyn/shared-feature-themes'
 import {
@@ -167,7 +167,7 @@ export const ComponentsDrawerComponent = forwardRef<any, ComponentsDrawerCompone
               <ItemIcon
                 color="primary"
                 {...item.icon}
-                path={item.icon?.path || IconVariant.ENTITY_BLOCK}
+                path={item.icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
               />
             </>
           }

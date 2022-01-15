@@ -17,7 +17,7 @@
 
 import {setBesignerCanvasHovered} from '@aglyn/core-data-besigner'
 import {TrunkComponent, useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {styled} from '@aglyn/shared-feature-themes'
+import {createTheme, styled, ThemeProvider} from '@aglyn/shared-feature-themes'
 import Box from '@mui/material/Box'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
 import {forwardRef, type HTMLAttributes, type MouseEvent, useCallback} from 'react'
@@ -25,6 +25,8 @@ import CanvasRenderedElementRefsComponent from '../contexts/canvas-rendered-elem
 import ElementLeafComponent from './element-leaf.component'
 import ElementOverlaysComponent from './element-overlays.component'
 
+
+const hostTheme = createTheme({palette: {}})
 
 const ViewportFrame = styled('div', {
   name: 'AglynViewportFrame',
@@ -61,16 +63,18 @@ const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
       >
         <CanvasRenderedElementRefsComponent>
           {/*<MuiShadowDom.div>*/}
-          <Box
-            id="aglyn:site-container"
-            onMouseLeave={handleMouseLeave}
-            sx={{minHeight: 1, width: 1}}
-          >
-            <TrunkComponent
-              leafComponent={ElementLeafComponent}
-              sx={{minHeight: 1}}
-            />
-          </Box>
+          <ThemeProvider theme={hostTheme}>
+            <Box
+              id="aglyn:site-container"
+              onMouseLeave={handleMouseLeave}
+              sx={{minHeight: 1, width: 1, bgcolor: 'background.paper'}}
+            >
+              <TrunkComponent
+                leafComponent={ElementLeafComponent}
+                sx={{minHeight: 1}}
+              />
+            </Box>
+          </ThemeProvider>
           {/*</MuiShadowDom.div>*/}
 
           <Box

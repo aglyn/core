@@ -17,7 +17,7 @@
 
 import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {IconVariant} from '@aglyn/shared-data-brand'
+import {ICON_VARIANT_TREE_VIEW} from '@aglyn/shared-data-brand'
 import {styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
 import {hexadecimalFromNumber, hexadecimalToNumber} from '@aglyn/shared-util-tools'
@@ -116,7 +116,7 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
             >
               <MuiTab
                 value={hexadecimalFromNumber(BesignerPanelTabFlag.ELEMENTS_TREE)}
-                icon={<MdiIcon path={IconVariant.TREE_VIEW} />}
+                icon={<MdiIcon path={ICON_VARIANT_TREE_VIEW.path} />}
               />
             </MuiTabList>
           </Box>

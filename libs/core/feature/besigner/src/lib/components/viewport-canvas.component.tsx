@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
+import {BesignerDeviceFlag} from '@aglyn/core-data-besigner'
 import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
 import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
+import clsx from 'clsx'
 import dynamic from 'next/dynamic'
 // import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
 import {forwardRef, type HTMLAttributes, type Ref, useRef} from 'react'
 import {useSlider} from 'react-use'
+import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
 
 
 const ViewportFrameComponent = dynamic(
@@ -59,11 +62,12 @@ const ViewportCanvas = styled('div', {
 })
 
 const canvasArtboardClassKeys = generateComponentClassKeys('AglynCanvasArtboard', [
-  'deviceXl',
-  'deviceLg',
-  'deviceMd',
-  'deviceSm',
+  'deviceResponsive',
   'deviceXs',
+  'deviceSm',
+  'deviceMd',
+  'deviceLg',
+  'deviceXl',
 ])
 const ViewportArtboard = styled('div', {
   name: 'AglynViewportArtboard',
@@ -75,12 +79,17 @@ const ViewportArtboard = styled('div', {
   marginRight: 'auto',
   display: 'flex',
   flexDirection: 'column',
-  width: 1280,
-  [`&.${canvasArtboardClassKeys.deviceXl}`]: {width: theme.breakpoints.values.xl},
-  [`&.${canvasArtboardClassKeys.deviceLg}`]: {width: theme.breakpoints.values.lg},
-  [`&.${canvasArtboardClassKeys.deviceMd}`]: {width: theme.breakpoints.values.md},
+  transition: theme.transitions.create(['width'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  width: '100%',
+  [`&, &.${canvasArtboardClassKeys.deviceResponsive}`]: {width: '100%'},
+  [`&.${canvasArtboardClassKeys.deviceXs}`]: {width: 390},
   [`&.${canvasArtboardClassKeys.deviceSm}`]: {width: theme.breakpoints.values.sm},
-  [`&.${canvasArtboardClassKeys.deviceXs}`]: {width: theme.breakpoints.values.xs},
+  [`&.${canvasArtboardClassKeys.deviceMd}`]: {width: theme.breakpoints.values.md},
+  [`&.${canvasArtboardClassKeys.deviceLg}`]: {width: theme.breakpoints.values.lg},
+  [`&.${canvasArtboardClassKeys.deviceXl}`]: {width: theme.breakpoints.values.xl},
 }))
 
 // const ArtboardPanner = styled(ZoomablePanningComponent, {name: 'AglynArtboardPanner'})(
@@ -108,13 +117,24 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, pannerRef, ...rest} = props
 
+
+    const devicePreview = useAglynBesignerStoreState('flags', 'devicePreview')
+    const artboardClass = clsx({
+      [canvasArtboardClassKeys.deviceResponsive]: BesignerDeviceFlag.RESPONSIVE === devicePreview,
+      [canvasArtboardClassKeys.deviceXs]: BesignerDeviceFlag.XS === devicePreview,
+      [canvasArtboardClassKeys.deviceSm]: BesignerDeviceFlag.SM === devicePreview,
+      [canvasArtboardClassKeys.deviceMd]: BesignerDeviceFlag.MD === devicePreview,
+      [canvasArtboardClassKeys.deviceLg]: BesignerDeviceFlag.LG === devicePreview,
+      [canvasArtboardClassKeys.deviceXl]: BesignerDeviceFlag.XL === devicePreview,
+    })
+
     return (
       <ViewportCanvas
         ref={ref}
         id="aglyn:viewport-canvas"
         {...rest}
       >
-        <ViewportArtboard id="aglyn:viewport-artboard">
+        <ViewportArtboard id="aglyn:viewport-artboard" className={artboardClass}>
           {/*<ViewportCanvasPanner*/}
           {/*  {...{ref: pannerRef} as any}*/}
           {/*  disableScrollZoom*/}

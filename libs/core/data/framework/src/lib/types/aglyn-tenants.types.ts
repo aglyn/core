@@ -24,6 +24,7 @@ export type HostUid = string
 export interface AglynTenant {
   $id: TenantUid
   hosts: HostUid[]
+  displayName: string
 }
 
 export interface AglynTenantHost {

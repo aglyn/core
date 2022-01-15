@@ -29,6 +29,7 @@ import {
 } from '@aglyn/core-data-framework'
 import {type LogLevelString} from '@aglyn/shared-util-logger'
 import {
+  BesignerDeviceFlag,
   type BesignerPanelTabFlag,
   type BesignerPanelViewFlag,
   type DndDragSourceTypeFlag,
@@ -52,6 +53,7 @@ export type BesignerFlagState = {
   logLevel?: LogLevelString
   interactMode?: InteractionModeFlag
   activeView?: BesignerPanelViewFlag
+  devicePreview?: BesignerDeviceFlag
 }
 export type BesignerCanvasSelectedElement = {
   $id?: ElementId

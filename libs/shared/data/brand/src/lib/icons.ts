@@ -16,9 +16,11 @@
  */
 
 import {
+  mdiArrowExpandHorizontal,
   mdiArrowTopLeft,
   mdiBookVariant,
   mdiBookVariantMultiple,
+  mdiCellphone,
   mdiCodeArray,
   mdiCodeBracesBox,
   mdiCodeString,
@@ -29,40 +31,49 @@ import {
   mdiFileTree,
   mdiFormDropdown,
   mdiInformationVariant,
+  mdiLaptop,
   mdiLoginVariant,
   mdiLogoutVariant,
+  mdiMenuDown,
+  mdiMonitor,
+  mdiMonitorSmall,
+  mdiOpenInNew,
   mdiPencil,
+  mdiTablet,
   mdiVariable,
 } from '@aglyn/shared-ui-mdi-jsx'
 
 
-export const IconVariant = {
-  // Blocks and symbols
-  ENTITY_BLOCK: mdiCubeOutline.path,
-
-  // Data
-  PROPERTY: mdiVariable.path,
-  DOCUMENT: mdiBookVariant.path,
-  COLLECTION: mdiBookVariantMultiple.path,
-
-  // Data-sets
-  PROPERTIES: mdiFormDropdown.path,
-  DETAILS: mdiInformationVariant.path,
-  TREE_VIEW: mdiFileTree.path,
-
-  // Data-Type
-  STRING: mdiCodeString.path,
-  ARRAY: mdiCodeArray.path,
-  OBJECT: mdiCodeBracesBox.path,
-
-  // Modification
-  MODIFY_DUPLICATE: mdiContentDuplicate.path,
-  MODIFY_DELETE: mdiDeleteOutline.path,
-  MODIFY_EDIT: mdiPencil.path,
-  MODIFY_DRAG: mdiDrag.path,
-  SELECT_PARENT: mdiArrowTopLeft.path,
-
-  // User
-  LOGIN: mdiLoginVariant.path,
-  LOGOUT: mdiLogoutVariant.path,
-}
+// Blocks and symbols
+export const ICON_VARIANT_ENTITY_BLOCK = mdiCubeOutline
+// Data
+export const ICON_VARIANT_PROPERTY = mdiVariable
+export const ICON_VARIANT_DOCUMENT = mdiBookVariant
+export const ICON_VARIANT_COLLECTION = mdiBookVariantMultiple
+// Data-sets
+export const ICON_VARIANT_PROPERTIES = mdiFormDropdown
+export const ICON_VARIANT_DETAILS = mdiInformationVariant
+export const ICON_VARIANT_TREE_VIEW = mdiFileTree
+// Data-Type
+export const ICON_VARIANT_STRING = mdiCodeString
+export const ICON_VARIANT_ARRAY = mdiCodeArray
+export const ICON_VARIANT_OBJECT = mdiCodeBracesBox
+// Modification
+export const ICON_VARIANT_MODIFY_DUPLICATE = mdiContentDuplicate
+export const ICON_VARIANT_MODIFY_DELETE = mdiDeleteOutline
+export const ICON_VARIANT_MODIFY_EDIT = mdiPencil
+export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
+export const ICON_VARIANT_SELECT_PARENT = mdiArrowTopLeft
+// User
+export const ICON_VARIANT_LOGIN = mdiLoginVariant
+export const ICON_VARIANT_LOGOUT = mdiLogoutVariant
+// Devices
+export const ICON_VARIANT_MOBILE = mdiCellphone
+export const ICON_VARIANT_TABLET = mdiTablet
+export const ICON_VARIANT_LAPTOP = mdiLaptop
+export const ICON_VARIANT_MONITOR_SMALL = mdiMonitorSmall
+export const ICON_VARIANT_MONITOR_LARGE = mdiMonitor
+export const ICON_VARIANT_FLUID_RESPONSIVE = mdiArrowExpandHorizontal
+// Navigation
+export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
+export const ICON_VARIANT_MENU_DOWN = mdiMenuDown

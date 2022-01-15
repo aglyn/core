@@ -22,7 +22,6 @@ import {type WithStyles} from '@mui/styles'
 
 import {type ClassKeyInferable} from '@mui/styles/withStyles'
 
-import {type Shape} from '@mui/system/createTheme/shape'
 import {type ColorPropOverrides, type IActionStates} from '../lib/theme.types'
 
 
@@ -52,6 +51,11 @@ declare module '@mui/material/AppBar' {
   interface AppBarPropsColorOverrides extends ColorPropOverrides {}
 }
 
+declare module '@mui/system/createTheme/shape' {
+  interface Shape {
+    appIconBorderRadius: number | string
+  }
+}
 declare module '@mui/material/styles/createPalette' {
   interface TypeBackground {
     secondary: string
@@ -68,6 +72,7 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 declare module '@mui/material/styles' {
+
   /**
    * START EXAMPLE – MODULE AUGMENTATION ↓
    * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
@@ -112,12 +117,6 @@ declare module '@mui/material/styles' {
    * END EXAMPLE – MODULE AUGMENTATION ↑
    */
 
-
-  interface Theme {
-    insetShadows: Shadows
-    shape: Shape & {appIconBorderRadius: number | string}
-  }
-
   interface Palette {
     background: Palette['background']
     tertiary: Palette['primary']
@@ -126,6 +125,11 @@ declare module '@mui/material/styles' {
     svgFilled: IActionStates
     svgStroke: IActionStates
     text: Palette['text']
+  }
+
+  interface Theme {
+    palette: Palette
+    insetShadows: Shadows
   }
 
   interface PaletteOptions {

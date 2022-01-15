@@ -64,7 +64,7 @@
     "effector-react": "^22.0.6",
     "effector-storage": "^4.5.0",
     "eventemitter2": "^6.4.5",
-    "firebase": "^9.6.1",
+    "firebase": "^9.6.3",
     "firebase-admin": "^10.0.1",
     "flat": "^5.0.2",
     "fuse.js": "^6.5.3",

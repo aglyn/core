@@ -22,7 +22,7 @@ import {
   useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/core-feature-renderer'
-import {IconVariant} from '@aglyn/shared-data-brand'
+import {ICON_VARIANT_ENTITY_BLOCK} from '@aglyn/shared-data-brand'
 import {alpha, styled} from '@aglyn/shared-feature-themes'
 import {mdiChevronDown, mdiChevronRight, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
@@ -77,7 +77,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
             <MdiIcon
               color="quaternary"
               {...icon}
-              path={icon?.path || IconVariant.ENTITY_BLOCK}
+              path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
               sx={[
                 {
                   fontSize: 20,

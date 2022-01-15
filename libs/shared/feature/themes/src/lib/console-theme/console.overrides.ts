@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../../vendor/mui'
+import {type ThemeOptions} from '../../vendor/mui'
+
 
 export const consoleOverrides: ThemeOptions['components'] = {
   MuiAvatar: {
@@ -28,7 +29,7 @@ export const consoleOverrides: ThemeOptions['components'] = {
   },
   MuiIconButton: {
     // color: 'inherit', // Default color to inherit
-    styleOverrides: { root: { padding: 8 } },
+    styleOverrides: {root: {padding: 8}},
   },
   MuiLink: {
     styleOverrides: {
@@ -56,8 +57,8 @@ export const consoleOverrides: ThemeOptions['components'] = {
   },
   MuiTooltip: {
     defaultProps: {
-      arrow: true
-    }
-  }
+      arrow: true,
+    },
+  },
 }
 export default consoleOverrides

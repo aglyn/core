@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,4 +42,14 @@ export enum DndDropLinealTypeFlag {
   ACTIVITY_ELEMENT_BEFORE = 0x1,
   ACTIVITY_ELEMENT_INSIDE = 0x2,
   ACTIVITY_ELEMENT_AFTER = 0x3,
+}
+
+export enum BesignerDeviceFlag {
+  SCALE = 0x1,
+  RESPONSIVE = 0x2,
+  XS = 0x3,
+  SM = 0x4,
+  MD = 0x5,
+  LG = 0x6,
+  XL = 0x7,
 }

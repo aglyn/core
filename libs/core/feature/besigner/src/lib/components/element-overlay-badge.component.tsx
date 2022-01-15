@@ -16,7 +16,8 @@
  */
 
 import {type ElementId, isRootElementId} from '@aglyn/core-data-framework'
-import {IconVariant} from '@aglyn/shared-data-brand'
+import {ICON_VARIANT_MODIFY_EDIT, ICON_VARIANT_MODIFY_DRAG, ICON_VARIANT_MODIFY_DUPLICATE,
+  ICON_VARIANT_SELECT_PARENT} from '@aglyn/shared-data-brand'
 import {SrOnlyComponent, type SrOnlyComponentProps} from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import MuiButton, {type ButtonProps} from '@mui/material/Button'
@@ -120,7 +121,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
             title="Drag"
             children="drag"
             ButtonProps={{ref: dragHandleRef}}
-            icon={{path: IconVariant.MODIFY_DRAG, color: 'secondary'}}
+            icon={{path: ICON_VARIANT_MODIFY_DRAG.path, color: 'secondary'}}
             sx={{
               pl: 0.75, pr: 0.5,
               '&:hover': {cursor: 'move'},
@@ -134,7 +135,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
             title="Duplicate"
             children="duplicate"
             ButtonProps={{onClick: handleDuplicateClick}}
-            icon={{path: IconVariant.MODIFY_DUPLICATE}}
+            icon={{path: ICON_VARIANT_MODIFY_DUPLICATE.path}}
           />
         )}
 
@@ -142,7 +143,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
           title="Modify"
           children="modify"
           onClick={handleModifyClick}
-          icon={{path: IconVariant.MODIFY_EDIT}}
+          icon={{path: ICON_VARIANT_MODIFY_EDIT.path}}
         />
 
         {!isRootElementId($id) && (
@@ -154,7 +155,7 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
               onMouseEnter: handleParentHover,
               onMouseLeave: handleHoverParentLeave,
             }}
-            icon={{path: IconVariant.SELECT_PARENT}}
+            icon={{path: ICON_VARIANT_SELECT_PARENT.path}}
           />
         )}
 
