@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-const bundleAnalyzer = require('@next/bundle-analyzer')
 const nextComposePlugins = require('next-compose-plugins')
 const pkg = require('../package.json')
 const withNx = require('@nrwl/next/plugins/with-nx')
