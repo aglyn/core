@@ -24,6 +24,9 @@
     },
     "storage": {
       "port": 9199
+    },
+    "pubsub": {
+      "port": 8085
     }
   },
   "database": {
@@ -33,7 +36,8 @@
     "predeploy": [
       "npm --prefix \"$RESOURCE_DIR\" run lint",
       "npm --prefix \"$RESOURCE_DIR\" run build"
-    ]
+    ],
+    "source": "functions"
   },
   "hosting": {
     "public": "public",
@@ -41,9 +45,18 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ]
   },
   "storage": {
     "rules": "firebase-storage.rules"
+  },
+  "remoteconfig": {
+    "template": "firebase-remoteconfig.template.json"
   }
 }

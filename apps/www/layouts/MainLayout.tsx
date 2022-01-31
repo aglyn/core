@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {BUILD_ID, PKG_VERSION} from '@aglyn/shared-data-brand'
+import {BUILD_ID, PACKAGE_VERSION} from '@aglyn/shared-data-brand'
 import {styled} from '@aglyn/shared-feature-themes'
 import {
   AglynSvgLogo,
@@ -405,7 +405,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
               justifyContent="center"
             >
               <Typography align="center" color="textSecondary" variant="overline">
-                <span>{`Version ${PKG_VERSION}`}</span>
+                <span>{`Version ${PACKAGE_VERSION}`}</span>
                 {' '}
                 <span>{`(${BUILD_ID})`}</span>
               </Typography>

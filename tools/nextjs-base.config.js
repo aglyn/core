@@ -20,11 +20,9 @@ const pkg = require('../package.json')
 const withNx = require('@nrwl/next/plugins/with-nx')
 const deepFillIn = require('mout/object/deepFillIn')
 
-const PKG_VERSION = String(pkg?.version ?? 'NULL')
-const PROCESS_VERSION = String(process.version ?? 'NULL')
-const PROCESS_VERSIONS = String(process.versions ?? 'NULL')
-
-const COMMIT_REF = String(process.env.COMMIT_REF ?? 'NULL')
+const PACKAGE_VERSION = String(pkg?.version ?? 'X.X.X')
+const PROCESS_VERSION = process.version
+const PROCESS_VERSIONS = process.versions
 
 const NODE_ENV = process.env.NODE_ENV
 const IS_DEVELOPMENT = NODE_ENV === 'development'
@@ -38,7 +36,7 @@ const SECURITY_HEADERS = [
    * in the background, so the DNS is more likely to be resolved by the time the referenced items
    * are needed. This reduces latency when the user clicks a link.
    */
-  {key: 'X-DNS-Prefetch_Control', value: 'on'},
+  {key: 'X-DNS-Prefetch-Control', value: 'on'},
 
   /**
    * This header indicates whether the site should be allowed to be displayed within an iframe.
@@ -77,9 +75,9 @@ const SECURITY_HEADERS = [
 ]
 
 const BRAND_HEADERS = [
-  {key: 'x-aglyn-package-version', value: `${PKG_VERSION.toLowerCase()}`},
-  {key: 'x-aglyn-process-version', value: `${PROCESS_VERSION.toLowerCase()}`},
-  {key: 'x-aglyn-process-versions', value: `${PROCESS_VERSIONS.toLowerCase()}`},
+  {key: 'x-aglyn-package-version', value: PACKAGE_VERSION},
+  {key: 'x-aglyn-process-version', value: PROCESS_VERSION},
+  {key: 'x-aglyn-process-versions', value: PROCESS_VERSIONS},
 ]
 
 /**
@@ -99,10 +97,19 @@ const AGLYN_CONFIG = {
   // than Terser.
   crossOrigin: 'anonymous',
   env: {
-    PKG_VERSION,
-    COMMIT_REF,
-    PROCESS_VERSION,
-    PROCESS_VERSIONS,
+    AGLYN_HOST: process.env.AGLYN_HOST,
+    AGLYN_HOSTNAME: process.env.AGLYN_HOSTNAME,
+    AGLYN_PORT: process.env.AGLYN_PORT,
+    AGLYN_PROTOCOL: process.env.AGLYN_PROTOCOL,
+    AGLYN_URL: process.env.AGLYN_URL,
+    COMMIT_REF: process.env.COMMIT_REF,
+    PACKAGE_VERSION: PACKAGE_VERSION,
+    PROCESS_VERSION: process.version,
+    PROCESS_VERSIONS: process.versions,
+    VERCEL: process.env.VERCEL,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
+    VERCEL_URL: process.env.VERCEL_URL,
   },
   eslint: {
     ignoreDuringBuilds: IS_PRODUCTION,
@@ -144,8 +151,20 @@ const AGLYN_CONFIG = {
     disableStaticImages: false,
     domains: [
       'aglyn.com',
-      'console.aglyn.com',
+      'app.aglyn.com',
+      'bucket.aglyn.com',
       'cdn.aglyn.com',
+      'cloud.aglyn.com',
+      'cname.aglyn.com',
+      'console.aglyn.com',
+      'proxy.aglyn.com',
+      'space.aglyn.com',
+      'static.aglyn.com',
+      'storage.aglyn.com',
+      'tenant.aglyn.com',
+      'host.aglyn.com',
+      'hostname.aglyn.com',
+      'www.aglyn.com',
     ],
     formats: ['image/avif', 'image/webp'],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -214,9 +233,15 @@ function withAglyn(nextConfig = {}) {
       //   ? AGLYN_CONFIG.webpack5
       //   : userConfig.webpack5,
 
+      generateBuildId: async () => {
+        return await typeof merged?.generateBuildId === 'function'
+          && merged.generateBuildId()
+          || getCommitRef()
+      },
+
       headers: async () => {
         const aglynConfigHeaders = await AGLYN_CONFIG.headers()
-        const nextConfigHeaders = typeof merged?.headers === 'function'
+        const nextConfigHeaders = typeof merged.headers === 'function'
           ? await merged.headers() || []
           : merged?.headers || []
 
@@ -266,3 +291,13 @@ function withAglyn(nextConfig = {}) {
 
 
 module.exports = withAglyn
+
+function getCommitRef() {
+  return (
+    process.env.COMMIT_REF
+    || process.env.NEXT_PUBLIC_COMMIT_REF
+    || process.env.VERCEL_GIT_COMMIT_SHA
+    || process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA
+    || ''
+  ).slice(0, 6) || undefined
+}

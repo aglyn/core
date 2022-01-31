@@ -16,7 +16,7 @@
  */
 
 
-export const PKG_VERSION = String(process.env.PKG_VERSION || 'NULL')
+export const PACKAGE_VERSION = String(process.env.PACKAGE_VERSION || 'NULL')
 export const BUILD_ID = String(process.env.BUILD_ID || 'NULL')
 export const COMMIT_REF = String(process.env.COMMIT_REF || 'NULL')
 
