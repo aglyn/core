@@ -12,6 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "jsx": "preserve",
+    "jsxImportSource": "@emotion/react",
     "lib": ["dom", "dom.iterable", "esnext"],
     "listFiles": true,
     "module": "esnext",
