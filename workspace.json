@@ -24,9 +24,9 @@
       },
       "tags": ["sc:lib", "sc:lib:addon"]
     },
-    "cloud": {
-      "root": "apps/cloud",
-      "sourceRoot": "apps/cloud",
+    "api": {
+      "root": "apps/api",
+      "sourceRoot": "apps/api",
       "projectType": "application",
       "targets": {
         "build": {
@@ -34,8 +34,8 @@
           "outputs": ["{options.outputPath}"],
           "defaultConfiguration": "production",
           "options": {
-            "root": "apps/cloud",
-            "outputPath": "dist/apps/cloud"
+            "root": "apps/api",
+            "outputPath": "dist/apps/api"
           },
           "configurations": {
             "production": {}
@@ -44,12 +44,12 @@
         "serve": {
           "executor": "@nrwl/next:server",
           "options": {
-            "buildTarget": "cloud:build",
+            "buildTarget": "api:build",
             "dev": true
           },
           "configurations": {
             "production": {
-              "buildTarget": "cloud:build:production",
+              "buildTarget": "api:build:production",
               "dev": false
             }
           }
@@ -57,14 +57,14 @@
         "export": {
           "executor": "@nrwl/next:export",
           "options": {
-            "buildTarget": "cloud:build:production"
+            "buildTarget": "api:build:production"
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/cloud"],
+          "outputs": ["coverage/apps/api"],
           "options": {
-            "jestConfig": "apps/cloud/jest.config.js",
+            "jestConfig": "apps/api/jest.config.js",
             "passWithNoTests": true
           }
         },
@@ -72,7 +72,7 @@
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["apps/cloud/**/*.{ts,tsx,js,jsx}"]
+            "lintFilePatterns": ["apps/api/**/*.{ts,tsx,js,jsx}"]
           }
         }
       },
@@ -87,11 +87,11 @@
           "executor": "@nrwl/cypress:cypress",
           "options": {
             "cypressConfig": "apps/cloud-e2e/cypress.json",
-            "devServerTarget": "cloud:serve"
+            "devServerTarget": "api:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "cloud:serve:production"
+              "devServerTarget": "api:serve:production"
             }
           }
         },
@@ -104,7 +104,7 @@
         }
       },
       "tags": [],
-      "implicitDependencies": ["cloud"]
+      "implicitDependencies": ["api"]
     },
     "console": {
       "root": "apps/console",
