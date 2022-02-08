@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-import { objectDeepMergeMany } from '@aglyn/shared-util-vendor'
+import {objectDeepMergeFillIn} from '@aglyn/shared-util-vendor'
 import {
-  AglynComponentElementDataDenormalized,
-  AglynComponentElementTemplateData,
-  TemplateSubElementData,
-} from '../controllers/aglyn-components.controller'
-import { createComponentElementId } from './create-component-element-id'
+  type AglynComponentElementTemplate,
+  type AglynComponentTemplateData,
+} from '../types/aglyn-components.types'
+import {AglynElementNormalized} from '../types/aglyn-elements.types'
+import {createComponentElementId} from './create-component-element-id'
 
 
-function traverseComponentTemplate(data: TemplateSubElementData): AglynComponentElementDataDenormalized {
+function traverseComponentTemplate(data: AglynComponentTemplateData): AglynElementNormalized {
   return {
     ...data,
     $id: createComponentElementId(),
@@ -33,22 +33,19 @@ function traverseComponentTemplate(data: TemplateSubElementData): AglynComponent
 }
 
 export type CreateComponentElementDataOptions =
-  | AglynComponentElementTemplateData
-  | { data: AglynComponentElementDataDenormalized }
+  | AglynComponentElementTemplate
+  | {data: AglynElementNormalized}
 
-export const ELEMENT_DEFAULTS: Partial<AglynComponentElementDataDenormalized> = {
+export const ELEMENT_DEFAULTS: Partial<AglynElementNormalized> = {
   props: {},
   elements: [],
 }
 
 export function createComponentElementData(
   options?: CreateComponentElementDataOptions,
-): AglynComponentElementDataDenormalized {
+): AglynElementNormalized {
   const {data} = {...options}
 
-  return objectDeepMergeMany([
-    {...ELEMENT_DEFAULTS},
-    traverseComponentTemplate(data),
-  ]) as AglynComponentElementDataDenormalized
+  return objectDeepMergeFillIn({...ELEMENT_DEFAULTS}, traverseComponentTemplate(data))
 }
 export default createComponentElementData

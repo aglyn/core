@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { ThemeOptions } from '../../vendor/mui'
+import {type ThemeOptions} from '../../vendor/mui'
+
 
 export const consoleOverrides: ThemeOptions['components'] = {
   MuiAvatar: {
@@ -27,15 +28,20 @@ export const consoleOverrides: ThemeOptions['components'] = {
     },
   },
   MuiIconButton: {
+    defaultProps: {
+      color: 'secondary',
+    },
     // color: 'inherit', // Default color to inherit
-    styleOverrides: { root: { padding: 8 } },
+    styleOverrides: {root: {padding: 8}},
   },
   MuiLink: {
+    defaultProps: {
+      color: 'secondary',
+    },
     styleOverrides: {
       root: {
         '&[disabled]': {
           pointerEvents: 'none',
-          color: 'var(--text-disabled)',
           textDecoration: 'none',
           filter: 'grayscale(1) opacity(0.65)',
         },
@@ -43,11 +49,13 @@ export const consoleOverrides: ThemeOptions['components'] = {
     },
   },
   MuiButton: {
+    defaultProps: {
+      color: 'secondary',
+    },
     styleOverrides: {
       root: {
         '&a[disabled]': {
           pointerEvents: 'none',
-          color: 'var(--text-disabled)',
           textDecoration: 'none',
           filter: 'grayscale(1) opacity(0.65)',
         },
@@ -56,8 +64,8 @@ export const consoleOverrides: ThemeOptions['components'] = {
   },
   MuiTooltip: {
     defaultProps: {
-      arrow: true
-    }
-  }
+      arrow: true,
+    },
+  },
 }
 export default consoleOverrides

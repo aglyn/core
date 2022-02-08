@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import { jssPreset, StylesProvider, useTheme } from '@aglyn/shared-feature-themes'
+import {jssPreset, StylesProvider, useTheme} from '@aglyn/shared-feature-themes'
 
-import { create, Jss, JssOptions } from 'jss'
+import {create, Jss, JssOptions} from 'jss'
 import rtl from 'jss-rtl'
 import React, {
   Children,
@@ -30,7 +30,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import ReactFrameComponent, { FrameComponentProps } from 'react-frame-component'
+import ReactFrameComponent, {FrameComponentProps} from 'react-frame-component'
 
 import useCombinedRefs from '../hooks/use-combined-refs'
 
@@ -88,7 +88,6 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(fun
         {/* JSS Insertion Point */}
         <style
           ref={styleRef}
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{__html: baseStyles}}
           id={'sandbox-frame-jss'}
         />

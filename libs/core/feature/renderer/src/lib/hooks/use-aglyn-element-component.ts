@@ -15,19 +15,15 @@
  * limitations under the License.
  */
 
-import type { IAglynComponent, ElementId } from '@aglyn/core-data-framework'
-import { getComponent } from '@aglyn/core-data-framework'
-import { useMemo } from 'react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
-import { useAglynElementData } from './use-aglyn-element-data'
+import {type ElementId, type IAglynComponent} from '@aglyn/core-data-framework'
+import {type OrUndef} from '@aglyn/shared-data-types'
+import useAglynComponent from './use-aglyn-component'
+import useAglynElementData from './use-aglyn-element-data'
 
-export function useAglynElementComponent($id: ElementId): IAglynComponent {
-  const { getApp } = useAglynAppContext()
-  const elementData = useAglynElementData($id)
-  const componentId = elementData.componentId
-  const bundleId = elementData.bundleId
-  return useMemo(() => {
-    return getComponent(getApp(), { componentId, bundleId })
-  }, [getApp, componentId, bundleId])
+
+export function useAglynElementComponent<P, T>($id: ElementId): OrUndef<IAglynComponent<P, T>> {
+  const componentId = useAglynElementData($id, 'componentId')
+  const bundleId = useAglynElementData($id, 'bundleId')
+  return useAglynComponent(componentId, bundleId)
 }
 export default useAglynElementComponent

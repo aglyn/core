@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import { getDisplayName } from '@aglyn/shared-util-tools'
-import { NextRouter, Router, useRouter } from 'next/router'
-import { ComponentType, forwardRef } from 'react'
-import { Normalized } from './aglyn-deprecated'
+import {mdiHome, type MdiIconProps, mdiVectorPolylineEdit} from '@aglyn/shared-ui-mdi-jsx'
+import {getDisplayName} from '@aglyn/shared-util-tools'
+import {type NextRouter, Router, useRouter} from 'next/router'
+import {type ComponentType, forwardRef} from 'react'
+import {Normalized} from './aglyn-deprecated'
 
 
 type ID = string // The slug of the page excluding parent
@@ -37,7 +38,7 @@ type PageMeta = {
   dynamic?: boolean,
   title: PageTitle
   name: NameMeta
-  icon?: string
+  icon?: MdiIconProps
   pages?: Paths
   areas?: Paths
   parent?: ID
@@ -77,7 +78,10 @@ export function getPageParents(page: PageMeta): PageMeta[] {
   return [...parentParents, parent].filter(i => Boolean(i))
 }
 export function getPageArea(page: PageMeta): PageMeta {
-  const area = page?.area ?? getPageParents(page).reduceRight((a, c) => a ? a : (c.area ? c : null), null)?.area
+  const area = page?.area ?? getPageParents(page).reduceRight((
+    a,
+    c,
+  ) => a ? a : (c.area ? c : null), null)?.area
   return getArea(area) ?? getArea(ROOT_META.id)
 }
 export function getPageAncestors(page: PageMeta): PageMeta[] {
@@ -127,7 +131,7 @@ export const ROOT_META: PageMeta = {
   id: '/',
   slug: '',
   title: 'App Dashboard',
-  icon: 'home',
+  icon: {path: mdiHome.path},
   pages: [],
   areas: [],
   name: {
@@ -145,7 +149,7 @@ const manageArea = addArea({
   slug: 'manage',
   title: 'Manage',
   parent: ROOT_META.id,
-  icon: 'vector-polyline-edit',
+  icon: {path: mdiVectorPolylineEdit.path},
   pages: [],
   areas: [],
   name: {
@@ -285,7 +289,7 @@ addPage({
 })
 
 type AggregatedRouterProps = Pick<Router, 'asPath' | 'basePath' | 'pathname' | 'query' | 'route'>
-type DenormalizedPage = Omit<PageMeta, 'pages'> & { pages: PageMeta[] }
+type DenormalizedPage = Omit<PageMeta, 'pages'> & {pages: PageMeta[]}
 export type AggregatedPageMeta = AggregatedRouterProps & {
   pageMeta: PageMeta
   overrideMeta?: PageMeta
@@ -329,7 +333,7 @@ export type WithPageMetaProps<P> = P & Record<WithN, AggregatedPageMeta>
 export type WithPageMetaComponent<P> = ComponentType<WithPageMetaProps<P>>
 
 export function withAggregatedPageMeta<P>(
-  Component: ComponentType<P & { aggregatedPageMeta?: AggregatedPageMeta }>,
+  Component: ComponentType<P & {aggregatedPageMeta?: AggregatedPageMeta}>,
 ) {
   const displayName = `WithAggregatedPageMeta(${getDisplayName(Component)})`
   const WithAggregatedPageMeta = forwardRef<any, Omit<P, 'aggregatedPageMeta'>>(

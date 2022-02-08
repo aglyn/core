@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,27 @@
 
 // MARK – IMPORTS
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const withAglyn = require('../../nextjs-base.config')
+const withAglyn = require('../../tools/nextjs-base.config')
 
 // MARK – GLOBALS
 const isProduction = process.env.NODE_ENV === 'production'
-const securityPolicy = isProduction
-  ? 'default-src \'self\' aglyn.com *.aglyn.com'
-  : 'default-src \'self\''
 
+/**
+ * @type {import('/tools/nextjs-base.config').WithAglynOptions}
+ **/
 module.exports = withAglyn({
-  // headers: [
-  // {
-  //   key: 'Content-Security-Policy',
-  //   value: securityPolicy,
-  // },
-  // ],
+  async headers() {
+    return [
+      {
+        source: '/besigner',
+        headers: [
+          // Allow app to be framed inside aglyn subdomains for editing
+          {
+            key: 'Content-Security-Policy',
+            value: 'frame-ancestors  https://*.aglyn.com https://aglyn.com',
+          },
+        ],
+      },
+    ]
+  },
 })

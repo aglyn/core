@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,30 +15,15 @@
  * limitations under the License.
  */
 
-import {
-  AglynComponentElementDataNormalizedMap,
-  getCanvasNormalizedElementsStore,
-} from '@aglyn/core-data-framework'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { useStoreMap } from 'effector-react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import {type AglynElementsList, getCanvasNormalizedElementsStore} from '@aglyn/core-data-framework'
+import {useStoreMap} from 'effector-react'
+import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
-export function useAglynCanvasElementsNormalized(): AglynComponentElementDataNormalizedMap
-export function useAglynCanvasElementsNormalized<Result>(
-  callbackFn: (state: AglynComponentElementDataNormalizedMap) => Result
-): Result
-export function useAglynCanvasElementsNormalized<Result>(
-  callbackFn?: (state: AglynComponentElementDataNormalizedMap) => Result
-): Result | AglynComponentElementDataNormalizedMap {
-  const { getApp } = useAglynAppContext()
+
+export function useAglynCanvasElementsNormalized(): AglynElementsList {
+  const {getApp} = useAglynAppContext()
   const app = getApp()
   const store = getCanvasNormalizedElementsStore(app)
-  return useStoreMap({
-    store,
-    keys: [callbackFn],
-    fn: (state, [callbackFn]) => {
-      return _isFnT(callbackFn) ? (callbackFn(state) as Result) : state
-    },
-  })
+  return useStoreMap(store, (store) => store)
 }
 export default useAglynCanvasElementsNormalized

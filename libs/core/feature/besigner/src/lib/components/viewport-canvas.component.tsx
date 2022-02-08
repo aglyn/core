@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,42 +15,42 @@
  * limitations under the License.
  */
 
-import { alpha, generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
-import { ZoomablePanningComponent } from '@aglyn/shared-ui-jsx'
-import { forwardRef, HTMLAttributes, Ref } from 'react'
-import { ViewportFrameComponent } from './viewport-frame.component'
+import {BesignerDeviceFlag} from '@aglyn/core-data-besigner'
+import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
+import clsx from 'clsx'
+import dynamic from 'next/dynamic'
+// import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
+import {forwardRef, type HTMLAttributes, type Ref} from 'react'
+import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
 
+
+const ViewportFrameComponent = dynamic(
+  () => import('./viewport-frame.component').then((mod) => mod.ViewportFrameComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
 
 const ViewportCanvas = styled('div', {
-  name: 'AglynViewportCanvas'
-})(({theme}) => ({
+  name: 'AglynViewportCanvas',
+})({
   flexGrow: 1,
   minHeight: '100%',
   width: '100%',
-  backgroundColor: theme.palette.background.secondary,
-  // position: 'relative',
-  backgroundImage: [
-    `radial-gradient(circle, ${alpha(
-      theme.palette.tertiary.main,
-      0.28,
-    )} 0.086em, rgba(0,0,0,0) 1px)`,
-    // `linear-gradient(to bottom, ${alpha(theme.palette.divider, 0.07)} 1px, transparent 1px)`,
-  ].join(','),
-  backgroundSize: ['30px', '30px'].join(' '),
   overflowY: 'auto',
   overflowX: 'auto',
   // display: 'flex',
-}))
+})
 
 const canvasArtboardClassKeys = generateComponentClassKeys('AglynCanvasArtboard', [
-  'deviceXl',
-  'deviceLg',
-  'deviceMd',
-  'deviceSm',
+  'responsive',
   'deviceXs',
+  'deviceSm',
+  'deviceMd',
+  'deviceLg',
+  'deviceXl',
 ])
-const CanvasArtboard = styled('div', {
-  name: 'AglynCanvasArtboard'
+const ViewportArtboard = styled('div', {
+  name: 'AglynViewportArtboard',
 })(({theme}) => ({
   overflow: 'hidden',
   minHeight: '100%',
@@ -59,30 +59,35 @@ const CanvasArtboard = styled('div', {
   marginRight: 'auto',
   display: 'flex',
   flexDirection: 'column',
-  width: 1280,
-  [`&.${canvasArtboardClassKeys.deviceXl}`]: {width: theme.breakpoints.values.xl},
-  [`&.${canvasArtboardClassKeys.deviceLg}`]: {width: theme.breakpoints.values.lg},
-  [`&.${canvasArtboardClassKeys.deviceMd}`]: {width: theme.breakpoints.values.md},
+  transition: theme.transitions.create(['width'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  width: '100%',
+  [`&, &.${canvasArtboardClassKeys.responsive}`]: {width: '100%'},
+  [`&.${canvasArtboardClassKeys.deviceXs}`]: {width: 390},
   [`&.${canvasArtboardClassKeys.deviceSm}`]: {width: theme.breakpoints.values.sm},
-  [`&.${canvasArtboardClassKeys.deviceXs}`]: {width: theme.breakpoints.values.xs},
+  [`&.${canvasArtboardClassKeys.deviceMd}`]: {width: theme.breakpoints.values.md},
+  [`&.${canvasArtboardClassKeys.deviceLg}`]: {width: theme.breakpoints.values.lg},
+  [`&.${canvasArtboardClassKeys.deviceXl}`]: {width: theme.breakpoints.values.xl},
 }))
 
-const ArtboardPanner = styled(ZoomablePanningComponent, {name: 'AglynArtboardPanner'})(
-  ({theme}) => ({
-    overflow: 'hidden',
-    padding: theme.spacing(3),
-    height: '100%',
-    width: theme.breakpoints.values.lg,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    ['& > div']: {
-      flexGrow: 1,
-      display: 'flex',
-      height: '100%',
-      width: '100%',
-    },
-  }),
-)
+// const ArtboardPanner = styled(ZoomablePanningComponent, {name: 'AglynArtboardPanner'})(
+//   ({theme}) => ({
+//     overflow: 'hidden',
+//     padding: theme.spacing(3),
+//     height: '100%',
+//     width: theme.breakpoints.values.lg,
+//     marginLeft: 'auto',
+//     marginRight: 'auto',
+//     ['& > div']: {
+//       flexGrow: 1,
+//       display: 'flex',
+//       height: '100%',
+//       width: '100%',
+//     },
+//   }),
+// )
 
 export interface ViewportCanvasComponentProps extends HTMLAttributes<HTMLDivElement> {
   pannerRef?: Ref<any>
@@ -92,9 +97,24 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, pannerRef, ...rest} = props
 
+
+    const devicePreview = useAglynBesignerStoreState('flags', 'devicePreview')
+    const artboardClass = clsx({
+      [canvasArtboardClassKeys.responsive]: BesignerDeviceFlag.RESPONSIVE === devicePreview,
+      [canvasArtboardClassKeys.deviceXs]: BesignerDeviceFlag.XS === devicePreview,
+      [canvasArtboardClassKeys.deviceSm]: BesignerDeviceFlag.SM === devicePreview,
+      [canvasArtboardClassKeys.deviceMd]: BesignerDeviceFlag.MD === devicePreview,
+      [canvasArtboardClassKeys.deviceLg]: BesignerDeviceFlag.LG === devicePreview,
+      [canvasArtboardClassKeys.deviceXl]: BesignerDeviceFlag.XL === devicePreview,
+    })
+
     return (
-      <ViewportCanvas ref={ref} {...rest}>
-        <CanvasArtboard>
+      <ViewportCanvas
+        ref={ref}
+        id="aglyn:viewport-canvas"
+        {...rest}
+      >
+        <ViewportArtboard id="aglyn:viewport-artboard" className={artboardClass}>
           {/*<ViewportCanvasPanner*/}
           {/*  {...{ref: pannerRef} as any}*/}
           {/*  disableScrollZoom*/}
@@ -106,7 +126,7 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
           {/*>*/}
           <ViewportFrameComponent />
           {/*</ViewportCanvasPanner>*/}
-        </CanvasArtboard>
+        </ViewportArtboard>
 
         {/*<RulerComponent*/}
         {/*  variant="vertical"*/}
@@ -125,5 +145,5 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
 ViewportCanvasComponent.displayName = 'ViewportCanvasComponent'
 ViewportCanvasComponent.defaultProps = {}
 
-export { ViewportCanvasComponent }
+export {ViewportCanvasComponent}
 export default ViewportCanvasComponent

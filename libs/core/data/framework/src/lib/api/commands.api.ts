@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 
-import { _INTERNAL_COMMANDS_ } from '../constants/_internal'
+import {_INTERNAL_COMMANDS_} from '../constants/_internal'
 import {
-  CommandRegisterListenerPayload,
-  CommandRemoveResolverPayload,
-  CommandsSetResolverPayload,
-  CommandTriggerPayload,
-  CommandUnregisterListenerPayload,
+  type CommandsRegisterListenerPayload,
+  type CommandsRemoveResolverPayload,
+  type CommandsSetResolverPayload,
+  type CommandsTriggerPayload,
+  type CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
-import { AglynAppController } from '../controllers/aglyn-app.controller'
-import { AglynCommandsController } from '../controllers/aglyn-commands.controller'
-import { _validateAppArg } from './app.api'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {type IAglynCommandsController} from '../types/aglyn-commands.types'
+import {_validateAppArg} from './app.api'
 
 
-export function _getCommandController(app: AglynAppController): AglynCommandsController {
+export function _getCommandController(app: IAglynAppController): IAglynCommandsController {
   _validateAppArg(app)
   return _INTERNAL_COMMANDS_.get(app.getName())
 }
 
 
 export function setCommandResolver(
-  app: AglynAppController,
+  app: IAglynAppController,
   data: CommandsSetResolverPayload,
 ): void {
   const commandController = _getCommandController(app)
@@ -43,32 +43,32 @@ export function setCommandResolver(
 }
 
 export function removeCommandResolver(
-  app: AglynAppController,
-  data: CommandRemoveResolverPayload,
+  app: IAglynAppController,
+  data: CommandsRemoveResolverPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.removeResolver(data)
 }
 
 export function registerCommandListener(
-  app: AglynAppController,
-  data: CommandRegisterListenerPayload,
+  app: IAglynAppController,
+  data: CommandsRegisterListenerPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.registerListener(data)
 }
 
 export function unregisterCommandListener(
-  app: AglynAppController,
-  data: CommandUnregisterListenerPayload,
+  app: IAglynAppController,
+  data: CommandsUnregisterListenerPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.unregisterListener(data)
 }
 
 export function triggerCommand(
-  app: AglynAppController,
-  data: CommandTriggerPayload,
+  app: IAglynAppController,
+  data: CommandsTriggerPayload,
 ): void {
   const commandController = _getCommandController(app)
   commandController.trigger(data)

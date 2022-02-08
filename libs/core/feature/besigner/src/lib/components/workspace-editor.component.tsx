@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,32 @@
  * limitations under the License.
  */
 
-import { styled } from '@aglyn/shared-feature-themes'
-import NoSsr from '@mui/material/NoSsr'
-import Stack, { StackProps } from '@mui/material/Stack'
-import { forwardRef } from 'react'
-import { AppBarPrimaryComponent } from './app-bar-primary.component'
-import { AppBarSecondaryComponent } from './app-bar-secondary.component'
-import { PanelLeftComponent } from './panel-left.component'
-import { PanelRightComponent } from './panel-right.component'
-import { ViewportRootComponent } from './viewport-root.component'
+import {styled} from '@aglyn/shared-feature-themes'
+import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
+import Stack, {type StackProps} from '@mui/material/Stack'
+import dynamic from 'next/dynamic'
+import {forwardRef} from 'react'
+import AppBarPrimaryComponent from './app-bar-primary.component'
+import AppBarSecondaryComponent from './app-bar-secondary.component'
 
+
+const PanelLeftComponent = dynamic(
+  () => import('./panel-left.component').then((mod) => mod.PanelLeftComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
+
+const PanelRightComponent = dynamic(
+  () => import('./panel-right.component').then((mod) => mod.PanelRightComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
+
+const ViewportRootComponent = dynamic(
+  () => import('./viewport-root.component').then((mod) => mod.ViewportRootComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
 
 const WorkspaceEditor = styled(Stack, {
-  name: 'AglynWorkspaceEditor'
+  name: 'AglynWorkspaceEditor',
 })({
   position: 'absolute',
   left: 0,
@@ -41,7 +54,7 @@ const WorkspaceEditor = styled(Stack, {
 
 export interface WorkspaceEditorComponentProps extends StackProps {}
 
-const WorkspaceEditorComponentRaw = forwardRef<any, WorkspaceEditorComponentProps>(
+const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
 
@@ -60,65 +73,44 @@ const WorkspaceEditorComponentRaw = forwardRef<any, WorkspaceEditorComponentProp
           justifyContent="flex-start"
           alignItems="stretch"
           id="aglyn:besigner-header"
+          component="header"
           spacing={0}
           sx={{
             zIndex: 1,
           }}
         >
-          <AppBarPrimaryComponent
-            id="aglyn:besigner-appbar-primary"
-            aria-label="primary app toolbar"
-          />
-          <NoSsr>
-            <AppBarSecondaryComponent
-              id="aglyn:besigner-appbar-secondary"
-              aria-label="secondary app toolbar"
-            />
-          </NoSsr>
+          <AppBarPrimaryComponent />
+          <AppBarSecondaryComponent />
         </Stack>
 
         <Stack
           direction="row"
           alignItems="stretch"
+          justifyContent="space-between"
+          id="aglyn:besigner-main"
+          component="main"
           flexGrow={1}
           spacing={0}
-          id="aglyn:besigner-main"
           sx={{
             overflow: 'hidden',
             zIndex: 0,
           }}
         >
-          <NoSsr>
-            <PanelLeftComponent
-              id="aglyn:besigner-panel-left"
-              aria-label="besigner left drawer"
-            />
-          </NoSsr>
+          <PanelLeftComponent />
 
-          <ViewportRootComponent
-            id="aglyn:besigner-viewport"
-            aria-label="besigner viewport"
-            direction="column"
-            alignItems="center"
-            spacing={0}
-          />
+          <ViewportRootComponent />
 
-          <NoSsr>
-            <PanelRightComponent
-              id="aglyn:besigner-panel-right"
-              aria-label="besigner toolbox right"
-            />
-          </NoSsr>
+          <PanelRightComponent />
         </Stack>
 
         {children}
       </WorkspaceEditor>
     )
-  }
+  },
 )
 
-WorkspaceEditorComponentRaw.displayName = 'WorkspaceEditorComponent'
-WorkspaceEditorComponentRaw.defaultProps = {}
+WorkspaceEditorComponent.displayName = 'WorkspaceEditorComponent'
+WorkspaceEditorComponent.defaultProps = {}
 
-export const WorkspaceEditorComponent = WorkspaceEditorComponentRaw
+export {WorkspaceEditorComponent}
 export default WorkspaceEditorComponent

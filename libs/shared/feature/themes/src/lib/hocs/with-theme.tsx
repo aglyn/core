@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,17 @@
  * limitations under the License.
  */
 
-import { _isArr } from '@aglyn/shared-util-guards'
-import { getDisplayName } from '@aglyn/shared-util-tools'
+import {type JSXComponentType} from '@aglyn/shared-data-types'
+import {_isArr} from '@aglyn/shared-util-guards'
+import {getDisplayName} from '@aglyn/shared-util-tools'
 import CssBaseline from '@mui/material/CssBaseline'
-import { ComponentType, memo } from 'react'
-import { Theme, ThemeProvider } from '../../vendor/mui'
+import {createContext, useContext} from 'react'
+import {type Theme, ThemeProvider} from '../../vendor/mui'
+import {
+  type ThemeMode,
+  useHandleThemeModes,
+  type UseThemeMode,
+} from '../hooks/use-handle-theme-modes'
 
 
 export type WithThemeOptions = {
@@ -27,26 +33,37 @@ export type WithThemeOptions = {
   disableCssBaseline?: boolean
 }
 
+export type PropsWithThemeMode<P> = P & {themeMode?: ThemeMode}
+
+export const ThemeContextDispatch = createContext<UseThemeMode>(null)
+
+export function useThemeModeContext() {
+  return useContext(ThemeContextDispatch)
+}
+
 function withTheme(options: WithThemeOptions) {
   const {theme, disableCssBaseline} = {...options}
   const [lightTheme, darkTheme] = _isArr(theme) ? theme : [theme]
 
-  return function WithTheme<P>(Component: ComponentType<P>) {
-    const displayName = `WithTheme(${getDisplayName(Component)})`
+  return function WithTheme<P>(Component: JSXComponentType<P>): JSXComponentType<PropsWithThemeMode<P>> {
+    const displayName = `ThemedComponent(${getDisplayName(Component)})`
 
-    function WithTheme(props: P & { themeType?: 'light' | 'dark' }) {
-      const {themeType, ...rest} = props
-      const activeTheme = themeType === 'dark' ? darkTheme : lightTheme
+    function ThemedComponent(props: PropsWithThemeMode<P>) {
+      const {themeMode, ...rest} = props
+      const UseThemeMode = useHandleThemeModes(themeMode)
+      const [mode] = UseThemeMode
       return (
-        <ThemeProvider theme={activeTheme}>
-          {!disableCssBaseline ? <CssBaseline /> : null}
-          <Component {...rest as P} />
+        <ThemeProvider theme={mode === 'dark' ? (darkTheme || lightTheme) : lightTheme}>
+          <ThemeContextDispatch.Provider value={UseThemeMode}>
+            {!disableCssBaseline ? <CssBaseline /> : null}
+            <Component {...rest as P} />
+          </ThemeContextDispatch.Provider>
         </ThemeProvider>
       )
     }
-    WithTheme.displayName = displayName
-    return memo(WithTheme)
+    ThemedComponent.displayName = displayName
+    return ThemedComponent
   }
 }
-export { withTheme }
+export {withTheme}
 export default withTheme

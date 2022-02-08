@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,10 @@ export * from './lib/console-theme'
 export * from './lib/hocs/with-emotion-styles-cache-client'
 export * from './lib/hocs/with-theme'
 
+export * from './lib/hooks/use-handle-theme-modes'
+
 export * from './lib/util/create-responsive-theme'
 export * from './lib/util/generate-component-class-keys'
 export * from './lib/util/create-inset-shadows'
+export * from './lib/util/handle-pass-sx-props'
 export * from './lib/util/use-font-family'

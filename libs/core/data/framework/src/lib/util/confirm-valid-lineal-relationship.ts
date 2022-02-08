@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
-import { ComponentsLinealDirectiveFlag } from '../constants/components'
+import {_isArr, _isArrEmpty} from '@aglyn/shared-util-guards'
+import {ComponentsLinealDirectiveFlag} from '../constants/components'
 import {
-  AglynComponentRenderFlags,
-  ComponentsLinealOrder,
-} from '../controllers/aglyn-components.controller'
-import { BundleUId, ComponentId } from '../types'
+  type AglynComponentHierarchyFlags,
+  type BundleUId,
+  type ComponentId,
+  type ComponentsLinealOrder,
+} from '../types/aglyn-components.types'
 
 
 export enum InvalidLinealRelationFlag {
@@ -104,12 +105,12 @@ export interface ConfirmValidLinealRelationshipOptions {
   item: {
     componentId: ComponentId
     bundleId: ComponentId
-    hierarchy: AglynComponentRenderFlags['hierarchy']
+    hierarchy: AglynComponentHierarchyFlags
   }
   parent: {
     componentId: ComponentId
     bundleId: ComponentId
-    hierarchy: AglynComponentRenderFlags['hierarchy']
+    hierarchy: AglynComponentHierarchyFlags
   }
 }
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
+import {generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {_isEqualitySameType} from '@aglyn/shared-util-guards'
+import Box, {type BoxProps as MuiBoxProps} from '@mui/material/Box'
+import MuiDrawer, {type DrawerProps as MuiDrawerProps} from '@mui/material/Drawer'
 import clsx from 'clsx'
-import { DEFAULT_LEFT_DRAWER_WIDTH } from '../constants'
-import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
-import { _isEqualitySameType } from '@aglyn/shared-util-guards'
-import MuiDrawer, { DrawerProps as MuiDrawerProps } from '@mui/material/Drawer'
-import { forwardRef, HTMLAttributes } from 'react'
+import {forwardRef} from 'react'
+import {DEFAULT_LEFT_DRAWER_WIDTH} from '../constants'
 
 
-const classKeys = generateComponentClassKeys('AglynWorkspacePanel',[
+const classKeys = generateComponentClassKeys('AglynWorkspacePanel', [
   'drawer',
   'open',
   'anchorLeft',
@@ -32,16 +33,16 @@ const classKeys = generateComponentClassKeys('AglynWorkspacePanel',[
   'anchorBottom',
 ])
 
-interface WorkspacePanelProps extends HTMLAttributes<HTMLDivElement> {
+interface WorkspacePanelProps extends MuiBoxProps {
   size?: string | number
 }
 
-const WorkspacePanel = styled('div', {
+const WorkspacePanel = styled(Box, {
   name: 'AglynWorkspacePanel',
   shouldForwardProp(propName: any) {
     return !_isEqualitySameType(propName, 'size')
   },
-})<WorkspacePanelProps>(({ theme, size }) => {
+})<WorkspacePanelProps>(({theme, size}) => {
   const calcSize = (size || DEFAULT_LEFT_DRAWER_WIDTH)
 
   return ({
@@ -100,7 +101,7 @@ const WorkspacePanel = styled('div', {
           width: calcSize,
           height: '100%',
         },
-      }
+      },
     },
     [`& .${classKeys.drawer}`]: {
       flexShrink: 0,
@@ -108,7 +109,7 @@ const WorkspacePanel = styled('div', {
         boxSizing: 'border-box',
         position: 'unset',
       },
-    }
+    },
   })
 })
 
@@ -127,6 +128,7 @@ const WorkspacePanelComponent = forwardRef<any, WorkspacePanelComponentProps>(
       size,
       open: openProp,
       anchor,
+      id,
       ...rest
     } = props
     const open = Boolean(openProp)
@@ -142,6 +144,7 @@ const WorkspacePanelComponent = forwardRef<any, WorkspacePanelComponentProps>(
     return (
       <WorkspacePanel
         ref={ref}
+        id={id}
         size={size}
         className={className}
         {...rest}
@@ -157,7 +160,7 @@ const WorkspacePanelComponent = forwardRef<any, WorkspacePanelComponentProps>(
         </MuiDrawer>
       </WorkspacePanel>
     )
-  }
+  },
 )
 
 WorkspacePanelComponent.displayName = 'WorkspacePanelComponent'
@@ -165,5 +168,5 @@ WorkspacePanelComponent.defaultProps = {
   anchor: 'left',
 }
 
-export { WorkspacePanelComponent }
+export {WorkspacePanelComponent}
 export default WorkspacePanelComponent

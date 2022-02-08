@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,47 +15,47 @@
  * limitations under the License.
  */
 
-import type { AglynComponentElementDataNormalized, ElementId } from '@aglyn/core-data-framework'
-import { getCanvasNormalizedElementsStore } from '@aglyn/core-data-framework'
-import type { AnyProps, Conditional, EmptyObj } from '@aglyn/shared-data-types'
-import { useStoreMap } from 'effector-react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import {
+  type AglynElementDenormalized,
+  type ElementId,
+  getCanvasDenormalizedElementsStore,
+} from '@aglyn/core-data-framework'
+import {type AnyProps, type Conditional, type EmptyObj} from '@aglyn/shared-data-types'
+import {useStoreMap} from 'effector-react'
+import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
-export type UseAglynElementData<
-  P = AnyProps,
-  K extends keyof AglynComponentElementDataNormalized<P> = null
-> = Conditional<
-  K,
-  keyof AglynComponentElementDataNormalized<P>,
-  AglynComponentElementDataNormalized<P>[K],
-  AglynComponentElementDataNormalized<P>
->
+
+export type UseAglynElementData<P = AnyProps,
+  K extends keyof AglynElementDenormalized<P> = null> = Conditional<K,
+  keyof AglynElementDenormalized<P>,
+  AglynElementDenormalized<P>[K],
+  AglynElementDenormalized<P>>
 
 export function useAglynElementData<P = EmptyObj>(
-  $id: ElementId
-): AglynComponentElementDataNormalized<P>
+  $id: ElementId,
+): AglynElementDenormalized<P>
 
-export function useAglynElementData<
-  P = EmptyObj,
-  K extends keyof AglynComponentElementDataNormalized<P> = null,
->($id: ElementId, key: K): AglynComponentElementDataNormalized<P>[K]
+export function useAglynElementData<P = EmptyObj,
+  K extends keyof AglynElementDenormalized<P> = null>(
+  $id: ElementId,
+  key: K,
+): AglynElementDenormalized<P>[K]
 
-export function useAglynElementData<
-  P = EmptyObj,
-  K extends keyof AglynComponentElementDataNormalized<P> = null
->($id: ElementId, key?: K)/*: UseAglynElementData<P, K>*/ {
-  const { getApp } = useAglynAppContext()
-  const store = getCanvasNormalizedElementsStore(getApp())
+export function useAglynElementData<P = EmptyObj,
+  K extends keyof AglynElementDenormalized<P> = null>(
+  $id: ElementId,
+  key?: K,
+): UseAglynElementData<P, K> {
 
+  const {getApp} = useAglynAppContext()
+  const store = getCanvasDenormalizedElementsStore(getApp())
   return useStoreMap({
     store,
     keys: [$id, key],
     fn: (store, [$id, key]) => {
-      if (!key) {
-        return store[$id]
-      }
-      return store[$id]?.[key]
+      if (!key) {return store[$id] || null}
+      return store[$id]?.[key] || null
     },
-  }) //as UseAglynElementData<P, K>
+  }) as UseAglynElementData<P, K>
 }
 export default useAglynElementData

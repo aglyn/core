@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,18 @@
  * limitations under the License.
  */
 
-import {
-  deleteCanvasElement,
-  ElementId,
-  setBesignerCanvasHovered,
-  setBesignerCanvasSelected,
-} from '@aglyn/core-data-framework'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
-import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
-import { ChangeEvent, useCallback } from 'react'
+import {setBesignerCanvasHovered, setBesignerCanvasSelected} from '@aglyn/core-data-besigner'
+import {deleteCanvasElement, type ElementId} from '@aglyn/core-data-framework'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {useConfirmationContext} from '@aglyn/shared-ui-jsx'
+import {type ChangeEvent, useCallback} from 'react'
 
 
 export interface UseDeleteElementCallbackOptions {
   $id?: ElementId
-  onfulfilled?: (value: unknown) => void | PromiseLike<void>
-  onrejected?: (reason: any) => void | PromiseLike<void>
-  oncatch?: (error: unknown) => void | PromiseLike<void>
+  onFulfilled?: (value: unknown) => void | PromiseLike<void>
+  onRejected?: (reason: any) => void | PromiseLike<void>
+  onCatch?: (error: unknown) => void | PromiseLike<void>
 }
 
 export type UseDeleteElementCallback = {
@@ -40,12 +36,11 @@ export type UseDeleteElementCallback = {
 export const useDeleteElementCallback = (
   options?: UseDeleteElementCallbackOptions,
 ): UseDeleteElementCallback => {
-  const {$id, onfulfilled, onrejected, oncatch} = {...options}
+  const {$id, onFulfilled, onRejected, onCatch} = {...options}
   const {confirm} = useConfirmationContext()
   const {getApp} = useAglynAppContext()
-  return useCallback(
-    (e: ChangeEvent<unknown>, clbkOpts?: UseDeleteElementCallbackOptions) => {
-      const app = getApp()
+
+  return useCallback((e: ChangeEvent<unknown>, opts?: UseDeleteElementCallbackOptions) => {
 
       confirm({
         title: 'Are you sure?',
@@ -56,27 +51,28 @@ export const useDeleteElementCallback = (
           color: 'error',
         },
       })
-      .then(
-        (res) => {
-          setBesignerCanvasSelected(app, {selected: null})
-          setBesignerCanvasHovered(app, {hovered: null})
-          deleteCanvasElement(app, {$id: clbkOpts?.$id ?? $id})
-          clbkOpts?.onfulfilled && clbkOpts?.onfulfilled(res)
-          onfulfilled && onfulfilled(res)
-        },
-        (reason) => {
-          console.warn('rejected', reason)
-          clbkOpts?.onrejected && clbkOpts?.onrejected(reason)
-          onrejected && onrejected(reason)
-        },
-      )
-      .catch((e) => {
-        console.error('caught error', e)
-        clbkOpts?.oncatch && clbkOpts?.oncatch(e)
-        oncatch && oncatch(e)
-      })
-    },
-    [$id, onfulfilled, onrejected, oncatch, confirm],
+        .then(
+          (res) => {
+            const app = getApp()
+            setBesignerCanvasSelected(app, {selected: () => ({})})
+            setBesignerCanvasHovered(app, {hovered: () => ({})})
+            deleteCanvasElement(app, {$id: opts?.$id || $id})
+            opts?.onFulfilled && opts?.onFulfilled(res)
+            onFulfilled && onFulfilled(res)
+          },
+          (reason) => {
+            console.warn('rejected', reason)
+            opts?.onRejected && opts?.onRejected(reason)
+            onRejected && onRejected(reason)
+          },
+        )
+        .catch((e) => {
+          console.error('caught error', e)
+          opts?.onCatch && opts?.onCatch(e)
+          onCatch && onCatch(e)
+        })
+
+    }, [getApp, confirm, $id, onFulfilled, onRejected, onCatch],
   )
 }
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,99 +15,99 @@
  * limitations under the License.
  */
 
-import { AnyProps, OrUndef } from '@aglyn/shared-data-types'
-import { _INTERNAL_COMPONENTS_ } from '../constants/_internal'
+import {type OrUndef} from '@aglyn/shared-data-types'
+import {_INTERNAL_COMPONENTS_} from '../constants/_internal'
 import {
-  ComponentGetPayload,
-  ComponentRegisterPayload,
-  ComponentsBundleGetPayload,
-  ComponentsBundleRegisterPayload,
-  ComponentsBundleUnregisterPayload,
-  ComponentSchemaGetPayload,
-  ComponentUnregisterPayload,
+  type ComponentGetPayload,
+  type ComponentRegisterPayload,
+  type ComponentsBundleGetPayload,
+  type ComponentsBundleRegisterPayload,
+  type ComponentsBundleUnregisterPayload,
+  type ComponentSchemaGetPayload,
+  type ComponentUnregisterPayload,
 } from '../constants/emitter'
-import { AglynAppController } from '../controllers/aglyn-app.controller'
-import type {
-  IAglynComponent,
-  AglynComponentElementTemplateData,
-  AglynComponentsBundle,
-  AglynComponentSchema,
-  AglynComponentsController,
-  ComponentsRegistryEntry,
-  ComponentsRegistryKeys,
-  ComponentsRegistryValues,
-} from '../controllers/aglyn-components.controller'
-import { _validateAppArg } from './app.api'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {
+  type AglynComponentElementTemplate,
+  type AglynComponentsBundle,
+  type AglynComponentSchema,
+  type ComponentsRegistryEntry,
+  type ComponentsRegistryKeys,
+  type ComponentsRegistryValues,
+  type IAglynComponent,
+  type IAglynComponentsController,
+} from '../types/aglyn-components.types'
+import {_validateAppArg} from './app.api'
 
 
-export function _getComponentsController(app: AglynAppController): AglynComponentsController {
+export function _getComponentsController(app: IAglynAppController): IAglynComponentsController {
   _validateAppArg(app)
   return _INTERNAL_COMPONENTS_.get(app.getName())
 }
 
 
-export function getAllComponents(app: AglynAppController): ComponentsRegistryEntry[] {
+export function getAllComponents(app: IAglynAppController): ComponentsRegistryEntry[] {
   return _getComponentsController(app)?.getAllComponents()
 }
 
-export function getAllComponentsValues(app: AglynAppController): ComponentsRegistryValues {
+export function getAllComponentsValues(app: IAglynAppController): ComponentsRegistryValues {
   return _getComponentsController(app)?.getAllComponentsValues()
 }
 
-export function getAllComponentsKeys(app: AglynAppController): ComponentsRegistryKeys {
+export function getAllComponentsKeys(app: IAglynAppController): ComponentsRegistryKeys {
   return _getComponentsController(app)?.getAllComponentsKeys()
 }
 
 export function getAllComponentsTemplateValues(
-  app: AglynAppController,
-): AglynComponentElementTemplateData[] {
+  app: IAglynAppController,
+): AglynComponentElementTemplate[] {
   return _getComponentsController(app)?.getAllComponentsTemplateValues()
 }
 
-export function getComponent<P extends AnyProps>(
-  app: AglynAppController,
+export function getComponent<P, T>(
+  app: IAglynAppController,
   payload: ComponentGetPayload,
-): OrUndef<IAglynComponent<P>> {
+): OrUndef<IAglynComponent<P, T>> {
   return _getComponentsController(app)?.getComponent(payload)
 }
 
 export function getComponentSchema(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ComponentSchemaGetPayload,
 ): OrUndef<AglynComponentSchema> {
   return _getComponentsController(app)?.getComponentSchema(payload)
 }
 
 export function getBundle(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ComponentsBundleGetPayload,
 ): OrUndef<AglynComponentsBundle> {
   return _getComponentsController(app)?.getBundle(payload)
 }
 
 export function registerComponent(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ComponentRegisterPayload,
 ): void {
   _getComponentsController(app)?.registerComponent(payload)
 }
 
 export function registerBundle(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ComponentsBundleRegisterPayload,
 ): void {
   _getComponentsController(app)?.registerBundle(payload)
 }
 
 export function unregisterComponent(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ComponentUnregisterPayload,
 ): void {
   _getComponentsController(app)?.unregisterComponent(payload)
 }
 
 export function unregisterBundle(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ComponentsBundleUnregisterPayload,
 ): void {
   _getComponentsController(app)?.unregisterBundle(payload)

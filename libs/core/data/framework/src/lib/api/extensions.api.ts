@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,52 +15,55 @@
  * limitations under the License.
  */
 
-import { _INTERNAL_EXTENSIONS_ } from '../constants/_internal'
-import { AglynAppEffectFlag, AglynModuleEffectPayload } from '../constants/emitter'
-import { AglynAppController } from '../controllers/aglyn-app.controller'
-import { AglynExtensionsController } from '../controllers/aglyn-extensions.controller'
-import { AglynExtension } from '../models/aglyn-extension.model'
-import { _validateAppArg } from './app.api'
+import {_INTERNAL_EXTENSIONS_} from '../constants/_internal'
+import {AglynAppEffectFlag, type AglynModuleEffectPayload} from '../constants/emitter'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {type IAglynExtensionsController} from '../types/aglyn-extensions.types'
+import {type IAglynExtension} from '../types/aglyn-extension.types'
+import {_validateAppArg} from './app.api'
 
 
-export function _getExtensionController(app: AglynAppController): AglynExtensionsController {
+export function _getExtensionController(app: IAglynAppController): IAglynExtensionsController {
   _validateAppArg(app)
   return _INTERNAL_EXTENSIONS_.get(app.getName())
 }
 
 
-export function getExtension<T extends AglynExtension>(app: AglynAppController, data: { name: string }): T {
+export function getExtension<T extends IAglynExtension>(
+  app: IAglynAppController,
+  data: {name: string},
+): T {
   const {name} = data
   const extensionController = _getExtensionController(app)
   return extensionController.getExtensionByName(name) as T
 }
-export function getExtensions(app: AglynAppController): AglynExtension[] {
+export function getExtensions(app: IAglynAppController): IAglynExtension[] {
   const extensionController = _getExtensionController(app)
   return extensionController.getAllExtensions()
 }
 export function registerExtension(
-  app: AglynAppController,
+  app: IAglynAppController,
   data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_REGISTER],
 ): void {
   const extensionController = _getExtensionController(app)
   extensionController.registerExtension(data)
 }
 export function unregisterExtension(
-  app: AglynAppController,
+  app: IAglynAppController,
   data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_DESTROY],
 ): void {
   const extensionController = _getExtensionController(app)
   extensionController.destroyExtension(data)
 }
 export function loadExtension(
-  app: AglynAppController,
+  app: IAglynAppController,
   data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_LOAD],
 ) {
   const extensionController = _getExtensionController(app)
   extensionController.loadExtension(data)
 }
 export function unloadExtension(
-  app: AglynAppController,
+  app: IAglynAppController,
   data: AglynModuleEffectPayload[AglynAppEffectFlag.EXTENSION_UNLOAD],
 ) {
   const extensionController = _getExtensionController(app)

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,35 +20,15 @@ export const APP_WWW = {
   META_TITLE: 'Aglyn',
   META_DESCRIPTION: 'Contributions to the “no code” web application market by optimizing the process and necessary steps for a website to get off the ground for organizations',
 }
+export const APP_CONSOLE = {
+  META_TITLE: 'Aglyn Console',
+  META_DESCRIPTION: 'Contributions to the “no code” web application market by optimizing the process and necessary steps for a website to get off the ground for organizations',
+}
+export const APP_SITE = {
+  META_TITLE: 'My website',
+  META_DESCRIPTION: 'Created with Aglyn website besigner',
+}
 
 export const ProductNames = {
   WWW: '.com',
-}
-
-export enum IconVariant {
-  // Data
-  PROPERTY = 'variable',
-  DOCUMENT = 'book-variant',
-  COLLECTION = 'book-variant-multiple',
-
-  // Data-sets
-  PROPERTIES = 'form-dropdown',
-  DETAILS = 'information-variant',
-  TREE_VIEW = 'file-tree',
-
-
-  // Data-Type
-  STRING = 'code-string',
-  ARRAY = 'code-array',
-  OBJECT = 'code-braces-box',
-
-  // Modification
-  MODIFY_DUPLICATE = 'content-duplicate',
-  MODIFY_DELETE = 'delete-outline',
-  MODIFY_EDIT = 'pencil',
-  SELECT_PARENT = 'arrow-top-left',
-
-  // User
-  LOGIN = 'login-variant',
-  LOGOUT = 'logout-variant',
 }

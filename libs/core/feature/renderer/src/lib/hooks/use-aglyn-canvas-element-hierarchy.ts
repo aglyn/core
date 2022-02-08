@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,25 @@
  */
 
 import {
-  AglynComponentElementHierarchy,
-  ElementId,
-  getCanvasNormalizedElementsStore,
+  type AglynElementHierarchy,
+  type ElementId,
+  getCanvasDenormalizedElementsStore,
   getComponentElementHierarchy,
 } from '@aglyn/core-data-framework'
-import { useStoreMap } from 'effector-react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import {useStoreMap} from 'effector-react'
+import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
-export const useAglynCanvasElementHierarchy = (
-  $id: ElementId | null
-): AglynComponentElementHierarchy<typeof $id> => {
-  const { getApp } = useAglynAppContext()
-  const app = getApp()
-  const store = getCanvasNormalizedElementsStore(app)
+
+export function useAglynCanvasElementHierarchy<T extends ElementId>(
+  $id: T,
+): AglynElementHierarchy<T> {
+  const {getApp} = useAglynAppContext()
+  const store = getCanvasDenormalizedElementsStore(getApp())
 
   return useStoreMap({
     store,
     keys: [$id],
-    fn: (state, [$id]) => {
-      return getComponentElementHierarchy($id, state)
-    },
-  })
+    fn: (state, [$id]) => getComponentElementHierarchy($id, state),
+  }) as AglynElementHierarchy<T>
 }
+export default useAglynCanvasElementHierarchy

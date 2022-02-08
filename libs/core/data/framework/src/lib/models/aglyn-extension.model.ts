@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,50 +15,34 @@
  * limitations under the License.
  */
 
-import { getStaticField } from '@aglyn/shared-util-tools'
-import { AglynErrorEventFlag } from '../constants/error'
-import { AglynLifecycleFlag, nextLifecycleIsValid } from '../constants/lifecycle'
-import { EXTENSION_TYPE, TYPE_KIND } from '../constants/symbol'
-import type { AglynAppController } from '../controllers/aglyn-app.controller'
-import type { AglynLoadableObserver, ExtensionUUN } from '../types'
-import { AglynModuleModel, AglynModuleModelOptions } from './aglyn-module.model'
+import {getStaticField} from '@aglyn/shared-util-tools'
+import {AglynErrorEventFlag} from '../constants/error'
+import {AglynLifecycleFlag, nextLifecycleIsValid} from '../constants/lifecycle'
+import {EXTENSION_TYPE, OF_KIND} from '../constants/symbol'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {type ExtensionUUN} from '../types/aglyn-extensions.types'
+import {type AglynExtensionOptions, type IAglynExtension} from '../types/aglyn-extension.types'
+import {AglynModuleModel} from './aglyn-module.model'
 
-
-export interface AglynExtensionOptions extends AglynModuleModelOptions {
-  autoload?: boolean
-}
-
-export interface AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
-  extends AglynModuleModel<O>,
-    AglynLoadableObserver<AglynAppController, AglynAppController> {
-  getExtensionName(): string
-  getContext(): T
-  setContext(value: T): this
-}
 
 const TAG = 'AglynExtension'
-const MODULE_NAME = 'extensions.model'
+const NS = 'aglyn.core.data.framework.model.extension'
 
-export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModel<O> {
+export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModel<O> implements IAglynExtension<T, O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly [TYPE_KIND]: number | symbol = EXTENSION_TYPE
+  public static readonly [OF_KIND]: number | symbol = EXTENSION_TYPE
   public static readonly extensionName: string = 'unknown'
-  public static get namespace(): string {return `${MODULE_NAME}::${this.extensionName}`}
-  public static get moduleName(): string {return `${MODULE_NAME}::${this.extensionName}`}
 
-  protected context?: T = null
+  public static get namespace(): string {return `${NS}::${this.extensionName}`}
+
+  #context?: T = null
   #lifecycle?: AglynLifecycleFlag[] = [AglynLifecycleFlag.UNREGISTERED]
 
-  public get extensionName() {
-    return getStaticField('extensionName', this)
-  }
-  public get lifecycleHistory(): AglynLifecycleFlag[] {
-    return [...this.#lifecycle]
-  }
-  public get lifecycle(): AglynLifecycleFlag {
-    return this.#lifecycle.slice(-1)[0]
-  }
+  public get extensionName(): string {return getStaticField('extensionName', this)}
+  public get context(): T {return this.#context}
+  public get lifecycleHistory(): AglynLifecycleFlag[] {return [...this.#lifecycle]}
+  public get lifecycle(): AglynLifecycleFlag {return this.#lifecycle.slice(-1)[0]}
   public set lifecycle(value: AglynLifecycleFlag) {
     if (!nextLifecycleIsValid(this.lifecycle, value)) {
       // TODO: throw errorFactory error
@@ -67,52 +51,61 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
     this.#lifecycle.push(value)
   }
 
-  protected constructor(app: AglynAppController, options: O) {
+  protected constructor(app: IAglynAppController, options: O) {
     super(app, options)
   }
 
-  public toString = (): string => {
+  public toString(): string {
     return `${super.toString()}[${this.extensionName}]`
   }
-  public toJSON = () => {
+
+  public toJSON() {
     return {
       ...super.toJSON(),
-
       extensionName: this.extensionName,
     }
   }
 
-  public aglynOnInit(app: AglynAppController): void {
+  public aglynOnInit(app: IAglynAppController): this {
     super.aglynOnInit(app)
+    return this
   }
-  public aglynOnLoad(app: AglynAppController): void {
+
+  public aglynOnLoad(app: IAglynAppController): this {
     throw this.getErrorFactory().create(AglynErrorEventFlag.MODULE_MISSING_MEMBER, {
       extensionName: this.extensionName, memberMethod: 'aglynOnLoad',
     })
+    return this
   }
-  public aglynOnUnload(app: AglynAppController): void {
+
+  public aglynOnUnload(app: IAglynAppController): this {
     throw this.getErrorFactory().create(AglynErrorEventFlag.MODULE_MISSING_MEMBER, {
       extensionName: this.extensionName, memberMethod: 'aglynOnUnload',
     })
-  }
-  public aglynOnDestroy(app: AglynAppController): void {
-    super.aglynOnDestroy(app)
+    return this
   }
 
-  public getExtensionName = (): ExtensionUUN => {
+  public aglynOnDestroy(app: IAglynAppController): this {
+    super.aglynOnDestroy(app)
+    return this
+  }
+
+  public getExtensionName(): ExtensionUUN {
     return getStaticField('extensionName', this)
   }
-  public static getExtensionName = (): ExtensionUUN => {
+
+  public static getExtensionName(): ExtensionUUN {
     return getStaticField('extensionName', this)
   }
-  public getContext = (): T => {
-    return this.context
+
+  public getContext(): T {
+    return this.#context
   }
-  public setContext = (value: T): this => {
-    this.context = value
+
+  public setContext(value: T): this {
+    this.#context = value
     return this
   }
 }
 
-export type AglynExtensionT = typeof AglynExtension
 export default AglynExtension

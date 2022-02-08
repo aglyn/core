@@ -1,0 +1,11 @@
+export const mdiCallReceived = {
+  "id": "call-received",
+  "name": "Call Received",
+  "path": "M20,5.41L18.59,4L7,15.59V9H5V19H15V17H8.41",
+  "as": [],
+  "tags": [
+    "Cellphone / Phone",
+    "Arrow"
+  ]
+}
+export default mdiCallReceived

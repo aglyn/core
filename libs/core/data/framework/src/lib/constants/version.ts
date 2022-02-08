@@ -15,15 +15,6 @@
  * limitations under the License.
  */
 
-import {_isStrEmpty, _isStrT} from '@aglyn/shared-util-guards'
-
 
 export type AglynVersion = string
-export let SDK_VERSION = '1.0.0-beta.0'
-
-export function setVersion(version: string): void {
-  if (!_isStrT(version) || _isStrEmpty(version)) {
-    throw new Error('invalid version')
-  }
-  SDK_VERSION = version
-}
+export const SDK_VERSION = '1.0.0-beta.0'

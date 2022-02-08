@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,29 @@
  * limitations under the License.
  */
 
-import type {MutableShallow} from '@aglyn/shared-data-types'
 import {_isStrEmpty} from '@aglyn/shared-util-guards'
-import {trim} from '@aglyn/shared-util-tools'
-import {_INTERNAL_APPS_, DEFAULT_APP_UUN} from '../constants/_internal'
+import {_INTERNAL_APPS_} from '../constants/_internal'
+import {DEFAULT_APP_UUN} from '../constants/app'
 import {AGLYN_EMITTER, AglynAppEventFlag} from '../constants/emitter'
 import {AGLYN_ERROR, AglynErrorEventFlag} from '../constants/error'
 import {AGLYN_LOGGER} from '../constants/logger'
-import type {AglynAppOptions} from '../controllers/aglyn-app.controller'
 import {AglynAppController} from '../controllers/aglyn-app.controller'
-import type {AppUUN} from '../types'
+import {
+  type AglynAppOptions,
+  type AppUUN,
+  type IAglynAppController,
+} from '../types/aglyn-app.types'
 
 
-export function getAllApps(): AglynAppController[] {
+export function getAllApps(): IAglynAppController[] {
   return [..._INTERNAL_APPS_.values()]
 }
 
-export function doesAppExist(name?: AppUUN): boolean {
-  return _INTERNAL_APPS_.has(name || DEFAULT_APP_UUN)
+export function doesAppExist(appName?: AppUUN): boolean {
+  return _INTERNAL_APPS_.has(appName || DEFAULT_APP_UUN)
 }
 
-export function getApp(name?: string): AglynAppController {
+export function getApp(name?: AppUUN): IAglynAppController {
   const appName = name || DEFAULT_APP_UUN
   if (!doesAppExist(appName)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_NONE, {appName})
@@ -43,28 +45,28 @@ export function getApp(name?: string): AglynAppController {
   return _INTERNAL_APPS_.get(appName)
 }
 
-export function deleteApp(app: AglynAppController): void {
-  _validateAppArg(app)
-  const appName = app.getName()
+export function deleteApp(appName?: AppUUN): void {
+  const app = getApp(appName || DEFAULT_APP_UUN)
   AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETING, {appName})
   AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETING, {appName})
   app.aglynOnDestroy?.()
   _INTERNAL_APPS_.delete(appName)
-  ;(app as MutableShallow<AglynAppController>)['deleted'] = true
+  app.setDeleted(true)
   AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETED, {appName})
   AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETED, {appName})
 }
 
-export function initializeApp(opts: AglynAppOptions = {}): AglynAppController {
-  const options: AglynAppOptions = {...opts}
-  const appName: string = trim(opts.appName || DEFAULT_APP_UUN)
+export function initializeApp(opts?: AglynAppOptions): IAglynAppController {
+  const appName: string = opts?.appName || DEFAULT_APP_UUN
   if (_isStrEmpty(appName)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_NAME, {appName})
   }
   if (doesAppExist(appName)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_EXISTS, {appName})
   }
-  const app: AglynAppController = new AglynAppController(options)
+  const app: IAglynAppController = new AglynAppController({...opts, appName})
+  app.setupModules()
+  app.setupExtensions()
   _INTERNAL_APPS_.set(appName, app)
 
   app.aglynOnInit()
@@ -72,8 +74,8 @@ export function initializeApp(opts: AglynAppOptions = {}): AglynAppController {
   return app
 }
 
-export function _validateAppArg(app: AglynAppController): void {
-  if (!(app as AglynAppController) || !(app instanceof AglynAppController)) {
+export function _validateAppArg(app: IAglynAppController): void {
+  if (!(app as IAglynAppController) || !(app instanceof AglynAppController)) {
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_INSTANCE, {appName: app?.getName?.()})
   }
   if (app['deleted']) {

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,80 +15,40 @@
  * limitations under the License.
  */
 
-import { Dictionary, Serializable, StringLike } from '@aglyn/shared-data-types'
-import { LogLevelString } from '@aglyn/shared-util-logger'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { getStaticField } from '@aglyn/shared-util-tools'
-import { AGLYN_EMITTER, AglynEmitter } from '../constants/emitter'
-import { AGLYN_ERROR, AglynErrorFactory } from '../constants/error'
-import { AGLYN_LOGGER, AglynLogger } from '../constants/logger'
-import { AGLYN_PLATFORM, AglynPlatform } from '../constants/platform'
-import { AglynVersion, SDK_VERSION } from '../constants/version'
-import { AglynLifecycleObserver } from '../types'
+import {type Dictionary} from '@aglyn/shared-data-types'
+import {Timestamp} from '@aglyn/shared-util-timestamp'
+import {getStaticField} from '@aglyn/shared-util-tools'
+import {AGLYN_EMITTER, type AglynEmitter} from '../constants/emitter'
+import {AGLYN_ERROR, type AglynErrorFactory} from '../constants/error'
+import {AGLYN_LOGGER, type AglynLogger} from '../constants/logger'
+import {type AglynBaseModelOptions, type IAglynBaseModel} from '../types/aglyn-base.types'
 
-
-export interface AglynBaseModelOptions {
-  logLevel?: LogLevelString
-  errorFactory?: AglynErrorFactory
-  emitter?: AglynEmitter
-  logger?: AglynLogger
-}
-
-export interface AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> extends StringLike, Serializable, AglynLifecycleObserver {
-  getCreatedAt(): Timestamp
-  getOptions(): O
-  getErrorFactory(): AglynErrorFactory
-  setErrorFactory(value: AglynErrorFactory): this
-  getEmitter(): AglynEmitter
-  setEmitter(value: AglynEmitter): this
-  getLogger(): AglynLogger
-  setLogger(value: AglynLogger): this
-}
 
 const TAG = 'AglynBaseModel'
-const MODULE_NAME = 'model'
+const NS = 'aglyn.core.data.framework.model.base'
 
-export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> {
+export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> implements IAglynBaseModel<O> {
 
   public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = MODULE_NAME
-  public static readonly platform: AglynPlatform = AGLYN_PLATFORM
-  public static readonly sdkVersion: AglynVersion = SDK_VERSION
+  public static readonly namespace: string = NS
 
   readonly #options: O = null
-  readonly #created: Timestamp
+  readonly #createdAt: Timestamp
   #errorFactory: AglynErrorFactory
   #emitter: AglynEmitter
   #logger: AglynLogger
 
-  public get [Symbol.toStringTag](): string {
-    return getStaticField(Symbol.toStringTag, this)
-  }
-  public get namespace(): string {
-    return getStaticField('namespace', this)
-  }
-  public get platform(): AglynPlatform {
-    return getStaticField('platform', this)
-  }
-  public get sdkVersion(): AglynVersion {
-    return getStaticField('sdkVersion', this)
-  }
-  public get options(): O {
-    return this.#options
-  }
-  public get errorFactory(): AglynErrorFactory {
-    return this.#errorFactory
-  }
-  public get logger(): AglynLogger {
-    return this.#logger
-  }
-  public get emitter(): AglynEmitter {
-    return this.#emitter
-  }
+  public get [Symbol.toStringTag](): string {return getStaticField(Symbol.toStringTag, this)}
+  public get namespace(): string {return getStaticField('namespace', this)}
+  public get options(): O {return this.#options}
+  public get createdAt(): Timestamp {return this.#createdAt}
+  public get errorFactory(): AglynErrorFactory {return this.#errorFactory}
+  public get logger(): AglynLogger {return this.#logger}
+  public get emitter(): AglynEmitter {return this.#emitter}
 
   protected constructor(options: O) {
     this.#options = {...options}
-    this.#created = Timestamp.now()
+    this.#createdAt = Timestamp.now()
     this.#setup()
   }
   #setup() {
@@ -110,36 +70,34 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public toJSON(): Dictionary {
     return {
       namespace: this.namespace,
-      created: this.#created,
-      sdkVersion: this.sdkVersion,
-      platform: this.platform,
+      created: this.#createdAt,
     }
   }
 
-  public getOptions = (): O => {
+  public getOptions(): O {
     return this.#options
   }
-  public getCreatedAt = (): Timestamp => {
-    return this.#created
+  public getCreatedAt(): Timestamp {
+    return this.#createdAt
   }
-  public getErrorFactory = (): AglynErrorFactory => {
+  public getErrorFactory(): AglynErrorFactory {
     return this.#errorFactory
   }
-  public setErrorFactory = (value: AglynErrorFactory): this => {
+  public setErrorFactory(value: AglynErrorFactory): this {
     this.#errorFactory = value
     return this
   }
-  public getEmitter = (): AglynEmitter => {
+  public getEmitter(): AglynEmitter {
     return this.#emitter
   }
-  public setEmitter = (value: AglynEmitter): this => {
+  public setEmitter(value: AglynEmitter): this {
     this.#emitter = value
     return this
   }
-  public getLogger = (): AglynLogger => {
+  public getLogger(): AglynLogger {
     return this.#logger
   }
-  public setLogger = (value: AglynLogger): this => {
+  public setLogger(value: AglynLogger): this {
     this.#logger = value
     return this
   }

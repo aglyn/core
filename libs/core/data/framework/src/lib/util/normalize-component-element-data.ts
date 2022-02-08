@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,45 +15,53 @@
  * limitations under the License.
  */
 
-import { _isArr } from '@aglyn/shared-util-guards'
-import { AglynComponentElementDataDenormalized } from '../controllers/aglyn-components.controller'
-import { AglynComponentElementDataNormalizedMap, ElementId } from '../types'
+import {_isStrT} from '@aglyn/shared-util-guards'
+import {
+  type AglynElementDenormalized,
+  type AglynElementNormalized,
+  type AglynElementsById,
+  type AglynElementsList,
+  type ElementId,
+} from '../types/aglyn-elements.types'
 
 
 const normalizeData = (
-  element: AglynComponentElementDataDenormalized,
-  parentId: ElementId,
-  flatMap: AglynComponentElementDataNormalizedMap = {},
-): AglynComponentElementDataNormalizedMap => {
+  element: AglynElementDenormalized,
+  flatMap: AglynElementsById = {},
+  elemData: AglynElementsList = [],
+): AglynElementNormalized => {
   const {elements, ...rest} = element
-  flatMap[rest.$id] = {...rest, parentId, elements: []}
-  flatMap[parentId] = {
-    ...flatMap[parentId],
-    elements: (flatMap[parentId]?.elements || []).concat(rest.$id),
+
+  return {
+    ...rest,
+    elements: (elements || []).map($id => (
+      normalizeData(flatMap[$id], flatMap, elemData)
+    )),
   }
-  elements?.forEach((child) => {
-    normalizeData(child, rest.$id, flatMap)
-  })
-  return flatMap
 }
 
 export function normalizeComponentElementData(
-  element: AglynComponentElementDataDenormalized,
-  parentId?: ElementId,
-): AglynComponentElementDataNormalizedMap
+  element: AglynElementDenormalized,
+  parentId: ElementId,
+): AglynElementsList
 export function normalizeComponentElementData(
-  elements: AglynComponentElementDataDenormalized[],
-  parentId?: ElementId,
-): AglynComponentElementDataNormalizedMap
+  elements: AglynElementsById,
+  parentId: ElementId,
+): AglynElementsList
 export function normalizeComponentElementData(
-  elements: AglynComponentElementDataDenormalized | AglynComponentElementDataDenormalized[],
-  parentId?: ElementId,
-): AglynComponentElementDataNormalizedMap {
-  let elemData
+  elements: AglynElementDenormalized | AglynElementsById,
+  parentId: ElementId,
+): AglynElementsList {
+  const elemData: AglynElementsList = []
+  const elems: AglynElementsById = _isStrT(elements.$id)
+    ? {[elements.$id]: {...elements}} as AglynElementsById
+    : {...elements} as AglynElementsById
 
-  (_isArr(elements) ? elements : [elements]).forEach((element) => {
-    elemData = normalizeData(element, parentId, elemData)
-  })
+  elemData.push(
+    ...(elems[parentId].elements || []).map(($id: any) =>
+      normalizeData(elems[$id], elems),
+    ),
+  )
 
   return elemData
 }

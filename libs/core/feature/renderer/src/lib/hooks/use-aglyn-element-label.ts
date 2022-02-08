@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,16 @@
  * limitations under the License.
  */
 
-import { ElementId } from '@aglyn/core-data-framework'
-import { useMemo } from 'react'
-import { useAglynComponentSchema } from './use-aglyn-component-schema'
-import { useAglynElementData } from './use-aglyn-element-data'
+import {type ElementId} from '@aglyn/core-data-framework'
+import {useAglynComponentSchema} from './use-aglyn-component-schema'
+import {useAglynElementData} from './use-aglyn-element-data'
+
 
 export function useAglynElementLabel($id: ElementId) {
   const displayName = useAglynElementData($id, 'displayName')
   const componentId = useAglynElementData($id, 'componentId')
   const bundleId = useAglynElementData($id, 'bundleId')
   const schema = useAglynComponentSchema(componentId, bundleId)
-  const label = displayName || schema?.metadata?.displayName || $id
-  return useMemo(() => label, [label])
+  return displayName || schema?.displayName || $id
 }
 export default useAglynElementLabel

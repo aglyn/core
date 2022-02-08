@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,51 +15,49 @@
  * limitations under the License.
  */
 
-import { _isStrT } from '@aglyn/shared-util-guards'
+import {_isArr} from '@aglyn/shared-util-guards'
 import {
-  AglynComponentElementDataDenormalized,
-  AglynComponentElementDataNormalized,
-} from '../controllers/aglyn-components.controller'
-import { AglynComponentElementDataNormalizedMap, ElementId } from '../types'
+  type AglynElementNormalized,
+  type AglynElementsById,
+  type AglynElementsList,
+  type ElementId,
+} from '../types/aglyn-elements.types'
 
 
 const denormalizeData = (
-  element: AglynComponentElementDataNormalized,
-  flatMap: AglynComponentElementDataNormalizedMap = {},
-  elemData: AglynComponentElementDataDenormalized[] = [],
-): AglynComponentElementDataDenormalized => {
+  element: AglynElementNormalized,
+  parentId: ElementId,
+  flatMap: AglynElementsById = {},
+): AglynElementsById => {
   const {elements, ...rest} = element
-
-  return {
-    ...rest,
-    elements: (elements || []).map($id => (
-      denormalizeData(flatMap[$id], flatMap, elemData)
-    )),
+  flatMap[rest.$id] = {...rest, parentId, elements: []}
+  flatMap[parentId] = {
+    ...flatMap[parentId],
+    elements: (flatMap[parentId]?.elements || []).concat(rest.$id),
   }
+  elements?.forEach((child) => {
+    denormalizeData(child, rest.$id, flatMap)
+  })
+  return flatMap
 }
 
 export function denormalizeComponentElementData(
-  element: AglynComponentElementDataNormalized,
-  parentId: ElementId,
-): AglynComponentElementDataDenormalized[]
+  element: AglynElementNormalized,
+  parentId?: ElementId,
+): AglynElementsById
 export function denormalizeComponentElementData(
-  elements: AglynComponentElementDataNormalizedMap,
-  parentId: ElementId,
-): AglynComponentElementDataDenormalized[]
+  elements: AglynElementsList,
+  parentId?: ElementId,
+): AglynElementsById
 export function denormalizeComponentElementData(
-  elements: AglynComponentElementDataNormalized | AglynComponentElementDataNormalizedMap,
-  parentId: ElementId,
-): AglynComponentElementDataDenormalized[] {
-  const elemData: AglynComponentElementDataDenormalized[] = []
-  const elems: AglynComponentElementDataNormalizedMap = _isStrT(elements.$id)
-    ? {[elements.$id]: {...elements}} as AglynComponentElementDataNormalizedMap
-    : {...elements} as AglynComponentElementDataNormalizedMap
+  elements: AglynElementNormalized | AglynElementsList,
+  parentId?: ElementId,
+): AglynElementsById {
+  let elemData
 
-  elemData.push(
-    ...(elems[parentId].elements || []).map(($id: any) =>
-      denormalizeData(elems[$id], elems),
-    ),
-  )
+  (_isArr(elements) ? elements : [elements]).forEach((element) => {
+    elemData = denormalizeData(element, parentId, elemData)
+  })
 
   return elemData
 }

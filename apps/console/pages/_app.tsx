@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,58 +15,57 @@
  * limitations under the License.
  */
 
-import { CacheProvider, createEmotionCache, EmotionCache } from '@aglyn/shared-feature-themes'
-import { AppProps as NextAppProps } from 'next/app'
-import AppWrapper from '../components/app-wrapper'
+import {APP_CONSOLE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
+import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
+import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
+import {Fragment, useMemo} from 'react'
 
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache()
+export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentProps<Props, InitialProps> {}
 
-export interface _AppProps extends NextAppProps {
-  emotionCache?: EmotionCache
-}
+function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
+  const {NextAppWrapperProps, ...rest} = props
+  const {
+    metaElements: wrapperMetaElements,
+    linkElements: wrapperLinkElements,
+    headChildren: wrapperHeadChildren,
+    documentTitle: wrapperDocumentTitle,
+    ...nextAppWrapperProps
+  } = NextAppWrapperProps || {}
+  const documentTitle = useMemo(() => (
+    wrapperDocumentTitle || APP_CONSOLE.META_TITLE
+  ), [wrapperDocumentTitle])
+  const headChildren = useMemo(() => (
+    <Fragment>
+      {!IS_PRODUCTION ? null : (
+        <Fragment>
+        </Fragment>
+      )}
+      {wrapperHeadChildren}
+    </Fragment>
+  ), [wrapperHeadChildren])
+  const metaElements: MakeMetaElementsConfig = useMemo(() => ([
+    ['viewport', 'width=device-width, initial-scale=1'],
+    ['description', APP_CONSOLE.META_DESCRIPTION],
+    ...wrapperMetaElements || [],
+  ]), [wrapperMetaElements])
+  const linkElements: MakeLinkElementsConfig = useMemo(() => ([
+    ...wrapperLinkElements || [],
+  ]), [wrapperLinkElements])
 
-/**
- *
- * App component manages mounting and hydration for the client app
- * at the Next.JS app entry point, removes server styles and is
- * responsible for rendering every page Component
- *
- * @example
- * > ## Resolution order
- * >
- * > ### Server-side
- * > 1. [_App]{@link _App}.getInitialProps (if-exists)
- * > 2. <PageComponent>.getInitialProps
- * > 3. [_Document]{@link _Document}.getInitialProps
- * > 4. [_App]{@link _App}.render
- * > 5. <PageComponent>.render
- * > 6. [_Document]{@link _Document}.render
- * >
- * > ### Server-side (w/ error)
- * > 1. [_Document]{@link _Document}.getInitialProps
- * > 2. [_App]{@link _App}.render
- * > 3. <PageComponent>.render
- * > 4. [_Document]{@link _Document}.render
- * >
- * > ### Client-side
- * > 1. [_App]{@link _App}.getInitialProps (if-exists)
- * > 2. <PageComponent>.getInitialProps
- * > 3. [_App]{@link _App}.render
- * > 4. <PageComponent>.render
- *
- * @param {AppProps} props
- * @returns {JSX.Element}
- */
-export default function _App(props: _AppProps) {
-  const {Component, emotionCache = clientSideEmotionCache, pageProps} = props
 
   return (
-    <CacheProvider value={emotionCache}>
-      <AppWrapper>
-        <Component {...pageProps} />
-      </AppWrapper>
-    </CacheProvider>
+    <NextEmotionAppComponent
+      NextAppWrapperProps={{
+        documentTitle,
+        headChildren,
+        metaElements,
+        linkElements,
+        ...nextAppWrapperProps,
+      }}
+      {...rest}
+    />
   )
 }
+_App.displayName = '_App'
+export default _App

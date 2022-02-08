@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,32 @@
  * limitations under the License.
  */
 
-import {BUILD_ID, PKG_VERSION} from '@aglyn/shared-data-brand'
-import {darken, styled} from '@aglyn/shared-feature-themes'
+import {BUILD_ID, PACKAGE_VERSION} from '@aglyn/shared-data-brand'
+import {styled} from '@aglyn/shared-feature-themes'
 import {
   AglynSvgLogo,
   AppLink,
-  AppLinkProps,
+  type AppLinkProps,
   GridButtons,
-  GridButtonsProps,
+  type GridButtonsProps,
   Menu,
-  SvgPathIcon,
 } from '@aglyn/shared-ui-jsx'
+import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr, _isArrEmpty, _isObj} from '@aglyn/shared-util-guards'
-import AppBar, {AppBarProps} from '@mui/material/AppBar'
+import AppBar, {type AppBarProps} from '@mui/material/AppBar'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
-import {cyan, purple} from '@mui/material/colors'
+import {cyan} from '@mui/material/colors'
 import Container from '@mui/material/Container'
-import IconButton, {IconButtonProps} from '@mui/material/IconButton'
-import Tab, {TabProps} from '@mui/material/Tab'
-import Tabs from '@mui/material/Tabs'
+import IconButton, {type IconButtonProps} from '@mui/material/IconButton'
+import MuiTab, {type TabProps as MuiTabProps} from '@mui/material/Tab'
+import MuiTabs, {type TabsProps as MuiTabsProps} from '@mui/material/Tabs'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import {useRouter} from 'next/router'
-import {ElementType, Fragment, ReactNode} from 'react'
-import {Breadcrumbs, BreadcrumbsProps} from '../components/Breadcrumbs'
+import {type ElementType, Fragment, type ReactNode} from 'react'
+// import {Breadcrumbs, BreadcrumbsProps} from '../components/Breadcrumbs'
 import Copyright from '../components/Copyright'
 import {tailNavigation} from '../const'
 
@@ -138,9 +138,9 @@ const StyledProductName = styled('span', {
   },
 }))
 
-const StyledTabs = styled(Tabs, {
-  name: 'Tabs',
-})(({theme}) => ({
+const Tabs = styled(MuiTabs, {
+  name: 'AglynTabs',
+})<MuiTabsProps>(({theme}) => ({
   '& .Mui-flexContainer': {
     alignItems: 'center',
   },
@@ -163,9 +163,9 @@ const StyledTabs = styled(Tabs, {
   },
 }))
 
-const StyledTab = styled(Tab, {
-  name: 'Tab',
-})(({theme}) => ({
+const TabItem = styled(MuiTab, {
+  name: 'AglynTab',
+})<MuiTabProps>(({theme}) => ({
   flexDirection: 'row',
   '& > *:first-child': {
     marginBottom: 0,
@@ -203,20 +203,20 @@ const StyledMenu = styled(Menu, {
   '&:last-child': {paddingLeft: theme.spacing(0.75)},
 }))
 
-const StyledBreadcrumbs = styled(Breadcrumbs, {
-  name: 'Breadcrumbs',
-})(({theme}) => ({
-  marginTop: theme.spacing(1),
-  color: darken(theme.palette.getContrastText(purple['600']), 0.12),
-
-  ['& .AglynBreadcrumbs-item']: {
-    color: 'inherit',
-    ['&.AglynBreadcrumbs-last']: {
-      color: theme.palette.getContrastText(purple['600']),
-      fontWeight: theme.typography.fontWeightMedium,
-    },
-  },
-}))
+// const StyledBreadcrumbs = styled(Breadcrumbs, {
+//   name: 'Breadcrumbs',
+// })(({theme}) => ({
+//   marginTop: theme.spacing(1),
+//   color: darken(theme.palette.getContrastText(purple['600']), 0.12),
+//
+//   ['& .AglynBreadcrumbs-item']: {
+//     color: 'inherit',
+//     ['&.AglynBreadcrumbs-last']: {
+//       color: theme.palette.getContrastText(purple['600']),
+//       fontWeight: theme.typography.fontWeightMedium,
+//     },
+//   },
+// }))
 
 function a11yProps(index) {
   return {
@@ -229,20 +229,22 @@ export const NAVIGATION_MAX_WIDTH = 'lg'
 export const FOOTER_MAX_WIDTH = 'lg'
 
 export interface QuickActionsMenuItem extends IconButtonProps {
-  iconIds?: string
+  icon?: MdiIconProps
   avatar?: any
   dense?: boolean
   href?: any
   items?: QuickActionsMenuItem[]
 }
 
+export type NavTabItem = Partial<AppLinkProps<'text'> & MuiTabProps & {icon: MdiIconProps}>
+
 export interface MainLayoutProps {
   children?: ReactNode | undefined
   title?: string
   tabBarTitle?: string
   centerNavigationItems?: Array<any>
-  breadcrumbItems?: BreadcrumbsProps['items']
-  navTabItems?: (TabProps & AppLinkProps<'text'> & {iconIds: string})[]
+  // breadcrumbItems?: BreadcrumbsProps['items']
+  navTabItems?: NavTabItem[]
   quickActionMenus?: QuickActionsMenuItem[]
   productName?: string
   footerNavItems?: GridButtonsProps['items']
@@ -273,9 +275,12 @@ function MainLayoutRaw(props: MainLayoutProps) {
     }).href ?? ''
     : ''
 
-  const buildIconButton = ({avatar, iconId, children, ...rest}, i) => (
+  const buildIconButton = ({avatar, icon, children, ...rest}, i) => (
     <IconButton key={rest.id ?? rest['href'] ?? i} color="inherit" {...rest}>
-      {avatar ? <StyledAvatar {...avatar} /> : iconId && <SvgPathIcon iconIds={iconId} />}
+      {avatar
+        ? (<StyledAvatar {...avatar} />)
+        : icon ? (<MdiIcon {...icon} />) : null
+      }
       {children}
     </IconButton>
   )
@@ -283,7 +288,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
   const buildTextButton = (item, key) => (
     <AppLink
       key={key}
-      linkType="button"
+      componentVariant="button"
       color="inherit"
       sx={{p: item?.avatar ? 0.5 : undefined}}
       {...item}
@@ -331,7 +336,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
         {tabBarTitle || (_isArr(navTabItems) && !_isArrEmpty(navTabItems)) ? (
           <AppBar component="div" color="primary" elevation={0} position="static">
             <Container maxWidth={NAVIGATION_MAX_WIDTH}>
-              <StyledTabs
+              <Tabs
                 aria-label="area navigation"
                 indicatorColor="secondary"
                 scrollButtons="auto"
@@ -340,14 +345,14 @@ function MainLayoutRaw(props: MainLayoutProps) {
                 variant="scrollable"
               >
                 {tabBarTitle && <TabBarTitle>{tabBarTitle}</TabBarTitle>}
-                {navTabItems && navTabItems.map(({iconIds, ...item}, i) => (
-                  <StyledTab
+                {navTabItems && navTabItems.map(({icon, ...item}, i) => (
+                  <TabItem
                     key={item.id ?? item['key'] ?? i}
                     // disableRipple
                     color="inherit"
-                    component={AppLink}
+                    component={AppLink as any}
                     href={item.href ?? ''}
-                    icon={<SvgPathIcon iconIds={iconIds} />}
+                    icon={<MdiIcon {...icon} />}
                     label={item.label}
                     underline="none"
                     value={item.href ?? i}
@@ -356,7 +361,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
                     {...item}
                   />
                 ))}
-              </StyledTabs>
+              </Tabs>
             </Container>
           </AppBar>
         ) : null}
@@ -400,7 +405,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
               justifyContent="center"
             >
               <Typography align="center" color="textSecondary" variant="overline">
-                <span>{`Version ${PKG_VERSION}`}</span>
+                <span>{`Version ${PACKAGE_VERSION}`}</span>
                 {' '}
                 <span>{`(${BUILD_ID})`}</span>
               </Typography>

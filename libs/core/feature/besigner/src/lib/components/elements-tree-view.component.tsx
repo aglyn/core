@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,43 +15,40 @@
  * limitations under the License.
  */
 
+import {CANVAS_ROOT_ELEMENT_ID, type ElementId} from '@aglyn/core-data-framework'
 import {
-  CANVAS_ROOT_ELEMENT_ID,
-  DEFAULT_COMPONENT_ICON_ID,
-  ElementId,
-  setBesignerCanvasHovered,
-  setBesignerCanvasSelected,
-} from '@aglyn/core-data-framework'
-import {
-  useAglynAppContext,
   useAglynCanvasElementHierarchy,
   useAglynComponentSchema,
   useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/core-feature-renderer'
-import { styled } from '@aglyn/shared-feature-themes'
-import { SvgPathIcon } from '@aglyn/shared-ui-jsx'
-import MuiTreeItem, { TreeItemProps } from '@mui/lab/TreeItem'
-import MuiTreeView, { SingleSelectTreeViewProps } from '@mui/lab/TreeView'
-import { forwardRef, Fragment, useCallback, useMemo, useState } from 'react'
-import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
-import { useAglynCanvasSelected } from '../hooks/use-aglyn-canvas-selected'
+import {ICON_VARIANT_ENTITY_BLOCK} from '@aglyn/shared-data-brand'
+import {alpha, styled} from '@aglyn/shared-feature-themes'
+import {mdiChevronDown, mdiChevronRight, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import {_isArr} from '@aglyn/shared-util-guards'
+import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeItem'
+import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
+import {forwardRef, Fragment, useCallback, useMemo, useState} from 'react'
+import useAglynCanvasElementStatusManagers from '../hooks/use-aglyn-canvas-element-status-managers'
+import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
 
-const TreeItemIcon = styled(SvgPathIcon, {
-  name: 'AglynTreeItemIcon',
-})(({theme}) => ({
-  fontSize: theme.typography.pxToRem(20),
-  marginLeft: theme.spacing(-0.25),
-  marginRight: theme.spacing(0.35),
-  marginBottom: theme.spacing(-0.5),
-  padding: theme.spacing(0.26),
-  borderRadius: '0.25em',
-  backgroundColor: theme.palette.background.default,
-  border: `1px solid ${theme.palette.divider}`,
-  boxShadow: theme.shadows['1'],
+const TreeItem = styled(MuiTreeItem, {name: 'AglynTreeItem'})(({theme}) => ({
+  [`& .${treeItemClasses.content}`]: {
+    borderTopLeftRadius: `50px`,
+    borderBottomLeftRadius: `50px`,
+    '&.Mui-focused': {
+      backgroundColor: alpha(theme.palette.secondary.dark, theme.palette.action.focusOpacity),
+    },
+    '&.Mui-selected': {
+      backgroundColor: alpha(theme.palette.quaternary.main, theme.palette.action.selectedOpacity),
+    },
+    '&.Mui-selected.Mui-focused': {
+      backgroundColor: alpha(theme.palette.quaternary.main, theme.palette.action.activatedOpacity),
+    },
+  },
 }))
-const ScrollableTreeView = styled(MuiTreeView, {name: 'AglynScrollableTreeView'})({
+const TreeView = styled(MuiTreeView, {name: 'AglynTreeView'})({
   overflow: 'auto',
   flexGrow: 1,
 })
@@ -63,23 +60,40 @@ interface ElementsTreeItemComponentProps extends Partial<TreeItemProps> {
 const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps>(
   function RefRenderFn(props, ref) {
     const {$id, ...rest} = props,
-      elements = useAglynElementData($id, 'elements'),
+      elements = useAglynElementData($id, 'elements') || [],
       componentId = useAglynElementData($id, 'componentId'),
       bundleId = useAglynElementData($id, 'bundleId'),
       label = useAglynElementLabel($id),
-      iconIds = useAglynComponentSchema(componentId, bundleId)?.metadata?.iconIds,
-      iconColor = useAglynComponentSchema(componentId, bundleId)?.metadata?.iconColor
+      icon = useAglynComponentSchema(componentId, bundleId)?.icon
 
     return (
-      <MuiTreeItem
+      <TreeItem
         ref={ref}
         nodeId={$id}
+        collapseIcon={<MdiIcon path={mdiChevronDown.path} />}
+        expandIcon={<MdiIcon path={mdiChevronRight.path} />}
         label={
           <Fragment>
-            <TreeItemIcon
+            <MdiIcon
               color="quaternary"
-              iconIds={iconIds || DEFAULT_COMPONENT_ICON_ID}
-              sx={{color: iconColor}}
+              {...icon}
+              path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
+              sx={[
+                {
+                  fontSize: 20,
+                  marginLeft: -0.25,
+                  marginRight: 0.5,
+                  marginBottom: -0.5,
+                  padding: 0.26,
+                  borderRadius: '0.25em',
+                  backgroundColor: 'background.default',
+                  border: 1,
+                  borderColor: 'divider',
+                  boxShadow: 1,
+                  color: 'quaternary',
+                },
+                ...(_isArr(icon?.sx) ? icon.sx : [icon?.sx]),
+              ]}
             />
             {label}
           </Fragment>
@@ -89,7 +103,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
         {elements.map(($id) => (
           <ElementsTreeItemComponent key={$id} $id={$id} />
         ))}
-      </MuiTreeItem>
+      </TreeItem>
     )
   },
 )
@@ -99,44 +113,51 @@ export interface ElementsTreeViewComponentProps extends Partial<SingleSelectTree
 export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
+    const selected = useAglynCanvasSelected()
+    const selectedHierarchy = useAglynCanvasElementHierarchy(selected?.$id)
+    const [handleHover, handleSelect] = useAglynCanvasElementStatusManagers()
+    const [expanded, setExpanded] = useState<ElementId[]>([])
+    const allExpanded = useMemo(() => [
+      ...selectedHierarchy, ...expanded,
+    ], [selectedHierarchy, expanded])
 
-    const {getApp} = useAglynAppContext()
-    const elements = useAglynElementData(CANVAS_ROOT_ELEMENT_ID, 'elements')
-    const selected = useAglynBesignerStoreState('canvas', 'selected')
-    const selectedId = selected?.$id
-    const selectedIdHierarchy = useAglynCanvasElementHierarchy(selectedId)
-
-    const defaultExpanded = useMemo(
-      () => selectedIdHierarchy.filter((id) => id !== CANVAS_ROOT_ELEMENT_ID),
-      [selectedIdHierarchy],
-    )
     const handleTreeItemSelect = useCallback((e, $id) => {
-      console.log('handleTreeItemSelect $id', $id)
-      setBesignerCanvasSelected(getApp(), {selected: {$id}})
-    }, [])
+      e.stopPropagation()
+      e.preventDefault()
+      handleSelect($id === selected?.$id ? null : $id)
+    }, [handleSelect, selected])
+
+
     const handleTreeItemFocus = useCallback((e, $id) => {
-      console.log('handleTreeItemFocus $id', $id)
-      setBesignerCanvasHovered(getApp(), {hovered: {$id}})
-    }, [])
+      e.stopPropagation()
+      handleHover($id)
+    }, [handleHover])
+
+
+    const handleTreeItemToggle = useCallback((e, ids: ElementId[]) => {
+      e.stopPropagation()
+      e.preventDefault()
+      setExpanded(ids)
+    }, [setExpanded])
 
     return (
-      <ScrollableTreeView
+      <TreeView
         ref={ref}
+        id={'aglyn:tree-view'}
         aria-label="canvas elements navigator"
         onNodeSelect={handleTreeItemSelect}
         onNodeFocus={handleTreeItemFocus}
-        selected={selectedId ?? ''}
-        expanded={defaultExpanded}
-        defaultCollapseIcon={<SvgPathIcon iconIds={'chevron-down'} />}
-        defaultExpandIcon={<SvgPathIcon iconIds={'chevron-right'} />}
+        onNodeToggle={handleTreeItemToggle}
+        selected={selected?.$id ?? ''}
+        expanded={allExpanded}
         {...rest}
       >
-        {elements.map(($id) => (
-          <ElementsTreeItemComponent key={$id} $id={$id} />
-        ))}
-
         {children}
-      </ScrollableTreeView>
+        <ElementsTreeItemComponent
+          key={CANVAS_ROOT_ELEMENT_ID}
+          $id={CANVAS_ROOT_ELEMENT_ID}
+        />
+      </TreeView>
     )
   },
 )

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,19 @@
  * limitations under the License.
  */
 
-import { CANVAS_ROOT_ELEMENT_ID, createComponentElementData } from '@aglyn/core-data-framework'
 import {
-  useAglynCanvasApiEvents,
-  useAglynElementParentPosition,
-} from '@aglyn/core-feature-renderer'
-import { SyntheticEvent, useCallback } from 'react'
-import { ElementDrawerOptions, useElementDrawerContext } from '../contexts/element-drawer-context'
-import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
+  addCanvasElement,
+  CANVAS_ROOT_ELEMENT_ID,
+  createComponentElementData,
+} from '@aglyn/core-data-framework'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {type SyntheticEvent, useCallback} from 'react'
+import {
+  type ElementDrawerOptions,
+  useElementDrawerContext,
+} from '../contexts/element-drawer-context'
 import useAglynCanvasSelected from './use-aglyn-canvas-selected'
+
 
 export interface UseAddElementCallbackOptions<E extends SyntheticEvent<any> = SyntheticEvent<any>> {
   onComplete?: (event: E | null, response: unknown) => void
@@ -36,47 +40,39 @@ export type AddElementCallback<E extends SyntheticEvent<any> = SyntheticEvent<an
 }['bivarianceHack']
 
 export function useAddElementCallback<E extends SyntheticEvent<any>>(
-  options?: UseAddElementCallbackOptions
+  options?: UseAddElementCallbackOptions,
 ): AddElementCallback<E> {
-  const { onComplete, onError, drawerOptions } = { ...options }
-  const { elementDrawer } = useElementDrawerContext()
-  const { addElement } = useAglynCanvasApiEvents()
-  const { $id } = useAglynBesignerStoreState('canvas', 'selected') || {}
-  const { parentId, index, parentElements } = useAglynElementParentPosition($id) || {}
-  const siblingCount = parentElements.length
+  const {onComplete, onError, drawerOptions} = {...options}
+  const {elementDrawer} = useElementDrawerContext()
+  const {$id} = useAglynCanvasSelected() || {}
+  const {getApp} = useAglynAppContext()
 
-  return useCallback(
-    (e, options) => {
-      elementDrawer({
-        title: 'Add New Element',
-        ...drawerOptions,
-        ...options?.drawerOptions,
-      })
-        .then((res: any) => {
-          const data = res?.option?.data
-          if (data) {
-            const newElement = {
-              index: index === -1 ? siblingCount : index + 1,
-              parentId: parentId || CANVAS_ROOT_ELEMENT_ID,
-              element: createComponentElementData(data),
-            }
-            console.log('addElement', newElement)
-            addElement(newElement)
-          } else {
-            console.warn('Invalid data returned for addElement callback', data)
+  return useCallback((e, opts) => {
+    elementDrawer({title: 'Add New Element', ...drawerOptions, ...opts?.drawerOptions})
+      .then((res: any) => {
+        const data = res?.option?.data
+        if (data) {
+          const newElement = {
+            index: -1,
+            parentId: $id || CANVAS_ROOT_ELEMENT_ID,
+            element: createComponentElementData(data),
           }
-          onComplete && onComplete(e, res)
-          options?.onComplete && options?.onComplete(e, res)
-        })
+          console.log('addElement', newElement)
+          addCanvasElement(getApp(), newElement)
+        }
+        else {
+          console.warn('Invalid data returned for addElement callback', data)
+        }
+        onComplete && onComplete(e, res)
+        opts?.onComplete && opts?.onComplete(e, res)
+      })
 
-        .catch((error) => {
-          console.error(error)
-          onError && onError(e, error)
-          options?.onError && options?.onError(e, error)
-        })
-    },
-    [elementDrawer, addElement, siblingCount, parentId, index, onComplete, onError, drawerOptions]
-  )
+      .catch((error) => {
+        console.error(error)
+        onError && onError(e, error)
+        opts?.onError && opts?.onError(e, error)
+      })
+  }, [$id, getApp, elementDrawer, drawerOptions, onComplete, onError])
 }
 
 export default useAddElementCallback

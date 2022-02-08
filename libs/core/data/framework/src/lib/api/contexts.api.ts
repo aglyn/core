@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,33 @@
  * limitations under the License.
  */
 
-import { _INTERNAL_CONTEXTS_ } from '../constants/_internal'
+import {_INTERNAL_CONTEXTS_} from '../constants/_internal'
 import {
-  ContextsCreateEffectPayload,
-  ContextsCreateEventPayload,
-  ContextsCreateStorePayload,
-  ContextsGetStoreApiPayload,
-  ContextsGetStorePayload,
-  ContextsSetStorePayload,
+  type ContextsCreateEffectPayload,
+  type ContextsCreateEventPayload,
+  type ContextsCreateStorePayload,
+  type ContextsGetStoreApiPayload,
+  type ContextsGetStorePayload,
+  type ContextsSetStorePayload,
 } from '../constants/emitter'
-import { AglynAppController } from '../controllers/aglyn-app.controller'
-import type { AglynContextsController } from '../controllers/aglyn-contexts.controller'
-import { ContextEffect, ContextEvent, ContextStore } from '../controllers/aglyn-contexts.controller'
-import { _validateAppArg } from './app.api'
+import {type IAglynAppController} from '../types/aglyn-app.types'
+import {
+  type ContextEffect,
+  type ContextEvent,
+  type ContextStore,
+  type IAglynContextsController,
+} from '../types/aglyn-contexts.types'
+import {_validateAppArg} from './app.api'
 
 
-export function _getContextsController(app: AglynAppController): AglynContextsController {
+export function _getContextsController(app: IAglynAppController): IAglynContextsController {
   _validateAppArg(app)
   return _INTERNAL_CONTEXTS_.get(app.getName())
 }
 
 
 export function createContextStore<T>(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ContextsCreateStorePayload<T>,
 ): ContextStore<T> {
   const contextsController = _getContextsController(app)
@@ -45,7 +49,7 @@ export function createContextStore<T>(
 }
 
 export function createContextEvent(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload?: ContextsCreateEventPayload,
 ): ContextEvent {
   const contextsController = _getContextsController(app)
@@ -53,7 +57,7 @@ export function createContextEvent(
 }
 
 export function createContextEffect(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ContextsCreateEffectPayload,
 ): ContextEffect {
   const contextsController = _getContextsController(app)
@@ -61,15 +65,15 @@ export function createContextEffect(
 }
 
 export function setContextStore<T>(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ContextsSetStorePayload<T>,
-): AglynContextsController {
+): IAglynContextsController {
   const contextsController = _getContextsController(app)
   return contextsController.setStore(payload)
 }
 
 export function getContextStore<T>(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ContextsGetStorePayload,
 ): ContextStore<T> {
   const contextsController = _getContextsController(app)
@@ -77,7 +81,7 @@ export function getContextStore<T>(
 }
 
 export function getContextStoreApi<T, K extends keyof T = keyof T>(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ContextsGetStoreApiPayload,
 ): T {
   const contextsController = _getContextsController(app)
@@ -85,9 +89,9 @@ export function getContextStoreApi<T, K extends keyof T = keyof T>(
 }
 
 export function deleteContextStore(
-  app: AglynAppController,
+  app: IAglynAppController,
   payload: ContextsGetStorePayload,
-): AglynContextsController {
+): IAglynContextsController {
   const contextsController = _getContextsController(app)
   return contextsController.deleteStore(payload)
 }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import { generateComponentClassKeys, styled } from '@aglyn/shared-feature-themes'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import Stack, { StackProps } from '@mui/material/Stack'
+import {alpha, generateComponentClassKeys, styled} from '@aglyn/shared-feature-themes'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import Stack, {type StackProps as MuiStackProps} from '@mui/material/Stack'
 import clsx from 'clsx'
-import { ChangeEvent, forwardRef, useCallback, useRef } from 'react'
-import { useAglynBesignerPanelValue } from '../hooks/use-aglyn-besigner-panel-value'
-import { ViewportCanvasComponent } from './viewport-canvas.component'
-import { ZoomControlsComponent } from './zoom-controls.component'
+import {type ChangeEvent, forwardRef, useCallback, useRef} from 'react'
+import {useAglynBesignerPanelValue} from '../hooks/use-aglyn-besigner-panel-value'
+import {ViewportCanvasComponent} from './viewport-canvas.component'
+import {ViewportZoomControlsComponent} from './viewport-zoom-controls.component'
 
 
 const classKeys = generateComponentClassKeys('AglynViewport', [
@@ -34,38 +34,56 @@ const classKeys = generateComponentClassKeys('AglynViewport', [
 const AglynViewport = styled(Stack, {
   name: 'AglynViewport',
   // shouldForwardProp(propName) {return propName !== 'panelLeftWidth'},
-})<ViewportRootComponentProps>({
-  flexGrow: 1,
-  overflow: 'hidden',
-  // position: 'relative',
-  [`&.${classKeys.panelLeftOpen}`]: {},
-  [`&.${classKeys.panelBottomOpen}`]: {},
-  [`&.${classKeys.panelRightOpen}`]: {},
+})<ViewportRootComponentProps>(({theme}) => {
+  const bg = theme.palette.background.default
+  const base = theme.palette.divider
+  const sq = alpha(base, 0.02)
+  const outline = alpha(base, 0.0312)
+  const corner = alpha(base, 0.016)
+  const s = {
+    sq: '4px',
+    grid: '97px',
+    line: '1px',
+  }
+
+  return ({
+    flexGrow: 1,
+    overflow: 'hidden',
+    // position: 'relative',
+    boxShadow: [
+      `inset 0px 2px 4px -3px ${alpha(theme.palette.common.black, 0.08)}`,
+      `inset 0px 4px 5px -2px ${alpha(theme.palette.common.black, 0.04)}`,
+      `inset 0px 1px 10px -2px ${alpha(theme.palette.common.black, 0.06)}`,
+    ].join(','),
+    backgroundColor: bg,
+    background: [
+      `linear-gradient(-90deg, ${sq} ${s.line}, transparent ${s.line})`,
+      `linear-gradient(${sq} ${s.line}, transparent ${s.line})`,
+      `linear-gradient(-90deg, ${outline} ${s.line}, transparent ${s.line})`,
+      `linear-gradient(${outline} ${s.line}, transparent ${s.line})`,
+      `linear-gradient(transparent ${s.sq}, ${bg} ${s.sq}, ${bg} ${s.grid}, transparent ${s.grid})`,
+      `linear-gradient(-90deg, ${corner} ${s.line}, transparent ${s.line})`,
+      `linear-gradient(-90deg, transparent ${s.sq}, ${bg} ${s.sq}, ${bg} ${s.grid}, transparent ${s.grid})`,
+      `linear-gradient(${corner} ${s.line}, transparent ${s.line})`,
+      corner,
+    ].join(','),
+    backgroundSize: [
+      '10px 10px', '10px 10px', '100px 100px', '100px 100px', '100px 100px',
+      '100px 100px', '100px 100px', '100px 100px',
+    ].join(','),
+    // position: 'relative',
+    [`&.${classKeys.panelLeftOpen}`]: {},
+    [`&.${classKeys.panelBottomOpen}`]: {},
+    [`&.${classKeys.panelRightOpen}`]: {},
+  })
 })
 
-const CanvasShadow = styled('div', {
-  name: 'AglynCanvasShadow'
-})(({theme}) => ({
-  flexGrow: 1,
-  overflow: 'hidden',
-  width: '100%',
-  height: '100%',
-  left: 0,
-  right: 0,
-  top: 0,
-  bottom: 0,
-  // position: 'absolute',
-  zIndex: theme.zIndex.appBar - 1,
-  boxShadow: theme.insetShadows[3],
-  backgroundColor: 'transparent',
-  pointerEvents: 'none',
-}))
-
-export interface ViewportRootComponentProps extends StackProps {
+export interface ViewportRootComponentProps extends MuiStackProps {
   // drawerWidth?: number
+  component?
 }
 
-export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
+const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, className, ...rest} = props
 
@@ -93,25 +111,27 @@ export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>
     const rightToggled = useAglynBesignerPanelValue('panelRight', 'toggled')
     const bottomToggled = useAglynBesignerPanelValue('panelBottom', 'toggled')
 
-    const elemClassName = clsx(
-      {
-        [classKeys.panelLeftOpen]: Boolean(leftToggled),
-        [classKeys.panelRightOpen]: Boolean(rightToggled),
-        [classKeys.panelBottomOpen]: Boolean(bottomToggled),
-      },
-      className,
-    )
+    const elemClassName = clsx({
+      [classKeys.panelLeftOpen]: Boolean(leftToggled),
+      [classKeys.panelRightOpen]: Boolean(rightToggled),
+      [classKeys.panelBottomOpen]: Boolean(bottomToggled),
+    }, className)
 
     return (
       <AglynViewport
         ref={ref}
+        id="aglyn:viewport-root"
+        aria-label="besigner viewport root"
         className={elemClassName}
+        direction="column"
+        alignItems="center"
+        spacing={0}
+        component="main"
         // drawerWidth={left?.drawerWidth}
         {...rest}
       >
-        <CanvasShadow />
         <ViewportCanvasComponent pannerRef={pannerRef} />
-        <ZoomControlsComponent
+        <ViewportZoomControlsComponent
           onZoomReset={handleZoomReset}
           onZoomDecrease={handleZoomDecrease}
           onZoomIncrease={handleZoomIncrease}
@@ -125,4 +145,5 @@ export const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>
 ViewportRootComponent.displayName = 'ViewportRootComponent'
 ViewportRootComponent.defaultProps = {}
 
+export {ViewportRootComponent}
 export default ViewportRootComponent

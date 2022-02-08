@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,16 @@
  * limitations under the License.
  */
 
+import img3 from '/public/_static/images/designer/website-designer-custom-element-attributes.png'
+import img2 from '/public/_static/images/designer/website-designer-element-categories.png'
+import img4 from '/public/_static/images/designer/website-designer-functional-operations.png'
+import img1 from '/public/_static/images/designer/website-designer-preview-collage.png'
 import {ProductNames} from '@aglyn/shared-data-brand'
 import {GridItems} from '@aglyn/shared-ui-jsx'
+import {Image} from '@aglyn/shared-ui-next'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
-import Image from 'next/image'
-import React from 'react'
 import BackgroundImage from '../components/BackgroundImage'
 import {mainNavigation} from '../const'
 import MainLayout from '../layouts/MainLayout'
@@ -29,14 +32,9 @@ import PromoSectionView from '../views/PromoSectionView'
 import SiteFooterView from '../views/SiteFooterView'
 
 
-interface Props {
-
-}
-
 const TITLE = 'Build websites for your business goals'
 
-function Index(props: Props) {
-  const {} = props
+function Index(props) {
 
   return (
     <MainLayout
@@ -59,14 +57,28 @@ function Index(props: Props) {
               spacing={2}
               items={[
                 {
+                  xs: 12,
+                  children: (
+                    <>
+                      <Typography
+                        variant={'h2'}
+                        component={'h1'}
+                        children={TITLE}
+                        sx={{mb: 4}}
+                      />
+                    </>
+                  ),
+                },
+                {
                   xs: 12, md: 5,
                   children: (
                     <Image
-                      src="/_static/images/designer/website-designer-preview-collage.png"
+                      src={img1}
                       alt="website designer preview collage"
                       width="504"
                       height="380"
-                      loading="eager"
+                      shimmer
+                      priority
                     />
                   ),
                 },
@@ -75,16 +87,21 @@ function Index(props: Props) {
                   children: (
                     <>
                       <Typography
-                        variant={'h2'}
-                        children={TITLE}
-                        sx={{mb: 4}}
-                      />
-                      <Typography
                         variant={'h4'}
-                        variantMapping={{'h4': 'h3'}}
+                        component={'h2'}
+                        // variantMapping={{'h4': 'h3'}}
                         children={'The essentials to keep your workflow simple'}
                         color="quaternary.main"
+                        sx={{mb: 2}}
                       />
+                      <Typography
+                        variant={'h6'}
+                        component={'div'}
+                        color="text.secondary"
+                        sx={{mb: 4, '& > b': {color: 'text.secondary'}}}
+                      >
+                        <b>A</b>pps <b>G</b>iving <b>L</b>ove for <b>Y</b>our <b>N</b>etwork
+                      </Typography>
                     </>
                   ),
                 },
@@ -106,10 +123,11 @@ function Index(props: Props) {
                   xs: 12, md: 4,
                   children: (
                     <Image
-                      src="/_static/images/designer/website-designer-element-categories.png"
+                      src={img2}
                       alt="website designer element category search"
                       width="400"
                       height="478"
+                      shimmer
                     />
                   ),
                 },
@@ -148,10 +166,11 @@ function Index(props: Props) {
                   xs: 12, md: 4,
                   children: (
                     <Image
-                      src="/_static/images/designer/website-designer-custom-element-attributes.png"
+                      src={img3}
                       alt="website designer custom element attributes"
                       width="400"
                       height="477"
+                      shimmer
                     />
                   ),
                 },
@@ -190,10 +209,11 @@ function Index(props: Props) {
                   xs: 12, md: 4,
                   children: (
                     <Image
-                      src="/_static/images/designer/website-designer-functional-operations.png"
+                      src={img4}
                       alt="website designer functional operations"
                       width="400"
                       height="440"
+                      shimmer
                     />
                   ),
                 },

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,20 @@
  * limitations under the License.
  */
 
-import { styled } from '@aglyn/shared-feature-themes'
-import { AglynSvgIcon, BesignerSvgLogo } from '@aglyn/shared-ui-jsx'
-import AppBar, { AppBarProps } from '@mui/material/AppBar'
+import {styled, useThemeModeContext} from '@aglyn/shared-feature-themes'
+import {AglynSvgIcon, BesignerSvgLogo} from '@aglyn/shared-ui-jsx'
+import {mdiBrightness4, mdiBrightness5, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import AppBar, {type AppBarProps} from '@mui/material/AppBar'
+import Box from '@mui/material/Box'
+import MuiIconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
-import { forwardRef } from 'react'
+import MuiTooltip from '@mui/material/Tooltip'
+import {forwardRef} from 'react'
+
 
 const AppBarPrimary = styled(AppBar, {
-  name: 'AglynAppBarPrimary'
-})(({ theme }) => ({
+  name: 'AglynAppBarPrimary',
+})(({theme}) => ({
   top: 0,
   // backgroundColor: theme.palette.background.paper,
   borderBottom: `1px solid ${theme.palette.divider}`,
@@ -33,11 +38,14 @@ export interface AppBarPrimaryComponentProps extends Partial<AppBarProps> {}
 
 export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProps>(
   function RefRenderFn(props, ref) {
-    const { children, ...rest } = props
+    const {children, ...rest} = props
+    const [mode, toggleThemeMode] = useThemeModeContext()
 
     return (
       <AppBarPrimary
         ref={ref}
+        id="aglyn:besigner-appbar-primary"
+        aria-label="primary app toolbar"
         position="static"
         color="inherit"
         elevation={0}
@@ -46,22 +54,42 @@ export const AppBarPrimaryComponent = forwardRef<any, AppBarPrimaryComponentProp
         <Toolbar>
           <AglynSvgIcon
             sx={(theme) => ({
+              fontSize: `1.75em`,
               borderRadius: theme.shape.appIconBorderRadius,
               // boxShadow: theme.shadows[1],
-              ml: -1.5, mr: 0.5,
-              fontSize: `1.75em`
+              ml: -1.5, mr: 0.75,
+              fontSize: `1.75em`,
             })}
           />
           <BesignerSvgLogo
-            sx={{width:'auto'}}
+            sx={{width: 'auto'}}
             fontSize="medium"
-            color="primary"
+            color="inherit"
           />
+          <Box sx={{flexGrow: 1}} />
+          <MuiTooltip
+            aria-label="switch theme scheme colors"
+            title={
+              mode === 'dark'
+                ? 'Light mode'
+                : 'Dark mode'
+            }
+          >
+            <MuiIconButton onClick={toggleThemeMode as any}>
+              <MdiIcon
+                path={
+                  mode === 'dark'
+                    ? mdiBrightness4.path
+                    : mdiBrightness5.path
+                }
+              />
+            </MuiIconButton>
+          </MuiTooltip>
           {children}
         </Toolbar>
       </AppBarPrimary>
     )
-  }
+  },
 )
 
 AppBarPrimaryComponent.displayName = 'AppBarPrimaryComponent'

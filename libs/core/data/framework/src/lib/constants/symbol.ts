@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared-util-guards'
+import {_isFnT} from '@aglyn/shared-util-guards'
 
 // The Symbol used to tag the AglynObject-like types. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
@@ -67,10 +67,10 @@ const symFor = (hex: HexTag) => Symbol.for(`${SymPrefix}${HexSym[hex]}`)
 export const SymbolNamespace = 'aglyn'
 export const SymbolSeparator = '.'
 export const SymPrefix = `${SymbolNamespace}${SymbolSeparator}`
-export const FieldPrefix = 'ßß'
+export const FieldPrefix = '@'
 
-export const TYPE_OF = 'ßßtypeof'
-export const TYPE_KIND = 'ßßkind'
+export const OF_TYPE = '$$of_type'
+export const OF_KIND = '$$of_kind'
 
 export let MODULE_TYPE: SYMBOL_TYPE = HexTag.x60106
 export type MODULE_TYPE = SYMBOL_TYPE | typeof MODULE_TYPE

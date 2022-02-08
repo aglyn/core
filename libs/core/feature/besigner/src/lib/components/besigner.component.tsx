@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,60 +15,59 @@
  * limitations under the License.
  */
 
-import { AppUUN } from '@aglyn/core-data-framework'
+import {type AppUUN} from '@aglyn/core-data-framework'
 import {
   AglynAppContextComponent,
   ElementComponentsContextProvider,
   ElementsContextProvider,
 } from '@aglyn/core-feature-renderer'
-import { consoleThemeDark, consoleThemeLight, withTheme } from '@aglyn/shared-feature-themes'
-import { ConfirmationProviderComponent } from '@aglyn/shared-ui-jsx'
-import { DndContext } from '@dnd-kit/core'
+import {consoleThemeDark, consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
+import {AppLoaderOverlayView, ConfirmationProviderComponent} from '@aglyn/shared-ui-jsx'
 import NoSsr from '@mui/material/NoSsr'
-import { forwardRef, Fragment, useCallback } from 'react'
-import { ComponentsDrawerContextProvider } from '../contexts/components-drawer-context.provider'
-import { WorkspaceEditorComponent, WorkspaceEditorComponentProps } from './workspace-editor.component'
+import dynamic from 'next/dynamic'
+import {forwardRef, Fragment} from 'react'
+import {ComponentsDrawerContextProvider} from '../contexts/components-drawer-context.provider'
+import BesignerDndContext from './besigner-dnd-context.component'
+import {type WorkspaceEditorComponentProps} from './workspace-editor.component'
 
+
+const WorkspaceEditorComponent = dynamic(
+  () => import('./workspace-editor.component').then((mod) => mod.WorkspaceEditorComponent),
+  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+)
 
 export interface BesignerComponentProps extends WorkspaceEditorComponentProps {
   noSsr?: boolean
   appName?: AppUUN
 }
 
-const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(function RefRenderFn(
-  props,
-  ref,
-) {
-  const {noSsr, appName, ...rest} = props
-  const Wrapper = noSsr ? NoSsr : Fragment
+const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {noSsr, appName, ...rest} = props
+    const Wrapper = noSsr ? NoSsr : Fragment
 
-  const handleDragStart = useCallback((...args) => {
-    console.log('drag start', ...args)
-  }, [])
-  const handleDragEnd = useCallback((...args) => {
-    console.log('drag end', ...args)
-  }, [])
 
-  return (
-    <Wrapper>
-      <AglynAppContextComponent appName={appName}>
-        <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <ElementComponentsContextProvider>
-            <ElementsContextProvider>
-              <ConfirmationProviderComponent>
-                <ComponentsDrawerContextProvider>
-                  {/*<SnackbarProvider maxSnack={3}>*/}
-                  <WorkspaceEditorComponent ref={ref} {...rest} />
-                  {/*</SnackbarProvider>*/}
-                </ComponentsDrawerContextProvider>
-              </ConfirmationProviderComponent>
-            </ElementsContextProvider>
-          </ElementComponentsContextProvider>
-        </DndContext>
-      </AglynAppContextComponent>
-    </Wrapper>
-  )
-})
+    return (
+      <Wrapper>
+        <AglynAppContextComponent appName={appName}>
+          <BesignerDndContext>
+            <ElementComponentsContextProvider>
+              <ElementsContextProvider>
+                <ConfirmationProviderComponent>
+                  <ComponentsDrawerContextProvider>
+                    {/*<SnackbarProvider maxSnack={3}>*/}
+                    <WorkspaceEditorComponent ref={ref} {...rest} />
+                    {/*</SnackbarProvider>*/}
+                  </ComponentsDrawerContextProvider>
+                </ConfirmationProviderComponent>
+              </ElementsContextProvider>
+            </ElementComponentsContextProvider>
+          </BesignerDndContext>
+        </AglynAppContextComponent>
+      </Wrapper>
+    )
+  },
+)
 
 BesignerComponentRaw.displayName = 'BesignerComponent'
 BesignerComponentRaw.defaultProps = {}

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
-import { IndexOf } from '@aglyn/shared-data-types'
-import { ErrorTagMessages, NsErrorFactory } from '@aglyn/shared-util-errors'
-import { AppUUN, ExtensionUUN, PayloadData, PayloadParams } from '../types'
+import {type IndexOf} from '@aglyn/shared-data-types'
+import {type ErrorTagMessages, NsErrorFactory} from '@aglyn/shared-util-errors'
+import {type AppUUN} from '../types/aglyn-app.types'
+import {type ExtensionUUN} from '../types/aglyn-extensions.types'
+import {type PayloadData, type PayloadParams} from '../types/generic.types'
 
 
 export enum AglynErrorEventFlag {
@@ -35,17 +37,17 @@ export enum AglynErrorEventFlag {
 }
 
 export interface AglynErrorEventParams extends Record<AglynErrorEventType, unknown> {
-  [AglynErrorEventFlag.APP_NONE]: PayloadData<{ appName: AppUUN }>
-  [AglynErrorEventFlag.APP_BAD_NAME]: PayloadData<{ appName: AppUUN }>
-  [AglynErrorEventFlag.APP_EXISTS]: PayloadData<{ appName: AppUUN }>
-  [AglynErrorEventFlag.APP_DELETED]: PayloadData<{ appName: AppUUN }>
-  [AglynErrorEventFlag.APP_BAD_INSTANCE]: PayloadData<{ appName: AppUUN }>
+  [AglynErrorEventFlag.APP_NONE]: PayloadData<{appName: AppUUN}>
+  [AglynErrorEventFlag.APP_BAD_NAME]: PayloadData<{appName: AppUUN}>
+  [AglynErrorEventFlag.APP_EXISTS]: PayloadData<{appName: AppUUN}>
+  [AglynErrorEventFlag.APP_DELETED]: PayloadData<{appName: AppUUN}>
+  [AglynErrorEventFlag.APP_BAD_INSTANCE]: PayloadData<{appName: AppUUN}>
 
-  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: PayloadData<{ extensionName: ExtensionUUN, memberMethod: string }>
+  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: PayloadData<{extensionName: ExtensionUUN, memberMethod: string}>
 
-  [AglynErrorEventFlag.EXTENSION_NONE]: PayloadData<{ extensionName: ExtensionUUN }>
-  [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: PayloadData<{ appName: AppUUN }>
-  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: PayloadData<{ extensionName?: ExtensionUUN, appName: AppUUN }>
+  [AglynErrorEventFlag.EXTENSION_NONE]: PayloadData<{extensionName: ExtensionUUN}>
+  [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: PayloadData<{appName: AppUUN}>
+  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: PayloadData<{extensionName?: ExtensionUUN, appName: AppUUN}>
 }
 
 export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof AglynErrorEventFlag>> = {
@@ -55,11 +57,11 @@ export const AglynErrorEventMessageTemplates: ErrorTagMessages<IndexOf<typeof Ag
   [AglynErrorEventFlag.APP_DELETED]: 'AglynApp named \'{$appName}\' already deleted',
   [AglynErrorEventFlag.APP_BAD_INSTANCE]: 'AglynApp.{$appName}() takes either no argument or a AglynApp instance.',
 
-  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: 'Module \'{$moduleName}\' must implement member method AglynModule.{$memberMethod}()',
+  [AglynErrorEventFlag.MODULE_MISSING_MEMBER]: 'Module \'{$namespace}\' must implement member method AglynModule.{$memberMethod}()',
 
   [AglynErrorEventFlag.EXTENSION_NONE]: 'No AppExtension \'{$extensionName}\' has been registered on AglynApp \'{$appName}\'',
   [AglynErrorEventFlag.EXTENSION_BAD_MODULE_LOADER]: 'Invalid module loader has been provided',
-  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: 'Bad AglynExtension module \'{$moduleName}\' provided on AglynApp \'{$appName}\'',
+  [AglynErrorEventFlag.EXTENSION_BAD_MODULE]: 'Bad AglynExtension module \'{$namespace}\' provided on AglynApp \'{$appName}\'',
 }
 
 export type AglynErrorParams = PayloadParams<AglynErrorEventParams>

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,29 @@
  */
 
 import {
-  AglynComponentPropsFormSchema,
+  type AglynComponentPropsFormSchema,
   buildComponentPropsFormSchema,
-  BundleUId,
-  ComponentId,
+  type BundleUId,
+  type ComponentId,
 } from '@aglyn/core-data-framework'
-import { useAglynComponentSchema } from '@aglyn/core-feature-renderer'
-import { useMemo } from 'react'
+import {useAglynComponentSchema} from '@aglyn/core-feature-renderer'
+
 
 export interface UseComponentFormSchema extends AglynComponentPropsFormSchema {}
 
 export interface UseComponentFormSchemaOptions {
   componentId: ComponentId
-  bundleId: BundleUId
+  bundleId?: BundleUId
 }
 
 export const useComponentFormSchema = (
-  opts: UseComponentFormSchemaOptions
+  opts: UseComponentFormSchemaOptions,
 ): UseComponentFormSchema => {
-  const { componentId, bundleId } = opts
+  const {componentId, bundleId} = opts
   const componentSchema = useAglynComponentSchema(componentId, bundleId)
-  const formSchema = componentSchema?.renderFlags?.propsSchema
+  const formSchema = componentSchema?.formSchema
 
-  return useMemo(() => {
-    return buildComponentPropsFormSchema(formSchema)
-  }, [formSchema])
+  return buildComponentPropsFormSchema(formSchema)
 }
 
 export default useComponentFormSchema

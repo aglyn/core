@@ -15,18 +15,15 @@
  * limitations under the License.
  */
 
-import type { AglynComponentElementTemplateData } from '@aglyn/core-data-framework'
-import { getAllComponentsTemplateValues } from '@aglyn/core-data-framework'
-import { useMemo } from 'react'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
-import { AnyProps } from '@aglyn/shared-data-types'
+import {
+  type AglynComponentElementTemplate,
+  getAllComponentsTemplateValues,
+} from '@aglyn/core-data-framework'
+import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
-export function useAglynComponentTemplateBlocks<
-  P extends AnyProps
->(): AglynComponentElementTemplateData<P>[] {
-  const { getApp } = useAglynAppContext()
-  return useMemo(() => {
-    return getAllComponentsTemplateValues(getApp())
-  }, [getApp])
+
+export function useAglynComponentTemplateBlocks(): AglynComponentElementTemplate[] {
+  const {getApp} = useAglynAppContext()
+  return getAllComponentsTemplateValues(getApp())
 }
 export default useAglynComponentTemplateBlocks

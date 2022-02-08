@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,39 @@
  */
 
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import {FieldComponentType} from '@aglyn/shared-ui-jsx'
+import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
+
+
+export {FieldComponentType}
+
 export enum ComponentsLinealDirectiveFlag {
   LIMIT_TO = 0x01,
   DISALLOW = 0x02,
 }
 
-export enum PropertyEditorFieldFlag {
-  CHECKBOX = 'checkbox',
-  DATE_PICKER = 'date-picker',
-  ICON_SELECT = 'icon-select',
-  RADIO = 'radio',
-  SELECT = 'select',
-  TEXT_FIELD = 'text-field',
-  TEXTAREA = 'textarea',
-  TIME_PICKER = 'time-picker',
-}
+export const ELEMENT_ID_LENGTH = 10
 
-export const DEFAULT_COMPONENT_ICON_ID = 'cube-outline'
 
-export const DEFAULT_PROPS_FORM_SCHEMA = {
+export const DEFAULT_PROPS_FORM_SCHEMA: AglynComponentPropsFormSchema = {
   fields: [
+    // {
+    //   name: 'iconId',
+    //   component: FieldComponentType.ICON_SELECT,
+    //   label: 'Icon',
+    // },
+    // {
+    //   name: 'displayName',
+    //   component: FieldComponentType.TEXT_FIELD,
+    //   label: 'Display name',
+    //   // variant: 'outlined',
+    // },
     {
-      name: 'displayName',
-      component: PropertyEditorFieldFlag.TEXT_FIELD,
-      label: 'Display name',
-      // variant: 'outlined',
-    },
-    {
-      name: 'iconIds',
-      component: PropertyEditorFieldFlag.ICON_SELECT,
-      label: 'Icon',
-      // variant: 'outlined',
+      name: 'children',
+      description: 'The content of the component.',
+      component: FieldComponentType.TEXT_FIELD,
+      label: 'Content',
     },
   ],
 }
