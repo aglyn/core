@@ -24,6 +24,7 @@ import {
   REGEX_SPECIAL_CHARACTER,
 } from '@aglyn/shared-data-regex'
 import {FieldComponentTypeFlag, FieldValidatorTypeFlag, type FormField} from '@aglyn/shared-ui-jsx'
+import {createUid} from '@aglyn/shared-util-vendor'
 
 
 export const FIELD_SCHEMA_EMAIL: FormField = {
@@ -48,7 +49,7 @@ export const FIELD_SCHEMA_EMAIL: FormField = {
 
 export const FIELD_SCHEMA_PASSWORD: FormField = {
   component: FieldComponentTypeFlag.TEXT_FIELD,
-  name: 'password',
+  name: 'Passwd',
   label: 'Password',
   type: 'password',
   isRequired: true,
@@ -90,11 +91,47 @@ export const FIELD_SCHEMA_PASSWORD: FormField = {
   ],
 }
 
+export const FIELD_SCHEMA_PASSWORD_CONFIRM: FormField = {
+  component: FieldComponentTypeFlag.TEXT_FIELD,
+  name: 'ConfirmPasswd',
+  label: 'Confirm',
+  type: 'password',
+  'data-passwd-field': FIELD_SCHEMA_PASSWORD.name,
+  resolveProps: (
+    props,
+    {meta, input},
+    formOptions,
+  ) => {
+    const passwdFieldName = props['data-passwd-field'] || 'Passwd'
+    const passwdField = formOptions.getFieldState(passwdFieldName)
+
+    if (!passwdField) console.error('Error confirming password field. Missing field.')
+
+    return ({
+      required: true,
+      validate: [
+        {
+          type: FieldValidatorTypeFlag.REQUIRED,
+          message: 'Confirm your password.',
+        },
+        {
+          type: FieldValidatorTypeFlag.PATTERN,
+          pattern: RegExp(`^${passwdField?.value || createUid(2)}$`),
+          message: 'Those passwords didn\'t match. Try again.',
+        },
+      ],
+    })
+  },
+}
+
 export const FIELD_SCHEMA_FIRST_NAME: FormField = {
   component: FieldComponentTypeFlag.TEXT_FIELD,
   name: 'firstName',
   label: 'First name',
   type: 'text',
+  FormFieldGridProps: {
+    xs: 12, sm: 6,
+  },
   isRequired: true,
   validate: [
     {type: FieldValidatorTypeFlag.REQUIRED, message: 'Please enter a first name'},
@@ -107,6 +144,9 @@ export const FIELD_SCHEMA_LAST_NAME: FormField = {
   name: 'lastName',
   label: 'Last name',
   type: 'text',
+  FormFieldGridProps: {
+    xs: 12, sm: 6,
+  },
   isRequired: true,
   validate: [
     {type: FieldValidatorTypeFlag.REQUIRED, message: 'Provide your last name'},

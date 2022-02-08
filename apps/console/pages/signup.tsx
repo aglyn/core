@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import {FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD} from '@aglyn/shared-data-fields'
+import {
+  FIELD_SCHEMA_EMAIL,
+  FIELD_SCHEMA_FIRST_NAME,
+  FIELD_SCHEMA_LAST_NAME,
+  FIELD_SCHEMA_PASSWORD,
+  FIELD_SCHEMA_PASSWORD_CONFIRM,
+} from '@aglyn/shared-data-fields'
 import {
   AglynSvgIcon,
   AglynSvgLogo,
@@ -37,8 +43,11 @@ import AuthBasicFormComponent from '../components/auth-basic-form.component'
 
 const formSchema: FormSchema = {
   'fields': [
+    FIELD_SCHEMA_FIRST_NAME,
+    FIELD_SCHEMA_LAST_NAME,
     FIELD_SCHEMA_EMAIL,
     FIELD_SCHEMA_PASSWORD,
+    FIELD_SCHEMA_PASSWORD_CONFIRM,
   ],
 }
 const defaultValues = {email: '', password: ''}
