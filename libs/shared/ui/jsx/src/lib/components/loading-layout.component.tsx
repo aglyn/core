@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
+import {getDisplayName} from '@aglyn/shared-util-tools'
+import {ComponentType, forwardRef} from 'react'
+import {LoadingProviderComponent} from '../contexts/loading.context'
 import {
   LoadingOverlayComponent,
   type LoadingOverlayComponentProps,
-  LoadingProviderComponent,
-} from '@aglyn/shared-ui-jsx'
-import {getDisplayName} from '@aglyn/shared-util-tools'
-import {ComponentType, forwardRef} from 'react'
+} from './loading-overlay.component'
 
 
 export interface LoadingLayoutComponentProps extends Partial<LoadingOverlayComponentProps> {

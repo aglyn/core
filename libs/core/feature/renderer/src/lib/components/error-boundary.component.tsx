@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {type AglynElementType} from '@aglyn/core-data-framework'
-import {type AnyProps, type PropsWithInnerRef} from '@aglyn/shared-data-types'
+import type {AglynElementType} from '@aglyn/core-data-framework'
+import type {AnyProps, PropsWithInnerRef} from '@aglyn/shared-data-types'
 import {ReactIs} from '@aglyn/shared-ui-jsx'
 import {Component} from 'react'
 

@@ -133,6 +133,8 @@
     "@nrwl/tao": "13.7.3",
     "@nrwl/web": "13.7.3",
     "@nrwl/workspace": "13.7.3",
+    "@swc/core": "1.2.118",
+    "@swc/jest": "0.2.15",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "7.0.2",
     "@types/cookie": "^0.4.1",

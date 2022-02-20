@@ -16,7 +16,7 @@
  */
 
 import {HAS_DOCUMENT, IS_PRODUCTION} from '@aglyn/shared-data-brand'
-import {type JSXElementType} from '@aglyn/shared-data-types'
+import type {JSXElementType} from '@aglyn/shared-data-types'
 import {consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
 import {
   makeLinkElements,

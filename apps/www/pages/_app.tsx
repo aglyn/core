@@ -16,7 +16,7 @@
  */
 
 import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-brand'
-import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
+import type {MakeLinkElementsConfig, MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
 import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
 import {Fragment, useEffect, useMemo} from 'react'
 import HsEmbedScript from '../components/hs-embed-script'

@@ -15,24 +15,28 @@
  * limitations under the License.
  */
 
-import {type Dictionary} from '@aglyn/shared-data-types'
-import {type SxProps, type Theme} from '../../vendor/mui'
+import type {AnyObj, Dictionary, EmptyObj, OrUndef} from '@aglyn/shared-data-types'
+import type {SxProps, Theme} from '../../vendor/mui'
 
 
-export type MergedPassSxProps<T extends Dictionary<any> = Theme> = Extract<SxProps<T>, any[]>
+export type PassSxProps<Theme extends AnyObj = EmptyObj> =
+  OrUndef<SxProps<Theme>>
+export type MergedPassSxProps<T extends Dictionary<any> = Theme> =
+  Extract<PassSxProps<T>, any[]>
 
 export function handlePassSxProps<T extends Dictionary<any> = Theme>(
-  sx: SxProps<T>,
-  ...passProps: Array<SxProps<T>>
+  sx: PassSxProps<T>,
+  ...passProps: Array<PassSxProps<T>>
 ): MergedPassSxProps<T>
 
 export function handlePassSxProps<T extends Dictionary<any> = Theme>(
-  ...sx: Array<SxProps<T>>
+  ...sx: Array<PassSxProps<T>>
 ): MergedPassSxProps<T> {
-  const res: Extract<SxProps<T>, any[]> = []
+  const res: Extract<PassSxProps<T>, any[]> = []
 
   for (const i of sx) {
-    if (Array.isArray(i)) res.push(...i)
+    if (!i) continue
+    if (Array.isArray(i)) res.push(...handlePassSxProps(i))
     else res.push(i)
   }
 

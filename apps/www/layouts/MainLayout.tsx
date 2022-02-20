@@ -27,16 +27,22 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr, _isArrEmpty, _isObj} from '@aglyn/shared-util-guards'
-import AppBar, {type AppBarProps} from '@mui/material/AppBar'
-import Avatar from '@mui/material/Avatar'
-import Box from '@mui/material/Box'
+import {
+  AppBar,
+  type AppBarProps,
+  Avatar,
+  Box,
+  Container,
+  IconButton,
+  type IconButtonProps,
+  Tab as MuiTab,
+  type TabProps as MuiTabProps,
+  Tabs as MuiTabs,
+  type TabsProps as MuiTabsProps,
+  Toolbar,
+  Typography,
+} from '@mui/material'
 import {cyan} from '@mui/material/colors'
-import Container from '@mui/material/Container'
-import IconButton, {type IconButtonProps} from '@mui/material/IconButton'
-import MuiTab, {type TabProps as MuiTabProps} from '@mui/material/Tab'
-import MuiTabs, {type TabsProps as MuiTabsProps} from '@mui/material/Tabs'
-import Toolbar from '@mui/material/Toolbar'
-import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import {useRouter} from 'next/router'
 import {type ElementType, Fragment, type ReactNode} from 'react'

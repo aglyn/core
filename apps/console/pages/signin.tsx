@@ -15,17 +15,11 @@
  * limitations under the License.
  */
 
-import type {AuthCallbackResult, AuthResultError, AuthResultUser} from '@aglyn/shared-data-fbenums'
-import {FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD} from '@aglyn/shared-data-fields'
+import type {AuthCallbackResult, AuthResultError, AuthResultUser} from '@aglyn/shared-data-enums'
+import {FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD} from '@aglyn/shared-data-forms'
 import {getFirebaseAuth, googleOAuthProvider} from '@aglyn/shared-feature-fbclient'
-import {
-  AglynSvgIcon,
-  AglynSvgLogo,
-  AppLink,
-  componentMapper,
-  FormRenderer,
-  useLoading,
-} from '@aglyn/shared-ui-jsx'
+import {AglynSvgIcon, AglynSvgLogo, AppLink, useLoading} from '@aglyn/shared-ui-jsx'
+import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {mdiGoogle, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {useContinueRouteDecoded} from '@aglyn/shared-util-next'
 import type FormSchema from '@data-driven-forms/react-form-renderer/common-types/schema'
@@ -51,71 +45,65 @@ import LayoutUserAuthComponent from '../components/layout-user-auth.component'
 const firebaseAuth = getFirebaseAuth()
 
 const formSchema: FormSchema = {
-  'fields': [
-    FIELD_SCHEMA_EMAIL,
-    FIELD_SCHEMA_PASSWORD,
-  ],
+  fields: [FIELD_SCHEMA_EMAIL, FIELD_SCHEMA_PASSWORD],
 }
 const defaultValues = {email: '', Passwd: ''}
 
 function SignIn() {
-
   const router = useRouter()
   const [{href, hrefAs}] = useContinueRouteDecoded()
   const {queueLoading, loading} = useLoading()
   const [user, setUser] = useState<AuthResultUser>(null)
   const [error, setError] = useState<AuthResultError>(null)
 
-
   const handleRedirect = useCallback(async () => {
-    return href
-      ? await router.push(href, hrefAs || '')
-      : await router.push('/')
+    return href ? await router.push(href, hrefAs || '') : await router.push('/')
   }, [href, hrefAs, router])
 
   const handleGoogleOAuthSignIn = useCallback((): AuthCallbackResult => {
     return signInWithPopup(firebaseAuth, googleOAuthProvider)
   }, [])
 
-  const handlePasswordSignIn = useCallback((
-    email: string,
-    password: string,
-  ): AuthCallbackResult => {
-    return signInWithEmailAndPassword(firebaseAuth, email, password)
-  }, [])
+  const handlePasswordSignIn = useCallback(
+    (email: string, password: string): AuthCallbackResult => {
+      return signInWithEmailAndPassword(firebaseAuth, email, password)
+    },
+    [],
+  )
 
-  const handleSignIn = useCallback(async (values?: any) => {
-    if (error) setError(null)
-    if (loading) return
-    const dequeueLoading = queueLoading()
+  const handleSignIn = useCallback(
+    async (values?: any) => {
+      if (error) setError(null)
+      if (loading) return
+      const dequeueLoading = queueLoading()
 
-    await setPersistence(firebaseAuth, browserLocalPersistence)
-      .then(() => {
-        return values
-          ? handlePasswordSignIn(values.email, values.Passwd)
-          : handleGoogleOAuthSignIn()
-      })
-      .then((result) => {
-        setUser({...result, credential: GoogleAuthProvider.credentialFromResult(result)})
-        return handleRedirect()
-      })
-      .then(() => {
-        dequeueLoading()
-      })
-      .catch((error) => {
-        setError({...error, credential: GoogleAuthProvider.credentialFromError(error)})
-        dequeueLoading()
-      })
+      await setPersistence(firebaseAuth, browserLocalPersistence)
+        .then(() => {
+          return values
+            ? handlePasswordSignIn(values.email, values.Passwd)
+            : handleGoogleOAuthSignIn()
+        })
+        .then((result) => {
+          setUser({...result, credential: GoogleAuthProvider.credentialFromResult(result)})
+          return handleRedirect()
+        })
+        .then(() => {
+          dequeueLoading()
+        })
+        .catch((error) => {
+          setError({...error, credential: GoogleAuthProvider.credentialFromError(error)})
+          dequeueLoading()
+        })
+    },
+    [error, loading, queueLoading, handlePasswordSignIn, handleGoogleOAuthSignIn, handleRedirect],
+  )
 
-  }, [error, loading, queueLoading, handlePasswordSignIn, handleGoogleOAuthSignIn, handleRedirect])
-
-  const handleFormSubmit = useCallback(async (
-    values,
-    formApi: FormApi,
-    onError: (errors?: SubmissionErrors) => void,
-  ) => {
-    await handleSignIn(values)
-  }, [handleSignIn])
+  const handleFormSubmit = useCallback(
+    async (values, formApi: FormApi, onError: (errors?: SubmissionErrors) => void) => {
+      await handleSignIn(values)
+    },
+    [handleSignIn],
+  )
 
   const handleGoogleButtonClick = useCallback(async () => {
     await handleSignIn()
@@ -123,13 +111,7 @@ function SignIn() {
 
   return (
     <>
-      <Stack
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        spacing={2}
-      >
-
+      <Stack direction="column" justifyContent="center" alignItems="center" spacing={2}>
         <Paper
           elevation={1}
           sx={{
@@ -139,7 +121,6 @@ function SignIn() {
             maxWidth: 1,
           }}
         >
-
           <Stack
             direction="column"
             justifyContent="center"
@@ -147,17 +128,8 @@ function SignIn() {
             spacing={1}
             sx={{mb: 4}}
           >
-
-            <Typography
-              component="div"
-              variant="body2"
-              alignSelf="flex-end"
-            >
-              <AppLink
-                href="/signup"
-              >
-                {'Create account'}
-              </AppLink>
+            <Typography component="div" variant="body2" alignSelf="flex-end">
+              <AppLink href="/signup">{'Create account'}</AppLink>
             </Typography>
 
             <Stack
@@ -171,25 +143,18 @@ function SignIn() {
               <AglynSvgLogo sx={{fontSize: 64, transform: `translateY(0.12rem)`}} />
             </Stack>
 
-
-            <Typography
-              component="h1"
-              variant="h4"
-            >
+            <Typography component="h1" variant="h4">
               {'Sign in'}
             </Typography>
 
-            <Typography
-              component="div"
-              variant="h6"
-            >
+            <Typography component="div" variant="h6">
               {'Use your Aglyn account'}
             </Typography>
           </Stack>
 
           <FormRenderer
             FormTemplate={AuthFormTemplateComponent}
-            componentMapper={componentMapper}
+            componentMapper={simpleComponentMapper}
             onSubmit={handleFormSubmit}
             schema={formSchema}
             initialValues={defaultValues}
@@ -201,20 +166,10 @@ function SignIn() {
             {'Or sign in with'}
           </Divider>
 
-          <Stack
-            direction="column"
-            justifyContent="center"
-            alignItems="stretch"
-            spacing={1}
-          >
-
-            <Button
-              startIcon={<MdiIcon path={mdiGoogle.path} />}
-              onClick={handleGoogleButtonClick}
-            >
+          <Stack direction="column" justifyContent="center" alignItems="stretch" spacing={1}>
+            <Button startIcon={<MdiIcon path={mdiGoogle.path} />} onClick={handleGoogleButtonClick}>
               {'Google'}
             </Button>
-
           </Stack>
 
           <br />
@@ -228,23 +183,12 @@ function SignIn() {
           {`User: ${JSON.stringify(user, null, 2)}`}
           <br />
           <br />
-
         </Paper>
 
-        <Typography
-          component="div"
-          variant="body2"
-          color=""
-        >
+        <Typography component="div" variant="body2" color="">
           {'Having trouble logging in? '}
-          <AppLink
-            href="/account-recovery"
-          >
-            Account recovery
-          </AppLink>
+          <AppLink href="/account-recovery">Account recovery</AppLink>
         </Typography>
-
-
       </Stack>
     </>
   )

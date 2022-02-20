@@ -436,31 +436,16 @@
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
     },
-    "shared-data-fbenums": {
-      "root": "libs/shared/data/fbenums",
-      "sourceRoot": "libs/shared/data/fbenums/src",
+    "shared-data-forms": {
+      "root": "libs/shared/data/forms",
+      "sourceRoot": "libs/shared/data/forms/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["libs/shared/data/fbenums/**/*.ts"]
-          }
-        }
-      },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
-    },
-    "shared-data-fields": {
-      "root": "libs/shared/data/fields",
-      "sourceRoot": "libs/shared/data/fields/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "outputs": ["{options.outputFile}"],
-          "options": {
-            "lintFilePatterns": ["libs/shared/data/fields/**/*.ts"]
+            "lintFilePatterns": ["libs/shared/data/forms/**/*.ts"]
           }
         }
       },
@@ -602,6 +587,29 @@
         }
       },
       "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:ui"]
+    },
+    "shared-ui-jsx-forms": {
+      "root": "libs/shared/ui/jsx-forms",
+      "sourceRoot": "libs/shared/ui/jsx-forms/src",
+      "projectType": "library",
+      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:ui"],
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/ui/jsx-forms/**/*.{ts,tsx,js,jsx}"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/ui/jsx-forms"],
+          "options": {
+            "jestConfig": "libs/shared/ui/jsx-forms/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
     },
     "shared-ui-mdi-jsx": {
       "root": "libs/shared/ui/mdi-jsx",

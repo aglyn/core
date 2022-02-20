@@ -59,8 +59,6 @@ export * from './lib/hooks/use-timeout-delay'
 
 export * from './lib/const/svg-icons'
 
-export * from './lib/ddf-form'
-
 export * from './lib/hocs/with-hoc'
 export * from './lib/hocs/create-hoc-with-context-consumer'
 

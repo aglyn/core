@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {COOKIE_KEY_USER_TOKEN} from '@aglyn/shared-data-fbenums'
+import {COOKIE_KEY_USER_TOKEN} from '@aglyn/shared-data-enums'
 import {type NextRequest} from 'next/server'
 
 

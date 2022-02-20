@@ -20,7 +20,7 @@ import {
   AuthErrorMessage,
   AuthErrorNotice,
   type AuthResultError,
-} from '@aglyn/shared-data-fbenums'
+} from '@aglyn/shared-data-enums'
 import Alert, {type AlertProps as MuiAlertProps} from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 

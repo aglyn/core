@@ -18,12 +18,12 @@
 import {type ElementId, updateCanvasElement} from '@aglyn/core-data-framework'
 import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
 import {
-  componentMapper,
   FormRenderer,
   type FormRendererProps,
   FormSpy,
+  simpleComponentMapper,
   useFormApi,
-} from '@aglyn/shared-ui-jsx'
+} from '@aglyn/shared-ui-jsx-forms'
 import {mdiContentSave, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {type FormTemplateRenderProps} from '@data-driven-forms/react-form-renderer'
 import Box from '@mui/material/Box'
@@ -97,7 +97,7 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
         <FormRenderer
           ref={ref}
           FormTemplate={FormTemplate}
-          componentMapper={componentMapper}
+          componentMapper={simpleComponentMapper}
           onCancel={handleFormCancel}
           onSubmit={handleElementSave}
           initialValues={elemProps}

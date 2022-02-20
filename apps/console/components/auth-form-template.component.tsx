@@ -16,8 +16,7 @@
  */
 
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
-import {FormSpy, useFormApi} from '@aglyn/shared-ui-jsx'
-import {type FormTemplateRenderProps} from '@data-driven-forms/react-form-renderer'
+import {FormSpy, type FormTemplateRenderProps, useFormApi} from '@aglyn/shared-ui-jsx-forms'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'

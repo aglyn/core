@@ -34,7 +34,7 @@ import {
   type ResolvePropsFunction,
   type Validator,
 } from '@data-driven-forms/react-form-renderer'
-import {type ComponentsLinealDirectiveFlag} from '../constants/components'
+import {type ComponentsLinealDirectiveFlag, type FieldComponentType} from '../constants/components'
 import {
   type ComponentGetPayload,
   type ComponentRegisterPayload,
@@ -105,7 +105,7 @@ export interface IAglynComponent<P = any, T = any> extends JSXForwardRefExoticCo
 
 export interface AglynComponentField extends Dictionary<any> {
   name: string
-  component: string
+  component: string | FieldComponentType
   validate?: Validator[]
   condition?: ConditionDefinition | (ConditionDefinition[])
   initializeOnMount?: boolean

@@ -17,7 +17,7 @@
 
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {FieldComponentType} from '@aglyn/shared-ui-jsx'
+import {FieldComponentType} from '@aglyn/shared-ui-jsx-forms'
 import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
 
 
