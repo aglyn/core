@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import {
   IconButton,
   List,
   ListItemButton,
+  ListItemButtonProps,
   ListItemText,
   ListSubheader,
 } from '@mui/material'
@@ -42,8 +43,8 @@ const classKeys = generateComponentClassKeys('AreaManageNavigationListWidgetView
 ])
 
 const StyledListItem = styled(ListItemButton, {
-  name: 'ListItem',
-})(({theme}) => ({
+  name: 'AglynListItem',
+})<ListItemButtonProps<AppLink>>(({theme}) => ({
   position: 'relative',
   [`&.${classKeys.active}`]: {
     '&:before': {
@@ -144,7 +145,7 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
               color="inherit"
               selected={isActive(item)}
               component={AppLink}
-              linkType="button"
+              componentVariant="button"
               dense
             >
               <ListItemText children={item?.name.long} />
@@ -183,7 +184,7 @@ const AreaManageNavigationListWidgetViewRaw = forwardRef<any,
                       href={item?.id}
                       selected={isActive(item)}
                       component={AppLink}
-                      linkType="button"
+                      componentVariant="button"
                       dense
                     >
                       <ListItemText primary={item?.name.long} />

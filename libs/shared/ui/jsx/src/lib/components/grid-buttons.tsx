@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,40 @@
  * limitations under the License.
  */
 
-import Button, {ButtonProps as MuiButtonProps} from '@mui/material/Button'
-import type {GridProps as MuiGridProps} from '@mui/material/Grid'
-import {forwardRef} from 'react'
+import type {GridProps as MuiGridProps} from '@mui/material'
+import {Button, ButtonProps as MuiButtonProps} from '@mui/material'
+import {type ElementType, forwardRef} from 'react'
 import GridItems from './grid-items'
 
 
 /* eslint-disable-next-line */
-export interface GridButtonsProps extends MuiGridProps {
-  items: (MuiButtonProps & {GridItemProps?: MuiGridProps})[]
+export interface GridButtonsProps<P = MuiButtonProps> extends MuiGridProps {
+  items: (P & {GridItemProps?: MuiGridProps})[]
+  ItemComponent?: ElementType<P>
 }
 
-export const GridButtons = forwardRef<any, GridButtonsProps>(function RefRenderFn(props, ref) {
-  const {items, ...rest} = props
-  return (
-    <GridItems
-      ref={ref}
-      items={
-        items.map(({GridItemProps, ...item}) => ({
-          children: <Button {...item} />,
-          ...GridItemProps,
-        }))
-      }
-      {...rest}
-    />
-  )
-})
+export const GridButtons = forwardRef<any, GridButtonsProps<any>>(
+  function RefRenderFn(props, ref) {
+    const {items, ItemComponent = Button, ...rest} = props
+    return (
+      <GridItems
+        ref={ref}
+        items={
+          items.map(({GridItemProps, ...item}) => ({
+            children: <ItemComponent {...item} />,
+            ...GridItemProps,
+          }))
+        }
+        {...rest}
+      />
+    )
+  },
+)
 
 GridButtons.displayName = 'GridButtons'
 GridButtons.defaultProps = {
   items: [],
+  ItemComponent: Button,
 }
 
 export default GridButtons

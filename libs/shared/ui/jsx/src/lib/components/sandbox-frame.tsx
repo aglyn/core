@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
+import type {InferElementTypeProps} from '@aglyn/shared-data-types'
 import {jssPreset, StylesProvider, useTheme} from '@aglyn/shared-feature-themes'
 
-import {create, Jss, JssOptions} from 'jss'
+import {create, type Jss, type JssOptions} from 'jss'
 import rtl from 'jss-rtl'
 import React, {
   Children,
@@ -25,16 +26,18 @@ import React, {
   forwardRef,
   Fragment,
   isValidElement,
+  type ReactElement,
   useCallback,
   useMemo,
   useRef,
   useState,
 } from 'react'
-import ReactFrameComponent, {FrameComponentProps} from 'react-frame-component'
+import ReactFrameComponent from 'react-frame-component'
 
 import useCombinedRefs from '../hooks/use-combined-refs'
 
 
+export type FrameComponentProps = InferElementTypeProps<typeof ReactFrameComponent>
 export type SandboxFrameDocument = HTMLIFrameElement['contentDocument']
 export type SandboxFrameWindow = HTMLIFrameElement['contentWindow']
 type State = {
@@ -46,12 +49,12 @@ type State = {
 }
 
 /* eslint-disable-next-line */
-export interface SandboxFrameProps
-  extends Omit<FrameComponentProps, 'contentDidMount' | 'contentDidUpdate'> {
+export interface SandboxFrameProps extends Omit<FrameComponentProps, 'contentDidMount' | 'contentDidUpdate'> {
   onContentDidMount?: (state: State) => void
   onContentDidUpdate?: (state: State) => void
   jssPlugins?: JssOptions['plugins']
   baseStyles?: string
+  title?: ReactElement
 }
 
 /**
@@ -84,7 +87,7 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(fun
   const head = useMemo(
     () => (
       <Fragment>
-        <title>{title}</title>
+        {title && <title>{title}</title>}
         {/* JSS Insertion Point */}
         <style
           ref={styleRef}

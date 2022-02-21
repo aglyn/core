@@ -15,12 +15,10 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
 import {GridItems, type GridItemsProps} from '@aglyn/shared-ui-jsx'
 import {mdiCogOutline, MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_s, copy} from '@aglyn/shared-util-tools'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
+import {Box, Container, Typography} from '@mui/material'
 import type {ReactNode} from 'react'
 import {isElement} from 'react-is'
 // import {type CurrentUserContextType} from '../contexts/current-user-context'
@@ -37,14 +35,6 @@ const getHeader = (first, second) => (
   </span>
 )
 
-const StyledNavBarSpacer = styled('div', {
-  name: 'NavBarSpacer',
-})({
-  display: 'flex',
-  width: '100%',
-  height: 96,
-})
-
 export interface ConsoleLayoutProps extends MainLayoutProps {
   ContentGridItemsProps?: GridItemsProps
   items?: GridItemsProps['items']
@@ -52,8 +42,8 @@ export interface ConsoleLayoutProps extends MainLayoutProps {
     icon?: MdiIconProps | ReactNode
     children?: ReactNode
   }
-  aggregatedPageMeta: any//AggregatedPageMeta
-  currentUserContext: any//CurrentUserContextType
+  aggregatedPageMeta?: any//AggregatedPageMeta
+  currentUserContext?: any//CurrentUserContextType
 }
 
 function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
@@ -68,19 +58,19 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
     currentUserContext,
     ...rest
   } = props
-  const {pageMeta, overrideMeta, pageAncestors} = aggregatedPageMeta
+  const {pageMeta, overrideMeta, pageAncestors} = aggregatedPageMeta || {}
   const title = titleProp ?? (overrideMeta ?? pageMeta)?.title
-  const [rootArea, mainArea, subArea] = pageAncestors
+  const [rootArea, mainArea, subArea] = pageAncestors || []
   const header = {
     icon: {path: mainArea?.icon},
     children: getHeader(
-      mainArea ? mainArea.name.default : rootArea?.name.default,
-      subArea ? subArea.name.plural : (overrideMeta ?? pageMeta)?.name.default,
+      mainArea ? mainArea?.name?.default : rootArea?.name?.default,
+      subArea ? subArea?.name?.plural : (overrideMeta ?? pageMeta)?.name?.default,
     ),
     ...headerProp,
   }
-  const breadcrumbItems = (/*breadcrumbItemsProp ??*/ (copy(pageAncestors) as any[]))
-    .concat(overrideMeta ?? pageMeta)
+  const breadcrumbItems = (/*breadcrumbItemsProp ??*/ (copy(pageAncestors || []) as any[]))
+    .concat((overrideMeta ?? pageMeta) || [])
     .map((item: any) => ({
       href: _s(item?.id),
       children: item?.name.plural,
@@ -121,7 +111,14 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
       {...rest}
     >
       <header>
-        <StyledNavBarSpacer />
+        <Box
+          component={'div'}
+          sx={{
+            display: 'flex',
+            width: '100%',
+            height: 96,
+          }}
+        />
         <Container maxWidth={CONTENT_MAX_WIDTH}>
           <Typography component="h1" variant="h4">
             {!header?.icon || isElement(header.icon) ? header.icon : (
@@ -139,7 +136,11 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
       <main /*className={classes.content}*/>
         <Container maxWidth={CONTENT_MAX_WIDTH}>
           {items || ContentGridItemsProps ? (
-            <GridItems items={items} spacing={3} {...ContentGridItemsProps} />
+            <GridItems
+              items={items}
+              spacing={3}
+              {...ContentGridItemsProps}
+            />
           ) : null}
           {children}
         </Container>

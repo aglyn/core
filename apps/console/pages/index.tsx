@@ -21,6 +21,7 @@ import {mdiBug, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import styled from '@emotion/styled'
 import {useAuthState} from 'react-firebase-hooks/auth'
 import LayoutAuthenticatedComponent from '../layouts/layout-authenticated.component'
+import LayoutConsoleComponent from '../layouts/layout-console.component'
 
 
 const firebaseAuth = getFirebaseAuth()
@@ -37,7 +38,9 @@ export function Index() {
    * Note: The corresponding styles are in the ./index.@emotion/styled file.
    */
   return (
-    <>
+    <LayoutConsoleComponent
+      tabBarTitle={'Dashboard'}
+    >
       <StyledPage>
         <h2>Resources &amp; Tosols</h2>
         <p>Thank you for using and showing some ♥ for Nx.</p>
@@ -79,7 +82,7 @@ export function Index() {
           ]}
         />
       </StyledPage>
-    </>
+    </LayoutConsoleComponent>
   )
 }
 Index.displayName = 'Page:Index'

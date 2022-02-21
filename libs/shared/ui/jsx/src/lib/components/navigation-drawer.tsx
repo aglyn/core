@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import Toolbar, {ToolbarProps as MuiToolbarProps} from '@mui/material/Toolbar'
 import clsx from 'clsx'
 import {forwardRef, HTMLAttributes, ReactNode, Ref, useRef} from 'react'
 import useCombinedRefs from '../hooks/use-combined-refs'
-import ElevationScroll from './elevation-scroll'
+import ElevateOnScroll from './elevate-on-scroll'
 
 
 const classKeys = generateComponentClassKeys('AglynNavigationDrawer', [
@@ -113,7 +113,7 @@ export const NavigationDrawer = forwardRef<any, NavigationDrawerProps>(
 
     return (
       <Drawer ref={ref} anchor="right" className={className} {...rest}>
-        <ElevationScroll target={localContentRef.current}>
+        <ElevateOnScroll scrollTrigger={{target: localContentRef.current}}>
           <AppBar
             color="default"
             position="relative"
@@ -136,7 +136,7 @@ export const NavigationDrawer = forwardRef<any, NavigationDrawerProps>(
               </Right>
             </Toolbar>
           </AppBar>
-        </ElevationScroll>
+        </ElevateOnScroll>
         <Content
           ref={useCombinedRefs(localContentRef, contentRef)}
           {...ContentProps}

@@ -32,7 +32,11 @@ export const consoleOverrides: ThemeOptions['components'] = {
       color: 'secondary',
     },
     // color: 'inherit', // Default color to inherit
-    styleOverrides: {root: {padding: 8}},
+    styleOverrides: {
+      root: ({theme}) => ({
+        padding: theme.spacing(1),
+      }),
+    },
   },
   MuiLink: {
     defaultProps: {
@@ -40,7 +44,7 @@ export const consoleOverrides: ThemeOptions['components'] = {
     },
     styleOverrides: {
       root: {
-        '&[disabled]': {
+        '&[disabled], &.disabled': {
           pointerEvents: 'none',
           textDecoration: 'none',
           filter: 'grayscale(1) opacity(0.65)',
@@ -54,7 +58,7 @@ export const consoleOverrides: ThemeOptions['components'] = {
     },
     styleOverrides: {
       root: {
-        '&a[disabled]': {
+        '&a[disabled], &.disabled': {
           pointerEvents: 'none',
           textDecoration: 'none',
           filter: 'grayscale(1) opacity(0.65)',
@@ -65,6 +69,16 @@ export const consoleOverrides: ThemeOptions['components'] = {
   MuiTooltip: {
     defaultProps: {
       arrow: true,
+    },
+  },
+  MuiToolbar: {
+    styleOverrides: {
+      root: ({theme}) => ({
+        [theme.breakpoints.up('sm')]: {
+          paddingLeft: theme.spacing(2),
+          paddingRight: theme.spacing(2),
+        },
+      }),
     },
   },
 }

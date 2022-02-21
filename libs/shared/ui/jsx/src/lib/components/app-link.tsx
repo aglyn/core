@@ -77,9 +77,6 @@ const classKey = generateComponentClassKeys('AppLink', [
  * componentVariant === 'naked' = NextLink
  * componentVariant === 'button' = MuiButton
  * componentVariant === any = MuiLink
- *
- * @param {AppLinkProps} props
- * @return {JSX.Element}
  */
 const AppLink = forwardRef(
   function RefRenderFn<T extends AppLinkVariant>(props: AppLinkProps<T>, ref) {
@@ -136,7 +133,8 @@ const AppLink = forwardRef(
     )
   },
 )
-AppLink.displayName = 'Link'
+AppLink.displayName = 'AppLink'
 
+type AppLink = typeof AppLink
 export {AppLink}
 export default AppLink

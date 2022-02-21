@@ -278,8 +278,8 @@ function MainLayoutRaw(props: MainLayoutProps) {
       const prevHref = (_isObj(prev.href) ? prev.href.paths : prev.href) as string
 
       return currentHref.length > prevHref.length ? current : prev
-    }).href ?? ''
-    : ''
+    }).href ?? false
+    : false
 
   const buildIconButton = ({avatar, icon, children, ...rest}, i) => (
     <IconButton key={rest.id ?? rest['href'] ?? i} color="inherit" {...rest}>
@@ -347,7 +347,7 @@ function MainLayoutRaw(props: MainLayoutProps) {
                 indicatorColor="secondary"
                 scrollButtons="auto"
                 textColor="inherit"
-                value={tabValue}
+                value={tabValue ?? false}
                 variant="scrollable"
               >
                 {tabBarTitle && <TabBarTitle>{tabBarTitle}</TabBarTitle>}
@@ -394,10 +394,10 @@ function MainLayoutRaw(props: MainLayoutProps) {
             <StyledRight>
               <GridButtons
                 spacing={1}
+                ItemComponent={AppLink}
                 items={footerNavItems.map((i) => ({
                   size: 'small',
-                  component: AppLink,
-                  linkType: 'button',
+                  componentVariant: 'button',
                   ...i,
                 }))}
               />

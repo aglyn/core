@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-import MuiMenu, {MenuProps as MuiMenuProps} from '@mui/material/Menu'
-import MuiMenuItem, {MenuItemProps as MuiMenuItemProps} from '@mui/material/MenuItem'
-import React, {
-  Children,
-  cloneElement,
-  forwardRef,
-  HTMLAttributes,
-  MouseEvent,
-  useState,
-} from 'react'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import {
+  Box,
+  type BoxProps,
+  Menu as MuiMenu,
+  MenuItem as MuiMenuItem,
+  type MenuItemProps as MuiMenuItemProps,
+  type MenuProps as MuiMenuProps,
+} from '@mui/material'
+import {Children, cloneElement, forwardRef, type MouseEvent, useState} from 'react'
 
 
 const ITEM_HEIGHT = 48
@@ -41,14 +41,14 @@ const initialState: State = {
 }
 
 /* eslint-disable-next-line */
-export interface MenuProps extends HTMLAttributes<HTMLDivElement> {
+export interface MenuProps extends BoxProps {
   items: Array<MuiMenuItemProps>
   context?: boolean
   MenuProps?: Partial<MuiMenuProps>
 }
 
 export const Menu = forwardRef<any, MenuProps>(function RefRenderFn(props, ref) {
-  const {children, items, context, className, MenuProps, ...rest} = props
+  const {children, items, context, className, sx, MenuProps, ...rest} = props
 
   const [state, setState] = useState<State>(initialState)
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -67,10 +67,13 @@ export const Menu = forwardRef<any, MenuProps>(function RefRenderFn(props, ref) 
   const cloned = cloneElement(child as any, {onClick: handleClick})
 
   return (
-    <div
+    <Box
+      component={'div'}
       ref={ref}
       onContextMenu={handleClick}
-      style={{cursor: context ? 'context-menu' : undefined}}
+      sx={mergeSxProps({
+        cursor: context ? 'context-menu' : undefined,
+      }, sx)}
       {...(context ? {onContextMenu: handleClick} : {})}
       {...rest}
     >
@@ -128,7 +131,7 @@ export const Menu = forwardRef<any, MenuProps>(function RefRenderFn(props, ref) 
           />
         ))}
       </MuiMenu>
-    </div>
+    </Box>
   )
 })
 

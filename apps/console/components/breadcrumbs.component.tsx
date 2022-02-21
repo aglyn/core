@@ -20,9 +20,10 @@ import {AppLink, type AppLinkProps} from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
 import {_isLength} from '@aglyn/shared-util-guards'
 import {yes} from '@aglyn/shared-util-tools'
-import MuiBreadcrumbs, {
+import {
+  Breadcrumbs as MuiBreadcrumbs,
   type BreadcrumbsProps as MuiBreadcrumbsProps,
-} from '@mui/material/Breadcrumbs'
+} from '@mui/material'
 import Typography from '@mui/material/Typography'
 import clsx from 'clsx'
 import {forwardRef, useMemo} from 'react'
@@ -63,13 +64,13 @@ const StyledBreadcrumbs = styled(MuiBreadcrumbs, {
   },
 }))
 
-export interface ItemProps extends AppLinkProps<'text'> {
+export interface BreadcrumbItemProps extends AppLinkProps<'text'> {
   icon?: MdiIconProps
   disabled?: boolean
 }
 
 export interface BreadcrumbsProps extends MuiBreadcrumbsProps {
-  items: ItemProps[]
+  items: BreadcrumbItemProps[]
   centerIcons?: boolean
 }
 
@@ -78,31 +79,30 @@ const BreadcrumbsComponent = forwardRef<any, BreadcrumbsProps>(
     const {centerIcons, children, items, ...rest} = props
 
     const MemoedItem = useMemo(() => {
-      const Component = forwardRef<any, ItemProps & {isLast: boolean}>(function RefRenderFn(
-        itemProps,
-        ref,
-      ) {
-        const {icon, className, isLast, disabled, ...item} = itemProps
-        const isDisabled = yes(disabled || isLast)
-        const itemClass = clsx(
-          classKeys.item,
-          {
-            [classKeys.disabled]: isDisabled,
-            [classKeys.centered]: Boolean(centerIcons),
-            [classKeys.last]: Boolean(isLast),
-          },
-          className,
-        )
+      const Component = forwardRef<any, BreadcrumbItemProps & {isLast: boolean}>(
+        function RefRenderFn(itemProps, ref) {
+          const {icon, className, isLast, disabled, ...item} = itemProps
+          const isDisabled = yes(disabled || isLast)
+          const itemClass = clsx(
+            classKeys.item,
+            {
+              [classKeys.disabled]: isDisabled,
+              [classKeys.centered]: Boolean(centerIcons),
+              [classKeys.last]: Boolean(isLast),
+            },
+            className,
+          )
 
-        const ItemComponent = isLast ? Typography : AppLink
+          const ItemComponent = isLast ? Typography : AppLink
 
-        return (
-          <ItemComponent ref={ref as any} className={itemClass} {...item}>
-            {icon ? <MdiIcon className={classKeys.icon} {...icon} /> : null}
-            {item.children}
-          </ItemComponent>
-        )
-      })
+          return (
+            <ItemComponent ref={ref as any} className={itemClass} {...item}>
+              {icon ? <MdiIcon className={classKeys.icon} {...icon} /> : null}
+              {item.children}
+            </ItemComponent>
+          )
+        },
+      )
       Component.displayName = 'BreadcrumbItem'
       return Component
     }, [centerIcons])

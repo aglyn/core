@@ -24,13 +24,13 @@ import type {ContinueRouteData} from '../types'
 
 
 export function decodeContinueQuery(query: string): ContinueRouteData {
-  return JSON.parse(
+  return JSON.parse(JSON.stringify(
     base64Decode(
       decodeURIComponent(
         query,
       ),
     ),
-  )
+  ))
 }
 
 export function useContinueQueryDecoded(): [ContinueRouteData, OrUndef<string[] | string>] {
