@@ -16,9 +16,9 @@
  */
 
 
-import {IS_PRODUCTION} from '@aglyn/shared-data-enums'
+import {IS_DEVELOPMENT, IS_PRODUCTION} from '@aglyn/shared-data-enums'
 import {type FirebaseApp, initializeApp} from 'firebase/app'
-import {type AppCheck, initializeAppCheck, ReCaptchaV3Provider} from 'firebase/app-check'
+import {type AppCheck} from 'firebase/app-check'
 import {
   type Auth,
   type AuthProvider,
@@ -45,7 +45,9 @@ export const getFirebaseAuth = (app?: FirebaseApp) => {
   if (typeof window !== 'undefined') {
     if (firebaseAuth && !app) return firebaseAuth
     const auth = getAuth(app || firebaseApp)
-    connectAuthEmulator(auth, 'http://localhost:9099')
+    if (IS_DEVELOPMENT) {
+      connectAuthEmulator(auth, 'http://localhost:9099')
+    }
     if (!firebaseAuth && !app) {
       firebaseAuth = auth
     }
@@ -58,7 +60,9 @@ export const initializeFirebaseAuth = (app?: FirebaseApp) => {
   const auth = initializeAuth(app || firebaseApp, {
     persistence: browserLocalPersistence,
   })
-  connectAuthEmulator(auth, 'http://localhost:9099')
+  if (IS_DEVELOPMENT) {
+    connectAuthEmulator(auth, 'http://localhost:9099')
+  }
   if (!firebaseAuth && !app) {
     firebaseAuth = auth
   }
@@ -69,20 +73,20 @@ export const initializeFirebaseAuth = (app?: FirebaseApp) => {
 
 export const initializeFirebaseAppCheck = (app?: FirebaseApp) => {
   // if (typeof window !== 'undefined' && (app || firebaseApp)) {
-  if (IS_PRODUCTION) {
-    const check = initializeAppCheck(app || firebaseApp, {
-      // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
-      // key is the counterpart to the secret key you set in the Firebase console.
-      provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECPATCHA_PUBLIC_KEY),
-      // Optional argument. If true, the SDK automatically refreshes App Check
-      // tokens as needed.
-      isTokenAutoRefreshEnabled: true,
-    })
-    if (!appCheck && !app) {
-      appCheck = check
-    }
-    return check
-  }
+  // if (IS_PRODUCTION) {
+  //   const check = initializeAppCheck(app || firebaseApp, {
+  //     // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
+  //     // key is the counterpart to the secret key you set in the Firebase console.
+  //     provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECPATCHA_PUBLIC_KEY),
+  //     // Optional argument. If true, the SDK automatically refreshes App Check
+  //     // tokens as needed.
+  //     isTokenAutoRefreshEnabled: true,
+  //   })
+  //   if (!appCheck && !app) {
+  //     appCheck = check
+  //   }
+  //   return check
+  // }
   // }
   return null
 }
@@ -127,17 +131,20 @@ export const initializeFirebaseAppCheck = (app?: FirebaseApp) => {
     firebaseAuth = initializeAuth(firebaseApp, {
       persistence: browserLocalPersistence,
     })
-    connectAuthEmulator(firebaseAuth, 'http://localhost:9099')
+
+    if (IS_DEVELOPMENT) {
+      connectAuthEmulator(firebaseAuth, 'http://localhost:9099')
+    }
 
     if (IS_PRODUCTION) {
-      appCheck = initializeAppCheck(firebaseApp, {
-        // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
-        // key is the counterpart to the secret key you set in the Firebase console.
-        provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECPATCHA_PUBLIC_KEY),
-        // Optional argument. If true, the SDK automatically refreshes App Check
-        // tokens as needed.
-        // isTokenAutoRefreshEnabled: true,
-      })
+      // appCheck = initializeAppCheck(firebaseApp, {
+      //   // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
+      //   // key is the counterpart to the secret key you set in the Firebase console.
+      //   provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECPATCHA_PUBLIC_KEY),
+      //   // Optional argument. If true, the SDK automatically refreshes App Check
+      //   // tokens as needed.
+      //   // isTokenAutoRefreshEnabled: true,
+      // })
     }
   }
 })()
