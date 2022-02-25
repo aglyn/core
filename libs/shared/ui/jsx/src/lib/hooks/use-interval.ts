@@ -53,7 +53,7 @@ export function useInterval(
       interval = setInterval(handler, delay, ...args)
       return () => clearInterval(interval)
     }
-  }, [delay, count])
+  }, [delay, count, args])
 }
 
 export default useInterval

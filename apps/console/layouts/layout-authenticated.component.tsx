@@ -16,14 +16,12 @@
  */
 
 import {getFirebaseAuth} from '@aglyn/shared-feature-fbclient'
-import {AglynSvgLogo, LoadingLayoutComponent, useLoading} from '@aglyn/shared-ui-jsx'
+import {LoadingLayoutComponent, useLoading} from '@aglyn/shared-ui-jsx'
 import {useContinueQueryEncoded} from '@aglyn/shared-util-next'
-import CircularProgress from '@mui/material/CircularProgress'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
 import {useRouter} from 'next/router'
 import {type ReactNode, useEffect} from 'react'
 import {useAuthState} from 'react-firebase-hooks/auth'
+import SecureLoadingOverlayComponent from '../components/secure-loading-overlay.component'
 
 
 const firebaseAuth = getFirebaseAuth()
@@ -57,40 +55,14 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
           dequeueLoading && dequeueLoading()
         })
     }
-  }, [user, authLoading, continueRoute])
+  }, [user, authLoading, continueRoute, queueLoading, router])
 
 
   return (
     <>
-      {authLoading || !user ? (
-        <Stack
-          component="div"
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          spacing={2}
-          sx={{
-            width: `100vw`,
-            height: `100vh`,
-            bgcolor: 'primary.main',
-            color: 'primary.contrastText',
-          }}
-        >
-          <AglynSvgLogo sx={{width: 280, maxWidth: 1}} color="secondary" />
-          <CircularProgress color="secondary" />
-          <Typography
-            component="div"
-            variant="overline"
-            sx={{mt: 2, fontWeight: 'fontWeightBold'}}
-          >
-            {'One moment...'}
-          </Typography>
-        </Stack>
-      ) : (
-        <>
-          {children}
-        </>
-      )}
+      {authLoading || !user
+        ? (<SecureLoadingOverlayComponent />)
+        : children}
     </>
   )
 }

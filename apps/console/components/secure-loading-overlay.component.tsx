@@ -1,0 +1,63 @@
+/**
+ * @license
+ * Copyright 2022 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
+import {AglynSvgLogo} from '@aglyn/shared-ui-jsx'
+import {Stack, StackProps} from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
+import {forwardRef} from 'react'
+import LoadingTextComponent from './loading-text.component'
+
+
+export interface SecureLoadingOverlayProps extends StackProps {}
+
+const SecureLoadingOverlayComponent = forwardRef<any, SecureLoadingOverlayProps>(
+  function RefRenderFn(props, ref) {
+    const {sx, ...rest} = props
+    return (
+      <Stack
+        ref={ref}
+        component="div"
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        spacing={2}
+        sx={mergeSxProps({
+          width: `100vw`,
+          height: `100vh`,
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
+        }, sx)}
+        {...rest}
+      >
+        <AglynSvgLogo sx={{width: 280, maxWidth: 1}} color="secondary" />
+        <CircularProgress color="secondary" />
+        <LoadingTextComponent
+          component="div"
+          variant="overline"
+          sx={{mt: 2, fontWeight: 'fontWeightBold'}}
+        >
+          {'One moment'}
+        </LoadingTextComponent>
+      </Stack>
+    )
+  }
+)
+SecureLoadingOverlayComponent.displayName = 'SecureLoadingOverlayComponent'
+
+export {SecureLoadingOverlayComponent}
+export default SecureLoadingOverlayComponent

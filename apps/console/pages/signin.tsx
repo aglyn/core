@@ -172,8 +172,16 @@ function SignIn() {
             {'Or sign in with'}
           </Divider>
 
-          <Stack direction="column" justifyContent="center" alignItems="stretch" spacing={1}>
-            <Button startIcon={<MdiIcon path={mdiGoogle.path} />} onClick={handleGoogleButtonClick}>
+          <Stack
+            direction="column"
+            justifyContent="center"
+            alignItems="stretch"
+            spacing={1}
+          >
+            <Button
+              startIcon={<MdiIcon path={mdiGoogle.path} />}
+              onClick={handleGoogleButtonClick}
+            >
               {'Google'}
             </Button>
           </Stack>

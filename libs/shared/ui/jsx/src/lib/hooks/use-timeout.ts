@@ -39,7 +39,7 @@ export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]
       timeout = setTimeout(handler, delay, ...args)
       return () => clearTimeout(timeout)
     }
-  }, [delay])
+  }, [args, delay])
 }
 
 export default useTimeout
