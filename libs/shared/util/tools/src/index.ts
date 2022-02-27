@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export * from './lib/_s'
+export * from './lib/str'
 export * from './lib/apply-mixins'
 export * from './lib/copy'
 export * from './lib/crud'

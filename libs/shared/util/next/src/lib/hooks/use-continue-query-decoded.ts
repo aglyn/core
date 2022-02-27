@@ -15,32 +15,55 @@
  * limitations under the License.
  */
 
-import type {OrUndef} from '@aglyn/shared-data-types'
 import {_isArr} from '@aglyn/shared-util-guards'
-import {base64Decode} from '@aglyn/shared-util-tools'
+import {base64Decode, str} from '@aglyn/shared-util-tools'
 import {useRouter} from 'next/router'
-import {useMemo} from 'react'
+import {useCallback, useMemo} from 'react'
+import type {UrlObject} from 'url'
 import type {ContinueRouteData} from '../types'
 
 
-export function decodeContinueQuery(query: string): ContinueRouteData {
-  return JSON.parse(JSON.stringify(
-    base64Decode(
-      decodeURIComponent(
-        query,
-      ),
-    ),
-  ))
-}
+export type UseContinueQueryDecodedRoutePusher = (
+  url?: UrlObject | string,
+  as?: UrlObject | string,
+  options?: {shallow?: boolean, locale?: string | false, scroll?: boolean}
+) => Promise<boolean>
 
-export function useContinueQueryDecoded(): [ContinueRouteData, OrUndef<string[] | string>] {
+export type UseContinueQueryDecodedResponse = [
+  ContinueRouteData,
+  UseContinueQueryDecodedRoutePusher
+]
+
+export function useContinueQueryDecoded(): UseContinueQueryDecodedResponse {
   const router = useRouter()
   const {continue: query} = router.query
 
-  return useMemo(() => {
-    const href = (_isArr(query) ? query[0] : query) || ''
-    return [decodeContinueQuery(href), query]
+  const continueRouteData = useMemo(() => {
+    const continueQuery = _isArr(query) ? query[0] : query
+    return useContinueQueryDecoded.decodeContinueQuery(continueQuery || '')
   }, [query])
+
+  const pushContinue = useCallback((
+    url: UrlObject | string = '/',
+    as?: UrlObject | string,
+    options?: {shallow?: boolean, locale?: string | false, scroll?: boolean}
+  ): Promise<boolean> => {
+    const {href, asPath} = continueRouteData
+    return router.push(href || url, href && asPath || as, options)
+  }, [router, continueRouteData])
+
+
+  return useMemo(() => {
+    return [continueRouteData, pushContinue]
+  }, [continueRouteData, pushContinue])
+}
+
+useContinueQueryDecoded.decodeContinueQuery = (query: string): ContinueRouteData => {
+  return JSON.parse(JSON.stringify(
+    base64Decode(
+      decodeURIComponent(str(query)),
+    ),
+  ))
 }
 
 export default useContinueQueryDecoded

@@ -17,7 +17,7 @@
 
 import {useLoading} from '@aglyn/shared-ui-jsx'
 import {mdiFilterVariant, MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import {_s, objectRemap} from '@aglyn/shared-util-tools'
+import {objectRemap, str} from '@aglyn/shared-util-tools'
 import {createUid} from '@aglyn/shared-util-vendor'
 import IconButton from '@mui/material/IconButton'
 import {useRouter} from 'next/router'
@@ -81,7 +81,7 @@ function AreaManageViewRaw(props: AreaManageViewProps) {
   }
   // Handle table data row click
   const handleRowClick = (p) => {
-    handleDocumentOpen(_s(p.row.id))
+    handleDocumentOpen(str(p.row.id))
   }
   // Close Document
   const removeDocumentIdFromUrl = useCallback(async () => {

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-export * from './types/icon'
+export * from './types'
+export * from './constants'
+export * from '../../generated/6.5.95/mdi-icons'
 
-export * from './icons'
-export {DEFAULT_ICON} from './constants'
-
-export {convertIdToModuleName} from './utils/convert-id-to-module-name'
-export {getMdiAllIcons} from './utils/get-mdi-all-icons'
-export {getMdiIconFromId} from './utils/get-mdi-icon-from-id'
+export * from './utils/convert-id-to-module-name'
+export * from './utils/get-mdi-all-icons'
+export * from './utils/get-mdi-icon-from-id'
+export * from './utils/handle-icon-not-found'

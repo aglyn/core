@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {MdiIcons} from '../internal'
-import type {Icon, IconId} from '../types/icon'
+import {MdiIcons} from '../constants'
+import type {Icon, IconId} from '../types'
 
 
 export function getMdiAllIcons(): Map<IconId, Icon> {

@@ -20,46 +20,66 @@ import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {BackgroundImageComponent, type BackgroundImageComponentProps} from '@aglyn/shared-ui-jsx'
 import {useContinueQueryDecoded} from '@aglyn/shared-util-next'
 import {useRouter} from 'next/router'
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import {useAuthState} from 'react-firebase-hooks/auth'
 
 
 const firebaseAuth = getFirebaseAuth()
 
 export interface LayoutRequestAuthenticationProps extends Partial<BackgroundImageComponentProps> {
-
+  requireEmailVerification?: boolean
 }
 
-function LayoutRequestAuthenticationComponent(props: LayoutRequestAuthenticationProps) {
+function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps) {
   const {
     children,
     sx,
+    requireEmailVerification,
     ...rest
   } = props
   const router = useRouter()
-  const [user] = useAuthState(firebaseAuth)
-  const [{href, asPath}] = useContinueQueryDecoded()
+  const [user, userAuthLoading] = useAuthState(firebaseAuth)
+  const [, pushContinue] = useContinueQueryDecoded()
+  const [redirecting, setRedirecting] = useState(false)
 
   useEffect(() => {
-    if (user) {
-      href
-        ? router.push(href, asPath || undefined)
-        : router.push('/')
+    if (!user || userAuthLoading || redirecting) return void 0
+
+    if (!requireEmailVerification || user.emailVerified) {
+      return void pushContinueOrHome()
     }
-  }, [href, asPath, router, user])
+
+    return void 0
+
+    async function pushContinueOrHome() {
+      setRedirecting(true)
+      await pushContinue('/')
+        .then((success) => {
+          if (!success) {
+            console.warn('Redirecting following user auth incomplete')
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+        .finally(() => {
+          setRedirecting(false)
+        })
+    }
+  }, [user, userAuthLoading, redirecting, pushContinue, requireEmailVerification])
 
   return (
     <BackgroundImageComponent
       url="/_static/images/backgrounds/patterns/abstract-wave-lines.svg"
       sx={mergeSxProps({
         minHeight: '100vh',
-        bgcolor: 'primary.dark',
+        bgcolor: 'background.default',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        p: [2, 3],
-        color: 'common.white',
+        p: {p: 2, md: 3},
+        color: 'text.primary',
       }, sx)}
       {...rest}
     >
@@ -69,7 +89,7 @@ function LayoutRequestAuthenticationComponent(props: LayoutRequestAuthentication
     </BackgroundImageComponent>
   )
 }
-LayoutRequestAuthenticationComponent.displayName = 'LayoutRequestAuthenticationComponent'
+LayoutUnauthenticatedComponent.displayName = 'LayoutUnauthenticatedComponent'
 
-export {LayoutRequestAuthenticationComponent}
-export default LayoutRequestAuthenticationComponent
+export {LayoutUnauthenticatedComponent}
+export default LayoutUnauthenticatedComponent

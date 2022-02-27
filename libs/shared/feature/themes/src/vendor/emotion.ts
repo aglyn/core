@@ -15,20 +15,21 @@
  * limitations under the License.
  */
 
-import createCache, {type Options as CreateEmotionCacheOptions} from '@emotion/cache'
-import {CacheProvider, type EmotionCache} from '@emotion/react'
-import createInstance, {type EmotionServer} from '@emotion/server/create-instance'
+import emotionCache, {
+  type EmotionCache,
+  type Options as CreateEmotionCacheOptions,
+} from '@emotion/cache'
 
 
-export {CacheProvider, CreateEmotionCacheOptions, EmotionCache, EmotionServer}
+export type {CreateEmotionCacheOptions, EmotionCache}
+
+export * from '@emotion/react'
+
+export {default as createEmotionServer, type EmotionServer} from '@emotion/server/create-instance'
 
 export function createEmotionCache(options?: CreateEmotionCacheOptions): EmotionCache {
-  return createCache({
+  return emotionCache({
     key: 'css',
     ...options,
   })
-}
-
-export function createEmotionServer(cache: EmotionCache): EmotionServer {
-  return createInstance(cache)
 }

@@ -21,7 +21,21 @@ import {useMemo} from 'react'
 import type {ContinueRouteData} from '../types'
 
 
-export function encodeContinueQuery(query: ContinueRouteData) {
+export function useContinueQueryEncoded() {
+  const router = useRouter()
+
+  return useMemo(() => {
+    const href = typeof location !== 'undefined'
+        ? location?.href
+        : router.pathname,
+      pathname = router.pathname,
+      asPath = router.asPath
+
+    return useContinueQueryEncoded.encodeContinueQuery({href})
+  }, [router])
+}
+
+useContinueQueryEncoded.encodeContinueQuery = (query: ContinueRouteData): string => {
   return encodeURIComponent(
     base64Encode(
       JSON.stringify(
@@ -29,19 +43,6 @@ export function encodeContinueQuery(query: ContinueRouteData) {
       ),
     ),
   )
-}
-
-export function useContinueQueryEncoded() {
-  const router = useRouter()
-  const href = typeof location !== 'undefined'
-      ? location?.href
-      : router.pathname,
-    pathname = router.pathname,
-    asPath = router.asPath
-
-  return useMemo(() => {
-    return encodeContinueQuery({href})
-  }, [href, pathname, asPath])
 }
 
 export default useContinueQueryEncoded

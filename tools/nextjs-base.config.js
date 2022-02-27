@@ -89,6 +89,24 @@ const AGLYN_CONFIG = {
     analyzeBundle: process.env.NEXT_ANALYZE_BUNDLE === 'true' && !IS_PRODUCTION,
     analyzerOptions: {},
   },
+  compiler: {
+    /**
+     * Enables automatically removing JSX properties. These are often used for
+     * testing. Similar to babel-plugin-react-remove-properties.
+     *
+     * Note: The regexes defined here are processed in Rust so the syntax is
+     * different from {@link RegExp | JavaScript `RegEx`}
+     *
+     * @example reactRemoveProperties: {properties: ['^data-custom$']}
+     * @example reactRemoveProperties: true || false
+     * @see {@link https://docs.rs/regex | Rust Regex Docs}
+     * @inheritDoc
+     */
+    reactRemoveProperties: {properties: ['^data-test']},
+
+    // ssr and displayName are configured by default
+    // styledComponents: true,
+  },
   // Next.js provides gzip compression to compress rendered content and static
   // files. In general, you will want to enable compression on a HTTP proxy like
   // nginx, to offload load from the Node.js process.
@@ -115,8 +133,6 @@ const AGLYN_CONFIG = {
     ignoreDuringBuilds: IS_PRODUCTION,
   },
   experimental: {
-    // ssr and displayName are configured by default
-    styledComponents: false,
     optimizeImages: IS_PRODUCTION,
     // optimizeCss: true,
     // Next.js can automatically create a standalone folder which copies only
@@ -240,9 +256,11 @@ function withAglyn(nextConfig = {}) {
       //   : userConfig.webpack5,
 
       generateBuildId: async () => {
-        return await typeof merged?.generateBuildId === 'function'
+        return await (
+          typeof merged?.generateBuildId === 'function'
           && merged.generateBuildId()
           || getCommitRef()
+        )
       },
 
       headers: async () => {
