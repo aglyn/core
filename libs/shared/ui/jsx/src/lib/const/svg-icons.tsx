@@ -119,7 +119,11 @@ export const AglynSvgIcon = styled(forwardRef<any, AglynSvgIconProps>(
           </clipPath>
         </defs>
         <g id="a" clipPath="url(#b)">
-          <rect width="24" height="24" className={aglynSvgIconClassKey.rectBg} />
+          <rect
+            width="24"
+            height="24"
+            className={aglynSvgIconClassKey.rectBg}
+          />
           <g transform="translate(3.128 2.629)">
             <g transform="translate(0 0.7)">
               <path
@@ -157,19 +161,23 @@ export const AglynSvgIcon = styled(forwardRef<any, AglynSvgIconProps>(
   border: !bordered ? undefined : `1px solid ${theme.palette.divider}`,
   [`& .${aglynSvgIconClassKey.rectBg}`]: {
     fill: 'currentColor',
-    color: rectBgColor ?? theme.palette.primary.main,
+    color: rectBgColor || (
+      theme.palette.mode === 'dark'
+        ? theme.palette.primary.light
+        : theme.palette.primary.main
+    ),
   },
   [`& .${aglynSvgIconClassKey.a1}`]: {
     fill: 'currentColor',
-    color: a1Color ?? theme.palette.secondary.main,
+    color: a1Color || theme.palette.secondary.main,
   },
   [`& .${aglynSvgIconClassKey.a2}`]: {
     fill: 'currentColor',
-    color: a2Color ?? theme.palette.tertiary.main,
+    color: a2Color || theme.palette.tertiary.main,
   },
   [`& .${aglynSvgIconClassKey.a3}`]: {
     fill: 'currentColor',
-    color: a3Color ?? theme.palette.primary.contrastText,
+    color: a3Color || theme.palette.primary.contrastText,
   },
 }))
 AglynSvgIcon.displayName = 'AglynSvgIcon'

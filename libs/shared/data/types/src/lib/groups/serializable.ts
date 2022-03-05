@@ -27,6 +27,6 @@ export type iJSONValue = iJSONPrimitive | iJSONMap | iJSONList
 export type iJSON = Dictionary<iJSONPrimitive | iJSONMap | iJSONList>
 
 /** Implements a toJSON method */
-export interface Serializable<T extends iJSON = any> {
+export interface Serializable<T = iJSON> {
   toJSON?(): T
 }

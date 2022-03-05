@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ export abstract class Crud<T = any> implements CrudModel<T> {
   has<K extends keyof T>(id: K): boolean { return Object.prototype.hasOwnProperty.call(this.model, id) }
 
   /** @inheritdoc */
-  del<K extends keyof T>(id: K): this {
+  delete<K extends keyof T>(id: K): this {
     delete this.model[id]
     return this
   }
