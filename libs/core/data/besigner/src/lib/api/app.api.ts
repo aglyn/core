@@ -25,12 +25,9 @@ import {
   type AppUUN,
   DEFAULT_APP_UUN,
 } from '@aglyn/core-data-framework'
-import {_isStrEmpty} from '@aglyn/shared-util-guards'
-import {BesignerAppController} from '../controllers/besigner-app.controller'
-import {
-  type BesignerAppOptions,
-  type IBesignerAppController,
-} from '../controllers/besigner-app.types'
+import {_isObj, _isStrEmpty} from '@aglyn/shared-util-guards'
+import BesignerAppController from '../controllers/besigner-app.controller'
+import type {BesignerAppOptions, IBesignerAppController} from '../controllers/besigner-app.types'
 
 
 export function getAllBesignerApps(): IBesignerAppController[] {
@@ -79,7 +76,8 @@ export function initializeBesignerApp(opts?: BesignerAppOptions): IBesignerAppCo
 }
 
 export function _validateBesignerAppArg(app: IBesignerAppController): void {
-  if (!(app as IBesignerAppController) || !(app instanceof BesignerAppController)) {
+  if (!(app as IBesignerAppController) || !_isObj(app) /*!(app instanceof BesignerAppController)*/) {
+    console.warn('Not instanceof BesignerAppController', app)
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_INSTANCE, {appName: app?.getName?.()})
   }
   if (app['deleted']) {

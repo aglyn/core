@@ -26,26 +26,26 @@ import {objectDeepMergeFillIn} from '@aglyn/shared-util-vendor'
 import {createApi} from 'effector'
 import {persist} from 'effector-storage/local'
 import {BesignerPanelViewFlag, InteractionModeFlag} from '../constants/besigner'
-import {
-  type BesignerClosePanelPayload,
-  type BesignerFlagInteractModePayload,
-  type BesignerGetStorePayload,
-  type BesignerOpenPanelPayload,
-  type BesignerSetCanvasHoveredPayload,
-  type BesignerSetCanvasSelectedPayload,
-  type BesignerSetDndStatePayload,
-  type BesignerSetPanelPayload,
+import type {
+  BesignerClosePanelPayload,
+  BesignerFlagInteractModePayload,
+  BesignerGetStorePayload,
+  BesignerOpenPanelPayload,
+  BesignerSetCanvasHoveredPayload,
+  BesignerSetCanvasSelectedPayload,
+  BesignerSetDndStatePayload,
+  BesignerSetPanelPayload,
 } from '../constants/emitter'
-import {
-  type AglynBesignerControllerOptions,
-  type BesignerCanvasState,
-  type BesignerContext,
-  type BesignerContextStores,
-  type BesignerDndState,
-  type BesignerFlagState,
-  type BesignerNestedStores,
-  type BesignerPanelsState,
-  type IAglynBesignerController,
+import type {
+  AglynBesignerControllerOptions,
+  BesignerCanvasState,
+  BesignerContext,
+  BesignerContextStores,
+  BesignerDndState,
+  BesignerFlagState,
+  BesignerNestedStores,
+  BesignerPanelsState,
+  IAglynBesignerController,
 } from './aglyn-besigner.types'
 
 

@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 
-import {type ContextStore, IAglynAppController} from '@aglyn/core-data-framework'
+import type {ContextStore, IAglynAppController} from '@aglyn/core-data-framework'
 import {_INTERNAL_BESIGNERS_} from '../constants/_internal'
-import {
-  type BesignerClosePanelPayload,
-  type BesignerFlagInteractModePayload,
-  type BesignerGetStorePayload,
-  type BesignerOpenPanelPayload,
-  type BesignerSetCanvasHoveredPayload,
-  type BesignerSetCanvasSelectedPayload,
-  type BesignerSetDndStatePayload,
-  type BesignerSetPanelPayload,
+import type {
+  BesignerClosePanelPayload,
+  BesignerFlagInteractModePayload,
+  BesignerGetStorePayload,
+  BesignerOpenPanelPayload,
+  BesignerSetCanvasHoveredPayload,
+  BesignerSetCanvasSelectedPayload,
+  BesignerSetDndStatePayload,
+  BesignerSetPanelPayload,
 } from '../constants/emitter'
-import {
-  type BesignerContextStores,
-  type IAglynBesignerController,
+import type {
+  BesignerContextStores,
+  IAglynBesignerController,
 } from '../controllers/aglyn-besigner.types'
-import {type IBesignerAppController} from '../controllers/besigner-app.types'
+import type {IBesignerAppController} from '../controllers/besigner-app.types'
 import {_validateBesignerAppArg} from './app.api'
 
 

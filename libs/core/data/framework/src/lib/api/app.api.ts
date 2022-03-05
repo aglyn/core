@@ -15,18 +15,14 @@
  * limitations under the License.
  */
 
-import {_isStrEmpty} from '@aglyn/shared-util-guards'
+import {_isObj, _isStrEmpty} from '@aglyn/shared-util-guards'
 import {_INTERNAL_APPS_} from '../constants/_internal'
 import {DEFAULT_APP_UUN} from '../constants/app'
 import {AGLYN_EMITTER, AglynAppEventFlag} from '../constants/emitter'
 import {AGLYN_ERROR, AglynErrorEventFlag} from '../constants/error'
 import {AGLYN_LOGGER} from '../constants/logger'
 import {AglynAppController} from '../controllers/aglyn-app.controller'
-import {
-  type AglynAppOptions,
-  type AppUUN,
-  type IAglynAppController,
-} from '../types/aglyn-app.types'
+import type {AglynAppOptions, AppUUN, IAglynAppController} from '../types/aglyn-app.types'
 
 
 export function getAllApps(): IAglynAppController[] {
@@ -75,7 +71,8 @@ export function initializeApp(opts?: AglynAppOptions): IAglynAppController {
 }
 
 export function _validateAppArg(app: IAglynAppController): void {
-  if (!(app as IAglynAppController) || !(app instanceof AglynAppController)) {
+  if (!(app as IAglynAppController) || !_isObj(app) /*!(app instanceof AglynAppController)*/) {
+    console.warn('Not instanceof AglynAppController', app)
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_INSTANCE, {appName: app?.getName?.()})
   }
   if (app['deleted']) {

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {AglynAppController, IAglynModuleModel} from '@aglyn/core-data-framework'
+import {AglynAppController, type IAglynModuleModel} from '@aglyn/core-data-framework'
 import {_INTERNAL_BESIGNERS_} from '../constants/_internal'
 import {AglynBesignerController} from './aglyn-besigner.controller'
-import {type IAglynBesignerController} from './aglyn-besigner.types'
-import {type BesignerAppOptions, type IBesignerAppController} from './besigner-app.types'
+import type {IAglynBesignerController} from './aglyn-besigner.types'
+import type {BesignerAppOptions, IBesignerAppController} from './besigner-app.types'
 
 
 const TAG = 'BesignerApp'
