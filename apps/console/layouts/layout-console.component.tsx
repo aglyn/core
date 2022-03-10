@@ -57,7 +57,14 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
       appBarSuffix="Console"
       centerNavigationItems={[
         {
+          id: 'center-nav-home',
           children: 'Home',
+          href: '/',
+        },
+        {
+          id: 'center-nav-besigner',
+          children: 'Besigner',
+          href: '/besigner',
         },
         ...centerNavigationItems || [],
       ]}

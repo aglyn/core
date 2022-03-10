@@ -55,8 +55,8 @@ const Card = styled(MuiCard, {
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
       [theme.breakpoints.up('md')]: {
-        paddingTop: theme.spacing(3),
-        paddingBottom: theme.spacing(3),
+        paddingLeft: theme.spacing(3),
+        paddingRight: theme.spacing(3),
       },
     },
   },

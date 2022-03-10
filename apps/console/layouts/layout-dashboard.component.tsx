@@ -75,6 +75,19 @@ function a11yProps(index) {
   }
 }
 
+const defaultNavTabItems = [
+  {
+    id: 'nav-tab-dashboard',
+    label: 'Dashboard',
+    href: '/',
+  },
+  {
+    id: 'nav-tab-pages',
+    label: 'Pages',
+    href: '/pages',
+  },
+]
+
 export type NavTabItem = Partial<AppLinkProps & MuiTabProps & {icon: MdiIconProps}>
 
 export interface LayoutDashboardProps {
@@ -120,18 +133,7 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
       />
     </Stack>
   )
-  const navTabItems: NavTabItem[] = navTabItemsProp || [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      href: '/',
-    },
-    {
-      id: 'besigner',
-      label: 'Besigner',
-      href: '/besigner',
-    },
-  ]
+  const navTabItems: NavTabItem[] = navTabItemsProp || defaultNavTabItems
   const router = useRouter()
   const tabValue = useMemo(() => {
     return navTabItems.find((i) => {

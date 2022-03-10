@@ -62,7 +62,7 @@ export function Index(props) {
           {
             xs: 12, md: 6,
             children: (
-              <WidgetCardComponent>
+              <WidgetCardComponent contentGutterX>
                 hello
               </WidgetCardComponent>
             ),

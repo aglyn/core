@@ -47,6 +47,7 @@ import {
   mdiTune,
   mdiVariable,
   mdiWeatherNight,
+  mdiWeb,
   mdiWhiteBalanceSunny,
 } from '@aglyn/shared-ui-mdi-jsx'
 
@@ -93,3 +94,4 @@ export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
 export const ICON_VARIANT_MENU_DOWN = mdiMenuDown
 // Site area
 export const ICON_VARIANT_HOME = mdiHomeVariant
+export const ICON_VARIANT_PAGES = mdiWeb
