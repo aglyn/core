@@ -51,12 +51,12 @@ function ElevateOnScroll<P>(props: ElevationOnScrollProps<P>) {
   const activeWithoutHysteresis = useScrollTrigger({
     disableHysteresis: true,
     threshold: withoutHysteresis?.threshold ?? threshold,
-    target: withoutHysteresis?.target ?? target,
+    target: withoutHysteresis?.target || target || undefined,
   })
   const activeWithHysteresis = useScrollTrigger({
     disableHysteresis: false,
     threshold: withHysteresis?.threshold ?? threshold,
-    target: withHysteresis?.target ?? target,
+    target: withHysteresis?.target || target || undefined,
   })
   const state = useMemo(
     () => ({activeWithHysteresis, activeWithoutHysteresis}),
