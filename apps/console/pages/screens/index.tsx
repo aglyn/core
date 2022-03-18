@@ -31,7 +31,7 @@ import {FormRenderer, simpleComponentMapper} from '@aglyn/shared-ui-jsx-forms'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Button, Container, Typography} from '@mui/material'
 import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
-import {collection, doc, query, setDoc} from 'firebase/firestore'
+import {collection, deleteDoc, doc, query, setDoc} from 'firebase/firestore'
 import {useCallback, useState} from 'react'
 import {useFirestore, useFirestoreCollectionData} from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
@@ -58,24 +58,41 @@ export function Screens(props) {
 
   const handleFormOpen = useCallback(() => {setQuickDrawerOpen(true)}, [])
   const handleFormClose = useCallback(() => {setQuickDrawerOpen(false)}, [])
-  const handleDeleteScreen = useCallback(async () => {
+  const deleteScreen = useCallback(async (id: string) => {
+    if (loading) return
+    const dequeueLoading = queueLoading()
+    await deleteDoc(doc(firestore, 'screens', id))
+      .then(() => {
+        handleFormClose()
+      })
+      .catch((error) => {
+        // setError({...error})
+      })
+      .finally(() => {
+        dequeueLoading()
+      })
+  }, [firestore, loading, queueLoading, handleFormClose])
+  const handleDeleteScreen = useCallback((id: string) => async () => {
     await confirm({
       title: 'Are you sure?',
       description:
-        'You are about to delete an element from the canvas, please confirm the desired option. Press \'Delete\' to confirm and delete the item. Press \'Cancel\' to void the operation and close this dialog.',
+        'You are about to delete a screen from the application, please confirm the desired option. Press \'Delete\' to confirm and delete the item. Press \'Cancel\' to void the operation and close this dialog.',
       confirmationText: 'Delete',
       confirmationButtonProps: {
         color: 'error',
       },
     })
-  }, [confirm])
+      .then(() => {
+        return deleteScreen(id)
+      })
+  }, [confirm, deleteScreen])
 
   const columns: GridColumns = [
     {
       field: 'actions',
       type: 'actions',
       width: 100,
-      getActions: () => [
+      getActions: ({id}) => [
         <GridActionsCellItem
           key="action-edit"
           icon={<MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />}
@@ -85,7 +102,7 @@ export function Screens(props) {
           key="action-delete"
           icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />}
           label="Delete"
-          onClick={handleDeleteScreen}
+          onClick={handleDeleteScreen(id as string)}
         />,
       ],
     },
