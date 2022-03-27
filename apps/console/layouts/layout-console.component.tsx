@@ -100,6 +100,7 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
 
 LayoutConsoleComponent.displayName = 'LayoutConsoleComponent'
 LayoutConsoleComponent.defaultProps = {
+  disableAppBarElevation: true,
   centerNavigationItems: [
     {
       id: 'center-nav-home',
@@ -110,9 +111,6 @@ LayoutConsoleComponent.defaultProps = {
       id: 'center-nav-besigner',
       children: 'Besigner',
       // href: '/besigner',
-      MenuProps: {
-        arrow: true,
-      },
       items: [
         {
           id: 'center-nav-home',

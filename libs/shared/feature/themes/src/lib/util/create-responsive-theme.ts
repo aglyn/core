@@ -16,7 +16,6 @@
  */
 
 import {createTheme, responsiveFontSizes, type Theme, type ThemeOptions} from '../../vendor/mui'
-import {createInsetShadows} from './create-inset-shadows'
 
 
 export type CreateResponsiveThemeOptions = {
@@ -73,8 +72,6 @@ export type CreateResponsiveThemeOptions = {
 export function createResponsiveTheme(options: CreateResponsiveThemeOptions): Theme {
   const {themeOptions, responsiveFontSizesOptions} = options
   let theme = createTheme(themeOptions)
-
-  createInsetShadows(theme)
 
   theme = responsiveFontSizes(theme, {
     // Override to include `xs` and `xl` - default: ['sm', 'md', 'lg']

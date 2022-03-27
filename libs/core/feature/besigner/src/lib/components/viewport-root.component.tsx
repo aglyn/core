@@ -50,11 +50,7 @@ const AglynViewport = styled(Stack, {
     flexGrow: 1,
     overflow: 'hidden',
     // position: 'relative',
-    boxShadow: [
-      `inset 0px 2px 4px -3px ${alpha(theme.palette.common.black, 0.08)}`,
-      `inset 0px 4px 5px -2px ${alpha(theme.palette.common.black, 0.04)}`,
-      `inset 0px 1px 10px -2px ${alpha(theme.palette.common.black, 0.06)}`,
-    ].join(','),
+    boxShadow: theme.shadowsInset[3],
     backgroundColor: bg,
     background: [
       `linear-gradient(-90deg, ${sq} ${s.line}, transparent ${s.line})`,

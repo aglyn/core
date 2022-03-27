@@ -38,11 +38,7 @@ const LoadingTextComponent = forwardRef(
   },
 )
 LoadingTextComponent.displayName = 'LoadingTextComponent'
-LoadingTextComponent.defaultProps = {
-  maxEllipsis: 3,
-  minEllipsis: 0,
-  animationDelay: 750,
-}
+LoadingTextComponent.defaultProps = {}
 
 export {LoadingTextComponent}
 export default LoadingTextComponent

@@ -24,18 +24,14 @@ import {
   ICON_VARIANT_MOBILE,
   ICON_VARIANT_MONITOR_LARGE,
   ICON_VARIANT_MONITOR_SMALL,
+  ICON_VARIANT_SYMBOL_CONFIRMED,
   ICON_VARIANT_TABLET,
 } from '@aglyn/shared-data-enums'
+import {Menu, MenuProps} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {
   Button as MuiButton,
   ButtonGroup as MuiButtonGroup,
-  ListItemIcon as MuiMenuItemIcon,
-  ListSubheader as MuiListSubheader,
-  Menu as MuiMenu,
-  MenuItem as MuiMenuItem,
-  Stack as MuiStack,
-  type StackProps,
   Tooltip as MuiTooltip,
 } from '@mui/material'
 import {forwardRef, type MouseEvent, useCallback, useMemo, useState} from 'react'
@@ -75,7 +71,7 @@ const devicePreviewOptions = [
   },
 ]
 
-export interface DevicePreviewControlsProps extends StackProps {}
+export interface DevicePreviewControlsProps extends Partial<MenuProps> {}
 
 const DevicePreviewControlsComponent = forwardRef<any, DevicePreviewControlsProps>(
   function RefRenderFn(props, ref) {
@@ -101,10 +97,32 @@ const DevicePreviewControlsComponent = forwardRef<any, DevicePreviewControlsProp
     }
 
     return (
-      <MuiStack ref={ref} direction="row" spacing={1} {...rest}>
+      <Menu
+        ref={ref}
+        id="aglyn:device-preview"
+        onClick={handleMenuClose}
+        horizontalOrigin="right"
+        items={[
+          {
+            type: 'subheader',
+            children: 'Artboard preview mode',
+            sx: {lineHeight: theme => theme.typography.pxToRem(32)},
+          },
+          ...(devicePreviewOptions.map((item) => ({
+            key: item.value,
+            selected: item.value === activeDevice.value,
+            disabled: item.value === activeDevice.value,
+            onClick: handleMenuClick(item.value),
+            endIcon: item.value !== activeDevice.value ? undefined : ({
+              path: ICON_VARIANT_SYMBOL_CONFIRMED.path,
+            }),
+            ...item,
+          }))),
+        ]}
+        {...rest}
+      >
         <MuiButtonGroup size="small" variant="outlined" color="inherit">
           <MuiTooltip title={'Device preview mode'}>
-
             <MuiButton
               aria-label="device preview mode"
               aria-haspopup="menu"
@@ -120,36 +138,8 @@ const DevicePreviewControlsComponent = forwardRef<any, DevicePreviewControlsProp
             </MuiButton>
           </MuiTooltip>
         </MuiButtonGroup>
+      </Menu>
 
-        <MuiMenu
-          id="aglyn:device-preview"
-          anchorEl={anchorEl}
-          open={devicesMenuOpen}
-          onClose={handleMenuClose}
-          onClick={handleMenuClose}
-          transformOrigin={{horizontal: 'right', vertical: 'top'}}
-          anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
-        >
-          <MuiListSubheader
-            sx={{lineHeight: theme => theme.typography.pxToRem(32)}}
-          >
-            Artboard preview mode
-          </MuiListSubheader>
-          {devicePreviewOptions.map((item) => (
-            <MuiMenuItem
-              key={item.value}
-              selected={item.value === activeDevice.value}
-              disabled={item.value === activeDevice.value}
-              onClick={handleMenuClick(item.value)}
-            >
-              <MuiMenuItemIcon>
-                <MdiIcon fontSize="small" {...item.icon} />
-              </MuiMenuItemIcon>
-              {item.children}
-            </MuiMenuItem>
-          ))}
-        </MuiMenu>
-      </MuiStack>
     )
   },
 )

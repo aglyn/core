@@ -31,6 +31,7 @@ import {
   MenuItem as MuiMenuItem,
   type MenuItemProps as MuiMenuItemProps,
   type MenuProps as MuiMenuProps,
+  Typography,
 } from '@mui/material'
 import {
   Children,
@@ -52,7 +53,7 @@ const defaultState = {
 }
 
 type ItemTypes = 'item' | 'divider' | 'subheader' | undefined | never
-type ItemTypeProps = MuiMenuItemProps & {type?: 'item', icon?: MdiIconProps}
+type ItemTypeProps = MuiMenuItemProps & {type?: 'item', icon?: MdiIconProps, endIcon?: MdiIconProps}
 type DividerTypeProps = DividerProps & {type: 'divider'}
 type SubheaderTypeProps = MuiListSubheaderProps & {type: 'subheader'}
 export type MenuItemProps<T extends ItemTypes = ItemTypes> =
@@ -105,6 +106,14 @@ export const Menu = forwardRef<any, MenuProps>(
     const open = Boolean(state.anchorEl || state.mouseY)
     const cloned = cloneElement(child, {onClick: handleClick})
 
+    const {PaperProps, ...menuProps} = MenuProps || {} as any
+    const {sx: paperSx, ...paperProps} = PaperProps || {} as any
+    const arrowPlacement = horizontalOrigin === 'right'
+      ? {right: 14}
+      : horizontalOrigin === 'center'
+        ? {right: 'auto', left: 'auto'}
+        : {left: 14}
+
     return (
       <Box
         ref={ref}
@@ -130,17 +139,34 @@ export const Menu = forwardRef<any, MenuProps>(
             horizontal: horizontalOrigin || 'left',
           }}
           PaperProps={context ? undefined : {
-            sx: {
+            elevation: 0,
+            sx: mergeSxProps({
               maxHeight: ITEM_HEIGHT * 4.5,
               width: '30ch',
-            },
+              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              backgroundColor: 'background.secondary',
+              marginTop: 0.5,
+              '&:before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                width: 10,
+                height: 10,
+                bgcolor: 'background.secondary',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+                ...arrowPlacement,
+              },
+            }, paperSx),
+            ...paperProps,
           }}
           // getContentAnchorEl={null}
           open={open}
           onClose={handleClose}
-          {...MenuProps}
+          {...menuProps}
         >
-          {items.map(({onClick, icon, children, type, ...item}: any, key) => {
+          {items.map(({onClick, icon, children, type, endIcon, ...item}: any, key) => {
 
             switch (type) {
               case 'subheader':
@@ -186,6 +212,14 @@ export const Menu = forwardRef<any, MenuProps>(
                     <ListItemText>
                       {children}
                     </ListItemText>
+
+                    {!endIcon?.path || !endIcon ? null : (
+                      <Typography variant="body2" color="text.secondary">
+                        {!endIcon?.path ? endIcon : (
+                          <MdiIcon fontSize="small" {...endIcon} />
+                        )}
+                      </Typography>
+                    )}
                   </MuiMenuItem>
                 )
             }

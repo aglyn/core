@@ -228,7 +228,6 @@ Screens.layoutComponent = LayoutConsoleComponent
 Screens.layoutProps = {
   LayoutConsoleComponent: {
     title: 'App Screens',
-    disableAppBarElevation: true,
   },
 }
 

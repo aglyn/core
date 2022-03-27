@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-import {type AnyProps} from '@aglyn/shared-data-types'
+import type {AnyProps} from '@aglyn/shared-data-types'
+import {copy} from '@aglyn/shared-util-tools'
 import {objectDeepMerge} from '@aglyn/shared-util-vendor'
-import {type NextPage} from 'next'
-import {type AppProps as NextAppProps} from 'next/app'
-import {type ReactElement} from 'react'
+import type {NextPage} from 'next'
+import type {AppProps as NextAppProps} from 'next/app'
+import type {ReactElement} from 'react'
 
 
 export type NextPageGetLayoutFn = (
@@ -67,7 +68,7 @@ export function getNextPageLayout<Props, InitialProps>(
 
     return (page, props) => {
       const OuterComponent = getNextPageLayout({
-        ...props,
+        ...copy(props),
         Component: ComponentLayout,
         mergedLayoutProps: layoutProps,
       })

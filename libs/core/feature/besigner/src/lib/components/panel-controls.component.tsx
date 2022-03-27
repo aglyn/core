@@ -18,7 +18,6 @@
 import {BesignerPanelViewFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
 import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {
-  ICON_VARIANT_DOCK_BOTTOM_TOGGLE,
   ICON_VARIANT_DOCK_LEFT_TOGGLE,
   ICON_VARIANT_DOCK_RIGHT_TOGGLE,
 } from '@aglyn/shared-data-enums'
@@ -30,7 +29,7 @@ import {
   ToggleButtonGroup as MuiToggleButtonGroup,
   Tooltip as MuiTooltip,
 } from '@mui/material'
-import {forwardRef, MouseEvent, useCallback} from 'react'
+import {forwardRef, type MouseEvent, useCallback} from 'react'
 import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
 
 
@@ -81,14 +80,14 @@ const PanelControlsComponent = forwardRef<any, PanelControlsProps>(
               <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_LEFT_TOGGLE.path} />
             </MuiToggleButton>
           </MuiTooltip>
-          <MuiTooltip title={'Bottom panel'}>
-            <MuiToggleButton
-              selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_BOTTOM)}
-              value={BesignerPanelViewFlag.PANEL_BOTTOM}
-            >
-              <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_BOTTOM_TOGGLE.path} />
-            </MuiToggleButton>
-          </MuiTooltip>
+          {/*<MuiTooltip title={'Bottom panel'}>*/}
+          {/*  <MuiToggleButton*/}
+          {/*    selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_BOTTOM)}*/}
+          {/*    value={BesignerPanelViewFlag.PANEL_BOTTOM}*/}
+          {/*  >*/}
+          {/*    <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_BOTTOM_TOGGLE.path} />*/}
+          {/*  </MuiToggleButton>*/}
+          {/*</MuiTooltip>*/}
           <MuiTooltip title={'Right panel'}>
             <MuiToggleButton
               selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_RIGHT)}

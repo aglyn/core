@@ -22,6 +22,7 @@ import {
   mdiBookVariant,
   mdiBookVariantMultiple,
   mdiCellphone,
+  mdiCheck,
   mdiCodeArray,
   mdiCodeBracesBox,
   mdiCodeString,
@@ -118,3 +119,4 @@ export const ICON_VARIANT_PAGES = mdiWeb
 export const ICON_VARIANT_BESIGNER = mdiMathCompass
 // Symbolized illustrations
 export const ICON_VARIANT_SYMBOL_SECURE = mdiShieldLock
+export const ICON_VARIANT_SYMBOL_CONFIRMED = mdiCheck

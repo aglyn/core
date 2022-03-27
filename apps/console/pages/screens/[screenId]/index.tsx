@@ -140,7 +140,6 @@ ScreenDetails.layoutComponent = LayoutConsoleComponent
 ScreenDetails.layoutProps = {
   LayoutConsoleComponent: {
     title: 'Screen Details',
-    disableAppBarElevation: true,
   },
 }
 

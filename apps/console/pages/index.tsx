@@ -84,7 +84,6 @@ Index.layoutComponent = LayoutConsoleComponent
 Index.layoutProps = {
   LayoutConsoleComponent: {
     title: 'My Dashboard',
-    disableAppBarElevation: true,
   },
 }
 

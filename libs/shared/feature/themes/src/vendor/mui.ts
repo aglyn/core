@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-import {OverridableComponent} from '@mui/material/OverridableComponent'
+import type {OverridableComponent} from '@mui/material/OverridableComponent'
 import type {Theme} from '@mui/material/styles'
+// eslint-disable-next-line no-restricted-imports
+import type {CSSProperties} from '@mui/material/styles/createMixins'
 // eslint-disable-next-line no-restricted-imports
 import type {Shadows} from '@mui/material/styles/shadows'
 import type {WithStyles} from '@mui/styles'
@@ -94,6 +96,11 @@ declare module '@mui/material/styles/zIndex' {
     blocking: number
   }
 }
+declare module '@mui/material/styles/createMixins' {
+  interface Mixins {
+    menuArrow: CSSProperties
+  }
+}
 declare module '@mui/material/styles' {
 
   /**
@@ -160,9 +167,13 @@ declare module '@mui/material/styles' {
     text: Palette['text']
   }
 
+  interface ThemeOptions {
+    shadowsInset?: Shadows
+  }
+
   interface Theme {
     palette: Palette
-    insetShadows: Shadows
+    shadowsInset: Shadows
   }
 
   interface DefaultTheme extends Theme {}
