@@ -45,11 +45,11 @@ function ComponentsDrawerContextProvider(props: ComponentsDrawerContextProviderP
   const isOpen = resolveReject.length === 2
 
   const handleClose = useCallback((e, reason) => {
-    reject({reason})
+    reject && reject({reason})
     setResolveReject([])
   }, [reject])
   const handleConfirm = useCallback((e, item) => {
-    resolve({option: item})
+    resolve && resolve({option: item})
     setResolveReject([])
   }, [resolve])
 

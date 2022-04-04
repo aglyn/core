@@ -21,7 +21,6 @@ import {
   DEFAULT_APP_UUN,
   getApp as getAglynApp,
   type IAglynAppController,
-  setCanvasElements,
 } from '@aglyn/core-data-framework'
 import {createContext, type ReactNode, useCallback, useContext, useEffect} from 'react'
 
@@ -60,7 +59,7 @@ function AglynAppContextComponent(props: AglynAppContextComponentProps) {
 
 
   useEffect(() => {
-    setCanvasElements(getApp(), canvasElements)
+    // setCanvasElements(getApp(), canvasElements)
   }, [getApp, canvasElements])
 
   return (

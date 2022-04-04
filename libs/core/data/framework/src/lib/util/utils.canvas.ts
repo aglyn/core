@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import {arrayMoveAtIndex, arrayPushAtIndex, arrayRemoveItem} from '@aglyn/shared-util-tools'
-import {objectDeepMerge} from '@aglyn/shared-util-vendor'
+import {_hasOwnProperty} from '@aglyn/shared-util-guards'
+import {arrayMoveAtIndex, arrayPushAtIndex, arrayRemoveItem, copy} from '@aglyn/shared-util-tools'
+import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import {
   type CanvasAddElementPayload,
   type CanvasDeleteElementPayload,
@@ -27,7 +28,7 @@ import {
   type CanvasUpdateElementPayload,
 } from '../constants/emitter'
 import {type ElementsDataStore} from '../types/aglyn-canvas.types'
-import {type AglynElementsById} from '../types/aglyn-elements.types'
+import {type AglynElementsById, type ElementId} from '../types/aglyn-elements.types'
 import {createComponentElementDataCopy} from './create-component-element-data-copy'
 import {deleteComponentElement} from './delete-component-element'
 import {denormalizeComponentElementData} from './denormalize-component-element-data'
@@ -45,7 +46,7 @@ export const handleCanvasApiChangeEvent = <S extends ElementsDataStore, P>(
 ) => (
   state: S, payload: P,
 ) => {
-  return handleStateModificationHistoryChange(state, fn(state.present, payload))
+  return handleStateModificationHistoryChange(copy(state), fn(state.present, payload))
 }
 
 
@@ -62,13 +63,21 @@ export const handleCanvasAddElement = (
   payload: CanvasAddElementPayload,
 ) => {
 
-  const {element, parentId, index} = payload
+  const {index} = payload
 
-  const newParent = state[parentId]
-  if (!newParent) {throw new Error('Element must have a valid parent')}
+  const element = copy(payload.element)
+  let parentId: ElementId = null
+
+  if (_hasOwnProperty(payload.parentId, state)) {
+    parentId = payload.parentId
+  } else {
+    console.error('Element must have a valid parent, falling back to root')
+    parentId = CANVAS_ROOT_ELEMENT_ID
+  }
 
   const newData = denormalizeComponentElementData(element, parentId)
   const siblingIds = state[parentId]?.elements || []
+  const newElements = newData[parentId]?.elements || []
 
   return {
     ...state,
@@ -76,11 +85,10 @@ export const handleCanvasAddElement = (
     [parentId]: {
       ...state[parentId],
       elements: arrayPushAtIndex(
-        index === -1 ? siblingIds.length : index,
         state[parentId]?.elements || [],
-        newData[parentId]?.elements || [],
-        {copy: true},
-      ).items,
+        index === -1 ? siblingIds.length : index,
+        ...newElements,
+      ),
     },
   }
 }
@@ -91,11 +99,13 @@ export const handleCanvasUpdateElement = (
   payload: CanvasUpdateElementPayload,
 ) => {
 
-  const {element} = payload
+  const element = copy(payload.element)
+
   return {
     ...state,
     [element.$id]: {
-      ...objectDeepMerge(state[element.$id], element),
+      ...state[element.$id],
+      ...element,
     },
   } as ElementsDataStore['present']
 }
@@ -106,7 +116,7 @@ export const handleCanvasSetElement = (
   payload: CanvasSetElementPayload,
 ) => {
 
-  const {element} = payload
+  const element = copy(payload.element)
   return {
     ...state,
     [element.$id]: {
@@ -121,24 +131,30 @@ export const handleCanvasMoveElement = (
   payload: CanvasMoveElementPayload,
 ) => {
 
-  const {$id, index, parentId} = payload
+  const {$id, index} = payload
+  let parentId: ElementId = null
 
-  const newParent = state[parentId]
-  if (!newParent) {throw new Error('Element must have a valid parent')}
+  if (_hasOwnProperty(payload.parentId, state)) {
+    parentId = payload.parentId
+  }
+  else {
+    console.error('Element must have a valid parent, falling back to root')
+    parentId = CANVAS_ROOT_ELEMENT_ID
+  }
 
   const parentHierarchy = getComponentElementHierarchy(parentId, state)
   if (parentHierarchy.indexOf($id) >= 0) {
     throw new Error('New parent is same or a child of the element')
   }
 
-  const current = {...state[$id]}
-  const response = {
+  const current = copy({...state[$id]})
+  const response = copy({
     ...state,
     [$id]: {
       ...current,
       parentId: parentId,
     },
-  }
+  })
   const siblingIds = response[parentId]?.elements || []
 
   if (parentId === current.parentId) {
@@ -154,19 +170,20 @@ export const handleCanvasMoveElement = (
   }
   else {
     console.log('moving')
+    const currentParentElements = response[current.parentId].elements || []
+
     response[parentId] = {
       ...response[parentId],
       elements: arrayPushAtIndex(
-        index === -1 ? siblingIds.length : index,
         siblingIds,
+        index === -1 ? siblingIds.length : index,
         $id,
-        {copy: true},
-      ).items,
+      ),
     }
-    const currentParentElements = response[current.parentId].elements || []
+
     response[current.parentId] = {
       ...response[current.parentId],
-      elements: arrayRemoveItem($id, currentParentElements),
+      elements: arrayRemoveItem(currentParentElements, $id),
     }
   }
 

@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {objectDeepMergeFillIn} from '@aglyn/shared-util-vendor'
+import {copy} from '@aglyn/shared-util-tools'
+import {objectDeepMerge} from '@aglyn/shared-util-vendor'
 import {
   type AglynComponentElementTemplate,
   type AglynComponentTemplateData,
@@ -46,6 +47,9 @@ export function createComponentElementData(
 ): AglynElementNormalized {
   const {data} = {...options}
 
-  return objectDeepMergeFillIn({...ELEMENT_DEFAULTS}, traverseComponentTemplate(data))
+  return objectDeepMerge(
+    copy(ELEMENT_DEFAULTS),
+    traverseComponentTemplate(copy(data))
+  )
 }
 export default createComponentElementData

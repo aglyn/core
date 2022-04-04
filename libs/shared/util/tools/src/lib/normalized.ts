@@ -123,7 +123,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
     id: K,
     model: T,
   ): NormalizedData<TT, ID> {
-    model.allIds = arrayRemoveItem(id, model.allIds)
+    model.allIds = arrayRemoveItem(model.allIds, id)
     model.byId = objectDeleteProperty(model.byId, id)
     return model
   }

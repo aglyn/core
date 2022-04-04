@@ -33,7 +33,7 @@ export function deleteComponentElement(
   })
 
   if (_isArr(parent?.elements)) {
-    parent.elements = arrayRemoveItem($id, parent.elements)
+    parent.elements = arrayRemoveItem(parent.elements, $id)
   }
 
   return store

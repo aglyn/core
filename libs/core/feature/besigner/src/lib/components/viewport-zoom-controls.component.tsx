@@ -108,6 +108,7 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
 
     const buttons = [
       {
+        key: 'vp-zoom-reset',
         id: 'reset-zoom',
         tooltipProps: {
           title: 'Reset zoom',
@@ -124,6 +125,7 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
         } as MdiIconProps,
       },
       {
+        key: 'vp-zoom-decrease',
         id: 'decrease-zoom',
         tooltipProps: {
           title: 'Decrease zoom (⌘-)',
@@ -140,6 +142,7 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
         },
       },
       {
+        key: 'vp-zoom-increase',
         id: 'increase-zoom',
         tooltipProps: {
           title: 'Increase zoom (⌘+)',
@@ -169,13 +172,13 @@ export const ViewportZoomControlsComponent = forwardRef<any, ViewportZoomControl
             srOnlyProps,
             buttonProps,
             svgPathIconProps,
-            ...rest
+            ...item
           }, key) => (
             <Tooltip
               key={item.key ?? item.id ?? key}
               {...tooltipProps}
             >
-              <Button {...buttonProps} {...rest}>
+              <Button {...buttonProps}>
                 <MdiIcon fontSize="small" {...svgPathIconProps} />
                 <SrOnlyComponent component="span" {...srOnlyProps} />
               </Button>

@@ -106,7 +106,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     this.#normalizedElementsStore = this.#context.map((elements) => {
       return normalizeComponentElementData(elements.present, CANVAS_ROOT_ELEMENT_ID)
     })
-    persist({store: this.#denormalizedElementsStore})
+    persist({store: this.#context})
 
     this.#events = createApi(this.#context, {
       undo: handleUndoEvent,
@@ -168,7 +168,7 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     return this
   }
   public moveElement(payload: CanvasMoveElementPayload): this {
-    this.#events.deleteElement(payload)
+    this.#events.moveElement(payload)
     return this
   }
   public duplicateElement(payload: CanvasDuplicateElementPayload): this {

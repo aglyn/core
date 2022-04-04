@@ -27,12 +27,10 @@ export const handleStateModificationHistoryUndo = <S>(
   state: ModificationHistoryState<S>,
 ): ModificationHistoryState<S> => {
   if (!_isArrEmpty(state.past)) {
-    const future = [state.present, ...state.future]
-    const past = state.past
     return {
-      present: past.pop(),
-      past: past,
-      future: future,
+      present: state.past.shift(),
+      past: state.past,
+      future: [state.present, ...state.future],
     }
   }
   return state

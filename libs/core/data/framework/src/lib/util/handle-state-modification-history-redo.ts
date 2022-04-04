@@ -27,12 +27,10 @@ export const handleStateModificationHistoryRedo = <S>(
   state: ModificationHistoryState<S>,
 ): ModificationHistoryState<S> => {
   if (!_isArrEmpty(state.future)) {
-    const future = state.future
-    const past = [state.present, ...state.past]
     return {
-      present: future.pop(),
-      past: past,
-      future: future,
+      present: state.future.shift(),
+      past: [state.present, ...state.past],
+      future: state.future,
     }
   }
   return state
