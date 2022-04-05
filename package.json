@@ -59,7 +59,7 @@
     "core-js": "^3.20.3",
     "debug": "^4.3.3",
     "deep-equal": "^2.0.5",
-    "deepmerge-ts": "^2.0.1",
+    "deepmerge-ts": "^4.0.2",
     "document-register-element": "1.14.10",
     "effector": "^22.1.2",
     "effector-react": "^22.0.6",
