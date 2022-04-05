@@ -30,11 +30,7 @@ function Index(props) {
 
   return (
     <DashboardLayout
-      breadcrumbItems={[
-        {
-          children: 'Details',
-        },
-      ]}
+      breadcrumbItems={[]}
       header={{
         children: 'My Dashboard',
         icon: {path: ICON_VARIANT_HOME.path},

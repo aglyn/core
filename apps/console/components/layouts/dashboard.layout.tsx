@@ -57,7 +57,7 @@ const defaultTabBarTitle = (
 const defaultBreadcrumbs = [
   {
     id: 'home',
-    children: 'Home',
+    // children: 'Home',
     href: '/',
     icon: {path: ICON_VARIANT_HOME.path},
   },

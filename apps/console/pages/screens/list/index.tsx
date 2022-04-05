@@ -35,7 +35,7 @@ import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {useSnackbar} from '@aglyn/shared-ui-snackstack'
 import {Button, IconButton, Typography} from '@mui/material'
 import {GridActionsCellItem, type GridColumns} from '@mui/x-data-grid'
-import {collection, doc, limit, query, setDoc, Timestamp} from 'firebase/firestore'
+import {collection, doc, limit, query, setDoc, Timestamp, updateDoc} from 'firebase/firestore'
 import {useCallback, useEffect, useState} from 'react'
 import {useFirestore, useFirestoreCollectionData} from 'reactfire'
 import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
@@ -120,9 +120,11 @@ function Screens(props) {
       confirmationButtonProps: {color: 'error'},
     })
       .then(() => {dequeueLoading = queueLoading()})
-      .then(() => setDoc(doc(firestore, 'screens', id, 'deletedAt'), Timestamp.now()))
+      .then(() => updateDoc(doc(firestore, 'screens', id), {deletedAt: Timestamp.now()}))
       .catch(() => {})
-    dequeueLoading && dequeueLoading()
+      .finally(() => {
+        dequeueLoading && dequeueLoading()
+      })
   }, [confirm, firestore, queueLoading])
 
 
@@ -153,8 +155,8 @@ function Screens(props) {
         ]
       },
     },
-    {field: '$id', headerName: 'ID', type: 'string', flex: 1, minWidth: 150},
-    {field: 'displayName', headerName: 'Display name', flex: 1, minWidth: 200, type: 'string'},
+    {field: '$id', headerName: 'ID', type: 'string', minWidth: 150},
+    {field: 'displayName', headerName: 'Display name', minWidth: 220, type: 'string'},
     {field: 'description', headerName: 'Description', flex: 1, minWidth: 275, type: 'string'},
     {field: 'updatedAt', headerName: 'Updated', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.()},
     {field: 'createdAt', headerName: 'Created', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.()},

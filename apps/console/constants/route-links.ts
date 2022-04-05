@@ -18,11 +18,13 @@
 
 
 export enum Route {
+  ACCOUNT_MANAGE_SETTINGS = '#',
   AUTH_SIGN_IN = '/signin',
   AUTH_SIGN_OUT = '/signout',
   AUTH_SIGN_UP = '/signup',
   AUTH_VERIFY_EMAIL = '/verify-email',
   SCREEN_BESIGNER = '/screens/[screenId]/versions/[versionId]/besigner',
+  SCREEN_DASHBOARD = '/',
   SCREEN_DETAILS = '/screens/[screenId]/versions/[versionId]/view',
   SCREEN_LIST = '/screens/list',
 }

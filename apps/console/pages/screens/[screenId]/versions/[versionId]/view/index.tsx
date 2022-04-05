@@ -31,6 +31,8 @@ import {buildRoute, Route} from '../../../../../../constants/route-links'
 import {CONTENT_MAX_WIDTH} from '../../../../../../constants/shared'
 
 
+const whiteSpace = <>&nbsp;</>
+
 function ScreenDetails(props) {
 
   const {query} = useRouter()
@@ -69,43 +71,43 @@ function ScreenDetails(props) {
       key: 'id',
       id: 'details-id',
       primary: 'Unique ID:',
-      secondary: `${screen?.$id ?? ' '}`,
+      secondary: screen?.$id,
     },
     {
       key: 'displayName',
       id: 'details-dname',
       primary: 'Display name:',
-      secondary: `${screen?.displayName ?? ' '}`,
+      secondary: screen?.displayName,
     },
     {
       key: 'description',
       id: 'details-desc',
       primary: 'Description:',
-      secondary: `${screen?.description ?? ' '}`,
+      secondary: screen?.description,
     },
     {
       key: 'dateCreated',
       id: 'details-datec',
       primary: 'Date created:',
-      secondary: `${screen?.createdAt?.toDate?.() || ' '}`,
+      secondary: screen?.createdAt?.toDate?.()?.toString(),
     },
     {
       key: 'dateUpdated',
       id: 'details-dateu',
       primary: 'Date updated:',
-      secondary: `${screen?.updatedAt?.toDate?.() || ' '}`,
+      secondary: screen?.updatedAt?.toDate?.()?.toString(),
     },
     {
       key: 'dateDeleted',
       id: 'details-dated',
       primary: 'Date deleted:',
-      secondary: `${screen?.deletedAt?.toDate?.() || ' '}`,
+      secondary: screen?.deletedAt?.toDate?.()?.toString(),
     },
     {
       key: 'versionId',
       id: 'details-vers',
       primary: 'Version ID:',
-      secondary: `${screen?.versionId || ' '}`,
+      secondary: screen?.versionId,
     },
   ]
 
@@ -155,9 +157,11 @@ function ScreenDetails(props) {
                   contentGutterY
                   contentBordered
                 >
-                  {details.map((item, key) => (
+                  {details.map(({primary, secondary, ...item}, key) => (
                     <ListItemText
                       key={item.key ?? item.id ?? key}
+                      primary={primary || whiteSpace}
+                      secondary={secondary || whiteSpace}
                       {...item}
                     />
                   ))}

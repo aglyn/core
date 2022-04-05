@@ -27,6 +27,7 @@ import {AppLink} from '@aglyn/shared-ui-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
 import {useUser} from 'reactfire'
+import {Route} from '../../constants/route-links'
 import AuthenticatedLayout from './authenticated.layout'
 import MainLayout, {type MainLayoutProps} from './main.layout'
 
@@ -76,7 +77,7 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
             {
               children: 'Settings',
               component: AppLink,
-              href: '/account/settings',
+              href: Route.ACCOUNT_MANAGE_SETTINGS,
               icon: {path: ICON_VARIANT_USER_SETTINGS.path},
             },
             {
@@ -85,7 +86,7 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
             {
               children: 'Sign out',
               component: AppLink,
-              href: '/signout',
+              href: Route.AUTH_SIGN_OUT,
               icon: {path: ICON_VARIANT_SIGN_OUT.path},
             },
           ],
@@ -104,27 +105,22 @@ ConsoleLayout.defaultProps = {
   disableAppBarElevation: true,
   centerNavigationItems: [
     {
-      id: 'center-nav-home',
+      id: 'center-nav-dashboard',
       children: 'Home',
-      href: '/',
+      href: Route.SCREEN_DASHBOARD,
     },
-    {
-      id: 'center-nav-besigner',
-      children: 'Besigner',
-      // href: '/besigner',
-      items: [
-        {
-          id: 'center-nav-home',
-          children: 'Home',
-          href: '/',
-        },
-        {
-          id: 'center-nav-besigner',
-          children: 'Besigner',
-          href: '/besigner',
-        },
-      ],
-    },
+    // {
+    //   id: 'center-nav-app',
+    //   children: 'Website',
+    //   // href: '/besigner',
+    //   items: [
+    //     {
+    //       id: 'center-nav-screens',
+    //       children: 'View Screens',
+    //       href: Route.SCREEN_LIST,
+    //     },
+    //   ],
+    // },
   ],
 }
 ConsoleLayout.layoutComponent = AuthenticatedLayout

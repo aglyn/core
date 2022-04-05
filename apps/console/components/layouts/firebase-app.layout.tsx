@@ -26,7 +26,7 @@ import {connectAuthEmulator, getAuth} from 'firebase/auth'
 import {connectDatabaseEmulator, getDatabase} from 'firebase/database'
 import {
   connectFirestoreEmulator,
-  enableIndexedDbPersistence,
+  enableMultiTabIndexedDbPersistence,
   getFirestore,
 } from 'firebase/firestore'
 import {useRouter} from 'next/router'
@@ -110,7 +110,7 @@ function GetInnerLayout({children}) {
       if (IS_DEVELOPMENT) {
         connectFirestoreEmulator(store, 'localhost', 8080)
       }
-      void enableIndexedDbPersistence(store)
+      void enableMultiTabIndexedDbPersistence(store)
       connectedFirestore = true
     }
     catch (error) {
