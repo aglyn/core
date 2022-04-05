@@ -41,11 +41,11 @@ import {useFirestore, useFirestoreCollectionData} from 'reactfire'
 import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
 import DataTableComponent from '../../../components/data-table.component'
+import ConsoleLayout from '../../../components/layouts/console.layout'
+import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../../../components/widget-card.component'
 import {buildRoute, Route} from '../../../constants/route-links'
 import {CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT} from '../../../constants/shared'
-import LayoutConsoleComponent from '../../../layouts/layout-console.component'
-import LayoutDashboardComponent from '../../../layouts/layout-dashboard.component'
 
 
 function Screens(props) {
@@ -163,7 +163,7 @@ function Screens(props) {
   console.log('Screens props', props, data, status, screens)
 
   return (
-    <LayoutDashboardComponent
+    <DashboardLayout
       activeTab={buildRoute(Route.SCREEN_LIST)}
       breadcrumbItems={[
         {
@@ -249,7 +249,7 @@ function Screens(props) {
           />
         </WidgetCardComponent>
       </ContainerComponent>
-    </LayoutDashboardComponent>
+    </DashboardLayout>
   )
 }
 const formSchema = {
@@ -276,7 +276,7 @@ const formSchema = {
   ],
 }
 Screens.displayName = 'Page:Screens'
-Screens.layoutComponent = LayoutConsoleComponent
+Screens.layoutComponent = ConsoleLayout
 Screens.layoutProps = {
   LayoutConsoleComponent: {
     title: 'App Screens',

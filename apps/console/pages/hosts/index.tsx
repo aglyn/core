@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import LayoutAuthenticatedComponent from '../../layouts/layout-authenticated.component'
+import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 
 
 function Hosts() {
@@ -27,6 +27,6 @@ function Hosts() {
   )
 }
 Hosts.displayName = 'Page:Hosts'
-Hosts.layoutComponent = LayoutAuthenticatedComponent
+Hosts.layoutComponent = AuthenticatedLayout
 
 export default Hosts

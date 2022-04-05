@@ -184,11 +184,11 @@ export type FirebaseAppProviderOptions = {
   suspense?: boolean
 }
 
-export interface LayoutFirebaseAppComponentProps {
+export interface FirebaseAppLayoutProps {
   children?: ReactNode
 }
 
-function LayoutFirebaseAppComponent(props: LayoutFirebaseAppComponentProps) {
+function FirebaseAppLayout(props: FirebaseAppLayoutProps) {
   const {children} = props
 
   return (
@@ -203,7 +203,7 @@ function LayoutFirebaseAppComponent(props: LayoutFirebaseAppComponentProps) {
     </FirebaseAppProvider>
   )
 }
-LayoutFirebaseAppComponent.displayName = 'LayoutFirebaseAppComponent'
+FirebaseAppLayout.displayName = 'FirebaseAppLayout'
 
-export {LayoutFirebaseAppComponent}
-export default LayoutFirebaseAppComponent
+export {FirebaseAppLayout}
+export default FirebaseAppLayout

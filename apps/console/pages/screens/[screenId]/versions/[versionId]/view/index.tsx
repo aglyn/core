@@ -24,11 +24,11 @@ import {doc} from 'firebase/firestore'
 import {useRouter} from 'next/router'
 import {useEffect} from 'react'
 import {useFirestore, useFirestoreDoc, useFirestoreDocData} from 'reactfire'
+import ConsoleLayout from '../../../../../../components/layouts/console.layout'
+import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../../../../../../components/widget-card.component'
 import {buildRoute, Route} from '../../../../../../constants/route-links'
 import {CONTENT_MAX_WIDTH} from '../../../../../../constants/shared'
-import LayoutConsoleComponent from '../../../../../../layouts/layout-console.component'
-import LayoutDashboardComponent from '../../../../../../layouts/layout-dashboard.component'
 
 
 function ScreenDetails(props) {
@@ -112,7 +112,7 @@ function ScreenDetails(props) {
   console.log('Screens props', besignerUrl, props, status, screen)
 
   return (
-    <LayoutDashboardComponent
+    <DashboardLayout
       activeTab={buildRoute(Route.SCREEN_LIST)}
       breadcrumbItems={[
         {
@@ -184,11 +184,11 @@ function ScreenDetails(props) {
 
 
       </ContainerComponent>
-    </LayoutDashboardComponent>
+    </DashboardLayout>
   )
 }
 ScreenDetails.displayName = 'Page:ScreenDetails'
-ScreenDetails.layoutComponent = LayoutConsoleComponent
+ScreenDetails.layoutComponent = ConsoleLayout
 ScreenDetails.layoutProps = {
   LayoutConsoleComponent: {
     title: 'Screen Details',

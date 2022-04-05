@@ -20,8 +20,8 @@ import {CircularProgress} from '@mui/material'
 import {signOut} from 'firebase/auth'
 import {useEffect} from 'react'
 import {useAuth} from 'reactfire'
-import LayoutAuthFormComponent from '../../layouts/layout-auth-form.component'
-import LayoutUnauthenticatedComponent from '../../layouts/layout-unauthenticated.component'
+import AuthFormComponent from '../../components/auth-form.component'
+import UnauthenticatedLayout from '../../components/layouts/unauthenticated.layout'
 
 
 function SignOut() {
@@ -33,7 +33,7 @@ function SignOut() {
   }, [firebaseAuth])
 
   return (
-    <LayoutAuthFormComponent
+    <AuthFormComponent
       headingTop={'Signing out'}
       headingBottom={'Please wait'}
       headingBottomProps={{
@@ -47,7 +47,7 @@ function SignOut() {
   )
 }
 SignOut.displayName = 'Page:SignOut'
-SignOut.layoutComponent = LayoutUnauthenticatedComponent
+SignOut.layoutComponent = UnauthenticatedLayout
 SignOut.layoutProps = {
   LayoutUnauthenticatedComponent: {
     isSignOut: true,

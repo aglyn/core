@@ -21,9 +21,9 @@ import {HAS_BROWSER} from '@aglyn/shared-data-enums'
 import {LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import dynamic from 'next/dynamic'
 import {useEffect} from 'react'
+import ConsoleLayout from '../../components/layouts/console.layout'
 // import {useEffect} from 'react-hooks'
 import '../../constants/app-setup'
-import LayoutConsoleComponent from '../../layouts/layout-console.component'
 
 
 const AglynBesigner = dynamic<BesignerComponentProps>(
@@ -50,7 +50,7 @@ function Besigner(props) {
 }
 
 Besigner.displayName = 'Page:Besigner'
-Besigner.layoutComponent = LayoutConsoleComponent
+Besigner.layoutComponent = ConsoleLayout
 Besigner.layoutProps = {
   LayoutConsoleComponent: {
     title: 'Besigner',

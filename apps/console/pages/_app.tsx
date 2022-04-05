@@ -21,7 +21,7 @@ import {ConfirmationProviderComponent, LoadingLayoutComponent} from '@aglyn/shar
 import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
 import {SnackbarProvider} from '@aglyn/shared-ui-snackstack'
 import {Fragment, useMemo} from 'react'
-import LayoutFirebaseAppComponent from '../layouts/layout-firebase-app.component'
+import FirebaseAppLayout from '../components/layouts/firebase-app.layout'
 import './styles.css'
 
 
@@ -29,7 +29,7 @@ const MainWrapper = (props) => {
   const {children} = props
 
   return (
-    <LayoutFirebaseAppComponent>
+    <FirebaseAppLayout>
       <LoadingLayoutComponent>
         <ConfirmationProviderComponent>
           <SnackbarProvider>
@@ -37,7 +37,7 @@ const MainWrapper = (props) => {
           </SnackbarProvider>
         </ConfirmationProviderComponent>
       </LoadingLayoutComponent>
-    </LayoutFirebaseAppComponent>
+    </FirebaseAppLayout>
   )
 }
 

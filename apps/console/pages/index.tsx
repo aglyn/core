@@ -18,10 +18,10 @@
 import {ICON_VARIANT_HOME} from '@aglyn/shared-data-enums'
 import {ContainerComponent, GridItems} from '@aglyn/shared-ui-jsx'
 import DataTableComponent from '../components/data-table.component'
+import ConsoleLayout from '../components/layouts/console.layout'
+import DashboardLayout from '../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../components/widget-card.component'
 import {CONTENT_MAX_WIDTH} from '../constants/shared'
-import LayoutConsoleComponent from '../layouts/layout-console.component'
-import LayoutDashboardComponent from '../layouts/layout-dashboard.component'
 
 
 function Index(props) {
@@ -29,7 +29,7 @@ function Index(props) {
   console.log('index props', props)
 
   return (
-    <LayoutDashboardComponent
+    <DashboardLayout
       breadcrumbItems={[
         {
           children: 'Details',
@@ -76,11 +76,11 @@ function Index(props) {
           ]}
         />
       </ContainerComponent>
-    </LayoutDashboardComponent>
+    </DashboardLayout>
   )
 }
 Index.displayName = 'Page:Index'
-Index.layoutComponent = LayoutConsoleComponent
+Index.layoutComponent = ConsoleLayout
 Index.layoutProps = {
   LayoutConsoleComponent: {
     title: 'My Dashboard',

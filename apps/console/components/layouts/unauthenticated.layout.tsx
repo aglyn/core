@@ -24,12 +24,12 @@ import {useEffect} from 'react'
 import {useSigninCheck} from 'reactfire'
 
 
-export interface LayoutRequestAuthenticationProps extends Partial<BackgroundImageComponentProps> {
+export interface UnauthenticatedLayoutProps extends Partial<BackgroundImageComponentProps> {
   requireEmailVerification?: boolean
   isSignOut?: boolean
 }
 
-function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps) {
+function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
   const {
     children,
     sx,
@@ -90,7 +90,7 @@ function LayoutUnauthenticatedComponent(props: LayoutRequestAuthenticationProps)
     </BackgroundImageComponent>
   )
 }
-LayoutUnauthenticatedComponent.displayName = 'AglynLayoutUnauthenticated'
+UnauthenticatedLayout.displayName = 'AglynLayoutUnauthenticated'
 
-export {LayoutUnauthenticatedComponent}
-export default LayoutUnauthenticatedComponent
+export {UnauthenticatedLayout}
+export default UnauthenticatedLayout

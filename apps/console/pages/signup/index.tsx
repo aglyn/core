@@ -40,8 +40,8 @@ import {useCallback, useState} from 'react'
 import {useAnalytics, useAuth} from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../components/auth-form-template.component'
-import LayoutAuthFormComponent from '../../layouts/layout-auth-form.component'
-import LayoutUnauthenticatedComponent from '../../layouts/layout-unauthenticated.component'
+import AuthFormComponent from '../../components/auth-form.component'
+import UnauthenticatedLayout from '../../components/layouts/unauthenticated.layout'
 
 
 const googleOAuthProvider = new GoogleAuthProvider()
@@ -99,7 +99,7 @@ function SignUp() {
   }, [handleSignUp])
 
   return (
-    <LayoutAuthFormComponent
+    <AuthFormComponent
       paperTop={
         <Typography
           component="div"
@@ -161,10 +161,10 @@ function SignUp() {
           {'Google'}
         </Button>
       </Stack>
-    </LayoutAuthFormComponent>
+    </AuthFormComponent>
   )
 }
 SignUp.displayName = 'Page:SignUp'
-SignUp.layoutComponent = LayoutUnauthenticatedComponent
+SignUp.layoutComponent = UnauthenticatedLayout
 
 export default SignUp

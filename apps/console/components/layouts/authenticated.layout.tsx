@@ -22,12 +22,12 @@ import {Fragment, type ReactNode, useEffect} from 'react'
 import {useSigninCheck} from 'reactfire'
 
 
-export interface LayoutAuthenticatedComponentProps {
+export interface AuthenticatedLayoutProps {
   children?: ReactNode
   requireEmailVerification?: boolean
 }
 
-function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) {
+function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
   const {children, requireEmailVerification} = props
   const {queueLoading} = useLoading()
   const router = useRouter()
@@ -65,7 +65,7 @@ function LayoutAuthenticatedComponent(props: LayoutAuthenticatedComponentProps) 
     </Fragment>
   )
 }
-LayoutAuthenticatedComponent.displayName = 'AglynLayoutAuthenticated'
+AuthenticatedLayout.displayName = 'AuthenticatedLayout'
 
-export {LayoutAuthenticatedComponent}
-export default LayoutAuthenticatedComponent
+export {AuthenticatedLayout}
+export default AuthenticatedLayout

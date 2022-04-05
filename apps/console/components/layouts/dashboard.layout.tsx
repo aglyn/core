@@ -19,13 +19,9 @@ import {ICON_VARIANT_HOME, ICON_VARIANT_SYMBOL_SECURE} from '@aglyn/shared-data-
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Box, Stack} from '@mui/material'
 import {type ReactNode, useMemo} from 'react'
-import DashboardHeaderComponent, {
-  type DashboardHeaderProps,
-} from '../components/dashboard-header.component'
-import FooterComponent from '../components/footer.component'
-import SecondaryAppBarComponent, {
-  type SecondaryAppBarProps,
-} from '../components/secondary-app-bar.component'
+import DashboardHeaderComponent, {type DashboardHeaderProps} from '../dashboard-header.component'
+import FooterComponent from '../footer.component'
+import SecondaryAppBarComponent, {type SecondaryAppBarProps} from '../secondary-app-bar.component'
 
 
 const defaultNavTabItems: SecondaryAppBarProps['navTabItems'] = [
@@ -67,7 +63,7 @@ const defaultBreadcrumbs = [
   },
 ]
 
-export interface LayoutDashboardProps {
+export interface DashboardLayoutProps {
   children?: ReactNode
   breadcrumbItems?: DashboardHeaderProps['breadcrumbItems']
   disableBreadcrumbs?: DashboardHeaderProps['disableBreadcrumbs']
@@ -80,7 +76,7 @@ export interface LayoutDashboardProps {
   aside?: ReactNode
 }
 
-function LayoutDashboardComponent(props: LayoutDashboardProps) {
+function DashboardLayout(props: DashboardLayoutProps) {
   const {
     children,
     header,
@@ -136,8 +132,8 @@ function LayoutDashboardComponent(props: LayoutDashboardProps) {
     </>
   )
 }
-LayoutDashboardComponent.displayName = 'LayoutDashboardComponent'
-LayoutDashboardComponent.defaultProps = {}
+DashboardLayout.displayName = 'DashboardLayout'
+DashboardLayout.defaultProps = {}
 
-export {LayoutDashboardComponent}
-export default LayoutDashboardComponent
+export {DashboardLayout}
+export default DashboardLayout

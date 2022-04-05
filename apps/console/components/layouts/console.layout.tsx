@@ -27,14 +27,14 @@ import {AppLink} from '@aglyn/shared-ui-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
 import {gravatarUrlFromEmail} from '@aglyn/shared-util-tools'
 import {useUser} from 'reactfire'
-import LayoutAuthenticatedComponent from './layout-authenticated.component'
-import LayoutMainComponent, {type LayoutMainProps} from './layout-main.component'
+import AuthenticatedLayout from './authenticated.layout'
+import MainLayout, {type MainLayoutProps} from './main.layout'
 
 
-export interface LayoutConsoleProps extends LayoutMainProps {
+export interface ConsoleLayoutProps extends MainLayoutProps {
 }
 
-function LayoutConsoleComponent(props: LayoutConsoleProps) {
+function ConsoleLayout(props: ConsoleLayoutProps) {
   const {
     title,
     children,
@@ -48,7 +48,7 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
     : 'device default'
 
   return (
-    <LayoutMainComponent
+    <MainLayout
       title={title ? [..._isArr(title) ? title : [title], 'Secure'] : 'Secure'}
       appBarSuffix="Console"
       quickActions={[
@@ -94,12 +94,12 @@ function LayoutConsoleComponent(props: LayoutConsoleProps) {
       {...rest}
     >
       {children}
-    </LayoutMainComponent>
+    </MainLayout>
   )
 }
 
-LayoutConsoleComponent.displayName = 'LayoutConsoleComponent'
-LayoutConsoleComponent.defaultProps = {
+ConsoleLayout.displayName = 'ConsoleLayout'
+ConsoleLayout.defaultProps = {
   disableAppBarElevation: true,
   centerNavigationItems: [
     {
@@ -126,7 +126,7 @@ LayoutConsoleComponent.defaultProps = {
     },
   ],
 }
-LayoutConsoleComponent.layoutComponent = LayoutAuthenticatedComponent
+ConsoleLayout.layoutComponent = AuthenticatedLayout
 
-export {LayoutConsoleComponent}
-export default LayoutConsoleComponent
+export {ConsoleLayout}
+export default ConsoleLayout

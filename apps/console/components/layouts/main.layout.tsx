@@ -42,7 +42,7 @@ import {
 } from '@mui/material'
 import Head from 'next/head'
 import {Fragment, type ReactNode} from 'react'
-import {DRAWER_WIDTH, TOP_BAR_HEIGHT} from '../constants/shared'
+import {DRAWER_WIDTH, TOP_BAR_HEIGHT} from '../../constants/shared'
 
 
 // eslint-disable-next-line react/display-name
@@ -128,7 +128,7 @@ export interface CenterNavMenuItem extends Omit<AppLinkProps<'button'>, 'compone
   items?: MenuItemProps[]
 }
 
-export interface LayoutMainProps {
+export interface MainLayoutProps {
   children?: ReactNode | undefined
   title?: ReactNode[] | ReactNode
   centerNavigationItems?: CenterNavMenuItem[]
@@ -138,7 +138,7 @@ export interface LayoutMainProps {
   disableAppBarElevation?: boolean
 }
 
-function LayoutMainComponent(props: LayoutMainProps) {
+function MainLayout(props: MainLayoutProps) {
   const {
     children,
     title,
@@ -305,8 +305,8 @@ function LayoutMainComponent(props: LayoutMainProps) {
   )
 }
 
-LayoutMainComponent.displayName = 'LayoutMainComponent'
-LayoutMainComponent.defaultProps = {}
+MainLayout.displayName = 'MainLayout'
+MainLayout.defaultProps = {}
 
-export {LayoutMainComponent}
-export default LayoutMainComponent
+export {MainLayout}
+export default MainLayout
