@@ -33,7 +33,7 @@ const withThemeProvider = createWithThemeProvider({
   theme: [consoleThemeLight, consoleThemeDark],
 })
 
-const MainWrapper = withThemeProvider((props: any) => {
+const MainComponent = withThemeProvider((props: any) => {
   const {children} = props
 
   return (
@@ -57,7 +57,7 @@ function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
 
   return (
     <_AppComponent
-      MainComponent={MainWrapper}
+      MainComponent={MainComponent}
       metaElements={[
         ['viewport', 'width=device-width, initial-scale=1'],
         ['description', APP_CONSOLE.DESCRIPTION],

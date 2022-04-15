@@ -16,6 +16,11 @@
  */
 
 import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-enums'
+import {
+  consoleThemeDark,
+  consoleThemeLight,
+  createWithThemeProvider,
+} from '@aglyn/shared-feature-themes'
 import {_AppComponent, type _AppProps} from '@aglyn/shared-ui-next'
 import {Fragment} from 'react'
 import HsEmbedScript from '../components/hs-embed-script'
@@ -31,6 +36,19 @@ if (!app) {
     firestoreEmulator: {host: 'localhost', port: 8080},
   })
 }
+const withThemeProvider = createWithThemeProvider({
+  theme: [consoleThemeLight, consoleThemeDark],
+})
+
+const MainComponent = withThemeProvider((props: any) => {
+  const {children} = props
+
+  return (
+    <>
+      {children}
+    </>
+  )
+})
 
 export interface _Props<Props, InitialProps> extends _AppProps<Props, InitialProps> {}
 
@@ -40,6 +58,7 @@ function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
 
   return (
     <_AppComponent
+      MainComponent={MainComponent}
       metaElements={[
         ['viewport', 'width=device-width, initial-scale=1'],
         ['description', APP_WWW.DESCRIPTION],
