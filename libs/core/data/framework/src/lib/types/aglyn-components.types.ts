@@ -97,8 +97,9 @@ export type ComponentsRegistryContext = {
 }
 
 export interface IAglynComponent<P = any, T = any> extends JSXForwardRefExoticComponent<JSXPropsWithoutRef<P> & JSXRefAttributes<T>> {
-  readonly [OF_TYPE]: SYMBOL_TYPE
-  readonly [OF_KIND]: SYMBOL_TYPE
+  [OF_TYPE]?: SYMBOL_TYPE
+  [OF_KIND]?: SYMBOL_TYPE
+  aglyn?: boolean
   componentId?: ComponentId
   bundleId?: BundleUId
 }
