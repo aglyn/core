@@ -267,7 +267,7 @@ Provides auth, data-store, analytics and more.
 1. Set the environment variables for the hosts:
 
 
-- `FIRESTORE_EMULATOR_HOST=localhost:8080`
+- `FIRESTORE_EMULATOR_HOST=localhost:8082`
 - `FIREBASE_AUTH_EMULATOR_HOST=localhost:9099`
 
 

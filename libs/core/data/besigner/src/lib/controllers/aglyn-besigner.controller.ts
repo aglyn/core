@@ -22,6 +22,7 @@ import {
   type ContextStore,
   type IAglynAppController,
 } from '@aglyn/core-data-framework'
+import {copy} from '@aglyn/shared-util-tools'
 import {objectDeepMergeFillIn} from '@aglyn/shared-util-vendor'
 import {createApi} from 'effector'
 import {persist} from 'effector-storage/local'
@@ -113,7 +114,7 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     this.#context._domain = this.app.contexts.domain.domain(this.namespace)
 
     this.#context._store = this.#context._domain.createStore<BesignerContextStores>(
-      objectDeepMergeFillIn({...DEFAULT_CONTEXT}, {...this.options.defaults}),
+      objectDeepMergeFillIn(copy(DEFAULT_CONTEXT), this.options.defaults || {}),
       {name: `${this.namespace}:store`},
     )
     persist({store: this.#context._store})

@@ -270,7 +270,7 @@ const AGLYN_CONFIG = {
  * @param nextConfig {import('./nextjs-base.config').WithAglynOptions}
  **/
 function withAglyn(nextConfig = {}) {
-  console.log('process.env.NODE_ENV', NODE_ENV)
+  console.log('process.env.NODE_ENV', NODE_ENV, '; CSRF_SECRET', process.env.CSRF_SECRET)
 
   /**
    * Base configuration for NextJS Apps next.config.js

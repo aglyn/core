@@ -108,7 +108,7 @@ function GetInnerLayout({children}) {
   if (!connectedFirestore) {
     try {
       if (IS_DEVELOPMENT) {
-        connectFirestoreEmulator(store, 'localhost', 8080)
+        connectFirestoreEmulator(store, 'localhost', 8082)
       }
       void enableMultiTabIndexedDbPersistence(store)
       connectedFirestore = true

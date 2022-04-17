@@ -84,7 +84,7 @@ export const getFirebaseAuth = (app?: FirebaseApp) => {
   //   if (HAS_WINDOW()) {
   //
   //     if (IS_DEVELOPMENT) {
-  //       connectFirestoreEmulator(firestoreDb, 'localhost', 8080)
+  //       connectFirestoreEmulator(firestoreDb, 'localhost', 8082)
   //     }
   //     enableMultiTabIndexedDbPersistence(firestoreDb)
   //       .catch((error) => {

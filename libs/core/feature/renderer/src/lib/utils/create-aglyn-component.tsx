@@ -24,24 +24,23 @@ import {
   OF_KIND,
   OF_TYPE,
 } from '@aglyn/core-data-framework'
-import type {JSXElementConstructor} from '@aglyn/shared-data-types'
 import {styled} from '@aglyn/shared-feature-themes'
 import {ErrorBoundaryComponent, type ErrorBoundaryProps, ReactIs} from '@aglyn/shared-ui-jsx'
 import {copy, getDisplayName} from '@aglyn/shared-util-tools'
 import {hoistNonReactStatics, pascalCase} from '@aglyn/shared-util-vendor'
-import {forwardRef, useMemo} from 'react'
+import {forwardRef, type ReactNode, useMemo} from 'react'
 
 
 export function createAglynStyledComponent<P>(
-  component: JSXElementConstructor<P>,
-  styledOptions?: AglynComponentSchema<P>['emotion']['options'],
+  ...args: Parameters<typeof styled>
 ) {
+  const [component, styledOptions] = args
   return styled(component, {...styledOptions})<P>({})
 }
 
 export function createAglynComponent<P>(
   schema: AglynComponentSchema<P>,
-  component: JSXElementConstructor<P>,
+  component: Parameters<typeof styled>[0],
   options?: Partial<ErrorBoundaryProps>,
 ): ComponentRegisterPayload<P> {
   const {componentId, bundleId, emotion} = copy(schema)
@@ -49,7 +48,7 @@ export function createAglynComponent<P>(
   const displayName = getDisplayName(component, pascalCase(componentId))
   const shouldNotBeStyled = emotion?.disable
 
-  const AglynComponent = forwardRef<any, P>(
+  const CreateAglynComponent = forwardRef<any, P>(
     function RefRenderFn(props, ref) {
 
       const Component = useMemo(() => {
@@ -66,7 +65,7 @@ export function createAglynComponent<P>(
           fallback={fallback}
           onCatch={onCatch}
         >
-          {!ReactIs.isValidElementType(Component) ? Component : (
+          {!ReactIs.isValidElementType(Component) ? (Component as unknown as ReactNode) : (
             <Component {...props as P} />
           )}
         </ErrorBoundaryComponent>
@@ -74,16 +73,16 @@ export function createAglynComponent<P>(
     },
   ) as IAglynComponent<P>
 
-  AglynComponent.displayName = `AglynComponent(${displayName})`
-  AglynComponent.componentId = componentId
-  AglynComponent.bundleId = bundleId
-  AglynComponent.aglyn = true
-  AglynComponent[OF_TYPE] = MODULE_TYPE
-  AglynComponent[OF_KIND] = COMPONENT_ELEMENT_TYPE
-  hoistNonReactStatics(AglynComponent)
+  CreateAglynComponent.displayName = `CreateAglynComponent(${displayName})`
+  CreateAglynComponent.componentId = componentId
+  CreateAglynComponent.bundleId = bundleId
+  CreateAglynComponent.aglyn = true
+  CreateAglynComponent[OF_TYPE] = MODULE_TYPE
+  CreateAglynComponent[OF_KIND] = COMPONENT_ELEMENT_TYPE
+  CreateAglynComponent && hoistNonReactStatics(CreateAglynComponent)
 
   return {
-    component: AglynComponent,
+    component: CreateAglynComponent,
     schema,
   }
 }

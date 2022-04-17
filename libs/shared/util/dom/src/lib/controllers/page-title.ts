@@ -17,7 +17,8 @@
 
 import {_isStrEmpty, _isUndOrNull} from '@aglyn/shared-util-guards'
 import {arraySafe} from '@aglyn/shared-util-tools'
-import {Subject} from 'rxjs'
+import {BehaviorSubject} from 'rxjs'
+import {map} from 'rxjs/operators'
 
 
 export type PageTitleObject = {
@@ -28,10 +29,10 @@ export type PageTitleObject = {
 }
 
 let _values: PageTitleObject = {suffix: 'My App'}
-export const $pageTitle = new Subject()
-export const $_screenObj = new Subject<PageTitleObject>()
+export const $_screenObj = new BehaviorSubject<PageTitleObject>({suffix: 'My App'})
+export const $pageTitle = $_screenObj.pipe(map(buildScreenTitle))
 
-function buildScreenTitle(values: PageTitleObject): void {
+function buildScreenTitle(values: PageTitleObject): string {
   const {
     number,
     screen,
@@ -44,7 +45,7 @@ function buildScreenTitle(values: PageTitleObject): void {
     .filter(i => !_isUndOrNull(i) && !_isStrEmpty(i))
     .join(separator)
 
-  $pageTitle.next(newTitle)
+  return newTitle
 }
 
 function buildValues(values?: PageTitleObject): PageTitleObject {
@@ -71,9 +72,3 @@ export function setScreenNumber(number?): void {
 export function setScreenTitle(values: PageTitleObject): void {
   $_screenObj.next(buildValues(values))
 }
-
-$_screenObj.subscribe({
-  next: (values) => {
-    buildScreenTitle(values)
-  },
-})

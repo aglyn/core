@@ -33,7 +33,7 @@ if (!app) {
   const previewProduction = true
   app = withAppController(IS_PRODUCTION || previewProduction ? {} : {
     authEmulator: 'http://localhost:9099/',
-    firestoreEmulator: {host: 'localhost', port: 8080},
+    firestoreEmulator: {host: 'localhost', port: 8082},
   })
 }
 const withThemeProvider = createWithThemeProvider({
