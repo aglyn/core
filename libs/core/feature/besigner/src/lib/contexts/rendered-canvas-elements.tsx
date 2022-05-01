@@ -21,8 +21,8 @@ import {
   type MutableRefObject,
   type ReactNode,
   useContext,
-  useMemo,
   useRef,
+  useState,
 } from 'react'
 import type {DragElementWrapper, DragSourceOptions} from 'react-dnd'
 
@@ -59,7 +59,7 @@ export interface RenderedCanvasElementsProps {
 function RenderedCanvasElementsProvider(props: RenderedCanvasElementsProps) {
   const {children} = props
   const elementRefs = useRef<Record<ElementId, ElementCanvasRefObject>>({})
-  const context = useMemo<RenderedCanvasElements>(() => ([
+  const [context] = useState<RenderedCanvasElements>(() => ([
     ($id, ref): void => {
       elementRefs.current[$id] = ref
     },
@@ -69,7 +69,7 @@ function RenderedCanvasElementsProvider(props: RenderedCanvasElementsProps) {
     ($id) => {
       return elementRefs.current[$id]
     },
-  ]), [elementRefs])
+  ]))
 
   return (
     <RenderedCanvasElementsContext.Provider value={context}>

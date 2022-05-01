@@ -18,8 +18,8 @@
 import {useEffect, useLayoutEffect} from 'react'
 
 
-export const useLayoutEffectIsomorphic = typeof window !== 'undefined'
+export const useIsomorphicLayoutEffect = typeof window !== 'undefined'
   ? useLayoutEffect
   : useEffect
 
-export default useLayoutEffectIsomorphic
+export default useIsomorphicLayoutEffect

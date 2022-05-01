@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,56 @@
  */
 
 
-import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
+import type {BesignerDndElementOver, IBesignerAppController} from '@aglyn/core-data-besigner'
+import {type BesignerDndState, setBesignerDndItem} from '@aglyn/core-data-besigner'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback, useEffect, useState} from 'react'
 
 
-export const useAglynDndOver = () => {
-  return useAglynBesignerStoreState('dnd', 'over')
+export function useAglynDndOver(): [
+  value: BesignerDndElementOver | undefined,
+  setValue: (
+    value: BesignerDndElementOver | ((
+      prev: BesignerDndElementOver,
+      dnd: BesignerDndState,
+    ) => BesignerDndElementOver),
+  ) => void
+] {
+  const app = useAglynAppContext() as IBesignerAppController
+  const [value, setValue] = useState<BesignerDndElementOver | undefined>(undefined)
+  const setDndOver = useAglynDndSetOver()
+
+  useEffect(() => {
+    const subscription = app.besigner?.__store__.dnd?.subscribe((value) => {
+      setValue(value?.over)
+    })
+    return () => subscription.unsubscribe()
+  }, [app])
+
+
+  return [value, setDndOver]
 }
 
 export default useAglynDndOver
+
+
+export function useAglynDndSetOver(): (
+  value: BesignerDndElementOver | ((
+    prev: BesignerDndElementOver,
+    dnd: BesignerDndState,
+  ) => BesignerDndElementOver),
+) => void {
+  const app = useAglynAppContext() as IBesignerAppController
+  return useCallback((
+    value: BesignerDndElementOver | ((
+      prev: BesignerDndElementOver,
+      dnd: BesignerDndState,
+    ) => BesignerDndElementOver),
+  ) => {
+    setBesignerDndItem(app, {
+      item: 'over',
+      value: (prev, dnd) => (_isFnT(value) ? value(prev, dnd) : value),
+    })
+  }, [app])
+}

@@ -38,7 +38,7 @@ export type ConfirmationContextType = {
 export type ConfirmationContext = Context<ConfirmationContextType>
 
 export const DEFAULT_CONTEXT_VALUE: ConfirmationContextType = {
-  confirm: noop() as any,
+  confirm: noop as any,
 }
 export const DEFAULT_CONTEXT_CONFIG: ConfirmationContextConfig = {
   title: 'Are you sure?',

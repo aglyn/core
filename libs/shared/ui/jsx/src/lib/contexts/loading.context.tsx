@@ -49,10 +49,10 @@ export type LoadingContextType = {
 
 export const LOADING_CONTEXT_DEFAULT_VALUE: LoadingContextType = {
   loading: false,
-  queueLoading: noop() as any,
-  dequeueLoading: noop() as any,
-  dequeueAllLoading: noop() as any,
-  checkLoading: noop() as any,
+  queueLoading: noop as any,
+  dequeueLoading: noop as any,
+  dequeueAllLoading: noop as any,
+  checkLoading: noop as any,
 }
 
 export const LoadingContext = createContext<LoadingContextType>(LOADING_CONTEXT_DEFAULT_VALUE)

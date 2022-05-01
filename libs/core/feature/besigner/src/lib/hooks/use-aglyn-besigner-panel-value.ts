@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,72 @@
  * limitations under the License.
  */
 
-import {type BesignerPanelsState} from '@aglyn/core-data-besigner'
-import {type KeyOf} from '@aglyn/shared-data-types'
-import {useAglynBesignerStoreState} from './use-aglyn-besigner-store-state'
+import {
+  type BesignerPanelKey,
+  type BesignerPanelsState,
+  type IBesignerAppController,
+  setBesignerPanel,
+} from '@aglyn/core-data-besigner'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback, useEffect, useState} from 'react'
 
 
-export function useAglynBesignerPanelValue<P extends KeyOf<BesignerPanelsState>, K extends KeyOf<BesignerPanelsState[P]>>(
-  item: P,
+export function useAglynBesignerPanelValue<P extends BesignerPanelKey, K extends keyof BesignerPanelsState[P]>(
+  panelName: P,
   key: K,
-): BesignerPanelsState[P][K] {
-  const panel = useAglynBesignerStoreState('panels', item)
-  const {[key]: value} = {...panel}
+): [
+  value: BesignerPanelsState[P][K] | undefined,
+  setValue: (
+    value: BesignerPanelsState[P][K] | ((
+      prev: BesignerPanelsState[P][K],
+      panel: BesignerPanelsState[P],
+      panels: BesignerPanelsState,
+    ) => BesignerPanelsState[P][K]),
+  ) => void
+] {
 
-  return value
+  const app = useAglynAppContext() as IBesignerAppController
+  const [value, setValue] = useState<BesignerPanelsState[P][K] | undefined>(undefined)
+  const setPanelValue = useAglynBesignerPanelSetValue<P, K>().bind(null, panelName, key)
+
+  useEffect(() => {
+    const subscription = app.besigner?.__store__.panels?.subscribe((panels) => {
+      setValue(panels?.[panelName]?.[key])
+    })
+    return () => subscription.unsubscribe()
+  }, [app, key, panelName])
+
+  return [value, setPanelValue]
 }
 
 export default useAglynBesignerPanelValue
+
+export function useAglynBesignerPanelSetValue<P extends BesignerPanelKey, K extends keyof BesignerPanelsState[P]>(): (
+  panelName: P,
+  key: K,
+  value: BesignerPanelsState[P][K] | ((
+    prev: BesignerPanelsState[P][K],
+    panel: BesignerPanelsState[P],
+    panels: BesignerPanelsState,
+  ) => BesignerPanelsState[P][K]),
+) => void {
+
+  const app = useAglynAppContext() as IBesignerAppController
+  return useCallback((
+    panelName: P,
+    key: K,
+    value: BesignerPanelsState[P][K] | ((
+      prev: BesignerPanelsState[P][K],
+      panel: BesignerPanelsState[P],
+      panels: BesignerPanelsState,
+    ) => BesignerPanelsState[P][K]),
+  ) => {
+    setBesignerPanel(app, {
+      panel: panelName,
+      value: (prev, panels) => ({
+        ...prev, [key]: (_isFnT(value) ? value(prev[key], prev, panels) : value),
+      }),
+    })
+  }, [app])
+}

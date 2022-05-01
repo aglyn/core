@@ -28,8 +28,8 @@ import {mdiChevronDown, mdiChevronRight, MdiIcon} from '@aglyn/shared-ui-mdi-jsx
 import {_isArr} from '@aglyn/shared-util-guards'
 import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeItem'
 import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
-import {forwardRef, Fragment, useCallback, useMemo, useState} from 'react'
-import useAglynCanvasElementStatusManagers from '../hooks/use-aglyn-canvas-element-status-managers'
+import {forwardRef, useCallback, useMemo, useState} from 'react'
+import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
 
@@ -65,6 +65,12 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
       bundleId = useAglynElementData($id, 'bundleId'),
       label = useAglynElementLabel($id),
       icon = useAglynComponentSchema(componentId, bundleId)?.icon
+    const setHovered = useAglynCanvasSetHovered()
+
+    const handleOnMouseOver = useCallback((e) => {
+      e.stopPropagation()
+      setHovered({$id})
+    }, [$id, setHovered])
 
     return (
       <TreeItem
@@ -72,8 +78,9 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
         nodeId={$id}
         collapseIcon={<MdiIcon path={mdiChevronDown.path} />}
         expandIcon={<MdiIcon path={mdiChevronRight.path} />}
+        onMouseOver={handleOnMouseOver}
         label={
-          <Fragment>
+          <>
             {!icon?.path && icon ? icon : (
               <MdiIcon
                 color="quaternary"
@@ -98,7 +105,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
               />
             )}
             {label}
-          </Fragment>
+          </>
         }
         {...rest}
       >
@@ -115,9 +122,9 @@ export interface ElementsTreeViewComponentProps extends Partial<SingleSelectTree
 export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
-    const selected = useAglynCanvasSelected()
+    const [selected, setSelected] = useAglynCanvasSelected()
+    const setHovered = useAglynCanvasSetHovered()
     const selectedHierarchy = useAglynCanvasElementHierarchy(selected?.$id)
-    const [handleHover, handleSelect] = useAglynCanvasElementStatusManagers()
     const [expanded, setExpanded] = useState<ElementId[]>([])
     const allExpanded = useMemo(() => [
       ...selectedHierarchy, ...expanded,
@@ -126,14 +133,14 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     const handleTreeItemSelect = useCallback((e, $id) => {
       e.stopPropagation()
       e.preventDefault()
-      handleSelect($id === selected?.$id ? null : $id)
-    }, [handleSelect, selected])
+      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
+    }, [setSelected])
 
 
     const handleTreeItemFocus = useCallback((e, $id) => {
       e.stopPropagation()
-      handleHover($id)
-    }, [handleHover])
+      setHovered({$id})
+    }, [setHovered])
 
 
     const handleTreeItemToggle = useCallback((e, ids: ElementId[]) => {

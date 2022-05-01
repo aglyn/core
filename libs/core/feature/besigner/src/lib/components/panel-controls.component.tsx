@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-import {BesignerPanelViewFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_DOCK_LEFT_TOGGLE,
   ICON_VARIANT_DOCK_RIGHT_TOGGLE,
@@ -29,53 +27,31 @@ import {
   ToggleButtonGroup as MuiToggleButtonGroup,
   Tooltip as MuiTooltip,
 } from '@mui/material'
-import {forwardRef, type MouseEvent, useCallback} from 'react'
-import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
+import {forwardRef} from 'react'
+import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
 
 
 export interface PanelControlsProps extends StackProps {}
 
 const PanelControlsComponent = forwardRef<any, PanelControlsProps>(
   function RefRenderFn(props, ref) {
-    const app = useAglynAppContext()
-    const panels = useAglynBesignerStoreState('panels')
-    const openPanels = Object.values(panels)
+    const [panelLeft, setPanelLeft] = useAglynBesignerPanel('panelLeft')
+    const [panelRight, setPanelRight] = useAglynBesignerPanel('panelRight')
+    const openPanels = [panelLeft, panelRight]
       .filter((i) => Boolean(i?.toggled))
       .map((i) => i?.id)
 
-    const handlePanelToggle = useCallback(
-      (event: MouseEvent<HTMLElement>, value: BesignerPanelViewFlag[]) => {
-        setBesignerPanels(app, {
-          panels: (panels) => ({
-            panelLeft: {
-              ...panels.panelLeft,
-              toggled: value.indexOf(BesignerPanelViewFlag.PANEL_LEFT) >= 0,
-            },
-            panelRight: {
-              ...panels.panelRight,
-              toggled: value.indexOf(BesignerPanelViewFlag.PANEL_RIGHT) >= 0,
-            },
-            panelBottom: {
-              ...panels.panelBottom,
-              toggled: value.indexOf(BesignerPanelViewFlag.PANEL_BOTTOM) >= 0,
-            },
-          }),
-        })
-      },
-      [app],
-    )
-
     return (
-      <MuiStack ref={ref} direction="row" spacing={1} {...ref}>
+      <MuiStack ref={ref} direction="row" spacing={1} {...props}>
         <MuiToggleButtonGroup
           size="small"
           value={openPanels}
-          onChange={handlePanelToggle}
         >
           <MuiTooltip title={'Left panel'}>
             <MuiToggleButton
-              selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_LEFT)}
-              value={BesignerPanelViewFlag.PANEL_LEFT}
+              selected={Boolean(panelLeft?.toggled)}
+              value={Boolean(panelLeft?.id) || false}
+              onClick={() => setPanelLeft((panel) => ({...panel, toggled: !panel?.toggled}))}
             >
               <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_LEFT_TOGGLE.path} />
             </MuiToggleButton>
@@ -90,8 +66,9 @@ const PanelControlsComponent = forwardRef<any, PanelControlsProps>(
           {/*</MuiTooltip>*/}
           <MuiTooltip title={'Right panel'}>
             <MuiToggleButton
-              selected={openPanels.some(i => i === BesignerPanelViewFlag.PANEL_RIGHT)}
-              value={BesignerPanelViewFlag.PANEL_RIGHT}
+              selected={Boolean(panelRight?.toggled)}
+              value={Boolean(panelRight?.id) || false}
+              onClick={() => setPanelRight((panel) => ({...panel, toggled: !panel?.toggled}))}
             >
               <MdiIcon fontSize="inherit" path={ICON_VARIANT_DOCK_RIGHT_TOGGLE.path} />
             </MuiToggleButton>

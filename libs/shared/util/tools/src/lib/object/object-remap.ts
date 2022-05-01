@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Conditional, NUN, OmitIndexOfType, PKey} from '@aglyn/shared-data-types'
+import type {Conditional, NUN, OmitIndexOfType, PKey} from '@aglyn/shared-data-types'
 
 
 export type RemapOptions = {deleteUndefined?: boolean}
@@ -49,7 +49,7 @@ export function objectRemap<K extends PKey, V, U = V, T = unknown>(
   target: RemapTarget<K, V>,
   callbackFn: RemapCallback<K, V, U>,
   options?: RemapOptions,
-  thisArg?: ThisType<T>
+  thisArg?: ThisType<T>,
 ): RemapOutput<typeof target, K, V, U, typeof options> {
   type ThisArg = Conditional<typeof thisArg, NUN, typeof target, typeof thisArg>
   type Ouput = RemapOutput<typeof target, K, V, U, typeof options>

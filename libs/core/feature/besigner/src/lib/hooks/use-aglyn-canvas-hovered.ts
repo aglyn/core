@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,58 @@
  */
 
 
-import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
+import {
+  type BesignerCanvasHoveredElement,
+  type BesignerCanvasState,
+  type IBesignerAppController,
+  setBesignerCanvasHovered,
+} from '@aglyn/core-data-besigner'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback, useEffect, useState} from 'react'
 
 
-export const useAglynCanvasHovered = () => {
-  return useAglynBesignerStoreState('canvas', 'hovered')
+export function useAglynCanvasHovered(): [
+  value: BesignerCanvasHoveredElement | undefined,
+  setValue: (
+    hovered: BesignerCanvasHoveredElement | ((
+      hovered: BesignerCanvasHoveredElement,
+      canvas: BesignerCanvasState,
+    ) => BesignerCanvasHoveredElement),
+  ) => void
+] {
+  const app = useAglynAppContext() as IBesignerAppController
+  const [value, setValue] = useState<BesignerCanvasHoveredElement | undefined>(undefined)
+  const setHovered = useAglynCanvasSetHovered()
+
+  useEffect(() => {
+    const subscription = app.besigner?.canvas.__store__.canvas?.subscribe((canvas) => {
+      setValue(canvas?.hovered)
+    })
+    return () => subscription.unsubscribe()
+  }, [app])
+
+
+  return [value, setHovered]
 }
 
 export default useAglynCanvasHovered
+
+export function useAglynCanvasSetHovered(): (
+  hovered: BesignerCanvasHoveredElement | ((
+    prev: BesignerCanvasHoveredElement,
+    canvas: BesignerCanvasState,
+  ) => BesignerCanvasHoveredElement),
+) => void {
+  const app = useAglynAppContext() as IBesignerAppController
+  return useCallback((
+    hovered: BesignerCanvasHoveredElement | ((
+      prev: BesignerCanvasHoveredElement,
+      canvas: BesignerCanvasState,
+    ) => BesignerCanvasHoveredElement),
+  ) => {
+    setBesignerCanvasHovered(app, {
+      hovered: (prev, canvas) => _isFnT(hovered) ? hovered(prev, canvas) : hovered,
+    })
+  }, [app])
+}

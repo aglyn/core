@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import {BesignerDeviceFlag, setBesignerFlag} from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {BesignerDeviceFlag} from '@aglyn/core-data-besigner'
 import {
   ICON_VARIANT_FLUID_RESPONSIVE,
   ICON_VARIANT_LAPTOP,
@@ -35,7 +34,7 @@ import {
   Tooltip as MuiTooltip,
 } from '@mui/material'
 import {forwardRef, type MouseEvent, useCallback, useMemo, useState} from 'react'
-import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
+import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
 
 
 const devicePreviewOptions = [
@@ -76,9 +75,8 @@ export interface DevicePreviewControlsProps extends Partial<MenuProps> {}
 const DevicePreviewControlsComponent = forwardRef<any, DevicePreviewControlsProps>(
   function RefRenderFn(props, ref) {
     const {...rest} = props
-    const app = useAglynAppContext()
 
-    const devicePreview = useAglynBesignerStoreState('flags', 'devicePreview')
+    const [devicePreview, setDevicePreview] = useAglynBesignerFlag('devicePreview')
     const [anchorEl, setAnchorEl] = useState<Element>(null)
     const [devicesMenuOpen, setDevicesMenuOpen] = useState(false)
     const activeDevice = useMemo(() => (
@@ -92,7 +90,7 @@ const DevicePreviewControlsComponent = forwardRef<any, DevicePreviewControlsProp
       setDevicesMenuOpen(true)
     }, [])
     const handleMenuClick = (device: BesignerDeviceFlag) => (event: MouseEvent<HTMLElement>) => {
-      setBesignerFlag(app, {flag: 'devicePreview', value: device})
+      setDevicePreview(device)
       setDevicesMenuOpen(false)
     }
 
@@ -102,6 +100,7 @@ const DevicePreviewControlsComponent = forwardRef<any, DevicePreviewControlsProp
         id="aglyn:device-preview"
         onClick={handleMenuClose}
         horizontalOrigin="right"
+
         items={[
           {
             type: 'subheader',

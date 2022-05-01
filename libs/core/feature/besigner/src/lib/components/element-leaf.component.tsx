@@ -23,8 +23,9 @@ import {
 import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
 import {type ChangeEvent, forwardRef, useCallback, useEffect, useRef} from 'react'
 import {useRenderedCanvasElements} from '../contexts/rendered-canvas-elements'
-import useAglynCanvasElementStatusManagers from '../hooks/use-aglyn-canvas-element-status-managers'
+import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasElementIsSelected from '../hooks/use-aglyn-canvas-is-element-selected'
+import {useAglynCanvasSetSelected} from '../hooks/use-aglyn-canvas-selected'
 import useLeafDnd from '../hooks/use-leaf-dnd'
 
 
@@ -37,23 +38,27 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const bundleId = useAglynElementData($id, 'bundleId')
     const leaf = leafComponent || ElementLeafComponent
     const isSelected = useAglynCanvasElementIsSelected($id)
-    const [handleHover, handleSelect] = useAglynCanvasElementStatusManagers($id)
+    const setHovered = useAglynCanvasSetHovered()
+    const setSelected = useAglynCanvasSetSelected()
     const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
     const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
     const elemRef = useRef<Element>(null)
-    setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
-    useEffect(() => () => {deleteElementRef($id)}, [$id, deleteElementRef])
+
+    useEffect(() => {
+      setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
+      return () => deleteElementRef($id)
+    }, [$id, deleteElementRef, dragHandleRef, setElementRef])
+
 
     const handleOnMouseOver = useCallback((e: ChangeEvent<any>) => {
       e.stopPropagation()
-      handleHover($id)
-    }, [$id, handleHover])
+      setHovered({$id})
+    }, [$id, setHovered])
     const handleOnMouseDown = useCallback((e: ChangeEvent<any>) => {
       e.preventDefault()
       e.stopPropagation()
-      if (isSelected) handleSelect(null)
-      else handleSelect($id)
-    }, [$id, handleSelect, isSelected])
+      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
+    }, [$id, setSelected])
 
     // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     // console.log('element attributes', elementAttributes)

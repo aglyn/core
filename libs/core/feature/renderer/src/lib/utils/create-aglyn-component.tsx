@@ -58,12 +58,11 @@ export function createAglynComponent<P>(
 
       return (
         <ErrorBoundaryComponent
-          ref={ref}
           fallback={fallback}
           onCatch={onCatch}
         >
           {!ReactIs.isValidElementType(Component) ? (Component as unknown as ReactNode) : (
-            <Component {...props as P} />
+            <Component ref={ref} {...props as P} />
           )}
         </ErrorBoundaryComponent>
       )

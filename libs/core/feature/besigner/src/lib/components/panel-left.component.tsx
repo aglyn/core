@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import {BesignerPanelTabFlag, setBesignerPanels} from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {BesignerPanelTabFlag} from '@aglyn/core-data-besigner'
 import {ICON_VARIANT_ELEMENT_TREE_VIEW} from '@aglyn/shared-data-enums'
 import {styled} from '@aglyn/shared-feature-themes'
 import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
@@ -24,14 +23,12 @@ import {numberFromHexadecimal, numberToHexadecimal} from '@aglyn/shared-util-too
 import {TabContext as MuiTabContext, TabList as MuiTabList, TabPanel as MuiTabPanel} from '@mui/lab'
 import {Box, Button, Tab as MuiTab} from '@mui/material'
 import {forwardRef, useCallback} from 'react'
-import {useAddElementCallback} from '../hooks/use-add-element-callback'
-import {useAglynBesignerStoreState} from '../hooks/use-aglyn-besigner-store-state'
-import {
-  ElementsTreeViewComponent,
+import useAddElementCallback from '../hooks/use-add-element-callback'
+import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
+import ElementsTreeViewComponent, {
   type ElementsTreeViewComponentProps,
 } from './elements-tree-view.component'
-import {
-  WorkspacePanelComponent,
+import WorkspacePanelComponent, {
   type WorkspacePanelComponentProps,
 } from './workspace-panel.component'
 
@@ -75,21 +72,13 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
   function RefRenderFn(props, ref) {
     const {children, ...rest} = props
 
-    const app = useAglynAppContext()
-    const {toggled, tab, size} = useAglynBesignerStoreState('panels', 'panelLeft') || {}
+    const [panel, setPanel] = useAglynBesignerPanel('panelLeft')
+    const {toggled, tab, size} = panel || {}
     const value = tab || BesignerPanelTabFlag.ELEMENTS_TREE
 
     const handleTabChange = useCallback((e, val) => {
-      setBesignerPanels(app, {
-        panels: (panels) => ({
-          ...panels,
-          panelLeft: {
-            ...panels.panelLeft,
-            tab: numberFromHexadecimal(val),
-          },
-        }),
-      })
-    }, [app])
+      setPanel((panel) => ({...panel, tab: numberFromHexadecimal(val)}))
+    }, [setPanel])
 
     return (
       <WorkspacePanelComponent

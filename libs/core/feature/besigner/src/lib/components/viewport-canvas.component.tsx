@@ -22,7 +22,7 @@ import clsx from 'clsx'
 import dynamic from 'next/dynamic'
 // import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
 import {forwardRef, type HTMLAttributes, type Ref} from 'react'
-import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
+import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
 
 
 const ViewportFrameComponent = dynamic(
@@ -98,7 +98,7 @@ const ViewportCanvasComponent = forwardRef<any, ViewportCanvasComponentProps>(
     const {children, pannerRef, ...rest} = props
 
 
-    const devicePreview = useAglynBesignerStoreState('flags', 'devicePreview')
+    const [devicePreview, setDevicePreview] = useAglynBesignerFlag('devicePreview')
     const artboardClass = clsx({
       [canvasArtboardClassKeys.responsive]: BesignerDeviceFlag.RESPONSIVE === devicePreview,
       [canvasArtboardClassKeys.deviceXs]: BesignerDeviceFlag.XS === devicePreview,

@@ -103,9 +103,9 @@ const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
       }
     }, [])
 
-    const leftToggled = useAglynBesignerPanelValue('panelLeft', 'toggled')
-    const rightToggled = useAglynBesignerPanelValue('panelRight', 'toggled')
-    const bottomToggled = useAglynBesignerPanelValue('panelBottom', 'toggled')
+    const [leftToggled] = useAglynBesignerPanelValue('panelLeft', 'toggled')
+    const [rightToggled] = useAglynBesignerPanelValue('panelRight', 'toggled')
+    const [bottomToggled] = useAglynBesignerPanelValue('panelBottom', 'toggled')
 
     const elemClassName = clsx({
       [classKeys.panelLeftOpen]: Boolean(leftToggled),

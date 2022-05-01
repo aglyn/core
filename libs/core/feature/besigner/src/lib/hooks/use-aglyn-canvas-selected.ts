@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,58 @@
  */
 
 
-import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
+import {
+  type BesignerCanvasSelectedElement,
+  type BesignerCanvasState,
+  type IBesignerAppController,
+  setBesignerCanvasSelected,
+} from '@aglyn/core-data-besigner'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback, useEffect, useState} from 'react'
 
 
-export const useAglynCanvasSelected = () => {
-  return useAglynBesignerStoreState('canvas', 'selected')
+export function useAglynCanvasSelected(): [
+  value: BesignerCanvasSelectedElement | undefined,
+  setValue: (
+    selected: BesignerCanvasSelectedElement | ((
+      prev: BesignerCanvasSelectedElement,
+      canvas: BesignerCanvasState,
+    ) => BesignerCanvasSelectedElement),
+  ) => void
+] {
+  const app = useAglynAppContext() as IBesignerAppController
+  const [value, setValue] = useState<BesignerCanvasSelectedElement | undefined>(undefined)
+  const setSelected = useAglynCanvasSetSelected()
+
+  useEffect(() => {
+    const subscription = app.besigner?.__store__.canvas?.subscribe((canvas) => {
+      setValue(canvas?.selected)
+    })
+    return () => subscription.unsubscribe()
+  }, [app])
+
+
+  return [value, setSelected]
 }
 
 export default useAglynCanvasSelected
+
+export function useAglynCanvasSetSelected(): (
+  selected: BesignerCanvasSelectedElement | ((
+    prev: BesignerCanvasSelectedElement,
+    canvas: BesignerCanvasState,
+  ) => BesignerCanvasSelectedElement),
+) => void {
+  const app = useAglynAppContext() as IBesignerAppController
+  return useCallback((
+    selected: BesignerCanvasSelectedElement | ((
+      prev: BesignerCanvasSelectedElement,
+      canvas: BesignerCanvasState,
+    ) => BesignerCanvasSelectedElement),
+  ) => {
+    setBesignerCanvasSelected(app, {
+      selected: (prev, canvas) => _isFnT(selected) ? selected(prev, canvas) : selected,
+    })
+  }, [app])
+}

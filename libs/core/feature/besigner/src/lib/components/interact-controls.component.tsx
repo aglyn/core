@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import {InteractionModeFlag, setBesignerFlag} from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {InteractionModeFlag} from '@aglyn/core-data-besigner'
 import {
   ICON_VARIANT_MODIFY_MODE_REARRANGE,
   ICON_VARIANT_MODIFY_MODE_SELECT,
@@ -30,7 +29,7 @@ import {
   Tooltip as MuiTooltip,
 } from '@mui/material'
 import {forwardRef, MouseEvent, useCallback} from 'react'
-import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
+import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
 
 
 export interface InteractControlsProps extends StackProps {}
@@ -38,14 +37,10 @@ export interface InteractControlsProps extends StackProps {}
 const InteractControlsComponent = forwardRef<any, InteractControlsProps>(
   function RefRenderFn(props, ref) {
     const {...rest} = props
-    const app = useAglynAppContext()
-    const interactMode = useAglynBesignerStoreState('flags', 'interactMode')
+    const [interactMode, setInteractMode] = useAglynBesignerFlag('interactMode')
     const handleInteractModeClick = useCallback((event: MouseEvent<HTMLElement>, value: any) => {
-      setBesignerFlag(app, {
-        flag: 'interactMode',
-        value: InteractionModeFlag[InteractionModeFlag[value]],
-      })
-    }, [app])
+      setInteractMode(InteractionModeFlag[InteractionModeFlag[value]])
+    }, [setInteractMode])
 
     return (
       <MuiStack ref={ref} direction="row" spacing={1} {...rest}>

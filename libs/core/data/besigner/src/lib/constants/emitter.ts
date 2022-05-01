@@ -16,14 +16,24 @@
  */
 
 
-import {type PayloadData} from '@aglyn/core-data-framework'
+import type {PayloadData} from '@aglyn/core-data-framework'
+import type {
+  BesignerCanvasHoveredElement,
+  BesignerCanvasSelectedElement,
+  BesignerCanvasState,
+  BesignerContextStores,
+  BesignerDndState,
+  BesignerFlagsState,
+  BesignerPanelKey,
+  BesignerPanelsState,
+} from '../controllers/aglyn-besigner.types'
 import {
-  type BesignerCanvasHoveredElement,
-  type BesignerCanvasSelectedElement,
-  type BesignerContextStores,
-  type BesignerDndState,
-  type BesignerFlagState,
-  type BesignerPanelsState,
+  BesignerCanvasItemKey,
+  BesignerCanvasItemValue,
+  BesignerDndItemKey,
+  BesignerDndItemValue,
+  BesignerFlagValue,
+  BesignerPanelValue,
 } from '../controllers/aglyn-besigner.types'
 
 
@@ -37,19 +47,55 @@ export enum BesignerAppEffectFlag {
 
 
 export type BesignerGetStorePayload<K extends keyof BesignerContextStores = any> = PayloadData<{store: K}>
-export type BesignerFlagInteractModePayload<K extends keyof BesignerFlagState = any> = PayloadData<{flag: K, value: BesignerFlagState[K]}>
-export type BesignerSetPanelPayload = PayloadData<{panels: (prev: BesignerPanelsState) => BesignerPanelsState}>
-export type BesignerOpenPanelPayload = PayloadData<{panel: keyof BesignerPanelsState}>
-export type BesignerClosePanelPayload = PayloadData<{panel: keyof BesignerPanelsState}>
-export type BesignerSetDndStatePayload = PayloadData<{dnd: (prev: BesignerDndState) => Partial<BesignerDndState>}>
-export type BesignerSetCanvasSelectedPayload = PayloadData<{selected: (prev: BesignerCanvasSelectedElement) => BesignerCanvasSelectedElement}>
-export type BesignerSetCanvasHoveredPayload = PayloadData<{hovered: (prev: BesignerCanvasHoveredElement) => BesignerCanvasHoveredElement}>
+export type BesignerSetFlagPayload<K extends keyof BesignerFlagsState = any> = PayloadData<{
+  flag: K, value: (
+    prev: BesignerFlagValue<K>,
+    flags: BesignerFlagsState,
+  ) => BesignerFlagValue<K>
+}>
+export type BesignerSetFlagsPayload = PayloadData<{flags: (prev: BesignerFlagsState) => BesignerFlagsState}>
+export type BesignerSetPanelPayload<K extends BesignerPanelKey = any> = PayloadData<{
+  panel: K, value: (
+    prev: BesignerPanelValue<K>,
+    panels: BesignerPanelsState,
+  ) => BesignerPanelValue<K>
+}>
+export type BesignerSetPanelsPayload = PayloadData<{panels: (prev: BesignerPanelsState) => BesignerPanelsState}>
+export type BesignerTogglePanelPayload = PayloadData<{panel: BesignerPanelKey}>
+export type BesignerOpenPanelPayload = PayloadData<{panel: BesignerPanelKey}>
+export type BesignerClosePanelPayload = PayloadData<{panel: BesignerPanelKey}>
+export type BesignerSetDndPayload = PayloadData<{dnd: (prev: BesignerDndState) => BesignerDndState}>
+export type BesignerSetDndItemPayload<K extends BesignerDndItemKey = any> = PayloadData<{
+  item: K, value: (
+    prev: BesignerDndItemValue<K>,
+    dnd: BesignerDndState,
+  ) => BesignerDndItemValue<K>
+}>
+export type BesignerSetCanvasPayload = PayloadData<{canvas: (prev: BesignerCanvasState) => BesignerCanvasState}>
+export type BesignerSetCanvasItemPayload<K extends BesignerCanvasItemKey = any> = PayloadData<{
+  item: K, value: (
+    prev: BesignerCanvasItemValue<K>,
+    canvas: BesignerCanvasState,
+  ) => BesignerCanvasItemValue<K>
+}>
+export type BesignerSetCanvasSelectedPayload = PayloadData<{
+  selected: (
+    prev: BesignerCanvasSelectedElement,
+    canvas: BesignerCanvasState,
+  ) => BesignerCanvasSelectedElement
+}>
+export type BesignerSetCanvasHoveredPayload = PayloadData<{
+  hovered: (
+    prev: BesignerCanvasHoveredElement,
+    canvas: BesignerCanvasState,
+  ) => BesignerCanvasHoveredElement
+}>
 
 declare module '@aglyn/core-data-framework' {
   interface AglynModuleEffectPayload {
     [BesignerAppEffectFlag.BESIGNER_GET_STORE]: BesignerGetStorePayload
-    [BesignerAppEffectFlag.BESIGNER_SET_FLAG]: BesignerFlagInteractModePayload
-    [BesignerAppEffectFlag.BESIGNER_SET_PANEL]: BesignerSetPanelPayload
+    [BesignerAppEffectFlag.BESIGNER_SET_FLAG]: BesignerSetFlagPayload
+    [BesignerAppEffectFlag.BESIGNER_SET_PANEL]: BesignerSetPanelsPayload
     [BesignerAppEffectFlag.BESIGNER_OPEN_PANEL]: BesignerOpenPanelPayload
     [BesignerAppEffectFlag.BESIGNER_CLOSE_PANEL]: BesignerClosePanelPayload
   }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,58 @@
  */
 
 
-import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
+import type {
+  BesignerDndElementActive,
+  BesignerDndState,
+  IBesignerAppController,
+} from '@aglyn/core-data-besigner'
+import {setBesignerDndItem} from '@aglyn/core-data-besigner'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback, useEffect, useState} from 'react'
 
 
-export const useAglynDndActive = () => {
-  return useAglynBesignerStoreState('dnd', 'active')
+export function useAglynDndActive(): [
+  value: BesignerDndElementActive | undefined,
+  setValue: (
+    value: BesignerDndElementActive | ((
+      prev: BesignerDndElementActive,
+      dnd: BesignerDndState,
+    ) => BesignerDndElementActive),
+  ) => void
+] {
+  const app = useAglynAppContext() as IBesignerAppController
+  const [value, setValue] = useState<BesignerDndElementActive | undefined>(undefined)
+  const setDndActive = useAglynDndSetActive()
+
+  useEffect(() => {
+    const subscription = app.besigner?.__store__.dnd?.subscribe((value) => {
+      setValue(value?.active)
+    })
+    return () => subscription.unsubscribe()
+  }, [app])
+
+  return [value, setDndActive]
 }
 
 export default useAglynDndActive
+
+export function useAglynDndSetActive(): (
+  value: BesignerDndElementActive | ((
+    prev: BesignerDndElementActive,
+    dnd: BesignerDndState,
+  ) => BesignerDndElementActive),
+) => void {
+  const app = useAglynAppContext() as IBesignerAppController
+  return useCallback((
+    value: BesignerDndElementActive | ((
+      prev: BesignerDndElementActive,
+      dnd: BesignerDndState,
+    ) => BesignerDndElementActive),
+  ) => {
+    setBesignerDndItem(app, {
+      item: 'active',
+      value: (prev, dnd) => (_isFnT(value) ? value(prev, dnd) : value),
+    })
+  }, [app])
+}

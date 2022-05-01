@@ -44,7 +44,8 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
 ): AddElementCallback<E> {
   const {onComplete, onError, drawerOptions} = {...options}
   const {elementDrawer} = useElementDrawerContext()
-  const {$id} = useAglynCanvasSelected() || {}
+  const [selected] = useAglynCanvasSelected()
+  const {$id} = selected || {}
   const app = useAglynAppContext()
 
   return useCallback((e, opts) => {
