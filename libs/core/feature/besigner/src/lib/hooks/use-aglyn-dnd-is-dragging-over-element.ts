@@ -26,7 +26,7 @@ export function useAglynDndIsDraggingOverElement($id: ElementId): boolean {
   const value = useSubscribable<boolean>(
     app.besigner?.dnd, false,
     (dnd) => $id && dnd?.over?.$id === $id,
-    [$id],
+    [$id, app],
   )
 
   return value

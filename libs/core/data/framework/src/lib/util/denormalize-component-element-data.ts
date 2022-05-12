@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {arraySafe} from '@aglyn/shared-util-tools'
+import {arraySafe, copy} from '@aglyn/shared-util-tools'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import type {
   AglynElementDenormalized,
@@ -48,6 +48,8 @@ const denormalizeData = (
 
 export function denormalizeComponentElementData(
   element: AglynElementNormalized,
+  parentId: ElementId,
+  accumulator?: AglynElementsDenormalized
 ): AglynElementsDenormalized
 export function denormalizeComponentElementData(
   elements: AglynElementsNormalized,
@@ -56,8 +58,9 @@ export function denormalizeComponentElementData(
 export function denormalizeComponentElementData(
   data: AglynElementNormalized | AglynElementsNormalized,
   parentId: ElementId = CANVAS_ROOT_ELEMENT_ID,
+  accumulator?: AglynElementsDenormalized
 ): AglynElementsDenormalized {
-  const denormalized: AglynElementsDenormalized = {
+  const denormalized: AglynElementsDenormalized = accumulator || {
     [parentId]: {
       $id: parentId,
       elements: [],
@@ -66,9 +69,10 @@ export function denormalizeComponentElementData(
     },
   }
   if (!data) return denormalized
+  const state = copy(data)
 
   try {
-    for (const element of arraySafe(data, [data])) {
+    for (const element of arraySafe(state, [state])) {
       denormalizeData(element, parentId, denormalized)
     }
   }

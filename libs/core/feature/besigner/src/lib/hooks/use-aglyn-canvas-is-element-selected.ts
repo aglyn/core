@@ -26,7 +26,7 @@ export function useAglynCanvasElementIsSelected($id: ElementId): boolean {
   const value = useSubscribable<BesignerCanvasSelectedElement>(
     app.besigner?.canvas, false,
     (canvas) => $id && canvas?.selected?.$id === $id,
-    [$id],
+    [$id, app],
   )
 
   return value

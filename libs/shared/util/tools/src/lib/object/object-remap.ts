@@ -17,9 +17,15 @@
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type {Conditional, NUN, OmitIndexOfType, PKey} from '@aglyn/shared-data-types'
+import {_isUndT} from '@aglyn/shared-util-guards'
+import {copy} from '../copy'
 
 
-export type RemapOptions = {deleteUndefined?: boolean}
+export type RemapOptions = {
+  /** When true will remove 'undefined' values */
+  remove?: boolean
+  copy?: 'deep' | 'shallow' | boolean
+}
 export type RemapTarget<K extends PKey, V = unknown> = Record<K, V>
 export type RemapCallback<K extends PKey, V, U = V> = {
   (value: V, key: K, target: RemapTarget<K, V>): U
@@ -34,7 +40,7 @@ export type RemapOutput<T extends RemapTarget<K, V>,
   K extends PKey,
   V,
   U = V,
-  O extends RemapOptions = any> = O extends {deleteUndefined: true}
+  O extends RemapOptions = any> = O extends {remove: true}
   ? RemapOutputFiltered<T, K, V, U>
   : RemapOutputDefault<T, K, V, U>
 
@@ -54,19 +60,21 @@ export function objectRemap<K extends PKey, V, U = V, T = RemapTarget<K, V>>(
 ): RemapOutput<typeof target, K, V, U, typeof options> {
   type ThisArg = Conditional<typeof thisArg, NUN, typeof target, typeof thisArg>
   type Output = RemapOutput<typeof target, K, V, U, typeof options>
-  const {deleteUndefined} = {...options}
-  const remapped = {} as Output
+  const remapped = (
+    options?.copy === 'deep' ? copy(target)
+      : options?.copy === 'shallow' || options?.copy === true ? {...target}
+        : target
+  ) as unknown as Output
   const _thisArg = (thisArg ?? remapped) as ThisArg
 
   for (const key in target) {
     if (Object.prototype.hasOwnProperty.call(target, key)) {
-      remapped[key] = callbackFn.call(_thisArg, target[key], key, target)
-      if (options?.deleteUndefined && remapped[key] === undefined) {
-        delete remapped[key]
-      }
+      const value = callbackFn.call(_thisArg, target[key], key, target)
+      if (options?.remove && _isUndT(value)) delete remapped[key]
+      else remapped[key] = value
     }
   }
-  return _target
+  return remapped
 }
 
 export default objectRemap

@@ -15,22 +15,28 @@
  * limitations under the License.
  */
 
+import type {MutableKeys} from '@aglyn/shared-data-types'
 import {copy} from '@aglyn/shared-util-tools'
-import {objectDeepMerge} from '@aglyn/shared-util-vendor'
-import {
-  type AglynComponentElementTemplate,
-  type AglynComponentTemplateData,
+import defaultsDeep from 'lodash-es/defaultsDeep'
+import type {
+  AglynComponentElementTemplate,
+  AglynComponentTemplateData,
 } from '../types/aglyn-components.types'
-import {AglynElementNormalized} from '../types/aglyn-elements.types'
-import {createComponentElementId} from './create-component-element-id'
+import type {AglynElementNormalized} from '../types/aglyn-elements.types'
+import createComponentElementId from './create-component-element-id'
 
 
 function traverseComponentTemplate(data: AglynComponentTemplateData): AglynElementNormalized {
-  return {
-    ...data,
-    $id: createComponentElementId(),
-    elements: [...data?.elements || []].map((data) => traverseComponentTemplate(data)),
+  const response = (data || {}) as AglynElementNormalized
+  ;(response as MutableKeys<AglynElementNormalized, '$id' | 'elements'>).$id =
+    createComponentElementId()
+
+  const children: AglynElementNormalized[] = []
+  for (const element of response?.elements || []) {
+    children.push(traverseComponentTemplate(element))
   }
+  response.elements = children
+  return response
 }
 
 export type CreateComponentElementDataOptions =
@@ -45,11 +51,9 @@ export const ELEMENT_DEFAULTS: Partial<AglynElementNormalized> = {
 export function createComponentElementData(
   options?: CreateComponentElementDataOptions,
 ): AglynElementNormalized {
-  const {data} = {...options}
-
-  return objectDeepMerge(
+  return defaultsDeep(
+    traverseComponentTemplate(options?.data),
     copy(ELEMENT_DEFAULTS),
-    traverseComponentTemplate(copy(data))
   )
 }
 export default createComponentElementData

@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {DependencyList, useCallback, useState} from 'react'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {type DependencyList, useCallback, useState} from 'react'
 import type {Subscribable as RxJsSubscribable} from 'rxjs'
 import useIsomorphicLayoutEffect from './use-isomorphic-layout-effect'
 
@@ -46,19 +47,15 @@ export function useSubscribable<T,
   $subscribable: SubscribableLike<U>,
   initialValue?: U | T,
   mapValue?: M,
-  dependencies?: DependencyList,
+  dependencies: DependencyList = [],
 ): U | T | undefined {
   const [value, update] = useState<T | U | undefined>(initialValue)
 
-  const mapUpdate = useCallback(
-    (newValue, prevValue) => (
-      mapValue
-        ? mapValue(newValue, prevValue as T) as T
-        : newValue as U
-    ),
+  const mapUpdate = useCallback((newValue, prevValue) => {
+    if (_isFnT(mapValue)) return mapValue(newValue, prevValue as T) as T
+    return newValue as U
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies || [],
-  )
+  }, dependencies)
 
   useIsomorphicLayoutEffect(() => {
     const subscribable = $subscribable?.subscribe?.((newValue) => {

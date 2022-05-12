@@ -41,6 +41,7 @@ export function useAglynDndActive(): [
   const value = useSubscribable<BesignerDndElementActive>(
     app.besigner?.dnd, undefined,
     (dnd) => dnd?.active,
+    [app],
   )
   const setDndActive = useAglynDndSetActive()
 

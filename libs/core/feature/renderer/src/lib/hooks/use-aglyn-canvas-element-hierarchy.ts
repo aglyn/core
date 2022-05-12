@@ -32,7 +32,7 @@ export function useAglynCanvasElementHierarchy<T extends ElementId>(
   return useSubscribable(
     getCanvasDenormalizedElementsStore(app), [] as any,
     (state) => getComponentElementHierarchy($id, state),
-    [$id],
+    [$id, app],
   ) as AglynElementHierarchy<T>
 }
 export default useAglynCanvasElementHierarchy

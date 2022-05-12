@@ -43,6 +43,11 @@ if (!Array.prototype.copyShallow) {
     return arrayCopyShallow(this)
   }
 }
+if (!Array.prototype.copyDeep) {
+  Array.prototype.copyDeep = function <T>(this: T[]): T[] {
+    return arrayCopyDeep(this)
+  }
+}
 if (!Array.prototype.moveAtIndex) {
   Array.prototype.moveAtIndex = function <T>(this: T[], index: number, newIndex: number): T[] {
     return arrayMoveAtIndex(this, index, newIndex)
@@ -53,25 +58,18 @@ if (!Array.prototype.pushAtIndex) {
     return arrayPushAtIndex(this, index, ...elems)
   }
 }
-
 if (!Array.prototype.remove) {
   Array.prototype.remove = function <T>(this: T[], elem: T): T[] {
     return arrayRemoveItem(this, elem)
   }
 }
 if (!Array.prototype.removeAtIndex) {
-  Array.prototype.removeAtIndex = function <T>(this: T[], elem: T): T[] {
-    return arrayRemoveAtIndex(this, elem)
+  Array.prototype.removeAtIndex = function <T>(this: T[], index: number): T[] {
+    return arrayRemoveAtIndex(this, index)
   }
 }
 if (!Array.prototype.replaceAtIndex) {
   Array.prototype.replaceAtIndex = function <T>(this: T[], index: number, elem: T): T[] {
     return arrayUpdateAtIndex(this, index, elem)
-  }
-}
-
-if (!Array.prototype.copyDeep) {
-  Array.prototype.copyDeep = function <T>(this: T[]): T[] {
-    return arrayCopyDeep(this)
   }
 }

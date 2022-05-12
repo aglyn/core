@@ -35,7 +35,7 @@ export function useAglynCanvasElementsDenormalized<Result>(
   return useSubscribable(
     getCanvasDenormalizedElementsStore(app), undefined,
     (state) => _isFnT(callbackFn) ? (callbackFn(state) as Result) : state,
-    [callbackFn],
+    [callbackFn, app],
   ) as Result | AglynElementsDenormalized
 }
 export default useAglynCanvasElementsDenormalized

@@ -20,7 +20,7 @@ import {
   type ElementId,
   getCanvasDenormalizedElementsStore,
 } from '@aglyn/core-data-framework'
-import {type AnyProps, type Conditional, type EmptyObj} from '@aglyn/shared-data-types'
+import type {AnyProps, Conditional, EmptyObj} from '@aglyn/shared-data-types'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
@@ -31,31 +31,27 @@ export type UseAglynElementData<P = AnyProps,
   AglynElementDenormalized<P>[K],
   AglynElementDenormalized<P>>
 
+
 export function useAglynElementData<P = EmptyObj>(
   $id: ElementId,
 ): AglynElementDenormalized<P>
-
 export function useAglynElementData<P = EmptyObj,
   K extends keyof AglynElementDenormalized<P> = null>(
   $id: ElementId,
-  key: K,
+  property: K,
 ): AglynElementDenormalized<P>[K]
-
 export function useAglynElementData<P = EmptyObj,
   K extends keyof AglynElementDenormalized<P> = null>(
   $id: ElementId,
-  key?: K,
+  property?: K,
 ): UseAglynElementData<P, K> {
-
   const app = useAglynAppContext()
-  return useSubscribable(
-    getCanvasDenormalizedElementsStore(app), undefined,
-    (store) => {
-      console.log('useAglynElementData', $id, store)
-      if (!key) {return store?.[$id] || null}
-      return store?.[$id]?.[key] || null
-    },
-    [$id, key],
-  ) as UseAglynElementData<P, K>
+  const subscribable = getCanvasDenormalizedElementsStore(app)
+  return useSubscribable(subscribable, undefined, (store) => {
+    const element = store?.[$id]
+    return property
+      ? element?.[property]
+      : element
+  }, [$id, property, app, subscribable]) as UseAglynElementData<P, K>
 }
 export default useAglynElementData

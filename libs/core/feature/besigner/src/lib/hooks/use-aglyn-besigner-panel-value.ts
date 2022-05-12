@@ -46,7 +46,7 @@ export function useAglynBesignerPanelValue<P extends BesignerPanelKey, K extends
   const value = useSubscribable<BesignerPanelsState[P][K]>(
     app.besigner?.panels, undefined,
     (panels) => panels?.[panelName]?.[key],
-    [key, panelName],
+    [key, panelName, app],
   )
 
   return [value, setPanelValue]

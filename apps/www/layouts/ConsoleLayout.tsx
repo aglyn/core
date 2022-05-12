@@ -18,7 +18,7 @@
 import {styled} from '@aglyn/shared-feature-themes'
 import {ContainerComponent, GridItems, type GridItemsProps} from '@aglyn/shared-ui-jsx'
 import {mdiCogOutline, MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import {copy, str} from '@aglyn/shared-util-tools'
+import {str} from '@aglyn/shared-util-tools'
 import {Typography} from '@mui/material'
 import {type ReactNode} from 'react'
 import {isElement} from 'react-is'
@@ -78,7 +78,7 @@ function ConsoleLayoutRaw(props: ConsoleLayoutProps) {
     ),
     ...headerProp,
   }
-  const breadcrumbItems = (/*breadcrumbItemsProp ??*/ (copy(pageAncestors) as any[]))
+  const breadcrumbItems = (/*breadcrumbItemsProp ??*/ ([...pageAncestors] as any[]))
     .concat(overrideMeta ?? pageMeta)
     .map((item: any) => ({
       href: str(item?.id),

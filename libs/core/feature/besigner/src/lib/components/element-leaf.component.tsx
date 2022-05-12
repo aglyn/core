@@ -21,7 +21,8 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
-import {type ChangeEvent, forwardRef, useCallback, useEffect, useRef} from 'react'
+import debounce from 'lodash-es/throttle'
+import {type ChangeEvent, forwardRef, useCallback, useEffect, useRef, useTransition} from 'react'
 import {useRenderedCanvasElements} from '../contexts/rendered-canvas-elements'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasElementIsSelected from '../hooks/use-aglyn-canvas-is-element-selected'
@@ -43,6 +44,11 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
     const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
     const elemRef = useRef<Element>(null)
+    const [, startTransition] = useTransition()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const throttleUpdate = useCallback(debounce((callback: () => void) => {
+      startTransition(() => {callback()})
+    }, 150, {trailing: true, leading: true}), [])
 
     useEffect(() => {
       setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
@@ -52,13 +58,17 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
 
     const handleOnMouseOver = useCallback((e: ChangeEvent<any>) => {
       e.stopPropagation()
-      setHovered({$id})
-    }, [$id, setHovered])
+      throttleUpdate(() => {
+        setHovered({$id})
+      })
+    }, [$id, setHovered, throttleUpdate])
     const handleOnMouseDown = useCallback((e: ChangeEvent<any>) => {
       e.preventDefault()
       e.stopPropagation()
-      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
-    }, [$id, setSelected])
+      throttleUpdate(() => {
+        setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
+      })
+    }, [$id, setSelected, throttleUpdate])
 
     // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     // console.log('element attributes', elementAttributes)

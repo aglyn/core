@@ -16,7 +16,7 @@
  */
 
 import {copy} from '@aglyn/shared-util-tools'
-import {objectDeepMerge} from '@aglyn/shared-util-vendor'
+import defaultsDeep from 'lodash-es/defaultsDeep'
 import {BehaviorSubject, Observable} from 'rxjs'
 import {map} from 'rxjs/operators'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
@@ -46,14 +46,15 @@ import type {
   CanvasContext,
   IAglynCanvasController,
 } from '../types/aglyn-canvas.types'
+import type {AglynElementsDenormalized} from '../types/aglyn-elements.types'
 import type {AglynModuleEffectListener} from '../types/aglyn-module.types'
 import denormalizeComponentElementData from '../util/denormalize-component-element-data'
-import {handleRedoEvent} from '../util/handle-state-modification-history-redo'
-import {handleUndoEvent} from '../util/handle-state-modification-history-undo'
+import handleStateModificationHistoryChange from '../util/handle-state-modification-history-change'
+import handleStateModificationHistoryRedo from '../util/handle-state-modification-history-redo'
+import handleStateModificationHistoryUndo from '../util/handle-state-modification-history-undo'
 import normalizeComponentElementData from '../util/normalize-component-element-data'
 import {
   handleCanvasAddElement,
-  handleCanvasApiChangeEvent,
   handleCanvasDeleteElement,
   handleCanvasDuplicateElement,
   handleCanvasMoveElement,
@@ -99,12 +100,14 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
   constructor(app: IAglynAppController, options: AglynCanvasControllerOptions) {
     super(app, options)
-    const optionsDefaults = copy(options.defaults || {})
-    const state = objectDeepMerge({
-      past: [],
-      future: [],
-      present: [],
-    }, optionsDefaults)
+    const state = defaultsDeep(
+      options.defaults || {},
+      {
+        past: [],
+        future: [],
+        present: [],
+      },
+    )
 
     const present = new BehaviorSubject(
       denormalizeComponentElementData(
@@ -151,6 +154,16 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     this.__store__?.present?.next(present)
     return this
   }
+  private handleStateModification<P>(
+    callback: (present: AglynElementsDenormalized, payload?: P) => AglynElementsDenormalized,
+    payload?: P,
+  ) {
+    const state = this.getState()
+    const response = callback(copy(state.present), payload)
+    const updated = handleStateModificationHistoryChange(state, response)
+    this.nextState(updated)
+    return this
+  }
 
   public getPastElements(payload?: CanvasGetElementsPastPayload): this['__store__']['past'] {
     return this.__store__?.['past']
@@ -192,49 +205,33 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
 
 
   public undo(payload?: CanvasUndoPayload): this {
-    const state = handleUndoEvent(this.getState())
-    this.nextState(state)
+    this.nextState(handleStateModificationHistoryUndo(this.getState()))
     return this
   }
   public redo(payload?: CanvasRedoPayload): this {
-    const state = handleRedoEvent(this.getState())
-    this.nextState(state)
+    this.nextState(handleStateModificationHistoryRedo(this.getState()))
     return this
   }
   public addElement(payload: CanvasAddElementPayload): this {
-    const state = handleCanvasApiChangeEvent(handleCanvasAddElement)(this.getState(), payload)
-    this.nextState(state)
-    return this
+    return this.handleStateModification(handleCanvasAddElement, payload)
   }
   public deleteElement(payload: CanvasDeleteElementPayload): this {
-    const state = handleCanvasApiChangeEvent(handleCanvasDeleteElement)(this.getState(), payload)
-    this.nextState(state)
-    return this
+    return this.handleStateModification(handleCanvasDeleteElement, payload)
   }
   public duplicateElement(payload: CanvasDuplicateElementPayload): this {
-    const state = handleCanvasApiChangeEvent(handleCanvasDuplicateElement)(this.getState(), payload)
-    this.nextState(state)
-    return this
+    return this.handleStateModification(handleCanvasDuplicateElement, payload)
   }
   public moveElement(payload: CanvasMoveElementPayload): this {
-    const state = handleCanvasApiChangeEvent(handleCanvasMoveElement)(this.getState(), payload)
-    this.nextState(state)
-    return this
+    return this.handleStateModification(handleCanvasMoveElement, payload)
   }
   public setElement(payload: CanvasSetElementPayload): this {
-    const state = handleCanvasApiChangeEvent(handleCanvasSetElement)(this.getState(), payload)
-    this.nextState(state)
-    return this
+    return this.handleStateModification(handleCanvasSetElement, payload)
   }
   public setElements(payload: CanvasSetElementsPayload): this {
-    const state = handleCanvasApiChangeEvent(handleCanvasSetElements)(this.getState(), payload)
-    this.nextState(state)
-    return this
+    return this.handleStateModification(handleCanvasSetElements, payload)
   }
   public updateElement(payload: CanvasUpdateElementPayload): this {
-    const state = handleCanvasApiChangeEvent(handleCanvasUpdateElement)(this.getState(), payload)
-    this.nextState(state)
-    return this
+    return this.handleStateModification(handleCanvasUpdateElement, payload)
   }
 }
 

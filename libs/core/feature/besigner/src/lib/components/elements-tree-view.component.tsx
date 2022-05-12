@@ -32,7 +32,8 @@ import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr} from '@aglyn/shared-util-guards'
 import MuiTreeItem, {treeItemClasses, type TreeItemProps} from '@mui/lab/TreeItem'
 import MuiTreeView, {type SingleSelectTreeViewProps} from '@mui/lab/TreeView'
-import {forwardRef, useCallback, useMemo, useState} from 'react'
+import debounce from 'lodash-es/throttle'
+import {forwardRef, useCallback, useMemo, useState, useTransition} from 'react'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 
@@ -70,10 +71,17 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
       label = useAglynElementLabel($id),
       icon = useAglynComponentSchema(componentId, bundleId)?.icon
     const setHovered = useAglynCanvasSetHovered()
+    const [, startTransition] = useTransition()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const throttleUpdate = useCallback(debounce((callback: () => void) => {
+      startTransition(() => {callback()})
+    }, 150, {trailing: true, leading: true}), [])
 
     const handleOnMouseOver = useCallback((e) => {
       e.stopPropagation()
-      setHovered({$id})
+      throttleUpdate(() => {
+        setHovered({$id})
+      })
     }, [$id, setHovered])
 
     return (
@@ -133,25 +141,36 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     const allExpanded = useMemo(() => [
       ...selectedHierarchy, ...expanded,
     ], [selectedHierarchy, expanded])
+    const [, startTransition] = useTransition()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const throttleUpdate = useCallback(debounce((callback: () => void) => {
+      startTransition(() => {callback()})
+    }, 150, {trailing: true, leading: true}), [])
 
     const handleTreeItemSelect = useCallback((e, $id) => {
       e.stopPropagation()
       e.preventDefault()
-      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
-    }, [setSelected])
+      throttleUpdate(() => {
+        setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
+      })
+    }, [setSelected, throttleUpdate])
 
 
     const handleTreeItemFocus = useCallback((e, $id) => {
       e.stopPropagation()
-      setHovered({$id})
-    }, [setHovered])
+      throttleUpdate(() => {
+        setHovered({$id})
+      })
+    }, [setHovered, throttleUpdate])
 
 
     const handleTreeItemToggle = useCallback((e, ids: ElementId[]) => {
       e.stopPropagation()
       e.preventDefault()
-      setExpanded(ids)
-    }, [setExpanded])
+      throttleUpdate(() => {
+        setExpanded(ids)
+      })
+    }, [throttleUpdate])
 
     return (
       <TreeView

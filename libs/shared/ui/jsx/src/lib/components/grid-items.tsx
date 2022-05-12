@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import type {OverrideableComponentProps, RenamedKey} from '@aglyn/shared-data-types'
+import type {OverrideableComponentProps, ReplaceKey} from '@aglyn/shared-data-types'
 import {Grid as MuiGrid, type GridProps as MuiGridProps} from '@mui/material'
 import {forwardRef} from 'react'
 
 /* eslint-disable-next-line */
-export interface GridItemsProps extends MuiGridProps, RenamedKey<OverrideableComponentProps, 'component', 'itemComponent'> {
+export interface GridItemsProps extends MuiGridProps, ReplaceKey<OverrideableComponentProps, 'component', 'itemComponent'> {
   items: MuiGridProps[]
 }
 

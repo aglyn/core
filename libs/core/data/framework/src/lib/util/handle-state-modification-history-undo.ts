@@ -16,23 +16,18 @@
  */
 
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
+import {copy} from '@aglyn/shared-util-tools'
 import type {ModificationHistoryState} from '../types/generic.types'
 
 
-export const handleUndoEvent = <S>(state: ModificationHistoryState<S>) => {
-  return handleStateModificationHistoryUndo(state)
-}
-
-export const handleStateModificationHistoryUndo = <S>(
+export function handleStateModificationHistoryUndo<S>(
   state: ModificationHistoryState<S>,
-): ModificationHistoryState<S> => {
+): ModificationHistoryState<S> {
   if (!_isArrEmpty(state.past)) {
-    return {
-      present: state.past.shift(),
-      past: state.past,
-      future: [state.present, ...state.future],
-    }
+    state.future.unshift(copy(state.present))
+    state.present = state.past.shift()
   }
   return state
 }
+
 export default handleStateModificationHistoryUndo

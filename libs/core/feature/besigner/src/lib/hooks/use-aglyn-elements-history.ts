@@ -34,10 +34,12 @@ export function useAglynCanvasHistoryControls(): UseAglynCanvasHistory {
   const canUndo = useSubscribable<number | false>(
     app.canvas?.pastElements, false,
     (past) => past?.length > 0 ? past.length : false,
+    [app],
   )
   const canRedo = useSubscribable<number | false>(
     app.canvas?.futureElements, false,
     (future) => future?.length > 0 ? future.length : false,
+    [app],
   )
   const handleUndo = useCallback(() => canvasUndo(app, {}), [app])
   const handleRedo = useCallback(() => canvasRedo(app, {}), [app])

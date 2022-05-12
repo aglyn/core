@@ -27,7 +27,7 @@ export function useAglynCanvasElementIsHovered($id: ElementId): boolean {
   const value = useSubscribable<BesignerCanvasHoveredElement>(
     app.besigner?.canvas, false,
     (canvas) => $id && canvas?.hovered?.$id === $id,
-    [$id],
+    [$id, app],
   )
 
   return value

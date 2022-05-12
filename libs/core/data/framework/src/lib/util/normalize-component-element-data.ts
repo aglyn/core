@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {arraySafe} from '@aglyn/shared-util-tools'
+import {arraySafe, copy} from '@aglyn/shared-util-tools'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
 import type {
   AglynElementDenormalized,
@@ -34,7 +34,6 @@ const normalizeData = (
   if (element?.$id) {
     const _element = element as unknown as AglynElementNormalized
     const childIds: ElementId[] = [...arraySafe(element.elements)]
-    delete _element.parentId
     _element.elements = []
     for (const $id of childIds) {
       if (!$id || !denormalized[$id]) continue
@@ -51,6 +50,7 @@ export function normalizeComponentElementData(
 ): AglynElementsNormalized
 export function normalizeComponentElementData(
   elements: AglynElementsDenormalized,
+  parentId?: ElementId,
 ): AglynElementsNormalized
 export function normalizeComponentElementData(
   data: AglynElementDenormalized | AglynElementsDenormalized,
@@ -58,18 +58,19 @@ export function normalizeComponentElementData(
 ): AglynElementsNormalized {
   const normalized: AglynElementsNormalized = []
   if (!data) return normalized
+  const state = copy(data)
 
   try {
     let denormalized: AglynElementsDenormalized
     // If received a denormalized element
-    if (data.$id) {
-      const _element = data as AglynElementDenormalized
+    if (state.$id) {
+      const _element = state as AglynElementDenormalized
       denormalized = {[_element.$id]: _element}
       return normalizeData(_element, denormalized, normalized)
     }
 
     // If received a denormalized map of elements by id
-    denormalized = data as AglynElementsDenormalized
+    denormalized = state as AglynElementsDenormalized
     const parent = denormalized[parentId] ||= {$id: parentId} as AglynElementDenormalized
     for (const $id of parent.elements ||= []) {
       normalizeData(denormalized[$id], denormalized, normalized)

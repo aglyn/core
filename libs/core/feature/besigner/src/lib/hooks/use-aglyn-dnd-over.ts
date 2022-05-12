@@ -37,6 +37,7 @@ export function useAglynDndOver(): [
   const value = useSubscribable<BesignerDndElementOver>(
     app.besigner?.dnd, undefined,
     (dnd) => dnd?.over,
+    [app],
   )
   const setDndOver = useAglynDndSetOver()
 

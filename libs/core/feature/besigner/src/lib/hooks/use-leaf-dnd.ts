@@ -30,6 +30,7 @@ import {
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
 import {numberToHexadecimal} from '@aglyn/shared-util-tools'
+import debounce from 'lodash-es/throttle'
 import {useCallback, useEffect, useMemo, useTransition} from 'react'
 import {
   type DragElementWrapper,
@@ -80,7 +81,12 @@ export function useLeafDnd(
   const dragType = options?.dragType || DndDragSourceTypeFlag.CANVAS_ELEMENT
   const dropType = options?.dropType || DndDropLinealTypeFlag.ACTIVITY_ELEMENT_INSIDE
 
-  const [transitioning, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const throttleUpdate = useCallback(debounce((callback: () => void) => {
+    startTransition(() => {callback()})
+  }, 150, {trailing: true, leading: true}), [])
+
   const app = useAglynAppContext()
   const setHovered = useAglynCanvasSetHovered()
   const setSelected = useAglynCanvasSetSelected()
@@ -93,23 +99,23 @@ export function useLeafDnd(
 
 
   const handleDragStart = useCallback((active: BesignerDndElementActive) => {
-    startTransition(() => {
+    throttleUpdate(() => {
       console.log('handleDragStart', $id, active)
       setSelected({$id})
       setDndActive(active)
     })
-  }, [$id, setDndActive, setSelected])
+  }, [$id, setDndActive, setSelected, throttleUpdate])
   const handleDragOver = useCallback((over?: BesignerDndElementOver) => {
-    startTransition(() => {
+    throttleUpdate(() => {
       setHovered({$id})
       setDndOver(over)
     })
-  }, [$id, setDndOver, setHovered])
+  }, [$id, setDndOver, setHovered, throttleUpdate])
   const handleDragEnd = useCallback((
     active: BesignerDndElementActive,
     over?: BesignerDndElementOver,
   ) => {
-    startTransition(() => {
+    throttleUpdate(() => {
       console.log('handleDragEnd', active, over)
       setDndActive(undefined)
       setDndOver(undefined)
@@ -118,7 +124,7 @@ export function useLeafDnd(
         moveCanvasElement(app, {$id: active.$id, parentId: over?.$id, index: -1})
       }
     })
-  }, [app, setDndActive, setDndOver])
+  }, [app, setDndActive, setDndOver, throttleUpdate])
 
 
   const dragItem = useMemo(() => ({
@@ -182,8 +188,10 @@ export function useLeafDnd(
     drop: (active, monitor) => {
       if (monitor.didDrop()) return undefined
       if (monitor.isOver({shallow: true})) {
-        console.log('drop collection', active, dropItem)
-        handleDragEnd(active, dropItem)
+        startTransition(() => {
+          console.log('drop collection', active, dropItem)
+          handleDragEnd(active, dropItem)
+        })
       }
       return dropItem
     },

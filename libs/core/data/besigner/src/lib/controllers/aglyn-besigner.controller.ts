@@ -20,8 +20,7 @@ import {
   AglynModuleModel,
   type IAglynAppController,
 } from '@aglyn/core-data-framework'
-import {copy} from '@aglyn/shared-util-tools'
-import {objectDeepMerge} from '@aglyn/shared-util-vendor'
+import defaultsDeep from 'lodash-es/defaultsDeep'
 import {BehaviorSubject} from 'rxjs'
 // import {persist} from 'effector-storage/local'
 import {BesignerDeviceFlag, BesignerPanelViewFlag, InteractionModeFlag} from '../constants/besigner'
@@ -71,39 +70,41 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
 
   constructor(app: IAglynAppController, options: AglynBesignerControllerOptions) {
     super(app, options)
-    const optionsDefaults = copy(options.defaults || {})
-    const state = objectDeepMerge({
-      flags: {
-        debug: true,
-        logLevel: 'info',
-        interactMode: InteractionModeFlag.SELECT,
-        devicePreview: BesignerDeviceFlag.RESPONSIVE,
-      },
-      panels: {
-        panelLeft: {
-          id: BesignerPanelViewFlag.PANEL_LEFT,
-          size: 290,
-          toggled: false,
+    const state = defaultsDeep(
+      options.defaults,
+      {
+        flags: {
+          debug: true,
+          logLevel: 'info',
+          interactMode: InteractionModeFlag.SELECT,
+          devicePreview: BesignerDeviceFlag.RESPONSIVE,
         },
-        panelRight: {
-          id: BesignerPanelViewFlag.PANEL_RIGHT,
-          size: 375,
-          toggled: false,
+        panels: {
+          panelLeft: {
+            id: BesignerPanelViewFlag.PANEL_LEFT,
+            size: 290,
+            toggled: false,
+          },
+          panelRight: {
+            id: BesignerPanelViewFlag.PANEL_RIGHT,
+            size: 375,
+            toggled: false,
+          },
+          panelBottom: {
+            id: BesignerPanelViewFlag.PANEL_BOTTOM,
+            toggled: false,
+          },
         },
-        panelBottom: {
-          id: BesignerPanelViewFlag.PANEL_BOTTOM,
-          toggled: false,
+        canvas: {
+          hovered: {},
+          selected: {},
+        },
+        dnd: {
+          active: null,
+          over: null,
         },
       },
-      canvas: {
-        hovered: {},
-        selected: {},
-      },
-      dnd: {
-        active: null,
-        over: null,
-      },
-    }, optionsDefaults)
+    )
 
     this.__store__ = {
       canvas: new BehaviorSubject(state.canvas),

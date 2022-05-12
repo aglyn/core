@@ -53,7 +53,7 @@ export function withAglynElementData<U = any, T = any>(
   const displayName = getDisplayName(WrappedComponent)
   const WithAglynElementData = forwardRef<T, RequiredElementDataProps & U>(
     function RefRenderFn(props, ref) {
-      const {$id, children: childrenProp, className: classNameProp, ...rest} = props
+      const {$id, className: classNameProp, ...rest} = props
       const elementData = useAglynElementData($id)
       const component = useAglynComponent(elementData.componentId, elementData.bundleId)
       const {children, className: classNameElem, ...elemProps} = useAglynElementResolvedProps($id)
@@ -70,7 +70,6 @@ export function withAglynElementData<U = any, T = any>(
           {...(rest as any)}
         >
           {children}
-          {childrenProp}
         </WrappedComponent>
       )
     },

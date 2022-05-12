@@ -30,7 +30,6 @@ import type {
 import type {CanvasContext} from '../types/aglyn-canvas.types'
 import type {AglynElementsDenormalized, ElementId} from '../types/aglyn-elements.types'
 import {createComponentElementDataCopy} from './create-component-element-data-copy'
-import {deleteComponentElement} from './delete-component-element'
 import {denormalizeComponentElementData} from './denormalize-component-element-data'
 import {getComponentElementHierarchy} from './get-component-element-hierarchy'
 import {handleStateModificationHistoryChange} from './handle-state-modification-history-change'
@@ -46,7 +45,7 @@ export const handleCanvasApiChangeEvent = <S extends CanvasContext, P>(
 ) => (
   state: S, payload: P,
 ) => {
-  return handleStateModificationHistoryChange(copy(state), fn(state.present, payload))
+  return handleStateModificationHistoryChange(state, fn(state.present, payload))
 }
 
 
@@ -54,20 +53,15 @@ export const handleCanvasSetElements = (
   state: AglynElementsDenormalized,
   payload: CanvasSetElementsPayload,
 ) => {
-
   const {elements} = payload || {}
   return elements || {}
 }
 export const handleCanvasAddElement = (
   state: AglynElementsDenormalized,
   payload: CanvasAddElementPayload,
-) => {
-
-  const {index} = payload
-
-  const element = copy(payload.element)
+): AglynElementsDenormalized => {
+  const {index, element} = payload
   let parentId: ElementId = null
-
   if (_hasOwnProperty(payload.parentId, state)) {
     parentId = payload.parentId
   }
@@ -76,63 +70,54 @@ export const handleCanvasAddElement = (
     parentId = CANVAS_ROOT_ELEMENT_ID
   }
 
-  const newData = denormalizeComponentElementData(element, parentId)
-  const siblingIds = state[parentId]?.elements || []
-  const newElements = newData[parentId]?.elements || []
-
-  return {
-    ...state,
-    ...newData,
+  const {
+    [parentId]: _,
+    ...newElements
+  } = denormalizeComponentElementData(element, parentId, {
     [parentId]: {
-      ...state[parentId],
-      elements: arrayPushAtIndex(
-        state[parentId]?.elements || [],
-        index === -1 ? siblingIds.length : index,
-        ...newElements,
-      ),
+      $id: parentId,
+      componentId: state[parentId]?.componentId,
+      elements: [],
     },
+  })
+
+  // Add all if the descendent elements to the state
+  for (const [$id, element] of Object.entries(newElements)) {
+    state[$id] = element
   }
+  // Add the new element to the parents' elements property
+  arrayPushAtIndex(state[parentId].elements ||= [], index, element.$id)
+  return state
 }
 
 
 export const handleCanvasUpdateElement = (
   state: AglynElementsDenormalized,
   payload: CanvasUpdateElementPayload,
-) => {
-
-  const element = copy(payload.element)
-
-  return {
-    ...state,
-    [element.$id]: {
-      ...state[element.$id],
-      ...element,
-    },
-  } as CanvasContext['present']
+): AglynElementsDenormalized => {
+  state[payload.element?.$id] = {
+    ...state[payload.element?.$id],
+    ...payload.element,
+  }
+  return state
 }
 
 
 export const handleCanvasSetElement = (
   state: AglynElementsDenormalized,
   payload: CanvasSetElementPayload,
-) => {
-
-  const element = copy(payload.element)
-  return {
-    ...state,
-    [element.$id]: {
-      ...element,
-    },
-  } as CanvasContext['present']
+): AglynElementsDenormalized => {
+  state[payload.element?.$id] = payload.element
+  return state
 }
 
 
 export const handleCanvasMoveElement = (
   state: AglynElementsDenormalized,
   payload: CanvasMoveElementPayload,
-) => {
-
+): AglynElementsDenormalized => {
   const {$id, index} = payload
+  if (!state[$id]) return state
   let parentId: ElementId = null
 
   if (_hasOwnProperty(payload.parentId, state)) {
@@ -148,71 +133,60 @@ export const handleCanvasMoveElement = (
     throw new Error('New parent is same or a child of the element')
   }
 
-  const current = copy({...state[$id]})
-  const response = copy({
-    ...state,
-    [$id]: {
-      ...current,
-      parentId: parentId,
-    },
-  })
-  const siblingIds = response[parentId]?.elements || []
+  const currentParentId = copy(state[$id].parentId)
 
-  if (parentId === current.parentId) {
+  if (parentId === currentParentId && state[parentId]) {
     console.log('reordering')
-    response[parentId] = {
-      ...response[parentId],
-      elements: arrayMoveAtIndex(
-        siblingIds,
-        siblingIds.indexOf($id),
-        index === -1 ? siblingIds.length : index,
-      ),
-    }
+    const parentElements = state[parentId].elements ||= []
+    // Move current index
+    arrayMoveAtIndex(parentElements, parentElements.indexOf($id), index)
   }
   else {
     console.log('moving')
-    const currentParentElements = response[current.parentId].elements || []
-
-    response[parentId] = {
-      ...response[parentId],
-      elements: arrayPushAtIndex(
-        siblingIds,
-        index === -1 ? siblingIds.length : index,
-        $id,
-      ),
-    }
-
-    response[current.parentId] = {
-      ...response[current.parentId],
-      elements: arrayRemoveItem(currentParentElements, $id),
-    }
+    // Update element parentId property
+    state[$id].parentId = parentId
+    // Remove from current parent
+    arrayRemoveItem(state[currentParentId]?.elements || [], $id)
+    // Add to new parent
+    arrayPushAtIndex(state[parentId]?.elements || [], index, $id)
   }
 
-  return response
+  return state
 }
 
 
 export const handleCanvasDuplicateElement = (
   state: AglynElementsDenormalized,
   payload: CanvasDuplicateElementPayload,
-) => {
-
+): AglynElementsDenormalized => {
   const {$id} = payload
   const element = state[$id]
   const parent = state[element?.parentId]
-  const position = (parent?.elements ?? []).indexOf($id)
-  const elementCopy = createComponentElementDataCopy($id, state)
+  const elementCopy = createComponentElementDataCopy(element?.$id, state)
   return handleCanvasAddElement(state, {
     element: elementCopy,
-    parentId: elementCopy.parentId,
-    index: position + 1,
+    parentId: parent?.$id,
+    index: (parent?.elements || []).indexOf($id) + 1,
   })
 }
+
 export const handleCanvasDeleteElement = (
   state: AglynElementsDenormalized,
   payload: CanvasDeleteElementPayload,
-) => {
-
+): AglynElementsDenormalized => {
   const {$id} = payload
-  return deleteComponentElement($id, state)
+  const element = state[$id]
+  if (!element) return state
+  // Remove all child elements first
+  for (const childId in (element.elements ||= [])) {
+    handleCanvasDeleteElement(state, {$id: childId})
+  }
+  // Secondly remove the element from the parent
+  if (element.parentId && state[element.parentId]) {
+    arrayRemoveItem(state[element.parentId].elements ||= [], element.$id)
+  }
+  // Lastly remove the element
+  delete state[element.$id]
+
+  return state
 }

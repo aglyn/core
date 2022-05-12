@@ -35,7 +35,7 @@ export function useAglynDndElementStatus($id: ElementId): AglynDndElementStatus 
       Boolean($id && dnd.active?.$id === $id),
       Boolean($id && dnd.over?.$id === $id),
     ],
-    [$id],
+    [$id, app],
   )
 
   return value

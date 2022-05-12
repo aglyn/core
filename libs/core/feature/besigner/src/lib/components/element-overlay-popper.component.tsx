@@ -93,7 +93,7 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
     const state = useSubscribable<BesignerCanvasItemValue>(
       app.besigner?.canvas, undefined,
       (canvas) => canvas?.[variantToStoreName[variant]],
-      [variant],
+      [variant, app],
     )
 
     const $id = state?.$id

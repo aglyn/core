@@ -21,7 +21,7 @@ import copy from '../copy'
  * Deeply copy everything in iterable or array
  * @param target - Iterable list to deep copy
  */
-export function arrayCopyDeep<T>(target: Iterable<T> | ArrayLike<T>): typeof target {
+export function arrayCopyDeep<T>(target: T[]): T[] {
   return copy(target)
 }
 export default arrayCopyDeep
