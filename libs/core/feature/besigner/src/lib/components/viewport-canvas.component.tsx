@@ -23,9 +23,10 @@ import dynamic from 'next/dynamic'
 // import {ZoomablePanningComponent} from '@aglyn/shared-ui-jsx'
 import {forwardRef, type HTMLAttributes, type Ref} from 'react'
 import useAglynBesignerFlag from '../hooks/use-aglyn-besigner-flag'
+import type {ViewportFrameComponentProps} from './viewport-frame.component'
 
 
-const ViewportFrameComponent = dynamic(
+const ViewportFrameComponent = dynamic<ViewportFrameComponentProps>(
   () => import('./viewport-frame.component').then((mod) => mod.ViewportFrameComponent),
   {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )

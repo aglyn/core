@@ -30,7 +30,7 @@ export {
 
 export {default as createEmotionServer, type EmotionServer} from '@emotion/server/create-instance'
 
-export function createEmotionCache(options?: CreateEmotionCacheOptions): EmotionCache {
+export function createEmotionCache(options?: Partial<CreateEmotionCacheOptions>): EmotionCache {
   return emotionCache({
     key: 'css',
     ...options,

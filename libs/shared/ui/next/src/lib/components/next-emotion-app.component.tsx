@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {CacheProvider, createEmotionCache, type EmotionCache} from '@aglyn/shared-feature-themes'
 import type {ReactNode} from 'react'
 

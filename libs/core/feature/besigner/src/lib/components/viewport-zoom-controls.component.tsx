@@ -41,6 +41,7 @@ import {
 const ViewportZoomControls = styled('div', {
   name: 'AglynViewportZoomControls',
 })(({theme}) => ({
+  display: 'none',
   position: 'absolute',
   bottom: theme.spacing(1),
   zIndex: theme.zIndex.tooltip,

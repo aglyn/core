@@ -67,6 +67,7 @@ function _AppComponent<Props, InitialProps>(props: _AppProps<Props, InitialProps
     }
   }, [])
 
+  console.log('_AppComponent', props)
 
   return (
     <NextEmotionAppComponent emotionCache={emotionCache}>
@@ -88,7 +89,7 @@ _AppComponent.aglyn = true
 _AppComponent.defaultProps = {
   metaElements: [],
   linkElements: [],
-  mainWrapper: function MainWrapper(props) {
+  MainComponent: function MainComponent(props) {
     const {children} = props
 
     return (

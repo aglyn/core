@@ -45,13 +45,13 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const {$id, leafComponent, ...rest} = props
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
-    const leaf = useMemo(() => leafComponent || ElementLeafComponent, [leafComponent])
     const isSelected = useAglynCanvasElementIsSelected($id)
     const setHovered = useAglynCanvasSetHovered()
     const setSelected = useAglynCanvasSetSelected()
+    const elemRef = useRef<Element>(null)
+    const leaf = useMemo(() => leafComponent || ElementLeafComponent, [leafComponent])
     const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
     const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
-    const elemRef = useRef<Element>(null)
     const [, startTransition] = useTransition()
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const throttleUpdate = useCallback(debounce((callback: () => void) => {
@@ -78,6 +78,8 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
         setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
       })
     }, [$id, setSelected, throttleUpdate])
+
+    console.log('leaf component besigner', rest)
 
     // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     // console.log('element attributes', elementAttributes)

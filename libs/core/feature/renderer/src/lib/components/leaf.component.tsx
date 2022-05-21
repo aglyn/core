@@ -16,6 +16,7 @@
  */
 
 import type {ComponentId} from '@aglyn/core-data-framework'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {isValidElementType} from '@aglyn/shared-ui-jsx'
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
 import {Box, type BoxProps} from '@mui/material'
@@ -39,16 +40,19 @@ const LeafComponent = forwardRef<any, LeafComponentProps>(
       leafComponent,
       children,
       className,
+      sx,
       ...rest
     } = props
 
     const leaf = useMemo(() => leafComponent || LeafComponent, [leafComponent])
-    const {className: resolvedClassName, ...resolved} = useAglynElementResolvedProps($id)
+    const {className: resolvedClassName, sx: resolvedSx, ...resolved} = useAglynElementResolvedProps($id)
     const elements = useAglynElementData($id, 'elements')
     const component = useAglynElementComponent<any, any>($id)
     const Component = useMemo(() => {
       return component && isValidElementType(component) ? component : Box
     }, [component])
+
+    console.log('leaf component renderer', rest, resolved, mergeSxProps(sx, resolvedSx))
 
     return (
       <Component
@@ -56,6 +60,7 @@ const LeafComponent = forwardRef<any, LeafComponentProps>(
         key={`element-leaf-${$id}`}
         id={`element-leaf-${$id}`}
         className={clsx(className, resolvedClassName)}
+        sx={mergeSxProps(sx, resolvedSx)}
         {...rest}
         {...resolved}
       >
