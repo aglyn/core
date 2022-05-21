@@ -32,7 +32,9 @@ AglynAppContext.displayName = 'AglynAppContext'
 AglynAppContext.aglyn = true
 export default AglynAppContext
 
-export const useAglynAppContext = () => useContext(AglynAppContext)
+export function useAglynAppContext<T extends IAglynAppController = IAglynAppController>(): T {
+  return useContext(AglynAppContext) as T
+}
 
 export interface AglynAppContextComponentProps {
   appName?: AppUUN

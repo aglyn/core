@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import {IBesignerAppController} from '@aglyn/core-data-besigner'
 import {canvasRedo, canvasUndo} from '@aglyn/core-data-framework'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export type UseAglynCanvasHistory = [
@@ -30,7 +29,7 @@ export type UseAglynCanvasHistory = [
 ]
 
 export function useAglynCanvasHistoryControls(): UseAglynCanvasHistory {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const canUndo = useSubscribable<number | false>(
     app.canvas?.pastElements, false,
     (past) => past?.length > 0 ? past.length : false,

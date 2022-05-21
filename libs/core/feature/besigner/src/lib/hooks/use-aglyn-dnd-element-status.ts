@@ -16,10 +16,9 @@
  */
 
 
-import type {IBesignerAppController} from '@aglyn/core-data-besigner'
 import type {ElementId} from '@aglyn/core-data-framework'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export type AglynDndElementStatus = [
@@ -28,7 +27,7 @@ export type AglynDndElementStatus = [
 ]
 
 export function useAglynDndElementStatus($id: ElementId): AglynDndElementStatus {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const value = useSubscribable<AglynDndElementStatus>(
     app.besigner?.dnd, [false, false],
     (dnd) => [

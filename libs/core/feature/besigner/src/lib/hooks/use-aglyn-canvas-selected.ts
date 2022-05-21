@@ -19,25 +19,35 @@
 import {
   type BesignerCanvasSelectedElement,
   type BesignerCanvasState,
-  type IBesignerAppController,
   setBesignerCanvasSelected,
 } from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
+
+export type BesignerCanvasSetSelected = (selected: BesignerCanvasSelected) => void
+export type BesignerCanvasSelected = BesignerCanvasSelectedElement | ((
+  prev: BesignerCanvasSelectedElement,
+  canvas: BesignerCanvasState,
+) => BesignerCanvasSelectedElement)
+
+
+export function useAglynCanvasSetSelected(): BesignerCanvasSetSelected {
+  const app = useBesignerAppContext()
+  return useCallback((selected: BesignerCanvasSelected) => {
+    setBesignerCanvasSelected(app, {
+      selected: (prev, canvas) => _isFnT(selected) ? selected(prev, canvas) : selected,
+    })
+  }, [app])
+}
 
 export function useAglynCanvasSelected(): [
   value: BesignerCanvasSelectedElement | undefined,
-  setValue: (
-    selected: BesignerCanvasSelectedElement | ((
-      prev: BesignerCanvasSelectedElement,
-      canvas: BesignerCanvasState,
-    ) => BesignerCanvasSelectedElement),
-  ) => void
+  setValue: BesignerCanvasSetSelected
 ] {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const value = useSubscribable<BesignerCanvasSelectedElement>(
     app.besigner?.canvas, undefined,
     (canvas) => canvas?.selected,
@@ -49,22 +59,3 @@ export function useAglynCanvasSelected(): [
 }
 
 export default useAglynCanvasSelected
-
-export function useAglynCanvasSetSelected(): (
-  selected: BesignerCanvasSelectedElement | ((
-    prev: BesignerCanvasSelectedElement,
-    canvas: BesignerCanvasState,
-  ) => BesignerCanvasSelectedElement),
-) => void {
-  const app = useAglynAppContext() as IBesignerAppController
-  return useCallback((
-    selected: BesignerCanvasSelectedElement | ((
-      prev: BesignerCanvasSelectedElement,
-      canvas: BesignerCanvasState,
-    ) => BesignerCanvasSelectedElement),
-  ) => {
-    setBesignerCanvasSelected(app, {
-      selected: (prev, canvas) => _isFnT(selected) ? selected(prev, canvas) : selected,
-    })
-  }, [app])
-}

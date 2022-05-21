@@ -19,28 +19,23 @@
 import {
   type BesignerCanvasHoveredElement,
   type BesignerCanvasState,
-  type IBesignerAppController,
   setBesignerCanvasHovered,
 } from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
-export function useAglynCanvasSetHovered(): (
-  hovered: BesignerCanvasHoveredElement | ((
-    prev: BesignerCanvasHoveredElement,
-    canvas: BesignerCanvasState,
-  ) => BesignerCanvasHoveredElement),
-) => void {
-  const app = useAglynAppContext() as IBesignerAppController
-  return useCallback((
-    hovered: BesignerCanvasHoveredElement | ((
-      prev: BesignerCanvasHoveredElement,
-      canvas: BesignerCanvasState,
-    ) => BesignerCanvasHoveredElement),
-  ) => {
+export type AglynCanvasSetHovered = (hovered: AglynCanvasHovered) => void
+export type AglynCanvasHovered = BesignerCanvasHoveredElement | ((
+  prev: BesignerCanvasHoveredElement,
+  canvas: BesignerCanvasState,
+) => BesignerCanvasHoveredElement)
+
+export function useAglynCanvasSetHovered(): AglynCanvasSetHovered {
+  const app = useBesignerAppContext()
+  return useCallback((hovered: AglynCanvasHovered) => {
     setBesignerCanvasHovered(app, {
       hovered: (prev, canvas) => _isFnT(hovered) ? hovered(prev, canvas) : hovered,
     })
@@ -49,14 +44,9 @@ export function useAglynCanvasSetHovered(): (
 
 export function useAglynCanvasHovered(): [
   value: BesignerCanvasHoveredElement | undefined,
-  setValue: (
-    hovered: BesignerCanvasHoveredElement | ((
-      hovered: BesignerCanvasHoveredElement,
-      canvas: BesignerCanvasState,
-    ) => BesignerCanvasHoveredElement),
-  ) => void
+  setValue: AglynCanvasSetHovered
 ] {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const setHovered = useAglynCanvasSetHovered()
   const value = useSubscribable<BesignerCanvasHoveredElement>(
     app.besigner?.canvas, undefined,

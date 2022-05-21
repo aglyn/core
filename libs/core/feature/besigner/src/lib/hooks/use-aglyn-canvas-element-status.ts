@@ -16,15 +16,14 @@
  */
 
 
-import type {IBesignerAppController} from '@aglyn/core-data-besigner'
 import {
   type ElementId,
   getCanvasDenormalizedElementsStore,
   getComponentElementHierarchy,
 } from '@aglyn/core-data-framework'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import type {Conditional} from '@aglyn/shared-data-types'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 type ElementSelfStatus = {
@@ -45,7 +44,7 @@ export function useAglynCanvasElementStatus<T extends boolean = false>(
   $id: ElementId,
   includeChildStatus: T = false as T,
 ): AglynCanvasElementStatus<T> {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const value = useSubscribable<AglynCanvasElementStatus<T>>(
     app.besigner?.canvas,
     () => {

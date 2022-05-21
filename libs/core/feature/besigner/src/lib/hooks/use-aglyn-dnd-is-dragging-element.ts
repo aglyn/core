@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import type {IBesignerAppController} from '@aglyn/core-data-besigner'
 import type {ElementId} from '@aglyn/core-data-framework'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export function useAglynDndIsDraggingElement($id: ElementId): boolean {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const value = useSubscribable<boolean>(
     app.besigner?.dnd, false,
     (dnd) => $id && dnd.active?.$id === $id,

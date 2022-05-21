@@ -15,21 +15,12 @@
  * limitations under the License.
  */
 
-import type {BesignerCanvasSelectedElement} from '@aglyn/core-data-besigner'
-import type {ElementId} from '@aglyn/core-data-framework'
-import {useSubscribable} from '@aglyn/shared-ui-jsx'
-import useBesignerAppContext from '../utils/use-besigner-app-context'
+import type {IBesignerAppController} from '@aglyn/core-data-besigner'
+import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 
 
-export function useAglynCanvasElementIsSelected($id: ElementId): boolean {
-  const app = useBesignerAppContext()
-  const value = useSubscribable<BesignerCanvasSelectedElement>(
-    app.besigner?.canvas, false,
-    (canvas) => $id && canvas?.selected?.$id === $id,
-    [$id, app],
-  )
-
-  return value
+export function useBesignerAppContext(...args: Parameters<typeof useAglynAppContext>): IBesignerAppController {
+  return useAglynAppContext<IBesignerAppController>(...args)
 }
 
-export default useAglynCanvasElementIsSelected
+export default useBesignerAppContext

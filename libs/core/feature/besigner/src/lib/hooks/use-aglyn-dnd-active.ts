@@ -16,16 +16,12 @@
  */
 
 
-import type {
-  BesignerDndElementActive,
-  BesignerDndState,
-  IBesignerAppController,
-} from '@aglyn/core-data-besigner'
+import type {BesignerDndElementActive, BesignerDndState} from '@aglyn/core-data-besigner'
 import {setBesignerDndItem} from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export function useAglynDndActive(): [
@@ -37,7 +33,7 @@ export function useAglynDndActive(): [
     ) => BesignerDndElementActive),
   ) => void
 ] {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const value = useSubscribable<BesignerDndElementActive>(
     app.besigner?.dnd, undefined,
     (dnd) => dnd?.active,
@@ -56,7 +52,7 @@ export function useAglynDndSetActive(): (
     dnd: BesignerDndState,
   ) => BesignerDndElementActive),
 ) => void {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   return useCallback((
     value: BesignerDndElementActive | ((
       prev: BesignerDndElementActive,

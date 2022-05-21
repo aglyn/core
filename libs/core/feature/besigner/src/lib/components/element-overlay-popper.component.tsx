@@ -19,11 +19,10 @@ import {
   BesignerCanvasItemValue,
   type BesignerCanvasState,
   BesignerPanelTabFlag,
-  IBesignerAppController,
   setBesignerPanels,
 } from '@aglyn/core-data-besigner'
 import {duplicateCanvasElement} from '@aglyn/core-data-framework'
-import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
+import {useAglynElementData} from '@aglyn/core-feature-renderer'
 import {type KeyOf} from '@aglyn/shared-data-types'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Popper'
@@ -31,6 +30,7 @@ import {type ChangeEvent, forwardRef, useCallback} from 'react'
 import {RenderedCanvasElementsContext} from '../contexts/rendered-canvas-elements'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import {useAglynCanvasSetSelected} from '../hooks/use-aglyn-canvas-selected'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 import ElementOverlayBadgeComponent from './element-overlay-badge.component'
 import ElementOverlayOutlineComponent from './element-overlay-outline.component'
 
@@ -89,7 +89,7 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
     const {variant, id, ...rest} = props || {}
 
 
-    const app = useAglynAppContext() as IBesignerAppController
+    const app = useBesignerAppContext()
     const state = useSubscribable<BesignerCanvasItemValue>(
       app.besigner?.canvas, undefined,
       (canvas) => canvas?.[variantToStoreName[variant]],

@@ -17,6 +17,7 @@
 
 import {copy} from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
+import isEqual from 'lodash-es/isEqual'
 import {BehaviorSubject, Observable} from 'rxjs'
 import {map} from 'rxjs/operators'
 import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
@@ -159,10 +160,14 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     payload?: P,
   ) {
     const state = this.getState()
-    const response = callback(copy(state.present), payload)
-    const updated = handleStateModificationHistoryChange(state, response)
-    this.nextState(updated)
+    const prev = copy(state.present)
+    const now = callback(prev, payload)
+    const updated = handleStateModificationHistoryChange(state, now)
+    !this.isDeepEqual(prev, now) && this.nextState(updated)
     return this
+  }
+  private isDeepEqual<T>(prev: unknown, now: T): prev is T {
+    return isEqual(prev, now)
   }
 
   public getPastElements(payload?: CanvasGetElementsPastPayload): this['__store__']['past'] {

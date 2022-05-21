@@ -19,12 +19,11 @@ import {
   type BesignerPanelItem,
   type BesignerPanelKey,
   type BesignerPanelsState,
-  type IBesignerAppController,
   setBesignerPanel,
 } from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {useCallback, useEffect, useState} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export function useAglynBesignerPanel(
@@ -39,7 +38,7 @@ export function useAglynBesignerPanel(
   ) => void
 ] {
 
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const [value, setValue] = useState<BesignerPanelItem | undefined>(undefined)
   const setPanel = useAglynBesignerSetPanel().bind(null, name)
 
@@ -63,7 +62,7 @@ export function useAglynBesignerSetPanel(): (
   ) => BesignerPanelItem),
 ) => void {
 
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   return useCallback((
     name: BesignerPanelKey,
     panel: BesignerPanelItem | ((

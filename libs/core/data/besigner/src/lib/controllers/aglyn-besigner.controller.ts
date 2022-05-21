@@ -20,7 +20,9 @@ import {
   AglynModuleModel,
   type IAglynAppController,
 } from '@aglyn/core-data-framework'
+import {copy} from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
+import isEqual from 'lodash-es/isEqual'
 import {BehaviorSubject} from 'rxjs'
 // import {persist} from 'effector-storage/local'
 import {BesignerDeviceFlag, BesignerPanelViewFlag, InteractionModeFlag} from '../constants/besigner'
@@ -123,6 +125,10 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     }
   }
 
+  private isDeepEqual<T>(prev: unknown, now: T): prev is T {
+    return isEqual(prev, now)
+  }
+
 
   public getStore<K extends keyof BesignerContext>(
     payload: BesignerGetStorePayload<K>,
@@ -135,29 +141,33 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
   public setFlag(payload: BesignerSetFlagPayload): this {
     const {flag, value} = payload || {}
     const prev = this.__store__?.flags?.getValue()
-    const now = {...prev, [flag]: value(prev?.[flag], prev)}
-    this.__store__?.flags?.next(now)
+    const prevValue = prev?.[flag]
+    const nowValue = value(prevValue, prev)
+    const now = {...prev, [flag]: nowValue}
+    !this.isDeepEqual(prevValue, nowValue) && this.__store__?.flags?.next(now)
     return this
   }
   public setFlags(payload: BesignerSetFlagsPayload): this {
     const {flags} = payload || {}
     const prev = this.__store__?.flags?.getValue()
     const now = flags(prev)
-    this.__store__?.flags?.next(now)
+    !this.isDeepEqual(prev, now) && this.__store__?.flags?.next(now)
     return this
   }
   public setPanel(payload: BesignerSetPanelPayload): this {
     const {panel, value} = payload || {}
-    const prev = this.__store__?.panels?.getValue()
-    const now = {...prev, [panel]: value(prev?.[panel], prev)}
-    this.__store__?.panels?.next(now)
+    const prev = copy(this.__store__?.panels?.getValue())
+    const prevPanel = prev?.[panel]
+    const nowPanel = value(prevPanel, prev)
+    const now = {...prev, [panel]: nowPanel}
+    !this.isDeepEqual(prevPanel, nowPanel) && this.__store__?.panels?.next(now)
     return this
   }
   public setPanels(payload: BesignerSetPanelsPayload): this {
     const {panels} = payload || {}
     const prev = this.__store__?.panels?.getValue()
     const now = panels(prev)
-    this.__store__?.panels?.next(now)
+    !this.isDeepEqual(prev, now) && this.__store__?.panels?.next(now)
     return this
   }
   public togglePanel(payload: BesignerTogglePanelPayload): this {
@@ -165,7 +175,7 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     const prev = this.__store__?.panels?.getValue()
     const prevPanel = prev?.[panel]
     const now = {...prev, [panel]: {...prevPanel, toggled: !prevPanel?.toggled}}
-    this.__store__?.panels?.next(now)
+    !this.isDeepEqual(prev, now) && this.__store__?.panels?.next(now)
     return this
   }
   public openPanel(payload: BesignerOpenPanelPayload): this {
@@ -173,7 +183,7 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     const prev = this.__store__?.panels?.getValue()
     const prevPanel = prev?.[panel]
     const now = {...prev, [panel]: {...prevPanel, toggled: true}}
-    this.__store__?.panels?.next(now)
+    !prevPanel?.toggled && this.__store__?.panels?.next(now)
     return this
   }
   public closePanel(payload: BesignerClosePanelPayload): this {
@@ -181,14 +191,16 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     const prev = this.__store__?.panels?.getValue()
     const prevPanel = prev?.[panel]
     const now = {...prev, [panel]: {...prevPanel, toggled: false}}
-    this.__store__?.panels?.next(now)
+    prevPanel?.toggled && this.__store__?.panels?.next(now)
     return this
   }
   public setDndItem(payload: BesignerSetDndItemPayload): this {
     const {item, value} = payload || {}
     const prev = this.__store__?.dnd?.getValue()
-    const now = {...prev, [item]: value(prev?.[item], prev)}
-    this.__store__?.dnd?.next(now)
+    const prevItem = prev?.[item]
+    const nowItem = value(prevItem, prev)
+    const now = {...prev, [item]: nowItem}
+    !this.isDeepEqual(prevItem, nowItem) && this.__store__?.dnd?.next(now)
     return this
   }
   public setDnd(payload: BesignerSetDndPayload): this {
@@ -201,29 +213,31 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
   public setCanvasItem(payload: BesignerSetCanvasItemPayload): this {
     const {item, value} = payload || {}
     const prev = this.__store__?.canvas?.getValue()
+    const prevItem = prev?.[item]
+    const nowItem = value(prevItem, prev)
     const now = {...prev, [item]: value(prev?.[item], prev)}
-    this.__store__?.canvas?.next(now)
+    !this.isDeepEqual(prevItem, nowItem) && this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvas(payload: BesignerSetCanvasPayload): this {
     const {canvas} = payload || {}
     const prev = this.__store__?.canvas?.getValue()
     const now = canvas(prev)
-    this.__store__?.canvas?.next(now)
+    !this.isDeepEqual(prev, now) && this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this {
     const {selected} = payload || {}
     const prev = this.__store__?.canvas?.getValue()
     const now = {...prev, selected: selected(prev?.selected, prev)}
-    this.__store__?.canvas?.next(now)
+    !this.isDeepEqual(prev?.selected, now?.selected) && this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvasHovered(payload: BesignerSetCanvasHoveredPayload): this {
     const {hovered} = payload || {}
     const prev = this.__store__?.canvas?.getValue()
     const now = {...prev, hovered: hovered(prev?.hovered, prev)}
-    this.__store__?.canvas?.next(now)
+    !this.isDeepEqual(prev?.hovered, now?.hovered) && this.__store__?.canvas?.next(now)
     return this
   }
 }

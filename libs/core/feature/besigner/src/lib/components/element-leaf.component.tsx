@@ -31,6 +31,29 @@ import useLeafDnd from '../hooks/use-leaf-dnd'
 
 export interface ElementLeafComponentProps extends LeafComponentProps {}
 
+const DraggableLeafComponent = forwardRef<any, ElementLeafComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {$id, ...rest} = props
+    const elemRef = useRef<Element>(null)
+    const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
+    const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
+    useEffect(() => {
+      setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
+      console.log('setElementRef', $id, elemRef)
+      return () => deleteElementRef($id)
+    }, [$id, deleteElementRef, dragHandleRef, setElementRef])
+    return (
+      <LeafComponent
+        ref={useCombinedRefs(ref, elemRef, dragPreviewRef, dropRef)}
+        $id={$id}
+        {...rest}
+      />
+    )
+  },
+)
+DraggableLeafComponent.displayName = 'DraggableLeafComponent'
+
+
 const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
   function RefRenderFn(props, ref) {
     const {$id, leafComponent, ...rest} = props
@@ -39,17 +62,8 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const isSelected = useAglynCanvasElementIsSelected($id)
     const setHovered = useAglynCanvasSetHovered()
     const setSelected = useAglynCanvasSetSelected()
-    const elemRef = useRef<Element>(null)
     const leaf = useMemo(() => leafComponent || ElementLeafComponent, [leafComponent])
-    const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
-    const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
     const [, debounceUpdate] = useDebouncedTransition(200, {trailing: true, leading: false}, [])
-
-    useEffect(() => {
-      setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
-      console.log('setElementRef', $id, elemRef)
-      return () => deleteElementRef($id)
-    }, [$id, deleteElementRef, dragHandleRef, setElementRef])
 
 
     const handleOnMouseOver = useCallback((e: ChangeEvent<any>) => {
@@ -70,8 +84,8 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     // console.log('element attributes', elementAttributes)
 
     return (
-      <LeafComponent
-        ref={useCombinedRefs(ref, elemRef, dragPreviewRef, dropRef)}
+      <DraggableLeafComponent
+        ref={ref}
         $id={$id}
         leafComponent={leaf}
         onMouseOver={handleOnMouseOver}
@@ -86,7 +100,7 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
   },
 )
 
-ElementLeafComponent.displayName = 'Besigner.LeafComponent'
+ElementLeafComponent.displayName = 'BesignerLeafComponent'
 ElementLeafComponent.aglyn = true
 ElementLeafComponent.defaultProps = {}
 

@@ -131,7 +131,7 @@ export const handleCanvasMoveElement = (
     parentId = CANVAS_ROOT_ELEMENT_ID
   }
 
-  const parentHierarchy = getComponentElementHierarchy(parentId, state)
+  // const parentHierarchy = getComponentElementHierarchy(parentId, state)
   if (getComponentElementHierarchy(parentId, state).indexOf(payload.$id) >= 0)
     throw new Error('New parent is same or a child of the element')
 

@@ -18,13 +18,12 @@
 import {
   type BesignerPanelKey,
   type BesignerPanelsState,
-  type IBesignerAppController,
   setBesignerPanel,
 } from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export function useAglynBesignerPanelValue<P extends BesignerPanelKey, K extends keyof BesignerPanelsState[P]>(
@@ -41,7 +40,7 @@ export function useAglynBesignerPanelValue<P extends BesignerPanelKey, K extends
   ) => void
 ] {
 
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const setPanelValue = useAglynBesignerPanelSetValue<P, K>().bind(null, panelName, key)
   const value = useSubscribable<BesignerPanelsState[P][K]>(
     app.besigner?.panels, undefined,
@@ -64,7 +63,7 @@ export function useAglynBesignerPanelSetValue<P extends BesignerPanelKey, K exte
   ) => BesignerPanelsState[P][K]),
 ) => void {
 
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   return useCallback((
     panelName: P,
     key: K,

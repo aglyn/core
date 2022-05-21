@@ -16,12 +16,12 @@
  */
 
 
-import type {BesignerDndElementOver, IBesignerAppController} from '@aglyn/core-data-besigner'
+import type {BesignerDndElementOver} from '@aglyn/core-data-besigner'
 import {type BesignerDndState, setBesignerDndItem} from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export function useAglynDndOver(): [
@@ -33,7 +33,7 @@ export function useAglynDndOver(): [
     ) => BesignerDndElementOver),
   ) => void
 ] {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   const value = useSubscribable<BesignerDndElementOver>(
     app.besigner?.dnd, undefined,
     (dnd) => dnd?.over,
@@ -54,7 +54,7 @@ export function useAglynDndSetOver(): (
     dnd: BesignerDndState,
   ) => BesignerDndElementOver),
 ) => void {
-  const app = useAglynAppContext() as IBesignerAppController
+  const app = useBesignerAppContext()
   return useCallback((
     value: BesignerDndElementOver | ((
       prev: BesignerDndElementOver,
