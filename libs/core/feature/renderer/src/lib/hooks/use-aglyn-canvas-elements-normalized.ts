@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
-import {type AglynElementsList, getCanvasNormalizedElementsStore} from '@aglyn/core-data-framework'
+import {
+  type AglynElementsNormalized,
+  getCanvasNormalizedElementsStore,
+} from '@aglyn/core-data-framework'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
-export function useAglynCanvasElementsNormalized(): AglynElementsList {
+export function useAglynCanvasElementsNormalized(): AglynElementsNormalized {
   const app = useAglynAppContext()
   return useSubscribable(getCanvasNormalizedElementsStore(app))
 }

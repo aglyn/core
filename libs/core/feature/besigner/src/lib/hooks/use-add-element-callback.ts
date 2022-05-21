@@ -44,7 +44,7 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
 ): AddElementCallback<E> {
   const {onComplete, onError, drawerOptions} = {...options}
   const {elementDrawer} = useElementDrawerContext()
-  const [selected] = useAglynCanvasSelected()
+  const [selected, setSelected] = useAglynCanvasSelected()
   const {$id} = selected || {}
   const app = useAglynAppContext()
 
@@ -60,6 +60,7 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
           }
           console.log('addElement', newElement)
           addCanvasElement(app, newElement)
+          setSelected({$id: newElement.element.$id})
         }
         else {
           console.warn('Invalid data returned for addElement callback', data)

@@ -49,6 +49,7 @@ export const DEFAULT_PROPS_FORM_SCHEMA: AglynComponentPropsFormSchema = {
       description: 'The content of the component.',
       component: FieldComponentType.TEXT_FIELD,
       label: 'Content',
+      size: 'small',
     },
   ],
 }

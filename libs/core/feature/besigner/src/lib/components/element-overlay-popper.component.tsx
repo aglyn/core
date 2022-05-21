@@ -22,9 +22,10 @@ import {
   setBesignerPanels,
 } from '@aglyn/core-data-besigner'
 import {duplicateCanvasElement} from '@aglyn/core-data-framework'
-import {useAglynElementData} from '@aglyn/core-feature-renderer'
+import {useAglynElementData, useAglynElementLabel} from '@aglyn/core-feature-renderer'
 import {type KeyOf} from '@aglyn/shared-data-types'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {Box} from '@mui/material'
 import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Popper'
 import {type ChangeEvent, forwardRef, useCallback} from 'react'
 import {RenderedCanvasElementsContext} from '../contexts/rendered-canvas-elements'
@@ -100,6 +101,7 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
     const parentId = useAglynElementData($id, 'parentId')
     const setHovered = useAglynCanvasSetHovered()
     const setSelected = useAglynCanvasSetSelected()
+    const badgeLabel = useAglynElementLabel($id)
 
     const handleDuplicateClick = useCallback((e: ChangeEvent<unknown>) => {
       duplicateCanvasElement(app, {$id})
@@ -164,26 +166,52 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
                 data-aglyn-overlay-type="outline"
               >
 
-                {variant === 'selectedOverlay' && (
-                  <ElementOverlayBadgeComponent
-                    $id={$id}
-                    data-aglyn-overlay-id={$id}
-                    data-aglyn-overlay-variant={variant}
-                    data-aglyn-overlay-type="badge"
-                    dragHandleRef={dragHandleRef}
-                    onModifyClick={handleModifyClick}
-                    onDuplicateClick={handleDuplicateClick}
-                    onSelectParentClick={handleSelectParentClick}
-                    onHoverParent={handleHoverParent}
-                    onHoverParentLeave={handleHoverParentLeave}
-                    sx={{
-                      boxShadow: 4,
-                      pointerEvents: 'auto',
-                      marginTop: `-2.1em`,
-                      position: 'absolute',
-                    }}
-                  />
-                )}
+                {{
+                  'selectedOverlay': (
+                    <ElementOverlayBadgeComponent
+                      $id={$id}
+                      data-aglyn-overlay-id={$id}
+                      data-aglyn-overlay-variant={variant}
+                      data-aglyn-overlay-type="badge-actions"
+                      dragHandleRef={dragHandleRef}
+                      onModifyClick={handleModifyClick}
+                      onDuplicateClick={handleDuplicateClick}
+                      onSelectParentClick={handleSelectParentClick}
+                      onHoverParent={handleHoverParent}
+                      onHoverParentLeave={handleHoverParentLeave}
+                      sx={{
+                        boxShadow: 4,
+                        pointerEvents: 'auto',
+                        marginTop: `-2.1em`,
+                        position: 'absolute',
+                      }}
+                    />
+                  ),
+                  'hoveredOverlay': (
+                    <Box
+                      data-aglyn-overlay-id={$id}
+                      data-aglyn-overlay-variant={variant}
+                      data-aglyn-overlay-type="badge-label"
+                      sx={{
+                        pointerEvents: 'none',
+                        marginTop: '-20px',
+                        marginLeft: '-2px',
+                        position: 'absolute',
+                        bgcolor: 'secondary.main',
+                        color: 'secondary.contrastText',
+                        whiteSpace: 'nowrap',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        px: 0.6, py: 0.4,
+                        lineHeight: 1,
+                        maxWidth: 120,
+                        fontSize: 12,
+                      }}
+                    >
+                      {badgeLabel}
+                    </Box>
+                  ),
+                }[variant]}
               </ElementOverlayOutlineComponent>
             </MuiPopper>
           )

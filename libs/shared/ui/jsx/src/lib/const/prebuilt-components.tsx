@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {LoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
+import LoadingOverlayComponent from '../components/loading-overlay.component'
 
 
 export const LOADING_OVERLAY_ELEMENT = (

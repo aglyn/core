@@ -28,7 +28,7 @@ import {
   ICON_VARIANT_ENTITY_BLOCK,
 } from '@aglyn/shared-data-enums'
 import {alpha, styled} from '@aglyn/shared-feature-themes'
-import {isReactElement, useDebouncedTransition} from '@aglyn/shared-ui-jsx'
+import {isReactElement} from '@aglyn/shared-ui-jsx'
 import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {_isArr, _isObjT} from '@aglyn/shared-util-guards'
 import {
@@ -77,14 +77,11 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
       label = useAglynElementLabel($id),
       icon = useAglynComponentSchema(componentId, bundleId)?.icon
     const setHovered = useAglynCanvasSetHovered()
-    const [, debounceUpdate] = useDebouncedTransition(200, {trailing: true, leading: false}, [])
 
     const handleOnMouseOver = useCallback((e) => {
       e.stopPropagation()
-      debounceUpdate(() => {
-        setHovered({$id})
-      })
-    }, [$id, setHovered, debounceUpdate])
+      setHovered({$id})
+    }, [$id, setHovered])
 
     const itemIcon = useMemo(() => {
       if (!icon?.path && icon && (!_isObjT(icon) || isReactElement(icon))) {
@@ -160,32 +157,25 @@ export const ElementsTreeViewComponent = forwardRef<any, ElementsTreeViewCompone
     const allExpanded = useMemo(() => [
       ...selectedHierarchy, ...expanded,
     ], [selectedHierarchy, expanded])
-    const [, debounceUpdate] = useDebouncedTransition(200, {trailing: true, leading: false}, [])
 
     const handleTreeItemSelect = useCallback((e, $id) => {
       e.stopPropagation()
       e.preventDefault()
-      debounceUpdate(() => {
-        setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
-      })
-    }, [setSelected, debounceUpdate])
+      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
+    }, [setSelected])
 
 
     const handleTreeItemFocus = useCallback((e, $id) => {
       e.stopPropagation()
-      debounceUpdate(() => {
-        setHovered({$id})
-      })
-    }, [setHovered, debounceUpdate])
+      setHovered({$id})
+    }, [setHovered])
 
 
     const handleTreeItemToggle = useCallback((e, ids: ElementId[]) => {
       e.stopPropagation()
       e.preventDefault()
-      debounceUpdate(() => {
-        setExpanded(ids)
-      })
-    }, [debounceUpdate])
+      setExpanded(ids)
+    }, [])
 
     return (
       <TreeView

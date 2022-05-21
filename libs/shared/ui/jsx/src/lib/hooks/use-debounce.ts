@@ -28,13 +28,13 @@ export function useDebounce<T extends (...args: any) => any>(
   func: T,
   wait: number | undefined,
   options: DebounceSettings,
-  deps?: DependencyList
+  deps?: DependencyList,
 ): DebouncedFuncLeading<T>
 export function useDebounce<T extends (...args: any) => any>(
   func: T,
   wait?: number,
   options?: DebounceSettings,
-  deps: DependencyList = []
+  deps: DependencyList = [],
 ): DebouncedFunc<T> {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useCallback(debounce(func, wait, options), deps)

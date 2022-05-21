@@ -20,7 +20,7 @@ import {
   type LeafComponentProps,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import {useCombinedRefs, useDebouncedTransition} from '@aglyn/shared-ui-jsx'
+import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
 import {type ChangeEvent, forwardRef, useCallback, useEffect, useMemo, useRef} from 'react'
 import {useRenderedCanvasElements} from '../contexts/rendered-canvas-elements'
 import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
@@ -39,7 +39,6 @@ const DraggableLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
     useEffect(() => {
       setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
-      console.log('setElementRef', $id, elemRef)
       return () => deleteElementRef($id)
     }, [$id, deleteElementRef, dragHandleRef, setElementRef])
     return (
@@ -63,22 +62,17 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const setHovered = useAglynCanvasSetHovered()
     const setSelected = useAglynCanvasSetSelected()
     const leaf = useMemo(() => leafComponent || ElementLeafComponent, [leafComponent])
-    const [, debounceUpdate] = useDebouncedTransition(200, {trailing: true, leading: false}, [])
 
 
     const handleOnMouseOver = useCallback((e: ChangeEvent<any>) => {
       e.stopPropagation()
-      debounceUpdate(() => {
-        setHovered({$id})
-      })
-    }, [$id, setHovered, debounceUpdate])
+      setHovered({$id})
+    }, [$id, setHovered])
     const handleOnMouseDown = useCallback((e: ChangeEvent<any>) => {
       e.preventDefault()
       e.stopPropagation()
-      debounceUpdate(() => {
-        setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
-      })
-    }, [$id, setSelected, debounceUpdate])
+      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
+    }, [$id, setSelected])
 
     // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     // console.log('element attributes', elementAttributes)

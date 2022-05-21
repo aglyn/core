@@ -16,7 +16,7 @@
  */
 
 import type {PaletteOptions, Theme, ThemeOptions} from '../vendor/mui'
-import {buildFontFamilyList, FontFamily} from './constants'
+import {buildFontFamilyList} from './constants'
 import type {IActionStates} from './theme.types'
 import createResponsiveTheme from './util/create-responsive-theme'
 
@@ -334,7 +334,7 @@ const baseOptions: ThemeOptions = {
   },
   spacing: 8,
   typography: {
-    fontFamily: buildFontFamilyList(FontFamily.ROBOTO).join(','),
+    fontFamily: buildFontFamilyList().join(','),
     // fontSize: 14,
     // htmlFontSize: 16,
     // fontWeightLight: 300,

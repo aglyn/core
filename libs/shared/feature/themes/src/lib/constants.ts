@@ -65,19 +65,21 @@ export enum FontFamily {
   SF_PRO = '"SF Pro"',
   SF_PRO_DISPLAY = '"SF Pro Display"',
   SF_PRO_TEXT = '"SF Pro Text"',
+  SOURCE_SANS_PRO = '"Source Sans Pro"',
   TIMES_NEW_ROMAN = '"Times New Roman"',
   VERDANA = 'Verdana',
 }
 
-export const buildFontFamilyList = (fontFamily = FontFamily.ROBOTO) => [
+export const buildFontFamilyList = (fontFamily = FontFamily.SOURCE_SANS_PRO) => [
+  fontFamily,
   FontFamily.APPLE_SYSTEM,
   FontFamily.BLINK_MAC_SYSTEM_FONT,
   FontFamily.SEGOE_UI,
-  fontFamily,
+  FontFamily.ROBOTO,
   FontFamily.HELVETICA_NEUE,
   FontFamily.ARIAL,
   FontFamily.SANS_SERIF,
   FontFamily.APPLE_COLOR_EMOJI,
   FontFamily.SEGOE_UI_EMOJI,
   FontFamily.SEGOE_UI_SYMBOL,
-]
+].filter(Boolean)

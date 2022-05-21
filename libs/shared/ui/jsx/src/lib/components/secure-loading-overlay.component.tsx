@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {mergeSxProps} from '@aglyn/shared-feature-themes'
-import {AglynSvgLogo} from '@aglyn/shared-ui-jsx'
 import {Box, Modal, type ModalProps as MuiModalProps, Stack} from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import {forwardRef} from 'react'
+import {AglynSvgLogo} from '../const/svg-icons'
 import LoadingTextComponent from './loading-text.component'
 
 

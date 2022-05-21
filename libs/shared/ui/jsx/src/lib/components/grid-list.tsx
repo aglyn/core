@@ -22,11 +22,11 @@ import {
   styled,
   type SxProps,
 } from '@aglyn/shared-feature-themes'
-import {ContainerComponent, type ContainerProps} from '@aglyn/shared-ui-jsx'
 import {Box, type BoxProps, Card, Grid, type GridProps as MuiGridProps} from '@mui/material'
 import clsx from 'clsx'
 import {forwardRef, type ReactNode, useCallback, useMemo} from 'react'
 import {VirtuosoGrid, type VirtuosoGridHandle, type VirtuosoGridProps} from 'react-virtuoso'
+import ContainerComponent, {type ContainerProps} from './container.component'
 
 
 const classKey = generateComponentClassKeys('AglynGridList', [
@@ -150,7 +150,7 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
         },
       )
       Component.displayName = 'Component'
-Component.aglyn = true
+      Component.aglyn = true
       return Component
     }, [GridItemProps])
 

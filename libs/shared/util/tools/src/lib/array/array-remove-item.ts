@@ -23,9 +23,7 @@
  */
 export function arrayRemoveItem<T>(array: Array<T>, item: T): Array<T> {
   const index = array.indexOf(item)
-  if (index >= 0) {
-    array.splice(index, 1)
-  }
+  if (index >= 0) array.splice(index, 1)
   return array
 }
 export default arrayRemoveItem

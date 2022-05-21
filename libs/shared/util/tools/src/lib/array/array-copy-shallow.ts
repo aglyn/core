@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 
+import clone from 'lodash-es/clone'
+
 
 /**
- * Shallow copy iterable or array like, shortcut for Array.from
+ * Shallow copy array like, shortcut for {@link _.clone}
+ * @see _.clone
  * @param iterable - An iterable object to convert to an array
- * @param callbackFn - A mapping function to call on every element of the array
- * @param thisArg - Value of 'this' used to invoke the callbackFn
  */
-export function arrayCopyShallow<T, U>(
-  iterable: Iterable<T> | ArrayLike<T>,
-  callbackFn?: (v: T, k: number) => U,
-  thisArg?: any,
-): U[] {
-  return Array.from(iterable, callbackFn, thisArg)
+export function arrayCopyShallow<T>(iterable: Array<T>): Array<T>
+export function arrayCopyShallow<T>(iterable: Iterable<T>): Iterable<T>
+export function arrayCopyShallow<T>(iterable: ArrayLike<T>): ArrayLike<T>
+export function arrayCopyShallow<T>(iterable: Array<T> | ArrayLike<T> | Iterable<T>): Array<T> | ArrayLike<T> | Iterable<T> {
+  return clone(iterable)
 }
 export default arrayCopyShallow

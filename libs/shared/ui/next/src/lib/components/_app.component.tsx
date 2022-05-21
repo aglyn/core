@@ -67,8 +67,6 @@ function _AppComponent<Props, InitialProps>(props: _AppProps<Props, InitialProps
     }
   }, [])
 
-  console.log('_AppComponent', props)
-
   return (
     <NextEmotionAppComponent emotionCache={emotionCache}>
       <NextPageTitleComponent>

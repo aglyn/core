@@ -160,8 +160,8 @@ export class AglynCanvasController extends AglynModuleModel<AglynCanvasControlle
     payload?: P,
   ) {
     const state = this.getState()
-    const prev = copy(state.present)
-    const now = callback(prev, payload)
+    const prev = state.present
+    const now = callback(copy(prev), payload)
     const updated = handleStateModificationHistoryChange(state, now)
     !this.isDeepEqual(prev, now) && this.nextState(updated)
     return this

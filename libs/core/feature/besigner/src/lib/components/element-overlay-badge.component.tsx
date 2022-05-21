@@ -22,13 +22,19 @@ import {
   ICON_VARIANT_MODIFY_EDIT,
   ICON_VARIANT_SELECT_PARENT,
 } from '@aglyn/shared-data-enums'
+import {mergeSxProps} from '@aglyn/shared-feature-themes'
 import {SrOnlyComponent, type SrOnlyComponentProps} from '@aglyn/shared-ui-jsx'
 import {MdiIcon, type MdiIconProps} from '@aglyn/shared-ui-mdi-jsx'
-import MuiButton, {type ButtonProps} from '@mui/material/Button'
-import MuiButtonGroup, {type ButtonGroupProps} from '@mui/material/ButtonGroup'
-import MuiTooltip, {type TooltipProps} from '@mui/material/Tooltip'
+import {
+  Button as MuiButton,
+  ButtonGroup as MuiButtonGroup,
+  type ButtonGroupProps,
+  type ButtonProps,
+  Tooltip as MuiTooltip,
+  type TooltipProps,
+} from '@mui/material'
 import {type ChangeEvent, forwardRef, useCallback} from 'react'
-import {type DragElementWrapper} from 'react-dnd'
+import type {DragElementWrapper} from 'react-dnd'
 
 
 export interface BadgeButtonProps extends Omit<TooltipProps, 'children'> {
@@ -50,7 +56,13 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>(
 
     return (
       <MuiTooltip ref={ref} {...rest}>
-        <MuiButton {...ButtonProps}>
+        <MuiButton
+          {...ButtonProps}
+          sx={mergeSxProps({
+            px: 0.8,
+            '&.MuiButtonGroup-grouped': {minWidth: 32},
+          }, ButtonProps?.sx)}
+        >
           <MdiIcon fontSize="small" {...icon} />
           <SrOnlyComponent component="span" {...SrOnlyProps}>
             {children}
@@ -129,7 +141,6 @@ const ElementOverlayBadgeComponent = forwardRef<any, ElementOverlayBadgeButtonsC
             sx={{
               pl: 0.75, pr: 0.5,
               '&:hover': {cursor: 'move'},
-              '&.MuiButtonGroup-grouped': {minWidth: 32},
             }}
           />
         )}

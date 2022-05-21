@@ -16,20 +16,21 @@
  */
 
 import {_isFnT} from '@aglyn/shared-util-guards'
+import isEqual from 'lodash-es/isEqual'
 import {type DependencyList, useCallback, useState} from 'react'
-import type {Subscribable as RxJsSubscribable} from 'rxjs'
+import type {Observable as RxJsObservable, Unsubscribable as RxJsUnsubscribable} from 'rxjs'
+import {distinctUntilChanged} from 'rxjs/operators'
 import useIsomorphicLayoutEffect from './use-isomorphic-layout-effect'
 
 
-export type SubscribableLike<T> = RxJsSubscribable<T> | Observable<T>
+export type SubscribableLike<T> = RxJsObservable<T> | Observable<T>
+export type MapObservable<V, R> = (newValue: V, prevValue: R) => R
 
 export interface Observable<T> {
   subscribe: (listener: (value: T) => void) => {
-    unsubscribe: () => void;
+    unsubscribe: RxJsUnsubscribable;
   };
 }
-
-export type MapObservable<V, R> = (newValue: V, prevValue: R) => R
 
 
 export function useSubscribable<T>($subscribable: SubscribableLike<T>): T | undefined
@@ -49,7 +50,7 @@ export function useSubscribable<T,
   mapValue?: M,
   dependencies: DependencyList = [],
 ): U | T | undefined {
-  const [value, update] = useState<T | U | undefined>(initialValue)
+  const [value, update] = useState<T | U | undefined>(() => initialValue)
 
   const mapUpdate = useCallback((newValue, prevValue) => {
     if (_isFnT(mapValue)) return mapValue(newValue, prevValue as T) as T
@@ -58,10 +59,21 @@ export function useSubscribable<T,
   }, dependencies)
 
   useIsomorphicLayoutEffect(() => {
-    const subscribable = $subscribable?.subscribe?.((newValue) => {
-      update((prevValue) => mapUpdate(newValue, prevValue))
-    })
-    return () => subscribable?.unsubscribe?.()
+    function handleChange(newValue) {
+      update((prevValue) => {
+        const value = mapUpdate(newValue, prevValue)
+        if (isEqual(prevValue, value)) return prevValue
+        return value
+      })
+    }
+
+    const subscriber: RxJsUnsubscribable = (
+      $subscribable?.['pipe']
+        ? (<any>$subscribable).pipe(distinctUntilChanged(isEqual))
+        : $subscribable
+    ).subscribe(handleChange)
+
+    return () => subscriber?.unsubscribe?.()
   }, [$subscribable, mapUpdate])
 
   return value

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import {alpha, mergeSxProps} from '@aglyn/shared-feature-themes'
 import {
   Box,
