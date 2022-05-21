@@ -66,8 +66,6 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
       })
     }, [$id, setSelected, debounceUpdate])
 
-    console.log('leaf component besigner', rest)
-
     // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     // console.log('element attributes', elementAttributes)
 

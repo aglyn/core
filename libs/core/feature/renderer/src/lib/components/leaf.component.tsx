@@ -52,8 +52,6 @@ const LeafComponent = forwardRef<any, LeafComponentProps>(
       return component && isValidElementType(component) ? component : Box
     }, [component])
 
-    console.log('leaf component renderer', rest, resolved, mergeSxProps(sx, resolvedSx))
-
     return (
       <Component
         ref={ref}

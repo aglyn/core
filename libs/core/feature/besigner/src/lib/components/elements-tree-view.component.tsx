@@ -88,7 +88,7 @@ const ElementsTreeItemComponent = forwardRef<any, ElementsTreeItemComponentProps
 
     const itemIcon = useMemo(() => {
       if (!icon?.path && icon && (!_isObjT(icon) || isReactElement(icon))) {
-        return icon
+        return icon as any
       }
 
       return (

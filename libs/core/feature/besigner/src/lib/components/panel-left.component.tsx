@@ -120,7 +120,6 @@ const PanelLeftComponent = forwardRef<any, PanelLeftComponentProps>(
                   icon={<MdiIcon {...icon} />}
                   sx={{
                     minHeight: 'unset',
-                    textTransform: 'lowercase',
                     fontSize: theme => theme.typography.pxToRem(12),
                     lineHeight: 0.8,
                     pt: 1,
