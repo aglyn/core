@@ -63,6 +63,20 @@ const stylesSchema = {
       name: 'color',
       label: 'Text Color',
       description: 'The text color of descendents',
+      FormFieldGridProps: {
+        xs: 12,
+        sm: 6,
+      },
+    },
+    {
+      component: FieldComponentType.COLOR_PICKER,
+      name: 'backgroundColor',
+      label: 'Background Color',
+      description: 'The background color of descendents',
+      FormFieldGridProps: {
+        xs: 12,
+        sm: 6,
+      },
     },
   ],
 }
