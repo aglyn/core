@@ -165,7 +165,7 @@ function Screens(props) {
     {field: 'createdAt', headerName: 'Created', flex: 1, minWidth: 150, type: 'date', valueFormatter: ({value}: any) => value?.toDate?.().toLocaleTimeString() || '--'},
   ]
 
-  console.log('Screens props', props, data, status, screens)
+  // console.log('Screens props', props, data, status, screens)
 
   return (
     <DashboardLayout

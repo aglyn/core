@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import type { JSXComponentType } from '@aglyn/shared-data-types'
-import { _isArr, _isNull, _isStrT } from '@aglyn/shared-util-guards'
-import { getDisplayName } from '@aglyn/shared-util-tools'
-import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
-import { CssBaseline, useMediaQuery } from '@mui/material'
-import { get as getCookie, set as setCookie } from 'js-cookie'
+import type {JSXComponentType} from '@aglyn/shared-data-types'
+import {_isArr, _isNull} from '@aglyn/shared-util-guards'
+import {getDisplayName, noop} from '@aglyn/shared-util-tools'
+import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
+import {CssBaseline, useMediaQuery} from '@mui/material'
+import {get as getCookie, set as setCookie} from 'js-cookie'
 import {
   createContext,
   forwardRef,
@@ -29,20 +29,36 @@ import {
   useContext,
   useMemo,
   useState,
-  useRef,
-  useEffect,
 } from 'react'
-import { createTheme, type Theme, ThemeProvider } from '../../vendor/mui'
+import {useIsomorphicLayoutEffect} from 'react-use'
+import {createTheme, type Theme, ThemeProvider} from '../../vendor/mui'
+
 
 export type ThemeMode = 'light' | 'dark' | 'system' | null
+export type ThemeModeType = 'user' | 'system'
+export type ThemeModeResult = [ThemeModeType, ThemeMode]
 export type UseThemeMode = [
-  themeMode: ThemeMode,
+  mode: ThemeModeResult,
   toggleThemeMode: (event: SyntheticEvent<any>, to?: ThemeMode) => void,
-  themeMode: ThemeMode
+  cookieMode: ThemeMode
 ]
 
-export const COOKIE_THEME_KEY = 'theme-color-scheme'
-export const ThemeContextDispatch = createContext<UseThemeMode>(null)
+export const THEME_DISPLAY_NAME: Record<ThemeMode, string> = {
+  light: 'Light',
+  dark: 'Dark',
+  system: 'Device default',
+}
+
+export const getThemeModeDisplayName = (theme: ThemeMode) => {
+  return THEME_DISPLAY_NAME[theme] || THEME_DISPLAY_NAME.system
+}
+
+export const COOKIE_THEME_KEY = 'theme-color-mode'
+export const ThemeContextDispatch = createContext<UseThemeMode>([
+  ['system', 'system'],
+  noop,
+  'system',
+])
 
 export function useThemeMode() {
   return useContext(ThemeContextDispatch)
@@ -57,40 +73,42 @@ function getCookieThemeMode(): ThemeMode {
 }
 
 export function useCookieThemeMode(): [ThemeMode, (mode: ThemeMode) => void] {
-  const ref = useRef<ThemeMode>(getCookieThemeMode())
+  const [mode, setMode] = useState<ThemeMode>(() => getCookieThemeMode())
 
   /**
-   * Update ref value on each paint if changed
+   * Update value on each paint if changed
    */
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const cookieMode = getCookieThemeMode()
-    if (cookieMode !== ref.current) {
-      ref.current = cookieMode
-    }
+    setMode((prev) => prev !== cookieMode ? cookieMode : prev)
   })
 
   const setCookieThemeMode = useCallback((newMode: ThemeMode) => {
     setCookie(COOKIE_THEME_KEY, newMode, {expires: 365})
+    setMode((prev) => prev !== newMode ? newMode : prev)
   }, [])
 
-  return useMemo(() => [ref.current, setCookieThemeMode], [setCookieThemeMode])
+  return useMemo(() => [mode, setCookieThemeMode], [mode, setCookieThemeMode])
 }
 
 export function useThemeModeState(): UseThemeMode {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
   const [cookieMode, setCookieMode] = useCookieThemeMode()
 
-  const systemTheme = useMemo<ThemeMode>(() => {
+  const systemMode = useMemo<ThemeMode>(() => {
     return (prefersDark ? 'dark' : 'light')
   }, [prefersDark])
 
-  const themeMode = useMemo<ThemeMode>(() => {
-    return cookieMode || systemTheme
-  }, [cookieMode, systemTheme])
+  const [type, mode] = useMemo<ThemeModeResult>(() => {
+    if (cookieMode && cookieMode !== 'system') {
+      return ['user', cookieMode]
+    }
+    return ['system', systemMode]
+  }, [cookieMode, systemMode])
 
   const toggleThemeMode = useCallback((
     event: SyntheticEvent<any>,
-    to?: ThemeMode
+    to?: ThemeMode,
   ) => {
     let newMode: ThemeMode
 
@@ -100,21 +118,16 @@ export function useThemeModeState(): UseThemeMode {
         newMode = 'system'
         break
       case to === 'dark':
-        newMode = 'dark'
-        break
       case to === 'light':
-        newMode = 'light'
+        newMode = to
         break
       case _isNull(cookieMode):
-      case cookieMode === 'system':
         newMode = 'light'
-        break
-      case cookieMode === 'dark':
-        newMode = 'system'
         break
       case cookieMode === 'light':
         newMode = 'dark'
         break
+      case cookieMode === 'dark':
       default:
         newMode = 'system'
         break
@@ -124,8 +137,8 @@ export function useThemeModeState(): UseThemeMode {
   }, [cookieMode, setCookieMode])
 
   return useMemo(
-    () => [themeMode, toggleThemeMode, cookieMode],
-    [themeMode, toggleThemeMode, cookieMode]
+    () => [[type, mode], toggleThemeMode, cookieMode],
+    [type, mode, toggleThemeMode, cookieMode],
   )
 }
 
@@ -135,19 +148,19 @@ export type WithThemeProviderOptions = {
 }
 
 function createWithThemeProvider(options: WithThemeProviderOptions) {
-  const { theme, disableCssBaseline } = options
+  const {theme, disableCssBaseline} = options
   const [lightTheme, darkTheme] = !_isArr(theme)
-    ? [theme, createTheme({ ...theme, palette: { ...theme?.palette, mode: 'dark' } })]
+    ? [theme, createTheme({...theme, palette: {...theme?.palette, mode: 'dark'}})]
     : theme
 
   return function withThemeProvider<P>(WrappedComponent: JSXComponentType<P>) {
     const displayName = getDisplayName(WrappedComponent)
 
     const WithThemeProvider = forwardRef<any, P>(function RefRenderFn(props, ref) {
-      const { ...rest } = props
+      const {...rest} = props
       const ThemeModeState = useThemeModeState()
       const activeTheme = useMemo<Theme>(() => {
-        const themeMode = ThemeModeState[0]
+        const [[, themeMode]] = ThemeModeState
         return themeMode === 'dark' ? darkTheme : lightTheme
       }, [ThemeModeState])
       return (
@@ -170,5 +183,5 @@ function createWithThemeProvider(options: WithThemeProviderOptions) {
     return WithThemeProvider
   }
 }
-export { createWithThemeProvider }
+export {createWithThemeProvider}
 export default createWithThemeProvider

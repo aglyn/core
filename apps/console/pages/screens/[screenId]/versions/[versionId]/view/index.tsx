@@ -128,7 +128,7 @@ function ScreenDetails(props) {
     },
   ]
 
-  console.log('Screens props', besignerUrl, props, status, screen)
+  // console.log('Screens props', besignerUrl, props, status, screen)
 
   return (
     <DashboardLayout
