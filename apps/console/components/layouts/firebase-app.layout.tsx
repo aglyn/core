@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import {IS_DEVELOPMENT} from '@aglyn/shared-data-enums'
+import {
+  FIREBASE_AUTH_EMULATOR_ENABLED,
+  FIREBASE_DATABASE_EMULATOR_ENABLED,
+  FIREBASE_FIRESTORE_EMULATOR_ENABLED,
+  IS_DEVELOPMENT,
+} from '@aglyn/shared-data-enums'
 import {DEFAULT_RECAPTCHA_API_KEY, defaultFirebaseAppOptions} from '@aglyn/shared-feature-fbclient'
 import {NextRouterEvent, SecureLoadingOverlayComponent} from '@aglyn/shared-ui-jsx'
 import {NoSsr} from '@mui/material'
@@ -107,7 +112,7 @@ function GetInnerLayout({children}) {
   // Set up development emulators
   if (!connectedFirestore) {
     try {
-      if (IS_DEVELOPMENT) {
+      if (FIREBASE_FIRESTORE_EMULATOR_ENABLED) {
         connectFirestoreEmulator(store, 'localhost', 8082)
       }
       void enableMultiTabIndexedDbPersistence(store)
@@ -119,7 +124,7 @@ function GetInnerLayout({children}) {
   }
   if (!connectedDatabase) {
     try {
-      if (IS_DEVELOPMENT) {
+      if (FIREBASE_DATABASE_EMULATOR_ENABLED) {
         connectDatabaseEmulator(database, 'localhost', 9000)
       }
       connectedDatabase = true
@@ -130,7 +135,7 @@ function GetInnerLayout({children}) {
   }
   if (!connectedAuth) {
     try {
-      if (IS_DEVELOPMENT) {
+      if (FIREBASE_AUTH_EMULATOR_ENABLED) {
         connectAuthEmulator(auth, 'http://localhost:9099')
       }
       connectedAuth = true
