@@ -30,7 +30,7 @@ export {
   type DataType,
   dataTypes,
   type DataTypeValidators,
-  DefaultSchemaError,
+  // DefaultSchemaError,
   defaultSchemaValidator,
   type ExtendedMapperComponent,
   type Field as FieldSchema,

@@ -29,10 +29,12 @@ import {
   useContext,
   useMemo,
   useState,
+  useRef,
+  useEffect,
 } from 'react'
 import { createTheme, type Theme, ThemeProvider } from '../../vendor/mui'
 
-export type ThemeMode = 'light' | 'dark' | null
+export type ThemeMode = 'light' | 'dark' | 'system' | null
 export type UseThemeMode = [
   themeMode: ThemeMode,
   toggleThemeMode: (event: SyntheticEvent<any>, to?: ThemeMode) => void,
@@ -54,40 +56,76 @@ function getCookieThemeMode(): ThemeMode {
   return null
 }
 
+export function useCookieThemeMode(): [ThemeMode, (mode: ThemeMode) => void] {
+  const ref = useRef<ThemeMode>(getCookieThemeMode())
+
+  /**
+   * Update ref value on each paint if changed
+   */
+  useEffect(() => {
+    const cookieMode = getCookieThemeMode()
+    if (cookieMode !== ref.current) {
+      ref.current = cookieMode
+    }
+  })
+
+  const setCookieThemeMode = useCallback((newMode: ThemeMode) => {
+    setCookie(COOKIE_THEME_KEY, newMode, {expires: 365})
+  }, [])
+
+  return useMemo(() => [ref.current, setCookieThemeMode], [setCookieThemeMode])
+}
+
 export function useThemeModeState(): UseThemeMode {
   const prefersDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const [localMode, setLocalMode] = useState<ThemeMode>(getCookieThemeMode())
+  const [cookieMode, setCookieMode] = useCookieThemeMode()
+
+  const systemTheme = useMemo<ThemeMode>(() => {
+    return (prefersDark ? 'dark' : 'light')
+  }, [prefersDark])
 
   const themeMode = useMemo<ThemeMode>(() => {
-    const cookieMode = getCookieThemeMode()
-    return localMode || cookieMode || (prefersDark ? 'dark' : 'light')
-  }, [prefersDark, localMode])
+    return cookieMode || systemTheme
+  }, [cookieMode, systemTheme])
 
-  const toggleThemeMode = useCallback(
-    (event: SyntheticEvent<any>, to?: ThemeMode) => {
-      const newMode =
-        _isStrT(to) || _isNull(to)
-          ? _isNull(to)
-            ? null
-            : to === 'dark'
-            ? 'dark'
-            : 'light'
-          : _isNull(localMode)
-          ? 'light'
-          : localMode === 'light'
-          ? 'dark'
-          : localMode === 'dark'
-          ? null
-          : null
-      setCookie(COOKIE_THEME_KEY, newMode, { expires: 365 })
-      setLocalMode(newMode)
-    },
-    [localMode]
-  )
+  const toggleThemeMode = useCallback((
+    event: SyntheticEvent<any>,
+    to?: ThemeMode
+  ) => {
+    let newMode: ThemeMode
+
+    switch (true) {
+      case _isNull(to):
+      case to === 'system':
+        newMode = 'system'
+        break
+      case to === 'dark':
+        newMode = 'dark'
+        break
+      case to === 'light':
+        newMode = 'light'
+        break
+      case _isNull(cookieMode):
+      case cookieMode === 'system':
+        newMode = 'light'
+        break
+      case cookieMode === 'dark':
+        newMode = 'system'
+        break
+      case cookieMode === 'light':
+        newMode = 'dark'
+        break
+      default:
+        newMode = 'system'
+        break
+    }
+
+    setCookieMode(newMode)
+  }, [cookieMode, setCookieMode])
 
   return useMemo(
-    () => [themeMode, toggleThemeMode, localMode],
-    [themeMode, toggleThemeMode, localMode]
+    () => [themeMode, toggleThemeMode, cookieMode],
+    [themeMode, toggleThemeMode, cookieMode]
   )
 }
 
