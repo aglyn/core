@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { _isArr } from '@aglyn/shared-util-guards'
-import { NsError } from './ns-error'
-import { replaceTemplate } from './tools'
-import { ErrorPayload, ErrorTagMessages, ErrorTagPayloads, EventFlag } from './types'
+import {_isArr} from '@aglyn/shared-util-guards'
+import {NsError} from './ns-error'
+import {replaceTemplate} from './tools'
+import type {ErrorPayload, ErrorTagMessages, ErrorTagPayloads, EventFlag} from './types'
 
 
 /**

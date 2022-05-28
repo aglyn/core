@@ -16,26 +16,18 @@
  */
 
 import {_isArrEmpty} from '@aglyn/shared-util-guards'
-import {type ModificationHistoryState} from '../types/generic.types'
+import {copy} from '@aglyn/shared-util-tools'
+import type {ModificationHistoryState} from '../types/generic.types'
 
 
-export const handleRedoEvent = <S>(state: ModificationHistoryState<S>) => {
-  if (!_isArrEmpty(state.future)) {
-    return handleStateModificationHistoryRedo(state)
-  }
-  return undefined
-}
-
-export const handleStateModificationHistoryRedo = <S>(
+export function handleStateModificationHistoryRedo<S>(
   state: ModificationHistoryState<S>,
-): ModificationHistoryState<S> => {
+): ModificationHistoryState<S> {
   if (!_isArrEmpty(state.future)) {
-    return {
-      past: [state.present, ...state.past],
-      present: state.future.slice(0, 1)[0],
-      future: state.future.slice(1),
-    }
+    state.past.unshift(copy(state.present))
+    state.present = state.future.shift()
   }
   return state
 }
+
 export default handleStateModificationHistoryRedo

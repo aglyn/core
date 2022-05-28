@@ -20,17 +20,14 @@ import {
   AGLYN_EMITTER,
   AGLYN_ERROR,
   AGLYN_LOGGER,
-  AglynAppEventFlag,
   AglynErrorEventFlag,
+  AglynEventStateFlag,
   type AppUUN,
   DEFAULT_APP_UUN,
 } from '@aglyn/core-data-framework'
-import {_isStrEmpty} from '@aglyn/shared-util-guards'
-import {BesignerAppController} from '../controllers/besigner-app.controller'
-import {
-  type BesignerAppOptions,
-  type IBesignerAppController,
-} from '../controllers/besigner-app.types'
+import {_isObj, _isStrEmpty} from '@aglyn/shared-util-guards'
+import BesignerAppController from '../controllers/besigner-app.controller'
+import type {BesignerAppOptions, IBesignerAppController} from '../controllers/besigner-app.types'
 
 
 export function getAllBesignerApps(): IBesignerAppController[] {
@@ -51,13 +48,13 @@ export function getBesignerApp(name?: AppUUN): IBesignerAppController {
 
 export function deleteBesignerApp(appName?: AppUUN): void {
   const app = getBesignerApp(appName || DEFAULT_APP_UUN)
-  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETING, {appName})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETING, {appName})
-  app.aglynOnDestroy?.()
+  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETING, {appName})
+  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETING, {appName})
+  app.onDestroy?.()
   _INTERNAL_APPS_.delete(appName)
   app.setDeleted(true)
-  AGLYN_LOGGER.debug(AglynAppEventFlag.APP_DELETED, {appName})
-  AGLYN_EMITTER.emit(AglynAppEventFlag.APP_DELETED, {appName})
+  AGLYN_LOGGER.debug(AglynEventStateFlag.APP_DELETED, {appName})
+  AGLYN_EMITTER.emit(AglynEventStateFlag.APP_DELETED, {appName})
 }
 
 export function initializeBesignerApp(opts?: BesignerAppOptions): IBesignerAppController {
@@ -73,13 +70,14 @@ export function initializeBesignerApp(opts?: BesignerAppOptions): IBesignerAppCo
   app.setupExtensions()
   _INTERNAL_APPS_.set(appName, app)
 
-  app.aglynOnInit()
+  app.onInitialize()
 
   return app
 }
 
 export function _validateBesignerAppArg(app: IBesignerAppController): void {
-  if (!(app as IBesignerAppController) || !(app instanceof BesignerAppController)) {
+  if (!(app as IBesignerAppController) || !_isObj(app) /*!(app instanceof BesignerAppController)*/) {
+    console.warn('Not instanceof BesignerAppController', app)
     throw AGLYN_ERROR.create(AglynErrorEventFlag.APP_BAD_INSTANCE, {appName: app?.getName?.()})
   }
   if (app['deleted']) {

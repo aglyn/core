@@ -16,23 +16,23 @@
  */
 
 import {_INTERNAL_CANVAS_} from '../constants/_internal'
-import {
-  type CanvasAddElementPayload,
-  type CanvasDeleteElementPayload,
-  type CanvasDuplicateElementPayload,
-  type CanvasGetApiEventsPayload,
-  type CanvasGetElementsDenormalizedPayload,
-  type CanvasGetElementsNormalizedPayload,
-  type CanvasGetStorePayload,
-  type CanvasMoveElementPayload,
-  type CanvasRedoPayload,
+import type {
+  CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
+  CanvasGetApiEventsPayload,
+  CanvasGetElementsDenormalizedPayload,
+  CanvasGetElementsNormalizedPayload,
+  CanvasGetStorePayload,
+  CanvasMoveElementPayload,
+  CanvasRedoPayload,
   CanvasSetElementPayload,
-  type CanvasSetElementsPayload,
-  type CanvasUndoPayload,
-  type CanvasUpdateElementPayload,
+  CanvasSetElementsPayload,
+  CanvasUndoPayload,
+  CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from '../types/aglyn-app.types'
-import {type IAglynCanvasController} from '../types/aglyn-canvas.types'
+import type {IAglynAppController} from '../types/aglyn-app.types'
+import type {IAglynCanvasController} from '../types/aglyn-canvas.types'
 import {_validateAppArg} from './app.api'
 
 
@@ -55,7 +55,7 @@ export function getCanvasDenormalizedElementsStore(
   payload?: CanvasGetElementsDenormalizedPayload,
 ) {
   const canvasController = _getCanvasController(app)
-  return canvasController.getDenormalizedElementsStore(payload)
+  return canvasController.getDenormalizedElements(payload)
 }
 
 export function getCanvasNormalizedElementsStore(
@@ -63,7 +63,7 @@ export function getCanvasNormalizedElementsStore(
   payload?: CanvasGetElementsNormalizedPayload,
 ) {
   const canvasController = _getCanvasController(app)
-  return canvasController.getNormalizedElementsStore(payload)
+  return canvasController.getNormalizedElements(payload)
 }
 
 export function getCanvasApiEvents(
@@ -71,7 +71,7 @@ export function getCanvasApiEvents(
   payload?: CanvasGetApiEventsPayload,
 ) {
   const canvasController = _getCanvasController(app)
-  return canvasController.getApiEvents(payload)
+  return canvasController.getApi(payload)
 }
 
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,12 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {AppLink, GridItems} from '@aglyn/shared-ui-jsx'
-import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
-import MuiLink from '@mui/material/Link'
-import Typography from '@mui/material/Typography'
+import { styled } from '@aglyn/shared-ui-theme'
+import { AppLink, ContainerComponent, GridItems } from '@aglyn/shared-ui-jsx'
+import { Box, Link as MuiLink, Typography } from '@mui/material'
 import NextImage from 'next/image'
-import {type ElementType, forwardRef, type HTMLAttributes} from 'react'
-import {footerNavigation} from '../const'
-
+import { type ElementType, forwardRef, type HTMLAttributes } from 'react'
+import { footerNavigation } from '../const'
 
 const FooterElement = styled('footer', {
   name: 'FooterElement',
@@ -38,15 +34,15 @@ export interface SiteFooterViewProps extends HTMLAttributes<HTMLDivElement> {
 
 const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function RefRenderFn(
   props,
-  ref,
+  ref
 ) {
-  const {children, className: propClass, ...rest} = props
+  const { children, className: propClass, ...rest } = props
 
   return (
     <FooterElement ref={ref} {...rest}>
-      <Box sx={{pt: 4}}>
-        {children && <Container maxWidth="lg">{children}</Container>}
-        <Container maxWidth="lg">
+      <Box sx={{ pt: 4 }}>
+        {children && <ContainerComponent maxWidth="lg">{children}</ContainerComponent>}
+        <ContainerComponent maxWidth="lg">
           <GridItems
             spacing={2}
             justifyContent="space-between"
@@ -80,7 +76,7 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function 
                   </>
                 ),
               },
-              ...footerNavigation.map(({items, ...item}, key) => ({
+              ...footerNavigation.map(({ items, ...item }, key) => ({
                 xs: 12 as any,
                 sm: 6 as any,
                 md: 3 as any,
@@ -91,7 +87,7 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function 
                     </Typography>
                     <Typography component="ul">
                       {items.map((item, key) => (
-                        <li key={key}>
+                        <li key={item?.key ?? item?.id ?? key}>
                           <AppLink {...item} />
                         </li>
                       ))}
@@ -101,12 +97,13 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(function 
               })),
             ]}
           />
-        </Container>
+        </ContainerComponent>
       </Box>
     </FooterElement>
   )
 })
 
 SiteFooterView.displayName = 'SiteFooterView'
-export {SiteFooterView}
+SiteFooterView.aglyn = true
+export { SiteFooterView }
 export default SiteFooterView

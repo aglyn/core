@@ -17,7 +17,7 @@
 
 //TODO: FIX ALL TYPINGS AND REFACTOR OPTIONS/PROPS
 
-import { jssPreset, StylesProvider } from '@aglyn/shared-feature-themes'
+import { jssPreset, StylesProvider } from '@aglyn/shared-ui-theme'
 
 import { create } from 'jss'
 import rtl from 'jss-rtl'
@@ -29,9 +29,11 @@ import { createShadowDomProxy } from './shadow-dom' /* eslint-disable-next-line 
 /* eslint-disable-next-line */
 export interface MuiShadowDomProps {}
 
-const MuiShadowStylesProvider = React.forwardRef<HTMLProps<HTMLDivElement>,
-  PropsWithChildren<MuiShadowDomProps>>(function RefRenderFn(props, ref) {
-  const {children} = props
+const MuiShadowStylesProvider = React.forwardRef<
+  HTMLProps<HTMLDivElement>,
+  PropsWithChildren<MuiShadowDomProps>
+>(function RefRenderFn(props, ref) {
+  const { children } = props
   const [styleNode, setStyleNode] = useState(null)
   const elemRef = useCombinedRefs(setStyleNode, ref)
   const jss = create({
@@ -42,22 +44,23 @@ const MuiShadowStylesProvider = React.forwardRef<HTMLProps<HTMLDivElement>,
   return (
     <StylesProvider jss={jss}>
       {styleNode ? children : null}
-      <div ref={elemRef}/>
+      <div ref={elemRef} />
     </StylesProvider>
   )
 })
 MuiShadowStylesProvider.displayName = 'MuiShadowStylesProvider'
+MuiShadowStylesProvider.aglyn = true
 
 export const MuiShadowDom = createShadowDomProxy(
   {},
   {
     keyPrefix: 'mui',
-    render: function(props) {
-      const {children} = props
+    render: function (props) {
+      const { children } = props
 
       return <MuiShadowStylesProvider>{children}</MuiShadowStylesProvider>
     },
-  },
+  }
 )
 
 export default MuiShadowDom

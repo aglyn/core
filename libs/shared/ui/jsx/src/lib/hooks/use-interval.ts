@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { useEffect, useRef } from 'react'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useEffect, useRef} from 'react'
+
 
 export function useInterval(
   callback: TimerHandler,
@@ -52,7 +53,7 @@ export function useInterval(
       interval = setInterval(handler, delay, ...args)
       return () => clearInterval(interval)
     }
-  }, [delay, count])
+  }, [delay, count, args])
 }
 
 export default useInterval

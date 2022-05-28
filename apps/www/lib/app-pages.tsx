@@ -17,6 +17,7 @@
 
 import {mdiHome, type MdiIconProps, mdiVectorPolylineEdit} from '@aglyn/shared-ui-mdi-jsx'
 import {getDisplayName} from '@aglyn/shared-util-tools'
+import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
 import {type NextRouter, Router, useRouter} from 'next/router'
 import {type ComponentType, forwardRef} from 'react'
 import {Normalized} from './aglyn-deprecated'
@@ -289,7 +290,7 @@ addPage({
 })
 
 type AggregatedRouterProps = Pick<Router, 'asPath' | 'basePath' | 'pathname' | 'query' | 'route'>
-type DenormalizedPage = Omit<PageMeta, 'pages'> & {pages: PageMeta[]}
+type DenormalizedPage = Omit<PageMeta, 'pages'> & {pages: (PageMeta & any)[]}
 export type AggregatedPageMeta = AggregatedRouterProps & {
   pageMeta: PageMeta
   overrideMeta?: PageMeta
@@ -333,15 +334,15 @@ export type WithPageMetaProps<P> = P & Record<WithN, AggregatedPageMeta>
 export type WithPageMetaComponent<P> = ComponentType<WithPageMetaProps<P>>
 
 export function withAggregatedPageMeta<P>(
-  Component: ComponentType<P & {aggregatedPageMeta?: AggregatedPageMeta}>,
+  WrappedComponent: ComponentType<P & {aggregatedPageMeta?: AggregatedPageMeta}>,
 ) {
-  const displayName = `WithAggregatedPageMeta(${getDisplayName(Component)})`
+  const displayName = getDisplayName(WrappedComponent)
   const WithAggregatedPageMeta = forwardRef<any, Omit<P, 'aggregatedPageMeta'>>(
     function RefRenderFn(props, ref) {
       const router = useRouter()
       const aggregatedPageMeta = getAggregatedPageMeta(router)
       return (
-        <Component
+        <WrappedComponent
           ref={ref}
           aggregatedPageMeta={aggregatedPageMeta}
           {...props as P}
@@ -349,6 +350,7 @@ export function withAggregatedPageMeta<P>(
       )
     },
   )
-  WithAggregatedPageMeta.displayName = displayName
+  WithAggregatedPageMeta.displayName = `WithAggregatedPageMeta(${displayName})`
+  hoistNonReactStatics(WithAggregatedPageMeta, WrappedComponent)
   return WithAggregatedPageMeta
 }

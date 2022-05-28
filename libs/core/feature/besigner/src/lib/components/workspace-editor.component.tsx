@@ -15,28 +15,24 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-feature-themes'
-import {AppLoaderOverlayView} from '@aglyn/shared-ui-jsx'
-import Stack, {type StackProps} from '@mui/material/Stack'
+import {LOADING_OVERLAY_ELEMENT} from '@aglyn/shared-ui-jsx'
+import {styled} from '@aglyn/shared-ui-theme'
+import {Stack, type StackProps} from '@mui/material'
 import dynamic from 'next/dynamic'
 import {forwardRef} from 'react'
-import AppBarPrimaryComponent from './app-bar-primary.component'
+import AppBarBreadcrumbsComponent from './app-bar-breadcrumbs.component'
 import AppBarSecondaryComponent from './app-bar-secondary.component'
+import type {AsidePanelComponentProps} from './aside-panel.component'
 
 
-const PanelLeftComponent = dynamic(
-  () => import('./panel-left.component').then((mod) => mod.PanelLeftComponent),
-  {ssr: false, loading: () => <AppLoaderOverlayView open />},
-)
-
-const PanelRightComponent = dynamic(
-  () => import('./panel-right.component').then((mod) => mod.PanelRightComponent),
-  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+const PanelLeftComponent = dynamic<AsidePanelComponentProps>(
+  () => import('./aside-panel.component').then((mod) => mod.AsidePanelComponent),
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
 const ViewportRootComponent = dynamic(
   () => import('./viewport-root.component').then((mod) => mod.ViewportRootComponent),
-  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
 const WorkspaceEditor = styled(Stack, {
@@ -69,21 +65,6 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
         {...rest}
       >
         <Stack
-          direction="column"
-          justifyContent="flex-start"
-          alignItems="stretch"
-          id="aglyn:besigner-header"
-          component="header"
-          spacing={0}
-          sx={{
-            zIndex: 1,
-          }}
-        >
-          <AppBarPrimaryComponent />
-          <AppBarSecondaryComponent />
-        </Stack>
-
-        <Stack
           direction="row"
           alignItems="stretch"
           justifyContent="space-between"
@@ -91,16 +72,28 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
           component="main"
           flexGrow={1}
           spacing={0}
-          sx={{
-            overflow: 'hidden',
-            zIndex: 0,
-          }}
+          sx={{overflow: 'hidden', zIndex: 0}}
         >
-          <PanelLeftComponent />
+          <PanelLeftComponent panel={'panelLeft'} />
 
-          <ViewportRootComponent />
+          <Stack
+            direction="column"
+            alignItems="stretch"
+            justifyContent="space-between"
+            id="aglyn:besigner-viewport"
+            component="main"
+            flexGrow={1}
+            spacing={0}
+            sx={{overflow: 'hidden', zIndex: 0}}
+          >
+            <AppBarSecondaryComponent />
 
-          <PanelRightComponent />
+            <ViewportRootComponent />
+
+            <AppBarBreadcrumbsComponent />
+          </Stack>
+
+          <PanelLeftComponent panel={'panelRight'} />
         </Stack>
 
         {children}
@@ -110,6 +103,7 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
 )
 
 WorkspaceEditorComponent.displayName = 'WorkspaceEditorComponent'
+WorkspaceEditorComponent.aglyn = true
 WorkspaceEditorComponent.defaultProps = {}
 
 export {WorkspaceEditorComponent}

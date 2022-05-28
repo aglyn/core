@@ -16,6 +16,7 @@
  */
 
 const nextComposePlugins = require('next-compose-plugins')
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
 const pkg = require('../package.json')
 const withNx = require('@nrwl/next/plugins/with-nx')
 const deepFillIn = require('mout/object/deepFillIn')
@@ -28,6 +29,18 @@ const NODE_ENV = process.env.NODE_ENV
 const IS_DEVELOPMENT = NODE_ENV === 'development'
 const IS_PRODUCTION = NODE_ENV === 'production'
 const IS_TEST = NODE_ENV === 'test'
+
+const SECURE_HEADER_DOMAINS = [
+  'https://*.aglyn.com',
+  'https://aglyn.com',
+  IS_DEVELOPMENT && 'http://localhost:4000',
+  IS_DEVELOPMENT && 'http://localhost:4100',
+  IS_DEVELOPMENT && 'http://localhost:4200',
+  IS_DEVELOPMENT && 'http://localhost:4210',
+  IS_DEVELOPMENT && 'http://localhost:4300',
+  IS_DEVELOPMENT && 'http://localhost:4400',
+  IS_DEVELOPMENT && 'http://localhost:4500',
+].filter(i => Boolean(i)).join(' ')
 
 const SECURITY_HEADERS = [
   /**
@@ -43,7 +56,10 @@ const SECURITY_HEADERS = [
    * This can prevent against clickjacking attacks. This header has been superseded by CSP's
    * frame-ancestors option, which has better support in modern browsers.
    */
-  {key: 'X-Frame-Options', value: 'SAMEORIGIN'},
+  {
+    key: 'X-Frame-Options',
+    value: `allow-from ${SECURE_HEADER_DOMAINS}`,
+  },
 
   /**
    * This header prevents the browser from attempting to guess the type of content if the
@@ -72,6 +88,16 @@ const SECURITY_HEADERS = [
    * to all deployments.
    */
   {key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload'},
+
+  /**
+   * This header helps prevent cross-site scripting (XSS), clickjacking and other code injection
+   * attacks. Content Security Policy (CSP) can specify allowed origins for content including
+   * scripts, stylesheets, images, fonts, objects, media (audio, video), iframes, and more.
+   */
+  {
+    key: 'Content-Security-Policy',
+    value: `frame-ancestors ${SECURE_HEADER_DOMAINS}`,
+  },
 ]
 
 const BRAND_HEADERS = [
@@ -85,13 +111,31 @@ const BRAND_HEADERS = [
  **/
 const AGLYN_CONFIG = {
   aglyn: {
-    analyzeBundle: process.env.NEXT_ANALYZE_BUNDLE === 'true',
+    analyzeBundle: process.env.NEXT_ANALYZE_BUNDLE === 'true' && !IS_PRODUCTION,
     analyzerOptions: {},
+  },
+  compiler: {
+    /**
+     * Enables automatically removing JSX properties. These are often used for
+     * testing. Similar to babel-plugin-react-remove-properties.
+     *
+     * Note: The regexes defined here are processed in Rust so the syntax is
+     * different from {@link RegExp | JavaScript `RegEx`}
+     *
+     * @example reactRemoveProperties: {properties: ['^data-custom$']}
+     * @example reactRemoveProperties: true || false
+     * @see {@link https://docs.rs/regex | Rust Regex Docs}
+     * @inheritDoc
+     */
+    reactRemoveProperties: {properties: ['^data-test']},
+
+    // ssr and displayName are configured by default
+    // styledComponents: true,
   },
   // Next.js provides gzip compression to compress rendered content and static
   // files. In general, you will want to enable compression on a HTTP proxy like
   // nginx, to offload load from the Node.js process.
-  compress: true,
+  compress: IS_PRODUCTION,
   // Opt-in to using the Next.js compiler for minification. This is 7x faster
   // than Terser.
   crossOrigin: 'anonymous',
@@ -114,9 +158,7 @@ const AGLYN_CONFIG = {
     ignoreDuringBuilds: IS_PRODUCTION,
   },
   experimental: {
-    // ssr and displayName are configured by default
-    styledComponents: false,
-    optimizeImages: true,
+    optimizeImages: IS_PRODUCTION,
     // optimizeCss: true,
     // Next.js can automatically create a standalone folder which copies only
     // the necessary files for a production deployment including select files in
@@ -131,6 +173,9 @@ const AGLYN_CONFIG = {
     // from server-side rendering where you're pre-generating HTML on the server
     serverComponents: false,
     workerThreads: true,
+
+    // required to stop the FATAL heap crash
+    esmExternals: false,
   },
   generateEtags: true,
   headers: async () => {
@@ -146,7 +191,8 @@ const AGLYN_CONFIG = {
   },
   httpAgentOptions: {keepAlive: true},
   images: {
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // DEFAULT [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
+    deviceSizes: [600, 768, 900, 1080, 1200, 1536, 1920, 2560],
     disableStaticImages: false,
     domains: [
       'aglyn.com',
@@ -165,22 +211,28 @@ const AGLYN_CONFIG = {
       'hostname.aglyn.com',
       'www.aglyn.com',
     ],
+    // DEFAULT: [16, 32, 48, 64, 96, 128, 256, 384]
+    imageSizes: [24, 40, 64, 96, 144, 256, 390, 512],
     formats: ['image/avif', 'image/webp'],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     loader: 'default',
-    minimumCacheTTL: 60,
+    minimumCacheTTL: (60 * 60) * 24, // 24hrs = 86400sec
     path: '/_next/image',
   },
   nx: {
     // Set this to false if you do not want to use SVGR
     // See: https://github.com/gregberge/svgr
-    svgr: true,
+    svgr: false,
   },
-  onDemandEntries: {maxInactiveAge: 15000, pagesBufferLength: 2},
-  optimizeFonts: true,
-  outputFileTracing: true,
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 1000 * 30,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
+  optimizeFonts: IS_PRODUCTION,
+  // outputFileTracing: true,
   productionBrowserSourceMaps: false,
-  poweredByHeader: true,
+  poweredByHeader: !IS_PRODUCTION,
   // Available on both server and client
   publicRuntimeConfig: {
     staticFolder: '/_static',
@@ -188,18 +240,21 @@ const AGLYN_CONFIG = {
   reactStrictMode: !IS_PRODUCTION,
   // Available on server only
   serverRuntimeConfig: {},
-  staticPageGenerationTimeout: 30,
-  swcMinify: true,
+  staticPageGenerationTimeout: 15,
+  swcMinify: IS_PRODUCTION,
   trailingSlash: false,
   typescript: {
     // Motivated by https://github.com/zeit/next.js/issues/7687
     // ignoreDevErrors: IS_PRODUCTION,
     ignoreBuildErrors: IS_PRODUCTION,
   },
-  webpack5: true,
   // Disable production source maps
   webpack: (config, options) => {
-    const {webpack, buildId} = options
+    const {webpack, buildId, isServer} = options
+    // if (!isServer) {
+    //   /** @see https://github.com/vercel/next.js/issues/7755#issuecomment-812805708 */
+    //   config.resolve.fallback.fs = false
+    // }
     config.plugins.push(
       new webpack.DefinePlugin({
         'process.env.BUILD_ID': JSON.stringify(buildId),
@@ -215,7 +270,7 @@ const AGLYN_CONFIG = {
  * @param nextConfig {import('./nextjs-base.config').WithAglynOptions}
  **/
 function withAglyn(nextConfig = {}) {
-  console.log('process.env.NODE_ENV', NODE_ENV)
+  console.log('process.env.NODE_ENV', NODE_ENV, '; CSRF_SECRET', process.env.CSRF_SECRET)
 
   /**
    * Base configuration for NextJS Apps next.config.js
@@ -233,9 +288,12 @@ function withAglyn(nextConfig = {}) {
       //   : userConfig.webpack5,
 
       generateBuildId: async () => {
-        return await typeof merged?.generateBuildId === 'function'
+        console.log('merged?.generateBuildId', merged?.generateBuildId())
+        return await (
+          typeof merged?.generateBuildId === 'function'
           && merged.generateBuildId()
           || getCommitRef()
+        )
       },
 
       headers: async () => {
@@ -250,11 +308,10 @@ function withAglyn(nextConfig = {}) {
         ]
       },
 
-      webpack: (config, options, ...args) => {
-        const aglynWebpackConfig = AGLYN_CONFIG.webpack(config, options, ...args)
+      webpack: (webpackConfig, options) => {
+        const config = AGLYN_CONFIG.webpack(webpackConfig, options)
 
         if (aglynConfig.analyzeBundle) {
-          const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer')
           const {
             serverFilename,
             clientFilename,
@@ -275,10 +332,10 @@ function withAglyn(nextConfig = {}) {
         }
 
         if (typeof merged.webpack === 'function') {
-          return merged.webpack(aglynWebpackConfig, options, ...args)
+          return merged.webpack(config, options)
         }
 
-        return aglynWebpackConfig
+        return config
       },
     }
   }
@@ -298,5 +355,5 @@ function getCommitRef() {
     || process.env.VERCEL_GIT_COMMIT_SHA
     || process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA
     || ''
-  ).slice(0, 6) || undefined
+  ).slice(0, 6) || null
 }

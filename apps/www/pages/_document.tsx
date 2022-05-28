@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,10 @@
  * limitations under the License.
  */
 
-import {
-  NextEmotionDocumentComponent,
-  type NextEmotionDocumentComponentProps,
-} from '@aglyn/shared-ui-next'
+import {_EmotionDocumentComponent, type _EmotionDocumentProps} from '@aglyn/shared-ui-next'
 
 
-export interface _DocumentProps extends NextEmotionDocumentComponentProps {}
+export interface _DocumentProps extends _EmotionDocumentProps {}
 
 /**
  * Document component handles the initial `document` markup and
@@ -56,8 +53,6 @@ export interface _DocumentProps extends NextEmotionDocumentComponentProps {}
  * @extends {NextDocument<P>}
  * @template P
  */
-class _Document<P extends _DocumentProps> extends NextEmotionDocumentComponent<P> {
-  static displayName = '_Document'
-}
+class _Document<P extends _DocumentProps> extends _EmotionDocumentComponent<P> {}
 
 export default _Document

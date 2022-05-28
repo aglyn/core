@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {type ModificationHistoryState} from '../types/generic.types'
+import {copy} from '@aglyn/shared-util-tools'
+import type {ModificationHistoryState} from '../types/generic.types'
 
 
 const MAX_HISTORY = 25
@@ -25,11 +26,11 @@ export const handleStateModificationHistoryChange = <S, T extends ModificationHi
   newState: S,
   maxHistory = MAX_HISTORY,
 ): ModificationHistoryState<S> => {
-  return {
-    past: [state.present, ...state.past].slice(0, maxHistory),
-    present: newState,
-    future: [],
-  }
+  const len = state.past.unshift(copy(state.present))
+  if (len > maxHistory) state.past.splice(maxHistory - 1, len - maxHistory)
+  state.present = newState
+  state.future = []
+  return state
 }
 
 export default handleStateModificationHistoryChange

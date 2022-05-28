@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,64 +15,75 @@
  * limitations under the License.
  */
 
-import {getApp} from '@aglyn/core-data-framework'
-import {GridButtons} from '@aglyn/shared-ui-jsx'
-import {mdiBug, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import styled from '@emotion/styled'
-import React from 'react'
+import {ICON_VARIANT_HOME} from '@aglyn/shared-data-enums'
+import {ContainerComponent, GridItems} from '@aglyn/shared-ui-jsx'
+import {useNextPageTitle} from '@aglyn/shared-ui-next'
+import DataTableComponent from '../components/data-table.component'
+import AuthenticatedLayout from '../components/layouts/authenticated.layout'
+import ConsoleLayout from '../components/layouts/console.layout'
+import DashboardLayout from '../components/layouts/dashboard.layout'
+import WidgetCardComponent from '../components/widget-card.component'
+import {CONTENT_MAX_WIDTH} from '../constants/shared'
 
 
-const StyledPage = styled.div`
-  .page {
-  }
-`
+function Index(props) {
 
-export function Index() {
-  console.log('page:/index', getApp())
+  console.log('index props', props)
+  useNextPageTitle({screen: 'My Dashboard'})
 
-  /*
-   * Replace the elements below with your own.
-   *
-   * Note: The corresponding styles are in the ./index.@emotion/styled file.
-   */
   return (
-    <StyledPage>
-      <h2>Resources &amp; Tools</h2>
-      <p>Thank you for using and showing some ♥ for Nx.</p>
-      <MdiIcon path={mdiBug.path} />
-      <GridButtons
-        items={[
-          {
-            GridItemProps: {
-              xs: 6,
+    <DashboardLayout
+      breadcrumbItems={[]}
+      header={{
+        children: 'My Dashboard',
+        icon: {path: ICON_VARIANT_HOME.path},
+      }}
+    >
+      <ContainerComponent gutterY maxWidth={CONTENT_MAX_WIDTH}>
+        <GridItems
+          spacing={3}
+          items={[
+            {
+              xs: 12, md: 6,
+              children: (
+                <WidgetCardComponent
+                  header={'Users'}
+                >
+                  <DataTableComponent
+                    rowHeight={40}
+                    getRowId={(row) => row.uid}
+                    columns={[
+                      {field: 'uid', headerName: 'User ID', type: 'string'},
+                      {field: 'displayName', headerName: 'Display Name', type: 'string', width: 150, maxWidth: 175},
+                      {field: 'email', headerName: 'E-Mail', type: 'string', width: 175, maxWidth: 200},
+                      {field: 'emailVerified', headerName: 'E-Verified', type: 'boolean', maxWidth: 100},
+                      {field: 'created', headerName: 'Created', type: 'date', maxWidth: 100},
+                    ]}
+                    rows={[]}
+                  />
+                </WidgetCardComponent>
+              ),
             },
-            children: 'Hello Button 1',
-            variant: 'contained',
-            color: 'primary',
-            fullWidth: true,
-          },
-          {
-            GridItemProps: {
-              xs: 3,
+            {
+              xs: 12, md: 6,
+              children: (
+                <WidgetCardComponent contentGutterX>
+                  hello
+                </WidgetCardComponent>
+              ),
             },
-            children: 'Hello Button 1',
-            variant: 'contained',
-            color: 'primary',
-            fullWidth: true,
-          },
-          {
-            GridItemProps: {
-              xs: 3,
-            },
-            children: 'Hello Button 1',
-            variant: 'contained',
-            color: 'primary',
-            fullWidth: true,
-          },
-        ]}
-      />
-    </StyledPage>
+          ]}
+        />
+      </ContainerComponent>
+    </DashboardLayout>
   )
+}
+Index.displayName = 'Page:Index'
+Index.layouts = [AuthenticatedLayout, ConsoleLayout]
+Index.layoutProps = {
+  ConsoleLayout: {
+    title: 'My Dashboard',
+  },
 }
 
 export default Index

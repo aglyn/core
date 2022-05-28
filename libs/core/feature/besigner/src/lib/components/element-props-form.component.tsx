@@ -18,32 +18,53 @@
 import {type ElementId, updateCanvasElement} from '@aglyn/core-data-framework'
 import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
 import {
-  componentMapper,
   FormRenderer,
   type FormRendererProps,
   FormSpy,
+  type FormTemplateRenderProps,
+  simpleComponentMapper,
   useFormApi,
-} from '@aglyn/shared-ui-jsx'
+} from '@aglyn/shared-ui-jsx-forms'
 import {mdiContentSave, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {type FormTemplateRenderProps} from '@data-driven-forms/react-form-renderer'
+import {NoSsr} from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
-import {type ChangeEvent, forwardRef, useCallback} from 'react'
+import {type ChangeEvent, forwardRef, type ReactNode, useCallback} from 'react'
 import useComponentFormSchema from '../hooks/use-component-form-schema'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 
-const FormTemplate = forwardRef<any, FormTemplateRenderProps>(
+/**
+ * @TODO ⚠️ remove and reimplement following PR merge
+ *   https://github.com/data-driven-forms/react-forms/pull/1218
+ */
+export const ElementPropsFormTemplate = forwardRef<any, FormTemplateRenderProps>(
   function RefRenderFn(props, ref) {
     const {formFields, schema, ...rest} = props
     const {handleSubmit} = useFormApi()
     return (
-      <form ref={ref} onSubmit={handleSubmit} noValidate {...rest}>
+      <form
+        ref={ref}
+        onSubmit={handleSubmit}
+        onChange={handleSubmit}
+        onBlur={handleSubmit}
+        noValidate
+        {...rest}
+      >
         {schema.title}
         <Grid spacing={2} container>
-          {formFields}
+          {/*{Children.map(formFields as any, (child) => {*/}
+          {/*  console.log('child', child, child?.props)*/}
+          {/*  const originalOnChange = child.props.onChange?.bind(undefined)*/}
+          {/*  child.props.onChange = (...args) => {*/}
+          {/*    handleSubmit()*/}
+          {/*    originalOnChange(...args)*/}
+          {/*  }*/}
+          {/*  return child*/}
+          {/*})}*/}
+          {formFields as unknown as ReactNode}
         </Grid>
         <FormSpy>
           {({submitting, pristine, valid}) => (
@@ -68,7 +89,8 @@ const FormTemplate = forwardRef<any, FormTemplateRenderProps>(
     )
   },
 )
-FormTemplate.displayName = 'FormTemplate'
+ElementPropsFormTemplate.displayName = 'ElementPropsFormTemplate'
+ElementPropsFormTemplate.aglyn = true
 
 export interface ElementPropsFormProps extends FormRendererProps {
   $id?: ElementId
@@ -77,7 +99,7 @@ export interface ElementPropsFormProps extends FormRendererProps {
 const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
   function RefRenderFn(props, ref) {
     const {$id, ...rest} = props
-    const {getApp} = useAglynAppContext()
+    const app = useAglynAppContext()
     const deleteElementCallback = useDeleteElementCallback({$id})
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
@@ -86,37 +108,52 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback((values) => {
-      updateCanvasElement(getApp(), {element: {$id, props: {...values}}})
-    }, [$id, getApp])
+      updateCanvasElement(app, {
+        $id, update: (element) => {
+          return ({...element, props: {...values}})
+        },
+      })
+    }, [$id, app])
     const handleDeleteElement = useCallback((e: ChangeEvent<unknown>) => {
       deleteElementCallback(e)
     }, [deleteElementCallback])
 
     return (
       <>
-        <FormRenderer
-          ref={ref}
-          FormTemplate={FormTemplate}
-          componentMapper={componentMapper}
-          onCancel={handleFormCancel}
-          onSubmit={handleElementSave}
-          initialValues={elemProps}
-          schema={formSchema}
-          clearOnUnmount
-          subscription={{values: true}}
-          {...rest}
-        />
+        <NoSsr>
 
-        <FormControl margin="none" fullWidth>
-          <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
-            Delete Element
-          </Button>
-        </FormControl>
+          <FormRenderer
+            ref={ref}
+            componentMapper={simpleComponentMapper}
+            onCancel={handleFormCancel}
+            onSubmit={handleElementSave}
+            initialValues={elemProps}
+            schema={formSchema}
+            {...rest}
+          >
+            {({formFields, schema, ...rest}) => (
+              <>
+                <ElementPropsFormTemplate
+                  formFields={formFields}
+                  schema={schema}
+                  {...rest}
+                />
+
+                <FormControl margin="none" fullWidth>
+                  <Button onClick={handleDeleteElement} sx={{mt: 2, color: 'error.main'}} fullWidth>
+                    Delete Element
+                  </Button>
+                </FormControl>
+              </>
+            )}
+          </FormRenderer>
+        </NoSsr>
       </>
     )
   },
 )
 ElementPropsForm.displayName = 'ElementPropsForm'
+ElementPropsForm.aglyn = true
 
 export {ElementPropsForm}
 export default ElementPropsForm

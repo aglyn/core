@@ -19,10 +19,9 @@ import {
   type Theme,
   ThemeProvider as MuiThemeProvider,
   type ThemeProviderProps as MuiThemeProviderProps,
-} from '@aglyn/shared-feature-themes'
-import {type ReactElement, useEffect} from 'react'
-import {type NextAppMiddleware} from '../lib/next-app'
-
+} from '@aglyn/shared-ui-theme'
+import { type ReactElement, useEffect } from 'react'
+import { type NextAppMiddleware } from '../lib/next-app'
 
 /**
  * Next app middleware for material-ui theme provider component
@@ -35,7 +34,7 @@ import {type NextAppMiddleware} from '../lib/next-app'
  * @returns {ThemeProviderElement<T>}
  */
 export function ThemeProviderComponent<T>(props: Props): ThemeProviderElement<T> {
-  const {theme, children, selector, ...rest} = props
+  const { theme, children, selector, ...rest } = props
 
   useEffect(() => {
     function removeSsrStyles() {
@@ -59,8 +58,9 @@ ThemeProviderComponent.defaultProps = {
   selector: '#jss-server-side',
 }
 ThemeProviderComponent.displayName = 'ThemeProviderComponent'
+ThemeProviderComponent.aglyn = true
 
-export type Props = MuiThemeProviderProps & {selector?: string}
+export type Props = MuiThemeProviderProps & { selector?: string }
 export type ThemeProviderElement<T> = ReactElement<MuiThemeProviderProps<T>>
 export type ThemeProviderMiddleware<T = Theme, P = Props> = (theme: T) => NextAppMiddleware<P>
 

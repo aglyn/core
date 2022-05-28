@@ -15,57 +15,43 @@
  * limitations under the License.
  */
 
-import {APP_SITE, IS_PRODUCTION} from '@aglyn/shared-data-brand'
-import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
-import {Fragment, useEffect, useMemo} from 'react'
+import { APP_CONSOLE, IS_PRODUCTION } from '@aglyn/shared-data-enums'
+import {
+  consoleThemeDark,
+  consoleThemeLight,
+  createWithThemeProvider,
+} from '@aglyn/shared-ui-theme'
+import { _AppComponent, type _AppProps } from '@aglyn/shared-ui-next'
+import { Fragment } from 'react'
 
+const withThemeProvider = createWithThemeProvider({
+  theme: [consoleThemeLight, consoleThemeDark],
+})
 
-export interface _AppProps<Props, InitialProps>
-  extends NextEmotionAppComponentProps<Props, InitialProps> {}
+const MainComponent = withThemeProvider((props: any) => {
+  const { children } = props
 
-function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
-  const {NextAppWrapperProps, ...rest} = props
-  const {
-    metaElements: wrapperMetaElements,
-    linkElements: wrapperLinkElements,
-    headChildren: wrapperHeadChildren,
-    documentTitle: wrapperDocumentTitle,
-    ...nextAppWrapperProps
-  } = NextAppWrapperProps || {}
-  const documentTitle = useMemo(
-    () => wrapperDocumentTitle || APP_SITE.META_TITLE,
-    [wrapperDocumentTitle],
-  )
-  const headChildren = useMemo(
-    () => (
-      <Fragment>
-        {!IS_PRODUCTION ? null : <Fragment></Fragment>}
-        {wrapperHeadChildren}
-      </Fragment>
-    ),
-    [wrapperHeadChildren],
-  )
-  const metaElements: any = useMemo(
-    () => [
-      ['viewport', 'width=device-width, initial-scale=1'],
-      ['description', APP_SITE.META_DESCRIPTION],
-      ...(wrapperMetaElements || []),
-    ],
-    [wrapperMetaElements],
-  )
-  const linkElements = useMemo(() => [...(wrapperLinkElements || [])], [wrapperLinkElements])
+  return <>{children}</>
+})
 
-  useEffect(() => {}, [])
+export interface _Props<Props, InitialProps> extends _AppProps<Props, InitialProps> {}
+
+function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
+  const { headChildren, ...rest } = props
 
   return (
-    <NextEmotionAppComponent
-      NextAppWrapperProps={{
-        documentTitle,
-        headChildren,
-        metaElements,
-        linkElements,
-        ...nextAppWrapperProps,
-      }}
+    <_AppComponent
+      MainComponent={MainComponent}
+      metaElements={[
+        ['viewport', 'width=device-width, initial-scale=1'],
+        ['description', APP_CONSOLE.DESCRIPTION],
+      ]}
+      headChildren={
+        <Fragment>
+          {!IS_PRODUCTION ? null : <Fragment></Fragment>}
+          {headChildren}
+        </Fragment>
+      }
       {...rest}
     />
   )

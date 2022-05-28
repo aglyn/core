@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,46 @@
  */
 
 
-import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
+import {
+  type BesignerCanvasSelectedElement,
+  type BesignerCanvasState,
+  setBesignerCanvasSelected,
+} from '@aglyn/core-data-besigner'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
-export const useAglynCanvasSelected = () => {
-  return useAglynBesignerStoreState('canvas', 'selected')
+
+export type BesignerCanvasSetSelected = (selected: BesignerCanvasSelected) => void
+export type BesignerCanvasSelected = BesignerCanvasSelectedElement | ((
+  prev: BesignerCanvasSelectedElement,
+  canvas: BesignerCanvasState,
+) => BesignerCanvasSelectedElement)
+
+
+export function useAglynCanvasSetSelected(): BesignerCanvasSetSelected {
+  const app = useBesignerAppContext()
+  return useCallback((selected: BesignerCanvasSelected) => {
+    setBesignerCanvasSelected(app, {
+      selected: (prev, canvas) => _isFnT(selected) ? selected(prev, canvas) : selected,
+    })
+  }, [app])
+}
+
+export function useAglynCanvasSelected(): [
+  value: BesignerCanvasSelectedElement | undefined,
+  setValue: BesignerCanvasSetSelected
+] {
+  const app = useBesignerAppContext()
+  const value = useSubscribable<BesignerCanvasSelectedElement>(
+    app.besigner?.canvas, undefined,
+    (canvas) => canvas?.selected,
+    [app],
+  )
+  const setSelected = useAglynCanvasSetSelected()
+
+  return [value, setSelected]
 }
 
 export default useAglynCanvasSelected

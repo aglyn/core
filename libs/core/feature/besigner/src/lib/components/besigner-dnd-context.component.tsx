@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import {BackendFactory} from 'dnd-core'
+import type {BackendFactory} from 'dnd-core'
 import {type ReactNode} from 'react'
 import {DndProvider} from 'react-dnd'
-import {TouchBackend} from 'react-dnd-touch-backend'
+// import {TouchBackend} from 'react-dnd-touch-backend'
+import {HTML5Backend} from 'react-dnd-html5-backend'
 
 
 export interface BesignerDndContextProps<BackendContext, BackendOptions> {
@@ -38,21 +39,23 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
     delay: 0,
     delayTouchStart: 0,
     delayMouseStart: 0,
-    touchSlop: 5,
+    touchSlop: 2,
     ...options,
   }
 
   return (
     <DndProvider
-      backend={TouchBackend}
+      backend={HTML5Backend}
       options={opts}
       {...rest}
+      debugMode
     >
       {children}
     </DndProvider>
   )
 }
 BesignerDndContext.displayName = 'BesignerDndContext'
+BesignerDndContext.aglyn = true
 
 export {BesignerDndContext}
 export default BesignerDndContext

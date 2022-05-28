@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-import {type AglynElementsList, getCanvasNormalizedElementsStore} from '@aglyn/core-data-framework'
-import {useStoreMap} from 'effector-react'
+import {
+  type AglynElementsNormalized,
+  getCanvasNormalizedElementsStore,
+} from '@aglyn/core-data-framework'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useAglynAppContext} from '../contexts/aglyn-app-context'
 
 
-export function useAglynCanvasElementsNormalized(): AglynElementsList {
-  const {getApp} = useAglynAppContext()
-  const app = getApp()
-  const store = getCanvasNormalizedElementsStore(app)
-  return useStoreMap(store, (store) => store)
+export function useAglynCanvasElementsNormalized(): AglynElementsNormalized {
+  const app = useAglynAppContext()
+  return useSubscribable(getCanvasNormalizedElementsStore(app))
 }
 export default useAglynCanvasElementsNormalized

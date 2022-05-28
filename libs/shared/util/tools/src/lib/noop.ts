@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,25 @@
  * limitations under the License.
  */
 
+
+export interface NoopFn {
+  <T = any>(..._: T[]): any
+}
+
 /**
  * Create a no operation function with no return
- * @returns {<T>(..._: T[]) => void}
  */
-export function noop(): <T>(..._: T[]) => void {
-  return function noop<T>(..._: T[]): void {
+export function createNoop(): NoopFn {
+  return function noop<T = any>(..._: T[]): any {
     // Do nothing.
   }
+}
+
+/**
+ * Create a no operation function with no return
+ */
+export function noop<T = any>(..._: T[]): any {
+  // Do nothing.
 }
 
 export default noop

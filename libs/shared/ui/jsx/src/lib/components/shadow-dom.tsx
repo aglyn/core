@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@
 
 //TODO: FIX ALL TYPINGS AND REFACTOR OPTIONS/PROPS
 
-import { _isFnT, _isStrT } from '@aglyn/shared-util-guards'
-import { getDisplayName } from '@aglyn/shared-util-tools'
-import { ChangeCase } from '@aglyn/shared-util-vendor'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {getDisplayName} from '@aglyn/shared-util-tools'
+import {hoistNonReactStatics, paramCase} from '@aglyn/shared-util-vendor'
 import React, {
   forwardRef,
-  ForwardRefExoticComponent,
-  PropsWithoutRef,
-  ReactNode,
-  ReactPortal,
-  RefAttributes,
+  type ForwardRefExoticComponent,
+  type PropsWithoutRef,
+  type ReactNode,
+  type ReactPortal,
+  type RefAttributes,
   useEffect,
   useRef,
   useState,
 } from 'react'
-import { createPortal } from 'react-dom'
+import {createPortal} from 'react-dom'
 
 import useCombinedRefs from '../hooks/use-combined-refs'
 
@@ -56,8 +56,11 @@ export type ShadowDomRootFactoryOptions = {
   render?: (props: ShadowDomRootRenderProps) => ReactNode
 }
 export type ShadowDomRootProps = ShadowRootInit & {
+  key?: string | number
+  id?: string | number
   styleSheets?: string[]
   adoptedStyleSheets?: string[]
+  children?: ReactNode
 }
 export type ShadowDomRootExoticComponent<T, P> = ForwardRefExoticComponent<PropsWithoutRef<ShadowDomRootProps> & RefAttributes<T>>
 
@@ -73,45 +76,54 @@ export function createShadowDomRoot<T, P>(
   Component,
 ): ShadowDomRootExoticComponent<T, P> {
   const {render} = options
-  const ShadowDomRoot = forwardRef<T, ShadowDomRootProps>(function RefRenderFn(props, ref) {
-    const {mode, delegatesFocus, styleSheets, adoptedStyleSheets, children, ...rest} = props
-    const localRef = useRef<T>(null)
-    const elemRef = useCombinedRefs(localRef, ref)
-    const [shadowRoot, setShadowRoot] = useState<ShadowRoot>(null)
-    const key = `node_${mode}${delegatesFocus}`
+  const displayName = getDisplayName(Component)
+  const ShadowDomRoot = forwardRef<T, ShadowDomRootProps>(
+    function RefRenderFn(props, ref) {
+      const {
+        mode,
+        delegatesFocus,
+        styleSheets,
+        adoptedStyleSheets,
+        children,
+        ...rest
+      } = props
+      const localRef = useRef<T>(null)
+      const elemRef = useCombinedRefs(localRef, ref)
+      const [shadowRoot, setShadowRoot] = useState<ShadowRoot>(null)
+      const key = `node_${mode}${delegatesFocus}`
 
-    useEffect(() => {
-      const instance = localRef.current as unknown as Element
-      if (instance) {
-        const root: unknown = instance.attachShadow({mode, delegatesFocus})
-        if (styleSheets && styleSheets.length) {
-          root['styleSheets'] = styleSheets
+      useEffect(() => {
+        const instance = localRef.current as unknown as Element
+        if (instance) {
+          const root: unknown = instance.attachShadow({mode, delegatesFocus})
+          if (styleSheets && styleSheets.length) {
+            root['styleSheets'] = styleSheets
+          }
+          if (adoptedStyleSheets && adoptedStyleSheets.length) {
+            root['adoptedStyleSheets'] = styleSheets
+          }
+          setShadowRoot(root as ShadowRoot)
         }
-        if (adoptedStyleSheets && adoptedStyleSheets.length) {
-          root['adoptedStyleSheets'] = styleSheets
-        }
-        setShadowRoot(root as ShadowRoot)
-      }
-    }, [localRef, mode, delegatesFocus, styleSheets, adoptedStyleSheets])
+      }, [localRef, mode, delegatesFocus, styleSheets, adoptedStyleSheets])
 
-    return (
-      <Component key={key} ref={elemRef} {...(rest as unknown as P)}>
-        {shadowRoot ? (
-          <ShadowDomContentPortal shadowRoot={shadowRoot}>
-            {_isFnT(render) ? render({shadowRoot, children}) : children}
-          </ShadowDomContentPortal>
-        ) : null}
-      </Component>
-    )
-  })
+      return (
+        <Component
+          ref={elemRef}
+          key={rest.key ?? rest.id ?? key}
+          {...(rest as unknown as P)}
+        >
+          {shadowRoot ? (
+            <ShadowDomContentPortal shadowRoot={shadowRoot}>
+              {_isFnT(render) ? render({shadowRoot, children}) : children}
+            </ShadowDomContentPortal>
+          ) : null}
+        </Component>
+      )
+    },
+  )
 
-  const name = getDisplayName(Component, null) ?? _isStrT(Component) ? Component : 'Component'
-  ShadowDomRoot.displayName = `ShadowDomRoot(${name})`
-  ShadowDomRoot.defaultProps = {
-    mode: 'open',
-    delegatesFocus: false,
-    styleSheets: [],
-  }
+  ShadowDomRoot.displayName = `ShadowDomRoot(${displayName})`
+  hoistNonReactStatics(ShadowDomRoot, Component)
 
   return ShadowDomRoot
 }
@@ -129,7 +141,7 @@ export function createShadowDomProxy(target = {}, options?: CreateShadowDomFacto
 
   return new Proxy(target, {
     get: (_, name: string) => {
-      const component = ChangeCase.paramCase(name) ?? 'div'
+      const component = paramCase(name) ?? 'div'
       const key = `${keyPrefix ?? 'default'}-${name}`
       if (!components.has(key)) {
         const root = createShadowDomRoot({render}, component)

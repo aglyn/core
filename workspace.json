@@ -17,12 +17,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/addons/ui/mui-bundle"],
           "options": {
-            "jestConfig": "libs/addons/ui/mui-bundle/jest.config.js",
+            "jestConfig": "libs/addons/ui/mui-bundle/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:addon"]
+      "tags": ["scope:lib", "scope:aglyn", "scope:ui", "aglyn:addons"]
     },
     "admin": {
       "root": "apps/admin",
@@ -38,7 +38,8 @@
             "outputPath": "dist/apps/admin"
           },
           "configurations": {
-            "production": {}
+            "production": {},
+            "development": {}
           }
         },
         "serve": {
@@ -51,8 +52,13 @@
             "production": {
               "buildTarget": "admin:build:production",
               "dev": false
+            },
+            "development": {
+              "buildTarget": "admin:build:development",
+              "dev": true
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "export": {
           "executor": "@nrwl/next:export",
@@ -64,7 +70,7 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/admin"],
           "options": {
-            "jestConfig": "apps/admin/jest.config.js",
+            "jestConfig": "apps/admin/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -76,7 +82,7 @@
           }
         }
       },
-      "tags": []
+      "tags": ["scope:app", "scope:private"]
     },
     "admin-e2e": {
       "root": "apps/admin-e2e",
@@ -103,7 +109,7 @@
           }
         }
       },
-      "tags": [],
+      "tags": ["scope:app", "scope:private", "scope:e2e"],
       "implicitDependencies": ["admin"]
     },
     "api": {
@@ -120,7 +126,8 @@
             "outputPath": "dist/apps/api"
           },
           "configurations": {
-            "production": {}
+            "production": {},
+            "development": {}
           }
         },
         "serve": {
@@ -133,8 +140,13 @@
             "production": {
               "buildTarget": "api:build:production",
               "dev": false
+            },
+            "development": {
+              "buildTarget": "api:build:development",
+              "dev": true
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "export": {
           "executor": "@nrwl/next:export",
@@ -146,7 +158,7 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/api"],
           "options": {
-            "jestConfig": "apps/api/jest.config.js",
+            "jestConfig": "apps/api/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -158,7 +170,7 @@
           }
         }
       },
-      "tags": []
+      "tags": ["scope:app", "scope:private"]
     },
     "api-e2e": {
       "root": "apps/api-e2e",
@@ -185,7 +197,7 @@
           }
         }
       },
-      "tags": [],
+      "tags": ["scope:app", "scope:private", "scope:e2e"],
       "implicitDependencies": ["api"]
     },
     "console": {
@@ -201,8 +213,10 @@
             "outputPath": "dist/apps/console"
           },
           "configurations": {
-            "production": {}
-          }
+            "production": {},
+            "development": {}
+          },
+          "defaultConfiguration": "production"
         },
         "serve": {
           "executor": "@nrwl/next:server",
@@ -215,8 +229,13 @@
             "production": {
               "buildTarget": "console:build:production",
               "dev": false
+            },
+            "development": {
+              "buildTarget": "console:build:development",
+              "dev": true
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "export": {
           "executor": "@nrwl/next:export",
@@ -228,7 +247,7 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/console"],
           "options": {
-            "jestConfig": "apps/console/jest.config.js",
+            "jestConfig": "apps/console/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -246,7 +265,7 @@
           }
         }
       },
-      "tags": ["sc:app", "sc:app:console"]
+      "tags": ["scope:app", "scope:private"]
     },
     "console-e2e": {
       "root": "apps/console-e2e",
@@ -274,7 +293,7 @@
           "outputs": ["{options.outputFile}"]
         }
       },
-      "tags": ["sc:app", "sc:app:console"],
+      "tags": ["scope:app", "scope:private", "scope:e2e"],
       "implicitDependencies": ["console"]
     },
     "core-data-besigner": {
@@ -293,12 +312,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/core/data/besigner"],
           "options": {
-            "jestConfig": "libs/core/data/besigner/jest.config.js",
+            "jestConfig": "libs/core/data/besigner/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:data", "sc:lib:core:data:besigner"]
+      "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:besigner"]
     },
     "core-data-framework": {
       "root": "libs/core/data/framework",
@@ -316,7 +335,7 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/core/data/framework"],
           "options": {
-            "jestConfig": "libs/core/data/framework/jest.config.js",
+            "jestConfig": "libs/core/data/framework/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -327,7 +346,7 @@
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:data", "sc:lib:core:data:framework"]
+      "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:framework"]
     },
     "core-data-tenancy": {
       "root": "libs/core/data/tenancy",
@@ -345,12 +364,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/core/data/tenancy"],
           "options": {
-            "jestConfig": "libs/core/data/tenancy/jest.config.js",
+            "jestConfig": "libs/core/data/tenancy/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:data", "sc:lib:core:data:tenancy"]
+      "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:tenancy"]
     },
     "core-feature-besigner": {
       "root": "libs/core/feature/besigner",
@@ -368,13 +387,14 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/core/feature/besigner"],
           "options": {
-            "jestConfig": "libs/core/feature/besigner/jest.config.js",
+            "jestConfig": "libs/core/feature/besigner/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:feature", "sc:lib:core:feature:besigner"]
+      "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:besigner"]
     },
+    "core-feature-canvas-designer": "libs/core/feature/canvas-designer",
     "core-feature-renderer": {
       "root": "libs/core/feature/renderer",
       "sourceRoot": "libs/core/feature/renderer/src",
@@ -391,50 +411,42 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/core/feature/renderer"],
           "options": {
-            "jestConfig": "libs/core/feature/renderer/jest.config.js",
+            "jestConfig": "libs/core/feature/renderer/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:core", "sc:lib:core:feature", "sc:lib:core:feature:renderer"]
+      "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:renderer"]
     },
-    "shared-data-brand": {
-      "root": "libs/shared/data/brand",
-      "sourceRoot": "libs/shared/data/brand/src",
+    "shared-data-enums": {
+      "root": "libs/shared/data/enums",
+      "sourceRoot": "libs/shared/data/enums/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["libs/shared/data/brand/**/*.ts"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/shared/data/brand"],
-          "options": {
-            "jestConfig": "libs/shared/data/brand/jest.config.js",
-            "passWithNoTests": true
+            "lintFilePatterns": ["libs/shared/data/enums/**/*.ts"]
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+      "tags": ["scope:lib", "scope:shared", "scope:data"]
     },
-    "shared-data-fields": {
-      "root": "libs/shared/data/fields",
-      "sourceRoot": "libs/shared/data/fields/src",
+    "shared-data-forms": {
+      "root": "libs/shared/data/forms",
+      "sourceRoot": "libs/shared/data/forms/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["libs/shared/data/fields/**/*.ts"]
+            "lintFilePatterns": ["libs/shared/data/forms/**/*.ts"]
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+      "tags": ["scope:lib", "scope:shared", "scope:data"]
     },
     "shared-data-mdi": {
       "root": "libs/shared/data/mdi",
@@ -452,12 +464,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/data/mdi"],
           "options": {
-            "jestConfig": "libs/shared/data/mdi/jest.config.js",
+            "jestConfig": "libs/shared/data/mdi/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+      "tags": ["scope:lib", "scope:shared", "scope:data"]
     },
     "shared-data-regex": {
       "root": "libs/shared/data/regex",
@@ -472,7 +484,7 @@
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:data"]
+      "tags": ["scope:lib", "scope:shared", "scope:data"]
     },
     "shared-data-types": {
       "root": "libs/shared/data/types",
@@ -490,35 +502,42 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/data/types"],
           "options": {
-            "jestConfig": "libs/shared/data/types/jest.config.js",
+            "jestConfig": "libs/shared/data/types/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+      "tags": ["scope:lib", "scope:shared", "scope:data"]
     },
-    "shared-feature-themes": {
-      "root": "libs/shared/feature/themes",
-      "sourceRoot": "libs/shared/feature/themes/src",
+    "shared-feature-fbclient": {
+      "root": "libs/shared/feature/fbclient",
+      "sourceRoot": "libs/shared/feature/fbclient/src",
       "projectType": "library",
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
           "options": {
-            "lintFilePatterns": ["libs/shared/feature/themes/**/*.ts"]
-          },
-          "outputs": ["{options.outputFile}"]
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/shared/feature/themes"],
-          "options": {
-            "jestConfig": "libs/shared/feature/themes/jest.config.js",
-            "passWithNoTests": true
+            "lintFilePatterns": ["libs/shared/feature/fbclient/**/*.ts"]
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:ui"]
+      "tags": ["scope:lib", "scope:shared", "scope:feature"]
+    },
+    "shared-feature-fbserver": {
+      "root": "libs/shared/feature/fbserver",
+      "sourceRoot": "libs/shared/feature/fbserver/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/feature/fbserver/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:feature"]
     },
     "shared-ui-jsx": {
       "root": "libs/shared/ui/jsx",
@@ -536,12 +555,35 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/ui/jsx"],
           "options": {
-            "jestConfig": "libs/shared/ui/jsx/jest.config.js",
+            "jestConfig": "libs/shared/ui/jsx/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:ui"]
+      "tags": ["scope:lib", "scope:shared", "scope:ui"]
+    },
+    "shared-ui-jsx-forms": {
+      "root": "libs/shared/ui/jsx-forms",
+      "sourceRoot": "libs/shared/ui/jsx-forms/src",
+      "projectType": "library",
+      "tags": ["scope:lib", "scope:shared", "scope:ui"],
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/ui/jsx-forms/**/*.{ts,tsx,js,jsx}"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/ui/jsx-forms"],
+          "options": {
+            "jestConfig": "libs/shared/ui/jsx-forms/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      }
     },
     "shared-ui-mdi-jsx": {
       "root": "libs/shared/ui/mdi-jsx",
@@ -559,18 +601,18 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/ui/mdi-jsx"],
           "options": {
-            "jestConfig": "libs/shared/ui/mdi-jsx/jest.config.js",
+            "jestConfig": "libs/shared/ui/mdi-jsx/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:ui"]
+      "tags": ["scope:lib", "scope:shared", "scope:ui"]
     },
     "shared-ui-next": {
       "root": "libs/shared/ui/next",
       "sourceRoot": "libs/shared/ui/next/src",
       "projectType": "library",
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:ui"],
+      "tags": ["scope:lib", "scope:shared", "scope:ui"],
       "targets": {
         "lint": {
           "executor": "@nrwl/linter:eslint",
@@ -583,11 +625,69 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/ui/next"],
           "options": {
-            "jestConfig": "libs/shared/ui/next/jest.config.js",
+            "jestConfig": "libs/shared/ui/next/jest.config.ts",
             "passWithNoTests": true
           }
         }
       }
+    },
+    "shared-ui-snackstack": {
+      "root": "libs/shared/ui/snackstack",
+      "sourceRoot": "libs/shared/ui/snackstack/src",
+      "projectType": "library",
+      "tags": ["scope:lib", "scope:shared", "scope:ui"],
+      "targets": {
+        "build": {
+          "executor": "@nrwl/web:rollup",
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/libs/shared/ui/snackstack",
+            "tsConfig": "libs/shared/ui/snackstack/tsconfig.lib.json",
+            "project": "libs/shared/ui/snackstack/package.json",
+            "entryFile": "libs/shared/ui/snackstack/src/index.ts",
+            "external": ["react/jsx-runtime"],
+            "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+            "compiler": "swc",
+            "assets": [
+              {
+                "glob": "libs/shared/ui/snackstack/README.md",
+                "input": ".",
+                "output": "."
+              }
+            ]
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/ui/snackstack/**/*.{ts,tsx,js,jsx}"]
+          }
+        }
+      }
+    },
+    "shared-ui-theme": {
+      "root": "libs/shared/ui/theme",
+      "sourceRoot": "libs/shared/ui/theme/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/shared/ui/theme/**/*.ts"]
+          },
+          "outputs": ["{options.outputFile}"]
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/ui/theme"],
+          "options": {
+            "jestConfig": "libs/shared/ui/theme/jest.config.ts",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:ui"]
     },
     "shared-util-dom": {
       "root": "libs/shared/util/dom",
@@ -605,12 +705,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/dom"],
           "options": {
-            "jestConfig": "libs/shared/util/dom/jest.config.js",
+            "jestConfig": "libs/shared/util/dom/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-emitter": {
       "root": "libs/shared/util/emitter",
@@ -628,12 +728,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/emitter"],
           "options": {
-            "jestConfig": "libs/shared/util/emitter/jest.config.js",
+            "jestConfig": "libs/shared/util/emitter/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:feature"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-errors": {
       "root": "libs/shared/util/errors",
@@ -651,12 +751,42 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/errors"],
           "options": {
-            "jestConfig": "libs/shared/util/errors/jest.config.js",
+            "jestConfig": "libs/shared/util/errors/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
+    },
+    "shared-util-fbclient": {
+      "root": "libs/shared/util/fbclient",
+      "sourceRoot": "libs/shared/util/fbclient/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/fbclient/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
+    },
+    "shared-util-fbserver": {
+      "root": "libs/shared/util/fbserver",
+      "sourceRoot": "libs/shared/util/fbserver/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/fbserver/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-guards": {
       "root": "libs/shared/util/guards",
@@ -674,12 +804,27 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/guards"],
           "options": {
-            "jestConfig": "libs/shared/util/guards/jest.config.js",
+            "jestConfig": "libs/shared/util/guards/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
+    },
+    "shared-util-http": {
+      "root": "libs/shared/util/http",
+      "sourceRoot": "libs/shared/util/http/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/http/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-logger": {
       "root": "libs/shared/util/logger",
@@ -697,12 +842,53 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/logger"],
           "options": {
-            "jestConfig": "libs/shared/util/logger/jest.config.js",
+            "jestConfig": "libs/shared/util/logger/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:feature"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
+    },
+    "shared-util-next": {
+      "root": "libs/shared/util/next",
+      "sourceRoot": "libs/shared/util/next/src",
+      "projectType": "library",
+      "targets": {
+        "build": {
+          "executor": "@nrwl/js:tsc",
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/libs/shared/util/next",
+            "tsConfig": "libs/shared/util/next/tsconfig.lib.json",
+            "packageJson": "libs/shared/util/next/package.json",
+            "main": "libs/shared/util/next/src/index.ts",
+            "assets": ["libs/shared/util/next/*.md"]
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/next/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
+    },
+    "shared-util-rest-api": {
+      "root": "libs/shared/util/rest-api",
+      "sourceRoot": "libs/shared/util/rest-api/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/util/rest-api/**/*.ts"]
+          }
+        }
+      },
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-timestamp": {
       "root": "libs/shared/util/timestamp",
@@ -720,12 +906,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/timestamp"],
           "options": {
-            "jestConfig": "libs/shared/util/timestamp/jest.config.js",
+            "jestConfig": "libs/shared/util/timestamp/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:feature"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-tools": {
       "root": "libs/shared/util/tools",
@@ -743,12 +929,12 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/tools"],
           "options": {
-            "jestConfig": "libs/shared/util/tools/jest.config.js",
+            "jestConfig": "libs/shared/util/tools/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
     "shared-util-vendor": {
       "root": "libs/shared/util/vendor",
@@ -766,13 +952,14 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/shared/util/vendor"],
           "options": {
-            "jestConfig": "libs/shared/util/vendor/jest.config.js",
+            "jestConfig": "libs/shared/util/vendor/jest.config.ts",
             "passWithNoTests": true
           }
         }
       },
-      "tags": ["sc:lib", "sc:lib:shared", "sc:lib:shared:util"]
+      "tags": ["scope:lib", "scope:shared", "scope:util"]
     },
+    "silo": "apps/silo",
     "tenant": {
       "root": "apps/tenant",
       "sourceRoot": "apps/tenant",
@@ -787,7 +974,8 @@
             "outputPath": "dist/apps/tenant"
           },
           "configurations": {
-            "production": {}
+            "production": {},
+            "development": {}
           }
         },
         "serve": {
@@ -801,8 +989,13 @@
             "production": {
               "buildTarget": "tenant:build:production",
               "dev": false
+            },
+            "development": {
+              "buildTarget": "tenant:build:development",
+              "dev": true
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "export": {
           "executor": "@nrwl/next:export",
@@ -814,7 +1007,7 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/tenant"],
           "options": {
-            "jestConfig": "apps/tenant/jest.config.js",
+            "jestConfig": "apps/tenant/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -826,7 +1019,7 @@
           }
         }
       },
-      "tags": ["sc:app", "sc:app:tenant"]
+      "tags": ["scope:app", "scope:public"]
     },
     "tenant-e2e": {
       "root": "apps/tenant-e2e",
@@ -853,7 +1046,7 @@
           }
         }
       },
-      "tags": [],
+      "tags": ["scope:app", "scope:public", "scope:e2e"],
       "implicitDependencies": ["tenant"]
     },
     "www": {
@@ -869,8 +1062,10 @@
             "outputPath": "dist/apps/www"
           },
           "configurations": {
-            "production": {}
-          }
+            "production": {},
+            "development": {}
+          },
+          "defaultConfiguration": "production"
         },
         "serve": {
           "executor": "@nrwl/next:server",
@@ -883,8 +1078,13 @@
             "production": {
               "buildTarget": "www:build:production",
               "dev": false
+            },
+            "development": {
+              "buildTarget": "www:build:development",
+              "dev": true
             }
-          }
+          },
+          "defaultConfiguration": "development"
         },
         "export": {
           "executor": "@nrwl/next:export",
@@ -896,7 +1096,7 @@
           "executor": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/www"],
           "options": {
-            "jestConfig": "apps/www/jest.config.js",
+            "jestConfig": "apps/www/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -914,7 +1114,7 @@
           }
         }
       },
-      "tags": ["sc:app", "sc:app:www"]
+      "tags": ["scope:app", "scope:public"]
     },
     "www-e2e": {
       "root": "apps/www-e2e",
@@ -942,7 +1142,7 @@
           "outputs": ["{options.outputFile}"]
         }
       },
-      "tags": ["sc:app", "sc:app:www"],
+      "tags": ["scope:app", "scope:public", "scope:e2e"],
       "implicitDependencies": ["www"]
     }
   }

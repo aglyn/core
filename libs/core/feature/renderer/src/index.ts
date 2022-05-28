@@ -15,5 +15,5 @@
  * limitations under the License.
  */
 
-export * from './lib/renderer'
-export default import('./lib/components/trunk.component')
+export * from './renderer'
+export default './lib/components/trunk.component'

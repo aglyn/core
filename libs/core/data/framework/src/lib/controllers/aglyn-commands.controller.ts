@@ -18,8 +18,8 @@
 import {EmitterFn} from '@aglyn/shared-util-emitter'
 import {_isFnT} from '@aglyn/shared-util-guards'
 import {
-  AglynAppEffectFlag,
-  AglynAppEventFlag,
+  AglynEventStateFlag,
+  AglynEventTriggerFlag,
   type CommandsRegisterListenerPayload,
   type CommandsRemoveResolverPayload,
   type CommandsSetResolverPayload,
@@ -27,7 +27,6 @@ import {
   type CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
 import {type IAglynAppController} from '../types/aglyn-app.types'
 import {
   type AglynCommander,
@@ -36,15 +35,16 @@ import {
   type CommandUId,
   type IAglynCommandsController,
 } from '../types/aglyn-commands.types'
+import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
 
 
 const TAG = 'AglynCommands'
-const NS = 'aglyn.core.data.framework.module.commands'
+const NS = 'com.aglyn.core.data.framework.controller.commands'
 
 export class AglynCommandsController extends AglynModuleModel<AglynCommandsControllerOptions> implements IAglynCommandsController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   #commander: AglynCommander = EmitterFn()
   #resolvers: Map<CommandUId, AglynCommandResolver> = new Map()
@@ -54,11 +54,11 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return [
-      [AglynAppEffectFlag.COMMANDS_RESOLVER_SET, this.setResolver],
-      [AglynAppEffectFlag.COMMANDS_LISTENER_REGISTER, this.registerListener],
-      [AglynAppEffectFlag.COMMANDS_RESOLVER_REMOVE, this.removeResolver],
-      [AglynAppEffectFlag.COMMANDS_LISTENER_UNREGISTER, this.unregisterListener],
-      [AglynAppEffectFlag.COMMANDS_TRIGGER, this.trigger],
+      [AglynEventTriggerFlag.COMMANDS_RESOLVER_SET, this.setResolver],
+      [AglynEventTriggerFlag.COMMANDS_LISTENER_REGISTER, this.registerListener],
+      [AglynEventTriggerFlag.COMMANDS_RESOLVER_REMOVE, this.removeResolver],
+      [AglynEventTriggerFlag.COMMANDS_LISTENER_UNREGISTER, this.unregisterListener],
+      [AglynEventTriggerFlag.COMMANDS_TRIGGER, this.trigger],
     ]
   }
 
@@ -69,7 +69,7 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
   public toJSON() {
     return {
       ...super.toJSON(),
-      commands: [...this.#commander.all.values()],
+      commands: this.#commander.all.entries() as any,
     }
   }
 
@@ -78,8 +78,8 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
     const commandId = resolver?.commandId || cId
     if (_isFnT(resolver) && commandId) {
       this.#resolvers.set(commandId, resolver)
-      this.logger.debug(AglynAppEventFlag.COMMAND_RESOLVER_SET, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_RESOLVER_SET, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_RESOLVER_SET, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_RESOLVER_SET, {commandId})
     }
     else {
       // TODO: throw errorFactory error
@@ -93,8 +93,8 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
     const commandId = listener?.commandId || cId
     if (_isFnT(listener) && commandId) {
       this.#commander.on(commandId, listener)
-      this.logger.debug(AglynAppEventFlag.COMMAND_LISTENER_REGISTERED, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_LISTENER_REGISTERED, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_LISTENER_REGISTERED, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_LISTENER_REGISTERED, {commandId})
     }
     else {
       // TODO: throw errorFactory error
@@ -108,8 +108,8 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
     const commandId = listener?.commandId || cId
     if (commandId) {
       this.#commander.off(commandId, listener)
-      this.logger.debug(AglynAppEventFlag.COMMAND_LISTENER_UNREGISTERED, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_LISTENER_UNREGISTERED, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_LISTENER_UNREGISTERED, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_LISTENER_UNREGISTERED, {commandId})
     }
     else {
       // TODO: throw errorFactory error
@@ -121,8 +121,8 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
     const {commandId} = payload
     if (commandId) {
       this.#resolvers.delete(commandId)
-      this.logger.debug(AglynAppEventFlag.COMMAND_RESOLVER_REMOVED, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_RESOLVER_REMOVED, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_RESOLVER_REMOVED, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_RESOLVER_REMOVED, {commandId})
     }
     else {
       // TODO: throw errorFactory error
@@ -134,17 +134,17 @@ export class AglynCommandsController extends AglynModuleModel<AglynCommandsContr
     const {commandId} = payload
     const resolver = this.#resolvers.get(commandId)
     if (_isFnT(resolver)) {
-      this.logger.debug(AglynAppEventFlag.COMMAND_RESOLVER_TRIGGERING, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_RESOLVER_TRIGGERING, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_RESOLVER_TRIGGERING, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_RESOLVER_TRIGGERING, {commandId})
       const response = resolver(payload)
-      this.logger.debug(AglynAppEventFlag.COMMAND_RESOLVER_TRIGGERED, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_RESOLVER_TRIGGERED, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_RESOLVER_TRIGGERED, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_RESOLVER_TRIGGERED, {commandId})
 
-      this.logger.debug(AglynAppEventFlag.COMMAND_LISTENERS_TRIGGERING, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_LISTENERS_TRIGGERING, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_LISTENERS_TRIGGERING, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_LISTENERS_TRIGGERING, {commandId})
       this.#commander.emit(commandId, {payload, response})
-      this.logger.debug(AglynAppEventFlag.COMMAND_LISTENERS_TRIGGERED, {commandId})
-      this.emitter.emit(AglynAppEventFlag.COMMAND_LISTENERS_TRIGGERED, {commandId})
+      this.logger.debug(AglynEventStateFlag.COMMAND_LISTENERS_TRIGGERED, {commandId})
+      this.emitter.emit(AglynEventStateFlag.COMMAND_LISTENERS_TRIGGERED, {commandId})
     }
     else {
       // TODO: throw errorFactory error

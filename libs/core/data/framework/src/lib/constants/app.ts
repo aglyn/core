@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,3 +17,5 @@
 
 export const DEFAULT_APP_UUN = '[DEFAULT]'
 export type DEFAULT_APP_UUN = typeof DEFAULT_APP_UUN
+
+export const RESOURCE_ID_LENGTH = 10

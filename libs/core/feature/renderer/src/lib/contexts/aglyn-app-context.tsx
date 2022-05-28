@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,53 +17,50 @@
 
 import {
   type AppUUN,
+  CanvasSetElementsPayload,
   DEFAULT_APP_UUN,
-  getApp as getAglynApp,
+  getApp,
   type IAglynAppController,
 } from '@aglyn/core-data-framework'
-import {createContext, type ReactNode, useCallback, useContext} from 'react'
+import {createContext, type ReactNode, useContext, useMemo, useState} from 'react'
 
 
-export interface IAglynAppContext {
-  getApp: (appName?: AppUUN) => IAglynAppController
-}
+export type IAglynAppContext = IAglynAppController | undefined
 
-export const AglynAppContext = createContext<IAglynAppContext>({
-  getApp: getAglynApp,
-})
+export const AglynAppContext = createContext<IAglynAppContext>(undefined)
 AglynAppContext.displayName = 'AglynAppContext'
-
-export const {
-  Provider: AglynAppContextProvider,
-  Consumer: AglynAppContextConsumer,
-} = AglynAppContext
+AglynAppContext.aglyn = true
 export default AglynAppContext
 
-export const useAglynAppContext = () => {
-  return useContext(AglynAppContext)
+export function useAglynAppContext<T extends IAglynAppController = IAglynAppController>(): T {
+  return useContext(AglynAppContext) as T
 }
 
 export interface AglynAppContextComponentProps {
   appName?: AppUUN
   children?: ReactNode
+  canvasElements?: CanvasSetElementsPayload
 }
 
-function AglynAppContextComponent(props: AglynAppContextComponentProps) {
-  const {appName, children} = props
+function AglynAppProvider(props: AglynAppContextComponentProps) {
+  const {appName, children, canvasElements} = props
 
-  const getApp = useCallback((overrideName?: AppUUN): IAglynAppController => {
-    return getAglynApp(overrideName ?? appName)
+  const [state, setState] = useState<IAglynAppContext>()
+
+  useMemo(() => {
+    setState(getApp(appName))
   }, [appName])
 
   return (
-    <AglynAppContextProvider value={{getApp}}>
+    <AglynAppContext.Provider value={state}>
       {children}
-    </AglynAppContextProvider>
+    </AglynAppContext.Provider>
   )
 }
-AglynAppContextComponent.displayName = 'AglynAppContextComponent'
-AglynAppContextComponent.defaultProps = {
+AglynAppProvider.displayName = 'AglynAppProvider'
+AglynAppProvider.aglyn = true
+AglynAppProvider.defaultProps = {
   appName: DEFAULT_APP_UUN,
 }
 
-export {AglynAppContextComponent}
+export {AglynAppProvider}

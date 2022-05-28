@@ -19,8 +19,8 @@ import img3 from '/public/_static/images/designer/website-designer-custom-elemen
 import img2 from '/public/_static/images/designer/website-designer-element-categories.png'
 import img4 from '/public/_static/images/designer/website-designer-functional-operations.png'
 import img1 from '/public/_static/images/designer/website-designer-preview-collage.png'
-import {ProductNames} from '@aglyn/shared-data-brand'
-import {GridItems} from '@aglyn/shared-ui-jsx'
+import {APP_WWW, BRAND_NAMES} from '@aglyn/shared-data-enums'
+import {ContainerComponent, GridItems} from '@aglyn/shared-ui-jsx'
 import {Image} from '@aglyn/shared-ui-next'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
@@ -38,18 +38,18 @@ function Index(props) {
 
   return (
     <MainLayout
-      title={TITLE + ' | Aglyn'}
+      title={APP_WWW.TITLE}
       centerNavigationItems={mainNavigation}
-      productName={ProductNames.WWW}
+      productName={BRAND_NAMES.WWW}
     >
       <BackgroundImage
         component={'header'}
         url={'/_static/images/backgrounds/patterns/abstract-wave-lines.svg'}
       >
         <Box py={6}>
-          <Container
+          <ContainerComponent
             maxWidth={'lg'}
-            sx={{py: 4}}
+            gutterY
           >
             <GridItems
               alignItems="center"
@@ -107,7 +107,7 @@ function Index(props) {
                 },
               ]}
             />
-          </Container>
+          </ContainerComponent>
         </Box>
       </BackgroundImage>
       <main>
@@ -257,5 +257,6 @@ function Index(props) {
 }
 
 Index.displayName = 'Index'
+Index.aglyn = true
 
 export default Index

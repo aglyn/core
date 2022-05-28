@@ -15,22 +15,27 @@
  * limitations under the License.
  */
 
-import {type Dictionary} from '@aglyn/shared-data-types'
+import {_isArr} from '@aglyn/shared-util-guards'
 import {Timestamp} from '@aglyn/shared-util-timestamp'
 import {getStaticField} from '@aglyn/shared-util-tools'
-import {AGLYN_EMITTER, type AglynEmitter} from '../constants/emitter'
+import {
+  AGLYN_EMITTER,
+  type AglynEmitter,
+  type AglynEventPayloads,
+  AglynEventStateFlag,
+} from '../constants/emitter'
 import {AGLYN_ERROR, type AglynErrorFactory} from '../constants/error'
 import {AGLYN_LOGGER, type AglynLogger} from '../constants/logger'
-import {type AglynBaseModelOptions, type IAglynBaseModel} from '../types/aglyn-base.types'
+import type {AglynBaseModelOptions, IAglynBaseModel} from '../types/aglyn-base.types'
 
 
 const TAG = 'AglynBaseModel'
-const NS = 'aglyn.core.data.framework.model.base'
+const NS = 'com.aglyn.core.data.framework.model.base'
 
-export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> implements IAglynBaseModel<O> {
+export class AglynBaseModel<O extends AglynBaseModelOptions = AglynBaseModelOptions> implements IAglynBaseModel<O> {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   readonly #options: O = null
   readonly #createdAt: Timestamp
@@ -46,40 +51,127 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
   public get logger(): AglynLogger {return this.#logger}
   public get emitter(): AglynEmitter {return this.#emitter}
 
-  protected constructor(options: O) {
-    this.#options = {...options}
+  constructor(options: O) {
+    this.#options = options
     this.#createdAt = Timestamp.now()
     this.#setup()
   }
+
   #setup() {
     const namespace = this.namespace
-
     const errorFactory = this.#options.errorFactory || AGLYN_ERROR
-    this.#errorFactory = !namespace ? errorFactory : errorFactory.childFactory(namespace)
-
-    this.#emitter = this.#options.emitter || AGLYN_EMITTER
-
     const logger = this.#options.logger || AGLYN_LOGGER
     const logLevel = this.#options.logLevel
+
+    this.#errorFactory = !namespace ? errorFactory : errorFactory.childFactory(namespace)
+    this.#emitter = this.#options.emitter || AGLYN_EMITTER
     this.#logger = !logLevel ? logger : logger.setLogLevel(logLevel)
+  }
+
+  #doEvent<F extends AglynEventStateFlag>(flag: F, payload?: AglynEventPayloads[F]): this {
+    this.logger.debug(flag, {
+      __namespace__: this.namespace,
+      __timestamp__: Timestamp.now().valueOf(),
+      ...payload || {namespace: this.namespace},
+    })
+    this.emitter.emit(flag, payload || {namespace: this.namespace})
+    return this
+  }
+  #handleEvent<F1 extends AglynEventStateFlag, F2 extends AglynEventStateFlag>(
+    flags: [before: F1, after: F2],
+    payload: undefined | AglynEventPayloads[F1 | F2] | [
+      before: AglynEventPayloads[F1],
+      after: AglynEventPayloads[F2]
+    ],
+    handler: () => AglynEventPayloads[F2] | void,
+  ): this {
+    const [beforeFlag, afterFlag] = flags
+    const beforePayload = _isArr(payload) ? payload[0] : payload
+    this.#doEvent(beforeFlag, beforePayload)
+    const res = handler()
+    const afterPayload = res || (_isArr(payload) ? payload[1] || payload[0] : payload)
+    this.#doEvent(afterFlag, afterPayload)
+    return this
+  }
+  protected handleEvent<F1 extends AglynEventStateFlag, F2 extends AglynEventStateFlag>(
+    flags: [before: F1, after: F2],
+    payload: undefined | AglynEventPayloads[F1 | F2] | [
+      before: AglynEventPayloads[F1],
+      after: AglynEventPayloads[F2]
+    ],
+    handler: () => AglynEventPayloads[F2] | void,
+  ): this {
+    this.#handleEvent(flags, payload, handler)
+    return this
+  }
+
+
+  public onInitialize(): this {
+    return this
+  }
+  /** @ignore */
+  public __initialize__(props?: never): this {
+    this.handleEvent([
+      AglynEventStateFlag.MODULE_INITIALIZING,
+      AglynEventStateFlag.MODULE_INITIALIZED,
+    ], undefined, () => {this.onInitialize()})
+    return this
+  }
+
+  public onActivate(): this {
+    return this
+  }
+  /** @ignore */
+  public __activate__(props?: never): this {
+    this.handleEvent([
+      AglynEventStateFlag.MODULE_ACTIVATING,
+      AglynEventStateFlag.MODULE_ACTIVATED,
+    ], undefined, () => {this.onActivate()})
+    return this
+  }
+
+  public onDeactivate(): this {
+    return this
+  }
+  /** @ignore */
+  public __deactivate__(props?: never): this {
+    this.handleEvent([
+      AglynEventStateFlag.MODULE_DEACTIVATING,
+      AglynEventStateFlag.MODULE_DEACTIVATED,
+    ], undefined, () => {this.onDeactivate()})
+    return this
+  }
+
+  public onDestroy(): this {
+    return this
+  }
+  /** @ignore */
+  public __destroy__(props?: never): this {
+    this.handleEvent([
+      AglynEventStateFlag.MODULE_DESTROYING,
+      AglynEventStateFlag.MODULE_DESTROYED,
+    ], undefined, () => {this.onDestroy()})
+    return this
   }
 
   public toString(): string {
     return getStaticField(Symbol.toStringTag, this)
   }
-  public toJSON(): Dictionary {
+  public toJSON() {
     return {
       namespace: this.namespace,
-      created: this.#createdAt,
+      created: this.#createdAt.toJSON(),
     }
   }
 
   public getOptions(): O {
     return this.#options
   }
+
   public getCreatedAt(): Timestamp {
     return this.#createdAt
   }
+
   public getErrorFactory(): AglynErrorFactory {
     return this.#errorFactory
   }
@@ -87,6 +179,7 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
     this.#errorFactory = value
     return this
   }
+
   public getEmitter(): AglynEmitter {
     return this.#emitter
   }
@@ -94,6 +187,7 @@ export abstract class AglynBaseModel<O extends AglynBaseModelOptions = AglynBase
     this.#emitter = value
     return this
   }
+
   public getLogger(): AglynLogger {
     return this.#logger
   }

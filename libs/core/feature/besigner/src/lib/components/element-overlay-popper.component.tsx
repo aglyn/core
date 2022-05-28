@@ -16,21 +16,22 @@
  */
 
 import {
-  duplicateCanvasElement,
-} from '@aglyn/core-data-framework'
-import {
+  BesignerCanvasItemValue,
   type BesignerCanvasState,
   BesignerPanelTabFlag,
-  setBesignerCanvasHovered,
-  setBesignerCanvasSelected,
   setBesignerPanels,
 } from '@aglyn/core-data-besigner'
-import {useAglynAppContext, useAglynElementData} from '@aglyn/core-feature-renderer'
+import {duplicateCanvasElement} from '@aglyn/core-data-framework'
+import {useAglynElementData, useAglynElementLabel} from '@aglyn/core-feature-renderer'
 import {type KeyOf} from '@aglyn/shared-data-types'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {Box} from '@mui/material'
 import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Popper'
 import {type ChangeEvent, forwardRef, useCallback} from 'react'
-import {CanvasRenderedElementRefsConsumer} from '../contexts/canvas-rendered-element-refs'
-import useAglynBesignerStoreState from '../hooks/use-aglyn-besigner-store-state'
+import {RenderedCanvasElementsContext} from '../contexts/rendered-canvas-elements'
+import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
+import {useAglynCanvasSetSelected} from '../hooks/use-aglyn-canvas-selected'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 import ElementOverlayBadgeComponent from './element-overlay-badge.component'
 import ElementOverlayOutlineComponent from './element-overlay-outline.component'
 
@@ -89,20 +90,26 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
     const {variant, id, ...rest} = props || {}
 
 
-    const {getApp} = useAglynAppContext()
-    const store = variantToStoreName[variant]
-    const state = useAglynBesignerStoreState('canvas', store)
+    const app = useBesignerAppContext()
+    const state = useSubscribable<BesignerCanvasItemValue>(
+      app.besigner?.canvas, undefined,
+      (canvas) => canvas?.[variantToStoreName[variant]],
+      [variant, app],
+    )
+
     const $id = state?.$id
     const parentId = useAglynElementData($id, 'parentId')
-
+    const setHovered = useAglynCanvasSetHovered()
+    const setSelected = useAglynCanvasSetSelected()
+    const badgeLabel = useAglynElementLabel($id)
 
     const handleDuplicateClick = useCallback((e: ChangeEvent<unknown>) => {
-      duplicateCanvasElement(getApp(), {$id})
-    }, [$id, getApp])
+      duplicateCanvasElement(app, {$id})
+    }, [$id, app])
 
 
     const handleModifyClick = useCallback((e: ChangeEvent<unknown>) => {
-      setBesignerPanels(getApp(), {
+      setBesignerPanels(app, {
         panels: (panels) => ({
           ...panels,
           panelRight: {
@@ -112,46 +119,29 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
           },
         }),
       })
-    }, [getApp])
+    }, [app])
 
 
     const handleSelectParentClick = useCallback((e: ChangeEvent<unknown>) => {
-      setBesignerCanvasSelected(getApp(), {
-        selected: (prev) => ({
-          ...prev,
-          $id: parentId,
-        }),
-      })
-    }, [getApp, parentId])
+      setSelected({$id: parentId})
+    }, [parentId, setSelected])
 
 
     const handleHoverParent = useCallback((e: ChangeEvent<unknown>) => {
-      setBesignerCanvasHovered(getApp(), {
-        hovered: (prev) => ({
-          ...prev,
-          $id: parentId,
-        }),
-      })
-    }, [getApp, parentId])
+      setHovered({$id: parentId})
+    }, [parentId, setHovered])
 
 
     const handleHoverParentLeave = useCallback((e: ChangeEvent<unknown>) => {
-      setBesignerCanvasHovered(getApp(), {
-        hovered: (prev) => ({
-          ...prev,
-          $id: null,
-        }),
-      })
-    }, [getApp])
+      setHovered(undefined)
+    }, [setHovered])
 
     return (
-      <CanvasRenderedElementRefsConsumer>
+      <RenderedCanvasElementsContext.Consumer>
         {([, , getElementRef]) => {
           const data = getElementRef($id)
           const anchorEl = data?.element?.current || virtualElement,
             dragHandleRef = data?.dragHandle
-
-          // console.log('anchorEl', variant, $id, getElementRef($id))
 
           return (
             <MuiPopper
@@ -176,35 +166,97 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
                 data-aglyn-overlay-type="outline"
               >
 
-                {variant === 'selectedOverlay' && (
-                  <ElementOverlayBadgeComponent
-                    $id={$id}
-                    data-aglyn-overlay-id={$id}
-                    data-aglyn-overlay-variant={variant}
-                    data-aglyn-overlay-type="badge"
-                    dragHandleRef={dragHandleRef}
-                    onModifyClick={handleModifyClick}
-                    onDuplicateClick={handleDuplicateClick}
-                    onSelectParentClick={handleSelectParentClick}
-                    onHoverParent={handleHoverParent}
-                    onHoverParentLeave={handleHoverParentLeave}
-                    sx={{
-                      boxShadow: 4,
-                      pointerEvents: 'auto',
-                      marginTop: `-2.1em`,
-                      position: 'absolute',
-                    }}
-                  />
-                )}
+
+                <MuiPopper
+                  anchorEl={anchorEl}
+                  placement={variant === 'hoveredOverlay' ? 'top-start' : undefined}
+                  modifiers={[
+                    {
+                      name: 'flip',
+                      enabled: true,
+                      options: {
+                        altBoundary: true,
+                        rootBoundary: 'viewport',
+                        padding: 0,
+                      },
+                    },
+                    {
+                      name: 'preventOverflow',
+                      enabled: true,
+                      options: {
+                        altAxis: true,
+                        altBoundary: true,
+                        tether: true,
+                        rootBoundary: 'viewport',
+                        padding: 0,
+                      },
+                    },
+                  ]}
+                  data-aglyn-overlay-id={$id}
+                  data-aglyn-overlay-variant={variant}
+                  data-aglyn-overlay-type="popper"
+                  open={Boolean(anchorEl)}
+                  keepMounted
+                  disablePortal
+                  {...rest}
+                >
+                  <div>
+                    {{
+                      'selectedOverlay': (
+
+                        <ElementOverlayBadgeComponent
+                          $id={$id}
+                          data-aglyn-overlay-id={$id}
+                          data-aglyn-overlay-variant={variant}
+                          data-aglyn-overlay-type="badge-actions"
+                          dragHandleRef={dragHandleRef}
+                          onModifyClick={handleModifyClick}
+                          onDuplicateClick={handleDuplicateClick}
+                          onSelectParentClick={handleSelectParentClick}
+                          onHoverParent={handleHoverParent}
+                          onHoverParentLeave={handleHoverParentLeave}
+                          sx={{
+                            boxShadow: 4,
+                            pointerEvents: 'auto',
+                          }}
+                        />
+                      ),
+                      'hoveredOverlay': (
+                        <Box
+                          data-aglyn-overlay-id={$id}
+                          data-aglyn-overlay-variant={variant}
+                          data-aglyn-overlay-type="badge-label"
+                          sx={{
+                            pointerEvents: 'none',
+                            // marginTop: '-20px',
+                            marginLeft: '-2px',
+                            bgcolor: 'secondary.main',
+                            color: 'secondary.contrastText',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                            px: 0.6, py: 0.4,
+                            lineHeight: 1,
+                            maxWidth: 120,
+                            fontSize: 12,
+                          }}
+                        >
+                          {badgeLabel}
+                        </Box>
+                      ),
+                    }[variant]}
+                  </div>
+                </MuiPopper>
               </ElementOverlayOutlineComponent>
             </MuiPopper>
           )
         }}
-      </CanvasRenderedElementRefsConsumer>
+      </RenderedCanvasElementsContext.Consumer>
     )
   },
 )
 ElementOverlayPopperComponent.displayName = 'ElementOverlayPopperComponent'
+ElementOverlayPopperComponent.aglyn = true
 ElementOverlayPopperComponent.defaultProps = {
   variant: 'hoveredOverlay',
 }

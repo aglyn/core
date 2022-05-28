@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import {canvasRedo, canvasUndo, getCanvasStore} from '@aglyn/core-data-framework'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {useStoreMap} from 'effector-react'
+import {canvasRedo, canvasUndo} from '@aglyn/core-data-framework'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
 import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export type UseAglynCanvasHistory = [
@@ -29,18 +29,19 @@ export type UseAglynCanvasHistory = [
 ]
 
 export function useAglynCanvasHistoryControls(): UseAglynCanvasHistory {
-  const {getApp} = useAglynAppContext()
-  const handleUndo = useCallback(() => canvasUndo(getApp(), {}), [getApp])
-  const handleRedo = useCallback(() => canvasRedo(getApp(), {}), [getApp])
-  const store = getCanvasStore(getApp())
-  const [canUndo, canRedo]: [number | false, number | false] = useStoreMap({
-    store,
-    keys: [],
-    fn: (state) => [
-      state.past.length > 0 ? state.past.length : false,
-      state.future.length > 0 ? state.future.length : false,
-    ],
-  })
+  const app = useBesignerAppContext()
+  const canUndo = useSubscribable<number | false>(
+    app.canvas?.pastElements, false,
+    (past) => past?.length > 0 ? past.length : false,
+    [app],
+  )
+  const canRedo = useSubscribable<number | false>(
+    app.canvas?.futureElements, false,
+    (future) => future?.length > 0 ? future.length : false,
+    [app],
+  )
+  const handleUndo = useCallback(() => canvasUndo(app, {}), [app])
+  const handleRedo = useCallback(() => canvasRedo(app, {}), [app])
   return [handleUndo, handleRedo, canUndo, canRedo]
 }
 export default useAglynCanvasHistoryControls

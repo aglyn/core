@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {_hasProperty, _isObj} from '@aglyn/shared-util-guards'
+import {_hasOwnProperty, _isObj} from '@aglyn/shared-util-guards'
 import {getProperty} from '@aglyn/shared-util-tools'
 import {createDomain as createEffectorDomain} from 'effector'
 import {
-  AglynAppEffectFlag,
+  AglynEventTriggerFlag,
   type ContextsCreateEffectPayload,
   type ContextsCreateEventPayload,
   type ContextsCreateStorePayload,
@@ -29,26 +29,26 @@ import {
   type ContextsSetStorePayload,
 } from '../constants/emitter'
 import {AglynModuleModel} from '../models/aglyn-module.model'
-import {type AglynModuleEffectListener} from '../types/aglyn-module.types'
-import {type IAglynAppController} from '../types/aglyn-app.types'
-import {
-  type AglynContextsControllerOptions,
-  type ContextDomain,
-  type ContextEffect,
-  type ContextEvent,
-  type ContextStore,
-  type ContextStoreUid,
-  type IAglynContextsController,
+import type {IAglynAppController} from '../types/aglyn-app.types'
+import type {
+  AglynContextsControllerOptions,
+  ContextDomain,
+  ContextEffect,
+  ContextEvent,
+  ContextStore,
+  ContextStoreUid,
+  IAglynContextsController,
 } from '../types/aglyn-contexts.types'
+import type {AglynModuleEffectListener} from '../types/aglyn-module.types'
 
 
 const TAG = 'AglynContexts'
-const NS = 'aglyn.core.data.framework.module.contexts'
+const NS = 'com.aglyn.core.data.framework.controller.contexts'
 
 export class AglynContextsController extends AglynModuleModel<AglynContextsControllerOptions> implements IAglynContextsController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   #domain: ContextDomain = null
   #stores: Map<ContextStoreUid, ContextStore<any>> = new Map()
@@ -57,12 +57,12 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return [
-      [AglynAppEffectFlag.CONTEXTS_CREATE_STORE, this.createStore],
-      [AglynAppEffectFlag.CONTEXTS_CREATE_EVENT, this.createEvent],
-      [AglynAppEffectFlag.CONTEXTS_CREATE_EFFECT, this.createEffect],
-      [AglynAppEffectFlag.CONTEXTS_GET_STORE, this.getStore],
-      [AglynAppEffectFlag.CONTEXTS_SET_STORE, this.setStore],
-      [AglynAppEffectFlag.CONTEXTS_DELETE_STORE, this.deleteStore],
+      [AglynEventTriggerFlag.CONTEXTS_CREATE_STORE, this.createStore],
+      [AglynEventTriggerFlag.CONTEXTS_CREATE_EVENT, this.createEvent],
+      [AglynEventTriggerFlag.CONTEXTS_CREATE_EFFECT, this.createEffect],
+      [AglynEventTriggerFlag.CONTEXTS_GET_STORE, this.getStore],
+      [AglynEventTriggerFlag.CONTEXTS_SET_STORE, this.setStore],
+      [AglynEventTriggerFlag.CONTEXTS_DELETE_STORE, this.deleteStore],
     ]
   }
 
@@ -78,7 +78,7 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
     const defaultStores = this.options.defaultStores
     if (defaultStores && _isObj(defaultStores)) {
       for (const storeId in defaultStores) {
-        if (_hasProperty(storeId, defaultStores)) {
+        if (_hasOwnProperty(storeId, defaultStores)) {
           const {options, defaultState} = getProperty(defaultStores, storeId) || {}
           const store = this.createStore({defaultState, options})
           this.setStore({storeId, store})
@@ -90,7 +90,7 @@ export class AglynContextsController extends AglynModuleModel<AglynContextsContr
   public toJSON() {
     return {
       ...super.toJSON(),
-      ...this.#stores,
+      contexts: this.#stores.entries() as any,
     }
   }
 

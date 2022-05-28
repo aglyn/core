@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-import {AglynAppController, IAglynModuleModel} from '@aglyn/core-data-framework'
+import {AglynAppController, type IAglynModuleModel} from '@aglyn/core-data-framework'
 import {_INTERNAL_BESIGNERS_} from '../constants/_internal'
 import {AglynBesignerController} from './aglyn-besigner.controller'
-import {type IAglynBesignerController} from './aglyn-besigner.types'
-import {type BesignerAppOptions, type IBesignerAppController} from './besigner-app.types'
+import type {IAglynBesignerController} from './aglyn-besigner.types'
+import type {BesignerAppOptions, IBesignerAppController} from './besigner-app.types'
 
 
 const TAG = 'BesignerApp'
-const NS = 'aglyn.core.data.besigner.app'
+const NS = 'com.aglyn.core.data.besigner.controller.app'
 
 export class BesignerAppController extends AglynAppController<BesignerAppOptions> implements IBesignerAppController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
   #besignerController: IAglynBesignerController = null
 

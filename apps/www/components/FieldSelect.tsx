@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,17 @@ function FieldSelect(props: FieldSelectProps) {
   return (
     <MuiTextField select {...rest}>
       {items.map((item, key) => (
-        <MuiMenuItem key={item.id ?? key} {...item} />),
+          <MuiMenuItem
+            key={item.key ?? item.id ?? key}
+            {...item}
+          />
+        ),
       )}
     </MuiTextField>
   )
 }
 
 FieldSelect.displayName = 'FieldSelect'
+FieldSelect.aglyn = true
 export {FieldSelect}
 export default FieldSelect

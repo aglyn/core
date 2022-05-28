@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,16 @@
  * limitations under the License.
  */
 
-import {createStyles, makeStyles, type Theme} from '@aglyn/shared-feature-themes'
-import {_isArr} from '@aglyn/shared-util-guards'
-import {MenuItem, TextField} from '@mui/material'
+import { createStyles, makeStyles, type Theme } from '@aglyn/shared-ui-theme'
+import { _isArr } from '@aglyn/shared-util-guards'
+import { MenuItem, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import {ChangeEventHandler} from 'react'
-import {ListChildComponentProps, VariableSizeList} from 'react-window'
-import {fieldHasError, type Fields} from '../forms'
-
+import { ChangeEventHandler } from 'react'
+import { ListChildComponentProps, VariableSizeList } from 'react-window'
+import { fieldHasError, type Fields } from '../forms'
 
 const useStyles = makeStyles<Theme, Props>((theme: Theme) =>
   createStyles({
@@ -38,16 +37,16 @@ const useStyles = makeStyles<Theme, Props>((theme: Theme) =>
       },
     },
     list: {},
-  }),
+  })
 )
 
-const buildOption = (option: Fields.Option) => (
-  <MenuItem key={option.value} value={option.value} children={option.label} />
+const buildOption = (option: Fields.Option, key?: any) => (
+  <MenuItem key={item.key ?? item.id ?? key} value={option.value} children={option.label} />
 )
 
 function checkboxListRow(props: ListChildComponentProps) {
-  const {index, style, data} = props
-  const {items, field, onUpdate} = data
+  const { index, style, data } = props
+  const { items, field, onUpdate } = data
   const item = (items ?? [])[index]
   console.log('data', data)
   return (
@@ -58,7 +57,7 @@ function checkboxListRow(props: ListChildComponentProps) {
           checked={true}
           tabIndex={-1}
           disableRipple
-          inputProps={{'aria-labelledby': item.label}}
+          inputProps={{ 'aria-labelledby': item.label }}
         />
       </ListItemIcon>
       <ListItemText primary={item.label} />
@@ -79,7 +78,7 @@ const getFieldOptions = (field: Fields.FieldT, fields: Fields.FieldGroup): Field
       })
   }
   if (error || !_isArr(items)) {
-    return [{value: null, label: error?.message ?? 'Error loading items'}]
+    return [{ value: null, label: error?.message ?? 'Error loading items' }]
   }
   return items
 }
@@ -92,12 +91,12 @@ export type Props = {
 
 export default function FieldSet(props: Props) {
   const classes = useStyles(props)
-  const {fields, loading, onUpdate} = props
+  const { fields, loading, onUpdate } = props
 
-  const getTextOrSelect = (field: Fields.FieldT) => (
+  const getTextOrSelect = (field: Fields.FieldT, key?: any) => (
     <TextField
       fullWidth
-      key={field.id}
+      key={field?.key ?? field?.id ?? key}
       name={field.id}
       type={field.type ?? 'text'}
       label={field.label}
@@ -113,7 +112,7 @@ export default function FieldSet(props: Props) {
     >
       {field.type !== 'select' ? null : (
         <>
-          {buildOption({label: 'Select an option', value: ''})}
+          {buildOption({ label: 'Select an option', value: '' })}
           {getFieldOptions(field, fields).map(buildOption)}
         </>
       )}
@@ -140,7 +139,7 @@ export default function FieldSet(props: Props) {
           width="100%"
           itemCount={items.length}
           itemSize={itemSize}
-          itemData={{items, field, onUpdate}}
+          itemData={{ items, field, onUpdate }}
         />
       </div>
     )

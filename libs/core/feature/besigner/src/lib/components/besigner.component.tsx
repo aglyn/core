@@ -15,64 +15,69 @@
  * limitations under the License.
  */
 
-import {type AppUUN} from '@aglyn/core-data-framework'
+import type {AppUUN, CanvasSetElementsPayload} from '@aglyn/core-data-framework'
 import {
-  AglynAppContextComponent,
+  AglynAppProvider,
   ElementComponentsContextProvider,
   ElementsContextProvider,
 } from '@aglyn/core-feature-renderer'
-import {consoleThemeDark, consoleThemeLight, withTheme} from '@aglyn/shared-feature-themes'
-import {AppLoaderOverlayView, ConfirmationProviderComponent} from '@aglyn/shared-ui-jsx'
-import NoSsr from '@mui/material/NoSsr'
+import {LOADING_OVERLAY_ELEMENT} from '@aglyn/shared-ui-jsx'
+import {NoSsr} from '@mui/material'
 import dynamic from 'next/dynamic'
 import {forwardRef, Fragment} from 'react'
-import {ComponentsDrawerContextProvider} from '../contexts/components-drawer-context.provider'
+import ComponentsDrawerContextProvider from '../contexts/components-drawer-context.provider'
+import RenderedCanvasElementsProvider from '../contexts/rendered-canvas-elements'
 import BesignerDndContext from './besigner-dnd-context.component'
-import {type WorkspaceEditorComponentProps} from './workspace-editor.component'
+import type {WorkspaceEditorComponentProps} from './workspace-editor.component'
 
 
-const WorkspaceEditorComponent = dynamic(
+const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
   () => import('./workspace-editor.component').then((mod) => mod.WorkspaceEditorComponent),
-  {ssr: false, loading: () => <AppLoaderOverlayView open />},
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
 export interface BesignerComponentProps extends WorkspaceEditorComponentProps {
   noSsr?: boolean
   appName?: AppUUN
+  canvasElements?: CanvasSetElementsPayload
 }
 
-const BesignerComponentRaw = forwardRef<any, BesignerComponentProps>(
+const BesignerComponent = forwardRef<any, BesignerComponentProps>(
   function RefRenderFn(props, ref) {
-    const {noSsr, appName, ...rest} = props
+    const {
+      noSsr,
+      appName,
+      canvasElements,
+      ...rest
+    } = props
     const Wrapper = noSsr ? NoSsr : Fragment
-
 
     return (
       <Wrapper>
-        <AglynAppContextComponent appName={appName}>
+        <AglynAppProvider
+          canvasElements={canvasElements}
+          appName={appName}
+        >
           <BesignerDndContext>
             <ElementComponentsContextProvider>
               <ElementsContextProvider>
-                <ConfirmationProviderComponent>
+                <RenderedCanvasElementsProvider>
                   <ComponentsDrawerContextProvider>
-                    {/*<SnackbarProvider maxSnack={3}>*/}
                     <WorkspaceEditorComponent ref={ref} {...rest} />
-                    {/*</SnackbarProvider>*/}
                   </ComponentsDrawerContextProvider>
-                </ConfirmationProviderComponent>
+                </RenderedCanvasElementsProvider>
               </ElementsContextProvider>
             </ElementComponentsContextProvider>
           </BesignerDndContext>
-        </AglynAppContextComponent>
+        </AglynAppProvider>
       </Wrapper>
     )
   },
 )
 
-BesignerComponentRaw.displayName = 'BesignerComponent'
-BesignerComponentRaw.defaultProps = {}
+BesignerComponent.displayName = 'BesignerComponent'
+BesignerComponent.aglyn = true
+BesignerComponent.defaultProps = {}
 
-export const BesignerComponent = withTheme({
-  theme: [consoleThemeLight, consoleThemeDark],
-})(BesignerComponentRaw)
+export {BesignerComponent}
 export default BesignerComponent

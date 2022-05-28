@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type {Icon} from './types/icon'
+
+import {_hasOwnProperty, _isArr, _isObj} from '@aglyn/shared-util-guards'
+import type {Icon, IconId} from './types'
 
 
 export const DEFAULT_ICON: Icon = {
@@ -24,3 +26,23 @@ export const DEFAULT_ICON: Icon = {
   as: [],
   tags: [],
 }
+
+export const MdiIcons = new Map<IconId, Icon>()
+
+;(async function() {
+  if (typeof window !== 'undefined') {
+    await /*import('../../generated/6.5.95/mdi-icons.min.json')*/ Promise.reject<any>('Temporarily disabled')
+      .then(({data}) => {
+        if (_isArr) {
+          data.forEach((value) => {
+            if (_isObj(value) && _hasOwnProperty('path', value) && _hasOwnProperty('id', value)) {
+              MdiIcons.set(value.id as IconId, value as Icon)
+            }
+          })
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading icons', error)
+      })
+  }
+})()

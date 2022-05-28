@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,16 @@
  * limitations under the License.
  */
 
-import {ProductNames} from '@aglyn/shared-data-brand'
-import {componentMapper, GridItems} from '@aglyn/shared-ui-jsx'
+import {BRAND_NAMES} from '@aglyn/shared-data-enums'
+import {ContainerComponent, GridItems} from '@aglyn/shared-ui-jsx'
 import {
   FormRenderer,
   FormSpy,
   type FormTemplateRenderProps,
+  simpleComponentMapper,
   useFormApi,
-} from '@data-driven-forms/react-form-renderer'
-import Alert from '@mui/material/Alert'
-import AlertTitle from '@mui/material/AlertTitle'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import Container from '@mui/material/Container'
-import Grid from '@mui/material/Grid'
-import LinearProgress from '@mui/material/LinearProgress'
-import Typography from '@mui/material/Typography'
+} from '@aglyn/shared-ui-jsx-forms'
+import {Alert, AlertTitle, Box, Button, Grid, LinearProgress, Typography} from '@mui/material'
 import {useCallback} from 'react'
 import {mainNavigation} from '../const'
 import {DdfForms} from '../forms'
@@ -131,11 +125,11 @@ function Contact(props) {
     <MainLayout
       title={'Contact Us | Aglyn'}
       centerNavigationItems={mainNavigation}
-      productName={ProductNames.WWW}
+      productName={BRAND_NAMES.WWW}
     >
       <main>
         <Box py={12} bgcolor={'background.paper'}>
-          <Container maxWidth={'lg'} sx={{py: 4}}>
+          <ContainerComponent maxWidth={'lg'} gutterY>
             <GridItems
               alignItems="center"
               direction="column"
@@ -174,19 +168,19 @@ function Contact(props) {
                   xs: 12,
                   md: 9,
                   children: (
-                    <Container maxWidth="sm">
+                    <ContainerComponent maxWidth="sm">
                       <FormRenderer
                         FormTemplate={FormTemplate}
-                        componentMapper={componentMapper}
+                        componentMapper={simpleComponentMapper}
                         schema={DdfForms.ContactFormSchema}
                         onSubmit={handleSubmit}
                       />
-                    </Container>
+                    </ContainerComponent>
                   ),
                 },
               ]}
             />
-          </Container>
+          </ContainerComponent>
         </Box>
       </main>
       <SiteFooterView />

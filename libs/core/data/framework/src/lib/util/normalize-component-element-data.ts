@@ -15,54 +15,71 @@
  * limitations under the License.
  */
 
-import {_isStrT} from '@aglyn/shared-util-guards'
-import {
-  type AglynElementDenormalized,
-  type AglynElementNormalized,
-  type AglynElementsById,
-  type AglynElementsList,
-  type ElementId,
+import {arraySafe, copy} from '@aglyn/shared-util-tools'
+import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
+import type {
+  AglynElementDenormalized,
+  AglynElementNormalized,
+  AglynElementsDenormalized,
+  AglynElementsNormalized,
+  ElementId,
 } from '../types/aglyn-elements.types'
 
 
 const normalizeData = (
   element: AglynElementDenormalized,
-  flatMap: AglynElementsById = {},
-  elemData: AglynElementsList = [],
-): AglynElementNormalized => {
-  const {elements, ...rest} = element
-
-  return {
-    ...rest,
-    elements: (elements || []).map($id => (
-      normalizeData(flatMap[$id], flatMap, elemData)
-    )),
+  denormalized: AglynElementsDenormalized = {},
+  accumulator: AglynElementsNormalized = [],
+): AglynElementsNormalized => {
+  if (element?.$id) {
+    const _element = element as unknown as AglynElementNormalized
+    const childIds: ElementId[] = [...arraySafe(element.elements)]
+    _element.elements = []
+    for (const $id of childIds) {
+      if (!$id || !denormalized[$id]) continue
+      const child = denormalized[$id]
+      normalizeData(child, denormalized, _element.elements)
+    }
+    accumulator.push(_element)
   }
+  return accumulator
 }
 
 export function normalizeComponentElementData(
   element: AglynElementDenormalized,
-  parentId: ElementId,
-): AglynElementsList
+): AglynElementsNormalized
 export function normalizeComponentElementData(
-  elements: AglynElementsById,
-  parentId: ElementId,
-): AglynElementsList
+  elements: AglynElementsDenormalized,
+  parentId?: ElementId,
+): AglynElementsNormalized
 export function normalizeComponentElementData(
-  elements: AglynElementDenormalized | AglynElementsById,
-  parentId: ElementId,
-): AglynElementsList {
-  const elemData: AglynElementsList = []
-  const elems: AglynElementsById = _isStrT(elements.$id)
-    ? {[elements.$id]: {...elements}} as AglynElementsById
-    : {...elements} as AglynElementsById
+  data: AglynElementDenormalized | AglynElementsDenormalized,
+  parentId: ElementId = CANVAS_ROOT_ELEMENT_ID,
+): AglynElementsNormalized {
+  const normalized: AglynElementsNormalized = []
+  if (!data) return normalized
+  const state = copy(data)
 
-  elemData.push(
-    ...(elems[parentId].elements || []).map(($id: any) =>
-      normalizeData(elems[$id], elems),
-    ),
-  )
+  try {
+    let denormalized: AglynElementsDenormalized
+    // If received a denormalized element
+    if (state.$id) {
+      const _element = state as AglynElementDenormalized
+      denormalized = {[_element.$id]: _element}
+      return normalizeData(_element, denormalized, normalized)
+    }
 
-  return elemData
+    // If received a denormalized map of elements by id
+    denormalized = state as AglynElementsDenormalized
+    const parent = denormalized[parentId] ||= {$id: parentId} as AglynElementDenormalized
+    for (const $id of parent.elements ||= []) {
+      normalizeData(denormalized[$id], denormalized, normalized)
+    }
+  }
+  catch (error) {
+    console.error(error)
+  }
+
+  return normalized
 }
 export default normalizeComponentElementData

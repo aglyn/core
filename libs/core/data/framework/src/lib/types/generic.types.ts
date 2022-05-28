@@ -33,22 +33,38 @@ export interface AglynLifecycleObserver<T = any> {
   /**
    * Should be invoked once immediately after instantiation
    */
-  aglynOnInit?(props?: T): void
+  onInitialize?(props?: T): void
   /**
    * Should be invoked once as last step before garbage collection
    */
-  aglynOnDestroy?(props?: T): void
+  onDestroy?(props?: T): void
+  /**
+   * @private
+   */
+  __initialize__(props?: T): void
+  /**
+   * @private
+   */
+  __destroy__(props?: T): void
 }
 
-export interface AglynLoadableObserver<T1 = any, T2 = T1> extends AglynLifecycleObserver<T1> {
+export interface AglynLoadableObserver<T = any> {
   /**
    * Should be invoked each time the object is loaded
    */
-  aglynOnLoad?(props?: T2): void
+  onActivate?(props?: T): void
   /**
    * Should be invoked each time the object is unloaded
    */
-  aglynOnUnload?(props?: T2): void
+  onDeactivate?(props?: T): void
+  /**
+   * @private
+   */
+  __activate__(props?: T): void
+  /**
+   * @private
+   */
+  __deactivate__(props?: T): void
 }
 
 export interface ModificationHistoryState<T> {

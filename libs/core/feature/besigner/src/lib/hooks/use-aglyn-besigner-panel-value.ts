@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,69 @@
  * limitations under the License.
  */
 
-import {type BesignerPanelsState} from '@aglyn/core-data-besigner'
-import {type KeyOf} from '@aglyn/shared-data-types'
-import {useAglynBesignerStoreState} from './use-aglyn-besigner-store-state'
+import {
+  type BesignerPanelKey,
+  type BesignerPanelsState,
+  setBesignerPanel,
+} from '@aglyn/core-data-besigner'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
-export function useAglynBesignerPanelValue<P extends KeyOf<BesignerPanelsState>, K extends KeyOf<BesignerPanelsState[P]>>(
-  item: P,
+export function useAglynBesignerPanelValue<P extends BesignerPanelKey, K extends keyof BesignerPanelsState[P]>(
+  panelName: P,
   key: K,
-): BesignerPanelsState[P][K] {
-  const panel = useAglynBesignerStoreState('panels', item)
-  const {[key]: value} = {...panel}
+): [
+  value: BesignerPanelsState[P][K] | undefined,
+  setValue: (
+    value: BesignerPanelsState[P][K] | ((
+      prev: BesignerPanelsState[P][K],
+      panel: BesignerPanelsState[P],
+      panels: BesignerPanelsState,
+    ) => BesignerPanelsState[P][K]),
+  ) => void
+] {
 
-  return value
+  const app = useBesignerAppContext()
+  const setPanelValue = useAglynBesignerPanelSetValue<P, K>().bind(null, panelName, key)
+  const value = useSubscribable<BesignerPanelsState[P][K]>(
+    app.besigner?.panels, undefined,
+    (panels) => panels?.[panelName]?.[key],
+    [key, panelName, app],
+  )
+
+  return [value, setPanelValue]
 }
 
 export default useAglynBesignerPanelValue
+
+export function useAglynBesignerPanelSetValue<P extends BesignerPanelKey, K extends keyof BesignerPanelsState[P]>(): (
+  panelName: P,
+  key: K,
+  value: BesignerPanelsState[P][K] | ((
+    prev: BesignerPanelsState[P][K],
+    panel: BesignerPanelsState[P],
+    panels: BesignerPanelsState,
+  ) => BesignerPanelsState[P][K]),
+) => void {
+
+  const app = useBesignerAppContext()
+  return useCallback((
+    panelName: P,
+    key: K,
+    value: BesignerPanelsState[P][K] | ((
+      prev: BesignerPanelsState[P][K],
+      panel: BesignerPanelsState[P],
+      panels: BesignerPanelsState,
+    ) => BesignerPanelsState[P][K]),
+  ) => {
+    setBesignerPanel(app, {
+      panel: panelName,
+      value: (prev, panels) => ({
+        ...prev, [key]: (_isFnT(value) ? value(prev[key], prev, panels) : value),
+      }),
+    })
+  }, [app])
+}

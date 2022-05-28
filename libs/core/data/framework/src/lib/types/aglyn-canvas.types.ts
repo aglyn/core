@@ -15,78 +15,103 @@
  * limitations under the License.
  */
 
-import {
-  type CanvasAddElementPayload,
-  type CanvasDeleteElementPayload,
-  type CanvasDuplicateElementPayload,
-  type CanvasGetApiEventsPayload,
-  type CanvasGetElementsDenormalizedPayload,
-  type CanvasGetElementsNormalizedPayload,
-  type CanvasMoveElementPayload,
-  type CanvasRedoPayload,
-  type CanvasSetElementPayload,
-  type CanvasSetElementsPayload,
-  type CanvasUndoPayload,
-  type CanvasUpdateElementPayload,
+import type {BehaviorSubject, Observable} from 'rxjs'
+import type {
+  CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
+  CanvasGetElementsDenormalizedPayload,
+  CanvasGetElementsFuturePayload,
+  CanvasGetElementsNormalizedPayload,
+  CanvasGetElementsPastPayload,
+  CanvasGetElementsPresentPayload,
+  CanvasGetStatePayload,
+  CanvasGetStorePayload,
+  CanvasMoveElementPayload,
+  CanvasNextStatePayload,
+  CanvasRedoPayload,
+  CanvasSetElementPayload,
+  CanvasSetElementsPayload,
+  CanvasUndoPayload,
+  CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from './aglyn-app.types'
-import {type ContextDomain, type ContextEvent, type ContextStore} from './aglyn-contexts.types'
-import {
-  type AglynElementNormalized,
-  type AglynElementsById,
-  type AglynElementsList,
-} from './aglyn-elements.types'
-import {
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type IAglynModuleModel,
+import type {IAglynAppController} from './aglyn-app.types'
+import type {ContextEvent} from './aglyn-contexts.types'
+import type {AglynElementsDenormalized, AglynElementsNormalized} from './aglyn-elements.types'
+import type {
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  IAglynModuleModel,
 } from './aglyn-module.types'
 
 
-export type ElementsDataStore = {
-  past: AglynElementsById[]
-  present: AglynElementsById
-  future: AglynElementsById[]
+export type CanvasContext = {
+  future: AglynElementsDenormalized[]
+  past: AglynElementsDenormalized[]
+  present: AglynElementsDenormalized
+  readonly normalized?: AglynElementsNormalized
 }
 
 export interface ElementsDataStoreApi {
-  undo: ContextEvent<any>
   redo: ContextEvent<any>
-  setElements: ContextEvent<CanvasSetElementsPayload>
+  undo: ContextEvent<any>
   addElement: ContextEvent<CanvasAddElementPayload>
-  updateElement: ContextEvent<CanvasUpdateElementPayload>
-  setElement: ContextEvent<CanvasSetElementPayload>
   deleteElement: ContextEvent<CanvasDeleteElementPayload>
-  moveElement: ContextEvent<CanvasMoveElementPayload>
   duplicateElement: ContextEvent<CanvasDuplicateElementPayload>
+  moveElement: ContextEvent<CanvasMoveElementPayload>
+  setElement: ContextEvent<CanvasSetElementPayload>
+  setElements: ContextEvent<CanvasSetElementsPayload>
+  updateElement: ContextEvent<CanvasUpdateElementPayload>
 }
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
-  initialElements: AglynElementNormalized[]
+  defaults?: {
+    present?: AglynElementsNormalized
+  }
 }
 
 export interface IAglynCanvasController extends IAglynModuleModel<AglynCanvasControllerOptions> {
-  readonly domain: ContextDomain
-  readonly events: ElementsDataStoreApi
-  readonly context: ContextStore<ElementsDataStore>
-  readonly denormalizedElementsStore: ContextStore<AglynElementsById>
-  readonly normalizedElementsStore: ContextStore<AglynElementsList>
+  readonly __store__: {
+    [K in keyof CanvasContext]: K extends 'normalized'
+      ? Observable<CanvasContext[K]>
+      : BehaviorSubject<CanvasContext[K]>
+  }
+  readonly pastElements: this['__store__']['past']
+  readonly futureElements: this['__store__']['future']
+  readonly presentElements: this['__store__']['present']
+  readonly denormalizedElements: this['__store__']['present']
+  readonly normalizedElements: this['__store__']['normalized']
 
-  getStore(payload?: CanvasGetApiEventsPayload): ContextStore<ElementsDataStore>
-  getApiEvents(payload?: CanvasGetApiEventsPayload): ElementsDataStoreApi
-  getDenormalizedElementsStore(payload?: CanvasGetElementsDenormalizedPayload): ContextStore<AglynElementsById>
-  getNormalizedElementsStore(payload?: CanvasGetElementsNormalizedPayload): ContextStore<AglynElementsList>
+  getStore<K extends keyof CanvasContext>(payload: CanvasGetStorePayload<K>): this['__store__'][K]
+  getState(payload?: CanvasGetStatePayload): CanvasContext
+  nextState(payload: CanvasNextStatePayload): this
+
+  getPastElements(payload?: CanvasGetElementsPastPayload): this['__store__']['past']
+  getFutureElements(payload?: CanvasGetElementsFuturePayload): this['__store__']['future']
+  getPresentElements(payload?: CanvasGetElementsPresentPayload): this['__store__']['present']
+  getDenormalizedElements(payload?: CanvasGetElementsDenormalizedPayload): this['__store__']['present']
+  getNormalizedElements(payload?: CanvasGetElementsNormalizedPayload): this['__store__']['normalized']
+  getApi(payload?: CanvasGetElementsNormalizedPayload): Pick<this,
+    'undo' |
+    'redo' |
+    'addElement' |
+    'deleteElement' |
+    'duplicateElement' |
+    'moveElement' |
+    'setElement' |
+    'setElements' |
+    'updateElement'>
 
   undo(payload?: CanvasUndoPayload): this
   redo(payload?: CanvasRedoPayload): this
 
-  setElements(payload: CanvasSetElementsPayload): this
   addElement(payload: CanvasAddElementPayload): this
-  updateElement(payload: CanvasUpdateElementPayload): this
-  setElement(payload: CanvasSetElementPayload): this
   deleteElement(payload: CanvasDeleteElementPayload): this
-  moveElement(payload: CanvasMoveElementPayload): this
   duplicateElement(payload: CanvasDuplicateElementPayload): this
+  moveElement(payload: CanvasMoveElementPayload): this
+  setElement(payload: CanvasSetElementPayload): this
+  setElements(payload: CanvasSetElementsPayload): this
+  updateElement(payload: CanvasUpdateElementPayload): this
 }
 
 export interface AglynCanvasControllerT extends AglynModuleModelT<AglynCanvasControllerOptions> {

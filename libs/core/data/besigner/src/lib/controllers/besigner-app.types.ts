@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import {
-  type AglynAppControllerT,
-  type AglynAppOptions,
-  type IAglynAppController,
+import type {
+  AglynAppControllerT,
+  AglynAppOptions,
+  IAglynAppController,
 } from '@aglyn/core-data-framework'
-import {
-  type AglynBesignerControllerOptions,
-  type IAglynBesignerController,
+import type {
+  AglynBesignerControllerOptions,
+  IAglynBesignerController,
 } from './aglyn-besigner.types'
 
 

@@ -17,7 +17,6 @@
 
 import {
   type AglynComponentSchema,
-  type AglynElementType,
   COMPONENT_ELEMENT_TYPE,
   type ComponentRegisterPayload,
   type IAglynComponent,
@@ -25,55 +24,37 @@ import {
   OF_KIND,
   OF_TYPE,
 } from '@aglyn/core-data-framework'
-import {styled} from '@aglyn/shared-feature-themes'
-import {copy, getDisplayName} from '@aglyn/shared-util-tools'
-import {ChangeCase} from '@aglyn/shared-util-vendor'
-import {forwardRef} from 'react'
-import {
-  ErrorBoundaryComponent,
-  type ErrorBoundaryComponentProps,
-} from '../components/error-boundary.component'
+import { styled } from '@aglyn/shared-ui-theme'
+import { type ErrorBoundaryProps, withErrorBoundary } from '@aglyn/shared-ui-jsx'
+import { copy } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics, pascalCase } from '@aglyn/shared-util-vendor'
+import { forwardRef } from 'react'
 
-
-export function createAglynComponent<P>(
+export function createAglynComponent<P = any, C = any>(
   schema: AglynComponentSchema<P>,
-  component: AglynElementType<P>,
-  errorComponent?: ErrorBoundaryComponentProps<P>['errorComponent'],
+  component: C | any,
+  options?: Partial<ErrorBoundaryProps>
 ): ComponentRegisterPayload<P> {
-  const {componentId, bundleId, emotion} = schema
+  const { componentId, bundleId, emotion } = schema
+  const pascalId = `${bundleId ? pascalCase(bundleId) + '-' : ''}${pascalCase(componentId)}`
 
-  const displayName = getDisplayName(component, ChangeCase.pascalCase(componentId))
+  const Component = emotion?.disable ? component : styled(component, emotion?.options)({})
 
-  const ComponentElement =
-    !emotion?.disable
-      ? styled(component as any, {
-        name: displayName,
-        ...emotion?.options,
-      })({})
-      : component
+  const AglynComponent = forwardRef<any, P>(function RefRenderFn(props, ref) {
+    return <Component ref={ref} {...props} />
+  }) as IAglynComponent<P>
 
-  const AglynComponent = forwardRef<any, P>(
-    function RefRenderFn(props, ref) {
-      return (
-        <ErrorBoundaryComponent
-          innerRef={ref}
-          props={props}
-          component={ComponentElement}
-          errorComponent={errorComponent}
-        />
-      )
-    },
-  ) as IAglynComponent<P>
-
-  AglynComponent.displayName = `AglynComponent(${displayName})`
+  AglynComponent.displayName = `AglynComponent(${pascalId})`
   AglynComponent.componentId = componentId
   AglynComponent.bundleId = bundleId
-  ;(AglynComponent as any)[OF_TYPE] = MODULE_TYPE
-  ;(AglynComponent as any)[OF_KIND] = COMPONENT_ELEMENT_TYPE
+  AglynComponent.aglyn = true
+  AglynComponent[OF_TYPE] = MODULE_TYPE
+  AglynComponent[OF_KIND] = COMPONENT_ELEMENT_TYPE
+  hoistNonReactStatics(AglynComponent, component)
 
   return {
+    component: withErrorBoundary(AglynComponent, options) as IAglynComponent<P>,
     schema: copy(schema),
-    component: AglynComponent,
   }
 }
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,21 @@
  * limitations under the License.
  */
 
-import {type ElementId} from '@aglyn/core-data-framework'
-import {getBesignerStore} from '@aglyn/core-data-besigner'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {useStoreMap} from 'effector-react'
+import {BesignerCanvasHoveredElement} from '@aglyn/core-data-besigner'
+import type {ElementId} from '@aglyn/core-data-framework'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 export function useAglynCanvasElementIsHovered($id: ElementId): boolean {
-  const {getApp} = useAglynAppContext()
-  const dndStore = getBesignerStore(getApp(), {store: 'canvas'})
-  return useStoreMap({
-    store: dndStore,
-    keys: [$id],
-    fn: (store, [$id]) => Boolean($id && store.hovered?.$id === $id),
-  })
+  const app = useBesignerAppContext()
+  const value = useSubscribable<BesignerCanvasHoveredElement>(
+    app.besigner?.canvas, false,
+    (canvas) => $id && canvas?.hovered?.$id === $id,
+    [$id, app],
+  )
+
+  return value
 }
 
 export default useAglynCanvasElementIsHovered

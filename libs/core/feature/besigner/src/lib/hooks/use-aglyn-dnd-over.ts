@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,54 @@
  */
 
 
-import useAglynBesignerStoreState from './use-aglyn-besigner-store-state'
+import type {BesignerDndElementOver} from '@aglyn/core-data-besigner'
+import {type BesignerDndState, setBesignerDndItem} from '@aglyn/core-data-besigner'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {_isFnT} from '@aglyn/shared-util-guards'
+import {useCallback} from 'react'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
-export const useAglynDndOver = () => {
-  return useAglynBesignerStoreState('dnd', 'over')
+export function useAglynDndOver(): [
+  value: BesignerDndElementOver | undefined,
+  setValue: (
+    value: BesignerDndElementOver | ((
+      prev: BesignerDndElementOver,
+      dnd: BesignerDndState,
+    ) => BesignerDndElementOver),
+  ) => void
+] {
+  const app = useBesignerAppContext()
+  const value = useSubscribable<BesignerDndElementOver>(
+    app.besigner?.dnd, undefined,
+    (dnd) => dnd?.over,
+    [app],
+  )
+  const setDndOver = useAglynDndSetOver()
+
+
+  return [value, setDndOver]
 }
 
 export default useAglynDndOver
+
+
+export function useAglynDndSetOver(): (
+  value: BesignerDndElementOver | ((
+    prev: BesignerDndElementOver,
+    dnd: BesignerDndState,
+  ) => BesignerDndElementOver),
+) => void {
+  const app = useBesignerAppContext()
+  return useCallback((
+    value: BesignerDndElementOver | ((
+      prev: BesignerDndElementOver,
+      dnd: BesignerDndState,
+    ) => BesignerDndElementOver),
+  ) => {
+    setBesignerDndItem(app, {
+      item: 'over',
+      value: (prev, dnd) => (_isFnT(value) ? value(prev, dnd) : value),
+    })
+  }, [app])
+}

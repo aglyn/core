@@ -51,6 +51,9 @@ export const schema: AglynComponentSchema<AppBarProps> = {
       data: {
         componentId: ID,
         bundleId: BUNDLE_ID,
+        props: {
+          position: 'sticky'
+        },
         elements: [
           toolbarSchema.templates![0]!.data,
         ],

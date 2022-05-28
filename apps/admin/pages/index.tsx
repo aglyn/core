@@ -18,7 +18,6 @@
 import {GridButtons} from '@aglyn/shared-ui-jsx'
 import {mdiBug, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import styled from '@emotion/styled'
-import React from 'react'
 
 
 const StyledPage = styled.div`

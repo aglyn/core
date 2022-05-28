@@ -17,7 +17,7 @@
 
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import {FieldComponentType} from '@aglyn/shared-ui-jsx'
+import {FieldComponentType} from '@aglyn/shared-ui-jsx-forms'
 import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
 
 
@@ -49,6 +49,7 @@ export const DEFAULT_PROPS_FORM_SCHEMA: AglynComponentPropsFormSchema = {
       description: 'The content of the component.',
       component: FieldComponentType.TEXT_FIELD,
       label: 'Content',
+      size: 'small',
     },
   ],
 }

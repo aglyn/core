@@ -18,88 +18,53 @@
 import {
   type AglynModuleEffectListener,
   AglynModuleModel,
-  type ContextDomain,
-  type ContextStore,
   type IAglynAppController,
 } from '@aglyn/core-data-framework'
-import {objectDeepMergeFillIn} from '@aglyn/shared-util-vendor'
-import {createApi} from 'effector'
-import {persist} from 'effector-storage/local'
-import {BesignerPanelViewFlag, InteractionModeFlag} from '../constants/besigner'
-import {
-  type BesignerClosePanelPayload,
-  type BesignerFlagInteractModePayload,
-  type BesignerGetStorePayload,
-  type BesignerOpenPanelPayload,
-  type BesignerSetCanvasHoveredPayload,
-  type BesignerSetCanvasSelectedPayload,
-  type BesignerSetDndStatePayload,
-  type BesignerSetPanelPayload,
+import {copy} from '@aglyn/shared-util-tools'
+import defaultsDeep from 'lodash-es/defaultsDeep'
+import isEqual from 'lodash-es/isEqual'
+import {BehaviorSubject} from 'rxjs'
+// import {persist} from 'effector-storage/local'
+import {BesignerDeviceFlag, BesignerPanelViewFlag, InteractionModeFlag} from '../constants/besigner'
+import type {
+  BesignerClosePanelPayload,
+  BesignerGetStorePayload,
+  BesignerOpenPanelPayload,
+  BesignerSetCanvasHoveredPayload,
+  BesignerSetCanvasItemPayload,
+  BesignerSetCanvasPayload,
+  BesignerSetCanvasSelectedPayload,
+  BesignerSetDndItemPayload,
+  BesignerSetDndPayload,
+  BesignerSetFlagPayload,
+  BesignerSetFlagsPayload,
+  BesignerSetPanelPayload,
+  BesignerSetPanelsPayload,
+  BesignerTogglePanelPayload,
 } from '../constants/emitter'
-import {
-  type AglynBesignerControllerOptions,
-  type BesignerCanvasState,
-  type BesignerContext,
-  type BesignerContextStores,
-  type BesignerDndState,
-  type BesignerFlagState,
-  type BesignerNestedStores,
-  type BesignerPanelsState,
-  type IAglynBesignerController,
+import type {
+  AglynBesignerControllerOptions,
+  BesignerContext,
+  IAglynBesignerController,
 } from './aglyn-besigner.types'
 
 
-const DEFAULT_CONTEXT: Partial<BesignerContextStores> = {
-  flags: {
-    debug: true,
-    logLevel: 'info',
-    interactMode: InteractionModeFlag.SELECT,
-  },
-  panels: {
-    panelLeft: {
-      id: BesignerPanelViewFlag.PANEL_LEFT,
-      size: 290,
-      toggled: false,
-    },
-    panelRight: {
-      id: BesignerPanelViewFlag.PANEL_RIGHT,
-      size: 375,
-      toggled: false,
-    },
-    panelBottom: {
-      id: BesignerPanelViewFlag.PANEL_BOTTOM,
-      toggled: false,
-    },
-  },
-  canvas: {},
-  dnd: {},
-}
-
-
 const TAG = 'AglynBesigner'
-const NS = 'aglyn.core.data.besigner.module.besigner'
+const NS = 'com.aglyn.core.data.besigner.controller.besigner'
 
 export class AglynBesignerController extends AglynModuleModel<AglynBesignerControllerOptions> implements IAglynBesignerController {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
 
-  #context: BesignerContext = {
-    _domain: null,
-    _store: null,
-    events: null,
-    stores: null,
+  public readonly __store__: {
+    [K in keyof BesignerContext]: BehaviorSubject<BesignerContext[K]>
   }
 
-  public get _domain(): ContextDomain {return this.#context._domain}
-  public get _store(): ContextStore<BesignerContextStores> {return this.#context._store}
-  public get stores(): BesignerNestedStores {return this.#context.stores}
-  public get events(): any {return this.#context.events}
-
-  public get flags(): ContextStore<BesignerFlagState> {return this.#context.stores.flags}
-  public get canvas(): ContextStore<BesignerCanvasState> {return this.#context.stores.canvas}
-  public get panels(): ContextStore<BesignerPanelsState> {return this.#context.stores.panels}
-  public get dnd(): ContextStore<BesignerDndState> {return this.#context.stores.dnd}
+  public get canvas(): this['__store__']['canvas'] {return this.__store__?.canvas}
+  public get dnd(): this['__store__']['dnd'] {return this.__store__?.dnd}
+  public get flags(): this['__store__']['flags'] {return this.__store__?.flags}
+  public get panels(): this['__store__']['panels'] {return this.__store__?.panels}
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
     return []
@@ -107,112 +72,52 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
 
   constructor(app: IAglynAppController, options: AglynBesignerControllerOptions) {
     super(app, options)
+    const state = defaultsDeep(
+      options.defaults,
+      {
+        flags: {
+          debug: true,
+          logLevel: 'info',
+          interactMode: InteractionModeFlag.SELECT,
+          devicePreview: BesignerDeviceFlag.RESPONSIVE,
+        },
+        panels: {
+          panelLeft: {
+            id: BesignerPanelViewFlag.PANEL_LEFT,
+            size: 290,
+            toggled: true,
+          },
+          panelRight: {
+            id: BesignerPanelViewFlag.PANEL_RIGHT,
+            size: 375,
+            toggled: true,
+          },
+          panelBottom: {
+            id: BesignerPanelViewFlag.PANEL_BOTTOM,
+            toggled: false,
+          },
+        },
+        canvas: {
+          hovered: {},
+          selected: {},
+        },
+        dnd: {
+          active: null,
+          over: null,
+        },
+      },
+    )
+
+    this.__store__ = {
+      canvas: new BehaviorSubject(state.canvas),
+      // .pipe(throttleTime(20, undefined, {leading: false, trailing: true})),
+      dnd: new BehaviorSubject(state.dnd),
+      flags: new BehaviorSubject(state.flags),
+      panels: new BehaviorSubject(state.panels),
+    }
     this.#setup()
   }
-  #setup() {
-    this.#context._domain = this.app.contexts.domain.domain(this.namespace)
-
-    this.#context._store = this.#context._domain.createStore<BesignerContextStores>(
-      objectDeepMergeFillIn({...DEFAULT_CONTEXT}, {...this.options.defaults}),
-      {name: `${this.namespace}:store`},
-    )
-    persist({store: this.#context._store})
-
-    this.#context.stores = {
-      flags: this.#context._store.map((state) => state.flags),
-      canvas: this.#context._store.map((state) => state.canvas),
-      panels: this.#context._store.map((state) => state.panels),
-      dnd: this.#context._store.map((state) => state.dnd),
-    }
-
-    this.#context.events = createApi(this.#context._store, {
-
-      setFlag: (store, payload: BesignerFlagInteractModePayload) => {
-        const {flag, value} = payload
-        return {
-          ...store,
-          flags: {
-            ...store.flags,
-            [flag]: value,
-          },
-        }
-      },
-
-      setPanels: (
-        store,
-        payload: BesignerSetPanelPayload,
-      ) => {
-        const {panels} = payload
-        return {
-          ...store,
-          panels: {
-            ...panels(store.panels) || {},
-          },
-        }
-      },
-
-      openPanel: (store, payload: BesignerOpenPanelPayload) => {
-        const {panel} = payload
-        return {
-          ...store,
-          panels: {
-            ...store.panels,
-            [panel]: {
-              ...store.panels[panel],
-              toggled: true,
-            },
-          },
-        }
-      },
-
-      closePanel: (store, payload: BesignerOpenPanelPayload) => {
-        const {panel} = payload
-        return {
-          ...store,
-          panels: {
-            ...store.panels,
-            [panel]: {
-              ...store.panels[panel],
-              toggled: false,
-            },
-          },
-        }
-      },
-
-      setDndState: (store, payload: BesignerSetDndStatePayload) => {
-        const {dnd} = payload || {}
-        return {
-          ...store,
-          dnd: {
-            ...dnd(store.dnd),
-          },
-        }
-      },
-
-      setCanvasSelected: (store, payload: BesignerSetCanvasSelectedPayload) => {
-        const {selected} = payload || {}
-        return {
-          ...store,
-          canvas: {
-            ...store.canvas,
-            selected: selected(store.canvas.selected),
-          },
-        }
-      },
-
-      setCanvasHovered: (store, payload: BesignerSetCanvasHoveredPayload) => {
-        const {hovered} = payload || {}
-        return {
-          ...store,
-          canvas: {
-            ...store.canvas,
-            hovered: hovered(store.canvas.hovered),
-          },
-        }
-      },
-
-    })
-  }
+  #setup() {}
 
   public toJSON() {
     return {
@@ -220,41 +125,119 @@ export class AglynBesignerController extends AglynModuleModel<AglynBesignerContr
     }
   }
 
-
-  public getStore<K extends keyof BesignerContextStores>(
-    payload: BesignerGetStorePayload<K>,
-  ): ContextStore<BesignerContextStores[K]> {
-    const {store} = payload
-    return this.#context.stores[store]
+  private isDeepEqual<T>(prev: unknown, now: T): prev is T {
+    return isEqual(prev, now)
   }
 
 
-  public setFlag(payload: BesignerFlagInteractModePayload): this {
-    this.#context.events.setFlag(payload)
+  public getStore<K extends keyof BesignerContext>(
+    payload: BesignerGetStorePayload<K>,
+  ): BehaviorSubject<BesignerContext[K]> {
+    const {store} = payload
+    return this.__store__?.[store]
+  }
+
+
+  public setFlag(payload: BesignerSetFlagPayload): this {
+    const {flag, value} = payload || {}
+    const prev = this.__store__?.flags?.getValue()
+    const prevValue = prev?.[flag]
+    const nowValue = value(prevValue, prev)
+    const now = {...prev, [flag]: nowValue}
+    !this.isDeepEqual(prevValue, nowValue) && this.__store__?.flags?.next(now)
     return this
   }
-  public setPanels(payload: BesignerSetPanelPayload): this {
-    this.#context.events.setPanels(payload)
+  public setFlags(payload: BesignerSetFlagsPayload): this {
+    const {flags} = payload || {}
+    const prev = this.__store__?.flags?.getValue()
+    const now = flags(prev)
+    !this.isDeepEqual(prev, now) && this.__store__?.flags?.next(now)
+    return this
+  }
+  public setPanel(payload: BesignerSetPanelPayload): this {
+    const {panel, value} = payload || {}
+    const prev = copy(this.__store__?.panels?.getValue())
+    const prevPanel = prev?.[panel]
+    const nowPanel = value(prevPanel, prev)
+    const now = {...prev, [panel]: nowPanel}
+    !this.isDeepEqual(prevPanel, nowPanel) && this.__store__?.panels?.next(now)
+    return this
+  }
+  public setPanels(payload: BesignerSetPanelsPayload): this {
+    const {panels} = payload || {}
+    const prev = this.__store__?.panels?.getValue()
+    const now = panels(prev)
+    !this.isDeepEqual(prev, now) && this.__store__?.panels?.next(now)
+    return this
+  }
+  public togglePanel(payload: BesignerTogglePanelPayload): this {
+    const {panel} = payload || {}
+    const prev = this.__store__?.panels?.getValue()
+    const prevPanel = prev?.[panel]
+    const now = {...prev, [panel]: {...prevPanel, toggled: !prevPanel?.toggled}}
+    !this.isDeepEqual(prev, now) && this.__store__?.panels?.next(now)
     return this
   }
   public openPanel(payload: BesignerOpenPanelPayload): this {
-    this.#context.events.setPanels(payload)
+    const {panel} = payload || {}
+    const prev = this.__store__?.panels?.getValue()
+    const prevPanel = prev?.[panel]
+    const now = {...prev, [panel]: {...prevPanel, toggled: true}}
+    !prevPanel?.toggled && this.__store__?.panels?.next(now)
     return this
   }
   public closePanel(payload: BesignerClosePanelPayload): this {
-    this.#context.events.setPanels(payload)
+    const {panel} = payload || {}
+    const prev = this.__store__?.panels?.getValue()
+    const prevPanel = prev?.[panel]
+    const now = {...prev, [panel]: {...prevPanel, toggled: false}}
+    prevPanel?.toggled && this.__store__?.panels?.next(now)
     return this
   }
-  public setDndState(payload: BesignerSetDndStatePayload): this {
-    this.#context.events.setDndState(payload)
+  public setDndItem(payload: BesignerSetDndItemPayload): this {
+    const {item, value} = payload || {}
+    const prev = this.__store__?.dnd?.getValue()
+    const prevItem = prev?.[item]
+    const nowItem = value(prevItem, prev)
+    const now = {...prev, [item]: nowItem}
+    !this.isDeepEqual(prevItem, nowItem) && this.__store__?.dnd?.next(now)
+    return this
+  }
+  public setDnd(payload: BesignerSetDndPayload): this {
+    const {dnd} = payload || {}
+    const prev = this.__store__?.dnd?.getValue()
+    const now = dnd(prev)
+    this.__store__?.dnd?.next(now)
+    return this
+  }
+  public setCanvasItem(payload: BesignerSetCanvasItemPayload): this {
+    const {item, value} = payload || {}
+    const prev = this.__store__?.canvas?.getValue()
+    const prevItem = prev?.[item]
+    const nowItem = value(prevItem, prev)
+    const now = {...prev, [item]: value(prev?.[item], prev)}
+    !this.isDeepEqual(prevItem, nowItem) && this.__store__?.canvas?.next(now)
+    return this
+  }
+  public setCanvas(payload: BesignerSetCanvasPayload): this {
+    const {canvas} = payload || {}
+    const prev = this.__store__?.canvas?.getValue()
+    const now = canvas(prev)
+    !this.isDeepEqual(prev, now) && this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this {
-    this.#context.events.setCanvasSelected(payload)
+    const {selected} = payload || {}
+    const prev = this.__store__?.canvas?.getValue()
+    const now = {...prev, selected: selected(prev?.selected, prev)}
+    !this.isDeepEqual(prev?.selected, now?.selected) && this.__store__?.canvas?.next(now)
     return this
   }
   public setCanvasHovered(payload: BesignerSetCanvasHoveredPayload): this {
-    this.#context.events.setCanvasHovered(payload)
+    const {hovered} = payload || {}
+    const prev = this.__store__?.canvas?.getValue()
+    const now = {...prev, hovered: hovered(prev?.hovered, prev)}
+    !this.isDeepEqual(prev?.hovered, now?.hovered) && this.__store__?.canvas?.next(now)
     return this
   }
 }

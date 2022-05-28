@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {getStaticField, yes} from '@aglyn/shared-util-tools'
+import {getStaticField, truthy} from '@aglyn/shared-util-tools'
 import {
   _INTERNAL_CANVAS_,
   _INTERNAL_COMMANDS_,
@@ -24,36 +24,42 @@ import {
   _INTERNAL_EXTENSIONS_,
 } from '../constants/_internal'
 import {DEFAULT_APP_UUN} from '../constants/app'
-import {AglynAppEffectFlag, AglynAppEventFlag} from '../constants/emitter'
+import {AglynEventStateFlag, AglynEventTriggerFlag} from '../constants/emitter'
 import {AGLYN_PLATFORM, AglynPlatform} from '../constants/platform'
 import {AglynVersion, SDK_VERSION} from '../constants/version'
 import {AglynBaseModel} from '../models/aglyn-base.model'
-import {IAglynModuleModel} from '../types/aglyn-module.types'
-import {
-  type AglynAppOptions,
-  type AglynEffectOptions,
-  type AppUUN,
-  type IAglynAppController,
+import AglynDependencyManager from '../models/aglyn-depends.model'
+import type {
+  AglynAppOptions,
+  AglynEffectOptions,
+  AppUUN,
+  IAglynAppController,
 } from '../types/aglyn-app.types'
+import type {AglynBaseModelT} from '../types/aglyn-base.types'
+import type {IAglynCanvasController} from '../types/aglyn-canvas.types'
+import type {IAglynCommandsController} from '../types/aglyn-commands.types'
+import type {IAglynComponentsController} from '../types/aglyn-components.types'
+import type {IAglynContextsController} from '../types/aglyn-contexts.types'
+import type {IAglynDependencyManager} from '../types/aglyn-depends.types'
+import type {IAglynExtensionsController} from '../types/aglyn-extensions.types'
+import type {IAglynModuleModel} from '../types/aglyn-module.types'
 import AglynCanvasController from './aglyn-canvas.controller'
-import {type IAglynCanvasController} from '../types/aglyn-canvas.types'
 import AglynCommandsController from './aglyn-commands.controller'
-import {type IAglynCommandsController} from '../types/aglyn-commands.types'
 import AglynComponentsController from './aglyn-components.controller'
-import {type IAglynComponentsController} from '../types/aglyn-components.types'
 import AglynContextsController from './aglyn-contexts.controller'
-import {type IAglynContextsController} from '../types/aglyn-contexts.types'
 import AglynExtensionsController from './aglyn-extensions.controller'
-import {type IAglynExtensionsController} from '../types/aglyn-extensions.types'
 
+
+type BaseAppT = <T extends AglynBaseModelT>(model: T) => new<Options>(...any: ConstructorParameters<T>) => AglynBaseModel<Options> & IAglynDependencyManager
+const BaseApp: ReturnType<BaseAppT> = AglynDependencyManager(AglynBaseModel)
 
 const TAG = 'AglynApp'
-const NS = 'aglyn.core.data.framework.controller.app'
+const NS = 'com.aglyn.core.data.framework.controller.app'
 
-export class AglynAppController<Options extends AglynAppOptions = AglynAppOptions> extends AglynBaseModel<Options> implements IAglynAppController<Options> {
+export class AglynAppController<Options extends AglynAppOptions = AglynAppOptions> extends BaseApp<Options> implements IAglynAppController<Options> {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly namespace: string = NS
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get namespace(): string {return NS}
   public static readonly platform: AglynPlatform = AGLYN_PLATFORM
   public static readonly version: AglynVersion = SDK_VERSION
 
@@ -92,38 +98,37 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     super(options)
     this.#appName = options.appName || DEFAULT_APP_UUN
   }
+
   public setupModules() {
-    const appName = this.#appName
-    this.logger.debug(AglynAppEventFlag.APP_CREATING, {appName})
-    this.emitter.emit(AglynAppEventFlag.APP_CREATING, {appName})
-
-    _INTERNAL_CONTEXTS_.set(
-      this.#appName,
-      this.#contextsController = new AglynContextsController(this, {
-        ...this.options.modulesOptions?.contexts,
-      }),
-    )
-    _INTERNAL_COMMANDS_.set(
-      this.#appName,
-      this.#commandsController = new AglynCommandsController(this, {
-        ...this.options.modulesOptions?.commands,
-      }),
-    )
-    _INTERNAL_COMPONENTS_.set(
-      this.#appName,
-      this.#componentsController = new AglynComponentsController(this, {
-        ...this.options.modulesOptions?.components,
-      }),
-    )
-    _INTERNAL_CANVAS_.set(
-      this.#appName,
-      this.#canvasController = new AglynCanvasController(this, {
-        ...this.options.modulesOptions?.canvas,
-      }),
-    )
-
-    this.logger.debug(AglynAppEventFlag.APP_CREATED, {appName})
-    this.emitter.emit(AglynAppEventFlag.APP_CREATED, {appName})
+    this.handleEvent([
+      AglynEventStateFlag.APP_CREATING,
+      AglynEventStateFlag.APP_CREATED,
+    ], {appName: this.#appName}, () => {
+      _INTERNAL_CONTEXTS_.set(
+        this.#appName,
+        this.#contextsController = new AglynContextsController(this, {
+          ...this.options.modulesOptions?.contexts,
+        }),
+      )
+      _INTERNAL_COMMANDS_.set(
+        this.#appName,
+        this.#commandsController = new AglynCommandsController(this, {
+          ...this.options.modulesOptions?.commands,
+        }),
+      )
+      _INTERNAL_COMPONENTS_.set(
+        this.#appName,
+        this.#componentsController = new AglynComponentsController(this, {
+          ...this.options.modulesOptions?.components,
+        }),
+      )
+      _INTERNAL_CANVAS_.set(
+        this.#appName,
+        this.#canvasController = new AglynCanvasController(this, {
+          ...this.options.modulesOptions?.canvas,
+        }),
+      )
+    })
     return this
   }
   public setupExtensions() {
@@ -146,24 +151,23 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     const {type} = opts
     const isInit = type === 'init',
       flagBefore = isInit
-        ? AglynAppEventFlag.APP_MODULE_INITIALIZING
-        : AglynAppEventFlag.APP_MODULE_DESTROYING,
+        ? AglynEventStateFlag.MODULE_INITIALIZING
+        : AglynEventStateFlag.MODULE_DESTROYING,
       flagAfter = isInit
-        ? AglynAppEventFlag.APP_MODULE_INITIALIZED
-        : AglynAppEventFlag.APP_MODULE_DESTROYED
+        ? AglynEventStateFlag.MODULE_INITIALIZED
+        : AglynEventStateFlag.MODULE_DESTROYED
     for (const mod of modules) {
       const namespace = mod.namespace
       this.logger.debug(flagBefore, {namespace})
       this.emitter.emit(flagBefore, {namespace})
-      isInit ? mod.aglynOnInit(this) : mod.aglynOnDestroy(this)
+      isInit ? mod.onInitialize(this) : mod.onDestroy(this)
       this.logger.debug(flagAfter, {namespace})
       this.emitter.emit(flagAfter, {namespace})
     }
   }
 
   public toString(): string {
-    console.log('app name', this.#appName)
-    return `${this[Symbol.toStringTag]}(name: '${this.#appName}')`
+    return `[object ${this[Symbol.toStringTag]}(name: '${this.#appName}')]`
   }
   public toJSON() {
     return {
@@ -174,23 +178,19 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     }
   }
 
-  public aglynOnInit(): void {
-    this.logger.debug(AglynAppEventFlag.APP_INITIALIZING, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_INITIALIZING, {appName: this.#appName})
-
-    this.#initializeAppModules()
-
-    this.logger.debug(AglynAppEventFlag.APP_INITIALIZED, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_INITIALIZED, {appName: this.#appName})
+  public onInitialize(): this {
+    this.handleEvent([
+      AglynEventStateFlag.APP_INITIALIZING,
+      AglynEventStateFlag.APP_INITIALIZED,
+    ], {appName: this.#appName}, () => {this.#initializeAppModules()})
+    return this
   }
-  public aglynOnDestroy(): void {
-    this.logger.debug(AglynAppEventFlag.APP_DESTROYING, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_DESTROYING, {appName: this.#appName})
-
-    this.#destroyAppModules()
-
-    this.logger.debug(AglynAppEventFlag.APP_DESTROYED, {appName: this.#appName})
-    this.emitter.emit(AglynAppEventFlag.APP_DESTROYED, {appName: this.#appName})
+  public onDestroy(): this {
+    this.handleEvent([
+      AglynEventStateFlag.APP_DESTROYING,
+      AglynEventStateFlag.APP_DESTROYED,
+    ], {appName: this.#appName}, () => {this.#destroyAppModules()})
+    return this
   }
 
   public getName(): AppUUN {
@@ -212,13 +212,13 @@ export class AglynAppController<Options extends AglynAppOptions = AglynAppOption
     return this.#componentsController
   }
   public isDeleted(): boolean {
-    return yes(this.#deleted)
+    return truthy(this.#deleted)
   }
   public setDeleted(value: boolean): this {
     this.#deleted = Boolean(value)
     return this
   }
-  public effect<U>(data: AglynEffectOptions<AglynAppEffectFlag, U>) {
+  public effect<U>(data: AglynEffectOptions<AglynEventTriggerFlag, U>) {
     const {type, payload} = data
     this.emitter.emit(type, payload as any)
     return this

@@ -15,32 +15,37 @@
  * limitations under the License.
  */
 
-import {arrayAddAtIndex, arrayRemoveItem, arrayReorder} from '@aglyn/shared-util-tools'
-import {objectDeepMerge} from '@aglyn/shared-util-vendor'
+import {_hasOwnProperty} from '@aglyn/shared-util-guards'
 import {
-  type CanvasAddElementPayload,
-  type CanvasDeleteElementPayload,
-  type CanvasDuplicateElementPayload,
-  type CanvasMoveElementPayload,
-  type CanvasSetElementPayload,
-  type CanvasSetElementsPayload,
-  type CanvasUpdateElementPayload,
+  arrayMoveAtIndex,
+  arrayPushAtIndex,
+  arrayRemoveItem,
+  copyShallow,
+} from '@aglyn/shared-util-tools'
+import {CANVAS_ROOT_ELEMENT_ID} from '../constants/canvas'
+import type {
+  CanvasAddElementPayload,
+  CanvasDeleteElementPayload,
+  CanvasDuplicateElementPayload,
+  CanvasMoveElementPayload,
+  CanvasSetElementPayload,
+  CanvasSetElementsPayload,
+  CanvasUpdateElementPayload,
 } from '../constants/emitter'
-import {type ElementsDataStore} from '../types/aglyn-canvas.types'
-import {type AglynElementsById} from '../types/aglyn-elements.types'
+import type {CanvasContext} from '../types/aglyn-canvas.types'
+import type {AglynElementsDenormalized, ElementId} from '../types/aglyn-elements.types'
 import {createComponentElementDataCopy} from './create-component-element-data-copy'
-import {deleteComponentElement} from './delete-component-element'
 import {denormalizeComponentElementData} from './denormalize-component-element-data'
 import {getComponentElementHierarchy} from './get-component-element-hierarchy'
 import {handleStateModificationHistoryChange} from './handle-state-modification-history-change'
 
 
-type CanvasApiEventHandler<S extends ElementsDataStore, P> = (
-  state: ElementsDataStore['present'],
+type CanvasApiEventHandler<S extends CanvasContext, P> = (
+  state: CanvasContext['present'],
   payload: P,
-) => ElementsDataStore['present']
+) => CanvasContext['present']
 
-export const handleCanvasApiChangeEvent = <S extends ElementsDataStore, P>(
+export const handleCanvasApiChangeEvent = <S extends CanvasContext, P>(
   fn: CanvasApiEventHandler<S, P>,
 ) => (
   state: S, payload: P,
@@ -50,151 +55,143 @@ export const handleCanvasApiChangeEvent = <S extends ElementsDataStore, P>(
 
 
 export const handleCanvasSetElements = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasSetElementsPayload,
 ) => {
-
-  const {elements} = payload
-  return elements
+  const {elements} = payload || {}
+  return elements || {}
 }
 export const handleCanvasAddElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasAddElementPayload,
-) => {
-
-  const {element, parentId, index} = payload
-
-  const newParent = state[parentId]
-  if (!newParent) {throw new Error('Element must have a valid parent')}
-
-  const newData = denormalizeComponentElementData(element, parentId)
-  const siblingIds = state[parentId]?.elements || []
-
-  return {
-    ...state,
-    ...newData,
-    [parentId]: {
-      ...state[parentId],
-      elements: arrayAddAtIndex(
-        index === -1 ? siblingIds.length : index,
-        state[parentId]?.elements || [],
-        newData[parentId]?.elements || [],
-        {copy: true},
-      ).items,
-    },
+): AglynElementsDenormalized => {
+  const {index, element} = payload
+  let parentId: ElementId = null
+  if (_hasOwnProperty(payload.parentId, state)) {
+    parentId = payload.parentId
   }
+  else {
+    console.error('Element must have a valid parent, falling back to root')
+    parentId = CANVAS_ROOT_ELEMENT_ID
+  }
+
+  const {
+    [parentId]: _,
+    ...newElements
+  } = denormalizeComponentElementData(element, parentId, {
+    [parentId]: {
+      $id: parentId,
+      componentId: state[parentId]?.componentId,
+      elements: [],
+    },
+  })
+
+  // Add all if the descendent elements to the state
+  for (const [$id, element] of Object.entries(newElements)) {
+    state[$id] = element
+  }
+  // Add the new element to the parents' elements property
+  arrayPushAtIndex(state[parentId].elements ||= [], index, element.$id)
+  return state
 }
 
 
 export const handleCanvasUpdateElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasUpdateElementPayload,
-) => {
-
-  const {element: {props, ...element}} = payload
-  return {
-    ...state,
-    [element.$id]: {
-      ...objectDeepMerge(state[element.$id], element),
-    },
-  } as ElementsDataStore['present']
+): AglynElementsDenormalized => {
+  state[payload.$id] = payload.update(state[payload.$id])
+  return state
 }
 
 
 export const handleCanvasSetElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasSetElementPayload,
-) => {
-
-  const {element} = payload
-  return {
-    ...state,
-    [element.$id]: {
-      ...element,
-    },
-  } as ElementsDataStore['present']
+): AglynElementsDenormalized => {
+  state[payload.element?.$id] = payload.element
+  return state
 }
 
 
 export const handleCanvasMoveElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasMoveElementPayload,
-) => {
+): AglynElementsDenormalized => {
+  const element = state[payload.$id]
+  if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
+    console.error('Failed duplicating. Non-existent or forbidden move.')
+    return state
+  }
 
-  const {$id, index, parentId} = payload
+  let parentId: ElementId = null
+  if (_hasOwnProperty(payload.parentId, state)) parentId = payload.parentId
+  else {
+    console.error('Element must have a valid parent, falling back to root')
+    parentId = CANVAS_ROOT_ELEMENT_ID
+  }
 
-  const newParent = state[parentId]
-  if (!newParent) {throw new Error('Element must have a valid parent')}
-
-  const parentHierarchy = getComponentElementHierarchy(parentId, state)
-  if (parentHierarchy.indexOf($id) >= 0) {
+  // const parentHierarchy = getComponentElementHierarchy(parentId, state)
+  if (getComponentElementHierarchy(parentId, state).indexOf(payload.$id) >= 0)
     throw new Error('New parent is same or a child of the element')
-  }
 
-  const current = {...state[$id]}
-  const response = {
-    ...state,
-    [$id]: {
-      ...current,
-      parentId: parentId,
-    },
-  }
-  const siblingIds = response[parentId]?.elements || []
 
-  if (parentId === current.parentId) {
+  const currentParentId = copyShallow(state[payload.$id].parentId)
+
+  if (parentId === currentParentId && state[parentId]) {
     console.log('reordering')
-    response[parentId] = {
-      ...response[parentId],
-      elements: arrayReorder(
-        siblingIds,
-        siblingIds.indexOf($id),
-        index === -1 ? siblingIds.length : index,
-      ),
-    }
+    const parentElements = state[parentId].elements ||= []
+    // Move current index
+    arrayMoveAtIndex(parentElements, parentElements.indexOf(payload.$id), payload.index)
   }
   else {
     console.log('moving')
-    response[parentId] = {
-      ...response[parentId],
-      elements: arrayAddAtIndex(
-        index === -1 ? siblingIds.length : index,
-        siblingIds,
-        $id,
-        {copy: true},
-      ).items,
-    }
-    const currentParentElements = response[current.parentId].elements || []
-    response[current.parentId] = {
-      ...response[current.parentId],
-      elements: arrayRemoveItem($id, currentParentElements),
-    }
+    // Update element parentId property
+    state[payload.$id].parentId = parentId
+    // Remove from current parent
+    arrayRemoveItem(state[currentParentId]?.elements || [], payload.$id)
+    // Add to new parent
+    arrayPushAtIndex(state[parentId]?.elements || [], payload.index, payload.$id)
   }
 
-  return response
+  return state
 }
 
 
 export const handleCanvasDuplicateElement = (
-  state: AglynElementsById,
+  state: AglynElementsDenormalized,
   payload: CanvasDuplicateElementPayload,
-) => {
-
-  const {$id} = payload
-  const element = state[$id]
-  const parent = state[element?.parentId]
-  const position = (parent?.elements ?? []).indexOf($id)
-  const elementCopy = createComponentElementDataCopy($id, state)
+): AglynElementsDenormalized => {
+  const element = state[payload.$id]
+  if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
+    throw new Error('Failed duplicating. Non-existent or forbidden duplication.')
+  }
+  const parent = state[element.parentId]
   return handleCanvasAddElement(state, {
-    element: elementCopy,
-    parentId: elementCopy.parentId,
-    index: position + 1,
+    element: createComponentElementDataCopy(element.$id, state),
+    parentId: parent?.$id,
+    index: (parent?.elements || []).indexOf(element.$id) + 1,
   })
 }
-export const handleCanvasDeleteElement = (
-  state: AglynElementsById,
-  payload: CanvasDeleteElementPayload,
-) => {
 
-  const {$id} = payload
-  return deleteComponentElement($id, state)
+export const handleCanvasDeleteElement = (
+  state: AglynElementsDenormalized,
+  payload: CanvasDeleteElementPayload,
+): AglynElementsDenormalized => {
+  const element = state[payload.$id]
+  if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
+    throw new Error('Failed deleting. Non-existent or forbidden deletion.')
+  }
+  // Remove all child elements first
+  for (const childId in (element.elements ||= [])) {
+    handleCanvasDeleteElement(state, {$id: childId})
+  }
+  // Secondly remove the element from the parent
+  if (element.parentId && state[element.parentId]) {
+    arrayRemoveItem(state[element.parentId].elements ||= [], element.$id)
+  }
+  // Lastly remove the element
+  delete state[element.$id]
+
+  return state
 }

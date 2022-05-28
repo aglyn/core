@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-/** A safe index key when symbol is not supported */
+/** The index key when symbol is not supported */
 export type Key = string | number
 
-/** A index signature for a object key  */
+/** The index signature for an object key  */
 export type PKey = string | number | symbol
 
-/** A index signature for a mapped object */
+/** The index signature for a mapped object */
 export type MapKey = string | symbol
 
 /** The index signature type of T */
@@ -54,18 +54,16 @@ export type EmptyObj<K extends PKey = PKey> = Record<K, never>
 export type AnyObj<K extends PKey = PKey> = Record<K, unknown>
 
 /** Record with only readonly properties */
-export type ReadonlyRecord<K extends PKey, T> = { [P in K]: T }
+export type ReadonlyRecord<K extends PKey, T> = Readonly<{ [P in K]: T }>
 
 /** Response value, Promise or Promise-Like value  */
 export type ValueOrPromise<T> = T extends Promise<unknown> ? T : T | PromiseLike<T>
 
 /** Allows conditional typing ype alias */
-export type Conditional<LEFT, RIGHT, TRUE, FALSE = never> = LEFT extends RIGHT ? TRUE : FALSE
+export type Conditional<L, R, T, F = never> = L extends R ? T : F
 
 /** Allows conditional non-distributive typing type alias @see https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types */
-export type ConditionalNonDist<LEFT, RIGHT, TRUE, FALSE = never> = [LEFT] extends [RIGHT]
-  ? TRUE
-  : FALSE
+export type ConditionalNonDist<L, R, T, F = never> = [L] extends [R] ? T : F
 
 /** If X extends true then Y */
 export type IfTrueOr<TRUE, ELSE> = Conditional<TRUE, true, ELSE>
@@ -73,66 +71,98 @@ export type IfTrueOr<TRUE, ELSE> = Conditional<TRUE, true, ELSE>
 /** If X extends true then Y */
 export type IfTrueOrNonDist<TRUE, ELSE> = ConditionalNonDist<TRUE, true, ELSE>
 
-/** From T, make all top level keys mutable (removes readonly) */
+/** From T, make all top level keys mutable (removes readonly status) */
 export type MutableShallow<T> = { -readonly [P in keyof T]: T[P] }
+
+/** From T, make all top level keys mutable (adds readonly status) */
+export type ImmutableShallow<T> = { readonly [P in keyof T]: T[P] }
 
 /** From T, make all keys mutable including nested objects/arrays (removes readonly) */
 export type MutableDeep<T> = {
   -readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U>
     ? MutableDeep<U>[]
-    : MutableDeep<T[P]>
+    : T[P] extends ReadonlySet<infer U>
+      ? MutableDeep<Set<U>>
+      : T[P] extends ReadonlyMap<infer K, infer U>
+        ? MutableDeep<Map<K, U>>
+        : MutableDeep<T[P]>
 }
 
+/** From T, make all top level keys mutable (adds readonly status) */
+export type ImmutableDeep<T> = {
+  readonly [P in keyof T]: T[P] extends ReadonlyArray<infer U>
+    ? MutableDeep<U>[]
+    : T[P] extends ReadonlySet<infer U>
+      ? MutableDeep<Set<U>>
+      : T[P] extends ReadonlyMap<infer K, infer U>
+        ? MutableDeep<Map<K, U>>
+        : MutableDeep<T[P]>
+}
+
+/** From T, make mutable properties whose keys are in union K (make specific keys mutable) */
+export type MutableKeys<T, K extends keyof T> = Omit<T, K> & MutableShallow<Pick<T, K>>
+
+/** From T, make mutable properties whose keys are in union K (make specific keys mutable) */
+export type ImmutableKeys<T, K extends keyof T> = Omit<T, K> & ImmutableShallow<Pick<T, K>>
+
 /** From T, require properties whose keys are in union K (make specific keys required) */
-export type RequiredPick<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
+export type RequireKeys<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 
 /** From T, require properties whose keys are in union K and the rest as partial (make specific keys required) */
-export type RequiredPickAlt<T, K extends keyof T> = Partial<Omit<T, K>> & Required<Pick<T, K>>
+export type PartialWithRequired<T, K extends keyof T> = Partial<Omit<T, K>> & Required<Pick<T, K>>
 
 /** From T, make properties partial whose keys are in union K (Make specific keys optional) */
-export type PartialPick<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+export type PartialKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
-/** From T, make properties partial whose keys are in union K and the rest as required (Make specific keys optional) */
-export type PartialPickAlt<T, K extends keyof T> = Required<Omit<T, K>> & Partial<Pick<T, K>>
+/** From T, make properties partial whose keys are in union K and the rest as required (Make specific keys optional and rest required) */
+export type RequiredWithPartial<T, Opt extends keyof T, Req extends keyof T = Opt> = Required<Omit<T, Req>> & Partial<Pick<T, Opt>>
 
 /** From T, extract keys whose types are required (excludes optional properties) (optionally narrow keys in union by specifying K) */
-export type KeyOfPickRequired<T, K extends keyof T = keyof T> = {
+export type ExtractRequiredKeys<T, K extends keyof T = keyof T> = {
   [P in K]-?: Pick<T, P> extends AnyObj ? never : P
 }[K]
 
 /** From T, extract keys whose types are optional (excludes required properties) (optionally narrow keys in union by specifying K) */
-export type KeyOfPickPartial<T, K extends keyof T = keyof T> = {
+export type ExtractPartialKeys<T, K extends keyof T = keyof T> = {
   [P in K]-?: Pick<T, P> extends AnyObj ? P : never
 }[K]
 
 /** From T, pick a set of properties whose keys are in the union with required keys only, (optionally narrow results by specifying K) */
-export type PickRequired<T, K extends keyof T = keyof T> = Pick<T,
-  {
-    [P in K]-?: Pick<T, P> extends AnyObj ? never : P
-  }[K]>
+export type PickRequired<T, K extends keyof T = keyof T> = Pick<T, {
+  [P in K]-?: Pick<T, P> extends AnyObj ? never : P
+}[K]>
 
 /** From T, pick a set of properties whose keys are in the union with partial keys only, (optionally narrow results by specifying K) */
-export type PickPartial<T, K extends keyof T = keyof T> = Pick<T,
-  {
-    [P in K]-?: Pick<T, P> extends AnyObj ? P : never
-  }[K]>
+export type PickPartial<T, K extends keyof T = keyof T> = Pick<T, {
+  [P in K]-?: Pick<T, P> extends AnyObj ? P : never
+}[K]>
 
-/** From T, rename a property whose key is in the union K (old key) with that of U (new key)  */
-export type RenamedKey<T, Old extends keyof T, New extends PKey> = Omit<T, Old> & {
-  [P in New]: T[Old]
+/** From T, replace a property whose key is in the union K (old key) with that of N[K]:V (key: value)  */
+export type Replace<T, K extends keyof T, V, N extends PKey = K> = Omit<T, K> & {
+  [P in N]: V
+}
+
+/** From T, rename a property whose key is in the union K (old key) with that of N (new key)  */
+export type ReplaceKey<T, K extends keyof T, N extends PKey> = Omit<T, K> & {
+  [P in N]: T[K]
+}
+
+/** From T, replace a property value whose key is in the union K (old key) with that of V (new value)  */
+export type ReplaceIndex<T, K extends keyof T, V> = Omit<T, K> & {
+  [P in K]: V
 }
 
 /** With L (left), spread properties with R (right) (e.g. [...L, ...R], {...L, ...R}) */
 export type Spreaded<L, R> = /* With L (left), omit keys not in union with keys of R (right)*/
   Omit<L, keyof R> &
   /* With R (right), omit keys in union with partial types*/
-  Omit<R, KeyOfPickPartial<R>> &
+  Omit<R, ExtractPartialKeys<R>> &
   /* With R (right), pick properties in union with optional types that do not exist in L (left) */
   Pick<R,
-    Exclude<KeyOfPickPartial<R>, keyof L>> & /* With L (left), replace properties of the keys in union with the keys in R (right) excluding properties of R (right) with types in union with undefined */
+    Exclude<ExtractPartialKeys<R>, keyof L>> & /* With L (left), replace properties of the keys in union with the keys in R (right) excluding properties of R (right) with types in union with undefined */
   {
-    [P in KeyOfPickPartial<R> &
-    (keyof L extends keyof L & keyof R ? KeyOfPickPartial<R> & keyof L : never)]:
+    [P in ExtractPartialKeys<R> &
+    (keyof L extends keyof L & keyof R ? ExtractPartialKeys<R> & keyof L : never)]:
     | L[P]
     | Exclude<R[P], undefined>
   }

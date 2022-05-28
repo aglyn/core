@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
+import {_isArr} from '@aglyn/shared-util-guards'
+import {copy} from '@aglyn/shared-util-tools'
+import mergeWith from 'lodash-es/mergeWith'
 import {DEFAULT_PROPS_FORM_SCHEMA} from '../constants/components'
-import {type AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
+import type {AglynComponentPropsFormSchema} from '../types/aglyn-components.types'
 
 
 export const buildComponentPropsFormSchema = (
-  formSchema?: AglynComponentPropsFormSchema,
+  schema?: AglynComponentPropsFormSchema,
+  defaults: AglynComponentPropsFormSchema = DEFAULT_PROPS_FORM_SCHEMA,
 ): AglynComponentPropsFormSchema => {
-  return {
-    ...DEFAULT_PROPS_FORM_SCHEMA,
-    ...formSchema,
-    fields: [
-      ...DEFAULT_PROPS_FORM_SCHEMA.fields || [],
-      ...formSchema?.fields || [],
-    ],
-  }
+  // const _defaults =
+  return mergeWith(copy(schema), copy(defaults), (target, source) => {
+    if (_isArr(target)) return target.concat(source)
+  })
 }
 
 export default buildComponentPropsFormSchema

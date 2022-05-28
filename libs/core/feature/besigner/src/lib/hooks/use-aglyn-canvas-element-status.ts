@@ -16,55 +16,66 @@
  */
 
 
-import {getBesignerStore} from '@aglyn/core-data-besigner'
 import {
   type ElementId,
   getCanvasDenormalizedElementsStore,
   getComponentElementHierarchy,
 } from '@aglyn/core-data-framework'
-import {useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {type Conditional} from '@aglyn/shared-data-types'
-import {useStoreMap} from 'effector-react'
+import type {Conditional} from '@aglyn/shared-data-types'
+import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 
 type ElementSelfStatus = {
   isSelfHovered: boolean
   isSelfSelected: boolean
 }
-type ElementChildStatus = {
+type ElementSelfChildStatus = {
+  isSelfHovered: boolean
+  isSelfSelected: boolean
   isChildHovered?: boolean
   isChildSelected?: boolean
 }
 
 export type AglynCanvasElementStatus<T> =
-  Conditional<T, true, ElementSelfStatus & ElementChildStatus, ElementSelfStatus>
+  Conditional<T, true, ElementSelfChildStatus, ElementSelfStatus>
 
 export function useAglynCanvasElementStatus<T extends boolean = false>(
   $id: ElementId,
   includeChildStatus: T = false as T,
 ): AglynCanvasElementStatus<T> {
-  const {getApp} = useAglynAppContext()
-  const canvasStore = getBesignerStore(getApp(), {store: 'canvas'})
-
-  return useStoreMap({
-    store: canvasStore,
-    keys: [$id, includeChildStatus, getApp],
-    fn: (store, [$id, includeChildStatus, getApp]) => {
-      const response: AglynCanvasElementStatus<T> = {
-        isSelfHovered: Boolean($id && store.hovered?.$id === $id),
-        isSelfSelected: Boolean($id && store.selected?.$id === $id),
+  const app = useBesignerAppContext()
+  const value = useSubscribable<AglynCanvasElementStatus<T>>(
+    app.besigner?.canvas,
+    () => {
+      const initialValue: ElementSelfChildStatus = {
+        isSelfHovered: false,
+        isSelfSelected: false,
       }
-      if (!includeChildStatus) return response
-
-      const elements = getCanvasDenormalizedElementsStore(getApp()).getState()
-      const selectedHierarchy = getComponentElementHierarchy(store?.selected?.$id, elements)
-      const hoverHierarchy = getComponentElementHierarchy(store?.hovered?.$id, elements)
-      response['isChildSelected'] = Boolean($id && checkHierarchy(selectedHierarchy, $id))
-      response['isChildHovered'] = Boolean($id && checkHierarchy(hoverHierarchy, $id))
-
+      if (includeChildStatus) {
+        initialValue.isChildHovered = false
+        initialValue.isChildSelected = false
+      }
+      return initialValue
+    },
+    (canvas) => {
+      const response: ElementSelfChildStatus = {
+        isSelfHovered: Boolean($id && canvas?.hovered?.$id === $id),
+        isSelfSelected: Boolean($id && canvas?.selected?.$id === $id),
+      }
+      if (includeChildStatus) {
+        const elements = getCanvasDenormalizedElementsStore(app).getValue()
+        const selectedHierarchy = getComponentElementHierarchy(canvas?.selected?.$id, elements)
+        const hoverHierarchy = getComponentElementHierarchy(canvas?.hovered?.$id, elements)
+        response.isChildSelected = Boolean($id && checkHierarchy(selectedHierarchy, $id))
+        response.isChildHovered = Boolean($id && checkHierarchy(hoverHierarchy, $id))
+      }
       return response
     },
-  })
+    [$id, app],
+  )
+
+  return value
 
   function checkHierarchy(v: string[], $id: ElementId) {
     return (v || [])?.some((id, i, a) => id === $id && i !== a.length - 1)

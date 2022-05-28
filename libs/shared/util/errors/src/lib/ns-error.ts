@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,18 @@
  * limitations under the License.
  */
 
-import { NsErrorFactory } from './ns-error-factory'
-import { ErrorPayload } from './types'
+import {NsErrorFactory} from './ns-error-factory'
+import type {ErrorPayload} from './types'
 
 
 export class NsError extends Error {
   readonly name = 'NsError'
 
-  constructor(public readonly code: string, message: string, public payload: ErrorPayload) {
+  constructor(
+    public readonly code: string,
+    public message: string,
+    public payload: ErrorPayload,
+  ) {
     super(message)
     // Fix For ES5
     // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work

@@ -15,58 +15,76 @@
  * limitations under the License.
  */
 
-import {generateComponentClassKeys} from '@aglyn/shared-feature-themes'
-import {_isObj} from '@aglyn/shared-util-guards'
-import {yes} from '@aglyn/shared-util-tools'
-import MuiButton, {type ButtonProps as MuiButtonProps} from '@mui/material/Button'
-import MuiLink, {type LinkProps as MuiLinkProps} from '@mui/material/Link'
+import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
+import { _isObj } from '@aglyn/shared-util-guards'
+import { truthy } from '@aglyn/shared-util-tools'
+import {
+  Button as MuiButton,
+  ButtonBase as MuiButtonBase,
+  type ButtonBaseProps as MuiButtonBaseProps,
+  type ButtonProps as MuiButtonProps,
+  Fab as MuiFab,
+  type FabProps as MuiFabProps,
+  IconButton as MuiIconButton,
+  type IconButtonProps as MuiIconButtonProps,
+  Link as MuiLink,
+  type LinkProps as MuiLinkProps,
+} from '@mui/material'
 import clsx from 'clsx'
-import {useRouter} from 'next/router'
-import {forwardRef} from 'react'
-import {NextLink, type NextLinkProps} from './next-link'
+import { useRouter } from 'next/router'
+import { forwardRef, useMemo } from 'react'
+import { NextLink, type NextLinkProps } from './next-link'
 
-
-export type AppLinkVariant = 'naked' | 'button' | 'text' | 'default' | undefined | never
+export type AppLinkVariant =
+  | 'naked'
+  | 'button'
+  | 'button-base'
+  | 'icon-button'
+  | 'fab'
+  | 'text'
+  | 'default'
+  | undefined
+  | never
 
 type BaseLinkProps = Omit<NextLinkProps, 'as' | 'hrefTo'>
-export type TextProps = MuiLinkProps<any, BaseLinkProps>
+export type ButtonBaseProps = MuiButtonBaseProps<any, BaseLinkProps>
 export type ButtonProps = MuiButtonProps<any, BaseLinkProps>
-export type NakedProps = MuiLinkProps<any, BaseLinkProps>
 export type DefaultProps = TextProps
+export type FabProps = MuiFabProps<any, BaseLinkProps>
+export type IconButtonProps = MuiIconButtonProps<any, BaseLinkProps>
+export type NakedProps = MuiLinkProps<any, BaseLinkProps>
+export type TextProps = MuiLinkProps<any, BaseLinkProps>
 
-export type AppLinkProps<T = AppLinkVariant> =
-  T extends string
-    ? T extends AppLinkVariant
-      ? T extends 'text' | 'default' ? TextProps & {componentVariant: T}
-        : T extends 'button' ? ButtonProps & {componentVariant: T}
-          : T extends 'naked' ? NakedProps & {componentVariant: T}
-            : never
+export type AppLinkVariantDefault = Extract<AppLinkVariant, 'text' | 'default' | undefined | never>
+
+export type AppLinkProps<T = AppLinkVariant> = T extends string
+  ? T extends AppLinkVariant
+    ? T extends AppLinkVariantDefault
+      ? DefaultProps & { componentVariant?: T }
+      : T extends 'button'
+      ? ButtonProps & { componentVariant: T }
+      : T extends 'button-base'
+      ? ButtonBaseProps & { componentVariant: T }
+      : T extends 'icon-button'
+      ? IconButtonProps & { componentVariant: T }
+      : T extends 'fab'
+      ? FabProps & { componentVariant: T }
+      : T extends 'naked'
+      ? NakedProps & { componentVariant: T }
       : never
-    : (DefaultProps & {componentVariant?: undefined | never})
+    : never
+  : DefaultProps & { componentVariant?: undefined | never }
 
-// type NakedBaseProps = NextLinkProps
-// type NakedTruncated = {componentVariant: 'naked'} & NakedBaseProps
-//
-// type ButtonBaseProps = MuiButtonProps<any, {component?: ElementType<NextLinkProps>}>
-// type ButtonTruncated = {componentVariant: 'button'} & ButtonBaseProps
-//
-// type TextBaseProps = MuiLinkProps<any, {component?: ElementType<NextLinkProps>}>
-// type TextTruncated = {componentVariant?: 'text'} & TextBaseProps
-//
-// interface CommonProps {}
-//
-// type TruncatedProps = ButtonTruncated | TextTruncated | NakedTruncated
-
-// export type AppLinkProps<T extends AppLinkVariant = 'default'> = CommonProps &
-//   Conditional<T, any,
-//     Conditional<T, 'naked', NakedTruncated, Conditional<T, 'button', ButtonTruncated,
-//       Conditional<T, 'text', TextTruncated, TruncatedProps>>>>
-
-const classKey = generateComponentClassKeys('AppLink', [
-  'disabled',
+export const appLinkClassKey = generateComponentClassKeys('AglynAppLink', [
   'active',
-  'variantNaked',
+  'activeAsAncestor',
+  'disabled',
   'variantButton',
+  'variantButtonBase',
+  'variantDefault',
+  'variantFab',
+  'variantIconButton',
+  'variantNaked',
   'variantText',
 ])
 
@@ -77,66 +95,112 @@ const classKey = generateComponentClassKeys('AppLink', [
  * componentVariant === 'naked' = NextLink
  * componentVariant === 'button' = MuiButton
  * componentVariant === any = MuiLink
- *
- * @param {AppLinkProps} props
- * @return {JSX.Element}
  */
-const AppLink = forwardRef(
-  function RefRenderFn<T extends AppLinkVariant>(props: AppLinkProps<T>, ref) {
-    const {className, componentVariant: variant, href, hrefAs, ...rest} = props
+const AppLink = forwardRef(function RefRenderFn<T extends AppLinkVariant>(
+  props: AppLinkProps<T>,
+  ref
+) {
+  const { className, componentVariant: variant, href, hrefAs, ...rest } = props
 
-    const router = useRouter()
-    const pathname = _isObj(href) ? href['pathname'] : href
-    const isCurrentPath = router.pathname === pathname || router.pathname === href
+  const { pathname, asPath } = useRouter()
+  const [active, activeAsAncestor] = useMemo(() => {
+    const hrefPath = _isObj(href) ? href['pathname'] : href,
+      samePath = hrefPath === pathname || hrefPath === asPath,
+      sameAsPath = hrefAs === pathname || hrefAs === asPath,
+      isRootHref = hrefPath === '/' || hrefAs === '/',
+      pathIsAncestor = pathname.startsWith(hrefPath) || pathname.startsWith(hrefAs),
+      asPathIsAncestor = asPath.startsWith(hrefPath) || asPath.startsWith(hrefAs),
+      currentlyNested = pathname.lastIndexOf('/') > 0 || asPath.lastIndexOf('/') > 0,
+      isSpecified = truthy(hrefPath || hrefAs)
+    const active = isSpecified && (samePath || sameAsPath)
+    const activeAsAncestor =
+      isSpecified && !isRootHref && currentlyNested && (pathIsAncestor || asPathIsAncestor)
+    return [active, !active && activeAsAncestor]
+  }, [asPath, href, hrefAs, pathname])
 
-    const isNaked = variant === 'naked',
-      isButton = variant === 'button',
-      isText = variant === 'text' || variant === 'default' || !variant
+  const elemClassName = clsx(
+    {
+      [appLinkClassKey.active]: active || truthy(rest['active']),
+      [appLinkClassKey.activeAsAncestor]: activeAsAncestor,
+      [appLinkClassKey.disabled]: truthy(rest['disabled']),
+      [appLinkClassKey.variantNaked]: variant === 'naked',
+      [appLinkClassKey.variantButton]: variant === 'button',
+      [appLinkClassKey.variantButtonBase]: variant === 'button-base',
+      [appLinkClassKey.variantIconButton]: variant === 'icon-button',
+      [appLinkClassKey.variantFab]: variant === 'fab',
+      [appLinkClassKey.variantText]: variant === 'text' || variant === 'default' || !variant,
+      [appLinkClassKey.variantDefault]: variant === 'default' || !variant,
+    },
+    className
+  )
 
-    const elemClassName = clsx({
-      [classKey.active]: isCurrentPath,
-      [classKey.disabled]: yes(rest['disabled']),
-      [classKey.variantNaked]: isNaked,
-      [classKey.variantButton]: isButton,
-      [classKey.variantText]: isText,
-    }, className)
-
-    if (variant === 'naked') {
-      return (
-        <NextLink
-          ref={ref}
-          className={elemClassName}
-          hrefTo={href}
-          hrefAs={hrefAs}
-          {...rest}
-        />
-      )
-    }
-    if (variant === 'button') {
-      return (
-        <MuiButton
-          ref={ref}
-          className={elemClassName}
-          component={NextLink}
-          hrefTo={href}
-          hrefAs={hrefAs}
-          {...rest}
-        />
-      )
-    }
+  if (variant === 'naked') {
     return (
-      <MuiLink
+      <NextLink ref={ref} className={elemClassName} hrefTo={href || ''} hrefAs={hrefAs} {...rest} />
+    )
+  }
+  if (variant === 'button') {
+    return (
+      <MuiButton
         ref={ref}
         className={elemClassName}
         component={NextLink}
-        hrefTo={href}
+        hrefTo={href || ''}
         hrefAs={hrefAs}
         {...rest}
       />
     )
-  },
-)
-AppLink.displayName = 'Link'
+  }
+  if (variant === 'button-base') {
+    return (
+      <MuiButtonBase
+        ref={ref}
+        className={elemClassName}
+        component={NextLink}
+        hrefTo={href || ''}
+        hrefAs={hrefAs}
+        {...rest}
+      />
+    )
+  }
+  if (variant === 'icon-button') {
+    return (
+      <MuiIconButton
+        ref={ref}
+        className={elemClassName}
+        component={NextLink}
+        hrefTo={href || ''}
+        hrefAs={hrefAs}
+        {...rest}
+      />
+    )
+  }
+  if (variant === 'fab') {
+    return (
+      <MuiFab
+        ref={ref}
+        className={elemClassName}
+        component={NextLink}
+        hrefTo={href || ''}
+        hrefAs={hrefAs}
+        {...rest}
+      />
+    )
+  }
+  return (
+    <MuiLink
+      ref={ref}
+      className={elemClassName}
+      component={NextLink}
+      hrefTo={href || ''}
+      hrefAs={hrefAs}
+      {...rest}
+    />
+  )
+})
+AppLink.displayName = 'AppLink'
+AppLink.aglyn = true
 
-export {AppLink}
+type AppLink = typeof AppLink
+export { AppLink }
 export default AppLink

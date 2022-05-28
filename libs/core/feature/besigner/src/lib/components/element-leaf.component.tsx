@@ -20,51 +20,49 @@ import {
   type LeafComponentProps,
   useAglynElementData,
 } from '@aglyn/core-feature-renderer'
-import {useCombinedRefs} from '@aglyn/shared-ui-jsx'
-import {type ChangeEvent, forwardRef, useCallback, useEffect, useRef} from 'react'
-import {useCanvasRenderedElementRefs} from '../contexts/canvas-rendered-element-refs'
-import useAglynCanvasElementStatusManagers from '../hooks/use-aglyn-canvas-element-status-managers'
+import {useCombinedRefs, useIsomorphicLayoutEffect} from '@aglyn/shared-ui-jsx'
+import {type ChangeEvent, forwardRef, useCallback, useMemo, useRef} from 'react'
+import {useRenderedCanvasElements} from '../contexts/rendered-canvas-elements'
+import {useAglynCanvasSetHovered} from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasElementIsSelected from '../hooks/use-aglyn-canvas-is-element-selected'
+import {useAglynCanvasSetSelected} from '../hooks/use-aglyn-canvas-selected'
 import useLeafDnd from '../hooks/use-leaf-dnd'
 
 
 export interface ElementLeafComponentProps extends LeafComponentProps {}
 
-const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
+
+const InnerLeafComponent = forwardRef<any, ElementLeafComponentProps>(
   function RefRenderFn(props, ref) {
     const {$id, leafComponent, ...rest} = props
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
-    const leaf = leafComponent || ElementLeafComponent
     const isSelected = useAglynCanvasElementIsSelected($id)
-    const [handleHover, handleSelect] = useAglynCanvasElementStatusManagers($id)
-    const [dragHandleRef, dragPreviewRef, dropRef] = useLeafDnd($id)
-    const [setElementRef, deleteElementRef] = useCanvasRenderedElementRefs()
-    const elemRef = useRef<Element>(null)
-    setElementRef($id, {$id, element: elemRef, dragHandle: dragHandleRef})
-    useEffect(() => () => {deleteElementRef($id)}, [$id, deleteElementRef])
+    const setHovered = useAglynCanvasSetHovered()
+    const setSelected = useAglynCanvasSetSelected()
+    const leaf = useMemo(() => leafComponent || ElementLeafComponent, [leafComponent])
+
 
     const handleOnMouseOver = useCallback((e: ChangeEvent<any>) => {
       e.stopPropagation()
-      handleHover($id)
-    }, [$id, handleHover])
-    const handleOnMouseDown = useCallback((e: ChangeEvent<any>) => {
+      setHovered({$id})
+    }, [$id, setHovered])
+    const handleOnMouseUp = useCallback((e: ChangeEvent<any>) => {
       e.preventDefault()
       e.stopPropagation()
-      if (isSelected) handleSelect(null)
-      else handleSelect($id)
-    }, [$id, handleSelect, isSelected])
+      setSelected((prev) => ({$id: $id && prev?.$id === $id ? undefined : $id}))
+    }, [$id, setSelected])
 
     // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
     // console.log('element attributes', elementAttributes)
 
     return (
       <LeafComponent
-        ref={useCombinedRefs(ref, elemRef, dragPreviewRef, dropRef)}
+        ref={ref}
         $id={$id}
         leafComponent={leaf}
         onMouseOver={handleOnMouseOver}
-        onMouseDown={handleOnMouseDown}
+        onMouseUp={handleOnMouseUp}
         data-aglyn-element-id={$id}
         data-aglyn-element-component={componentId}
         data-aglyn-element-bundle={bundleId}
@@ -74,8 +72,32 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     )
   },
 )
+InnerLeafComponent.displayName = 'InnerLeafComponent'
+InnerLeafComponent.aglyn = true
+InnerLeafComponent.defaultProps = {}
 
-ElementLeafComponent.displayName = 'Besigner.LeafComponent'
+
+const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
+  function RefRenderFn(props, ref) {
+    const {$id, ...rest} = props
+    const element = useRef<HTMLElement>()
+    const [dragHandle, dragPreview, dropRef] = useLeafDnd($id)
+    const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
+    useIsomorphicLayoutEffect(() => {
+      setElementRef($id, {$id, element, dragHandle})
+      return () => deleteElementRef($id)
+    }, [])
+    return (
+      <InnerLeafComponent
+        ref={useCombinedRefs(ref, element, dragPreview, dropRef)}
+        $id={$id}
+        {...rest}
+      />
+    )
+  },
+)
+ElementLeafComponent.displayName = 'BesignerLeafComponent'
+ElementLeafComponent.aglyn = true
 ElementLeafComponent.defaultProps = {}
 
 export {ElementLeafComponent}

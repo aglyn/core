@@ -20,21 +20,22 @@ import {AglynErrorEventFlag} from '../constants/error'
 import {AglynLifecycleFlag, nextLifecycleIsValid} from '../constants/lifecycle'
 import {EXTENSION_TYPE, OF_KIND} from '../constants/symbol'
 import {type IAglynAppController} from '../types/aglyn-app.types'
-import {type ExtensionUUN} from '../types/aglyn-extensions.types'
 import {type AglynExtensionOptions, type IAglynExtension} from '../types/aglyn-extension.types'
+import {type ExtensionUUN} from '../types/aglyn-extensions.types'
 import {AglynModuleModel} from './aglyn-module.model'
 
 
 const TAG = 'AglynExtension'
-const NS = 'aglyn.core.data.framework.model.extension'
+const NS = 'com.aglyn.core.data.framework.model.extension'
 
-export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions> extends AglynModuleModel<O> implements IAglynExtension<T, O> {
+export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = AglynExtensionOptions>
+  extends AglynModuleModel<O>
+  implements IAglynExtension<T, O> {
 
-  public static readonly [Symbol.toStringTag]: string = TAG
-  public static readonly [OF_KIND]: number | symbol = EXTENSION_TYPE
-  public static readonly extensionName: string = 'unknown'
-
+  public static get [Symbol.toStringTag](): string {return TAG}
+  public static get [OF_KIND](): number | symbol {return EXTENSION_TYPE}
   public static get namespace(): string {return `${NS}::${this.extensionName}`}
+  public static get extensionName(): string {return 'unknown'}
 
   #context?: T = null
   #lifecycle?: AglynLifecycleFlag[] = [AglynLifecycleFlag.UNREGISTERED]
@@ -42,13 +43,18 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
   public get extensionName(): string {return getStaticField('extensionName', this)}
   public get context(): T {return this.#context}
   public get lifecycleHistory(): AglynLifecycleFlag[] {return [...this.#lifecycle]}
-  public get lifecycle(): AglynLifecycleFlag {return this.#lifecycle.slice(-1)[0]}
-  public set lifecycle(value: AglynLifecycleFlag) {
-    if (!nextLifecycleIsValid(this.lifecycle, value)) {
-      // TODO: throw errorFactory error
-      throw new Error(`Inappropriate lifecycle '${value}' following '${this.lifecycle}'`)
+
+  public get lifecycle(): AglynLifecycleFlag {
+    return this.#lifecycle.at(-1)
+  }
+  public set lifecycle(lifecycleFlag: AglynLifecycleFlag) {
+    if (!nextLifecycleIsValid(this.lifecycle, lifecycleFlag)) {
+      throw this.getErrorFactory().create(AglynErrorEventFlag.MODULE_INVALID_LIFECYCLE, {
+        now: lifecycleFlag,
+        prev: this.lifecycle,
+      })
     }
-    this.#lifecycle.push(value)
+    this.#lifecycle.push(lifecycleFlag)
   }
 
   protected constructor(app: IAglynAppController, options: O) {
@@ -56,7 +62,7 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
   }
 
   public toString(): string {
-    return `${super.toString()}[${this.extensionName}]`
+    return `${super.toString()}(${this.extensionName})`
   }
 
   public toJSON() {
@@ -66,42 +72,31 @@ export abstract class AglynExtension<T = any, O extends AglynExtensionOptions = 
     }
   }
 
-  public aglynOnInit(app: IAglynAppController): this {
-    super.aglynOnInit(app)
+  public onInitialize(): this {
+    super.onInitialize()
     return this
   }
-
-  public aglynOnLoad(app: IAglynAppController): this {
-    throw this.getErrorFactory().create(AglynErrorEventFlag.MODULE_MISSING_MEMBER, {
-      extensionName: this.extensionName, memberMethod: 'aglynOnLoad',
-    })
+  public onActivate(): this {
+    super.onActivate()
     return this
   }
-
-  public aglynOnUnload(app: IAglynAppController): this {
-    throw this.getErrorFactory().create(AglynErrorEventFlag.MODULE_MISSING_MEMBER, {
-      extensionName: this.extensionName, memberMethod: 'aglynOnUnload',
-    })
+  public onDeactivate(): this {
+    super.onDeactivate()
     return this
   }
-
-  public aglynOnDestroy(app: IAglynAppController): this {
-    super.aglynOnDestroy(app)
+  public onDestroy(): this {
+    super.onDestroy()
     return this
   }
-
   public getExtensionName(): ExtensionUUN {
     return getStaticField('extensionName', this)
   }
-
   public static getExtensionName(): ExtensionUUN {
     return getStaticField('extensionName', this)
   }
-
   public getContext(): T {
     return this.#context
   }
-
   public setContext(value: T): this {
     this.#context = value
     return this

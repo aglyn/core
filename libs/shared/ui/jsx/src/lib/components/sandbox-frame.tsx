@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import {jssPreset, StylesProvider, useTheme} from '@aglyn/shared-feature-themes'
+import type { InferElementTypeProps } from '@aglyn/shared-data-types'
+import { jssPreset, StylesProvider, useTheme } from '@aglyn/shared-ui-theme'
 
-import {create, Jss, JssOptions} from 'jss'
+import { create, type Jss, type JssOptions } from 'jss'
 import rtl from 'jss-rtl'
 import React, {
   Children,
@@ -25,16 +26,17 @@ import React, {
   forwardRef,
   Fragment,
   isValidElement,
+  type ReactElement,
   useCallback,
   useMemo,
   useRef,
   useState,
 } from 'react'
-import ReactFrameComponent, {FrameComponentProps} from 'react-frame-component'
+import ReactFrameComponent from 'react-frame-component'
 
 import useCombinedRefs from '../hooks/use-combined-refs'
 
-
+export type FrameComponentProps = InferElementTypeProps<typeof ReactFrameComponent>
 export type SandboxFrameDocument = HTMLIFrameElement['contentDocument']
 export type SandboxFrameWindow = HTMLIFrameElement['contentWindow']
 type State = {
@@ -52,6 +54,7 @@ export interface SandboxFrameProps
   onContentDidUpdate?: (state: State) => void
   jssPlugins?: JssOptions['plugins']
   baseStyles?: string
+  title?: ReactElement
 }
 
 /**
@@ -59,7 +62,7 @@ export interface SandboxFrameProps
  */
 export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(function RefRenderFn(
   props,
-  ref,
+  ref
 ) {
   const theme = useTheme()
   const {
@@ -84,16 +87,16 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(fun
   const head = useMemo(
     () => (
       <Fragment>
-        <title>{title}</title>
+        {title && <title>{title}</title>}
         {/* JSS Insertion Point */}
         <style
           ref={styleRef}
-          dangerouslySetInnerHTML={{__html: baseStyles}}
+          dangerouslySetInnerHTML={{ __html: baseStyles }}
           id={'sandbox-frame-jss'}
         />
       </Fragment>
     ),
-    [title, baseStyles],
+    [title, baseStyles]
   )
   const handleContentDidMount = useCallback(() => {
     const instance = frameRef.current
@@ -145,6 +148,7 @@ export const SandboxFrame = forwardRef<HTMLIFrameElement, SandboxFrameProps>(fun
 })
 
 SandboxFrame.displayName = 'SandboxFrame'
+SandboxFrame.aglyn = true
 SandboxFrame.defaultProps = {
   // Global styles for frame document
   baseStyles: 'html, body, .frame-root, .frame-content { width: 100%; height: 100%; }',

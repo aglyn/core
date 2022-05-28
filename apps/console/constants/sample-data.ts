@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {AglynElementNormalized} from '@aglyn/core-data-framework'
+import type {AglynElementNormalized} from '@aglyn/core-data-framework'
 
 
 export const samplePageData: AglynElementNormalized[] = [

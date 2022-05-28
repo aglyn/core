@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,26 +20,25 @@ import {
   createStyles,
   type ExtendPropsOfWithStyles,
   withStyles,
-} from '@aglyn/shared-feature-themes'
-import {NavigationDrawer, type NavigationDrawerProps} from '@aglyn/shared-ui-jsx'
-import {mdiClose, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {_isStrT} from '@aglyn/shared-util-guards'
-import {objectRemap} from '@aglyn/shared-util-tools'
-import {Box, Button} from '@mui/material'
+} from '@aglyn/shared-ui-theme'
+import { NavigationDrawerComponent, type NavigationDrawerProps } from '@aglyn/shared-ui-jsx'
+import { mdiClose, MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { _isStrT } from '@aglyn/shared-util-guards'
+import { objectRemap } from '@aglyn/shared-util-tools'
+import { Box, Button } from '@mui/material'
 import Container from '@mui/material/Container'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
 import Typography from '@mui/material/Typography'
-import {forwardRef, Fragment} from 'react'
+import { ChangeEventHandler, forwardRef, Fragment, MouseEventHandler } from 'react'
 import FieldSet from '../components/FieldSet'
-import {Fields} from '../forms'
-
+import { Fields } from '../forms'
 
 export const drawerFormViewStyles = (theme) =>
   createStyles({
-    closeButton: {marginRight: theme.spacing(2)},
-    pt2: {paddingTop: theme.spacing(2)},
-    wrapper: {position: 'relative'},
+    closeButton: { marginRight: theme.spacing(2) },
+    pt2: { paddingTop: theme.spacing(2) },
+    wrapper: { position: 'relative' },
     loadingBar: {
       position: 'absolute',
       backgroundColor: alpha(theme.palette.primary.main, 0.86),
@@ -61,9 +60,9 @@ export interface DrawerFormViewProps
 
   loading?: boolean
   error?: string | boolean
-  onClose: React.MouseEventHandler
-  onSave: React.MouseEventHandler<HTMLButtonElement>
-  onUpdate: (fieldId: string) => React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  onClose: MouseEventHandler
+  onSave: MouseEventHandler<HTMLButtonElement>
+  onUpdate: (fieldId: string) => ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
 }
 
 const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn(props, ref) {
@@ -86,7 +85,7 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
   const actionLabel = isCreating ? 'Create' : 'Update'
 
   return (
-    <NavigationDrawer
+    <NavigationDrawerComponent
       ref={ref}
       appBarLeft={
         <Fragment>
@@ -121,11 +120,11 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
       <div className={classes.wrapper}>
         {loading && (
           <Fragment>
-            <LinearProgress classes={{root: classes.loadingBar}} color="secondary" />
+            <LinearProgress classes={{ root: classes.loadingBar }} color="secondary" />
           </Fragment>
         )}
 
-        <Container>
+        <ContainerComponent>
           <br />
           {error && (_isStrT(error) ? error : 'Error loading...')}
           {!error && (
@@ -140,17 +139,17 @@ const DrawerFormView = forwardRef<any, DrawerFormViewProps>(function RefRenderFn
                     {JSON.stringify(
                       objectRemap(fields, (f) => f.value ?? ''),
                       null,
-                      2,
+                      2
                     )}
                   </pre>
                 </Box>
               </Box>
             </Fragment>
           )}
-        </Container>
+        </ContainerComponent>
       </div>
-    </NavigationDrawer>
+    </NavigationDrawerComponent>
   )
 })
 
-export default withStyles(drawerFormViewStyles, {name: 'DrawerFormView'})(DrawerFormView)
+export default withStyles(drawerFormViewStyles, { name: 'DrawerFormView' })(DrawerFormView)

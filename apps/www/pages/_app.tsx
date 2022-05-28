@@ -15,73 +15,63 @@
  * limitations under the License.
  */
 
-import {APP_WWW, IS_PRODUCTION} from '@aglyn/shared-data-brand'
-import {type MakeLinkElementsConfig, type MakeMetaElementsConfig} from '@aglyn/shared-ui-jsx'
-import {NextEmotionAppComponent, type NextEmotionAppComponentProps} from '@aglyn/shared-ui-next'
-import {Fragment, useEffect, useMemo} from 'react'
+import { APP_WWW, IS_PRODUCTION } from '@aglyn/shared-data-enums'
+import {
+  consoleThemeDark,
+  consoleThemeLight,
+  createWithThemeProvider,
+} from '@aglyn/shared-ui-theme'
+import { _AppComponent, type _AppProps } from '@aglyn/shared-ui-next'
+import { Fragment } from 'react'
 import HsEmbedScript from '../components/hs-embed-script'
 import VisitorQueueScript from '../components/visitor-queue-script'
-import {withAppController} from '../lib/aglyn-deprecated/lib/controllers/app-controller'
-
+import { withAppController } from '../lib/aglyn-deprecated/lib/controllers/app-controller'
 
 let app
 if (!app) {
   const previewProduction = true
-  app = withAppController(IS_PRODUCTION || previewProduction ? {} : {
-    authEmulator: 'http://localhost:9099/',
-    firestoreEmulator: {host: 'localhost', port: 8080},
-  })
+  app = withAppController(
+    IS_PRODUCTION || previewProduction
+      ? {}
+      : {
+          authEmulator: 'http://localhost:9099/',
+          firestoreEmulator: { host: 'localhost', port: 8082 },
+        }
+  )
 }
+const withThemeProvider = createWithThemeProvider({
+  theme: [consoleThemeLight, consoleThemeDark],
+})
 
-export interface _AppProps<Props, InitialProps> extends NextEmotionAppComponentProps<Props, InitialProps> {}
+const MainComponent = withThemeProvider((props: any) => {
+  const { children } = props
 
+  return <>{children}</>
+})
 
-function _App<Props, InitialProps>(props: _AppProps<Props, InitialProps>) {
-  const {NextAppWrapperProps, ...rest} = props
-  const {
-    metaElements: wrapperMetaElements,
-    linkElements: wrapperLinkElements,
-    headChildren: wrapperHeadChildren,
-    documentTitle: wrapperDocumentTitle,
-    ...nextAppWrapperProps
-  } = NextAppWrapperProps || {}
-  const documentTitle = useMemo(() => (
-    wrapperDocumentTitle || APP_WWW.META_TITLE
-  ), [wrapperDocumentTitle])
-  const headChildren = useMemo(() => (
-    <Fragment>
-      {!IS_PRODUCTION ? null : (
-        <Fragment>
-          <HsEmbedScript />
-          <VisitorQueueScript />
-        </Fragment>
-      )}
-      {wrapperHeadChildren}
-    </Fragment>
-  ), [wrapperHeadChildren])
-  const metaElements: MakeMetaElementsConfig = useMemo(() => ([
-    ['viewport', 'width=device-width, initial-scale=1'],
-    ['description', APP_WWW.META_DESCRIPTION],
-    ...wrapperMetaElements || [],
-  ]), [wrapperMetaElements])
-  const linkElements: MakeLinkElementsConfig = useMemo(() => ([
-    ...wrapperLinkElements || [],
-  ]), [wrapperLinkElements])
+export interface _Props<Props, InitialProps> extends _AppProps<Props, InitialProps> {}
 
-  useEffect(() => {
-    if (IS_PRODUCTION) app?.getAnalytics()
-  }, [])
-
+function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
+  const { headChildren, ...rest } = props
 
   return (
-    <NextEmotionAppComponent
-      NextAppWrapperProps={{
-        documentTitle,
-        headChildren,
-        metaElements,
-        linkElements,
-        ...nextAppWrapperProps,
-      }}
+    <_AppComponent
+      MainComponent={MainComponent}
+      metaElements={[
+        ['viewport', 'width=device-width, initial-scale=1'],
+        ['description', APP_WWW.DESCRIPTION],
+      ]}
+      headChildren={
+        <Fragment>
+          {!IS_PRODUCTION ? null : (
+            <Fragment>
+              <HsEmbedScript />
+              <VisitorQueueScript />
+            </Fragment>
+          )}
+          {headChildren}
+        </Fragment>
+      }
       {...rest}
     />
   )

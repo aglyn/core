@@ -15,68 +15,94 @@
  * limitations under the License.
  */
 
-import {
-  type AglynComponentHierarchy,
-  type AglynModuleModelOptions,
-  type AglynModuleModelT,
-  type BundleUId,
-  type ComponentId,
-  type ContextDomain,
-  type ContextStore,
-  type ElementId,
-  type IAglynAppController,
-  type IAglynModuleModel,
+import type {
+  AglynComponentHierarchy,
+  AglynModuleModelOptions,
+  AglynModuleModelT,
+  BundleUId,
+  ComponentId,
+  ElementId,
+  IAglynAppController,
+  IAglynModuleModel,
 } from '@aglyn/core-data-framework'
-import {type LogLevelString} from '@aglyn/shared-util-logger'
-import {
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
+import type {LogLevelString} from '@aglyn/shared-util-logger'
+import type {BehaviorSubject} from 'rxjs'
+import type {
   BesignerDeviceFlag,
-  type BesignerPanelTabFlag,
-  type BesignerPanelViewFlag,
-  type DndDragSourceTypeFlag,
-  type DndDropLinealTypeFlag,
-  type InteractionModeFlag,
+  BesignerPanelTabFlag,
+  BesignerPanelViewFlag,
+  DndDragSourceTypeFlag,
+  DndDropLinealTypeFlag,
+  InteractionModeFlag,
 } from '../constants/besigner'
-import {
-  type BesignerClosePanelPayload,
-  type BesignerFlagInteractModePayload,
-  type BesignerGetStorePayload,
-  type BesignerOpenPanelPayload,
-  type BesignerSetCanvasHoveredPayload,
-  type BesignerSetCanvasSelectedPayload,
-  type BesignerSetDndStatePayload,
-  type BesignerSetPanelPayload,
+import type {
+  BesignerClosePanelPayload,
+  BesignerGetStorePayload,
+  BesignerOpenPanelPayload,
+  BesignerSetCanvasHoveredPayload,
+  BesignerSetCanvasItemPayload,
+  BesignerSetCanvasPayload,
+  BesignerSetCanvasSelectedPayload,
+  BesignerSetDndItemPayload,
+  BesignerSetDndPayload,
+  BesignerSetFlagPayload,
+  BesignerSetFlagsPayload,
+  BesignerSetPanelPayload,
+  BesignerSetPanelsPayload,
+  BesignerTogglePanelPayload,
 } from '../constants/emitter'
 
 
-export type BesignerFlagState = {
-  debug?: boolean
-  logLevel?: LogLevelString
-  interactMode?: InteractionModeFlag
-  activeView?: BesignerPanelViewFlag
-  devicePreview?: BesignerDeviceFlag
+export type BesignerContext = {
+  flags: {
+    debug: boolean
+    logLevel: LogLevelString
+    interactMode: InteractionModeFlag
+    activeView?: BesignerPanelViewFlag
+    devicePreview?: BesignerDeviceFlag
+  }
+  canvas: {
+    selected?: {
+      $id?: ElementId
+      hierarchy?: ElementId[]
+    }
+    hovered?: {
+      $id?: ElementId
+      hierarchy?: ElementId[]
+    }
+  }
+  panels: {
+    panelLeft?: BesignerPanelItem
+    panelRight?: BesignerPanelItem
+    panelBottom?: BesignerPanelItem
+  }
+  dnd: {
+    active?: BesignerDndElementBaseData<DndDragSourceTypeFlag>
+    over?: BesignerDndElementBaseData<DndDropLinealTypeFlag>
+  }
 }
-export type BesignerCanvasSelectedElement = {
-  $id?: ElementId
-  hierarchy?: ElementId[]
-}
-export type BesignerCanvasHoveredElement = {
-  $id?: ElementId
-  hierarchy?: ElementId[]
-}
-export type BesignerCanvasState = {
-  selected?: BesignerCanvasSelectedElement
-  hovered?: BesignerCanvasHoveredElement
-}
+export type BesignerFlagsState = BesignerContext['flags']
+export type BesignerFlagKey = keyof BesignerFlagsState
+export type BesignerFlagValue<K extends BesignerFlagKey = BesignerFlagKey> = BesignerFlagsState[K]
+export type BesignerCanvasState = BesignerContext['canvas']
+export type BesignerCanvasItemKey = keyof BesignerCanvasState
+export type BesignerCanvasItemValue<K extends BesignerCanvasItemKey = BesignerCanvasItemKey> = BesignerCanvasState[K]
+export type BesignerCanvasSelectedElement = BesignerCanvasItemValue<'selected'>
+export type BesignerCanvasHoveredElement = BesignerCanvasItemValue<'hovered'>
+export type BesignerPanelsState = BesignerContext['panels']
+export type BesignerPanelKey = keyof BesignerPanelsState
+export type BesignerPanelValue<K extends BesignerPanelKey = BesignerPanelKey> = BesignerPanelsState[K]
+export type BesignerDndState = BesignerContext['dnd']
+export type BesignerDndItemKey = keyof BesignerDndState
+export type BesignerDndItemValue<K extends BesignerDndItemKey = BesignerDndItemKey> = BesignerDndState[K]
+export type BesignerDndElementActive = BesignerContext['dnd']['active']
+export type BesignerDndElementOver = BesignerContext['dnd']['over']
 export type BesignerPanelItem = {
   id?: BesignerPanelViewFlag
   size?: number | string
   toggled?: boolean
   tab?: BesignerPanelTabFlag
-}
-export type BesignerPanelsState = {
-  panelLeft?: BesignerPanelItem
-  panelRight?: BesignerPanelItem
-  panelBottom?: BesignerPanelItem
 }
 export type BesignerDndElementBaseData<T extends DndDragSourceTypeFlag | DndDropLinealTypeFlag> = {
   $id: ElementId
@@ -85,51 +111,35 @@ export type BesignerDndElementBaseData<T extends DndDragSourceTypeFlag | DndDrop
   bundleId?: BundleUId
   hierarchy?: AglynComponentHierarchy
 }
-export type BesignerDndElementActive = BesignerDndElementBaseData<DndDragSourceTypeFlag>
-export type BesignerDndElementOver = BesignerDndElementBaseData<DndDropLinealTypeFlag>
-export type BesignerDndState = {
-  active?: BesignerDndElementActive
-  over?: BesignerDndElementOver
-}
-export type BesignerContextStores = {
-  flags: BesignerFlagState
-  canvas: BesignerCanvasState
-  panels: BesignerPanelsState
-  dnd: BesignerDndState
-}
-export type BesignerNestedStores<K extends keyof BesignerContextStores = keyof BesignerContextStores> = {
-  [P in K]: ContextStore<BesignerContextStores[P]>
-}
-
-export interface BesignerContext {
-  _domain: ContextDomain
-  _store: ContextStore<BesignerContextStores>
-  stores: BesignerNestedStores
-  events: any
-}
 
 export interface AglynBesignerControllerOptions extends AglynModuleModelOptions {
-  defaults?: Partial<BesignerContextStores>
+  defaults?: Partial<BesignerContext>
 }
 
 export interface IAglynBesignerController extends IAglynModuleModel<AglynBesignerControllerOptions> {
-  readonly _domain: ContextDomain
-  readonly _store: ContextStore<BesignerContextStores>
-  readonly stores: BesignerNestedStores
-  readonly events: any
-  readonly flags: ContextStore<BesignerFlagState>
-  readonly canvas: ContextStore<BesignerCanvasState>
-  readonly panels: ContextStore<BesignerPanelsState>
-  readonly dnd: ContextStore<BesignerDndState>
+  readonly __store__: {
+    [K in keyof BesignerContext]: BehaviorSubject<BesignerContext[K]>
+  }
+  readonly canvas: this['__store__']['canvas']
+  readonly dnd: this['__store__']['dnd']
+  readonly flags: this['__store__']['flags']
+  readonly panels: this['__store__']['panels']
 
-  getStore<K extends keyof BesignerContextStores>(payload: BesignerGetStorePayload<K>): ContextStore<BesignerContextStores[K]>
-  setFlag(payload: BesignerFlagInteractModePayload): this
-  setPanels(payload: BesignerSetPanelPayload): this
-  openPanel(payload: BesignerOpenPanelPayload): this
+  getStore<K extends keyof BesignerContext>(payload: BesignerGetStorePayload<K>): BehaviorSubject<BesignerContext[K]>
+
   closePanel(payload: BesignerClosePanelPayload): this
-  setDndState(payload: BesignerSetDndStatePayload): this
-  setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this
+  openPanel(payload: BesignerOpenPanelPayload): this
+  setCanvas(payload: BesignerSetCanvasPayload): this
   setCanvasHovered(payload: BesignerSetCanvasHoveredPayload): this
+  setCanvasItem(payload: BesignerSetCanvasItemPayload): this
+  setCanvasSelected(payload: BesignerSetCanvasSelectedPayload): this
+  setDnd(payload: BesignerSetDndPayload): this
+  setDndItem(payload: BesignerSetDndItemPayload): this
+  setFlag(payload: BesignerSetFlagPayload): this
+  setFlags(payload: BesignerSetFlagsPayload): this
+  setPanel(payload: BesignerSetPanelPayload): this
+  setPanels(payload: BesignerSetPanelsPayload): this
+  togglePanel(payload: BesignerTogglePanelPayload): this
 }
 
 export interface AglynBesignerControllerT extends AglynModuleModelT<AglynBesignerControllerOptions> {

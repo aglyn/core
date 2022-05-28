@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,13 @@
  * limitations under the License.
  */
 
+import aglynAttributeKey from './utils/aglynAttributeKey'
+
+
 export const DEFAULT_LEFT_DRAWER_WIDTH = 240
 
-function buildAttributeKey(name: string): `${ELEMENT_ATTRIBUTE_PREFIX}${typeof name}` {
-  return `${ELEMENT_ATTRIBUTE_PREFIX}${name}`
-}
-export const ELEMENT_ATTRIBUTE_PREFIX = 'data-aglyn-'
-export type ELEMENT_ATTRIBUTE_PREFIX = typeof ELEMENT_ATTRIBUTE_PREFIX
-export const ElementAttribute = {
-  ELEMENT_ID: buildAttributeKey('element-id'),
-  COMPONENT_ID: buildAttributeKey('component-id'),
-  BUNDLE_ID: buildAttributeKey('bundle-id'),
-  SELECTED: buildAttributeKey('selected'),
-  HOVERED: buildAttributeKey('hovered'),
-}
-export type ElementAttribute = typeof ElementAttribute
+export const ELEMENT_ID_KEY = aglynAttributeKey('element-id')
+export const ELEMENT_COMPONENT_ID_KEY = aglynAttributeKey('component-id')
+export const ELEMENT_BUNDLE_ID_KEY = aglynAttributeKey('bundle-id')
+export const ELEMENT_SELECTED_KEY = aglynAttributeKey('selected')
+export const ELEMENT_HOVERED_KEY = aglynAttributeKey('hovered')

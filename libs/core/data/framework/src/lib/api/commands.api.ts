@@ -16,15 +16,15 @@
  */
 
 import {_INTERNAL_COMMANDS_} from '../constants/_internal'
-import {
-  type CommandsRegisterListenerPayload,
-  type CommandsRemoveResolverPayload,
-  type CommandsSetResolverPayload,
-  type CommandsTriggerPayload,
-  type CommandsUnregisterListenerPayload,
+import type {
+  CommandsRegisterListenerPayload,
+  CommandsRemoveResolverPayload,
+  CommandsSetResolverPayload,
+  CommandsTriggerPayload,
+  CommandsUnregisterListenerPayload,
 } from '../constants/emitter'
-import {type IAglynAppController} from '../types/aglyn-app.types'
-import {type IAglynCommandsController} from '../types/aglyn-commands.types'
+import type {IAglynAppController} from '../types/aglyn-app.types'
+import type {IAglynCommandsController} from '../types/aglyn-commands.types'
 import {_validateAppArg} from './app.api'
 
 

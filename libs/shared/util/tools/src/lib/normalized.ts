@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { NormalizedData, NormalizedModel } from '@aglyn/shared-data-types'
-import { _isNum, _isObj } from '@aglyn/shared-util-guards'
-import { arrayRemoveItem } from './array-remove-item'
-import { arrayReorder } from './array-reorder'
-import { objectDeleteProperty } from './object-delete-property'
+import {NormalizedData, NormalizedModel} from '@aglyn/shared-data-types'
+import {_isNum, _isObj} from '@aglyn/shared-util-guards'
+import {arrayMoveAtIndex} from './array/array-move-at-index'
+import {arrayRemoveItem} from './array/array-remove-item'
+import {objectDeleteProperty} from './object/object-delete-property'
 
 
 type ID = string
@@ -100,7 +100,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
    * @returns {NormalizedModel<T>}
    * @memberof Normalized
    */
-  public static from<T extends { id: ID }, K extends ID>(...items: T[] | [id: K, value: any][]): NormalizedModel<T> {
+  public static from<T extends {id: ID}, K extends ID>(...items: T[] | [id: K, value: any][]): NormalizedModel<T> {
     const _items = [...items].map(i => _isObj(i) ? [i['id'], i] : [...i])
     const parsed = _items.reduce<NormalizedData<T, K>>((acc, [id, v]) => ({
       allIds: (acc?.allIds ?? []).concat(id),
@@ -119,8 +119,11 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
    * @returns {NormalizedData<T>}
    * @memberof Normalized
    */
-  public static remove<T extends NormalizedData<TT, any>, K extends ID, TT = any>(id: K, model: T): NormalizedData<TT, ID> {
-    model.allIds = arrayRemoveItem(id, model.allIds)
+  public static remove<T extends NormalizedData<TT, any>, K extends ID, TT = any>(
+    id: K,
+    model: T,
+  ): NormalizedData<TT, ID> {
+    model.allIds = arrayRemoveItem(model.allIds, id)
     model.byId = objectDeleteProperty(model.byId, id)
     return model
   }
@@ -153,7 +156,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
       model.allIds.push(id)
     }
     else if (_isNum(index) && currentIndex !== index) {
-      model.allIds = arrayReorder(model.allIds, currentIndex, index)
+      model.allIds = arrayMoveAtIndex(model.allIds, currentIndex, index)
     }
 
     return model
@@ -212,7 +215,7 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
    * @memberof Normalized
    */
   public has(id: ID): boolean {
-    return Object.prototype.hasOwnProperty.call(this.byId, id)
+    return this.hasOwnProperty.call(this.byId, id)
   }
 
   /**
@@ -237,5 +240,10 @@ export class Normalized<T = any, K extends ID = ID> implements NormalizedModel<T
    */
   public get(id: ID): undefined | T {
     return Normalized.get(id, this)
+  }
+
+  /** @ignore */
+  private get hasOwnProperty() {
+    return Object.prototype.hasOwnProperty
   }
 }

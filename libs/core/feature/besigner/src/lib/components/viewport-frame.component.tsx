@@ -16,17 +16,15 @@
  */
 
 import {setBesignerCanvasHovered} from '@aglyn/core-data-besigner'
-import {TrunkComponent, useAglynAppContext} from '@aglyn/core-feature-renderer'
-import {createTheme, styled, ThemeProvider} from '@aglyn/shared-feature-themes'
-import Box from '@mui/material/Box'
+import {CANVAS_ROOT_ELEMENT_ID} from '@aglyn/core-data-framework'
+import {useAglynAppContext, useAglynSiteTheme} from '@aglyn/core-feature-renderer'
+import {styled, ThemeProvider} from '@aglyn/shared-ui-theme'
+import {Box, BoxProps} from '@mui/material'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
-import {forwardRef, type HTMLAttributes, type MouseEvent, useCallback} from 'react'
-import CanvasRenderedElementRefsComponent from '../contexts/canvas-rendered-element-refs'
+import {type ComponentProps, forwardRef, useCallback} from 'react'
 import ElementLeafComponent from './element-leaf.component'
-import ElementOverlaysComponent from './element-overlays.component'
+import ElementOverlayPopperComponent from './element-overlay-popper.component'
 
-
-const hostTheme = createTheme({palette: {}})
 
 const ViewportFrame = styled('div', {
   name: 'AglynViewportFrame',
@@ -42,55 +40,100 @@ const ViewportFrame = styled('div', {
   // position: 'relative',
 }))
 
-export interface ViewportFrameComponentProps extends HTMLAttributes<HTMLDivElement> {}
+const SiteContainer = (props: Partial<BoxProps>) => {
+  const {...rest} = props
+  return (
+    <Box
+      key="aglyn:site-container"
+      id="aglyn:site-container"
+      sx={{
+        minHeight: 1,
+        width: 1,
+        bgcolor: 'background.paper',
+      }}
+      {...rest}
+    >
+      <ThemedElementContainer />
+    </Box>
+  )
+}
+
+const Elements = () => {
+  return (
+    <ElementLeafComponent
+      leafComponent={ElementLeafComponent}
+      $id={CANVAS_ROOT_ELEMENT_ID}
+      sx={{minHeight: 1}}
+    />
+  )
+}
+
+const ThemedElementContainer = () => {
+  const hostTheme = useAglynSiteTheme()
+  return (
+    <ThemeProvider theme={hostTheme}>
+      <Elements />
+    </ThemeProvider>
+  )
+}
+
+const Overlays = (props: Partial<BoxProps>) => {
+  const {...rest} = props
+  return (
+    <Box
+      key="aglyn:site-overlay"
+      id="aglyn:site-overlay"
+      sx={{
+        position: 'relative',
+        zIndex: 'tooltip',
+      }}
+      {...rest}
+    >
+      <ElementOverlayPopperComponent
+        key="aglyn:element-overlay-selected"
+        id="aglyn:element-overlay-selected"
+        variant="selectedOverlay"
+      />
+      <ElementOverlayPopperComponent
+        key="aglyn:element-overlay-hovered"
+        id="aglyn:element-overlay-hovered"
+        variant="hoveredOverlay"
+      />
+    </Box>
+  )
+}
+
+export interface ViewportFrameComponentProps extends ComponentProps<typeof ViewportFrame> {
+
+}
 
 const ViewportFrameComponent = forwardRef<any, ViewportFrameComponentProps>(
   function RefRenderFn(props, ref) {
-    const {children, ...rest} = props
+    const {onMouseLeave, ...rest} = props
 
-
-    const {getApp} = useAglynAppContext()
-    const handleMouseLeave = useCallback((e: MouseEvent) => {
+    const app = useAglynAppContext()
+    const handleMouseLeave = useCallback((e) => {
       e.stopPropagation()
-      setBesignerCanvasHovered(getApp(), {hovered: () => ({})})
-    }, [getApp])
+      setBesignerCanvasHovered(app, {hovered: () => ({})})
+      onMouseLeave && onMouseLeave(e)
+    }, [app, onMouseLeave])
 
     return (
       <ViewportFrame
         ref={ref}
         id="aglyn:viewport-frame"
+        onMouseLeave={handleMouseLeave}
         {...rest}
       >
-        <CanvasRenderedElementRefsComponent>
-          {/*<MuiShadowDom.div>*/}
-          <ThemeProvider theme={hostTheme}>
-            <Box
-              id="aglyn:site-container"
-              onMouseLeave={handleMouseLeave}
-              sx={{minHeight: 1, width: 1, bgcolor: 'background.paper'}}
-            >
-              <TrunkComponent
-                leafComponent={ElementLeafComponent}
-                sx={{minHeight: 1}}
-              />
-            </Box>
-          </ThemeProvider>
-          {/*</MuiShadowDom.div>*/}
-
-          <Box
-            id="aglyn:site-overlay"
-            sx={{position: 'relative', zIndex: 'tooltip'}}
-          >
-            <ElementOverlaysComponent />
-          </Box>
-        </CanvasRenderedElementRefsComponent>
-        {children}
+        <SiteContainer />
+        <Overlays />
       </ViewportFrame>
     )
   },
 )
 
 ViewportFrameComponent.displayName = 'ViewportFrameComponent'
+ViewportFrameComponent.aglyn = true
 ViewportFrameComponent.defaultProps = {}
 
 export {ViewportFrameComponent}

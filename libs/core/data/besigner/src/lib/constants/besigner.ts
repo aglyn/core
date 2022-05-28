@@ -28,14 +28,17 @@ export enum BesignerPanelViewFlag {
 }
 
 export enum BesignerPanelTabFlag {
-  ELEMENT_INFO = 0x1,
-  ELEMENT_PROPS_FORM = 0x2,
-  ELEMENTS_TREE = 0x3
+  ELEMENTS_TREE = 0x1,
+  ELEMENT_BROWSE = 0x2,
+  ELEMENT_INFO = 0x3,
+  ELEMENT_PROPS_FORM = 0x4,
+  ELEMENT_STYLES = 0x5,
 }
 
 export enum DndDragSourceTypeFlag {
-  CANVAS_ELEMENT = 0x1,
-  COMPONENT_TEMPLATE = 0x2,
+  CANVAS_ELEMENT = 'canvas',
+  COMPONENT_TEMPLATE = 'template',
+  TREE_ELEMENT = 'tree',
 }
 
 export enum DndDropLinealTypeFlag {
