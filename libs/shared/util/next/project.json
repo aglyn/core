@@ -5,34 +5,21 @@
   "targets": {
     "build": {
       "executor": "@nrwl/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/shared/util/next",
-        "tsConfig": "libs/shared/util/next/tsconfig.lib.json",
-        "packageJson": "libs/shared/util/next/package.json",
         "main": "libs/shared/util/next/src/index.ts",
-        "assets": [
-          "libs/shared/util/next/*.md"
-        ]
+        "tsConfig": "libs/shared/util/next/tsconfig.lib.json",
+        "assets": ["libs/shared/util/next/*.md"]
       }
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/shared/util/next/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/shared/util/next/**/*.ts"]
       }
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:util"
-  ]
+  "tags": ["scope:lib", "scope:shared", "scope:util"]
 }

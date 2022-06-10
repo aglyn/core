@@ -3,22 +3,33 @@
   "sourceRoot": "libs/core/feature/singleton/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/web:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/core/feature/singleton",
+        "tsConfig": "libs/core/feature/singleton/tsconfig.lib.json",
+        "project": "libs/core/feature/singleton/package.json",
+        "entryFile": "libs/core/feature/singleton/src/index.ts",
+        "external": ["react/jsx-runtime"],
+        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "compiler": "swc",
+        "assets": [
+          {
+            "glob": "libs/core/feature/singleton/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ]
+      }
+    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": [
-          "libs/core/feature/singleton/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/core/feature/singleton/**/*.ts"]
       }
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:aglyn",
-    "scope:feature",
-    "aglyn:framework"
-  ]
+  "tags": ["scope:lib", "scope:aglyn", "scope:feature", "aglyn:framework"]
 }

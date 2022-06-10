@@ -109,7 +109,7 @@ export function useLeafDnd(
     setDndOver(undefined)
     setBesignerDnd(app, {dnd: () => ({})})
     if (over?.$id && active?.$id !== over.$id) {
-      moveCanvasElement(app, {$id: active.$id, parentId: over?.$id, index: -1})
+      moveCanvasElement(app, {$id: active.$id, parentId: over?.$id, index: NaN})
     }
   }, [app, setDndActive, setDndOver])
 

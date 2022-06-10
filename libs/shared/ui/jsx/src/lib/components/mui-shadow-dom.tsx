@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,21 @@
 
 //TODO: FIX ALL TYPINGS AND REFACTOR OPTIONS/PROPS
 
-import { jssPreset, StylesProvider } from '@aglyn/shared-ui-theme'
+import {jssPreset, StylesProvider} from '@aglyn/shared-ui-theme'
 
-import { create } from 'jss'
+import {create} from 'jss'
 import rtl from 'jss-rtl'
-import React, { HTMLProps, PropsWithChildren, useState } from 'react'
+import {forwardRef, type HTMLProps, type PropsWithChildren, useState} from 'react'
 import {useForkedRefs} from '../hooks/use-ref-forked'
 
-import { createShadowDomProxy } from './shadow-dom' /* eslint-disable-next-line */
+import {createShadowDomProxy} from './shadow-dom' /* eslint-disable-next-line */
 
 /* eslint-disable-next-line */
 export interface MuiShadowDomProps {}
 
-const MuiShadowStylesProvider = React.forwardRef<
-  HTMLProps<HTMLDivElement>,
-  PropsWithChildren<MuiShadowDomProps>
->(function RefRenderFn(props, ref) {
-  const { children } = props
+const MuiShadowStylesProvider = forwardRef<HTMLProps<HTMLDivElement>,
+  PropsWithChildren<MuiShadowDomProps>>(function RefRenderFn(props, ref) {
+  const {children} = props
   const [styleNode, setStyleNode] = useState(null)
   const elemRef = useForkedRefs(setStyleNode, ref)
   const jss = create({

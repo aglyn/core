@@ -28,7 +28,7 @@ export function arrayMoveAtIndex<K extends number & keyof T, T extends Array<U>,
   newIndex: K | any,
 ): T {
   const item = array.splice(index, 1)[0]
-  if (newIndex === -1) array.push(item)
+  if (isNaN(newIndex)) array.push(item)
   else array.splice(newIndex, 0, item)
   return array
 }

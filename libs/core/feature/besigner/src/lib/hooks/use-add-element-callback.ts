@@ -54,7 +54,7 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
         const data = res?.option?.data
         if (data) {
           const newElement = {
-            index: -1,
+            index: NaN,
             parentId: $id || CANVAS_ROOT_ELEMENT_ID,
             element: createComponentElementData(data),
           }
@@ -74,7 +74,7 @@ export function useAddElementCallback<E extends SyntheticEvent<any>>(
         onError && onError(e, error)
         opts?.onError && opts?.onError(e, error)
       })
-  }, [$id, app, elementDrawer, drawerOptions, onComplete, onError])
+  }, [elementDrawer, drawerOptions, onComplete, $id, app, setSelected, onError])
 }
 
 export default useAddElementCallback

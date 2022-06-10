@@ -19,17 +19,37 @@
   ~ Brand light-blue: 039BE5
   -->
 
-<div align="center">
-  <a href="https://aglyn.com/" title="View aglyn.com in new tab" target="_blank">
-    <img alt="Aglyn Logo" src="https://aglyn.com/_static/images/icons/icon.svg" style="height: 128px"/>
+<h1 align="center">Aglyn - The clickable screen to create online.</h1>
+
+<p align="center">
+  <a href="https://aglyn.com" title="Go to aglyn.com">
+    <img src="https://aglyn.com/_static/images/icons/icon.svg" alt="aglyn-logo" width="120px" height="120px"/>
   </a>
-</div>
+  <br>
+  <i>Aglyn is a website builder platform for your business goals
+    <br> using an easy to learn clickable screen.</i>
+  <br>
+</p>
+
+<p align="center">
+  <a href="https://aglyn.com"><strong>aglyn.com</strong></a>
+  <br>
+  <a href="https://console.aglyn.com">Sign in</a>
+  ·
+  <a href="https://console.aglyn.com">Sign up</a>
+  <br>
+</p>
+
+<p align="center">
+  <a href="CONTRIBUTING.md">Contributing Guidelines</a>
+  ·
+  <a href="https://github.com/aglyn/core/issues">Submit an Issue</a>
+  <br>
+  <br>
+</p>
 
 
-<div align="center">
-  <h1>Aglyn</h1>
-  <p>Website Designer Platform for Your Business Goals</p>
-  <a href="https://aglyn.com/" title="Aglyn visit secure website (https://aglyn.com/)">
+<p align="center">
    <img src="https://img.shields.io/badge/Aglyn-Secure_Website-9C27B0?style=for-the-badge&cacheSeconds=maxAge&labelColor=404C5C&color=9C27B0&cacheSeconds=maxAge&logoHeight=40&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PGNsaXBQYXRoIGlkPSJiIj48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiLz48L2NsaXBQYXRoPjwvZGVmcz48ZyBpZD0iYSIgY2xpcC1wYXRoPSJ1cmwoI2IpIj48cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9IiM0MDRjNWMiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzLjEyOCAyLjYyOSkiPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgMC43KSI+PHBhdGggZD0iTTE3LjQyMiwxOC41ODNIMTUuMjY5bC0yLjY3My01LjhINS40NTNMMi44LDE4LjU4M0guNTU3bDguMTg0LTE4aC42MTVabS01Ljc0OC03Ljg1M0w5LjA0OCw0Ljg4OCw2LjQsMTAuNzMxWiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTAuNTU3IC0wLjU4MykiIGZpbGw9IiMwMzliZTUiLz48L2c+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMSAwLjM0NikiPjxwYXRoIGQ9Ik0xNy40MjIsMTguNTgzSDE1LjI2OWwtMi42NzMtNS44SDUuNDUzTDIuOCwxOC41ODNILjU1N2w4LjE4NC0xOGguNjE1Wm0tNS43NDgtNy44NTNMOS4wNDgsNC44ODgsNi40LDEwLjczMVoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0wLjU1NyAtMC41ODMpIiBmaWxsPSIjOWMyN2IwIi8+PC9nPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIpIj48cGF0aCBkPSJNMTcuNDIyLDE4LjU4M0gxNS4yNjlsLTIuNjczLTUuOEg1LjQ1M0wyLjgsMTguNTgzSC41NTdsOC4xODQtMThoLjYxNVptLTUuNzQ4LTcuODUzTDkuMDQ4LDQuODg4LDYuNCwxMC43MzFaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMC41NTcgLTAuNTgzKSIgZmlsbD0iI2ZmZiIvPjwvZz48L2c+PC9nPjwvc3ZnPg==" alt="aglyn secure website"/>
   </a>
   <a href="#">
@@ -37,30 +57,30 @@
   </a>
   <br/>
   <br/>
-</div>
+</p>
 
-##### Monorepo status
+<p align="center">
+  <a href="https://github.com/aglyn/core">
+    <img src="https://img.shields.io/github/license/aglyn/core?style=for-the-badge&cacheSeconds=maxAge&labelColor=404C5C&" alt="Monorepo license" />
+  </a>&nbsp;
+  <a href="https://github.com/aglyn/core">
+    <img src="https://img.shields.io/github/package-json/v/aglyn/core?style=for-the-badge&cacheSeconds=maxAge&labelColor=404C5C&" alt="Monorepo version" />
+  </a>
+</p>
 
-![license](https://img.shields.io/github/license/aglyn/core?style=for-the-badge&cacheSeconds=maxAge&labelColor=404C5C& "Monorepo license")
-![version](https://img.shields.io/github/package-json/v/aglyn/core?style=for-the-badge&cacheSeconds=maxAge&labelColor=404C5C& "Monorepo version")
+<h3 align="center">Connect with us</h3>
 
-
-<hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-
-<a name="about-aglyn"></a>
-
-## About Aglyn LLC Organization
-
-Enterprise: _Aglyn LLC (aglyn) is an American global distributed technology company and is most
-notable for Aglyn.com, as well as their contributions to improving the “no code” web development
-markets by optimizing the process and necessary steps for a website to get off the ground for
-organizations. Easing maintenance and minimizing work required by expensive engineers._
-
-##### Connect with us
-
-[![linkedin aglyn company](https://img.shields.io/badge/LinkedIn-Company_Page-0A66C2?logo=linkedin&style=for-the-badge&cacheSeconds=maxAge&color=0A66C2&logoColor=0A66C2&labelColor=F1F1F1)](https://www.linkedin.com/company/aglyn/ "LinkedIn company Aglyn (https://www.linkedin.com/company/aglyn/)")
-[![aglyn github organization](https://img.shields.io/badge/GitHub-Organization_Page-000000?style=for-the-badge&cacheSeconds=maxAge&labelColor=F1F1F1&color=404C5C&cacheSeconds=maxAge&logoHeight=40&logo=github&logoColor=000000)](https://aglyn.com/ "Aglyn visit GitHub organization")
-[![twitter aglyn official](https://img.shields.io/badge/Twitter-@AglynOfficial-1d9bf0?logo=twitter&style=for-the-badge&cacheSeconds=maxAge&color=1d9bf0&logoColor=1d9bf0&labelColor=F1F1F1)](https://www.linkedin.com/company/aglyn/ "Twitter Aglyn page (https://twitter.com/AglynOfficial)")
+<p align="center">
+  <a href="https://www.linkedin.com/company/aglyn/" title="Go to LinkedIn">
+    <img src="https://img.shields.io/badge/LinkedIn-Company_Page-0A66C2?logo=linkedin&style=for-the-badge&cacheSeconds=maxAge&color=0A66C2&logoColor=0A66C2&labelColor=F1F1F1" alt="linkedin-company-page" />
+  </a>&nbsp;
+  <a href="https://twitter.com/AglynOfficial" title="Go to Twitter">
+    <img src="https://img.shields.io/badge/Twitter-@AglynOfficial-1d9bf0?logo=twitter&style=for-the-badge&cacheSeconds=maxAge&color=1d9bf0&logoColor=1d9bf0&labelColor=F1F1F1" alt="twitter-aglyn" />
+  </a>&nbsp;
+  <a href="https://github.com/aglyn" title="Go to GitHub org">
+    <img src="https://img.shields.io/badge/GitHub-Organization_Page-000000?style=for-the-badge&cacheSeconds=maxAge&labelColor=F1F1F1&color=404C5C&cacheSeconds=maxAge&logoHeight=40&logo=github&logoColor=000000" alt="github-organization" />
+  </a>
+</p>
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
@@ -458,10 +478,33 @@ recommends: `build:`, `chore:`, `ci:`, `docs:`, `style:`, `refactor:`, `perf:`, 
 Other than `BREAKING CHANGE: <description>` may be provided and follow a convention similar
 to [git trailer format](https://git-scm.com/docs/git-interpret-trailers).
 
-<hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-
-## License
-
-[Apache–2.0](LICENSE)
 
 <hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+
+<a name="about" id="about"></a>
+
+<h2 align="center">About the organization</h2>
+
+<p align="center">
+  Enterprise: Aglyn LLC (aglyn) is an American global distributed technology company and is most
+  notable for Aglyn.com, as well as their contributions to improving the “no code” web development
+  markets by optimizing the process and necessary steps for a website to get off the ground for
+  organizations. Easing maintenance and minimizing work required by expensive engineers.
+</p>
+
+
+<hr/><!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SECTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+
+<h2 align="center">License</h2>
+
+<p align="center">
+  <a href="LICENSE">
+    Apache License
+    ·
+    Version 2.0
+    ·
+    January 2004
+  </a>
+</p>

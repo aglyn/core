@@ -3,22 +3,26 @@
   "sourceRoot": "libs/core/data/framework/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/js:swc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/core/data/framework",
+        "main": "libs/core/data/framework/src/index.ts",
+        "tsConfig": "libs/core/data/framework/tsconfig.lib.json",
+        "assets": ["libs/core/data/framework/*.md"]
+      }
+    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": [
-          "libs/core/data/framework/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/core/data/framework/**/*.ts"]
       },
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/core/data/framework"
-      ],
+      "outputs": ["coverage/libs/core/data/framework"],
       "options": {
         "jestConfig": "libs/core/data/framework/jest.config.ts",
         "passWithNoTests": true
@@ -31,10 +35,5 @@
       }
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:aglyn",
-    "scope:data",
-    "aglyn:framework"
-  ]
+  "tags": ["scope:lib", "scope:aglyn", "scope:data", "aglyn:framework"]
 }

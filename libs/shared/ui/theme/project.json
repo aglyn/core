@@ -3,31 +3,41 @@
   "sourceRoot": "libs/shared/ui/theme/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/web:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared/ui/theme",
+        "tsConfig": "libs/shared/ui/theme/tsconfig.lib.json",
+        "project": "libs/shared/ui/theme/package.json",
+        "entryFile": "libs/shared/ui/theme/src/index.ts",
+        "external": ["react/jsx-runtime"],
+        "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+        "compiler": "swc",
+        "assets": [
+          {
+            "glob": "libs/shared/ui/theme/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ]
+      }
+    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": [
-          "libs/shared/ui/theme/**/*.ts"
-        ]
+        "lintFilePatterns": ["libs/shared/ui/theme/**/*.ts"]
       },
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/shared/ui/theme"
-      ],
+      "outputs": ["coverage/libs/shared/ui/theme"],
       "options": {
         "jestConfig": "libs/shared/ui/theme/jest.config.ts",
         "passWithNoTests": true
       }
     }
   },
-  "tags": [
-    "scope:lib",
-    "scope:shared",
-    "scope:ui"
-  ]
+  "tags": ["scope:lib", "scope:shared", "scope:ui"]
 }
