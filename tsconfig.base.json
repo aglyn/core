@@ -28,6 +28,7 @@
     "strict": false,
     "strictBindCallApply": true,
     "stripInternal": true,
+    "strictNullChecks": false,
     "target": "es2015",
     "rootDir": ".",
     "baseUrl": ".",

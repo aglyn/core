@@ -1,10 +1,13 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/admin",
   "projectType": "application",
   "targets": {
     "build": {
       "executor": "@nrwl/next:build",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "root": "apps/admin",
@@ -41,7 +44,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/admin"],
+      "outputs": [
+        "coverage/apps/admin"
+      ],
       "options": {
         "jestConfig": "apps/admin/jest.config.ts",
         "passWithNoTests": true
@@ -49,11 +54,18 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/admin/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/admin/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     }
   },
-  "tags": ["scope:app", "scope:private"]
+  "tags": [
+    "scope:app",
+    "scope:private"
+  ]
 }

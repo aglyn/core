@@ -15,24 +15,28 @@
  * limitations under the License.
  */
 
-import { getApp } from '@aglyn/core-data-framework'
-import type { BesignerComponentProps } from '@aglyn/core-feature-besigner'
-import { HAS_BROWSER } from '@aglyn/shared-data-enums'
-import { mergeSxProps } from '@aglyn/shared-ui-theme'
-import { LOADING_OVERLAY_ELEMENT } from '@aglyn/shared-ui-jsx'
+import {getApp} from '@aglyn/core-data-framework'
+import type {BesignerComponentProps} from '@aglyn/core-feature-besigner'
+import {useBesignerAppContext} from '@aglyn/core-feature-besigner'
+import {HAS_BROWSER} from '@aglyn/shared-data-enums'
+import {LOADING_OVERLAY_ELEMENT, useLoading} from '@aglyn/shared-ui-jsx'
+import {encode} from '@msgpack/msgpack'
+import {Button} from '@mui/material'
 import dynamic from 'next/dynamic'
-import { useEffect } from 'react'
+import {useCallback, useEffect} from 'react'
 import '../../../../constants/app-setup'
+
 
 const AglynBesigner = dynamic<BesignerComponentProps>(
   () => import('@aglyn/core-feature-besigner').then((mod) => mod.BesignerComponent),
-  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT }
+  {ssr: false, loading: () => LOADING_OVERLAY_ELEMENT},
 )
 
-export interface BesignerProps extends BesignerComponentProps {}
+export interface BesignerPageProps {}
 
-function BesignerComponent(props: BesignerProps) {
-  const { sx, ...rest } = props
+function BesignerPage(props: BesignerPageProps) {
+  const app = useBesignerAppContext()
+  const {queueLoading} = useLoading()
 
   useEffect(() => {
     if (HAS_BROWSER()) {
@@ -40,10 +44,30 @@ function BesignerComponent(props: BesignerProps) {
     }
   }, [])
 
-  return <AglynBesigner sx={mergeSxProps({ flexGrow: 1, position: 'unset' }, sx)} {...rest} />
+  const handleClick = useCallback(async () => {
+    const dequeueLoading = queueLoading()
+    const elements = app.canvas.denormalizedElements
+    console.log('elements pre-encode', elements)
+    const encoded = encode(elements)
+    console.log('elements encoded', encoded)
+    dequeueLoading()
+  }, [app.canvas.denormalizedElements, queueLoading])
+
+  return (
+    <>
+      <Button
+        onClick={handleClick}
+      >
+        Save
+      </Button>
+      <AglynBesigner
+        sx={{flexGrow: 1, position: 'unset'}}
+      />
+    </>
+  )
 }
 
-BesignerComponent.displayName = 'BesignerComponent'
+BesignerPage.displayName = 'BesignerPage'
 
-export { BesignerComponent }
-export default BesignerComponent
+export {BesignerPage}
+export default BesignerPage

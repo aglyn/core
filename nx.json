@@ -18,20 +18,12 @@
     "default": {
       "runner": "@nrwl/nx-cloud",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ],
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
         "parallel": 1,
         "useDaemonProcess": true,
         "accessToken": "MmI2Y2NlN2MtNjM4NC00NTQ0LTgxODItNGI3YzMwZTQyZTM1fHJlYWQtd3JpdGU="
       }
     }
-  },
-  "cli": {
-    "defaultCollection": "@nrwl/next"
   },
   "generators": {
     "@nrwl/react": {
@@ -46,5 +38,6 @@
       }
     }
   },
-  "defaultProject": "console"
+  "defaultProject": "console",
+  "$schema": "./node_modules/nx/schemas/nx-schema.json"
 }

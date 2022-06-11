@@ -15,5 +15,4 @@
  * limitations under the License.
  */
 
-export * from './lib/besigner'
-export default './lib/components/besigner.component'
+export * from './besigner'

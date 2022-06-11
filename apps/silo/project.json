@@ -1,10 +1,13 @@
 {
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/silo",
   "projectType": "application",
   "targets": {
     "build": {
       "executor": "@nrwl/next:build",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "defaultConfiguration": "production",
       "options": {
         "root": "apps/silo",
@@ -42,11 +45,18 @@
     },
     "lint": {
       "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["apps/silo/**/*.{ts,tsx,js,jsx}"]
+        "lintFilePatterns": [
+          "apps/silo/**/*.{ts,tsx,js,jsx}"
+        ]
       }
     }
   },
-  "tags": ["scope:app", "scope:private"]
+  "tags": [
+    "scope:app",
+    "scope:private"
+  ]
 }

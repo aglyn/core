@@ -47,5 +47,6 @@
     "tenant-e2e": "apps/tenant-e2e",
     "www": "apps/www",
     "www-e2e": "apps/www-e2e"
-  }
+  },
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json"
 }
