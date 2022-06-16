@@ -22,9 +22,15 @@ import {
   setBesignerPanels,
 } from '@aglyn/core-data-besigner'
 import {duplicateCanvasElement} from '@aglyn/core-data-framework'
-import {useAglynElementData, useAglynElementLabel} from '@aglyn/core-feature-renderer'
+import {
+  useAglynElementComponentSchema,
+  useAglynElementData,
+  useAglynElementLabel,
+} from '@aglyn/core-feature-renderer'
+import {ICON_VARIANT_ENTITY_BLOCK} from '@aglyn/shared-data-enums'
 import {type KeyOf} from '@aglyn/shared-data-types'
 import {useSubscribable} from '@aglyn/shared-ui-jsx'
+import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
 import {Box} from '@mui/material'
 import MuiPopper, {type PopperProps as MuiPopperProps} from '@mui/material/Popper'
 import {type ChangeEvent, forwardRef, useCallback} from 'react'
@@ -102,11 +108,11 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
     const setHovered = useAglynCanvasSetHovered()
     const setSelected = useAglynCanvasSetSelected()
     const badgeLabel = useAglynElementLabel($id)
+    const icon = useAglynElementComponentSchema($id)?.icon
 
     const handleDuplicateClick = useCallback((e: ChangeEvent<unknown>) => {
       duplicateCanvasElement(app, {$id})
     }, [$id, app])
-
 
     const handleModifyClick = useCallback((e: ChangeEvent<unknown>) => {
       setBesignerPanels(app, {
@@ -120,7 +126,6 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
         }),
       })
     }, [app])
-
 
     const handleSelectParentClick = useCallback((e: ChangeEvent<unknown>) => {
       setSelected({$id: parentId})
@@ -239,8 +244,24 @@ const ElementOverlayPopperComponent = forwardRef<any, ElementOverlayPopperCompon
                             lineHeight: 1,
                             maxWidth: 120,
                             fontSize: 12,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
                           }}
                         >
+                          <MdiIcon
+                            color="inherit"
+                            path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
+                            sx={{
+                              mr: 0.35,
+                              pr: 0.25,
+                              ml: -0.35,
+                              fontSize: `1.1em`,
+                              borderRight: 1,
+                              borderColor: 'divider',
+                            }}
+                          />
                           {badgeLabel}
                         </Box>
                       ),
