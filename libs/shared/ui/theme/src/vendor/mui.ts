@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-import type { OverridableComponent } from '@mui/material/OverridableComponent'
-import type { Theme } from '@mui/material/styles'
+import type {OverridableComponent} from '@mui/material/OverridableComponent'
+import type {Theme} from '@mui/material/styles'
 // eslint-disable-next-line no-restricted-imports
-import type { CSSProperties } from '@mui/material/styles/createMixins'
+import type {CSSProperties} from '@mui/material/styles/createMixins'
 // eslint-disable-next-line no-restricted-imports
-import type { Shadows } from '@mui/material/styles/shadows'
+import type {Shadows} from '@mui/material/styles/shadows'
 // import type { WithStyles } from '@mui/styles'
 // import type { ClassKeyInferable } from '@mui/styles/withStyles'
 import * as React from 'react'
-import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
+import type {ColorPropOverrides, IActionStates} from '../lib/theme.types'
 // import type {ContainerTypeMap} from '@mui/material/Container'
 
 //    _____     _______ ____  ____  ___ ____  _____ ____
@@ -192,7 +192,7 @@ declare module '@mui/styles' {
 //  | |___ /  \|  __/| |_| |  _ < | |  ___) |
 //  |_____/_/\_\_|    \___/|_| \_\|_| |____/
 
-export { type Overwrite } from '@mui/types'
+export {type Overwrite} from '@mui/types'
 
 export {
   type ShapeOptions,
@@ -204,8 +204,8 @@ export {
   type BoxProps,
 } from '@mui/system'
 
-export { darkScrollbar } from '@mui/material'
-export { visuallyHidden } from '@mui/utils'
+export {darkScrollbar} from '@mui/material'
+export {visuallyHidden} from '@mui/utils'
 
 export {
   type Breakpoint,
@@ -224,7 +224,7 @@ export {
   type Direction,
   type Duration,
   type Easing,
-  type ExtendPropsOfWithStyles,
+  // type ExtendPropsOfWithStyles,
   type Palette,
   type PaletteColor,
   type PaletteColorOptions,
@@ -273,15 +273,15 @@ export {
 } from '@mui/material/styles/createPalette'
 
 // eslint-disable-next-line no-restricted-imports
-export { type TypographyOptions } from '@mui/material/styles/createTypography'
+export {type TypographyOptions} from '@mui/material/styles/createTypography'
 
 // eslint-disable-next-line no-restricted-imports
-export { type Shadows } from '@mui/material/styles/shadows'
+export {type Shadows} from '@mui/material/styles/shadows'
 
 // export { type ClassKeyInferable, type CreateCSSProperties } from '@mui/styles/withStyles'
 
 // eslint-disable-next-line no-restricted-imports
-export { type Shape } from '@mui/system/createTheme/shape'
+export {type Shape} from '@mui/system/createTheme/shape'
 
 export {
   type BaseCreateCSSProperties,

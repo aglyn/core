@@ -19,10 +19,12 @@ module.exports = {
   root: true,
   ignorePatterns: ['**/*'],
   plugins: ['@nrwl/nx', 'eslint-plugin-tsdoc'],
+  extends: './node_modules/gts',
   overrides: [
     {
       files: ['*.ts', '*.tsx', '*.js', '*.jsx'],
       rules: {
+        'node/no-extraneous-import': 'off',
         '@nrwl/nx/enforce-module-boundaries': [
           'error',
           {
@@ -84,10 +86,7 @@ module.exports = {
     },
     {
       files: ['*.ts'],
-      extends: [
-        'plugin:@nrwl/nx/typescript',
-        'plugin:@next/next/core-web-vitals',
-      ],
+      extends: ['plugin:@nrwl/nx/typescript', 'plugin:@next/next/core-web-vitals'],
       rules: {
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
@@ -98,11 +97,9 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 'off',
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react-hooks/exhaustive-deps': 'error',
@@ -128,11 +125,9 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 'off',
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react/no-children-prop': 'off',
@@ -146,11 +141,9 @@ module.exports = {
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react/no-children-prop': 'off',
@@ -164,11 +157,9 @@ module.exports = {
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react/no-children-prop': 'off',
