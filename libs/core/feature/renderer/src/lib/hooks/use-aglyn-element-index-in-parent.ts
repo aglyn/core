@@ -19,25 +19,33 @@ import type { ElementId } from '@aglyn/core-data-foundation'
 import { useMemo } from 'react'
 import { useAglynElementData } from './use-aglyn-element-data'
 
-export type useAglynElementParentPosition = [
-  indexInParent: number,
-  isFirstElement: boolean,
-  isLastElement: boolean,
-  parentId: ElementId,
-  parentElementIds: ElementId[],
-]
+export type useAglynElementParentPosition = {
+  index: number
+  isFirst: boolean
+  isLast: boolean
+  parentId: ElementId
+  elements: ElementId[]
+}
 
-export function useAglynElementParentPosition(
+export function useAglynElementIndexInParent(
   $id: ElementId,
 ): useAglynElementParentPosition {
   const parentId = useAglynElementData($id, 'parentId')
-  const parentElements = useAglynElementData(parentId, 'elements') || []
-  const indexInParent = parentElements.indexOf($id)
-  const length = parentElements.length
-  const [isFirst, isLast] = useMemo(() => {
-    return [indexInParent === 0, length === indexInParent + 1]
-  }, [indexInParent, length])
-
-  return [indexInParent, isFirst, isLast, parentId, parentElements]
+  const _elements = useAglynElementData(parentId, 'elements')
+  const elements = useMemo(() => _elements || [], [_elements])
+  const length = elements.length
+  const index = useMemo(() => elements.indexOf($id), [$id, elements])
+  const isFirst = useMemo(() => index === 0, [index])
+  const isLast = useMemo(() => length === index + 1, [index, length])
+  return useMemo(
+    () => ({
+      index,
+      isFirst,
+      isLast,
+      parentId,
+      elements,
+    }),
+    [index, isFirst, isLast, parentId, elements],
+  )
 }
 export default useAglynElementData

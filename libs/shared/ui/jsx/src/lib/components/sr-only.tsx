@@ -16,13 +16,13 @@
  */
 
 import { styled, visuallyHidden } from '@aglyn/shared-ui-theme'
-import type { BoxProps } from '@mui/material'
+import { Box, type BoxProps } from '@mui/material'
 
-export interface SrOnlyComponentProps extends BoxProps {}
+export interface SrOnlyProps extends BoxProps {}
 
-export const SrOnly = styled('div', {
+export const SrOnly = styled(Box, {
   name: 'AglynSrOnly',
-})<SrOnlyComponentProps>({
+})<SrOnlyProps>({
   ...visuallyHidden,
 })
 SrOnly.displayName = 'SrOnly'

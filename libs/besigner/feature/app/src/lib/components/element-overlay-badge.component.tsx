@@ -17,7 +17,7 @@
 
 import { isRootElementId, moveCanvasElement } from '@aglyn/core-data-app'
 import type { ElementId } from '@aglyn/core-data-foundation'
-import { useAglynElementParentPosition } from '@aglyn/core-feature-renderer'
+import { useAglynElementIndexInParent } from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_MODIFY_DRAG,
   ICON_VARIANT_MODIFY_DUPLICATE,
@@ -26,7 +26,7 @@ import {
   ICON_VARIANT_MODIFY_MOVE_UP,
   ICON_VARIANT_SELECT_PARENT,
 } from '@aglyn/shared-data-enums'
-import { SrOnly, type SrOnlyComponentProps } from '@aglyn/shared-ui-jsx'
+import { SrOnly, type SrOnlyProps } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
@@ -42,10 +42,10 @@ import type { DragElementWrapper } from 'react-dnd'
 import useBesignerAppContext from '../utils/use-besigner-app-context'
 
 export interface BadgeButtonProps extends Omit<TooltipProps, 'children'> {
-  children?: SrOnlyComponentProps['children']
+  children?: SrOnlyProps['children']
   icon: MdiIconProps
   ButtonProps?: ButtonProps
-  SrOnlyProps?: SrOnlyComponentProps
+  SrOnlyProps?: SrOnlyProps
 }
 
 export const BadgeButton = forwardRef<any, BadgeButtonProps>((props, ref) => {
@@ -80,8 +80,7 @@ BadgeButton.displayName = 'AglynBadgeButton'
 export const MoveButtons = forwardRef<any, { $id: ElementId }>((props, ref) => {
   const { $id } = props
   const app = useBesignerAppContext()
-  const [index, isFirstChild, isLastChild, parentId] =
-    useAglynElementParentPosition($id)
+  const { index, isFirst, isLast, parentId } = useAglynElementIndexInParent($id)
   const handleMoveUp = useCallback(
     (e: ChangeEvent<unknown>) => {
       moveCanvasElement(app, { $id, parentId, index: index - 1 })
@@ -97,7 +96,7 @@ export const MoveButtons = forwardRef<any, { $id: ElementId }>((props, ref) => {
 
   return (
     <>
-      {!isFirstChild && (
+      {!isFirst && (
         <BadgeButton
           ref={ref}
           title="Move up"
@@ -106,7 +105,7 @@ export const MoveButtons = forwardRef<any, { $id: ElementId }>((props, ref) => {
           icon={{ path: ICON_VARIANT_MODIFY_MOVE_UP.path }}
         />
       )}
-      {!isLastChild && (
+      {!isLast && (
         <BadgeButton
           ref={ref}
           title="Move down"

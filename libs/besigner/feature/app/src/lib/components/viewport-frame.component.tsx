@@ -27,7 +27,7 @@ import {
   useShadowDomContext,
 } from '@aglyn/shared-ui-jsx'
 import { styled, ThemeProvider } from '@aglyn/shared-ui-theme'
-import { Box, type BoxProps, CssBaseline } from '@mui/material'
+import { Box, type BoxProps, CssBaseline, GlobalStyles } from '@mui/material'
 // import {MuiShadowDom} from '@aglyn/shared-ui-jsx'
 import {
   type ComponentProps,
@@ -70,7 +70,7 @@ const Elements = () => {
   return (
     <Box
       sx={{
-        // bgcolor: 'background.paper',
+        bgcolor: 'background.paper',
         minHeight: 1,
         minWidth: 1,
       }}
@@ -83,15 +83,22 @@ const Elements = () => {
     </Box>
   )
 }
-
+const ViewportGlobalStyles = (
+  <GlobalStyles
+    styles={{
+      ':host': {
+        all: 'initial',
+      },
+    }}
+  />
+)
 const ThemedElementContainer = () => {
   const shadowDom = useShadowDomContext()
   const hostTheme = useAglynSiteTheme({ container: shadowDom })
   return (
     <ThemeProvider theme={hostTheme}>
-      <CssBaseline>
-        <Elements />
-      </CssBaseline>
+      <CssBaseline />
+      <Elements />
     </ThemeProvider>
   )
 }
@@ -105,7 +112,10 @@ const SiteContainer = (props: SiteShadowDomProps) => {
       mode="closed"
       {...rest}
     >
-      <ThemedElementContainer />
+      <>
+        {ViewportGlobalStyles}
+        <ThemedElementContainer />
+      </>
     </SiteShadowDom>
   )
 }

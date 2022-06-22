@@ -40,15 +40,19 @@ export function useAglynElementData<P>(
 export function useAglynElementData<
   P,
   K extends keyof AglynElementDenormalized<P> = null,
->($id: ElementId, property: K): AglynElementDenormalized<P>[K]
+>(
+  $id: ElementId,
+  property: K,
+  defaultValue?: any,
+): AglynElementDenormalized<P>[K]
 export function useAglynElementData<
   P,
   K extends keyof AglynElementDenormalized<P> = null,
->($id: ElementId, property?: K): UseAglynElementData<P, K> {
+>($id: ElementId, property?: K, defaultValue?: any): UseAglynElementData<P, K> {
   const app = useAglynAppContext()
   return useSubscribable(
     getCanvasDenormalizedElementsStore(app),
-    undefined,
+    defaultValue,
     (store) => {
       const element = store?.[$id]
       return property ? element?.[property] : element

@@ -15,16 +15,20 @@
  * limitations under the License.
  */
 
-import type {PaletteOptions, Theme, ThemeOptions} from '../vendor/mui'
-import {buildFontFamilyList} from './constants'
-import type {IActionStates} from './theme.types'
+import type { PaletteOptions, Theme, ThemeOptions } from '../vendor/mui'
+import { buildFontFamilyList } from './constants'
+import type { IActionStates } from './theme.types'
 import createResponsiveTheme from './util/create-responsive-theme'
-
 
 export type ColorVariant = 'light' | 'dark'
 export type BackgroundRecord = PaletteOptions['background']
-export type OrdinalIdentifier = 'primary' | 'secondary' | 'tertiary' | 'quaternary'
-export type OrdinalRecord<T extends OrdinalIdentifier = OrdinalIdentifier> = Pick<PaletteOptions, T>
+export type OrdinalIdentifier =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'quaternary'
+export type OrdinalRecord<T extends OrdinalIdentifier = OrdinalIdentifier> =
+  Pick<PaletteOptions, T>
 export type PrimaryRecord = OrdinalRecord<'primary'>['primary']
 export type SecondaryRecord = OrdinalRecord<'secondary'>['secondary']
 export type TertiaryRecord = OrdinalRecord<'tertiary'>['tertiary']
@@ -130,26 +134,26 @@ export const ordinalQuaternaryLight: QuaternaryRecord = {
   main: '#E040FB',
   light: '#E666FB',
   dark: '#9C2CAF',
-  contrastText: '#FFFFFF',
+  // contrastText: '#FFFFFF',
 }
 export const ordinalQuaternaryDark: QuaternaryRecord = {
   main: '#E040FB',
   light: '#E666FB',
   dark: '#9C2CAF',
-  contrastText: '#FFFFFF',
+  // contrastText: '#FFFFFF',
 }
 
 export const ordinalLight: OrdinalRecord = {
-  primary: {...ordinalPrimaryLight},
-  secondary: {...ordinalSecondaryLight},
-  tertiary: {...ordinalTertiaryLight},
-  quaternary: {...ordinalQuaternaryLight},
+  primary: { ...ordinalPrimaryLight },
+  secondary: { ...ordinalSecondaryLight },
+  tertiary: { ...ordinalTertiaryLight },
+  quaternary: { ...ordinalQuaternaryLight },
 }
 export const ordinalDark: OrdinalRecord = {
-  primary: {...ordinalPrimaryDark},
-  secondary: {...ordinalSecondaryDark},
-  tertiary: {...ordinalTertiaryDark},
-  quaternary: {...ordinalQuaternaryDark},
+  primary: { ...ordinalPrimaryDark },
+  secondary: { ...ordinalSecondaryDark },
+  tertiary: { ...ordinalTertiaryDark },
+  quaternary: { ...ordinalQuaternaryDark },
 }
 
 export const actionSvgBgLight: IActionStates = {
@@ -253,14 +257,14 @@ const baseOptions: ThemeOptions = {
       },
       // color: 'inherit', // Default color to inherit
       styleOverrides: {
-        root: ({theme}) => ({
+        root: ({ theme }) => ({
           padding: theme.spacing(1),
         }),
       },
       variants: [
         {
-          props: {variant: 'outlined'} as any, // @TODO ⚠️ fix typing
-          style: ({theme}) => ({
+          props: { variant: 'outlined' } as any, // @TODO ⚠️ fix typing
+          style: ({ theme }) => ({
             border: `1px solid`,
             borderColor: `inherit`,
           }),
@@ -284,7 +288,7 @@ const baseOptions: ThemeOptions = {
     MuiMenu: {},
     MuiToolbar: {
       styleOverrides: {
-        root: ({theme}) => ({
+        root: ({ theme }) => ({
           [theme.breakpoints.up('sm')]: {
             paddingLeft: theme.spacing(3),
             paddingRight: theme.spacing(3),
@@ -442,8 +446,8 @@ export const consoleOptions: ThemeOptions = {
   ...baseOptions,
   palette: {
     mode: 'light',
-    background: {...backgroundsLight},
-    grey: {...shadesOfGrey},
+    background: { ...backgroundsLight },
+    grey: { ...shadesOfGrey },
     ...ordinalLight,
     ...actionsLight,
     ...status,
@@ -453,8 +457,8 @@ export const consoleOptionsDark: ThemeOptions = {
   ...baseOptions,
   palette: {
     mode: 'dark',
-    background: {...backgroundsDark},
-    grey: {...shadesOfGrey},
+    background: { ...backgroundsDark },
+    grey: { ...shadesOfGrey },
     ...ordinalDark,
     ...actionsDark,
     ...status,
@@ -462,10 +466,10 @@ export const consoleOptionsDark: ThemeOptions = {
 }
 
 export const consoleThemeLight: Theme = createResponsiveTheme({
-  themeOptions: {...consoleOptions},
+  themeOptions: { ...consoleOptions },
 })
 export const consoleThemeDark: Theme = createResponsiveTheme({
-  themeOptions: {...consoleOptionsDark},
+  themeOptions: { ...consoleOptionsDark },
 })
 export const getConsoleTheme = (mode: 'light' | 'dark' = 'light') => {
   const theme = {

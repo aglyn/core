@@ -31,10 +31,13 @@ import { ICON_VARIANT_ENTITY_BLOCK } from '@aglyn/shared-data-enums'
 import { type KeyOf } from '@aglyn/shared-data-types'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
-import { Box, Stack } from '@mui/material'
-import MuiPopper, {
+import {
+  Divider,
+  Popper as MuiPopper,
   type PopperProps as MuiPopperProps,
-} from '@mui/material/Popper'
+  Stack,
+  Typography,
+} from '@mui/material'
 import { type ChangeEvent, forwardRef, useCallback } from 'react'
 import { RenderedCanvasElementsContext } from '../contexts/rendered-canvas-elements'
 import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
@@ -163,7 +166,8 @@ const ElementOverlayPopperComponent = forwardRef<
     <RenderedCanvasElementsContext.Consumer>
       {([, , getElementRef]) => {
         const data = getElementRef($id)
-        const anchorEl = data?.element?.current || virtualElement,
+        const anchorEl = () =>
+            getElementRef($id)?.element?.current || virtualElement,
           dragHandleRef = data?.dragHandle
 
         return (
@@ -183,7 +187,7 @@ const ElementOverlayPopperComponent = forwardRef<
           >
             <ElementOverlayOutlineComponent
               $id={$id}
-              anchorEl={anchorEl}
+              anchorEl={anchorEl()}
               data-aglyn-overlay-id={$id}
               data-aglyn-overlay-variant={variant}
               data-aglyn-overlay-type="outline"
@@ -249,19 +253,27 @@ const ElementOverlayPopperComponent = forwardRef<
                           data-aglyn-overlay-id={$id}
                           data-aglyn-overlay-variant={variant}
                           data-aglyn-overlay-type="badge-label"
-                          flexDirection="row"
+                          direction="row"
                           justifyContent="flex-start"
                           alignItems="center"
+                          spacing={0.35}
+                          divider={
+                            <Divider
+                              orientation="vertical"
+                              variant="fullWidth"
+                              light
+                              flexItem
+                            />
+                          }
                           sx={{
                             pointerEvents: 'none',
-                            marginLeft: '-2px',
-                            bgcolor: 'secondary.main',
+                            ml: '-2px',
+                            mb: '1px',
+                            bgcolor: 'secondary.dark',
                             color: 'secondary.contrastText',
-                            pl: 0.5,
-                            pr: 0.4,
-                            py: 0.4,
-                            lineHeight: 1,
-                            maxWidth: 120,
+                            px: 0.5,
+                            py: 0.35,
+                            maxWidth: 140,
                             fontSize: 12,
                           }}
                         >
@@ -269,21 +281,18 @@ const ElementOverlayPopperComponent = forwardRef<
                             color="inherit"
                             path={icon?.path || ICON_VARIANT_ENTITY_BLOCK.path}
                             sx={{
-                              mr: 0.35,
-                              pr: 0.25,
                               fontSize: `1.1em`,
-                              borderRight: 1,
-                              borderColor: 'divider',
                             }}
                           />
-                          <Box
-                            component={'span'}
+                          <Typography
+                            component="div"
                             children={badgeLabel}
-                            sx={{
-                              whiteSpace: 'nowrap',
-                              textOverflow: 'ellipsis',
-                              overflow: 'hidden',
-                            }}
+                            textOverflow={'ellipsis'}
+                            overflow={'hidden'}
+                            whiteSpace={'nowrap'}
+                            lineHeight={1}
+                            letterSpacing={-0.25}
+                            fontSize={11}
                           />
                         </Stack>
                       ),
