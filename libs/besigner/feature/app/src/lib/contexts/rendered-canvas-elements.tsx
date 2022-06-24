@@ -20,30 +20,30 @@ import {
   createContext,
   type MutableRefObject,
   useContext,
+  useMemo,
   useRef,
-  useState,
 } from 'react'
 import type { DragElementWrapper, DragSourceOptions } from 'react-dnd'
 
 export type ElementDragHandle = DragElementWrapper<DragSourceOptions>
 export type ElementCanvasRefObject = {
   $id: ElementId
-  element: MutableRefObject<Element>
+  node: Element
   dragHandle: ElementDragHandle
 }
 
-export type RenderedCanvasElements = [
-  setElementRef: ($id: ElementId, ref: ElementCanvasRefObject) => void,
-  deleteElementRef: ($id: ElementId) => void,
-  getElementRef: ($id: ElementId) => ElementCanvasRefObject,
-]
+export type RenderedCanvasElementsType = {
+  elements: MutableRefObject<Record<ElementId, ElementCanvasRefObject>>
+  setElementRef($id: ElementId, ref: ElementCanvasRefObject): void
+  deleteElementRef($id: ElementId): void
+}
 
 export const RenderedCanvasElementsContext =
-  createContext<RenderedCanvasElements>([
-    (() => {}) as any,
-    (() => {}) as any,
-    (() => {}) as any,
-  ])
+  createContext<RenderedCanvasElementsType>({
+    elements: { current: null } as any,
+    setElementRef() {},
+    deleteElementRef() {},
+  })
 RenderedCanvasElementsContext.displayName = 'RenderedCanvasElementsContext'
 RenderedCanvasElementsContext.aglyn = true
 
@@ -57,18 +57,21 @@ export interface RenderedCanvasElementsProps {
 
 function RenderedCanvasElementsProvider(props: RenderedCanvasElementsProps) {
   const { children } = props
-  const elementRefs = useRef<Record<ElementId, ElementCanvasRefObject>>({})
-  const [context] = useState<RenderedCanvasElements>(() => [
-    ($id, ref): void => {
-      elementRefs.current[$id] = ref
-    },
-    ($id): void => {
-      delete elementRefs.current[$id]
-    },
-    ($id) => {
-      return elementRefs.current[$id]
-    },
-  ])
+  const elements = useRef<Record<ElementId, ElementCanvasRefObject>>({})
+  const context = useMemo<RenderedCanvasElementsType>(
+    () => ({
+      get elements() {
+        return elements
+      },
+      setElementRef($id, ref): void {
+        elements.current[$id] = ref
+      },
+      deleteElementRef($id): void {
+        delete elements.current[$id]
+      },
+    }),
+    [],
+  )
 
   return (
     <RenderedCanvasElementsContext.Provider value={context}>

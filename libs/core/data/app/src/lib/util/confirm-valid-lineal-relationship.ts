@@ -98,14 +98,14 @@ function validateLinealOrder(
 
 export interface ConfirmValidLinealRelationshipOptions {
   item: {
-    componentId: ComponentId
-    bundleId: ComponentId
-    hierarchy: AglynComponentHierarchyFlags
+    componentId?: ComponentId
+    bundleId?: ComponentId
+    hierarchy?: AglynComponentHierarchyFlags
   }
   parent: {
-    componentId: ComponentId
-    bundleId: ComponentId
-    hierarchy: AglynComponentHierarchyFlags
+    componentId?: ComponentId
+    bundleId?: ComponentId
+    hierarchy?: AglynComponentHierarchyFlags
   }
 }
 

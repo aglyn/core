@@ -35,13 +35,10 @@ export interface ElementLeafComponentProps extends LeafComponentProps {}
 const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
   (props, ref) => {
     const { $id, leafComponent, ...rest } = props
-    const [, dragHandle, dragPreview] = useLeafDrag(
-      $id,
-      DndDragType.CANVAS_ELEMENT,
-    )
+    const [, dragHandle, dragPreview] = useLeafDrag($id, DndDragType.CANVAS)
     const [, dropRef] = useLeafDrop($id, DndDropType.INSIDE)
-    const [_ref, element] = useRefForked<HTMLElement>(ref, dragPreview, dropRef)
-    const [setElementRef, deleteElementRef] = useRenderedCanvasElements()
+    const [_ref, node] = useRefForked<HTMLElement>(ref, dragPreview, dropRef)
+    const { setElementRef, deleteElementRef } = useRenderedCanvasElements()
     const componentId = useAglynElementData($id, 'componentId')
     const bundleId = useAglynElementData($id, 'bundleId')
     const isSelected = useAglynCanvasElementIsSelected($id)
@@ -49,7 +46,7 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
     const setSelected = useAglynCanvasSetSelected()
 
     useEffect(() => {
-      setElementRef($id, { $id, element, dragHandle })
+      setElementRef($id, { $id, node: node.current, dragHandle })
       return () => deleteElementRef($id)
     })
 

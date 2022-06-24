@@ -27,6 +27,7 @@ import {
   useAglynAppContext,
   useAglynElementComponentSchema,
 } from '@aglyn/core-feature-renderer'
+import { useMemo } from 'react'
 import {
   type ConnectDragPreview,
   type ConnectDragSource,
@@ -37,16 +38,14 @@ import { useAglynDndSetActive } from './use-aglyn-dnd-active'
 import { useAglynDndSetOver } from './use-aglyn-dnd-over'
 
 export type DragCollected = {
-  isDragging?: boolean
-  active?: BesignerDraggableItem
-  over?: BesignerDroppableItem
+  isDragging: boolean
 }
 
 export const useLeafDrag = (
   $id: ElementId,
-  type?: DndDragType,
+  dragType?: DndDragType,
 ): [DragCollected, ConnectDragSource, ConnectDragPreview] => {
-  const dragType = type ?? DndDragType.CANVAS_ELEMENT
+  const type = dragType ?? DndDragType.CANVAS
   const app = useAglynAppContext()
   const setSelected = useAglynCanvasSetSelected()
   const setDndActive = useAglynDndSetActive()
@@ -55,28 +54,53 @@ export const useLeafDrag = (
   const componentId = schema?.componentId
   const bundleId = schema?.bundleId
   const hierarchy = schema?.hierarchy
-  const disableDrag = schema?.features?.dragging === FEATURE_FLAG.DISABLED
-  const dragItem = {
-    $id,
-    type: dragType,
-    componentId,
-    bundleId,
-    hierarchy,
-  }
+  const flags = schema?.flags
+
+  const canDrag: boolean = useMemo(() => {
+    if (isRootElementId($id)) return false
+    if (flags?.dragging === FEATURE_FLAG.DISABLED) return false
+    return true
+  }, [$id, flags])
+  const dragItem: BesignerDraggableItem = useMemo(
+    () => ({
+      $id,
+      type,
+      componentId,
+      bundleId,
+      hierarchy,
+    }),
+    [$id, type, componentId, bundleId, hierarchy],
+  )
+
+  console.log('dragItem item canDrag', dragItem, $id, type, canDrag, flags)
 
   return useDrag<BesignerDraggableItem, BesignerDroppableItem, DragCollected>(
     () => ({
-      type: dragType,
+      options: {
+        dropEffect: 'move',
+      },
+      type: dragItem.type,
+      canDrag: canDrag,
       item: () => {
         console.log('draggable item', dragItem)
-        setSelected({ $id })
+        setSelected({ $id: dragItem.$id })
         setDndActive(dragItem)
         return dragItem
       },
+      isDragging: (monitor) => {
+        console.log(
+          'monitor?.getItem()?.$id',
+          monitor?.getItem()?.$id,
+          dragItem?.$id,
+          canDrag,
+        )
+        return monitor?.getItem()?.$id === dragItem?.$id
+      },
       end: (dragItem, monitor) => {
-        const dropItem = monitor.getDropResult()
         setDndActive(undefined)
         setDndOver(undefined)
+        if (!monitor.didDrop()) return
+        const dropItem = monitor.getDropResult()
         if (!dropItem) return
         console.log('end drag ', dragItem, dropItem)
         moveCanvasElement(app, {
@@ -85,15 +109,11 @@ export const useLeafDrag = (
           index: NaN,
         })
       },
-      isDragging: (monitor) => monitor?.getItem()?.$id === dragItem?.$id,
-      canDrag: !isRootElementId($id) && !disableDrag,
       collect: (monitor) => ({
         isDragging: monitor.isDragging(),
-        // dropItem: monitor.getDropResult(),
-        // active: monitor.getItem(),
       }),
     }),
-    [dragItem, app, dragType],
+    [canDrag, dragItem, app, dragType, setSelected, setDndActive],
   )
 }
 export default useLeafDrag

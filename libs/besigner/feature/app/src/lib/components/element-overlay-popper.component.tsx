@@ -23,13 +23,13 @@ import {
 } from '@aglyn/besigner-data-app'
 import { duplicateCanvasElement } from '@aglyn/core-data-app'
 import {
-  useAglynElementComponentSchema,
   useAglynElementData,
   useAglynElementLabel,
 } from '@aglyn/core-feature-renderer'
 import { type KeyOf } from '@aglyn/shared-data-types'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import {
+  Box,
   Divider,
   Popper as MuiPopper,
   type PopperProps as MuiPopperProps,
@@ -37,7 +37,7 @@ import {
   Typography,
 } from '@mui/material'
 import { type ChangeEvent, forwardRef, useCallback } from 'react'
-import { RenderedCanvasElementsContext } from '../contexts/rendered-canvas-elements'
+import { useRenderedCanvasElements } from '../contexts/rendered-canvas-elements'
 import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
 import { useAglynCanvasSetSelected } from '../hooks/use-aglyn-canvas-selected'
 import useBesignerAppContext from '../utils/use-besigner-app-context'
@@ -100,7 +100,7 @@ const ElementOverlayPopperComponent = forwardRef<
   any,
   ElementOverlayPopperComponentProps
 >((props, ref) => {
-  const { variant, id, ...rest } = props || {}
+  const { variant, ...rest } = props || {}
 
   const app = useBesignerAppContext()
   const state = useSubscribable<BesignerCanvasItemValue>(
@@ -115,7 +115,8 @@ const ElementOverlayPopperComponent = forwardRef<
   const setHovered = useAglynCanvasSetHovered()
   const setSelected = useAglynCanvasSetSelected()
   const badgeLabel = useAglynElementLabel($id)
-  const icon = useAglynElementComponentSchema($id)?.icon
+  const { elements } = useRenderedCanvasElements()
+  const instance = elements.current[$id]
 
   const handleDuplicateClick = useCallback(
     (e: ChangeEvent<unknown>) => {
@@ -161,147 +162,141 @@ const ElementOverlayPopperComponent = forwardRef<
     [setHovered],
   )
 
-  return (
-    <RenderedCanvasElementsContext.Consumer>
-      {([, , getElementRef]) => {
-        const data = getElementRef($id)
-        const anchorEl = () =>
-            getElementRef($id)?.element?.current || virtualElement,
-          dragHandleRef = data?.dragHandle
+  const anchorEl = () => instance?.node
+  const isOpen = Boolean(instance?.node)
 
-        return (
-          <MuiPopper
-            ref={ref}
-            id={id}
-            anchorEl={anchorEl}
-            placement="top-start"
-            modifiers={modifiers}
-            data-aglyn-overlay-id={$id}
-            data-aglyn-overlay-variant={variant}
-            data-aglyn-overlay-type="popper"
-            open={Boolean(anchorEl)}
-            keepMounted
-            disablePortal
-            {...rest}
-          >
-            <ElementOverlayOutlineComponent
-              $id={$id}
-              anchorEl={anchorEl()}
-              data-aglyn-overlay-id={$id}
-              data-aglyn-overlay-variant={variant}
-              data-aglyn-overlay-type="outline"
-            >
-              <MuiPopper
-                anchorEl={anchorEl}
-                placement={
-                  variant === 'hoveredOverlay' ? 'top-start' : undefined
-                }
-                modifiers={[
-                  {
-                    name: 'flip',
-                    enabled: true,
-                    options: {
-                      altBoundary: true,
-                      rootBoundary: 'viewport',
-                      padding: 0,
-                    },
-                  },
-                  {
-                    name: 'preventOverflow',
-                    enabled: true,
-                    options: {
-                      altAxis: true,
-                      altBoundary: true,
-                      tether: true,
-                      rootBoundary: 'viewport',
-                      padding: 0,
-                    },
-                  },
-                ]}
-                data-aglyn-overlay-id={$id}
-                data-aglyn-overlay-variant={variant}
-                data-aglyn-overlay-type="popper"
-                open={Boolean(anchorEl)}
-                keepMounted
-                disablePortal
-                {...rest}
-              >
-                <div>
-                  {
-                    {
-                      selectedOverlay: (
-                        <ElementOverlayBadgeComponent
-                          $id={$id}
-                          data-aglyn-overlay-id={$id}
-                          data-aglyn-overlay-variant={variant}
-                          data-aglyn-overlay-type="badge-actions"
-                          dragHandleRef={dragHandleRef}
-                          onModifyClick={handleModifyClick}
-                          onDuplicateClick={handleDuplicateClick}
-                          onSelectParentClick={handleSelectParentClick}
-                          onHoverParent={handleHoverParent}
-                          onHoverParentLeave={handleHoverParentLeave}
-                          sx={{
-                            boxShadow: 4,
-                            pointerEvents: 'auto',
-                          }}
-                        />
-                      ),
-                      hoveredOverlay: (
-                        <Stack
-                          data-aglyn-overlay-id={$id}
-                          data-aglyn-overlay-variant={variant}
-                          data-aglyn-overlay-type="badge-label"
-                          direction="row"
-                          justifyContent="flex-start"
-                          alignItems="center"
-                          spacing={0.35}
-                          divider={
-                            <Divider
-                              orientation="vertical"
-                              variant="fullWidth"
-                              light
-                              flexItem
-                            />
-                          }
-                          sx={{
-                            pointerEvents: 'none',
-                            ml: '-2px',
-                            mb: '1px',
-                            bgcolor: 'secondary.main',
-                            color: 'secondary.contrastText',
-                            px: 0.5,
-                            py: 0.35,
-                            maxWidth: 140,
-                            fontSize: 12,
-                          }}
-                        >
-                          <ElementIconComponent
-                            $id={$id}
-                            color="inherit"
-                            sx={{ fontSize: `1.1em` }}
-                          />
-                          <Typography
-                            component="div"
-                            children={badgeLabel}
-                            textOverflow={'ellipsis'}
-                            overflow={'hidden'}
-                            whiteSpace={'nowrap'}
-                            // lineHeight={1}
-                            letterSpacing={-0.25}
-                            fontSize={11}
-                          />
-                        </Stack>
-                      ),
-                    }[variant]
-                  }
-                </div>
-              </MuiPopper>
-            </ElementOverlayOutlineComponent>
-          </MuiPopper>
-        )
-      }}
-    </RenderedCanvasElementsContext.Consumer>
+  const badge = {
+    selectedOverlay: (
+      <ElementOverlayBadgeComponent
+        $id={$id}
+        data-aglyn-overlay-id={$id}
+        data-aglyn-overlay-variant={variant}
+        data-aglyn-overlay-type="badge-actions"
+        dragHandle={instance?.dragHandle}
+        onModifyClick={handleModifyClick}
+        onDuplicateClick={handleDuplicateClick}
+        onSelectParentClick={handleSelectParentClick}
+        onHoverParent={handleHoverParent}
+        onHoverParentLeave={handleHoverParentLeave}
+        sx={{
+          boxShadow: 4,
+          pointerEvents: 'auto',
+        }}
+      />
+    ),
+    hoveredOverlay: (
+      <Stack
+        data-aglyn-overlay-id={$id}
+        data-aglyn-overlay-variant={variant}
+        data-aglyn-overlay-type="badge-label"
+        component="div"
+        direction="row"
+        justifyContent="flex-start"
+        alignItems="center"
+        spacing={0.35}
+        fontSize={6}
+        lineHeight={1}
+        fontWeight={600}
+        letterSpacing={-0.25}
+        divider={
+          <Divider orientation="vertical" variant="fullWidth" light flexItem />
+        }
+        sx={{
+          pointerEvents: 'none',
+          ml: '-2px',
+          mb: '1px',
+          bgcolor: 'secondary.main',
+          color: 'secondary.contrastText',
+          px: 0.5,
+          py: 0.35,
+          maxWidth: 140,
+          fontSize: 12,
+        }}
+      >
+        <Box
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          fontSize={1}
+          display="flex"
+        >
+          <ElementIconComponent
+            $id={$id}
+            color="inherit"
+            fontSize="inherit"
+            // sx={{ fontSize: `1.1em`, display: 'flex' }}
+          />
+        </Box>
+        <Typography
+          component="div"
+          children={badgeLabel}
+          textOverflow="ellipsis"
+          overflow="hidden"
+          whiteSpace="nowrap"
+          fontSize="inherit"
+        />
+      </Stack>
+    ),
+  }[variant]
+
+  return (
+    <MuiPopper
+      ref={ref}
+      anchorEl={anchorEl}
+      placement="top-start"
+      modifiers={modifiers}
+      data-aglyn-overlay-id={$id}
+      data-aglyn-overlay-variant={variant}
+      data-aglyn-overlay-type="popper"
+      open={isOpen}
+      keepMounted
+      disablePortal
+      {...rest}
+    >
+      <ElementOverlayOutlineComponent
+        $id={$id}
+        anchorEl={anchorEl()}
+        data-aglyn-overlay-id={$id}
+        data-aglyn-overlay-variant={variant}
+        data-aglyn-overlay-type="outline"
+      >
+        <MuiPopper
+          anchorEl={anchorEl}
+          placement={variant === 'hoveredOverlay' ? 'top-start' : undefined}
+          modifiers={[
+            {
+              name: 'flip',
+              enabled: true,
+              options: {
+                altBoundary: true,
+                rootBoundary: 'viewport',
+                padding: 0,
+              },
+            },
+            {
+              name: 'preventOverflow',
+              enabled: true,
+              options: {
+                altAxis: true,
+                altBoundary: true,
+                tether: true,
+                rootBoundary: 'viewport',
+                padding: 0,
+              },
+            },
+          ]}
+          data-aglyn-overlay-id={$id}
+          data-aglyn-overlay-variant={variant}
+          data-aglyn-overlay-type="popper"
+          open={isOpen}
+          keepMounted
+          disablePortal
+          {...rest}
+        >
+          <div>{badge}</div>
+        </MuiPopper>
+      </ElementOverlayOutlineComponent>
+    </MuiPopper>
   )
 })
 ElementOverlayPopperComponent.displayName = 'ElementOverlayPopperComponent'

@@ -23,6 +23,7 @@ import {
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { Grid, Typography, type TypographyProps } from '@mui/material'
+import { useMemo } from 'react'
 import { isElement } from 'react-is'
 import BreadcrumbsComponent, {
   type BreadcrumbsProps,
@@ -43,7 +44,7 @@ export interface DashboardHeaderProps
 function DashboardHeaderComponent(props: DashboardHeaderProps) {
   const {
     children,
-    header: headerProp,
+    header,
     breadcrumbItems,
     disableBreadcrumbs,
     headerRight,
@@ -54,8 +55,8 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
     children: headerChildren,
     sx: headerSx,
     icon: headerIcon,
-    ...header
-  } = headerProp || {}
+    ...headerProps
+  } = header || {}
 
   const breadcrumbs = useMemo(() => {
     return Array.isArray(breadcrumbItems) ? breadcrumbItems : []
@@ -98,7 +99,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
                   },
                   headerSx,
                 )}
-                {...header}
+                {...headerProps}
               >
                 {!headerIcon || isElement(headerIcon) ? (
                   headerIcon

@@ -121,7 +121,7 @@ export const MoveButtons = forwardRef<any, { $id: ElementId }>((props, ref) => {
 export interface ElementOverlayBadgeButtonsComponentProps
   extends ButtonGroupProps {
   $id: ElementId
-  dragHandleRef: DragElementWrapper<any>
+  dragHandle: DragElementWrapper<any>
   onDuplicateClick?: (e: ChangeEvent<unknown>) => void
   onModifyClick?: (e: ChangeEvent<unknown>) => void
   onSelectParentClick?: (e: ChangeEvent<unknown>) => void
@@ -135,7 +135,7 @@ const ElementOverlayBadgeComponent = forwardRef<
 >((props, ref) => {
   const {
     $id,
-    dragHandleRef,
+    dragHandle,
     onDuplicateClick,
     onModifyClick,
     onSelectParentClick,
@@ -192,9 +192,11 @@ const ElementOverlayBadgeComponent = forwardRef<
         <BadgeButton
           title="Drag"
           children="drag"
+          sx={{ '&, &:hover, &:focus': { cursor: 'move' } }}
+          // ref={dragHandleRef}
           ButtonProps={{
-            ref: dragHandleRef,
-            sx: { '&, &:hover': { cursor: 'move' } },
+            ref: dragHandle,
+            sx: { '&, &:hover, &:focus': { cursor: 'move' } },
           }}
           icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}
         />

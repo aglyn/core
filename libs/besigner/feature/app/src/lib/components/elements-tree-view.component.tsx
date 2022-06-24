@@ -41,14 +41,7 @@ import {
   TreeView as MuiTreeView,
 } from '@mui/lab'
 import { Box, Button, Stack, Typography } from '@mui/material'
-import {
-  ChangeEvent,
-  forwardRef,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ChangeEvent, forwardRef, useCallback, useMemo, useState } from 'react'
 import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
 import useAglynCanvasSelected, {
   useAglynCanvasSetSelected,
@@ -92,13 +85,15 @@ interface ElementsTreeItemComponentProps extends Partial<TreeItemProps> {
   $id: ElementId
 }
 
-const ElementsTreeItemComponent = forwardRef<
+const DraggableTreeItemComponent = forwardRef<
   any,
-  ElementsTreeItemComponentProps & { dragHandleRef?: any; dragPreviewRef?: any }
+  ElementsTreeItemComponentProps
 >((props, ref) => {
-  const { $id, dragHandleRef, dragPreviewRef, ...rest } = props,
-    elements = useAglynElementData($id, 'elements') || [],
-    label = useAglynElementLabel($id)
+  const { $id, ...rest } = props
+  const [, dragHandle, dragPreview] = useLeafDrag($id, DndDragType.TREE)
+  const [, dropRef] = useLeafDrop($id, DndDropType.INSIDE)
+  const elements = useAglynElementData($id, 'elements')
+  const label = useAglynElementLabel($id)
   const setHovered = useAglynCanvasSetHovered()
   const setSelected = useAglynCanvasSetSelected()
 
@@ -114,22 +109,22 @@ const ElementsTreeItemComponent = forwardRef<
     (e: ChangeEvent<any>) => {
       // e.preventDefault()
       // e.stopPropagation()
-      setSelected((prev) => ({
-        $id: $id && prev?.$id === $id ? undefined : $id,
-      }))
+      // setSelected((prev) => ({
+      //   $id: $id && prev?.$id === $id ? undefined : $id,
+      // }))
     },
     [$id, setSelected],
   )
 
   return (
     <TreeItem
-      ref={ref}
+      ref={useForkedRefs(ref, dropRef)}
       nodeId={$id}
       collapseIcon={<MdiIcon path={ICON_VARIANT_COLLAPSABLE_CLOSE.path} />}
       expandIcon={<MdiIcon path={ICON_VARIANT_COLLAPSABLE_OPEN.path} />}
       onMouseOver={handleOnMouseOver}
       label={
-        <Stack ref={dragPreviewRef} direction="row" alignItems="center">
+        <Stack ref={dragPreview} direction="row" alignItems="center">
           <Box
             component="div"
             sx={{
@@ -158,7 +153,7 @@ const ElementsTreeItemComponent = forwardRef<
           <Button
             component="div"
             color="inherit"
-            ref={dragHandleRef}
+            ref={dragHandle}
             onMouseDown={handleOnMouseDown}
             sx={{
               fontSize: 16,
@@ -182,30 +177,10 @@ const ElementsTreeItemComponent = forwardRef<
       }
       {...rest}
     >
-      {elements.map(($id) => (
+      {elements?.map(($id) => (
         <DraggableTreeItemComponent key={$id} $id={$id} />
       ))}
     </TreeItem>
-  )
-})
-
-const DraggableTreeItemComponent = forwardRef<
-  any,
-  ElementsTreeItemComponentProps
->((props, ref) => {
-  const { $id, ...rest } = props
-  const elemRef = useRef<Element>(null)
-  const [, dragHandle, dragPreview] = useLeafDrag($id, DndDragType.TREE_ELEMENT)
-  const [, dropRef] = useLeafDrop($id, DndDropType.INSIDE)
-
-  return (
-    <ElementsTreeItemComponent
-      ref={useForkedRefs(ref, elemRef, dropRef)}
-      dragPreviewRef={dragPreview}
-      dragHandleRef={dragHandle}
-      $id={$id}
-      {...rest}
-    />
   )
 })
 DraggableTreeItemComponent.displayName = 'DraggableTreeItemComponent'

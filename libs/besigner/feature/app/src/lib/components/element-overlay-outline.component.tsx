@@ -25,14 +25,13 @@ import {
   getElementClientRectBounding,
   type VirtualElement,
 } from '@aglyn/shared-util-dom'
-import Box, { type BoxProps } from '@mui/material/Box'
+import { Box, type BoxProps } from '@mui/material'
 import clsx from 'clsx'
 import { forwardRef, useMemo } from 'react'
 import useAglynCanvasElementStatus from '../hooks/use-aglyn-canvas-element-status'
 import useAglynDndElementStatus from '../hooks/use-aglyn-dnd-element-status'
 
 const classKeys = generateComponentClassKeys('AglynElementOverlayOutline', [
-  'open',
   'hoveringSelf',
   'selectedSelf',
   'draggingSelf',
@@ -64,6 +63,7 @@ const ElementOverlayOutline = styled(Box, {
     //   easing: theme.transitions.easing.easeInOut,
     // }),
 
+    cursor: 'copy',
     [`&.${classKeys.selectedSelf}`]: {
       outlineWidth: 2,
       outlineStyle: 'solid',
@@ -80,11 +80,10 @@ const ElementOverlayOutline = styled(Box, {
     [`&.${classKeys.draggingOver}`]: {
       outlineColor: theme.palette.quaternary.main,
       backgroundColor: alpha(theme.palette.quaternary.dark, 0.76),
-      [`&.${classKeys.draggingSelf}`]: {
-        outlineColor: 'transparent',
-        backgroundColor: alpha(theme.palette.secondary.light, 0.76),
-        cursor: 'no-drop',
-      },
+    },
+    [`&.${classKeys.draggingOver}.${classKeys.draggingSelf}`]: {
+      outlineColor: theme.palette.grey['500'],
+      backgroundColor: alpha(theme.palette.grey['500'], 0.64),
     },
   }
 })
@@ -113,10 +112,10 @@ const ElementOverlayOutlineComponent = forwardRef<
 
   const className = clsx(
     {
+      [classKeys.selectedSelf]: Boolean(isSelfSelected),
+      [classKeys.hoveringSelf]: Boolean(isSelfHovered),
       [classKeys.draggingSelf]: Boolean(isDragging),
       [classKeys.draggingOver]: Boolean(isDraggingOver),
-      [classKeys.hoveringSelf]: Boolean(isSelfHovered),
-      [classKeys.selectedSelf]: Boolean(isSelfSelected),
     },
     classNameProp,
   )

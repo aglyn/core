@@ -198,7 +198,7 @@ export interface AglynComponentSchema<P = any> {
   /**
    * Feature flags
    */
-  features?: {
+  flags?: {
     /**
      * Disable the use of emotion styled
      */

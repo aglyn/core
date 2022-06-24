@@ -39,13 +39,13 @@ export function createAglynComponent<P = any, C = any>(
   component: C | any,
   options?: Partial<ErrorBoundaryProps>,
 ): ComponentRegisterPayload<P> {
-  const { componentId, bundleId, features, styledOptions } = schema
+  const { componentId, bundleId, flags, styledOptions } = schema
   const pascalId = `${bundleId ? pascalCase(bundleId) + '-' : ''}${pascalCase(
     componentId,
   )}`
 
   const Component =
-    features?.emotion === FEATURE_FLAG.DISABLED
+    flags?.emotion === FEATURE_FLAG.DISABLED
       ? component
       : styled(component, styledOptions)({})
 

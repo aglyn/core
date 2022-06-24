@@ -36,9 +36,9 @@ export enum BesignerPanelTabFlag {
 }
 
 export enum DndDragType {
-  CANVAS_ELEMENT = 'canvas',
-  COMPONENT_TEMPLATE = 'template',
-  TREE_ELEMENT = 'tree',
+  CANVAS = 'canvas',
+  TEMPLATE = 'template',
+  TREE = 'tree',
 }
 
 export enum DndDropType {

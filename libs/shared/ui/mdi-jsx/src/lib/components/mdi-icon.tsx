@@ -19,23 +19,24 @@ import { DEFAULT_ICON } from '@aglyn/shared-data-mdi'
 import MuiSvgIcon, {
   type SvgIconProps as MuiSvgIconProps,
 } from '@mui/material/SvgIcon'
-import { forwardRef, type SVGAttributes } from 'react'
+import { forwardRef, type SVGAttributes, useMemo } from 'react'
 
-export interface MdiIconProps extends MuiSvgIconProps {
+export interface MdiIconProps extends Omit<MuiSvgIconProps, 'children'> {
   path?: string
   PathProps?: SVGAttributes<SVGPathElement>
+  children?: (element: JSX.Node) => JSX.Node
 }
 
 const MdiIcon = forwardRef<any, MdiIconProps>((props, ref) => {
   const { path, children, PathProps, ...rest } = props
 
+  const pathElement = useMemo(() => {
+    return <path d={path || DEFAULT_ICON.path} {...PathProps} />
+  }, [path, PathProps])
+
   return (
     <MuiSvgIcon ref={ref} {...rest}>
-      {children ? (
-        children
-      ) : (
-        <path d={path || DEFAULT_ICON.path} {...PathProps} />
-      )}
+      {typeof children === 'function' ? children(pathElement) : pathElement}
     </MuiSvgIcon>
   )
 })
