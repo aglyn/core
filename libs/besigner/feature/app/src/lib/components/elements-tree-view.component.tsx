@@ -105,16 +105,13 @@ const DraggableTreeItemComponent = forwardRef<
     [$id, setHovered],
   )
 
-  const handleOnMouseDown = useCallback(
-    (e: ChangeEvent<any>) => {
-      // e.preventDefault()
-      // e.stopPropagation()
-      // setSelected((prev) => ({
-      //   $id: $id && prev?.$id === $id ? undefined : $id,
-      // }))
-    },
-    [$id, setSelected],
-  )
+  const handleOnMouseDown = useCallback((e: ChangeEvent<any>) => {
+    // e.preventDefault()
+    // e.stopPropagation()
+    // setSelected((prev) => ({
+    //   $id: $id && prev?.$id === $id ? undefined : $id,
+    // }))
+  }, [])
 
   return (
     <TreeItem
