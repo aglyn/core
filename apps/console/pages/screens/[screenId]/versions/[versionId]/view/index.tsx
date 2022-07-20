@@ -23,12 +23,7 @@ import {
   ICON_VARIANT_PRIMARY_KEY,
   ICON_VARIANT_TEXT,
 } from '@aglyn/shared-data-enums'
-import {
-  AppLink,
-  ContainerComponent,
-  GridItems,
-  useLoading,
-} from '@aglyn/shared-ui-jsx'
+import { AppLink, Container, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -151,7 +146,7 @@ function ScreenDetails(props) {
           </AppLink>
         }
       >
-        <ContainerComponent gutterY maxWidth={CONTENT_MAX_WIDTH}>
+        <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <GridItems
             spacing={3}
             items={[
@@ -216,7 +211,7 @@ function ScreenDetails(props) {
               },
             ]}
           />
-        </ContainerComponent>
+        </Container>
       </DashboardLayout>
     </>
   )

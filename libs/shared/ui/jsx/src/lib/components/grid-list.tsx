@@ -36,7 +36,7 @@ import {
   type VirtuosoGridHandle,
   type VirtuosoGridProps,
 } from 'react-virtuoso'
-import ContainerComponent, { type ContainerProps } from './container.component'
+import Container, { type ContainerProps } from './container'
 
 const classKey = generateComponentClassKeys('AglynGridList', [
   'itemWrapper',
@@ -142,7 +142,7 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
             ...restGridProps
           } = GridContainerProps
           return (
-            <ContainerComponent gutterY {...ListWrapperProps}>
+            <Container gutterY {...ListWrapperProps}>
               {children}
               <Grid
                 ref={ref}
@@ -155,7 +155,7 @@ export const GridList = forwardRef<VirtuosoGridHandle, GridListProps>(
                 {...restGridProps}
                 {...props}
               />
-            </ContainerComponent>
+            </Container>
           )
         }),
       [ListWrapperProps, GridContainerProps],

@@ -36,12 +36,13 @@ import SecondaryAppBarComponent, {
 export interface BesignerAppBarProps extends SecondaryAppBarProps {
   detailsUrl: string
   onSave: ButtonProps['onClick']
+  onPropertiesEdit?: ButtonProps['onClick']
   saveAvailable?: boolean
 }
 
 const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
   (props, ref) => {
-    const { detailsUrl, onSave, saveAvailable } = props
+    const { onPropertiesEdit, onSave, saveAvailable } = props
 
     return (
       <SecondaryAppBarComponent
@@ -50,7 +51,7 @@ const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
           <Button
             size="small"
             color="tertiary"
-            // onClick={onSave}
+            onClick={onPropertiesEdit}
             endIcon={
               <MdiIcon
                 path={ICON_VARIANT_APP_SETTINGS.path}

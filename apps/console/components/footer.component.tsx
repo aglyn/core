@@ -18,7 +18,7 @@
 import { BUILD_ID, PACKAGE_VERSION } from '@aglyn/shared-data-enums'
 import {
   AppLink,
-  ContainerComponent,
+  Container,
   GridButtons,
   type GridButtonsProps,
 } from '@aglyn/shared-ui-jsx'
@@ -37,9 +37,9 @@ const FooterComponent = forwardRef<any, FooterProps>((props, ref) => {
   const { children, ...rest } = props
   return (
     <Box ref={ref} component="footer" {...rest}>
-      <ContainerComponent maxWidth={FOOTER_MAX_WIDTH} sx={{ mt: 6, pb: 1 }}>
+      <Container maxWidth={FOOTER_MAX_WIDTH} sx={{ mt: 6, pb: 1 }}>
         <Divider sx={{ mb: 2 }} />
-        <ContainerComponent dense maxWidth={false}>
+        <Container dense maxWidth={false}>
           <Stack flexWrap="wrap" alignItems="center" direction="row">
             <Stack component="div" flexGrow={1}>
               <CopyrightComponent />
@@ -73,8 +73,8 @@ const FooterComponent = forwardRef<any, FooterProps>((props, ref) => {
               </Typography>
             </Stack>
           </Stack>
-        </ContainerComponent>
-      </ContainerComponent>
+        </Container>
+      </Container>
     </Box>
   )
 })

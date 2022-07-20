@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
+import ComponentsGridListComponent from '@aglyn/besigner-feature-app/components/components-grid-list.component'
 import { AglynComponentsContext } from '@aglyn/core-feature-renderer'
 import { type ElementType, Fragment, useCallback, useState } from 'react'
 import {
-  ComponentsDrawerComponent,
-  type ComponentsDrawerProps,
-} from '../components/components-drawer.component'
+  CloseableDrawerComponent,
+  type CloseableDrawerProps,
+} from '../components/closeable-drawer.component'
 import {
   buildOptions,
   DEFAULT_OPTIONS,
@@ -29,17 +30,17 @@ import {
 } from './element-drawer-context'
 
 export interface ComponentsDrawerContextProviderProps
-  extends Partial<ComponentsDrawerProps> {
+  extends Partial<CloseableDrawerProps> {
   defaultOptions?: ElementDrawerOptions
   children?: JSX.Children
-  component?: ElementType<ComponentsDrawerProps>
+  component?: ElementType<CloseableDrawerProps>
 }
 
 function ComponentsDrawerContextProvider(
   props: ComponentsDrawerContextProviderProps,
 ) {
   const { children, defaultOptions, component, ...rest } = props
-  const Component = component || ComponentsDrawerComponent
+  const Component = component || CloseableDrawerComponent
   const [options, setOptions] = useState(() => ({
     ...DEFAULT_OPTIONS,
     ...defaultOptions,
@@ -82,12 +83,17 @@ function ComponentsDrawerContextProvider(
         {({ templateBlocks }) => (
           <Component
             open={isOpen}
-            options={options}
             onClose={handleClose}
-            onItemSelect={handleConfirm}
-            items={templateBlocks}
+            action={'Close'}
+            onActionClick={handleClose}
+            drawerTitle={options?.title}
             {...rest}
-          />
+          >
+            <ComponentsGridListComponent
+              onItemSelect={handleConfirm}
+              items={templateBlocks}
+            />
+          </Component>
         )}
       </AglynComponentsContext.Consumer>
     </Fragment>

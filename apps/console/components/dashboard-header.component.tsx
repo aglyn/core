@@ -18,7 +18,7 @@
 import {
   BackgroundImageComponent,
   type BackgroundImageComponentProps,
-  ContainerComponent,
+  Container,
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
@@ -78,7 +78,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
       }}
       {...rest}
     >
-      <ContainerComponent maxWidth={CONTENT_MAX_WIDTH}>
+      <Container maxWidth={CONTENT_MAX_WIDTH}>
         <Grid
           container
           direction="row"
@@ -87,7 +87,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
           spacing={2}
         >
           <Grid item>
-            <ContainerComponent dense maxWidth={false}>
+            <Container dense maxWidth={false}>
               <Typography
                 component="h1"
                 variant="h4"
@@ -143,13 +143,13 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
                   }}
                 />
               )}
-            </ContainerComponent>
+            </Container>
           </Grid>
 
           {headerRight && <Grid item>{headerRight}</Grid>}
         </Grid>
         {children}
-      </ContainerComponent>
+      </Container>
     </BackgroundImageComponent>
   )
 }

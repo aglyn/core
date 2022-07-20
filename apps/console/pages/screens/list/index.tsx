@@ -25,7 +25,7 @@ import {
 } from '@aglyn/shared-data-enums'
 import {
   AppLink,
-  ContainerComponent,
+  Container,
   NavigationDrawerComponent,
   SrOnly,
   useConfirmationContext,
@@ -274,7 +274,7 @@ function Screens(props) {
               </Button>
             }
           >
-            <ContainerComponent gutterY>
+            <Container gutterY>
               <FormRenderer
                 FormTemplate={AuthFormTemplateComponent}
                 componentMapper={simpleComponentMapper}
@@ -287,11 +287,11 @@ function Screens(props) {
                 error={error as any}
                 sx={{ mt: 2, mb: 1 }}
               />
-            </ContainerComponent>
+            </Container>
           </NavigationDrawerComponent>
         }
       >
-        <ContainerComponent gutterY maxWidth={CONTENT_MAX_WIDTH}>
+        <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <WidgetCardComponent>
             <DataTableComponent
               rowHeight={TABLE_ROW_HEIGHT}
@@ -306,7 +306,7 @@ function Screens(props) {
               pagination
             />
           </WidgetCardComponent>
-        </ContainerComponent>
+        </Container>
       </DashboardLayout>
     </>
   )

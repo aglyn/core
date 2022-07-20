@@ -16,7 +16,7 @@
  */
 
 import { ICON_VARIANT_HOME } from '@aglyn/shared-data-enums'
-import { ContainerComponent, GridItems } from '@aglyn/shared-ui-jsx'
+import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { useNextPageTitle } from '@aglyn/shared-ui-next'
 import DataTableComponent from '../components/data-table.component'
 import AuthenticatedLayout from '../components/layouts/authenticated.layout'
@@ -37,7 +37,7 @@ function Index(props) {
         icon: { path: ICON_VARIANT_HOME.path },
       }}
     >
-      <ContainerComponent gutterY maxWidth={CONTENT_MAX_WIDTH}>
+      <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
         <GridItems
           spacing={3}
           items={[
@@ -92,7 +92,7 @@ function Index(props) {
             },
           ]}
         />
-      </ContainerComponent>
+      </Container>
     </DashboardLayout>
   )
 }

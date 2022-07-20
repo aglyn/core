@@ -16,6 +16,7 @@
  */
 
 import {
+  PropertiesDialogComponent,
   useAddElementDrawerCallback,
   useBesignerAppContext,
   withBesignerContext,
@@ -45,7 +46,7 @@ import { Stack, Typography } from '@mui/material'
 import { Bytes, Timestamp } from 'firebase/firestore'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../components/besigner-app-bar.component'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import ConsoleLayout from '../../../../../../components/layouts/console.layout'
@@ -82,6 +83,7 @@ function Besigner(props) {
   const screenId = `${query.screenId}`
   const versionId = `${query.versionId}`
   const saveAvailable = true
+  const [screenDialog, setScreenDialog] = useState(false)
   const handleAddElementClick = useAddElementDrawerCallback()
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, { screenId, versionId })
   const normalized = useAglynCanvasElementsNormalized()
@@ -150,91 +152,105 @@ function Besigner(props) {
   }, [updateScreen, enqueueSnackbar, normalized, queueLoading])
 
   return (
-    <ConsoleLayout
-      title={'Besigner'}
-      appBarSuffix={'Besigner'}
-      centerNavigationItems={[
-        // {
-        //   id: 'center-nav-site-picker',
-        //   children: ,
-        // },
-        {
-          id: 'center-nav-back',
-          startIcon: (
-            <MdiIcon path={ICON_VARIANT_LEFT.path} fontSize={'small'} />
-          ),
-          color: 'tertiary',
-          children: (
-            <>
-              <span>{'Back'}</span>
-            </>
-          ),
-          href: detailUrl,
-        },
-        {
-          id: 'center-nav-file',
-          children: 'File',
-          // href: '/besigner',
-          items: [
-            {
-              id: 'center-nav-file-new-element',
-              icon: {
-                path: ICON_VARIANT_MODIFY_ADD.path,
+    <>
+      <ConsoleLayout
+        title={'Besigner'}
+        appBarSuffix={'Besigner'}
+        centerNavigationItems={[
+          // {
+          //   id: 'center-nav-site-picker',
+          //   children: ,
+          // },
+          {
+            id: 'center-nav-back',
+            startIcon: (
+              <MdiIcon path={ICON_VARIANT_LEFT.path} fontSize={'small'} />
+            ),
+            color: 'tertiary',
+            children: (
+              <>
+                <span>{'Back'}</span>
+              </>
+            ),
+            href: detailUrl,
+          },
+          {
+            id: 'center-nav-file',
+            children: 'File',
+            // href: '/besigner',
+            items: [
+              {
+                id: 'center-nav-file-new-element',
+                icon: {
+                  path: ICON_VARIANT_MODIFY_ADD.path,
+                },
+                children: 'Add new element',
+                onClick: handleAddElementClick,
               },
-              children: 'Add new element',
-              onClick: handleAddElementClick,
-            },
-            {
-              id: 'center-nav-file-screens',
-              icon: {
-                path: saveAvailable
-                  ? ICON_VARIANT_MODIFY_SAVE.path
-                  : ICON_VARIANT_SYMBOL_CONFIRMED.path,
+              {
+                id: 'center-nav-file-screens',
+                icon: {
+                  path: saveAvailable
+                    ? ICON_VARIANT_MODIFY_SAVE.path
+                    : ICON_VARIANT_SYMBOL_CONFIRMED.path,
+                },
+                children: saveAvailable ? 'Save screen' : 'Up to date',
+                onClick: handleSave,
               },
-              children: saveAvailable ? 'Save screen' : 'Up to date',
-              onClick: handleSave,
-            },
-          ],
-        },
-        {
-          id: 'center-nav-edit',
-          children: 'Edit',
-          // href: '/besigner',
-          items: [
-            {
-              id: 'center-nav-edit-properties',
-              icon: {
-                path: ICON_VARIANT_APP_SETTINGS.path,
+            ],
+          },
+          {
+            id: 'center-nav-edit',
+            children: 'Edit',
+            // href: '/besigner',
+            items: [
+              {
+                id: 'center-nav-edit-properties',
+                icon: {
+                  path: ICON_VARIANT_APP_SETTINGS.path,
+                },
+                children: 'Screen properties',
+                onClick: () => setScreenDialog(true),
               },
-              children: 'Screen properties',
-            },
-          ],
-        },
-      ]}
-    >
-      <NextPageTitle screen={'Besigner'} />
+            ],
+          },
+        ]}
+      >
+        <NextPageTitle screen={'Besigner'} />
 
-      {error || notFound ? (
-        <Stack alignItems="center" justifyContent="center">
-          <Typography>{'Not found'}</Typography>
-        </Stack>
-      ) : status === 'loading' ? (
-        LOADING_OVERLAY_ELEMENT
-      ) : (
-        <>
-          <BesignerAppBarComponent
-            detailsUrl={detailUrl}
-            onSave={handleSave}
-            saveAvailable
-          />
-          <WorkspaceEditorComponent>
-            <ViewportRootComponent>
-              <ViewportCanvasComponent />
-            </ViewportRootComponent>
-          </WorkspaceEditorComponent>
-        </>
-      )}
-    </ConsoleLayout>
+        {error || notFound ? (
+          <Stack alignItems="center" justifyContent="center">
+            <Typography>{'Not found'}</Typography>
+          </Stack>
+        ) : status === 'loading' ? (
+          LOADING_OVERLAY_ELEMENT
+        ) : (
+          <>
+            <BesignerAppBarComponent
+              detailsUrl={detailUrl}
+              onSave={handleSave}
+              onPropertiesEdit={() => setScreenDialog(true)}
+              saveAvailable
+            />
+            <WorkspaceEditorComponent>
+              <ViewportRootComponent>
+                <ViewportCanvasComponent />
+              </ViewportRootComponent>
+            </WorkspaceEditorComponent>
+          </>
+        )}
+      </ConsoleLayout>
+      <PropertiesDialogComponent
+        open={screenDialog}
+        onClose={() => {
+          setScreenDialog(false)
+        }}
+        onActionClick={async () => {
+          await handleSave()
+          setScreenDialog(false)
+        }}
+      />
+    </>
   )
 }
 
