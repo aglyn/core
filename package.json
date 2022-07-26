@@ -209,6 +209,8 @@
     "webpack-bundle-analyzer": "^4.5.0"
   },
   "overrides": {
+    "classname": "$clsx",
+    "classnames": "$clsx",
     "@mui/styles": {
       "@types/react": "$@types/react",
       "react": "$react"

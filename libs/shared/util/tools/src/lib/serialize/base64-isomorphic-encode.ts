@@ -16,14 +16,17 @@
  */
 
 /**
- * Decode a base64 value to unicode string, safely in BOM and Node
- * @param value - the base64 value to decode to unicode
- * @param encoding - character encoding of return value 'utf8'|'utf16'|'unicode'
+ * Encode a unicode value to base64 string, safely in BOM and Node
+ * @param value - the unicode value to encode to base64
+ * @param encoding - character encoding of value param 'utf8'|'utf16'|'unicode'
  */
-export function base64Decode(value: string, encoding: BufferEncoding = 'utf8'): string {
+export function base64IsomorphicEncode(
+  value: string,
+  encoding: BufferEncoding = 'utf8',
+): string {
   if (typeof window === 'undefined') {
-    return Buffer.from(value, 'base64').toString(encoding)
+    return Buffer.from(value, encoding).toString('base64')
   }
-  return window.atob(value)
+  return window.btoa(value)
 }
-export default base64Decode
+export default base64IsomorphicEncode

@@ -15,12 +15,23 @@
  * limitations under the License.
  */
 
+import type {
+  MakeLinkElementsConfig,
+  MakeMetaElementsConfig,
+} from '@aglyn/shared-ui-jsx'
 import { getConsoleMetaThemeColor } from '@aglyn/shared-ui-theme'
-import type { MakeLinkElementsConfig, MakeMetaElementsConfig } from '@aglyn/shared-ui-jsx'
 
 export const META_PREF: MakeMetaElementsConfig = [
-  [undefined, 'en-us', { httpEquiv: 'content-language', id: 'http-equiv-lang' }],
-  [undefined, 'IE=edge', { httpEquiv: 'X-UA-Compatible', id: 'http-equiv-x-ua-compatible' }],
+  [
+    undefined,
+    'en-us',
+    { httpEquiv: 'content-language', id: 'http-equiv-lang' },
+  ],
+  [
+    undefined,
+    'IE=edge',
+    { httpEquiv: 'X-UA-Compatible', id: 'http-equiv-x-ua-compatible' },
+  ],
   [
     'theme-color',
     getConsoleMetaThemeColor('light'),
@@ -34,7 +45,11 @@ export const META_PREF: MakeMetaElementsConfig = [
 ]
 
 export const LINK_PREF: MakeLinkElementsConfig = [
-  ['shortcut icon', '/_static/images/favicons/favicon.ico', { id: 'shortcut-icon-favicon-ico' }],
+  [
+    'shortcut icon',
+    '/_static/images/favicons/favicon.ico',
+    { id: 'shortcut-icon-favicon-ico' },
+  ],
   [
     'icon',
     '/_static/images/favicons/favicon.svg',
@@ -48,22 +63,42 @@ export const LINK_PREF: MakeLinkElementsConfig = [
   ['manifest', '/_static/_pwa/manifest.json', { id: 'manifest-pwa' }],
   [
     'stylesheet',
-    'https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700&display=swap',
-    { id: 'google-font-raleway-css2' },
+    'https://fonts.googleapis.com/css2?family=Roboto+Flex:ital,wght@300;400;500;700;900;&display=swap',
+    { id: 'google-font-robot-flex-css2' },
   ],
   [
     'stylesheet',
-    'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap',
+    'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap',
     { id: 'google-font-roboto-css' },
   ],
 ]
 
 export const LINK_PRIORITY: MakeLinkElementsConfig = [
-  ['preconnect', 'https://www.googletagmanager.com', { id: 'preconnect-googletagmanager' }],
-  ['preconnect', 'https://www.google-analytics.com', { id: 'preconnect-google-analytics' }],
-  ['preconnect', 'https://adservice.google.com', { id: 'preconnect-adservice-google' }],
-  ['preconnect', 'https://static.doubleclick.net', { id: 'preconnect-static-doubleclick' }],
-  ['preconnect', 'https://googleads.g.doubleclick.net', { id: 'preconnect-googleads-g' }],
+  [
+    'preconnect',
+    'https://www.googletagmanager.com',
+    { id: 'preconnect-googletagmanager' },
+  ],
+  [
+    'preconnect',
+    'https://www.google-analytics.com',
+    { id: 'preconnect-google-analytics' },
+  ],
+  [
+    'preconnect',
+    'https://adservice.google.com',
+    { id: 'preconnect-adservice-google' },
+  ],
+  [
+    'preconnect',
+    'https://static.doubleclick.net',
+    { id: 'preconnect-static-doubleclick' },
+  ],
+  [
+    'preconnect',
+    'https://googleads.g.doubleclick.net',
+    { id: 'preconnect-googleads-g' },
+  ],
   [
     'preconnect',
     'https://fonts.gstatic.com',

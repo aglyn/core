@@ -70,7 +70,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
       sx={{
         pt: 10,
         pb: 2,
-        bgcolor: 'bgSecondary.main',
+        bgcolor: 'surface.main',
         color: 'text.primary',
         borderBottomWidth: `1px`,
         borderBottomStyle: 'solid',

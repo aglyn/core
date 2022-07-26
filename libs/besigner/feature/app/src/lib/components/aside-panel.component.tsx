@@ -507,7 +507,7 @@ const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(
         <MuiTabContext value={numberToHexadecimal(value)}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <MuiAppBar
-              color="bgSecondary"
+              color="surface"
               position="relative"
               elevation={0}
               enableColorOnDark

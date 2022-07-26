@@ -118,5 +118,8 @@
       "@aglyn/tenant-feature-instance/*": ["libs/tenant/feature/instance/src/lib/*"]
     }
   },
-  "exclude": ["node_modules", "tmp", "**/generated"]
+  "exclude": ["node_modules", "tmp", "**/generated"],
+  "references": [
+    {"path": "libs/shared/data/types/src"}
+  ]
 }

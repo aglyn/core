@@ -67,7 +67,7 @@ declare module '@mui/material/SvgIcon' {
 }
 declare module '@mui/material/AppBar' {
   interface AppBarPropsColorOverrides extends ColorPropOverrides {
-    bgSecondary: true
+    surface: true
   }
 }
 declare module '@mui/material/IconButton' {
@@ -87,13 +87,13 @@ declare module '@mui/material/styles/createPalette' {
   interface PaletteOptions {
     tertiary?: ExtraColorOptions
     quaternary?: ExtraColorOptions
-    bgSecondary?: ExtraColorOptions
+    surface?: ExtraColorOptions
   }
 
   interface Palette {
     tertiary: ExtraColor
     quaternary: ExtraColor
-    bgSecondary: ExtraColor
+    surface: ExtraColor
   }
 }
 declare module '@mui/material/styles/zIndex' {
@@ -158,7 +158,7 @@ declare module '@mui/material/styles' {
     background?: PaletteOptions['background']
     tertiary?: ExtraColorOptions
     quaternary?: ExtraColorOptions
-    bgSecondary?: ExtraColorOptions
+    surface?: ExtraColorOptions
     svgBackground?: IActionStates
     svgFilled?: IActionStates
     svgStroke?: IActionStates
@@ -169,7 +169,7 @@ declare module '@mui/material/styles' {
     background: Palette['background']
     tertiary: ExtraColor
     quaternary: ExtraColor
-    bgSecondary: ExtraColor
+    surface: ExtraColor
     svgBackground: IActionStates
     svgFilled: IActionStates
     svgStroke: IActionStates

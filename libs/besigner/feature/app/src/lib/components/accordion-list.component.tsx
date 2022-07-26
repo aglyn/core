@@ -66,7 +66,7 @@ const AccordionSummary = styled(
   },
 )<AccordionSummaryProps>(({ theme, dense }) => ({
   textTransform: 'uppercase',
-  backgroundColor: theme.palette.bgSecondary.main,
+  backgroundColor: theme.palette.surface.main,
   flexDirection: 'row-reverse',
   '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
     transform: 'rotate(90deg)',

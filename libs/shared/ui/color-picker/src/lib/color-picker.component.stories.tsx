@@ -28,4 +28,6 @@ const Template: ComponentStory<typeof ColorPicker> = (args) => (
 )
 
 export const Primary = Template.bind({})
-Primary.args = {}
+Primary.args = {
+  disableAlpha: false,
+}

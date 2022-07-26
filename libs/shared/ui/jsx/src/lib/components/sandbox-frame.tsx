@@ -16,7 +16,7 @@
  */
 
 import '@aglyn/shared-data-jsx'
-import { useTheme } from '@aglyn/shared-ui-theme'
+import { jssPreset, StylesProvider, useTheme } from '@mui/styles'
 
 import { create, type Jss, type JssOptions } from 'jss'
 import rtl from 'jss-rtl'

@@ -17,7 +17,7 @@
 
 import { ICON_VARIANT_HOME } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
-import { useNextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageWithLayout, useNextPageTitle } from '@aglyn/shared-ui-next'
 import DataTableComponent from '../components/data-table.component'
 import AuthenticatedLayout from '../components/layouts/authenticated.layout'
 import ConsoleLayout from '../components/layouts/console.layout'
@@ -25,7 +25,7 @@ import DashboardLayout from '../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../components/widget-card.component'
 import { CONTENT_MAX_WIDTH } from '../constants/shared'
 
-function Index(props) {
+const Index: NextPageWithLayout = (props) => {
   console.log('index props', props)
   useNextPageTitle({ screen: 'My Dashboard' })
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { PrefixKeys } from '@aglyn/shared-data-types'
+import { deepPurple, lightBlue } from '@mui/material/colors'
 import type { PaletteOptions, Theme, ThemeOptions } from '../vendor/mui'
 import { buildFontFamilyList } from './constants'
 import type { IActionStates } from './theme.types'
@@ -90,6 +90,37 @@ export const backgroundsDark: BackgroundRecord = {
   paper: '#2a3440',
 }
 
+const colorScheme = {
+  light: {
+    primary: {
+      main: `#404C5C`,
+      contrastText: '#000000',
+    },
+    secondary: {
+      main: lightBlue['800'],
+      contrastText: '#000000',
+    },
+    tertiary: {
+      main: deepPurple['A400'],
+      contrastText: '#FFFFFF',
+    },
+  },
+  dark: {
+    primary: {
+      main: `#2C3540`,
+      contrastText: '#FFFFFF',
+    },
+    secondary: {
+      main: lightBlue['A400'],
+      contrastText: '#000000',
+    },
+    tertiary: {
+      main: '#AB47BC',
+      contrastText: '#FFFFFF',
+    },
+  },
+}
+
 export const ordinalBgSecondaryLight: QuaternaryRecord = {
   main: `#F8F9FA`,
   contrastText: '#000000',
@@ -113,29 +144,30 @@ export const ordinalPrimaryDark: PrimaryRecord = {
 }
 
 export const ordinalSecondaryLight: SecondaryRecord = {
-  main: '#0091ea',
+  main: lightBlue['A700'],
+  contrastText: '#000000',
   // light: '#40C4FF',
   // dark: '#0277BD',
   // contrastText: '#FFFFFF',
 }
 export const ordinalSecondaryDark: SecondaryRecord = {
-  main: '#00b0ff',
+  main: lightBlue['A400'],
+  contrastText: '#000000',
   // light: '#40C4FF',
   // dark: '#026CA0',
-  // contrastText: '#FFFFFF',
 }
 
 export const ordinalTertiaryLight: TertiaryRecord = {
-  main: '#9C27B0',
+  main: deepPurple['500'],
+  contrastText: '#FFFFFF',
   // light: '#AF52BF',
   // dark: '#6D1B7B',
-  // contrastText: '#FFFFFF',
 }
 export const ordinalTertiaryDark: TertiaryRecord = {
   main: '#AB47BC',
+  contrastText: '#FFFFFF',
   // light: '#BA68C8',
   // dark: '#9C27B0',
-  // contrastText: '#FFFFFF',
 }
 
 export const ordinalQuaternaryLight: QuaternaryRecord = {
@@ -164,11 +196,11 @@ export const ordinalDark: OrdinalRecord = {
   quaternary: { ...ordinalQuaternaryDark },
 }
 
-export const ordinalBgLight: PrefixKeys<OrdinalRecord, 'bg'> = {
-  bgSecondary: { ...ordinalBgSecondaryLight },
+export const otherColorsLight = {
+  surface: { ...ordinalBgSecondaryLight },
 }
-export const ordinalBgDark: PrefixKeys<OrdinalRecord, 'bg'> = {
-  bgSecondary: { ...ordinalBgSecondaryDark },
+export const otherColorsDark = {
+  surface: { ...ordinalBgSecondaryDark },
 }
 
 export const actionSvgBgLight: IActionStates = {
@@ -464,7 +496,7 @@ export const consoleOptions: ThemeOptions = {
     background: { ...backgroundsLight },
     grey: { ...shadesOfGrey },
     ...ordinalLight,
-    ...ordinalBgLight,
+    ...otherColorsLight,
     ...actionsLight,
     ...status,
   },
@@ -476,7 +508,7 @@ export const consoleOptionsDark: ThemeOptions = {
     background: { ...backgroundsDark },
     grey: { ...shadesOfGrey },
     ...ordinalDark,
-    ...ordinalBgDark,
+    ...otherColorsDark,
     ...actionsDark,
     ...status,
   },

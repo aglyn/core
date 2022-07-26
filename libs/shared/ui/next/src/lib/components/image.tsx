@@ -16,7 +16,7 @@
  */
 
 import { styled } from '@aglyn/shared-ui-theme'
-import { base64Encode } from '@aglyn/shared-util-tools'
+import { base64IsomorphicEncode } from '@aglyn/shared-util-tools'
 import NextImageRaw, { type ImageProps as NextImageProps } from 'next/image'
 import { useMemo } from 'react'
 
@@ -47,7 +47,7 @@ const shimmer = (props: {
 }
 
 function shimmerToBase64(shimmer?: string) {
-  return `data:image/svg+xml;base64,${base64Encode(shimmer)}`
+  return `data:image/svg+xml;base64,${base64IsomorphicEncode(shimmer)}`
 }
 
 export interface ImageProps extends NextEmotionImageProps {

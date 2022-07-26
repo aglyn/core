@@ -139,7 +139,7 @@ const CloseableDrawerComponent = forwardRef<any, CloseableDrawerProps>(
         appBarLeft={appBarLeft}
         appBarRight={appBarRight}
         onClose={handleClose}
-        AppBarProps={{ color: 'bgSecondary' }}
+        AppBarProps={{ color: 'surface' }}
         {...rest}
       >
         {children}

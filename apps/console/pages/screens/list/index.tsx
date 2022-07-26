@@ -247,7 +247,7 @@ function Screens(props) {
             anchor="right"
             variant="temporary"
             onClose={handleFormClose}
-            AppBarProps={{ color: 'bgSecondary' }}
+            AppBarProps={{ color: 'surface' }}
             appBarLeft={
               <>
                 <IconButton
