@@ -38,7 +38,7 @@ export type _AppProps<Props, InitialProps> =
   NextPageDecoratedLayoutComponentProps<Props, InitialProps> &
     EmotionCacheProps & {
       children?: JSX.Children
-      headchildren?: JSX.Children
+      headChildren?: JSX.Children
       linkElements?: MakeLinkElementsConfig
       MainComponent?: JSX.ElementType<{ children?: JSX.Children }>
       metaElements?: MakeMetaElementsConfig

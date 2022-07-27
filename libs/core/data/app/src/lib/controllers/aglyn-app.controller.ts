@@ -57,7 +57,9 @@ type BaseAppT = <T extends AglynBaseModelT>(
 ) => new <Options>(
   ...any: ConstructorParameters<T>
 ) => AglynBaseModel<Options> & IAglynDependencyManager
-const BaseApp: ReturnType<BaseAppT> = AglynDependencyManager(AglynBaseModel)
+const BaseApp = AglynDependencyManager(
+  AglynBaseModel,
+) as unknown as ReturnType<BaseAppT>
 
 const TAG = 'AglynApp'
 const NS = 'com.aglyn.core.data.framework.controller.app'
@@ -236,7 +238,7 @@ export class AglynAppController<
     this.#deleted = Boolean(value)
     return this
   }
-  public effect<U>(data: AglynEffectOptions<AglynEventTriggerFlag, U>) {
+  public effect<U>(data: AglynEffectOptions<AglynEventTriggerFlag, U>): this {
     const { type, payload } = data
     this.emitter.emit(type, payload as any)
     return this

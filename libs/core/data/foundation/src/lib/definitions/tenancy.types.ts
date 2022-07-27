@@ -16,7 +16,8 @@
  */
 
 import type { HttpStatusCode } from '@aglyn/shared-data-enums'
-import type { Conditional, TimestampSeconds } from '@aglyn/shared-data-types'
+import type { TimestampSeconds } from '@aglyn/shared-data-operators'
+import type { Conditional } from '@aglyn/shared-data-types'
 import type {
   ActivityAccess,
   HostEntityType,
@@ -25,7 +26,7 @@ import type {
   HostScreenVisibility,
   HostViewFormat,
 } from '../constants/tenancy'
-import {
+import type {
   AglynNodesDenormalized,
   AglynNodesList,
   AglynNodesNormalized,

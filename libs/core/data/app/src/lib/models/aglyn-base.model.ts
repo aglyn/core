@@ -244,6 +244,18 @@ export class AglynBaseModel<
     this.#emitter = value
     return this
   }
+  public get all() {
+    return this.#emitter.all
+  }
+  public on(type, handler) {
+    return this.#emitter.on(type, handler)
+  }
+  public off(type, handler?) {
+    return this.#emitter.off(type, handler)
+  }
+  public emit(type, handler?) {
+    return this.#emitter.emit(type, handler)
+  }
 
   public getLogger(): AglynLogger {
     return this.#logger
@@ -251,6 +263,36 @@ export class AglynBaseModel<
   public setLogger(value: AglynLogger): this {
     this.#logger = value
     return this
+  }
+  public setLogLevel(val) {
+    return this.#logger.setLogLevel(val) as any
+  }
+  public setUserLogHandler(logCallback, options) {
+    return this.#logger.setUserLogHandler(logCallback, options)
+  }
+  public debug(...args) {
+    return this.#logger.debug(...args)
+  }
+  public error(...args) {
+    return this.#logger.error(...args)
+  }
+  public info(...args) {
+    return this.#logger.info(...args)
+  }
+  public log(...args) {
+    return this.#logger.log(...args)
+  }
+  public warn(...args) {
+    return this.#logger.warn(...args)
+  }
+  public get logHandler() {
+    return this.#logger.logHandler
+  }
+  public get logLevel() {
+    return this.#logger.logLevel
+  }
+  public get userLogHandler() {
+    return this.#logger.userLogHandler
   }
 }
 

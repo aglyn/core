@@ -58,6 +58,10 @@ import WidgetCardComponent from '../../../components/widget-card.component'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT } from '../../../constants/shared'
 
+const CellItemLinkComponent = (props) => {
+  return <AppLink {...props} componentVariant={'naked'} />
+}
+
 function Screens(props) {
   const { queueLoading, loading } = useLoading()
   const { confirm } = useConfirmationContext()
@@ -171,9 +175,10 @@ function Screens(props) {
             key="action-detail"
             icon={<MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} />}
             label="detail"
-            LinkComponent={AppLink}
-            componentVariant="naked"
-            href={buildRoute(Route.SCREEN_DETAILS, { screenId, versionId })}
+            LinkComponent={CellItemLinkComponent}
+            {...({
+              href: buildRoute(Route.SCREEN_DETAILS, { screenId, versionId }),
+            } as any)}
           />,
           <GridActionsCellItem
             key="action-delete"

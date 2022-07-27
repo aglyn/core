@@ -94,7 +94,9 @@ export interface IAglynBaseModel<
 > extends StringLike,
     Serializable,
     AglynLifecycleObserver<LO>,
-    AglynLoadableObserver<LO> {
+    AglynLoadableObserver<LO>,
+    Partial<AglynLogger>,
+    Partial<AglynEmitter> {
   readonly [Symbol.toStringTag]: string
   readonly namespace: string
   readonly createdAt: Timestamp

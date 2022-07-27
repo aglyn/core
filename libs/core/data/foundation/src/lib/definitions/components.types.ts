@@ -26,9 +26,9 @@ import type {
 } from '@aglyn/shared-ui-jsx-forms'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx' // eslint-disable-next-line
-// @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
-// @nrwl/nx/enforce-module-boundaries
+// eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { ComponentClass, ComponentProps } from 'react'
 import type { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
 import type {
