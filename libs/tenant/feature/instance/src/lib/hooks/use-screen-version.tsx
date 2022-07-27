@@ -16,16 +16,21 @@
  */
 
 import type { AglynScreenVersion } from '@aglyn/core-data-foundation'
-import { Bytes, compress, decompress } from '@aglyn/core-util-app'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
+import { compress, decompress } from '@aglyn/core-util-app'
 import { copy } from '@aglyn/shared-util-tools'
-import { doc, setDoc, type SetOptions } from 'firebase/firestore'
+import {
+  Bytes,
+  doc,
+  setDoc,
+  type SetOptions,
+  Timestamp,
+} from 'firebase/firestore'
 import { useCallback, useMemo } from 'react'
 import {
   type ObservableStatus,
   type ReactFireOptions,
   useFirestore,
-  useFirestoreDocData,
+  useFirestoreDocDataOnce,
 } from 'reactfire'
 
 export type UseScreenVersionOptions = {
@@ -46,7 +51,7 @@ export function useScreenVersion(
   const firestore = useFirestore()
   const reference = doc(firestore, 'screens', screenId, 'versions', versionId)
 
-  const value = useFirestoreDocData(reference, {
+  const value = useFirestoreDocDataOnce(reference, {
     idField: '$id',
     ...useFirestoreDocDataOptions,
   }) as ObservableStatus<AglynScreenVersion>

@@ -17,6 +17,8 @@
 
 import {
   doesBesignerAppExist,
+  getBesignerApp,
+  IBesignerAppController,
   initializeBesignerApp,
 } from '@aglyn/besigner-data-app'
 import { samplePageData } from '@aglyn/besigner-feature-app'
@@ -83,9 +85,23 @@ const c5 = createAglynComponent(
 )
 const components = [c1, c2, c3, c4, c5]
 
+declare global {
+  // eslint-disable-next-line no-var
+  var Aglyn: IBesignerAppController
+  // eslint-disable-next-line no-var
+  // var Aglyn: AglynAppControllerT
+
+  interface Window {
+    Aglyn?: IBesignerAppController
+  }
+}
+
+const hasWindow = typeof window !== 'undefined'
+let Aglyn = globalThis.Aglyn
+
 try {
-  if (!doesBesignerAppExist() && typeof window !== 'undefined') {
-    const app = initializeBesignerApp({
+  if (!Aglyn && !doesBesignerAppExist() && hasWindow) {
+    Aglyn = globalThis.Aglyn = initializeBesignerApp({
       logLevel: 'debug',
       modulesOptions: {
         canvas: {
@@ -95,18 +111,19 @@ try {
         },
       },
     })
-    console.log('initialize app', app)
-
-    if (typeof window !== 'undefined' && !IS_PRODUCTION) {
+    console.log('set global Aglyn', Aglyn, globalThis)
+    if (!IS_PRODUCTION) {
       // @ts-ignore
-      window.__AGLYN__ = app
+      window.Aglyn = Aglyn
     }
 
-    components.forEach((i) => registerComponent(app, i))
-    registerBundle(app, muiBundle)
+    components.forEach((i) => registerComponent(Aglyn, i))
+    registerBundle(Aglyn, muiBundle)
+  } else if (!Aglyn && doesBesignerAppExist() && hasWindow) {
+    Aglyn = getBesignerApp()
   }
 } catch (e) {
   console.error(e, 'initialize aglyn app')
 }
 
-export {}
+export { Aglyn }

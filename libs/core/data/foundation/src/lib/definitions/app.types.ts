@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { Bytes } from '@aglyn/shared-data-operators'
+import type { Bytes } from 'firebase/firestore'
 import type { AglynEventTriggerFlag } from '../constants/emitter'
 import type { AglynPlatform } from '../constants/platform'
 import type { AglynVersion } from '../constants/version'

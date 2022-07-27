@@ -20,7 +20,6 @@ import {
   IAglynComponent,
   NodeId,
 } from '@aglyn/core-data-foundation'
-import { type InnerRefProp } from '@aglyn/shared-data-types'
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import clsx from 'clsx'
@@ -39,7 +38,8 @@ export interface RequiredElementDataProps {
   className?: string
 }
 
-export interface OptionalElementDataProps extends InnerRefProp {
+export interface OptionalElementDataProps
+  extends JSX.PropsWithForwardedRef<any> {
   elementData: AglynNodeItemDenormalized<any>
   component: IAglynComponent<any>
   elemProps: any

@@ -127,13 +127,16 @@ function Besigner(props) {
 
   const handleSave = useCallback(async () => {
     const dequeueLoading = queueLoading()
-    await updateScreen({ elements: normalized }, { merge: true }).catch((e) => {
-      enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
-        variant: 'error',
-        allowDuplicate: true,
+    await updateScreen({ elements: normalized }, { merge: true })
+      .catch((e) => {
+        enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
+          variant: 'error',
+          allowDuplicate: true,
+        })
       })
-    })
-    dequeueLoading()
+      .finally(() => {
+        dequeueLoading()
+      })
   }, [updateScreen, enqueueSnackbar, normalized, queueLoading])
 
   return (

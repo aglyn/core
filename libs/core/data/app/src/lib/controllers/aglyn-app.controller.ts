@@ -43,8 +43,9 @@ import {
   DEFAULT_APP_UUN,
   SDK_VERSION,
 } from '@aglyn/core-data-foundation'
-import { Bytes, compress, decompress } from '@aglyn/core-util-app'
+import { compress, decompress } from '@aglyn/core-util-app'
 import { getStaticField, truthy } from '@aglyn/shared-util-tools'
+import { Bytes } from 'firebase/firestore'
 import { AglynBaseModel } from '../models/aglyn-base.model'
 import AglynDependencyManager from '../models/aglyn-depends.model'
 import AglynCanvasController from './aglyn-canvas.controller'
@@ -134,6 +135,17 @@ export class AglynAppController<
     this.#appName = options.appName || DEFAULT_APP_UUN
   }
 
+  #initializeAppModules(): void {
+    for (const mod of this.modules) {
+      this.addDependency(mod)
+    }
+  }
+  #destroyAppModules(): void {
+    for (const mod of this.modules) {
+      this.removeDependency(mod.namespace)
+    }
+  }
+
   public setupModules() {
     this.handleEvent(
       [AglynEventStateFlag.APP_CREATING, AglynEventStateFlag.APP_CREATED],
@@ -165,17 +177,6 @@ export class AglynAppController<
     })
     _INTERNAL_EXTENSIONS_.set(this.#appName, this.#extensionsController)
     return this
-  }
-
-  #initializeAppModules(): void {
-    for (const mod of this.modules) {
-      this.addDependency(mod)
-    }
-  }
-  #destroyAppModules(): void {
-    for (const mod of this.modules) {
-      this.removeDependency(mod.namespace)
-    }
   }
 
   public toString(): string {

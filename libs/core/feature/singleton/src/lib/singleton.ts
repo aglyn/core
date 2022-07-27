@@ -20,19 +20,19 @@ import { IAglynAppController } from '@aglyn/core-data-foundation'
 
 declare global {
   // eslint-disable-next-line no-var
-  var __AGLYN__: IAglynAppController
+  var Aglyn: IAglynAppController
   // eslint-disable-next-line no-var
   // var Aglyn: AglynAppControllerT
 
   interface Window {
-    __AGLYN__?: IAglynAppController
+    Aglyn?: IAglynAppController
   }
 }
 
-let __AGLYN__ = globalThis.__AGLYN__
-if (!__AGLYN__) {
-  __AGLYN__ = globalThis.__AGLYN__ = initializeApp({})
-  console.log('set global __AGLYN__', __AGLYN__, globalThis)
+let Aglyn = globalThis.Aglyn
+if (!Aglyn) {
+  Aglyn = globalThis.Aglyn = initializeApp({})
+  console.log('set global Aglyn', Aglyn, globalThis)
 }
 
-export { __AGLYN__ }
+export { Aglyn }
