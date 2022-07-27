@@ -16,22 +16,22 @@
  */
 
 import type {
-  AglynElementDenormalized,
-  AglynElementNormalized,
-  AglynElementsDenormalized,
-  AglynElementsNormalized,
+  AglynNodeDenormalized,
+  AglynNodeNormalized,
+  AglynNodesDenormalized,
+  AglynNodesNormalized,
   NodeId,
 } from '@aglyn/core-data-foundation'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import { arraySafe, copy } from '@aglyn/shared-util-tools'
 
 const normalizeData = (
-  element: AglynElementDenormalized,
-  denormalized: AglynElementsDenormalized = {},
-  accumulator: AglynElementsNormalized = [],
-): AglynElementsNormalized => {
+  element: AglynNodeDenormalized,
+  denormalized: AglynNodesDenormalized = {},
+  accumulator: AglynNodesNormalized = [],
+): AglynNodesNormalized => {
   if (element?.$id) {
-    const _element = element as unknown as AglynElementNormalized
+    const _element = element as unknown as AglynNodeNormalized
     const childIds: NodeId[] = [...arraySafe(element.elements)]
     _element.elements = []
     for (const $id of childIds) {
@@ -45,34 +45,34 @@ const normalizeData = (
 }
 
 export function normalizeComponentElementData(
-  element: AglynElementDenormalized,
-): AglynElementsNormalized
+  element: AglynNodeDenormalized,
+): AglynNodesNormalized
 export function normalizeComponentElementData(
-  elements: AglynElementsDenormalized,
+  elements: AglynNodesDenormalized,
   parentId?: NodeId,
-): AglynElementsNormalized
+): AglynNodesNormalized
 export function normalizeComponentElementData(
-  data: AglynElementDenormalized | AglynElementsDenormalized,
+  data: AglynNodeDenormalized | AglynNodesDenormalized,
   parentId: NodeId = CANVAS_ROOT_ELEMENT_ID,
-): AglynElementsNormalized {
-  const normalized: AglynElementsNormalized = []
+): AglynNodesNormalized {
+  const normalized: AglynNodesNormalized = []
   if (!data) return normalized
   const state = copy(data)
 
   try {
-    let denormalized: AglynElementsDenormalized
+    let denormalized: AglynNodesDenormalized
     // If received a denormalized element
     if (state.$id) {
-      const _element = state as AglynElementDenormalized
+      const _element = state as AglynNodeDenormalized
       denormalized = { [_element.$id]: _element }
       return normalizeData(_element, denormalized, normalized)
     }
 
     // If received a denormalized map of elements by id
-    denormalized = state as AglynElementsDenormalized
+    denormalized = state as AglynNodesDenormalized
     const parent = (denormalized[parentId] ||= {
       $id: parentId,
-    } as AglynElementDenormalized)
+    } as AglynNodeDenormalized)
     for (const $id of (parent.elements ||= [])) {
       normalizeData(denormalized[$id], denormalized, normalized)
     }

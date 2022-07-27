@@ -15,12 +15,7 @@
  * limitations under the License.
  */
 
-import type {
-  AnyObj,
-  Conditional,
-  Dictionary,
-  OrUndef,
-} from '@aglyn/shared-data-types'
+import type { AnyObj, Dictionary, OrUndef } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type {
   ConditionDefinition,
@@ -34,7 +29,7 @@ import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx' // eslint-disable-n
 // @nrwl/nx/enforce-module-boundaries
 import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
 // @nrwl/nx/enforce-module-boundaries
-import type { ComponentClass, ComponentProps, ElementType } from 'react'
+import type { ComponentClass, ComponentProps } from 'react'
 import type { CANVAS_ROOT_ELEMENT_ID } from '../constants/canvas'
 import type {
   ComponentCategory,
@@ -120,45 +115,6 @@ export type AglynComponentType<
   | JSX.ElementConstructor<P>
   | keyof JSX.IntrinsicElements[keyof JSX.IntrinsicElements]
 
-export type AglynElementsById<T = AglynNodeSchema> = {
-  [K in T extends AglynNodeSchema<any, any> ? T['$id'] : never]: T & { $id: K }
-}
-export type AglynElementsList<T = AglynNodeSchema> = T[]
-
-export type AglynElementDenormalized<
-  P = any,
-  D extends ElementType = any,
-> = AglynNodeSchema<P, true, D>
-
-export type AglynElementNormalized<
-  P = any,
-  D extends ElementType = any,
-> = AglynNodeSchema<P, false, D>
-
-export type AglynElementsDenormalized =
-  AglynElementsById<AglynElementDenormalized>
-export type AglynElementsNormalized = AglynElementsList<AglynElementNormalized>
-
-export type AglynElementHierarchy<
-  $ID extends Conditional<
-    NodeId,
-    CANVAS_ROOT_ELEMENT_ID,
-    never,
-    NodeId
-  > = NodeId,
-> = [
-  root?: CANVAS_ROOT_ELEMENT_ID,
-  ...rootDescendents: [
-    ...elementAncestors: Conditional<
-      NodeId,
-      CANVAS_ROOT_ELEMENT_ID,
-      never,
-      NodeId
-    >[],
-    element: $ID,
-  ],
-]
-
 export interface AglynComponentsControllerOptions
   extends AglynModuleModelOptions {}
 
@@ -233,7 +189,7 @@ export interface AglynComponentSchema<P = any> {
   /**
    * Filter props
    */
-  resolveProps?: JSX.ResolveProps<AglynElementDenormalized<P>>
+  resolveProps?: JSX.ResolveProps<AglynNodeDenormalized<P>>
 
   /**
    * Attribute fields to modify the contextual properties
@@ -297,27 +253,28 @@ export interface AglynFieldSchema extends Dictionary<any> {
   description?: string
 }
 
+type NodeTemplateData = AglynNodeSchema & {
+  $id?: NodeId
+  elements?: NodeTemplateData
+}
+
 export type AglynNodeTemplateSchema = {
   id: TemplateId
   label: string
   description?: string
   icon?: MdiIconProps
   category?: string | ComponentCategory
-  data: Omit<AglynNodeSchema<any, false>, '$id'>
+  data: NodeTemplateData
 }
 
-export interface AglynNodeSchema<
-  P = JSX.AnyProps,
-  C extends boolean = true,
-  D extends ElementType = any,
-> {
+export interface AglynNodeSchema<P = JSX.AnyProps> {
   $id: NodeId
   componentId: ComponentId
   bundleId?: BundleId
   parentId?: NodeId
   sx?: JSX.SxProps
   props?: P
-  elements?: NodeId[] | AglynNodeSchema<P, C>
+  elements?: NodeId[] | AglynNodeSchema[]
 }
 
 /**
@@ -351,3 +308,20 @@ export type ComponentsRegistryContext = {
   schemas: InstanceSchemas
   templates: InstanceTemplates
 }
+
+export type AglynNodeNormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
+  elements?: AglynNodeNormalized[]
+}
+export type AglynNodeDenormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {
+  elements?: NodeId[]
+}
+
+export type AglynNodesById = Record<NodeId, AglynNodeDenormalized>
+export type AglynNodesList = Array<AglynNodeNormalized>
+export type AglynNodesDenormalized = AglynNodesById
+export type AglynNodesNormalized = AglynNodesList
+
+export type AglynNodeHierarchy<$ID extends NodeId = NodeId> = [
+  root: CANVAS_ROOT_ELEMENT_ID,
+  ...nodes: [...ancestors: NodeId[], element: $ID],
+]

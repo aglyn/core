@@ -20,8 +20,11 @@ import type {
   ValidationMap as PropTypesValidationMap,
   Validator as PropTypesValidator,
 } from 'prop-types'
-import type { Component as ReactComponent } from 'react'
-import { ReactElement, ReactNode } from 'react'
+import type {
+  Component as ReactComponent,
+  ReactElement,
+  ReactNode,
+} from 'react'
 
 declare global {
   namespace JSX {

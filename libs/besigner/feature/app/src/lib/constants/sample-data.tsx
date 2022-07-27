@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import type { AglynElementsNormalized } from '@aglyn/core-data-foundation'
+import type { AglynNodesNormalized } from '@aglyn/core-data-foundation'
 
-export const samplePageData: AglynElementsNormalized = [
+export const samplePageData: AglynNodesNormalized = [
   {
     $id: 'sample-element-1',
     componentId: 'sample-element',

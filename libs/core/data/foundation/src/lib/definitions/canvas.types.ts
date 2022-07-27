@@ -37,8 +37,8 @@ import type {
 } from '../constants/emitter'
 import type { IAglynAppController } from './app.types'
 import {
-  AglynElementsDenormalized,
-  AglynElementsNormalized,
+  AglynNodesDenormalized,
+  AglynNodesNormalized,
 } from './components.types'
 import type { ContextEvent } from './contexts.types'
 import type {
@@ -48,10 +48,10 @@ import type {
 } from './module.types'
 
 export type CanvasContext = {
-  future: AglynElementsDenormalized[]
-  past: AglynElementsDenormalized[]
-  present: AglynElementsDenormalized
-  readonly normalized?: AglynElementsNormalized
+  future: AglynNodesDenormalized[]
+  past: AglynNodesDenormalized[]
+  present: AglynNodesDenormalized
+  readonly normalized?: AglynNodesNormalized
 }
 
 export interface ElementsDataStoreApi {
@@ -68,7 +68,7 @@ export interface ElementsDataStoreApi {
 
 export interface AglynCanvasControllerOptions extends AglynModuleModelOptions {
   defaults?: {
-    present?: AglynElementsNormalized
+    present?: AglynNodesNormalized
   }
 }
 

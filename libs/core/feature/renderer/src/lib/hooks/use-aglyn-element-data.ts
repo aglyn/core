@@ -16,32 +16,29 @@
  */
 
 import { getCanvasDenormalizedElementsStore } from '@aglyn/core-data-app'
-import type {
-  AglynElementDenormalized,
-  NodeId,
-} from '@aglyn/core-data-foundation'
+import type { AglynNodeDenormalized, NodeId } from '@aglyn/core-data-foundation'
 import type { AnyProps, Conditional } from '@aglyn/shared-data-types'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 export type UseAglynElementData<
   P = AnyProps,
-  K extends keyof AglynElementDenormalized<P> = null,
+  K extends keyof AglynNodeDenormalized<P> = null,
 > = Conditional<
   K,
-  keyof AglynElementDenormalized<P>,
-  AglynElementDenormalized<P>[K],
-  AglynElementDenormalized<P>
+  keyof AglynNodeDenormalized<P>,
+  AglynNodeDenormalized<P>[K],
+  AglynNodeDenormalized<P>
 >
 
-export function useAglynElementData<P>($id: NodeId): AglynElementDenormalized<P>
+export function useAglynElementData<P>($id: NodeId): AglynNodeDenormalized<P>
 export function useAglynElementData<
   P,
-  K extends keyof AglynElementDenormalized<P> = null,
->($id: NodeId, property: K, defaultValue?: any): AglynElementDenormalized<P>[K]
+  K extends keyof AglynNodeDenormalized<P> = null,
+>($id: NodeId, property: K, defaultValue?: any): AglynNodeDenormalized<P>[K]
 export function useAglynElementData<
   P,
-  K extends keyof AglynElementDenormalized<P> = null,
+  K extends keyof AglynNodeDenormalized<P> = null,
 >($id: NodeId, property?: K, defaultValue?: any): UseAglynElementData<P, K> {
   const app = useAglynAppContext()
   return useSubscribable(

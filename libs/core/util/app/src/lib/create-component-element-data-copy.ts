@@ -16,8 +16,8 @@
  */
 
 import type {
-  AglynElementNormalized,
-  AglynElementsDenormalized,
+  AglynNodeNormalized,
+  AglynNodesDenormalized,
   NodeId,
 } from '@aglyn/core-data-foundation'
 import createComponentElementData from './create-component-element-data'
@@ -25,8 +25,8 @@ import normalizeComponentElementData from './normalize-component-element-data'
 
 export const createComponentElementDataCopy = (
   $id: NodeId,
-  state: AglynElementsDenormalized,
-): AglynElementNormalized => {
+  state: AglynNodesDenormalized,
+): AglynNodeNormalized => {
   const element = normalizeComponentElementData(
     state,
     state[$id].parentId,

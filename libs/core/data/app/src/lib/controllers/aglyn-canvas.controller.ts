@@ -17,8 +17,8 @@
 
 import type {
   AglynCanvasControllerOptions,
-  AglynElementsDenormalized,
   AglynModuleEffectListener,
+  AglynNodesDenormalized,
   CanvasAddElementPayload,
   CanvasContext,
   CanvasDeleteElementPayload,
@@ -161,9 +161,9 @@ export class AglynCanvasController
   }
   private handleStateModification<P>(
     callback: (
-      present: AglynElementsDenormalized,
+      present: AglynNodesDenormalized,
       payload?: P,
-    ) => AglynElementsDenormalized,
+    ) => AglynNodesDenormalized,
     payload?: P,
     clear = false,
   ) {

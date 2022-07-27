@@ -16,42 +16,41 @@
  */
 
 import type {
-  AglynElementNormalized,
+  AglynNodeNormalized,
   AglynNodeTemplateSchema,
 } from '@aglyn/core-data-foundation'
-import type { MutableKeys } from '@aglyn/shared-data-types'
 import { copy } from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
 import createComponentElementId from './create-component-element-id'
 
 function traverseComponentTemplate(
   data: AglynNodeTemplateSchema['data'],
-): AglynElementNormalized {
-  const response = { ...data } as AglynElementNormalized
-
-  ;(response as MutableKeys<AglynElementNormalized, '$id' | 'elements'>).$id =
-    createComponentElementId()
-
-  const children: AglynElementNormalized[] = []
-  for (const element of response?.elements || []) {
-    children.push(traverseComponentTemplate(element))
+): AglynNodeNormalized {
+  const response: AglynNodeNormalized = {
+    ...data,
+    $id: createComponentElementId(),
+    elements: [],
+    props: { ...data?.props },
   }
-  response.elements = children
+  const current = Array.isArray(data?.elements) ? data.elements : []
+  for (const child of current) {
+    response.elements.push(traverseComponentTemplate(child))
+  }
   return response
 }
 
 export type CreateComponentElementDataOptions =
   | AglynNodeTemplateSchema
-  | { data: AglynElementNormalized }
+  | { data: AglynNodeTemplateSchema['data'] }
 
-export const ELEMENT_DEFAULTS: Partial<AglynElementNormalized> = {
+export const ELEMENT_DEFAULTS: Partial<AglynNodeNormalized> = {
   props: {},
   elements: [],
 }
 
 export function createComponentElementData(
   options?: CreateComponentElementDataOptions,
-): AglynElementNormalized {
+): AglynNodeNormalized {
   return defaultsDeep(
     traverseComponentTemplate(copy(options?.data)),
     copy(ELEMENT_DEFAULTS),

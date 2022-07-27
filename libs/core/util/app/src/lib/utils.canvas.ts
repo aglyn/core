@@ -16,8 +16,8 @@
  */
 
 import type {
-  AglynElementsDenormalized,
-  AglynElementsNormalized,
+  AglynNodesDenormalized,
+  AglynNodesNormalized,
   CanvasAddElementPayload,
   CanvasContext,
   CanvasDeleteElementPayload,
@@ -59,14 +59,14 @@ export const handleCanvasApiChangeEvent =
   }
 
 export const handleCanvasSetElements = (
-  state: AglynElementsDenormalized,
+  state: AglynNodesDenormalized,
   payload: CanvasSetElementsPayload,
-): AglynElementsDenormalized => {
+): AglynNodesDenormalized => {
   const { elements, type } = payload || {}
 
   if (type === 'normal' && Array.isArray(elements)) {
     const newState = denormalizeComponentElementData(
-      elements as unknown as AglynElementsNormalized,
+      elements as unknown as AglynNodesNormalized,
       CANVAS_ROOT_ELEMENT_ID,
     )
     console.log('newState normal', payload, newState)
@@ -76,12 +76,12 @@ export const handleCanvasSetElements = (
 
   return (elements || {
     [DEFAULT_ROOT_ELEMENT.$id]: { ...DEFAULT_ROOT_ELEMENT },
-  }) as AglynElementsDenormalized
+  }) as AglynNodesDenormalized
 }
 export const handleCanvasAddElement = (
-  state: AglynElementsDenormalized,
+  state: AglynNodesDenormalized,
   payload: CanvasAddElementPayload,
-): AglynElementsDenormalized => {
+): AglynNodesDenormalized => {
   const { index, element } = payload
   let parentId: NodeId = null
   if (_hasOwnProperty(payload.parentId, state)) {
@@ -114,25 +114,25 @@ export const handleCanvasAddElement = (
 }
 
 export const handleCanvasUpdateElement = (
-  state: AglynElementsDenormalized,
+  state: AglynNodesDenormalized,
   payload: CanvasUpdateElementPayload,
-): AglynElementsDenormalized => {
+): AglynNodesDenormalized => {
   state[payload.$id] = payload.update(state[payload.$id])
   return state
 }
 
 export const handleCanvasSetElement = (
-  state: AglynElementsDenormalized,
+  state: AglynNodesDenormalized,
   payload: CanvasSetElementPayload,
-): AglynElementsDenormalized => {
+): AglynNodesDenormalized => {
   state[payload.element?.$id] = payload.element
   return state
 }
 
 export const handleCanvasMoveElement = (
-  state: AglynElementsDenormalized,
+  state: AglynNodesDenormalized,
   payload: CanvasMoveElementPayload,
-): AglynElementsDenormalized => {
+): AglynNodesDenormalized => {
   const element = state[payload.$id]
   if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
     console.error('Failed duplicating. Non-existent or forbidden move.')
@@ -179,9 +179,9 @@ export const handleCanvasMoveElement = (
 }
 
 export const handleCanvasDuplicateElement = (
-  state: AglynElementsDenormalized,
+  state: AglynNodesDenormalized,
   payload: CanvasDuplicateElementPayload,
-): AglynElementsDenormalized => {
+): AglynNodesDenormalized => {
   const element = state[payload.$id]
   if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
     throw new Error(
@@ -197,9 +197,9 @@ export const handleCanvasDuplicateElement = (
 }
 
 export const handleCanvasDeleteElement = (
-  state: AglynElementsDenormalized,
+  state: AglynNodesDenormalized,
   payload: CanvasDeleteElementPayload,
-): AglynElementsDenormalized => {
+): AglynNodesDenormalized => {
   const element = state[payload.$id]
   if (!element || element.$id === CANVAS_ROOT_ELEMENT_ID) {
     throw new Error('Failed deleting. Non-existent or forbidden deletion.')

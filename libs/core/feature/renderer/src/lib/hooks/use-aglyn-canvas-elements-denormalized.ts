@@ -16,24 +16,24 @@
  */
 
 import { getCanvasDenormalizedElementsStore } from '@aglyn/core-data-app'
-import type { AglynElementsDenormalized } from '@aglyn/core-data-foundation'
+import type { AglynNodesDenormalized } from '@aglyn/core-data-foundation'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import { _isFnT } from '@aglyn/shared-util-guards'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
-export function useAglynCanvasElementsDenormalized(): AglynElementsDenormalized
+export function useAglynCanvasElementsDenormalized(): AglynNodesDenormalized
 export function useAglynCanvasElementsDenormalized<Result>(
-  callbackFn: (state: AglynElementsDenormalized) => Result,
+  callbackFn: (state: AglynNodesDenormalized) => Result,
 ): Result
 export function useAglynCanvasElementsDenormalized<Result>(
-  callbackFn?: (state: AglynElementsDenormalized) => Result,
-): Result | AglynElementsDenormalized {
+  callbackFn?: (state: AglynNodesDenormalized) => Result,
+): Result | AglynNodesDenormalized {
   const app = useAglynAppContext()
   return useSubscribable(
     getCanvasDenormalizedElementsStore(app),
     undefined,
     (state) => (_isFnT(callbackFn) ? (callbackFn(state) as Result) : state),
     [callbackFn, app],
-  ) as Result | AglynElementsDenormalized
+  ) as Result | AglynNodesDenormalized
 }
 export default useAglynCanvasElementsDenormalized

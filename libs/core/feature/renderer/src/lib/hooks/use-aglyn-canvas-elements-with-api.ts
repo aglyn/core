@@ -16,14 +16,14 @@
  */
 
 import type {
-  AglynElementsDenormalized,
+  AglynNodesDenormalized,
   ElementsDataStoreApi,
 } from '@aglyn/core-data-foundation'
 import { useAglynCanvasApiEvents } from './use-aglyn-canvas-api-events'
 import { useAglynCanvasElementsDenormalized } from './use-aglyn-canvas-elements-denormalized'
 
 export type CanvasElementWithApi = [
-  elements: AglynElementsDenormalized,
+  elements: AglynNodesDenormalized,
   api: ElementsDataStoreApi,
 ]
 

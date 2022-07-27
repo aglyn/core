@@ -16,10 +16,10 @@
  */
 
 import type {
-  AglynElementDenormalized,
-  AglynElementNormalized,
-  AglynElementsDenormalized,
-  AglynElementsNormalized,
+  AglynNodeDenormalized,
+  AglynNodeNormalized,
+  AglynNodesDenormalized,
+  AglynNodesNormalized,
   NodeId,
 } from '@aglyn/core-data-foundation'
 import {
@@ -29,15 +29,13 @@ import {
 import { arraySafe, copy } from '@aglyn/shared-util-tools'
 
 const denormalizeData = (
-  element: AglynElementNormalized,
+  element: AglynNodeNormalized,
   parentId: NodeId,
-  accumulator: AglynElementsDenormalized = {},
-): AglynElementsDenormalized => {
+  accumulator: AglynNodesDenormalized = {},
+): AglynNodesDenormalized => {
   if (element?.$id && parentId && accumulator[parentId]) {
-    const _element = element as unknown as AglynElementDenormalized
-    const childElements: AglynElementsNormalized = [
-      ...arraySafe(element.elements),
-    ]
+    const _element = element as unknown as AglynNodeDenormalized
+    const childElements: AglynNodesNormalized = [...arraySafe(element.elements)]
     _element.parentId = parentId
     _element.elements = []
     accumulator[_element.$id] = _element
@@ -51,25 +49,27 @@ const denormalizeData = (
 }
 
 export function denormalizeComponentElementData(
-  element: AglynElementNormalized,
+  element: AglynNodeNormalized,
   parentId: NodeId,
-  accumulator?: AglynElementsDenormalized,
-): AglynElementsDenormalized
+  accumulator?: AglynNodesDenormalized,
+): AglynNodesDenormalized
 export function denormalizeComponentElementData(
-  elements: AglynElementsNormalized,
+  elements: AglynNodesNormalized,
   parentId?: NodeId,
-): AglynElementsDenormalized
+): AglynNodesDenormalized
 export function denormalizeComponentElementData(
-  data: AglynElementNormalized | AglynElementsNormalized,
+  data: AglynNodeNormalized | AglynNodesNormalized,
   parentId: NodeId = CANVAS_ROOT_ELEMENT_ID,
-  accumulator?: AglynElementsDenormalized,
-): AglynElementsDenormalized {
-  let denormalized: AglynElementsDenormalized
+  accumulator?: AglynNodesDenormalized,
+): AglynNodesDenormalized {
+  let denormalized: AglynNodesDenormalized
 
   if (accumulator) denormalized = accumulator
   else if (parentId === CANVAS_ROOT_ELEMENT_ID) {
     denormalized = {
-      [DEFAULT_ROOT_ELEMENT.$id]: { ...copy(DEFAULT_ROOT_ELEMENT) },
+      [DEFAULT_ROOT_ELEMENT.$id]: {
+        ...(copy(DEFAULT_ROOT_ELEMENT) as AglynNodeDenormalized),
+      },
     }
   } else {
     denormalized = {

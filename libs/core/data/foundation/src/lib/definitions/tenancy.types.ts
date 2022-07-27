@@ -26,9 +26,9 @@ import type {
   HostViewFormat,
 } from '../constants/tenancy'
 import {
-  AglynElementsDenormalized,
-  AglynElementsList,
-  AglynElementsNormalized,
+  AglynNodesDenormalized,
+  AglynNodesList,
+  AglynNodesNormalized,
 } from './components.types'
 
 export type UserUid = string
@@ -196,8 +196,8 @@ export interface AglynTenantHostScreenVersion<
   elements?: Conditional<
     T,
     HostViewFormat.NORMALIZED,
-    AglynElementsList,
-    AglynElementsDenormalized
+    AglynNodesList,
+    AglynNodesDenormalized
   >
 }
 
@@ -214,7 +214,7 @@ export interface AglynTenantHostLayoutVersion<
   elements?: Conditional<
     T,
     HostViewFormat.NORMALIZED,
-    AglynElementsNormalized,
-    AglynElementsDenormalized
+    AglynNodesNormalized,
+    AglynNodesDenormalized
   >
 }
