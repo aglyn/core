@@ -96,18 +96,22 @@ const AccordionDetails = styled(MuiAccordionDetails)<AccordionDetailsProps>(
   }),
 )
 
-interface AccordionListItem extends AnyObj {
+export interface AccordionListItem extends AnyObj {
   id?: JSX.Key
   key?: JSX.Key
 }
-interface AccordionRenderProps<T extends AccordionListItem> extends AnyObj {
+export interface AccordionRenderProps<
+  T extends AccordionListItem = AccordionListItem,
+> extends AnyObj {
   id: JSX.Key
   item: T
   isOpen: boolean
   openItems: JSX.Key[]
 }
 
-export interface AccordionListProps<T extends AccordionListItem> {
+export interface AccordionListProps<
+  T extends AccordionListItem = AccordionListItem,
+> {
   items: T[]
   unique?: boolean
   defaultExpanded?: JSX.Key[]

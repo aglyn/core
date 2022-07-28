@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+import {
+  AccordionListComponent,
+  type AccordionListProps,
+  type AccordionRenderProps,
+} from '@aglyn/besigner-feature-app'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import { createResourceUid } from '@aglyn/core-util-app'
 import {
@@ -46,7 +51,7 @@ import {
   setDoc,
   updateDoc,
 } from 'firebase/firestore'
-import { useCallback, useEffect, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import AuthErrorAlertComponent from '../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
@@ -57,6 +62,41 @@ import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import WidgetCardComponent from '../../../components/widget-card.component'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT } from '../../../constants/shared'
+
+// eslint-disable-next-line react/display-name
+const DetailsContentComponent = forwardRef<any, AccordionRenderProps>(
+  (props, ref) => {
+    return (
+      <>
+        <div ref={ref}>{JSON.stringify(props)}</div>
+      </>
+    )
+  },
+)
+// eslint-disable-next-line react/display-name
+const SummaryContentComponent = forwardRef<any, AccordionRenderProps>(
+  (props, ref) => {
+    return (
+      <>
+        <div ref={ref}>{JSON.stringify(props)}</div>
+      </>
+    )
+  },
+)
+// eslint-disable-next-line react/display-name
+const Accordion = forwardRef<any, AccordionListProps>((props, ref) => {
+  const { items } = props
+  return (
+    <AccordionListComponent
+      ref={ref}
+      unique
+      items={items}
+      AccordionSummaryProps={{ dense: true }}
+      DetailsContentComponent={DetailsContentComponent}
+      SummaryContentComponent={SummaryContentComponent}
+    />
+  )
+})
 
 const CellItemLinkComponent = (props) => {
   return <AppLink {...props} componentVariant={'naked'} />
@@ -298,6 +338,7 @@ function Screens(props) {
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <WidgetCardComponent>
+            <Accordion items={screens} />
             <DataTableComponent
               rowHeight={TABLE_ROW_HEIGHT}
               getRowId={(row) => row.$id}
