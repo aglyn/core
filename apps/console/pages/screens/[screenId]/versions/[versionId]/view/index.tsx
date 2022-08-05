@@ -25,12 +25,11 @@ import {
 } from '@aglyn/shared-data-enums'
 import { AppLink, Container, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
-import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { useScreen } from '@aglyn/tenant-feature-instance'
 import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../components/layouts/main.layout'
@@ -110,11 +109,14 @@ function ScreenDetails(props) {
     },
   ]
 
+  const displayName = useMemo(() => {
+    return `${screen?.displayName || 'Not Found'}`
+  }, [screen])
+
   // console.log('Screens props', besignerUrl, props, status, screen)
 
   return (
-    <>
-      <NextPageTitle screen={'Screen Details'} />
+    <MainLayout title={[displayName, 'Screen']} disableAppBarElevation>
       <DashboardLayout
         activeTab={buildRoute(Route.SCREEN_LIST)}
         breadcrumbItems={[
@@ -123,11 +125,11 @@ function ScreenDetails(props) {
             href: buildRoute(Route.SCREEN_LIST),
           },
           {
-            children: `${screen?.displayName || 'Not Found'}`,
+            children: displayName,
           },
         ]}
         header={{
-          children: `${screen?.displayName || 'Not Found'}`,
+          children: displayName,
           icon: { path: ICON_VARIANT_PAGES.path },
         }}
         headerRight={
@@ -213,20 +215,13 @@ function ScreenDetails(props) {
           />
         </Container>
       </DashboardLayout>
-    </>
+    </MainLayout>
   )
 }
 ScreenDetails.displayName = 'Page:ScreenDetails'
 ScreenDetails.layouts = [
   {
     Component: AuthenticatedLayout,
-  },
-  {
-    Component: MainLayout,
-    props: {
-      title: 'Screen Details',
-      disableAppBarElevation: true,
-    },
   },
 ]
 
