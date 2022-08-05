@@ -23,7 +23,7 @@ import { signOut } from 'firebase/auth'
 import { useEffect } from 'react'
 import { useAuth } from 'reactfire'
 import AuthFormComponent from '../../components/auth-form.component'
-import UnauthenticatedLayout from '../../components/layouts/unauthenticated.layout'
+import AuthenticatingLayout from '../../components/layouts/authenticating.layout'
 
 function SignOut() {
   useNextPageTitle({
@@ -53,7 +53,7 @@ function SignOut() {
 SignOut.displayName = 'Page:SignOut'
 SignOut.layouts = [
   {
-    Component: UnauthenticatedLayout,
+    Component: AuthenticatingLayout,
     props: {
       isSignOut: true,
     },

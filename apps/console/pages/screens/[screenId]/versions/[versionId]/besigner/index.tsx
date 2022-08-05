@@ -33,7 +33,11 @@ import {
   ICON_VARIANT_MODIFY_ADD,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
-import { LOADING_OVERLAY_ELEMENT, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  AppLink,
+  LOADING_OVERLAY_ELEMENT,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -44,7 +48,7 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../components/besigner-app-bar.component'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
-import ConsoleLayout from '../../../../../../components/layouts/console.layout'
+import MainLayout from '../../../../../../components/layouts/main.layout'
 import '../../../../../../constants/app-setup'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 
@@ -139,8 +143,9 @@ function Besigner(props) {
 
   return (
     <>
-      <ConsoleLayout
+      <MainLayout
         title={'Besigner'}
+        disableAppBarElevation
         // besigner={true}
         // appBarSuffix={'Besigner'}
         centerNavigationItems={[
@@ -181,6 +186,8 @@ function Besigner(props) {
                 id: 'center-nav-file-close',
                 children: 'Close',
                 href: detailUrl,
+                component: AppLink,
+                componentVariant: 'naked',
                 ListItemTextProps: { inset: true },
               },
               {
@@ -274,7 +281,7 @@ function Besigner(props) {
             </WorkspaceEditorComponent>
           </>
         )}
-      </ConsoleLayout>
+      </MainLayout>
       <PropertiesDialogComponent
         open={screenDialog}
         onClose={() => {

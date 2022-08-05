@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-import { APP_CONSOLE, ICON_VARIANT_MENU_DOWN } from '@aglyn/shared-data-enums'
+import {
+  APP_CONSOLE,
+  ICON_VARIANT_MENU_DOWN,
+  ICON_VARIANT_SIGN_OUT,
+  ICON_VARIANT_THEME_DARK,
+  ICON_VARIANT_THEME_LIGHT,
+  ICON_VARIANT_THEME_SYSTEM,
+  ICON_VARIANT_USER_SETTINGS,
+} from '@aglyn/shared-data-enums'
 import {
   AppLink,
   type AppLinkProps,
@@ -26,8 +34,14 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { Image, NextPageTitle } from '@aglyn/shared-ui-next'
-import { mergeSxProps, useThemeModeState } from '@aglyn/shared-ui-theme'
-import { _isArrEmpty } from '@aglyn/shared-util-guards'
+import {
+  getThemeModeDisplayName,
+  mergeSxProps,
+  useThemeMode,
+  useThemeModeState,
+} from '@aglyn/shared-ui-theme'
+import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
+import { useUserPhotoUrl } from '@aglyn/tenant-feature-instance'
 import {
   AppBar,
   Avatar,
@@ -41,6 +55,8 @@ import {
   Typography,
 } from '@mui/material'
 import { Fragment, useMemo } from 'react'
+import { useUser } from 'reactfire'
+import { Route } from '../../constants/route-links'
 import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
 import aglynBesignerLogoDark from '../../public/_static/images/icons/aglyn-besigner-logo-full-rev3-dark.svg'
 import aglynBesignerLogoLight from '../../public/_static/images/icons/aglyn-besigner-logo-full-rev3.svg'
@@ -298,10 +314,18 @@ function MainLayout(props: MainLayoutProps) {
     ...rest
   } = props
 
+  const { data: user } = useUser()
+  const userPhotoUrl = useUserPhotoUrl()
+  const [, toggleThemeMode, themeMode] = useThemeMode()
+  const themeModeDisplayName = getThemeModeDisplayName(themeMode)
+  const layoutTitle = useMemo(() => {
+    return title ? [...(_isArr(title) ? title : [title]), 'Secure'] : 'Secure'
+  }, [title])
+
   return (
     <Fragment>
       <NextPageTitle
-        screen={title || APP_CONSOLE.TITLE}
+        screen={layoutTitle || APP_CONSOLE.TITLE}
         suffix={APP_CONSOLE.AFFIX}
         separator={` ${APP_CONSOLE.SEP} `}
       />
@@ -312,12 +336,77 @@ function MainLayout(props: MainLayoutProps) {
         {...rest}
       >
         <TopAppBar
-          centerNavigationItems={centerNavigationItems}
+          disableAppBarElevation={disableAppBarElevation}
+          centerNavigationItems={
+            centerNavigationItems || [
+              // {
+              //   id: 'center-nav-site-picker',
+              //   children: ,
+              // },
+              {
+                id: 'center-nav-dashboard',
+                children: 'Home',
+                href: Route.SCREEN_DASHBOARD,
+              },
+              // {
+              //   id: 'center-nav-app',
+              //   children: 'Website',
+              //   // href: '/besigner',
+              //   items: [
+              //     {
+              //       id: 'center-nav-screens',
+              //       children: 'View Screens',
+              //       href: Route.SCREEN_LIST,
+              //     },
+              //   ],
+              // },
+            ]
+          }
           customCenter={customCenter}
           appBarSuffix={appBarSuffix}
-          quickActions={quickActions}
-          disableAppBarElevation={disableAppBarElevation}
-          besigner={besigner}
+          quickActions={[
+            ...(quickActions || []),
+            {
+              title: 'Manage account',
+              MenuProps: { dense: true, horizontalOrigin: 'right' },
+              sx: { p: 0.5 },
+              edge: 'end',
+              avatar: {
+                src: userPhotoUrl,
+              },
+              items: [
+                {
+                  onClick: toggleThemeMode,
+                  // component: 'button',
+                  children: `Theme mode: ${themeModeDisplayName}`,
+                  icon: {
+                    path:
+                      themeMode === 'dark'
+                        ? ICON_VARIANT_THEME_DARK.path
+                        : themeMode === 'light'
+                        ? ICON_VARIANT_THEME_LIGHT.path
+                        : ICON_VARIANT_THEME_SYSTEM.path,
+                  },
+                  'aria-label': 'switch theme mode',
+                },
+                {
+                  children: 'Settings',
+                  component: AppLink,
+                  href: Route.ACCOUNT_MANAGE_SETTINGS,
+                  icon: { path: ICON_VARIANT_USER_SETTINGS.path },
+                },
+                {
+                  type: 'divider',
+                },
+                {
+                  children: 'Sign out',
+                  component: AppLink,
+                  href: Route.AUTH_SIGN_OUT,
+                  icon: { path: ICON_VARIANT_SIGN_OUT.path },
+                },
+              ],
+            },
+          ]}
         />
         {children}
       </Stack>

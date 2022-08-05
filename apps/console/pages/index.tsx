@@ -20,8 +20,8 @@ import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageWithLayout, useNextPageTitle } from '@aglyn/shared-ui-next'
 import DataTableComponent from '../components/data-table.component'
 import AuthenticatedLayout from '../components/layouts/authenticated.layout'
-import ConsoleLayout from '../components/layouts/console.layout'
 import DashboardLayout from '../components/layouts/dashboard.layout'
+import MainLayout from '../components/layouts/main.layout'
 import WidgetCardComponent from '../components/widget-card.component'
 import { CONTENT_MAX_WIDTH } from '../constants/shared'
 
@@ -102,7 +102,7 @@ Index.layouts = [
     Component: AuthenticatedLayout,
   },
   {
-    Component: ConsoleLayout,
+    Component: MainLayout,
     props: {
       title: 'My Dashboard',
     },

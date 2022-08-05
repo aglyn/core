@@ -43,7 +43,7 @@ import { useAnalytics, useAuth } from 'reactfire'
 import AuthErrorAlertComponent from '../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../components/auth-form-template.component'
 import AuthFormComponent from '../../components/auth-form.component'
-import UnauthenticatedLayout from '../../components/layouts/unauthenticated.layout'
+import AuthenticatingLayout from '../../components/layouts/authenticating.layout'
 
 const googleOAuthProvider = new GoogleAuthProvider()
 
@@ -164,7 +164,7 @@ function SignUp() {
 SignUp.displayName = 'Page:SignUp'
 SignUp.layouts = [
   {
-    Component: UnauthenticatedLayout,
+    Component: AuthenticatingLayout,
   },
 ]
 

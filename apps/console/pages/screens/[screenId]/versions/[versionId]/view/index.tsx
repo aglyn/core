@@ -32,8 +32,8 @@ import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
-import ConsoleLayout from '../../../../../../components/layouts/console.layout'
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
+import MainLayout from '../../../../../../components/layouts/main.layout'
 import WidgetCardComponent from '../../../../../../components/widget-card.component'
 import { buildRoute, Route } from '../../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
@@ -222,9 +222,10 @@ ScreenDetails.layouts = [
     Component: AuthenticatedLayout,
   },
   {
-    Component: ConsoleLayout,
+    Component: MainLayout,
     props: {
       title: 'Screen Details',
+      disableAppBarElevation: true,
     },
   },
 ]

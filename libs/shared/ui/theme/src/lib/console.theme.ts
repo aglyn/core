@@ -145,27 +145,27 @@ export const ordinalPrimaryDark: PrimaryRecord = {
 
 export const ordinalSecondaryLight: SecondaryRecord = {
   main: '#0091ea',
-  contrastText: '#000000',
+  // contrastText: '#000000',
   // light: '#40C4FF',
   // dark: '#0277BD',
   // contrastText: '#FFFFFF',
 }
 export const ordinalSecondaryDark: SecondaryRecord = {
   main: '#00b0ff',
-  contrastText: '#000000',
+  // contrastText: '#000000',
   // light: '#40C4FF',
   // dark: '#026CA0',
 }
 
 export const ordinalTertiaryLight: TertiaryRecord = {
   main: '#E040FB',
-  contrastText: '#FFFFFF',
+  // contrastText: '#FFFFFF',
   // light: '#AF52BF',
   // dark: '#6D1B7B',
 }
 export const ordinalTertiaryDark: TertiaryRecord = {
   main: '#E040FB',
-  contrastText: '#FFFFFF',
+  // contrastText: '#FFFFFF',
   // light: '#BA68C8',
   // dark: '#9C27B0',
 }

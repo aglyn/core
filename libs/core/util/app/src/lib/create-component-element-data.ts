@@ -23,7 +23,7 @@ import { copy } from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
 import createComponentElementId from './create-component-element-id'
 
-function traverseComponentTemplate(
+export function traverseComponentTemplate(
   data: AglynNodeTemplateSchema['data'],
 ): AglynNodeItemDenormalized {
   const response: AglynNodeItemDenormalized = {

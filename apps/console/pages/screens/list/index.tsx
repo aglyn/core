@@ -58,8 +58,8 @@ import AuthErrorAlertComponent from '../../../components/auth-error-alert.compon
 import AuthFormTemplateComponent from '../../../components/auth-form-template.component'
 import DataTableComponent from '../../../components/data-table.component'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
-import ConsoleLayout from '../../../components/layouts/console.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
+import MainLayout from '../../../components/layouts/main.layout'
 import WidgetCardComponent from '../../../components/widget-card.component'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH, TABLE_ROW_HEIGHT } from '../../../constants/shared'
@@ -398,9 +398,10 @@ Screens.layouts = [
     Component: AuthenticatedLayout,
   },
   {
-    Component: ConsoleLayout,
+    Component: MainLayout,
     props: {
       title: 'Screens',
+      disableAppBarElevation: true,
     },
   },
 ]

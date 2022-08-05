@@ -15,20 +15,24 @@
  * limitations under the License.
  */
 
+import {
+  BackgroundImageComponent,
+  type BackgroundImageComponentProps,
+} from '@aglyn/shared-ui-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
-import { BackgroundImageComponent, type BackgroundImageComponentProps } from '@aglyn/shared-ui-jsx'
 import { useContinueUrl } from '@aglyn/shared-util-next'
 import { Stack } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useSigninCheck } from 'reactfire'
 
-export interface UnauthenticatedLayoutProps extends Partial<BackgroundImageComponentProps> {
+export interface AuthenticatingLayoutProps
+  extends Partial<BackgroundImageComponentProps> {
   requireEmailVerification?: boolean
   isSignOut?: boolean
 }
 
-function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
+function AuthenticatingLayout(props: AuthenticatingLayoutProps) {
   const { children, sx, requireEmailVerification, isSignOut, ...rest } = props
   const router = useRouter()
   const { status, data: signInCheckResult } = useSigninCheck()
@@ -42,10 +46,19 @@ function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
     if (isSignOut && signedIn) return void 0
     if (!signedIn && !isSignOut) return void 0
     if (isSignOut) return void router.push('/signin')
-    if (requireEmailVerification && !emailVerified) return void router.push('/validate-email')
+    if (requireEmailVerification && !emailVerified)
+      return void router.push('/validate-email')
 
     return void pushNext('/')
-  }, [authLoading, emailVerified, isSignOut, pushNext, requireEmailVerification, router, signedIn])
+  }, [
+    authLoading,
+    emailVerified,
+    isSignOut,
+    pushNext,
+    requireEmailVerification,
+    router,
+    signedIn,
+  ])
 
   return (
     <BackgroundImageComponent
@@ -61,7 +74,7 @@ function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
           p: { xs: 2, md: 3 },
           color: 'text.primary',
         },
-        sx
+        sx,
       )}
       {...rest}
     >
@@ -78,8 +91,8 @@ function UnauthenticatedLayout(props: UnauthenticatedLayoutProps) {
     </BackgroundImageComponent>
   )
 }
-UnauthenticatedLayout.displayName = 'UnauthenticatedLayout'
-UnauthenticatedLayout.aglyn = true
+AuthenticatingLayout.displayName = 'AuthenticatingLayout'
+AuthenticatingLayout.aglyn = true
 
-export { UnauthenticatedLayout }
-export default UnauthenticatedLayout
+export { AuthenticatingLayout }
+export default AuthenticatingLayout
