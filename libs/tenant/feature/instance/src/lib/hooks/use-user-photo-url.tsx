@@ -14,14 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { gravatarUrlFromEmail } from '@aglyn/shared-util-tools'
+import { useMemo } from 'react'
+import { useUser } from 'reactfire'
 
-export const ELEMENT_ATTRIBUTE_PREFIX = 'data-aglyn-'
-export type ELEMENT_ATTRIBUTE_PREFIX = typeof ELEMENT_ATTRIBUTE_PREFIX
+export function useUserPhotoUrl() {
+  const { data: user } = useUser()
 
-export const aglynAttributeKey = (
-  name: string,
-): `${ELEMENT_ATTRIBUTE_PREFIX}${typeof name}` => {
-  return `${ELEMENT_ATTRIBUTE_PREFIX}${name}`
+  return useMemo(() => {
+    return user?.photoURL || gravatarUrlFromEmail(user?.email)
+  }, [user])
 }
 
-export default aglynAttributeKey
+export default useUserPhotoUrl

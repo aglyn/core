@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-export * from './lib/constants/attributes'
 export * from './lib/constants/sample-data'
 export * from './lib/constants/shared'
 
@@ -39,8 +38,6 @@ export * from './lib/hooks/use-delete-element-callback'
 export * from './lib/hooks/use-leaf-drag'
 export * from './lib/hooks/use-leaf-drop'
 export * from './lib/hooks/use-besigner-app-context'
-
-export * from './lib/utils/aglynAttributeKey'
 
 export * from './lib/contexts/components-drawer-context.provider'
 export * from './lib/contexts/element-drawer-context'

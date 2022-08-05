@@ -20,6 +20,7 @@ export * from './lib/constants/site-paths'
 
 export * from './lib/hooks/use-screen'
 export * from './lib/hooks/use-screen-version'
+export * from './lib/hooks/use-user-photo-url'
 
 export * from './lib/utils/build-rewrite-site-host-path'
 export * from './lib/utils/get-tenant-page-static-paths'

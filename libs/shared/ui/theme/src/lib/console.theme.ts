@@ -144,14 +144,14 @@ export const ordinalPrimaryDark: PrimaryRecord = {
 }
 
 export const ordinalSecondaryLight: SecondaryRecord = {
-  main: lightBlue['A700'],
+  main: '#0091ea',
   contrastText: '#000000',
   // light: '#40C4FF',
   // dark: '#0277BD',
   // contrastText: '#FFFFFF',
 }
 export const ordinalSecondaryDark: SecondaryRecord = {
-  main: lightBlue['A400'],
+  main: '#00b0ff',
   contrastText: '#000000',
   // light: '#40C4FF',
   // dark: '#026CA0',

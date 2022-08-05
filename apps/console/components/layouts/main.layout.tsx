@@ -43,7 +43,7 @@ import {
 } from '@mui/material'
 import { Fragment } from 'react'
 import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
-import besignerIcon from '../../public/_static/images/icons/besiger-icon-v1-256.svg'
+import besignerIcon from '../../public/_static/images/icons/aglyn-logo-mark-rev3.svg'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {

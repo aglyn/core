@@ -112,8 +112,8 @@ const ElementOverlayOutlineComponent = forwardRef<
     <ElementOutlineWrapper
       ref={ref as any}
       id="aglyn:element-overlay-outline"
-      data-aglyn-overlay-id={$id}
-      data-aglyn-overlay-type="outline"
+      data-aglyn-node={$id}
+      data-aglyn-kind="overlay-outline"
       style={style}
       className={clsx(
         {

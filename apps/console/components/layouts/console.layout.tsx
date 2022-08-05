@@ -25,7 +25,7 @@ import {
 import { AppLink } from '@aglyn/shared-ui-jsx'
 import { getThemeModeDisplayName, useThemeMode } from '@aglyn/shared-ui-theme'
 import { _isArr } from '@aglyn/shared-util-guards'
-import { gravatarUrlFromEmail } from '@aglyn/shared-util-tools'
+import { useUserPhotoUrl } from '@aglyn/tenant-feature-instance'
 import { useUser } from 'reactfire'
 import { Route } from '../../constants/route-links'
 import MainLayout, { type MainLayoutProps } from './main.layout'
@@ -35,6 +35,7 @@ export interface ConsoleLayoutProps extends MainLayoutProps {}
 function ConsoleLayout(props: ConsoleLayoutProps) {
   const { title, children, quickActions, ...rest } = props
   const { data: user } = useUser()
+  const userPhotoUrl = useUserPhotoUrl()
   const [, toggleThemeMode, themeMode] = useThemeMode()
   const themeModeDisplayName = getThemeModeDisplayName(themeMode)
   // const tenantLabel =
@@ -53,7 +54,7 @@ function ConsoleLayout(props: ConsoleLayoutProps) {
           sx: { p: 0.5 },
           edge: 'end',
           avatar: {
-            src: user?.photoURL || gravatarUrlFromEmail(user?.email),
+            src: userPhotoUrl,
           },
           items: [
             {

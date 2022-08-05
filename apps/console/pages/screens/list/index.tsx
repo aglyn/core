@@ -270,7 +270,7 @@ function Screens(props) {
 
   return (
     <>
-      <NextPageTitle screen={'App Screens'} />
+      <NextPageTitle screen={'Screens'} />
       <DashboardLayout
         activeTab={buildRoute(Route.SCREEN_LIST)}
         breadcrumbItems={[
@@ -280,7 +280,7 @@ function Screens(props) {
           },
         ]}
         header={{
-          children: 'App Screens',
+          children: 'Screens',
           icon: { path: ICON_VARIANT_PAGES.path },
         }}
         headerRight={
@@ -400,7 +400,7 @@ Screens.layouts = [
   {
     Component: ConsoleLayout,
     props: {
-      title: 'App Screens',
+      title: 'Screens',
     },
   },
 ]

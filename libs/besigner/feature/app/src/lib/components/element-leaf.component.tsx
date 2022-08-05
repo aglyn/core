@@ -114,10 +114,10 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
         leafComponent={leafComponent || ElementLeafComponent}
         onMouseOver={handleOnMouseOver}
         onMouseDown={handleOnMouseDown}
-        data-aglyn-element-id={$id}
-        data-aglyn-element-component={componentId}
-        data-aglyn-element-bundle={bundleId}
-        data-aglyn-element-selected={isSelected}
+        data-aglyn-node={$id}
+        data-aglyn-component={componentId}
+        data-aglyn-bundle={bundleId}
+        data-aglyn-status={isSelected ? 'selected' : 'none'}
         {...rest}
       />
     )

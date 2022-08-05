@@ -192,8 +192,8 @@ const ElementOverlayActionsComponent = forwardRef<
     <MuiButtonGroup
       ref={ref}
       id="aglyn:element-overlay-badge"
-      data-aglyn-overlay-id={$id}
-      data-aglyn-overlay-variant="actions"
+      data-aglyn-node={$id}
+      data-aglyn-kind="overlay-actions"
       variant="contained"
       color="secondary"
       aria-label="element controls"

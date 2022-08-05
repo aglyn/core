@@ -60,8 +60,8 @@ const ElementOverlayLabelComponent = forwardRef<
     <ElementLabelWrapper
       ref={ref}
       id="aglyn:element-overlay-label"
-      data-aglyn-overlay-id={$id}
-      data-aglyn-overlay-variant="label"
+      data-aglyn-node={$id}
+      data-aglyn-kind="overlay-label"
       direction="row"
       justifyContent="flex-start"
       alignItems="center"

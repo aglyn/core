@@ -177,7 +177,8 @@ const ElementOverlayPopperComponent = forwardRef<
     <>
       <MuiPopper
         anchorEl={() => elementRef?.node}
-        data-aglyn-overlay-popper={`addHelper-${variant}`}
+        data-aglyn-node={$id}
+        data-aglyn-kind={'overlay-popper-new'}
         placement={'bottom'}
         modifiers={innerModifiers}
         open={addHelperOpen}
@@ -193,8 +194,8 @@ const ElementOverlayPopperComponent = forwardRef<
         anchorEl={() => elementRef?.node}
         placement="top-start"
         modifiers={outerModifiers}
-        data-aglyn-overlay-id={$id}
-        data-aglyn-overlay-popper={`outer-${variant}`}
+        data-aglyn-node={$id}
+        data-aglyn-kind={'overlay-popper-out'}
         open={isOpen}
         keepMounted
         disablePortal
@@ -207,7 +208,8 @@ const ElementOverlayPopperComponent = forwardRef<
 
               <MuiPopper
                 anchorEl={() => elementRef?.node}
-                data-aglyn-overlay-popper={`inner-${variant}`}
+                data-aglyn-node={$id}
+                data-aglyn-kind={'overlay-popper-in'}
                 placement={
                   variant === 'hoveredOverlay' ? 'top-start' : undefined
                 }

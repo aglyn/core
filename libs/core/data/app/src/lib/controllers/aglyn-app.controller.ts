@@ -179,7 +179,7 @@ export class AglynAppController<
   }
 
   public toString(): string {
-    return `[object ${this[Symbol.toStringTag]}(name: '${this.#appName}')]`
+    return `[object ${this[Symbol.toStringTag]}('${this.#appName}')]`
   }
   public toJSON() {
     return {
