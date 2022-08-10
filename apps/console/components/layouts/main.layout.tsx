@@ -58,10 +58,10 @@ import { Fragment, useMemo } from 'react'
 import { useUser } from 'reactfire'
 import { Route } from '../../constants/route-links'
 import { DRAWER_WIDTH, TOP_BAR_HEIGHT } from '../../constants/shared'
-import aglynBesignerLogoDark from '../../public/_static/images/icons/aglyn-besigner-logo-full-rev3-dark.svg'
-import aglynBesignerLogoLight from '../../public/_static/images/icons/aglyn-besigner-logo-full-rev3.svg'
-import aglynConsoleLogoDark from '../../public/_static/images/icons/aglyn-console-logo-full-rev3-dark.svg'
-import aglynConsoleLogoLight from '../../public/_static/images/icons/aglyn-console-logo-full-rev3.svg'
+import aglynBesignerLogoDark from '../../public/_static/images/brand/aglyn-besigner-logo-full-dark.svg'
+import aglynBesignerLogoLight from '../../public/_static/images/brand/aglyn-besigner-logo-full-light.svg'
+import aglynConsoleLogoDark from '../../public/_static/images/brand/aglyn-console-logo-full-dark.svg'
+import aglynConsoleLogoLight from '../../public/_static/images/brand/aglyn-console-logo-full-light.svg'
 
 // eslint-disable-next-line react/display-name
 const buildNav = (type?: 'icon' | 'text') => (item, i) => {

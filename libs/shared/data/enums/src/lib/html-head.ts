@@ -45,19 +45,15 @@ export const META_PREF: MakeMetaElementsConfig = [
 ]
 
 export const LINK_PREF: MakeLinkElementsConfig = [
+  ['icon', '/_static/images/favicons/favicon.svg', { id: 'icon-favicon-svg' }],
   [
     'shortcut icon',
-    '/_static/images/favicons/favicon-2.ico',
-    { id: 'shortcut-icon-favicon-ico' },
-  ],
-  [
-    'icon',
-    '/_static/images/favicons/favicon-2.svg',
-    { type: 'image/svg+xml', id: 'icon-favicon-svg' },
+    '/_static/images/favicons/favicon.ico',
+    { type: 'image/x-icon', id: 'shortcut-icon-favicon-ico' },
   ],
   [
     'alternate icon',
-    '/_static/images/favicons/favicon-2.png',
+    '/_static/images/favicons/favicon.png',
     { type: 'image/png', id: 'alternate-icon-favicon-png' },
   ],
   ['manifest', '/_static/_pwa/manifest.json', { id: 'manifest-pwa' }],

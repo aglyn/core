@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { AglynSvgIcon, AglynSvgLogo } from '@aglyn/shared-ui-jsx'
+import { Image } from '@aglyn/shared-ui-next'
+import { useThemeModeState } from '@aglyn/shared-ui-theme'
 import {
   Paper,
   Stack,
@@ -23,7 +24,11 @@ import {
   Typography,
   type TypographyProps,
 } from '@mui/material'
-import { forwardRef } from 'react'
+import { forwardRef, useMemo } from 'react'
+import aglynIcon from '../public/_static/images/brand/aglyn-logo-full-light.svg'
+import aglynIconDark from '../public/_static/images/brand/aglyn-logo-full-light.svg'
+import aglynLogo from '../public/_static/images/brand/aglyn-logo-full-light.svg'
+import aglynLogoDark from '../public/_static/images/brand/aglyn-logo-full-light.svg'
 
 export interface AuthFormProps extends StackProps {
   paperTop?: JSX.Node
@@ -47,6 +52,13 @@ const AuthFormComponent = forwardRef<any, AuthFormProps>((props, ref) => {
     children,
     ...rest
   } = props
+  const [[, themeMode]] = useThemeModeState()
+  const [aglynLogoUrl, aglynIconUrl] = useMemo(() => {
+    if (themeMode === 'dark') {
+      return [aglynLogo, aglynIcon]
+    }
+    return [aglynLogoDark, aglynIconDark]
+  }, [themeMode])
 
   return (
     <Stack
@@ -77,9 +89,15 @@ const AuthFormComponent = forwardRef<any, AuthFormProps>((props, ref) => {
             spacing={1}
             sx={{ pb: 3 }}
           >
-            <AglynSvgIcon rounded bordered sx={{ fontSize: 24 }} />
-            <AglynSvgLogo
-              sx={{ fontSize: 64, transform: `translateY(0.12rem)` }}
+            <Image
+              alt={'aglyn'}
+              src={aglynLogoUrl}
+              sx={{
+                height: '32px',
+                width: '99px',
+              }}
+              height={32}
+              width={99}
             />
           </Stack>
 
