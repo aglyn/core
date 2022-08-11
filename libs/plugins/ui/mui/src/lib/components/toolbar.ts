@@ -25,7 +25,7 @@ import { mdiBorderInside } from '@aglyn/shared-ui-mdi-jsx'
 import Toolbar, { type ToolbarProps } from '@mui/material/Toolbar'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { FIELD_DISABLE_GUTTERS } from '../constants/field-presets'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 
 const ID: ComponentId = 'toolbar'
 
@@ -51,9 +51,9 @@ export const schema: AglynComponentSchema<ToolbarProps> = {
       ],
     },
   ],
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'Toolbar Content',
       icon: {
         path: mdiBorderInside.path,

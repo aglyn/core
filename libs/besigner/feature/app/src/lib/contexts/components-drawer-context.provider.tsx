@@ -80,7 +80,7 @@ function ComponentsDrawerContextProvider(
         {children}
       </ElementDrawerContext.Provider>
       <AglynComponentsContext.Consumer>
-        {({ templateBlocks }) => (
+        {({ nodePresets }) => (
           <Component
             open={isOpen}
             onClose={handleClose}
@@ -91,7 +91,7 @@ function ComponentsDrawerContextProvider(
           >
             <ComponentsGridListComponent
               onItemSelect={handleConfirm}
-              items={templateBlocks}
+              items={nodePresets}
             />
           </Component>
         )}

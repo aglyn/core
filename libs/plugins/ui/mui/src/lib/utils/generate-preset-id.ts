@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
-import { getAllComponentsTemplateValues } from '@aglyn/core-data-app'
-import type { AglynNodeTemplateSchema } from '@aglyn/core-data-foundation'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import type { ComponentId } from '@aglyn/core-data-foundation'
+import { BUNDLE_ID } from '../constants/bundle-common'
 
-export function useAglynComponentTemplateBlocks(): AglynNodeTemplateSchema[] {
-  const app = useAglynAppContext()
-  return getAllComponentsTemplateValues(app)
+export const generatePresetId = (componentId: ComponentId): ComponentId => {
+  return `${BUNDLE_ID}:${componentId}`
 }
-export default useAglynComponentTemplateBlocks
+
+export default generatePresetId

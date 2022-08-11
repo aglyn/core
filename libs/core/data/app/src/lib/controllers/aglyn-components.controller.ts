@@ -16,11 +16,11 @@
  */
 
 import type {
-  AglynComponentBundle,
+  AglynBundleSchema,
   AglynComponentSchema,
   AglynComponentsControllerOptions,
   AglynModuleEffectListener,
-  AglynNodeTemplateSchema,
+  AglynNodePresetSchema,
   BundleId,
   ComponentId,
   ComponentsRegistryContext,
@@ -32,8 +32,8 @@ import type {
   IAglynComponentsController,
   InstanceBundles,
   InstanceComponents,
+  InstanceNodePresets,
   InstanceSchemas,
-  InstanceTemplates,
 } from '@aglyn/core-data-foundation'
 import {
   AglynEventStateFlag,
@@ -70,7 +70,7 @@ export class AglynComponentsController
     bundles: new Map(),
     components: new Map(),
     schemas: new Map(),
-    templates: new Map(),
+    presets: new Map(),
   }
 
   public get bundles(): InstanceBundles {
@@ -82,8 +82,8 @@ export class AglynComponentsController
   public get schemas(): InstanceSchemas {
     return this.#context.schemas
   }
-  public get templates(): InstanceTemplates {
-    return this.#context.templates
+  public get presets(): InstanceNodePresets {
+    return this.#context.presets
   }
 
   protected get listeners(): AglynModuleEffectListener<any>[] {
@@ -127,8 +127,8 @@ export class AglynComponentsController
   protected _componentValues(): ComponentsRegistryValues {
     return [...this.components.values()]
   }
-  protected _templateValues(): AglynNodeTemplateSchema[] {
-    return [...this.templates.values()]
+  protected _presetValues(): AglynNodePresetSchema[] {
+    return [...this.presets.values()]
   }
 
   public getAllComponents(): ComponentsRegistryEntry[] {
@@ -140,8 +140,8 @@ export class AglynComponentsController
   public getAllComponentsValues(): ComponentsRegistryValues {
     return this._componentValues()
   }
-  public getAllComponentsTemplateValues(): AglynNodeTemplateSchema[] {
-    return this._templateValues()
+  public getAllNodePresetsValues(): AglynNodePresetSchema[] {
+    return this._presetValues()
   }
 
   public getComponent<P, T>(
@@ -170,7 +170,7 @@ export class AglynComponentsController
   }
   public getBundle(
     payload: ComponentsBundleGetPayload,
-  ): OrUndef<AglynComponentBundle> {
+  ): OrUndef<AglynBundleSchema> {
     const { bundleId } = payload
     return this.bundles.get(bundleId)
   }
@@ -213,9 +213,9 @@ export class AglynComponentsController
           this.components.set(componentId, component)
           this.schemas.set(componentId, schema)
         }
-        if (_isArr(schema.templates)) {
-          schema.templates.forEach((i) => {
-            this.templates.set(i.id, i)
+        if (_isArr(schema.presets)) {
+          schema.presets.forEach((i) => {
+            this.presets.set(i.id, i)
           })
         }
       },
@@ -224,7 +224,7 @@ export class AglynComponentsController
   }
   public registerBundle(payload: ComponentsBundleRegisterPayload): this {
     const { bundle, components } = payload
-    const _bundle: AglynComponentBundle = { ...bundle, componentIds: [] }
+    const _bundle: AglynBundleSchema = { ...bundle, componentIds: [] }
     const bundleId: BundleId = _bundle.bundleId
     this.handleEvent(
       [
@@ -259,8 +259,8 @@ export class AglynComponentsController
             throw new Error(`No bundle exists with ID ${bundleId}.`)
             // TODO: throw errorFactory error
           }
-          this.schemas.get(key)?.templates?.forEach((i) => {
-            this.templates.delete(i.id)
+          this.schemas.get(key)?.presets?.forEach((i) => {
+            this.presets.delete(i.id)
           })
           this.components.delete(key)
           this.schemas.delete(key)
@@ -269,8 +269,8 @@ export class AglynComponentsController
           )
           this.bundles.set(bundleId, bundle)
         } else {
-          this.schemas.get(componentId)?.templates?.forEach((i) => {
-            this.templates.delete(i.id)
+          this.schemas.get(componentId)?.presets?.forEach((i) => {
+            this.presets.delete(i.id)
           })
           this.schemas.delete(componentId)
           this.components.delete(componentId)

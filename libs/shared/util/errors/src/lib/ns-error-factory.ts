@@ -93,7 +93,7 @@ function namespaceFactory(options?: NamespaceOptions) {
  *   };
  *
  *   // Type-safe function - must pass a valid error code as param.
- *   let error = new ErrorFactory<Err>('scope', 'Service', templates);
+ *   let error = new ErrorFactory<Err>('scope', 'Service', presets);
  *
  *   ...
  *   throw error.create(Err.GENERIC);

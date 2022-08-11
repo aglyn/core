@@ -25,7 +25,7 @@ import { mdiFormatListText } from '@aglyn/shared-ui-mdi-jsx'
 
 import ListItem, { type ListItemProps } from '@mui/material/ListItem'
 import { BUNDLE_ID } from '../constants/bundle-common'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 import { schema as listItemTextSchema } from './list-item-text'
 
 const ID: ComponentId = 'list-item'
@@ -41,9 +41,9 @@ export const schema: AglynComponentSchema<ListItemProps> = {
       components: [listItemTextSchema.componentId],
     },
   ],
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'List Item',
       icon: { path: mdiFormatListText.path },
       category: ComponentCategory.DATA_DISPLAY,
@@ -52,7 +52,7 @@ export const schema: AglynComponentSchema<ListItemProps> = {
         bundleId: BUNDLE_ID,
         elements: [
           {
-            ...listItemTextSchema.templates![0]!.data,
+            ...listItemTextSchema.presets![0]!.data,
           },
         ],
       },

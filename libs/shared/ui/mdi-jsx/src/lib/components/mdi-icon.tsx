@@ -16,7 +16,7 @@
  */
 
 import '@aglyn/shared-data-jsx'
-import { DEFAULT_ICON } from '@aglyn/shared-data-mdi/constants/default-icon'
+import DEFAULT_ICON from '@aglyn/shared-data-mdi/constants/default-icon'
 import {
   SvgIcon as MuiSvgIcon,
   type SvgIconProps as MuiSvgIconProps,

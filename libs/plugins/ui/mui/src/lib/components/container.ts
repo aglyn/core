@@ -24,7 +24,7 @@ import {
 import { mdiViewArrayOutline } from '@aglyn/shared-ui-mdi-jsx'
 import Container, { type ContainerProps } from '@mui/material/Container'
 import { BUNDLE_ID } from '../constants/bundle-common'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 
 const ID: ComponentId = 'container'
 
@@ -67,9 +67,9 @@ export const schema: AglynComponentSchema<ContainerProps> = {
       ],
     },
   ],
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'Container',
       icon: {
         path: mdiViewArrayOutline.path,

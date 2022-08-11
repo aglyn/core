@@ -30,7 +30,7 @@ import type {
   CommandUId,
 } from '../definitions/commands.types'
 import type {
-  AglynComponentBundle,
+  AglynBundleSchema,
   AglynComponentSchema,
   AglynNodeItemDenormalized,
   AglynNodeItemNormalized,
@@ -205,7 +205,7 @@ export type ComponentUnregisterPayload = PayloadData<{
   bundleId: BundleId
 }>
 export type ComponentsBundleRegisterPayload = PayloadData<{
-  bundle: Omit<AglynComponentBundle, 'componentIds'>
+  bundle: Omit<AglynBundleSchema, 'componentIds'>
   components: ComponentRegisterPayload[]
 }>
 export type ComponentsBundleUnregisterPayload = PayloadData<{

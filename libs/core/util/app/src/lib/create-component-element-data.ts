@@ -17,14 +17,14 @@
 
 import type {
   AglynNodeItemDenormalized,
-  AglynNodeTemplateSchema,
+  AglynNodePresetSchema,
 } from '@aglyn/core-data-foundation'
 import { copy } from '@aglyn/shared-util-tools'
 import defaultsDeep from 'lodash-es/defaultsDeep'
 import createComponentElementId from './create-component-element-id'
 
-export function traverseComponentTemplate(
-  data: AglynNodeTemplateSchema['data'],
+export function traverseNodePreset(
+  data: AglynNodePresetSchema['data'],
 ): AglynNodeItemDenormalized {
   const response: AglynNodeItemDenormalized = {
     ...data,
@@ -34,14 +34,14 @@ export function traverseComponentTemplate(
   }
   const current = Array.isArray(data?.elements) ? data.elements : []
   for (const child of current) {
-    response.elements.push(traverseComponentTemplate(child))
+    response.elements.push(traverseNodePreset(child))
   }
   return response
 }
 
 export type CreateComponentElementDataOptions =
-  | AglynNodeTemplateSchema
-  | { data: AglynNodeTemplateSchema['data'] }
+  | AglynNodePresetSchema
+  | { data: AglynNodePresetSchema['data'] }
 
 export const ELEMENT_DEFAULTS: Partial<AglynNodeItemDenormalized> = {
   props: {},
@@ -52,7 +52,7 @@ export function createComponentElementData(
   options?: CreateComponentElementDataOptions,
 ): AglynNodeItemDenormalized {
   return defaultsDeep(
-    traverseComponentTemplate(copy(options?.data)),
+    traverseNodePreset(copy(options?.data)),
     copy(ELEMENT_DEFAULTS),
   )
 }

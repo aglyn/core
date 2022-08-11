@@ -21,10 +21,7 @@ import {
   DndDragType,
 } from '@aglyn/besigner-data-app'
 import { getBundle, getComponentSchema } from '@aglyn/core-data-app'
-import type {
-  AglynNodeTemplateSchema,
-  NodeId,
-} from '@aglyn/core-data-foundation'
+import type { AglynNodePresetSchema, NodeId } from '@aglyn/core-data-foundation'
 import {
   useAglynAppContext,
   useAglynComponentSchema,
@@ -298,7 +295,7 @@ const ElementsTree = forwardRef<any, ElementsTreeViewComponentProps>(
 )
 
 type ComponentGridItemProps = CardIconListItemProps & {
-  item: AglynNodeTemplateSchema
+  item: AglynNodePresetSchema
 }
 const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
   (props, forwardRef) => {
@@ -360,7 +357,7 @@ const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
 type ComponentGroupDetailsProps = BoxProps &
   JSX.AnyProps & {
     item?: {
-      items?: AglynNodeTemplateSchema[]
+      items?: AglynNodePresetSchema[]
     }
     id?: string
     isOpen?: boolean
@@ -385,10 +382,10 @@ const ComponentGroupDetails = forwardRef<any, ComponentGroupDetailsProps>(
 const ComponentsList = forwardRef<any, ListProps>((props, ref) => {
   const { ...rest } = props
   const app = useBesignerAppContext()
-  const { templateBlocks } = useAglynComponentsContext()
+  const { nodePresets } = useAglynComponentsContext()
   const sortedItems = useMemo(
-    () => arraySortBy(templateBlocks, (i) => i.label),
-    [templateBlocks],
+    () => arraySortBy(nodePresets, (i) => i.label),
+    [nodePresets],
   )
   const allItem = useMemo(
     () => ({
@@ -409,7 +406,7 @@ const ComponentsList = forwardRef<any, ListProps>((props, ref) => {
       labelPrimary: JSX.Node
       labelSecondary: JSX.Node
       icon: MdiIconProps
-      items: AglynNodeTemplateSchema[]
+      items: AglynNodePresetSchema[]
     }[]
   >(() => {
     const bundles = []

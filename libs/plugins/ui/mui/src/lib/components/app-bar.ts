@@ -24,7 +24,7 @@ import { mdiPageLayoutHeader } from '@aglyn/shared-ui-mdi-jsx'
 import AppBar, { type AppBarProps } from '@mui/material/AppBar'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { FIELD_COLOR_ALT1, FIELD_POSITION } from '../constants/field-presets'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 import { schema as toolbarSchema } from './toolbar'
 
 const ID: ComponentId = 'app-bar'
@@ -38,9 +38,9 @@ export const schema: AglynComponentSchema<AppBarProps> = {
     sx: { color: '#2196f3' },
   },
   attributes: [FIELD_COLOR_ALT1, FIELD_POSITION],
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'App Toolbar',
       icon: {
         path: mdiPageLayoutHeader.path,
@@ -55,7 +55,7 @@ export const schema: AglynComponentSchema<AppBarProps> = {
         },
         elements: [
           {
-            ...toolbarSchema.templates![0]!.data,
+            ...toolbarSchema.presets![0]!.data,
           },
         ],
       },

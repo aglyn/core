@@ -30,7 +30,7 @@ import {
   FIELD_FULL_WIDTH,
   FIELD_SIZE,
 } from '../constants/field-presets'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 
 const ID: ComponentId = 'button'
 
@@ -60,9 +60,9 @@ export const schema: AglynComponentSchema<ButtonProps> = {
       ],
     },
   ],
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'Outlined Button',
       icon: {
         path: mdiGestureTapButton.path,

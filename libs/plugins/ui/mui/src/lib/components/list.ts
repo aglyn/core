@@ -24,7 +24,7 @@ import {
 import { mdiFormatListBulletedSquare } from '@aglyn/shared-ui-mdi-jsx'
 import List, { type ListProps } from '@mui/material/List'
 import { BUNDLE_ID } from '../constants/bundle-common'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 import { schema as listItemSchema } from './list-item'
 
 const ID: ComponentId = 'list'
@@ -40,9 +40,9 @@ export const schema: AglynComponentSchema<ListProps> = {
       components: [listItemSchema.componentId],
     },
   ],
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'List',
       icon: { path: mdiFormatListBulletedSquare.path },
       category: ComponentCategory.DATA_DISPLAY,
@@ -51,10 +51,10 @@ export const schema: AglynComponentSchema<ListProps> = {
         bundleId: BUNDLE_ID,
         elements: [
           {
-            ...listItemSchema.templates![0]!.data,
+            ...listItemSchema.presets![0]!.data,
           },
           {
-            ...listItemSchema.templates![0]!.data,
+            ...listItemSchema.presets![0]!.data,
           },
         ],
       },

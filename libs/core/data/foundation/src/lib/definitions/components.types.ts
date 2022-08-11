@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import type { AnyObj, Dictionary, OrUndef } from '@aglyn/shared-data-types'
+import type { Dictionary, OrUndef } from '@aglyn/shared-data-types'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type {
   ConditionDefinition,
@@ -56,7 +56,7 @@ import type {
 
 export type BundleId = string
 export type ComponentId = string
-export type TemplateId = string
+export type PresetId = string
 export type NodeId = string
 export type ComponentIdOrBundleTuple = ComponentId | [ComponentId, BundleId]
 
@@ -66,13 +66,13 @@ export type ComponentsRegistryEntry = [
   id: ComponentIdOrBundleTuple,
   component: IAglynComponent,
 ]
-export type InstanceBundles = Map<BundleId, AglynComponentBundle>
+export type InstanceBundles = Map<BundleId, AglynBundleSchema>
 export type InstanceComponents = Map<ComponentIdOrBundleTuple, IAglynComponent>
 export type InstanceSchemas = Map<
   ComponentIdOrBundleTuple,
   AglynComponentSchema
 >
-export type InstanceTemplates = Map<TemplateId, AglynNodeTemplateSchema>
+export type InstanceNodePresets = Map<PresetId, AglynNodePresetSchema>
 
 export type ComponentsLinealOrder = [
   directiveType: ComponentsLinealDirectiveFlag,
@@ -89,22 +89,11 @@ export type AglynComponentHierarchy<P = any> = Pick<
   'restrictParent' | 'restrictChildren'
 >
 export type AglynComponentFlags<P = any> = AglynComponentSchema<P>['flags']
-export type AglynComponentsBundleMetadata = AglynComponentBundle
+export type AglynComponentsBundleMetadata = AglynBundleSchema
 export type AglynComponentsBundleSchema = Omit<
-  AglynComponentBundle,
+  AglynBundleSchema,
   'componentIds'
 >
-
-export interface IAglynComponent<P = any, T = any>
-  extends JSX.ForwardRefExoticComponent<
-    JSX.PropsWithoutRef<P> & JSX.RefAttributes<T>
-  > {
-  [OF_TYPE]?: SYMBOL_TYPE
-  [OF_KIND]?: SYMBOL_TYPE
-  aglyn?: boolean
-  componentId?: ComponentId
-  bundleId?: BundleId
-}
 
 export type AglynComponentType<
   P extends ComponentProps<C> | any = any,
@@ -122,12 +111,12 @@ export interface IAglynComponentsController
   readonly bundles: InstanceBundles
   readonly components: InstanceComponents
   readonly schemas: InstanceSchemas
-  readonly templates: InstanceTemplates
+  readonly presets: InstanceNodePresets
 
   getAllComponents(): ComponentsRegistryEntry[]
   getAllComponentsKeys(): ComponentsRegistryKeys
   getAllComponentsValues(): ComponentsRegistryValues
-  getAllComponentsTemplateValues(): AglynNodeTemplateSchema[]
+  getAllNodePresetsValues(): AglynNodePresetSchema[]
 
   getComponent<P, T>(
     payload: ComponentGetPayload,
@@ -135,7 +124,7 @@ export interface IAglynComponentsController
   getComponentSchema(
     payload: ComponentSchemaGetPayload,
   ): OrUndef<AglynComponentSchema>
-  getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynComponentBundle>
+  getBundle(payload: ComponentsBundleGetPayload): OrUndef<AglynBundleSchema>
   buildMapKey(data: { componentId: ComponentId; bundleId: BundleId }): string
 
   registerComponent(payload: ComponentRegisterPayload): this
@@ -151,6 +140,17 @@ export interface AglynComponentsControllerT
     app: IAglynAppController,
     options: AglynComponentsControllerOptions,
   ): IAglynComponentsController
+}
+
+export interface IAglynComponent<P = any, T = any>
+  extends JSX.ForwardRefExoticComponent<
+    JSX.PropsWithoutRef<P> & JSX.RefAttributes<T>
+  > {
+  [OF_TYPE]?: SYMBOL_TYPE
+  [OF_KIND]?: SYMBOL_TYPE
+  aglyn?: boolean
+  componentId?: ComponentId
+  bundleId?: BundleId
 }
 
 export interface AglynComponentSchema<P = any> {
@@ -227,49 +227,25 @@ export interface AglynComponentSchema<P = any> {
   }
 
   /**
-   * Template items are the available items to add to the canvas
+   * Preset items are the available items to add to the canvas
    */
-  templates?: AglynNodeTemplateSchema[]
+  presets?: AglynNodePresetSchema[]
 }
 
-export type NodeTemplateData = Omit<AglynNodeSchema, '$id' | 'elements'> & {
+export type NodePresetData = Omit<AglynNodeSchema, '$id' | 'elements'> & {
   $id?: NodeId
-  elements?: NodeTemplateData[]
+  elements?: NodePresetData[]
 }
 
-export type AglynNodeTemplateSchema = {
-  id: TemplateId
+export type AglynNodePresetSchema = {
+  id: PresetId
   label: string
   componentId?: ComponentId
   bundleId?: BundleId
   description?: string
   icon?: MdiIconProps
   category?: string | ComponentCategory
-  data: NodeTemplateData
-}
-
-export interface AglynNodeSchema<P = JSX.AnyProps> {
-  $id: NodeId
-  componentId: ComponentId
-  bundleId?: BundleId
-  parentId?: NodeId
-  sx?: JSX.SxProps
-  props?: P
-  elements?: NodeId[] | AglynNodeSchema[]
-}
-
-/**
- * @TODO ⚠️ Migrate to simplified interface
- */
-export interface AglynNodeSchema2 {
-  $id: NodeId
-  kind?: 'element'
-  bundle?: BundleId
-  component?: ComponentId
-  tag?: keyof JSX.IntrinsicElements | string
-  props?: AnyObj
-  sx?: JSX.SxProps
-  children?: AglynNodeSchema2[]
+  data: NodePresetData
 }
 
 export interface AglynAttributeSchema extends Dictionary<any> {
@@ -287,7 +263,7 @@ export interface AglynAttributeSchema extends Dictionary<any> {
   description?: string
 }
 
-export interface AglynComponentBundle {
+export interface AglynBundleSchema {
   readonly bundleId: BundleId
   componentIds: ComponentId[]
   // Metadata
@@ -298,11 +274,21 @@ export interface AglynComponentBundle {
   icon?: MdiIconProps
 }
 
-export type ComponentsRegistryContext = {
+export interface ComponentsRegistryContext {
   bundles: InstanceBundles
   components: InstanceComponents
   schemas: InstanceSchemas
-  templates: InstanceTemplates
+  presets: InstanceNodePresets
+}
+
+export interface AglynNodeSchema<P = JSX.AnyProps> {
+  $id: NodeId
+  componentId: ComponentId
+  bundleId?: BundleId
+  parentId?: NodeId
+  sx?: JSX.SxProps
+  props?: P
+  elements?: NodeId[] | AglynNodeSchema[]
 }
 
 export type AglynNodeItemNormalized<P = JSX.AnyProps> = AglynNodeSchema<P> & {

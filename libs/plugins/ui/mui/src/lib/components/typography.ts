@@ -34,7 +34,7 @@ import {
 } from '@aglyn/shared-ui-mdi-jsx'
 import Typography, { type TypographyProps } from '@mui/material/Typography'
 import { BUNDLE_ID } from '../constants/bundle-common'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 
 const ID: ComponentId = 'typography'
 const typographyVariants = [
@@ -127,9 +127,9 @@ export const schema: AglynComponentSchema<TypographyProps> = {
       label: 'Gutter bottom?',
     },
   ],
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'Typography',
       icon: {
         path: mdiAlphabetical.path,
@@ -145,7 +145,7 @@ export const schema: AglynComponentSchema<TypographyProps> = {
       },
     },
     ...typographyVariants.map((item) => ({
-      id: generateTemplateId(`${ID}.${item.value}`),
+      id: generatePresetId(`${ID}.${item.value}`),
       label: item.label,
       icon: {
         sx: { color: '#057822' },

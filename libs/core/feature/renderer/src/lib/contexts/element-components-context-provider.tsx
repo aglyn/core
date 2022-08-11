@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { useAglynComponentTemplateBlocks } from '../hooks/use-aglyn-component-templates'
+import { useAglynNodePresetBlocks } from '../hooks/use-aglyn-node-presets'
 import { AglynComponentsContext } from './aglyn-components-context'
 
 export interface ElementComponentsContextProviderProps {
@@ -26,10 +26,10 @@ export function ElementComponentsContextProvider(
   props: ElementComponentsContextProviderProps,
 ) {
   const { children } = props
-  const templateBlocks = useAglynComponentTemplateBlocks()
+  const nodePresets = useAglynNodePresetBlocks()
 
   return (
-    <AglynComponentsContext.Provider value={{ templateBlocks }}>
+    <AglynComponentsContext.Provider value={{ nodePresets: nodePresets }}>
       {children}
     </AglynComponentsContext.Provider>
   )

@@ -25,7 +25,7 @@ import ListItemText, {
   type ListItemTextProps,
 } from '@mui/material/ListItemText'
 import { BUNDLE_ID } from '../constants/bundle-common'
-import { generateTemplateId } from '../utils/generate-template-id'
+import { generatePresetId } from '../utils/generate-preset-id'
 
 const ID: ComponentId = 'list-item-text'
 
@@ -34,9 +34,9 @@ export const schema: AglynComponentSchema<ListItemTextProps> = {
   bundleId: BUNDLE_ID,
   displayName: 'List Item Text',
   icon: { path: mdiFormatListChecks.path },
-  templates: [
+  presets: [
     {
-      id: generateTemplateId(ID),
+      id: generatePresetId(ID),
       label: 'List Item Text',
       icon: { path: mdiFormatListChecks.path },
       category: ComponentCategory.DATA_DISPLAY,
