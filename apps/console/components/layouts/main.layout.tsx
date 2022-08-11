@@ -233,7 +233,7 @@ const TopAppBar = (props: TopAppBarProps) => {
                     }),
                   }}
                 >
-                  <AglynConsoleLogoFull sx={{ fontSize: 156 }} />
+                  <AglynConsoleLogoFull sx={{ height: 24, width: 'auto' }} />
                   {appBarSuffix && (
                     <Typography
                       component="span"
