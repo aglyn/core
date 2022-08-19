@@ -33,6 +33,7 @@ import listItem, { schema as listItemSchema } from './lib/components/list-item'
 import listItemText, {
   schema as listItemTextSchema,
 } from './lib/components/list-item-text'
+import stack, { schema as stackSchema } from './lib/components/stack'
 import toolbar, { schema as toolbarSchema } from './lib/components/toolbar'
 import typography, {
   schema as typographySchema,
@@ -47,6 +48,7 @@ export const components: ComponentRegisterPayload[] = [
   createAglynComponent(listSchema, list),
   createAglynComponent(listItemSchema, listItem),
   createAglynComponent(listItemTextSchema, listItemText),
+  createAglynComponent(stackSchema, stack),
   createAglynComponent(toolbarSchema, toolbar),
   createAglynComponent(typographySchema, typography),
 ]

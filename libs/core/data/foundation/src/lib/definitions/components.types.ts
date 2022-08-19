@@ -267,6 +267,7 @@ export type AglynNodePresetSchema = {
 
 export enum FieldComponentType {
   BUTTON = 'button',
+  BUTTON_GROUP = 'button-group',
   CHECKBOX = 'checkbox',
   COLOR_PICKER = 'color-picker',
   DATE_PICKER = 'date-picker',

@@ -145,7 +145,7 @@ export const schema: AglynComponentSchema<TypographyProps> = {
       },
     },
     ...typographyVariants.map((item) => ({
-      id: generatePresetId(`${ID}.${item.value}`),
+      id: generatePresetId(ID, item.value),
       label: item.label,
       icon: {
         sx: { color: '#057822' },

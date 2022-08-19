@@ -18,8 +18,11 @@
 import type { ComponentId } from '@aglyn/core-data-foundation'
 import { BUNDLE_ID } from '../constants/bundle-common'
 
-export const generatePresetId = (componentId: ComponentId): ComponentId => {
-  return `${BUNDLE_ID}:${componentId}`
+export const generatePresetId = (
+  componentId: ComponentId,
+  ...other: string[]
+): ComponentId => {
+  return `${BUNDLE_ID}:${[componentId, ...other].join('.')}`
 }
 
 export default generatePresetId
