@@ -15,23 +15,30 @@
  * limitations under the License.
  */
 
-import type { ComponentRegisterPayload } from '@aglyn/core-data-foundation'
+import type {
+  AglynBundleSchema,
+  ComponentRegisterPayload,
+} from '@aglyn/core-data-foundation'
 import { createAglynComponent } from '@aglyn/core-feature-renderer'
 import { createComponentsBundle } from '@aglyn/core-util-app'
 import { mdiViewArray } from '@aglyn/shared-ui-mdi-jsx'
 
-import appBar, { schema as appBarSchema } from './components/app-bar'
-import button, { schema as buttonSchema } from './components/button'
-import container, { schema as containerSchema } from './components/container'
-import list, { schema as listSchema } from './components/list'
-import listItem, { schema as listItemSchema } from './components/list-item'
+import appBar, { schema as appBarSchema } from './lib/components/app-bar'
+import button, { schema as buttonSchema } from './lib/components/button'
+import container, {
+  schema as containerSchema,
+} from './lib/components/container'
+import list, { schema as listSchema } from './lib/components/list'
+import listItem, { schema as listItemSchema } from './lib/components/list-item'
 import listItemText, {
   schema as listItemTextSchema,
-} from './components/list-item-text'
-import toolbar, { schema as toolbarSchema } from './components/toolbar'
-import typography, { schema as typographySchema } from './components/typography'
+} from './lib/components/list-item-text'
+import toolbar, { schema as toolbarSchema } from './lib/components/toolbar'
+import typography, {
+  schema as typographySchema,
+} from './lib/components/typography'
 
-import { BUNDLE_ID } from './constants/bundle-common'
+import { BUNDLE_ID } from './lib/constants/bundle-common'
 
 export const components: ComponentRegisterPayload[] = [
   createAglynComponent(appBarSchema, appBar),
@@ -44,7 +51,7 @@ export const components: ComponentRegisterPayload[] = [
   createAglynComponent(typographySchema, typography),
 ]
 
-export const schema = {
+export const schema: AglynBundleSchema = {
   bundleId: BUNDLE_ID,
   displayName: 'Mui Components',
   description: 'Material-UI view components',
@@ -53,3 +60,4 @@ export const schema = {
 
 export const bundle = createComponentsBundle(schema, components)
 export default bundle
+export function activate(unknown, context) {}
