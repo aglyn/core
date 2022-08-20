@@ -15,27 +15,25 @@
  * limitations under the License.
  */
 
-import {
-  type AglynElementsDenormalized,
-  getCanvasDenormalizedElementsStore,
-} from '@aglyn/core-data-framework'
-import {useSubscribable} from '@aglyn/shared-ui-jsx'
-import {_isFnT} from '@aglyn/shared-util-guards'
-import {useAglynAppContext} from '../contexts/aglyn-app-context'
+import { getCanvasNormalizedNodesStore } from '@aglyn/core-data-app'
+import type { AglynNodesById } from '@aglyn/core-data-foundation'
+import { useSubscribable } from '@aglyn/shared-ui-jsx'
+import { _isFnT } from '@aglyn/shared-util-guards'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
-
-export function useAglynCanvasElementsDenormalized(): AglynElementsDenormalized
+export function useAglynCanvasElementsDenormalized(): AglynNodesById
 export function useAglynCanvasElementsDenormalized<Result>(
-  callbackFn: (state: AglynElementsDenormalized) => Result,
+  callbackFn: (state: AglynNodesById) => Result,
 ): Result
 export function useAglynCanvasElementsDenormalized<Result>(
-  callbackFn?: (state: AglynElementsDenormalized) => Result,
-): Result | AglynElementsDenormalized {
+  callbackFn?: (state: AglynNodesById) => Result,
+): Result | AglynNodesById {
   const app = useAglynAppContext()
   return useSubscribable(
-    getCanvasDenormalizedElementsStore(app), undefined,
-    (state) => _isFnT(callbackFn) ? (callbackFn(state) as Result) : state,
+    getCanvasNormalizedNodesStore(app),
+    undefined,
+    (state) => (_isFnT(callbackFn) ? (callbackFn(state) as Result) : state),
     [callbackFn, app],
-  ) as Result | AglynElementsDenormalized
+  ) as Result | AglynNodesById
 }
 export default useAglynCanvasElementsDenormalized

@@ -15,17 +15,15 @@
  * limitations under the License.
  */
 
-import type {ReactNode} from 'react'
-import {ElementsContext} from './elements-context'
-
+import { ElementsContext } from './elements-context'
 
 export interface ElementsContextProviderProps {
-  children?: ReactNode
+  children?: JSX.Children
   // addElement?: (payload: AddElementPayload) => void
 }
 
 function ElementsContextProvider(props: ElementsContextProviderProps) {
-  const {children} = props
+  const { children } = props
 
   return (
     <ElementsContext.Provider value={undefined}>
@@ -37,5 +35,5 @@ ElementsContextProvider.displayName = 'ElementsContextProvider'
 ElementsContextProvider.aglyn = true
 ElementsContextProvider.defaultProps = {}
 
-export {ElementsContextProvider}
+export { ElementsContextProvider }
 export default ElementsContextProvider

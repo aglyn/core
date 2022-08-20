@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import {render} from '@testing-library/react'
+import { render } from '@testing-library/react'
 
-import {BranchComponent} from './branch.component'
-
+import { BranchComponent } from './branch.component'
 
 describe('ElementsRendererComponent', () => {
   it('should render successfully', () => {
-    const {baseElement} = render(<BranchComponent />)
+    const { baseElement } = render(<BranchComponent />)
     expect(baseElement).toBeTruthy()
   })
 })

@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
+
 /**
  * Scientific notation values for decimal precision of time equivalents for
  * conversions when calculating time. Small to big uses a positive exponent and
@@ -50,6 +52,8 @@ export enum TimeExchange {
   YR_TO_SEC = 3.154e-7,
 }
 
+export interface ITimestamp extends FirestoreTimestamp {}
+
 /**
  * A `Timestamp` represents a point in time independent of any time zone or
  * calendar, represented as seconds and fractions of seconds at nanosecond
@@ -63,8 +67,7 @@ export enum TimeExchange {
  *
  * Model and logical flow inspired by `@firebase/firestore/lite/timestamp`
  */
-export class Timestamp {
-
+export class Timestamp extends FirestoreTimestamp implements ITimestamp {
   /**
    * The earliest date supported by Google Firestore timestamps
    * (0001-01-01T00:00:00Z).
@@ -92,12 +95,13 @@ export class Timestamp {
     /**
      * The number of seconds of UTC time since Unix epoch 1970-01-01T00:00:00Z.
      */
-    public readonly seconds: number,
+    readonly seconds: number,
     /**
      * The fractions of a second at nanosecond resolution.*
      */
-    public readonly nanoseconds: number,
+    readonly nanoseconds: number,
   ) {
+    super(seconds, nanoseconds)
     if (nanoseconds < 0) {
       throw new Error(
         'invalid-argument: timestamp nanoseconds out of range: ' + nanoseconds,
@@ -147,7 +151,7 @@ export class Timestamp {
    * @param date - The date to convert to a {@link Timestamp} instance
    * @returns {@link Timestamp} equivalent as the provided {@link Date}
    */
-  public static fromDate(date: Date): Timestamp {
+  public static fromDate(date: Date): ITimestamp {
     return this.fromMillis(date.getTime())
   }
 
@@ -161,8 +165,8 @@ export class Timestamp {
   public static fromMillis(milliseconds: number): Timestamp {
     const seconds = Math.floor(milliseconds / TimeExchange.MILLI_TO_SEC)
     const nanoseconds = Math.floor(
-      (milliseconds - seconds * TimeExchange.MILLI_TO_SEC)
-      * TimeExchange.NANO_TO_MILLI,
+      (milliseconds - seconds * TimeExchange.MILLI_TO_SEC) *
+        TimeExchange.NANO_TO_MILLI,
     )
     return new this(seconds, nanoseconds)
   }
@@ -187,10 +191,10 @@ export class Timestamp {
    *     the number of milliseconds since Unix epoch 1970-01-01T00:00:00Z.
    */
   public toMillis(): number {
-    return this.seconds
-      * TimeExchange.MILLI_TO_SEC
-      + this.nanoseconds
-      / TimeExchange.NANO_TO_MILLI
+    return (
+      this.seconds * TimeExchange.MILLI_TO_SEC +
+      this.nanoseconds / TimeExchange.NANO_TO_MILLI
+    )
   }
 
   /**
@@ -199,9 +203,10 @@ export class Timestamp {
    * @param other - The {@link Timestamp} to compare against.
    * @returns true if this {@link Timestamp} is equal to the provided one.
    */
-  public isEqual(other: Timestamp): boolean {
-    return other.seconds === this.seconds
-      && other.nanoseconds === this.nanoseconds
+  public isEqual(other: ITimestamp): boolean {
+    return (
+      other.seconds === this.seconds && other.nanoseconds === this.nanoseconds
+    )
   }
 
   /**
@@ -235,8 +240,8 @@ export class Timestamp {
   /**
    * Returns a JSON-serializable representation of this Timestamp.
    */
-  public toJSON(): {seconds: number; nanoseconds: number} {
-    return {seconds: this.seconds, nanoseconds: this.nanoseconds}
+  public toJSON(): { seconds: number; nanoseconds: number } {
+    return { seconds: this.seconds, nanoseconds: this.nanoseconds }
   }
 
   /**
@@ -249,11 +254,12 @@ export class Timestamp {
     return a._compareTo(b)
   }
 
-  public _compareTo(other: Timestamp): number {
+  public _compareTo(other: ITimestamp): number {
     if (this.seconds === other.seconds) {
       return Timestamp.comparator(this.nanoseconds, other.nanoseconds)
     }
     return Timestamp.comparator(this.seconds, other.seconds)
   }
-
 }
+
+export default Timestamp

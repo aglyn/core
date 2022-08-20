@@ -15,69 +15,61 @@
  * limitations under the License.
  */
 
-import type {ComponentId} from '@aglyn/core-data-framework'
-import {isValidElementType} from '@aglyn/shared-ui-jsx'
-import {mergeSxProps} from '@aglyn/shared-ui-theme'
-import {_isArrEmpty} from '@aglyn/shared-util-guards'
-import {Box, type BoxProps} from '@mui/material'
+import type { ComponentId } from '@aglyn/core-data-foundation'
+import { isValidElementType } from '@aglyn/shared-ui-jsx'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
+import { Box, type BoxProps } from '@mui/material'
 import clsx from 'clsx'
-import {forwardRef, Fragment, useMemo} from 'react'
+import { forwardRef, Fragment, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import useAglynElementComponent from '../hooks/use-aglyn-element-component'
-import useAglynElementData from '../hooks/use-aglyn-element-data'
 import useAglynElementResolvedProps from '../hooks/use-aglyn-element-resolved-props'
 import BranchComponent from './branch.component'
-
 
 export interface LeafComponentProps extends BoxProps<any, any> {
   $id: ComponentId
   leafComponent?: LeafComponent
 }
 
-const LeafComponent = forwardRef<any, LeafComponentProps>(
-  function RefRenderFn(props, ref) {
-    const {$id, leafComponent, children, className, sx, ...rest} = props
+const LeafComponent = forwardRef<any, LeafComponentProps>(function RefRenderFn(
+  props,
+  ref,
+) {
+  const { $id, leafComponent, children, className, sx, ...rest } = props
+  const component = useAglynElementComponent<any, any>($id)
+  const Component = useMemo(() => {
+    return component && isValidElementType(component) ? component : Box
+  }, [component])
+  const {
+    className: resolvedClassName,
+    sx: resolvedSx,
+    ...resolved
+  } = useAglynElementResolvedProps($id)
 
-    const leaf = useMemo(() => leafComponent || LeafComponent, [leafComponent])
-    const {
-      className: resolvedClassName,
-      sx: resolvedSx,
-      ...resolved
-    } = useAglynElementResolvedProps($id)
-    const elements = useAglynElementData($id, 'elements')
-    const component = useAglynElementComponent<any, any>($id)
-    const Component = useMemo(() => {
-      return component && isValidElementType(component) ? component : Box
-    }, [component])
-
-    return (
-      <Component
-        ref={ref}
-        key={`element-leaf-${$id}`}
-        id={`element-leaf-${$id}`}
-        className={clsx(className, resolvedClassName)}
-        sx={mergeSxProps(sx, resolvedSx)}
-        {...rest}
-        {...resolved}
-      >
-        {children}
-        <ReactMarkdown
-          children={resolved.children}
-          components={{
-            p: Fragment,
-          }}
-        />
-        {_isArrEmpty(elements) ? null : (
-          <BranchComponent
-            key={`element-branch-${$id}`}
-            leafComponent={leaf}
-            elements={elements}
-          />
-        )}
-      </Component>
-    )
-  },
-)
+  return (
+    <Component
+      ref={ref}
+      id={`element-leaf-${$id}`}
+      className={clsx(className, resolvedClassName)}
+      sx={mergeSxProps(sx, resolvedSx)}
+      {...rest}
+      {...resolved}
+    >
+      {children}
+      <ReactMarkdown
+        children={resolved.children}
+        components={{
+          p: Fragment,
+        }}
+      />
+      <BranchComponent
+        key={`element-branch-${$id}`}
+        $id={$id}
+        leafComponent={leafComponent}
+      />
+    </Component>
+  )
+})
 
 LeafComponent.displayName = 'LeafComponent'
 LeafComponent.aglyn = true
@@ -86,5 +78,5 @@ LeafComponent.defaultProps = {
 }
 
 type LeafComponent = typeof LeafComponent
-export {LeafComponent}
+export { LeafComponent }
 export default LeafComponent

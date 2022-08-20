@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,32 +15,60 @@
  * limitations under the License.
  */
 
-import {DEFAULT_ICON} from '@aglyn/shared-data-mdi'
-import MuiSvgIcon, {type SvgIconProps as MuiSvgIconProps} from '@mui/material/SvgIcon'
-import {forwardRef, type SVGAttributes} from 'react'
+import '@aglyn/shared-data-jsx'
+import DEFAULT_ICON from '@aglyn/shared-data-mdi/constants/default-icon'
+import {
+  SvgIcon as MuiSvgIcon,
+  type SvgIconProps as MuiSvgIconProps,
+} from '@mui/material'
+import { motion } from 'framer-motion'
+import { forwardRef, useMemo } from 'react'
 
-
-export interface MdiIconProps extends MuiSvgIconProps {
+export type MdiIconBaseProps = Omit<MuiSvgIconProps, 'children'>
+export type MdiIconFeatureProps = {
   path?: string
-  PathProps?: SVGAttributes<SVGPathElement>
+  PathProps?: JSX.ComponentProps<typeof motion.path>
+} & { children?: (d: string) => JSX.Children }
+
+const variants = {
+  hidden: {
+    opacity: 0,
+    fill: 'none',
+  },
+  visible: {
+    opacity: 1,
+    fill: 'inherit',
+  },
 }
 
-const MdiIcon = forwardRef<any, MdiIconProps>(
-  function RefRenderFn(props, ref) {
-    const {path, children, PathProps, ...rest} = props
+export type MdiIconProps = MdiIconBaseProps & MdiIconFeatureProps
 
-    return (
-      <MuiSvgIcon ref={ref} {...rest}>
-        {children ? children : (
-          <path d={path || DEFAULT_ICON.path} {...PathProps} />
-        )}
-      </MuiSvgIcon>
-    )
-  },
-)
+const MdiIcon = forwardRef<any, MdiIconProps>((props, ref) => {
+  const { path, children, PathProps, ...rest } = props
+
+  const d = useMemo<string>(() => {
+    return (typeof path === 'string' && path) || DEFAULT_ICON.path
+  }, [path])
+
+  return (
+    <MuiSvgIcon ref={ref} {...rest}>
+      {typeof children === 'function' ? (
+        children(d)
+      ) : (
+        <motion.path
+          d={d}
+          variants={variants}
+          initial="hidden"
+          animate="visible"
+          {...PathProps}
+        />
+      )}
+    </MuiSvgIcon>
+  )
+})
 
 MdiIcon.displayName = 'MdiIcon'
 MdiIcon.aglyn = true
 
-export {MdiIcon}
+export { MdiIcon }
 export default MdiIcon

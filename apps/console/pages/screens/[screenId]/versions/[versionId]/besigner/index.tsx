@@ -15,72 +15,283 @@
  * limitations under the License.
  */
 
-import {LOADING_OVERLAY_ELEMENT} from '@aglyn/shared-ui-jsx'
-import {useNextPageTitle} from '@aglyn/shared-ui-next'
-import {useSnackbar} from '@aglyn/shared-ui-snackstack'
-import {Stack, Typography} from '@mui/material'
-import {doc} from 'firebase/firestore'
-import {useRouter} from 'next/router'
-import {useEffect} from 'react'
-import {useFirestore, useFirestoreDocDataOnce} from 'reactfire'
-import BesignerIframeComponent from '../../../../../../components/besigner-iframe.component'
+import {
+  PropertiesDialogComponent,
+  useAddElementDrawerCallback,
+  useAglynCanvasHistoryControls,
+  useBesignerAppContext,
+  withBesignerContext,
+  type WorkspaceEditorComponentProps,
+} from '@aglyn/besigner-feature-app'
+import { getApp, setCanvasElements } from '@aglyn/core-data-app'
+import { useAglynCanvasElementsNormalized } from '@aglyn/core-feature-renderer'
+// import '@aglyn/foundation-feature-singleton'
+import {
+  HAS_BROWSER,
+  ICON_VARIANT_APP_SETTINGS,
+  ICON_VARIANT_MODIFY_ADD,
+  ICON_VARIANT_SYMBOL_CONFIRMED,
+} from '@aglyn/shared-data-enums'
+import {
+  AppLink,
+  LOADING_OVERLAY_ELEMENT,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
+import { NextPageTitle } from '@aglyn/shared-ui-next'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { useScreenVersion } from '@aglyn/tenant-feature-instance'
+import { Stack, Typography } from '@mui/material'
+import dynamic from 'next/dynamic'
+import { useRouter } from 'next/router'
+import { useCallback, useEffect, useState } from 'react'
+import BesignerAppBarComponent from '../../../../../../components/besigner-app-bar.component'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
-import ConsoleLayout from '../../../../../../components/layouts/console.layout'
+import MainLayout from '../../../../../../components/layouts/main.layout'
+import '../../../../../../constants/app-setup'
+import { buildRoute, Route } from '../../../../../../constants/route-links'
 
+const WorkspaceEditorComponent = dynamic<WorkspaceEditorComponentProps>(
+  () =>
+    import('@aglyn/besigner-feature-app').then(
+      (mod) => mod.WorkspaceEditorComponent,
+    ),
+  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
+)
+const ViewportRootComponent = dynamic<WorkspaceEditorComponentProps>(
+  () =>
+    import('@aglyn/besigner-feature-app').then(
+      (mod) => mod.ViewportRootComponent,
+    ),
+  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
+)
+const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
+  () =>
+    import('@aglyn/besigner-feature-app').then(
+      (mod) => mod.ViewportCanvasComponent,
+    ),
+  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
+)
 
 function Besigner(props) {
-  useNextPageTitle({screen: 'Besigner'})
-  const {query} = useRouter()
+  const { query } = useRouter()
+  const { enqueueSnackbar } = useSnackbar()
+  const { queueLoading } = useLoading()
+  const app = useBesignerAppContext()
   const screenId = `${query.screenId}`
   const versionId = `${query.versionId}`
-  const firestore = useFirestore()
-  const screenRef = doc(firestore, 'screens', screenId, 'versions', versionId)
-  const {status, data: screen} = useFirestoreDocDataOnce(screenRef, {idField: '$id'})
-  const elements = screen?.elements
-  const {enqueueSnackbar, closeSnackbar} = useSnackbar()
-
-  console.log('Besigner,', props.tenant, props)
-  console.log('Besigner data,', status, screen)
+  const saveAvailable = true
+  const [screenDialog, setScreenDialog] = useState(false)
+  const handleAddElementClick = useAddElementDrawerCallback()
+  const [undo, redo, canUndo, canRedo] = useAglynCanvasHistoryControls()
+  const detailUrl = buildRoute(Route.SCREEN_DETAILS, { screenId, versionId })
+  const normalized = useAglynCanvasElementsNormalized()
+  const [result, updateScreen] = useScreenVersion({ screenId, versionId })
+  const { data, status, error } = result
+  const elements = data?.elements
+  const hasError = status === 'error'
+  const notFound = status === 'success' && !data
 
   useEffect(() => {
-    if (status === 'error' || (status === 'success' && !screen)) {
-      enqueueSnackbar('An error has occurred', {
+    if (HAS_BROWSER()) {
+      console.log('page:/besigner app', getApp())
+    }
+  }, [])
+
+  useEffect(() => {
+    if (HAS_BROWSER()) {
+      console.log('Besigner props.tenant,', props.tenant, props)
+      console.log('Besigner status screen,', status, data)
+    }
+  }, [props, data, status])
+
+  useEffect(() => {
+    if (hasError) {
+      enqueueSnackbar(`Error: ${error?.message}`, {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } else if (notFound) {
+      enqueueSnackbar('404: Screen not found', {
         variant: 'error',
         allowDuplicate: true,
       })
     }
-  }, [closeSnackbar, enqueueSnackbar, status, screen])
+  }, [enqueueSnackbar, hasError, error, notFound])
 
-  return status === 'error' ? (
-    <Stack
-      alignItems="center"
-      justifyContent="center"
-    >
-      <Typography>
-        {'Not found'}
-      </Typography>
-    </Stack>
-  ) : status === 'loading' ? (
-    LOADING_OVERLAY_ELEMENT
-  ) : (
-    <BesignerIframeComponent
-      screenId={screenId}
-      versionId={versionId}
-    />
+  useEffect(() => {
+    if (elements) {
+      console.log('decoded update', elements)
+      setCanvasElements(app, { elements, type: 'denormal' })
+    }
+  }, [app, elements])
+
+  const handleSave = useCallback(async () => {
+    const dequeueLoading = queueLoading()
+    await updateScreen({ elements: normalized }, { merge: true })
+      .catch((e) => {
+        enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      })
+      .finally(() => {
+        dequeueLoading()
+      })
+  }, [updateScreen, enqueueSnackbar, normalized, queueLoading])
+
+  return (
+    <>
+      <MainLayout
+        title={'Besigner'}
+        disableAppBarElevation
+        // besigner={true}
+        // appBarSuffix={'Besigner'}
+        backButton={
+          {
+            component: AppLink,
+            componentVariant: 'naked',
+            href: detailUrl,
+          } as any
+        }
+        centerNavigationItems={[
+          // {
+          //   id: 'center-nav-site-picker',
+          //   children: ,
+          // },
+          {
+            id: 'center-nav-file',
+            children: 'File',
+            // href: '/besigner',
+            items: [
+              {
+                id: 'center-nav-file-save',
+                icon: saveAvailable
+                  ? undefined
+                  : {
+                      path: ICON_VARIANT_SYMBOL_CONFIRMED.path,
+                    },
+                children: saveAvailable ? 'Save' : 'Up to Date',
+                onClick: handleSave,
+                ListItemTextProps: { inset: Boolean(saveAvailable) },
+              },
+              {
+                id: 'center-nav-file-close',
+                children: 'Close',
+                href: detailUrl,
+                component: AppLink,
+                componentVariant: 'naked',
+                ListItemTextProps: { inset: true },
+              },
+              {
+                type: 'divider',
+              },
+              {
+                id: 'center-nav-file-new-version',
+                children: (
+                  <Typography component="div">
+                    {'New Version'}{' '}
+                    <Typography variant="caption" component="sup">
+                      {'Coming Soon'}
+                    </Typography>
+                  </Typography>
+                ),
+                onClick: handleAddElementClick,
+                disabled: true,
+                ListItemTextProps: { inset: true },
+              },
+              {
+                type: 'divider',
+              },
+              {
+                id: 'center-nav-edit-properties',
+                icon: {
+                  path: ICON_VARIANT_APP_SETTINGS.path,
+                },
+                children: 'Screen Properties',
+                onClick: () => setScreenDialog(true),
+              },
+            ],
+          },
+          {
+            id: 'center-nav-edit',
+            children: 'Edit',
+            // href: '/besigner',
+            items: [
+              {
+                id: 'center-nav-edit-undo',
+                children: 'Undo',
+                onClick: () => undo(),
+                disabled: !canUndo,
+                ListItemTextProps: { inset: true },
+              },
+              {
+                id: 'center-nav-edit-redo',
+                children: 'Redo',
+                onClick: () => redo(),
+                disabled: !canRedo,
+                ListItemTextProps: { inset: true },
+              },
+            ],
+          },
+          {
+            id: 'center-nav-insert',
+            children: 'Insert',
+            // href: '/besigner',
+            items: [
+              {
+                id: 'center-nav-insert-element',
+                icon: {
+                  path: ICON_VARIANT_MODIFY_ADD.path,
+                },
+                children: 'New Element',
+                onClick: handleAddElementClick,
+              },
+            ],
+          },
+        ]}
+      >
+        <NextPageTitle screen={'Besigner'} />
+
+        {error || notFound ? (
+          <Stack alignItems="center" justifyContent="center">
+            <Typography>{'Not found'}</Typography>
+          </Stack>
+        ) : status === 'loading' ? (
+          LOADING_OVERLAY_ELEMENT
+        ) : (
+          <>
+            <BesignerAppBarComponent
+              detailsUrl={detailUrl}
+              onSave={handleSave}
+              onPropertiesEdit={() => setScreenDialog(true)}
+              saveAvailable
+            />
+            <WorkspaceEditorComponent>
+              <ViewportRootComponent>
+                <ViewportCanvasComponent />
+              </ViewportRootComponent>
+            </WorkspaceEditorComponent>
+          </>
+        )}
+      </MainLayout>
+      <PropertiesDialogComponent
+        open={screenDialog}
+        onClose={() => {
+          setScreenDialog(false)
+        }}
+        onActionClick={async () => {
+          await handleSave()
+          setScreenDialog(false)
+        }}
+      />
+    </>
   )
 }
 
 Besigner.displayName = 'Page:Besigner'
-Besigner.layouts = [AuthenticatedLayout, ConsoleLayout]
-Besigner.layoutProps = {
-  ConsoleLayout: {
-    title: 'Besigner',
-    appBarSuffix: 'Besigner',
-  },
-}
+Besigner.layouts = [{ Component: AuthenticatedLayout }]
 
-export default Besigner
-
+export default withBesignerContext(Besigner)
 
 // export const getServerSideProps = async (ctx) => {
 //   // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'sample tenant', hosts: []})

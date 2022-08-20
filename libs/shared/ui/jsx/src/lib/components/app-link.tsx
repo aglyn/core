@@ -18,22 +18,37 @@
 import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
 import { _isObj } from '@aglyn/shared-util-guards'
 import { truthy } from '@aglyn/shared-util-tools'
-import {
-  Button as MuiButton,
-  ButtonBase as MuiButtonBase,
-  type ButtonBaseProps as MuiButtonBaseProps,
-  type ButtonProps as MuiButtonProps,
-  Fab as MuiFab,
-  type FabProps as MuiFabProps,
-  IconButton as MuiIconButton,
-  type IconButtonProps as MuiIconButtonProps,
-  Link as MuiLink,
-  type LinkProps as MuiLinkProps,
+import type {
+  ButtonBaseProps as MuiButtonBaseProps,
+  ButtonProps as MuiButtonProps,
+  FabProps as MuiFabProps,
+  IconButtonProps as MuiIconButtonProps,
+  LinkProps as MuiLinkProps,
 } from '@mui/material'
+import MuiButton from '@mui/material/Button'
+import MuiButtonBase from '@mui/material/ButtonBase'
+import MuiLink from '@mui/material/Link'
 import clsx from 'clsx'
+import dynamic, { type DynamicOptionsLoadingProps } from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { forwardRef, useMemo } from 'react'
 import { NextLink, type NextLinkProps } from './next-link'
+
+const Placeholder = (props: DynamicOptionsLoadingProps) => {
+  const { error } = props
+  console.log('props', props)
+  if (error) console.error(error)
+  return <a href={'#'}>{error ? 'error!' : 'loading'}</a>
+}
+
+const MuiFab = dynamic<MuiFabProps>(() => import('@mui/material/Fab'), {
+  loading: Placeholder,
+  ssr: true,
+})
+const MuiIconButton = dynamic<MuiIconButtonProps>(
+  () => import('@mui/material/IconButton'),
+  { loading: Placeholder, ssr: true },
+)
 
 export type AppLinkVariant =
   | 'naked'
@@ -55,7 +70,10 @@ export type IconButtonProps = MuiIconButtonProps<any, BaseLinkProps>
 export type NakedProps = MuiLinkProps<any, BaseLinkProps>
 export type TextProps = MuiLinkProps<any, BaseLinkProps>
 
-export type AppLinkVariantDefault = Extract<AppLinkVariant, 'text' | 'default' | undefined | never>
+export type AppLinkVariantDefault = Extract<
+  AppLinkVariant,
+  'text' | 'default' | undefined | never
+>
 
 export type AppLinkProps<T = AppLinkVariant> = T extends string
   ? T extends AppLinkVariant
@@ -74,6 +92,13 @@ export type AppLinkProps<T = AppLinkVariant> = T extends string
       : never
     : never
   : DefaultProps & { componentVariant?: undefined | never }
+
+export type AppLinkSimpleLinkProps = AppLinkProps<AppLinkVariantDefault>
+export type AppLinkNakedLinkProps = AppLinkProps<'naked'>
+export type AppLinkButtonProps = AppLinkProps<'button'>
+export type AppLinkButtonBaseProps = AppLinkProps<'button-base'>
+export type AppLinkIconButtonProps = AppLinkProps<'icon-button'>
+export type AppLinkFabProps = AppLinkProps<'fab'>
 
 export const appLinkClassKey = generateComponentClassKeys('AglynAppLink', [
   'active',
@@ -96,108 +121,129 @@ export const appLinkClassKey = generateComponentClassKeys('AglynAppLink', [
  * componentVariant === 'button' = MuiButton
  * componentVariant === any = MuiLink
  */
-const AppLink = forwardRef(function RefRenderFn<T extends AppLinkVariant>(
-  props: AppLinkProps<T>,
-  ref
-) {
-  const { className, componentVariant: variant, href, hrefAs, ...rest } = props
+const AppLink = forwardRef(
+  <T extends AppLinkVariant>(props: AppLinkProps<T>, ref) => {
+    const {
+      className,
+      componentVariant: variant,
+      href,
+      hrefAs,
+      ...rest
+    } = props
 
-  const { pathname, asPath } = useRouter()
-  const [active, activeAsAncestor] = useMemo(() => {
-    const hrefPath = _isObj(href) ? href['pathname'] : href,
-      samePath = hrefPath === pathname || hrefPath === asPath,
-      sameAsPath = hrefAs === pathname || hrefAs === asPath,
-      isRootHref = hrefPath === '/' || hrefAs === '/',
-      pathIsAncestor = pathname.startsWith(hrefPath) || pathname.startsWith(hrefAs),
-      asPathIsAncestor = asPath.startsWith(hrefPath) || asPath.startsWith(hrefAs),
-      currentlyNested = pathname.lastIndexOf('/') > 0 || asPath.lastIndexOf('/') > 0,
-      isSpecified = truthy(hrefPath || hrefAs)
-    const active = isSpecified && (samePath || sameAsPath)
-    const activeAsAncestor =
-      isSpecified && !isRootHref && currentlyNested && (pathIsAncestor || asPathIsAncestor)
-    return [active, !active && activeAsAncestor]
-  }, [asPath, href, hrefAs, pathname])
+    const { pathname, asPath } = useRouter()
+    const [active, activeAsAncestor] = useMemo(() => {
+      const hrefPath = _isObj(href) ? href['pathname'] : href,
+        samePath = hrefPath === pathname || hrefPath === asPath,
+        sameAsPath = hrefAs === pathname || hrefAs === asPath,
+        isRootHref = hrefPath === '/' || hrefAs === '/',
+        pathIsAncestor =
+          pathname.startsWith(hrefPath) || pathname.startsWith(hrefAs),
+        asPathIsAncestor =
+          asPath.startsWith(hrefPath) || asPath.startsWith(hrefAs),
+        currentlyNested =
+          pathname.lastIndexOf('/') > 0 || asPath.lastIndexOf('/') > 0,
+        isSpecified = truthy(hrefPath || hrefAs)
+      const active = isSpecified && (samePath || sameAsPath)
+      const activeAsAncestor =
+        isSpecified &&
+        !isRootHref &&
+        currentlyNested &&
+        (pathIsAncestor || asPathIsAncestor)
+      return [active, !active && activeAsAncestor]
+    }, [asPath, href, hrefAs, pathname])
 
-  const elemClassName = clsx(
-    {
-      [appLinkClassKey.active]: active || truthy(rest['active']),
-      [appLinkClassKey.activeAsAncestor]: activeAsAncestor,
-      [appLinkClassKey.disabled]: truthy(rest['disabled']),
-      [appLinkClassKey.variantNaked]: variant === 'naked',
-      [appLinkClassKey.variantButton]: variant === 'button',
-      [appLinkClassKey.variantButtonBase]: variant === 'button-base',
-      [appLinkClassKey.variantIconButton]: variant === 'icon-button',
-      [appLinkClassKey.variantFab]: variant === 'fab',
-      [appLinkClassKey.variantText]: variant === 'text' || variant === 'default' || !variant,
-      [appLinkClassKey.variantDefault]: variant === 'default' || !variant,
-    },
-    className
-  )
+    const elemClassName = clsx(
+      {
+        [appLinkClassKey.active]: active || truthy(rest['active']),
+        [appLinkClassKey.activeAsAncestor]: activeAsAncestor,
+        [appLinkClassKey.disabled]: truthy(rest['disabled']),
+        [appLinkClassKey.variantNaked]: variant === 'naked',
+        [appLinkClassKey.variantButton]: variant === 'button',
+        [appLinkClassKey.variantButtonBase]: variant === 'button-base',
+        [appLinkClassKey.variantIconButton]: variant === 'icon-button',
+        [appLinkClassKey.variantFab]: variant === 'fab',
+        [appLinkClassKey.variantText]:
+          variant === 'text' || variant === 'default' || !variant,
+        [appLinkClassKey.variantDefault]: variant === 'default' || !variant,
+      },
+      className,
+    )
 
-  if (variant === 'naked') {
-    return (
-      <NextLink ref={ref} className={elemClassName} hrefTo={href || ''} hrefAs={hrefAs} {...rest} />
-    )
-  }
-  if (variant === 'button') {
-    return (
-      <MuiButton
-        ref={ref}
-        className={elemClassName}
-        component={NextLink}
-        hrefTo={href || ''}
-        hrefAs={hrefAs}
-        {...rest}
-      />
-    )
-  }
-  if (variant === 'button-base') {
-    return (
-      <MuiButtonBase
-        ref={ref}
-        className={elemClassName}
-        component={NextLink}
-        hrefTo={href || ''}
-        hrefAs={hrefAs}
-        {...rest}
-      />
-    )
-  }
-  if (variant === 'icon-button') {
-    return (
-      <MuiIconButton
-        ref={ref}
-        className={elemClassName}
-        component={NextLink}
-        hrefTo={href || ''}
-        hrefAs={hrefAs}
-        {...rest}
-      />
-    )
-  }
-  if (variant === 'fab') {
-    return (
-      <MuiFab
-        ref={ref}
-        className={elemClassName}
-        component={NextLink}
-        hrefTo={href || ''}
-        hrefAs={hrefAs}
-        {...rest}
-      />
-    )
-  }
-  return (
-    <MuiLink
-      ref={ref}
-      className={elemClassName}
-      component={NextLink}
-      hrefTo={href || ''}
-      hrefAs={hrefAs}
-      {...rest}
-    />
-  )
-})
+    switch (variant) {
+      case 'naked':
+        return (
+          <NextLink
+            ref={ref}
+            className={elemClassName}
+            hrefTo={href || ''}
+            hrefAs={hrefAs}
+            {...rest}
+          />
+        )
+
+      case 'button':
+        return (
+          <MuiButton
+            ref={ref}
+            className={elemClassName}
+            component={NextLink}
+            hrefTo={href || ''}
+            hrefAs={hrefAs}
+            {...rest}
+          />
+        )
+
+      case 'button-base':
+        return (
+          <MuiButtonBase
+            ref={ref}
+            className={elemClassName}
+            component={NextLink}
+            hrefTo={href || ''}
+            hrefAs={hrefAs}
+            {...rest}
+          />
+        )
+
+      case 'icon-button':
+        return (
+          <MuiIconButton
+            ref={ref}
+            className={elemClassName}
+            component={NextLink}
+            hrefTo={href || ''}
+            hrefAs={hrefAs}
+            {...rest}
+          />
+        )
+
+      case 'fab':
+        return (
+          <MuiFab
+            ref={ref}
+            className={elemClassName}
+            component={NextLink}
+            hrefTo={href || ''}
+            hrefAs={hrefAs}
+            {...rest}
+          />
+        )
+
+      default:
+        return (
+          <MuiLink
+            ref={ref}
+            className={elemClassName}
+            component={NextLink}
+            hrefTo={href || ''}
+            hrefAs={hrefAs}
+            {...rest}
+          />
+        )
+    }
+  },
+)
 AppLink.displayName = 'AppLink'
 AppLink.aglyn = true
 

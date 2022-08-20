@@ -17,13 +17,16 @@
 
 import { APP_CONSOLE, IS_PRODUCTION } from '@aglyn/shared-data-enums'
 import {
+  ConfirmationProviderComponent,
+  LoadingLayoutComponent,
+} from '@aglyn/shared-ui-jsx'
+import { _AppComponent, type _AppProps } from '@aglyn/shared-ui-next'
+import { SnackbarProvider } from '@aglyn/shared-ui-snackstack'
+import {
   consoleThemeDark,
   consoleThemeLight,
   createWithThemeProvider,
 } from '@aglyn/shared-ui-theme'
-import { ConfirmationProviderComponent, LoadingLayoutComponent } from '@aglyn/shared-ui-jsx'
-import { _AppComponent, type _AppProps } from '@aglyn/shared-ui-next'
-import { SnackbarProvider } from '@aglyn/shared-ui-snackstack'
 import { Fragment } from 'react'
 import FirebaseAppLayout from '../components/layouts/firebase-app.layout'
 import './styles.css'
@@ -46,7 +49,7 @@ const MainComponent = withThemeProvider((props: any) => {
   )
 })
 
-export interface _Props<Props, InitialProps> extends _AppProps<Props, InitialProps> {}
+export type _Props<Props, InitialProps> = _AppProps<Props, InitialProps>
 
 function _App<Props, InitialProps>(props: _Props<Props, InitialProps>) {
   const { headChildren, ...rest } = props

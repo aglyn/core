@@ -23,6 +23,7 @@ module.exports = {
     {
       files: ['*.ts', '*.tsx', '*.js', '*.jsx'],
       rules: {
+        'node/no-extraneous-import': 'off',
         '@nrwl/nx/enforce-module-boundaries': [
           'error',
           {
@@ -43,11 +44,20 @@ module.exports = {
               },
               {
                 sourceTag: 'scope:feature',
-                onlyDependOnLibsWithTags: ['scope:data', 'scope:feature', 'scope:ui', 'scope:util'],
+                onlyDependOnLibsWithTags: [
+                  'scope:data',
+                  'scope:feature',
+                  'scope:ui',
+                  'scope:util',
+                ],
               },
               {
                 sourceTag: 'scope:ui',
-                onlyDependOnLibsWithTags: ['scope:data', 'scope:ui', 'scope:util'],
+                onlyDependOnLibsWithTags: [
+                  'scope:data',
+                  'scope:ui',
+                  'scope:util',
+                ],
               },
               {
                 sourceTag: 'scope:util',
@@ -55,7 +65,11 @@ module.exports = {
               },
               {
                 sourceTag: 'scope:addons',
-                onlyDependOnLibsWithTags: ['scope:addons', 'scope:aglyn', 'scope:shared'],
+                onlyDependOnLibsWithTags: [
+                  'scope:addons',
+                  'scope:aglyn',
+                  'scope:shared',
+                ],
               },
               {
                 sourceTag: 'scope:aglyn',
@@ -89,6 +103,7 @@ module.exports = {
         'plugin:@next/next/core-web-vitals',
       ],
       rules: {
+        '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
@@ -98,11 +113,9 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 'off',
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react-hooks/exhaustive-deps': 'error',
@@ -119,6 +132,7 @@ module.exports = {
         'plugin:@next/next/core-web-vitals',
       ],
       rules: {
+        '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
@@ -128,11 +142,9 @@ module.exports = {
         '@typescript-eslint/no-var-requires': 'off',
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react/no-children-prop': 'off',
@@ -146,11 +158,9 @@ module.exports = {
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react/no-children-prop': 'off',
@@ -164,11 +174,9 @@ module.exports = {
       rules: {
         'no-fallthrough': 'off',
         'no-restricted-imports': [
-          'error', {
-            patterns: [
-              '@mui/*/*/*',
-              '!@mui/material/test-utils/*',
-            ],
+          'error',
+          {
+            patterns: ['@mui/*/*/*', '!@mui/material/test-utils/*'],
           },
         ],
         'react/no-children-prop': 'off',

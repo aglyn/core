@@ -56,6 +56,7 @@ export enum FontFamily {
   PT_SERIF_CAPTION = '"PT Serif Caption"',
   RALEWAY = 'Raleway',
   ROBOTO = 'Roboto',
+  ROBOTO_FLEX = '"Roboto Flex"',
   ROBOTO_CONDENSED = '"Roboto Condensed"',
   ROCKWELL = 'Rockwell',
   SANS_SERIF = 'sans-serif',
@@ -70,13 +71,13 @@ export enum FontFamily {
   VERDANA = 'Verdana',
 }
 
-export const buildFontFamilyList = (fontFamily = FontFamily.SOURCE_SANS_PRO) =>
+export const buildFontFamilyList = (fontFamily = FontFamily.ROBOTO_FLEX) =>
   [
     fontFamily,
+    FontFamily.ROBOTO,
     FontFamily.APPLE_SYSTEM,
     FontFamily.BLINK_MAC_SYSTEM_FONT,
     FontFamily.SEGOE_UI,
-    FontFamily.ROBOTO,
     FontFamily.HELVETICA_NEUE,
     FontFamily.ARIAL,
     FontFamily.SANS_SERIF,

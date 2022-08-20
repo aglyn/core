@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,23 @@
  * limitations under the License.
  */
 
-import {
-  type BundleUId,
-  type CommandUId,
-  getComponent,
-  type IAglynComponent,
-} from '@aglyn/core-data-framework'
-import {type OrUndef} from '@aglyn/shared-data-types'
-import {useAglynAppContext} from '../contexts/aglyn-app-context'
-
+import { getComponent } from '@aglyn/core-data-app'
+import type {
+  AglynExoticComponent,
+  BundleId,
+  CommandUId,
+} from '@aglyn/core-data-foundation'
+import { type OrUndef } from '@aglyn/shared-data-types'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 export function useAglynComponent<P, T>(
   componentId: CommandUId,
-  bundleId?: BundleUId,
-): OrUndef<IAglynComponent<P, T>> {
+  bundleId?: BundleId,
+): OrUndef<AglynExoticComponent<P, T>> {
   const app = useAglynAppContext()
-  return getComponent(app, {componentId, bundleId}) as IAglynComponent<P, T>
+  return getComponent(app, { componentId, bundleId }) as AglynExoticComponent<
+    P,
+    T
+  >
 }
 export default useAglynComponent

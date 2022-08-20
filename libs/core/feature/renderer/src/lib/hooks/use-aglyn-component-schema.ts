@@ -15,23 +15,22 @@
  * limitations under the License.
  */
 
-import {
-  type AglynComponentSchema,
-  type BundleUId,
-  type ComponentId,
-  getComponentSchema,
-} from '@aglyn/core-data-framework'
-import {useMemo} from 'react'
-import {useAglynAppContext} from '../contexts/aglyn-app-context'
-
+import { getComponentSchema } from '@aglyn/core-data-app'
+import type {
+  AglynComponentSchema,
+  BundleId,
+  ComponentId,
+} from '@aglyn/core-data-foundation'
+import { useMemo } from 'react'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 export function useAglynComponentSchema(
   componentId: ComponentId,
-  bundleId?: BundleUId,
+  bundleId?: BundleId,
 ): AglynComponentSchema {
   const app = useAglynAppContext()
   return useMemo(() => {
-    return getComponentSchema(app, {componentId, bundleId})
+    return getComponentSchema(app, { componentId, bundleId })
   }, [app, componentId, bundleId])
 }
 export default useAglynComponentSchema

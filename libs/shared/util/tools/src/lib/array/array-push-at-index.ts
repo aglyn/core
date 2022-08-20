@@ -18,7 +18,7 @@
 
 /**
  * Mutates the existing array by adding new items onto the array at the provided
- * zero-based index. When the index is -1, new items will be pushed onto the end
+ * zero-based index. When the index is NaN, new items will be pushed onto the end
  * of the array. When the index is greater than or equal to 0, new items will be
  * pushed to the that index while any existing items previously located at or
  * following the index will be shifted to right. Returns the mutated array.
@@ -31,7 +31,7 @@ export function arrayPushAtIndex<T>(
   index: number,
   ...items: T[]
 ): Array<T> {
-  if (index === -1) array.push(...items)
+  if (isNaN(index)) array.push(...items)
   else array.splice(index, 0, ...items)
   return array
 }

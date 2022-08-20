@@ -15,18 +15,22 @@
  * limitations under the License.
  */
 
-import {LoadingTextComponent} from '@aglyn/shared-ui-jsx'
-import {useNextPageTitle} from '@aglyn/shared-ui-next'
-import {CircularProgress} from '@mui/material'
-import {signOut} from 'firebase/auth'
-import {useEffect} from 'react'
-import {useAuth} from 'reactfire'
+import { APP_CONSOLE } from '@aglyn/shared-data-enums'
+import { LoadingTextComponent } from '@aglyn/shared-ui-jsx'
+import { useNextPageTitle } from '@aglyn/shared-ui-next'
+import { CircularProgress } from '@mui/material'
+import { signOut } from 'firebase/auth'
+import { useEffect } from 'react'
+import { useAuth } from 'reactfire'
 import AuthFormComponent from '../../components/auth-form.component'
-import UnauthenticatedLayout from '../../components/layouts/unauthenticated.layout'
-
+import AuthenticatingLayout from '../../components/layouts/authenticating.layout'
 
 function SignOut() {
-  useNextPageTitle({screen: 'Sign out'})
+  useNextPageTitle({
+    screen: 'Sign out',
+    suffix: APP_CONSOLE.AFFIX,
+    separator: ` ${APP_CONSOLE.SEP} `,
+  })
 
   const firebaseAuth = useAuth()
 
@@ -39,21 +43,21 @@ function SignOut() {
       headingTop={'Signing out'}
       headingBottom={'Please wait'}
       headingBottomProps={{
-        sx: {pb: 4},
+        sx: { pb: 4 },
         component: LoadingTextComponent,
       }}
-      headingAfter={
-        <CircularProgress color="secondary" />
-      }
+      headingAfter={<CircularProgress color="secondary" />}
     />
   )
 }
 SignOut.displayName = 'Page:SignOut'
-SignOut.layouts = [UnauthenticatedLayout]
-SignOut.layoutProps = {
-  UnauthenticatedLayout: {
-    isSignOut: true,
+SignOut.layouts = [
+  {
+    Component: AuthenticatingLayout,
+    props: {
+      isSignOut: true,
+    },
   },
-}
+]
 
 export default SignOut

@@ -15,40 +15,48 @@
  * limitations under the License.
  */
 
-import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
   BackgroundImageComponent,
   type BackgroundImageComponentProps,
-  ContainerComponent,
+  Container,
 } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import { Grid, Typography, type TypographyProps } from '@mui/material'
-import { type ReactNode, useMemo } from 'react'
+import { useMemo } from 'react'
 import { isElement } from 'react-is'
-import BreadcrumbsComponent, { type BreadcrumbsProps } from '../components/breadcrumbs.component'
+import BreadcrumbsComponent, {
+  type BreadcrumbsProps,
+} from '../components/breadcrumbs.component'
 import { CONTENT_MAX_WIDTH } from '../constants/shared'
 
-export interface DashboardHeaderProps extends Partial<BackgroundImageComponentProps> {
-  children?: ReactNode
+export interface DashboardHeaderProps
+  extends Partial<BackgroundImageComponentProps> {
+  children?: JSX.Children
   breadcrumbItems?: BreadcrumbsProps['items']
   disableBreadcrumbs?: true
   header?: TypographyProps<any, any> & {
-    icon?: MdiIconProps | ReactNode
+    icon?: MdiIconProps | JSX.Children
   }
-  headerRight?: ReactNode
+  headerRight?: JSX.Children
 }
 
 function DashboardHeaderComponent(props: DashboardHeaderProps) {
   const {
     children,
-    header: headerProp,
+    header,
     breadcrumbItems,
     disableBreadcrumbs,
     headerRight,
     ...rest
   } = props
 
-  const { children: headerChildren, sx: headerSx, icon: headerIcon, ...header } = headerProp || {}
+  const {
+    children: headerChildren,
+    sx: headerSx,
+    icon: headerIcon,
+    ...headerProps
+  } = header || {}
 
   const breadcrumbs = useMemo(() => {
     return Array.isArray(breadcrumbItems) ? breadcrumbItems : []
@@ -62,7 +70,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
       sx={{
         pt: 10,
         pb: 2,
-        bgcolor: 'background.secondary',
+        bgcolor: 'surface.main',
         color: 'text.primary',
         borderBottomWidth: `1px`,
         borderBottomStyle: 'solid',
@@ -70,7 +78,7 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
       }}
       {...rest}
     >
-      <ContainerComponent maxWidth={CONTENT_MAX_WIDTH}>
+      <Container maxWidth={CONTENT_MAX_WIDTH}>
         <Grid
           container
           direction="row"
@@ -79,66 +87,69 @@ function DashboardHeaderComponent(props: DashboardHeaderProps) {
           spacing={2}
         >
           <Grid item>
-            <Typography
-              component="h1"
-              variant="h4"
-              sx={mergeSxProps(
-                {
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                },
-                headerSx
-              )}
-              {...header}
-            >
-              {!headerIcon || isElement(headerIcon) ? (
-                headerIcon
-              ) : (
-                <MdiIcon
-                  color="inherit"
-                  {...headerIcon}
-                  sx={mergeSxProps(
-                    {
-                      padding: 1,
-                      mr: 1.75,
-                      fontSize: `1.5em`,
-                      borderWidth: `1px`,
-                      borderStyle: 'solid',
-                      borderColor: 'tertiary.dark',
-                      color: 'quaternary.contrastText',
-                      bgcolor: 'quaternary.main',
-                      borderRadius: (theme) => `${theme.shape.appIconBorderRadius}`,
+            <Container dense maxWidth={false}>
+              <Typography
+                component="h1"
+                variant="h4"
+                sx={mergeSxProps(
+                  {
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  },
+                  headerSx,
+                )}
+                {...headerProps}
+              >
+                {!headerIcon || isElement(headerIcon) ? (
+                  headerIcon
+                ) : (
+                  <MdiIcon
+                    color="inherit"
+                    {...headerIcon}
+                    sx={mergeSxProps(
+                      {
+                        padding: 1,
+                        mr: 1.75,
+                        fontSize: `1.5em`,
+                        borderWidth: `1px`,
+                        borderStyle: 'solid',
+                        borderColor: 'tertiary.dark',
+                        color: 'tertiary.contrastText',
+                        bgcolor: 'tertiary.main',
+                        borderRadius: (theme) =>
+                          `${theme.shape.appIconBorderRadius}`,
+                      },
+                      headerIcon['sx'],
+                    )}
+                  />
+                )}
+                {headerChildren}
+              </Typography>
+
+              {disableBreadcrumbs ? null : (
+                <BreadcrumbsComponent
+                  items={breadcrumbs}
+                  sx={{
+                    my: 2,
+                    marginTop: 1,
+                    color: 'text.primary',
+                    a: {
+                      textDecoration: 'none',
+                      ':hover': {
+                        color: 'secondary.main',
+                      },
                     },
-                    headerIcon['sx']
-                  )}
+                  }}
                 />
               )}
-              {headerChildren}
-            </Typography>
-
-            {disableBreadcrumbs ? null : (
-              <BreadcrumbsComponent
-                items={breadcrumbs}
-                sx={{
-                  my: 2,
-                  marginTop: 1,
-                  color: 'text.primary',
-                  a: {
-                    textDecoration: 'none',
-                    ':hover': {
-                      color: 'secondary.main',
-                    },
-                  },
-                }}
-              />
-            )}
+            </Container>
           </Grid>
 
           {headerRight && <Grid item>{headerRight}</Grid>}
         </Grid>
         {children}
-      </ContainerComponent>
+      </Container>
     </BackgroundImageComponent>
   )
 }

@@ -15,50 +15,63 @@
  * limitations under the License.
  */
 
-import {_isFnT} from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-guards'
 import isEqual from 'lodash-es/isEqual'
-import {type DependencyList, useCallback, useState} from 'react'
-import type {Observable as RxJsObservable, Unsubscribable as RxJsUnsubscribable} from 'rxjs'
-import {distinctUntilChanged} from 'rxjs/operators'
-import useIsomorphicLayoutEffect from './use-isomorphic-layout-effect'
-
+import { type DependencyList, useCallback, useEffect, useState } from 'react'
+import type {
+  Observable as RxJsObservable,
+  Unsubscribable as RxJsUnsubscribable,
+} from 'rxjs'
 
 export type SubscribableLike<T> = RxJsObservable<T> | Observable<T>
 export type MapObservable<V, R> = (newValue: V, prevValue: R) => R
 
 export interface Observable<T> {
   subscribe: (listener: (value: T) => void) => {
-    unsubscribe: RxJsUnsubscribable;
-  };
+    unsubscribe: () => void
+  }
+  pipe?(...args): any
 }
 
-
-export function useSubscribable<T>($subscribable: SubscribableLike<T>): T | undefined
-export function useSubscribable<T,
+export function useSubscribable<T>(
+  $subscribable: SubscribableLike<T>,
+): T | undefined
+export function useSubscribable<
+  T,
   U = any,
-  M extends MapObservable<U, U | T | undefined> = MapObservable<U, U | T | undefined>>(
+  M extends MapObservable<U, U | T | undefined> = MapObservable<
+    U,
+    U | T | undefined
+  >,
+>(
   $subscribable: SubscribableLike<U>,
   initialValue: U | T,
   mapValue?: M,
   dependencies?: DependencyList,
 ): U | T
-export function useSubscribable<T,
+export function useSubscribable<
+  T,
   U = any,
-  M extends MapObservable<U, U | T | undefined> = MapObservable<U, U | T | undefined>>(
+  M extends MapObservable<U, U | T | undefined> = MapObservable<
+    U,
+    U | T | undefined
+  >,
+>(
   $subscribable: SubscribableLike<U>,
   initialValue?: U | T,
   mapValue?: M,
   dependencies: DependencyList = [],
 ): U | T | undefined {
   const [value, update] = useState<T | U | undefined>(() => initialValue)
+  const _dependencies = [...(dependencies || [])]
 
   const mapUpdate = useCallback((newValue, prevValue) => {
     if (_isFnT(mapValue)) return mapValue(newValue, prevValue as T) as T
     return newValue as U
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, dependencies)
+  }, _dependencies)
 
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     function handleChange(newValue) {
       update((prevValue) => {
         const value = mapUpdate(newValue, prevValue)
@@ -67,12 +80,8 @@ export function useSubscribable<T,
       })
     }
 
-    const subscriber: RxJsUnsubscribable = (
-      $subscribable?.['pipe']
-        ? (<any>$subscribable).pipe(distinctUntilChanged(isEqual))
-        : $subscribable
-    ).subscribe(handleChange)
-
+    const subscriber: RxJsUnsubscribable =
+      $subscribable?.subscribe(handleChange)
     return () => subscriber?.unsubscribe?.()
   }, [$subscribable, mapUpdate])
 

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2022 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,27 @@
  * limitations under the License.
  */
 
-import {type ReactNode} from 'react'
-import {useAglynComponentTemplateBlocks} from '../hooks/use-aglyn-component-templates'
-import {AglynComponentsContext} from './aglyn-components-context'
-
+import { useAglynNodePresetBlocks } from '../hooks/use-aglyn-node-presets'
+import { AglynComponentsContext } from './aglyn-components-context'
 
 export interface ElementComponentsContextProviderProps {
-  children?: ReactNode
+  children?: JSX.Children
 }
 
-export function ElementComponentsContextProvider(props: ElementComponentsContextProviderProps) {
-  const {children} = props
-  const templateBlocks = useAglynComponentTemplateBlocks()
+export function ElementComponentsContextProvider(
+  props: ElementComponentsContextProviderProps,
+) {
+  const { children } = props
+  const nodePresets = useAglynNodePresetBlocks()
 
   return (
-    <AglynComponentsContext.Provider value={{templateBlocks}}>
+    <AglynComponentsContext.Provider value={{ nodePresets: nodePresets }}>
       {children}
     </AglynComponentsContext.Provider>
   )
 }
-ElementComponentsContextProvider.displayName = 'ElementComponentsContextProvider'
+ElementComponentsContextProvider.displayName =
+  'ElementComponentsContextProvider'
 ElementComponentsContextProvider.aglyn = true
 ElementComponentsContextProvider.defaultProps = {
   elementComponents: [],

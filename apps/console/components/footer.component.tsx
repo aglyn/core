@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
-import {BUILD_ID, PACKAGE_VERSION} from '@aglyn/shared-data-enums'
-import {AppLink, ContainerComponent, GridButtons, type GridButtonsProps} from '@aglyn/shared-ui-jsx'
-import {Box, Stack, Typography} from '@mui/material'
-import {forwardRef, type HTMLAttributes} from 'react'
+import { BUILD_ID, PACKAGE_VERSION } from '@aglyn/shared-data-enums'
+import {
+  AppLink,
+  Container,
+  GridButtons,
+  type GridButtonsProps,
+} from '@aglyn/shared-ui-jsx'
+import { Box, Divider, Stack, Typography } from '@mui/material'
+import { forwardRef, type HTMLAttributes } from 'react'
 import CopyrightComponent from '../components/copyright.component'
-import {tailNavigation} from '../constants/shared'
-
+import { tailNavigation } from '../constants/shared'
 
 export const FOOTER_MAX_WIDTH = 'xl'
 
@@ -29,40 +33,15 @@ export interface FooterProps extends HTMLAttributes<HTMLDivElement> {
   items?: GridButtonsProps['items']
 }
 
-const FooterComponent = forwardRef<any, FooterProps>(
-  function RefRenderFn(props, ref) {
-    const {children, ...rest} = props
-    return (
-      <Box
-        ref={ref}
-        component="footer"
-        {...rest}
-      >
-        <ContainerComponent maxWidth={FOOTER_MAX_WIDTH}>
-          <Stack
-            marginTop={6}
-            paddingBottom={1}
-            paddingTop={2}
-            borderTop={1}
-            flexWrap="wrap"
-            borderColor="divider"
-            alignItems="center"
-            direction="row"
-            // sx={{
-            //   mt: 6,
-            //   pb: 1,
-            //   pt: 2,
-            //   borderTop: 1,
-            //   display: 'flex',
-            //   flexWrap: 'wrap',
-            //   borderColor: 'divider',
-            //   alignItems: 'center',
-            // }}
-          >
-            <Stack
-              component="div"
-              flexGrow={1}
-            >
+const FooterComponent = forwardRef<any, FooterProps>((props, ref) => {
+  const { children, ...rest } = props
+  return (
+    <Box ref={ref} component="footer" {...rest}>
+      <Container maxWidth={FOOTER_MAX_WIDTH} sx={{ mt: 6, pb: 1 }}>
+        <Divider sx={{ mb: 2 }} />
+        <Container dense maxWidth={false}>
+          <Stack flexWrap="wrap" alignItems="center" direction="row">
+            <Stack component="div" flexGrow={1}>
               <CopyrightComponent />
             </Stack>
 
@@ -84,20 +63,23 @@ const FooterComponent = forwardRef<any, FooterProps>(
               flexBasis="100%"
               justifyContent="center"
             >
-              <Typography align="center" color="textSecondary" variant="overline">
-                <span>{`Version ${PACKAGE_VERSION}`}</span>
-                {' '}
+              <Typography
+                align="center"
+                color="textSecondary"
+                variant="overline"
+              >
+                <span>{`Version ${PACKAGE_VERSION}`}</span>{' '}
                 <span>{`(${BUILD_ID})`}</span>
               </Typography>
             </Stack>
           </Stack>
-        </ContainerComponent>
-      </Box>
-    )
-  },
-)
+        </Container>
+      </Container>
+    </Box>
+  )
+})
 FooterComponent.displayName = 'FooterComponent'
 FooterComponent.aglyn = true
 
-export {FooterComponent}
+export { FooterComponent }
 export default FooterComponent

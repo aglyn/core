@@ -23,42 +23,30 @@ import {
   ICON_VARIANT_PRIMARY_KEY,
   ICON_VARIANT_TEXT,
 } from '@aglyn/shared-data-enums'
-import {AppLink, ContainerComponent, GridItems, useLoading} from '@aglyn/shared-ui-jsx'
-import {MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
-import {useNextPageTitle} from '@aglyn/shared-ui-next'
-import {useSnackbar} from '@aglyn/shared-ui-snackstack'
-import {List, ListItem, ListItemIcon, ListItemText} from '@mui/material'
-import {doc} from 'firebase/firestore'
-import {useRouter} from 'next/router'
-import {useEffect} from 'react'
-import {useFirestore, useFirestoreDoc, useFirestoreDocData} from 'reactfire'
+import { AppLink, Container, GridItems, useLoading } from '@aglyn/shared-ui-jsx'
+import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import { useScreen } from '@aglyn/tenant-feature-instance'
+import { List, ListItem, ListItemIcon, ListItemText } from '@mui/material'
+import { useRouter } from 'next/router'
+import { useEffect, useMemo } from 'react'
 import AuthenticatedLayout from '../../../../../../components/layouts/authenticated.layout'
-import ConsoleLayout from '../../../../../../components/layouts/console.layout'
 import DashboardLayout from '../../../../../../components/layouts/dashboard.layout'
+import MainLayout from '../../../../../../components/layouts/main.layout'
 import WidgetCardComponent from '../../../../../../components/widget-card.component'
-import {buildRoute, Route} from '../../../../../../constants/route-links'
-import {CONTENT_MAX_WIDTH} from '../../../../../../constants/shared'
-
+import { buildRoute, Route } from '../../../../../../constants/route-links'
+import { CONTENT_MAX_WIDTH } from '../../../../../../constants/shared'
 
 const whiteSpace = '--'
 
 function ScreenDetails(props) {
-  useNextPageTitle({screen: 'Screen Details'})
-
-  const {query} = useRouter()
+  const { query } = useRouter()
   const screenId = `${query.screenId}`
   const versionId = `${query.versionId}`
-  const firestore = useFirestore()
-  const screenRef = doc(firestore, 'screens', screenId)
-  const {queueLoading} = useLoading()
-  const docData2 = useFirestoreDoc(screenRef, {idField: '$id'})
-  const docData = useFirestoreDocData(screenRef, {idField: '$id'})
-  const {status, data: screen} = docData
-  const besignerUrl = buildRoute(Route.SCREEN_BESIGNER, {screenId, versionId})
-  const {enqueueSnackbar, closeSnackbar} = useSnackbar()
-
-  console.log('docData', docData)
-  console.log('docData2', docData2)
+  const besignerUrl = buildRoute(Route.SCREEN_BESIGNER, { screenId, versionId })
+  const { queueLoading } = useLoading()
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+  const [{ status, data: screen }] = useScreen<any>({ screenId })
 
   useEffect(() => {
     if (status === 'loading') {
@@ -79,164 +67,162 @@ function ScreenDetails(props) {
   const details = [
     {
       key: 'id',
-      id: 'details-id',
       primary: 'Screen ID:',
       secondary: screen?.$id,
-      icon: {path: ICON_VARIANT_PRIMARY_KEY.path},
+      icon: { path: ICON_VARIANT_PRIMARY_KEY.path },
     },
     {
       key: 'displayName',
-      id: 'details-dname',
       primary: 'Display name:',
       secondary: screen?.displayName,
-      icon: {path: ICON_VARIANT_TEXT.path},
+      icon: { path: ICON_VARIANT_TEXT.path },
     },
     {
       key: 'description',
-      id: 'details-desc',
       primary: 'Description:',
       secondary: screen?.description,
-      icon: {path: ICON_VARIANT_TEXT.path},
+      icon: { path: ICON_VARIANT_TEXT.path },
     },
     {
       key: 'dateCreated',
-      id: 'details-datec',
       primary: 'Date created:',
       secondary: screen?.createdAt?.toDate?.()?.toLocaleString(),
-      icon: {path: ICON_VARIANT_DATE_TIME.path},
+      icon: { path: ICON_VARIANT_DATE_TIME.path },
     },
     {
       key: 'dateUpdated',
-      id: 'details-dateu',
       primary: 'Last updated:',
       secondary: screen?.updatedAt?.toDate?.()?.toLocaleString(),
-      icon: {path: ICON_VARIANT_DATE_TIME.path},
+      icon: { path: ICON_VARIANT_DATE_TIME.path },
     },
     {
       key: 'dateDeleted',
-      id: 'details-dated',
       primary: 'Date deleted:',
       secondary: screen?.deletedAt?.toDate?.()?.toLocaleString(),
-      icon: {path: ICON_VARIANT_DATE_TIME.path},
+      icon: { path: ICON_VARIANT_DATE_TIME.path },
     },
     {
       key: 'versionId',
-      id: 'details-vers',
       primary: 'Version ID:',
       secondary: screen?.versionId,
-      icon: {path: ICON_VARIANT_IDENTIFIER.path},
+      icon: { path: ICON_VARIANT_IDENTIFIER.path },
     },
   ]
 
-  console.log('Screens props', besignerUrl, props, status, screen)
+  const displayName = useMemo(() => {
+    return `${screen?.displayName || 'Not Found'}`
+  }, [screen])
+
+  // console.log('Screens props', besignerUrl, props, status, screen)
 
   return (
-    <DashboardLayout
-      activeTab={buildRoute(Route.SCREEN_LIST)}
-      breadcrumbItems={[
-        {
-          children: 'Screens',
-          href: buildRoute(Route.SCREEN_LIST),
-        },
-        {
-          children: `${screen?.displayName || 'Not Found'}`,
-        },
-      ]}
-      header={{
-        children: `${screen?.displayName || 'Not Found'}`,
-        icon: {path: ICON_VARIANT_PAGES.path},
-      }}
-      headerRight={(
-        <AppLink
-          size="small"
-          variant="extended"
-          componentVariant="fab"
-          href={besignerUrl}
-          title={'Open with besigner'}
-          disabled={status !== 'success' || !screen}
-        >
-          <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} sx={{mr: 0.5}} />
-          Besigner
-        </AppLink>
-      )}
-    >
-      <ContainerComponent gutterY maxWidth={CONTENT_MAX_WIDTH}>
-
-        <GridItems
-          spacing={3}
-          items={[
-            {
-              xs: 12, md: 6, lg: 4,
-              children: (
-                <WidgetCardComponent
-                  header={'Basic Details'}
-                  // contentGutterX
-                  contentGutterY
-                  contentBordered
-                >
-                  <List
-                    dense
-                    disablePadding
+    <MainLayout title={[displayName, 'Screen']} disableAppBarElevation>
+      <DashboardLayout
+        activeTab={buildRoute(Route.SCREEN_LIST)}
+        breadcrumbItems={[
+          {
+            children: 'Screens',
+            href: buildRoute(Route.SCREEN_LIST),
+          },
+          {
+            children: displayName,
+          },
+        ]}
+        header={{
+          children: displayName,
+          icon: { path: ICON_VARIANT_PAGES.path },
+        }}
+        headerRight={
+          <AppLink
+            size="large"
+            variant="contained"
+            componentVariant="button"
+            href={besignerUrl}
+            title={'Open with besigner'}
+            disabled={status !== 'success' || !screen}
+            startIcon={
+              <MdiIcon color="inherit" path={ICON_VARIANT_BESIGNER.path} />
+            }
+          >
+            Open Besigner
+          </AppLink>
+        }
+      >
+        <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <GridItems
+            spacing={3}
+            items={[
+              {
+                xs: 12,
+                md: 6,
+                lg: 4,
+                children: (
+                  <WidgetCardComponent
+                    header={'Basic Details'}
+                    // contentGutterX
+                    contentGutterY
+                    contentBordered
                   >
-                    {details.map(({primary, secondary, icon, ...item}, key) => (
-                      <ListItem
-                        key={item.key ?? item.id ?? key}
-                        alignItems="flex-start"
-                        dense
-                      >
-                        <ListItemIcon
-                          sx={{
-                            border: `1px solid`,
-                            borderColor: 'divider',
-                            padding: 1,
-                            borderRadius: 1,
-                            minWidth: 'unset',
-                            marginRight: 2,
-                            color: 'tertiary.main',
-                          }}
-                        >
-                          <MdiIcon {...icon} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={primary || whiteSpace}
-                          secondary={secondary || whiteSpace}
-                          {...item}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </WidgetCardComponent>
-              ),
-            },
-            {
-              xs: 12, md: 6, lg: 8,
-              children: (
-                <WidgetCardComponent
-                  header={'Raw JSON'}
-                  contentGutterX
-                  contentGutterY
-                  contentBordered
-                >
-                  <pre>
-                  {JSON.stringify(screen, null, 2)}
-                  </pre>
-                </WidgetCardComponent>
-              ),
-            },
-          ]}
-        />
-
-
-      </ContainerComponent>
-    </DashboardLayout>
+                    <List dense disablePadding>
+                      {details.map(
+                        ({ primary, secondary, icon, ...item }, key) => (
+                          <ListItem
+                            key={item['key'] ?? item['id'] ?? key}
+                            alignItems="flex-start"
+                            dense
+                          >
+                            <ListItemIcon
+                              sx={{
+                                border: `1px solid`,
+                                borderColor: 'divider',
+                                padding: 1,
+                                borderRadius: 1,
+                                minWidth: 'unset',
+                                marginRight: 2,
+                                color: 'tertiary.main',
+                              }}
+                            >
+                              <MdiIcon {...icon} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={primary || whiteSpace}
+                              secondary={secondary || whiteSpace}
+                              {...item}
+                            />
+                          </ListItem>
+                        ),
+                      )}
+                    </List>
+                  </WidgetCardComponent>
+                ),
+              },
+              {
+                xs: 12,
+                md: 6,
+                lg: 8,
+                children: (
+                  <WidgetCardComponent
+                    header={'Raw JSON'}
+                    contentGutterX
+                    contentGutterY
+                    contentBordered
+                  >
+                    <pre>{JSON.stringify(screen, null, 2)}</pre>
+                  </WidgetCardComponent>
+                ),
+              },
+            ]}
+          />
+        </Container>
+      </DashboardLayout>
+    </MainLayout>
   )
 }
 ScreenDetails.displayName = 'Page:ScreenDetails'
-ScreenDetails.layouts = [AuthenticatedLayout, ConsoleLayout]
-ScreenDetails.layoutProps = {
-  ConsoleLayout: {
-    title: 'Screen Details',
+ScreenDetails.layouts = [
+  {
+    Component: AuthenticatedLayout,
   },
-}
+]
 
 export default ScreenDetails

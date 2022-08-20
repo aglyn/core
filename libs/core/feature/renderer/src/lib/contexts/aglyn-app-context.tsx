@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
+import { getApp } from '@aglyn/core-data-app'
 import {
   type AppUUN,
-  CanvasSetElementsPayload,
+  type CanvasSetElementsPayload,
   DEFAULT_APP_UUN,
-  getApp,
   type IAglynAppController,
-} from '@aglyn/core-data-framework'
-import {createContext, type ReactNode, useContext, useMemo, useState} from 'react'
-
+} from '@aglyn/core-data-foundation'
+import { createContext, useContext, useMemo, useState } from 'react'
 
 export type IAglynAppContext = IAglynAppController | undefined
 
@@ -32,18 +31,20 @@ AglynAppContext.displayName = 'AglynAppContext'
 AglynAppContext.aglyn = true
 export default AglynAppContext
 
-export function useAglynAppContext<T extends IAglynAppController = IAglynAppController>(): T {
+export function useAglynAppContext<
+  T extends IAglynAppController = IAglynAppController,
+>(): T {
   return useContext(AglynAppContext) as T
 }
 
 export interface AglynAppContextComponentProps {
   appName?: AppUUN
-  children?: ReactNode
+  children?: JSX.Children
   canvasElements?: CanvasSetElementsPayload
 }
 
 function AglynAppProvider(props: AglynAppContextComponentProps) {
-  const {appName, children, canvasElements} = props
+  const { appName, children, canvasElements } = props
 
   const [state, setState] = useState<IAglynAppContext>()
 
@@ -63,4 +64,4 @@ AglynAppProvider.defaultProps = {
   appName: DEFAULT_APP_UUN,
 }
 
-export {AglynAppProvider}
+export { AglynAppProvider }

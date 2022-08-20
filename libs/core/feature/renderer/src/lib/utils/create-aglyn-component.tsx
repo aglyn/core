@@ -16,16 +16,18 @@
  */
 
 import {
+  AGLYN_OF,
   type AglynComponentSchema,
+  type AglynExoticComponent,
   COMPONENT_ELEMENT_TYPE,
   type ComponentRegisterPayload,
-  type IAglynComponent,
-  MODULE_TYPE,
-  OF_KIND,
-  OF_TYPE,
-} from '@aglyn/core-data-framework'
+  FEATURE_FLAG,
+} from '@aglyn/core-data-foundation'
+import {
+  type ErrorBoundaryProps,
+  withErrorBoundary,
+} from '@aglyn/shared-ui-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
-import { type ErrorBoundaryProps, withErrorBoundary } from '@aglyn/shared-ui-jsx'
 import { copy } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics, pascalCase } from '@aglyn/shared-util-vendor'
 import { forwardRef } from 'react'
@@ -33,27 +35,35 @@ import { forwardRef } from 'react'
 export function createAglynComponent<P = any, C = any>(
   schema: AglynComponentSchema<P>,
   component: C | any,
-  options?: Partial<ErrorBoundaryProps>
+  options?: Partial<ErrorBoundaryProps>,
 ): ComponentRegisterPayload<P> {
-  const { componentId, bundleId, emotion } = schema
-  const pascalId = `${bundleId ? pascalCase(bundleId) + '-' : ''}${pascalCase(componentId)}`
+  const _schema = copy(schema)
+  const { componentId, bundleId, flags, styledOptions } = _schema
+  const pascalId = `${bundleId ? pascalCase(bundleId) + '-' : ''}${pascalCase(
+    componentId,
+  )}`
 
-  const Component = emotion?.disable ? component : styled(component, emotion?.options)({})
+  const Component =
+    flags?.emotion === FEATURE_FLAG.DISABLED
+      ? component
+      : styled(component, styledOptions)({})
 
-  const AglynComponent = forwardRef<any, P>(function RefRenderFn(props, ref) {
+  const AglynComponent = forwardRef<any, P>((props, ref) => {
     return <Component ref={ref} {...props} />
-  }) as IAglynComponent<P>
+  }) as AglynExoticComponent<P>
 
   AglynComponent.displayName = `AglynComponent(${pascalId})`
   AglynComponent.componentId = componentId
   AglynComponent.bundleId = bundleId
   AglynComponent.aglyn = true
-  AglynComponent[OF_TYPE] = MODULE_TYPE
-  AglynComponent[OF_KIND] = COMPONENT_ELEMENT_TYPE
+  AglynComponent[AGLYN_OF] = COMPONENT_ELEMENT_TYPE
   hoistNonReactStatics(AglynComponent, component)
 
   return {
-    component: withErrorBoundary(AglynComponent, options) as IAglynComponent<P>,
+    component: withErrorBoundary(
+      AglynComponent,
+      options,
+    ) as AglynExoticComponent<P>,
     schema: copy(schema),
   }
 }

@@ -15,53 +15,37 @@
  * limitations under the License.
  */
 
-import type {ComponentId} from '@aglyn/core-data-framework'
-import type {OverrideableComponentProps} from '@aglyn/shared-data-types'
-import {forwardRef, Fragment, useMemo} from 'react'
+import type { NodeId } from '@aglyn/core-data-foundation'
+import { forwardRef, Fragment, useMemo } from 'react'
+import useAglynElementData from '../hooks/use-aglyn-element-data'
 import LeafComponent from './leaf.component'
 
-
-export interface BranchComponentProps extends OverrideableComponentProps {
+export interface BranchComponentProps extends JSX.OverrideableComponentProps {
   leafComponent?: LeafComponent
-  elements?: ComponentId[]
+  $id?: NodeId
 }
 
-const BranchComponent = forwardRef<any, BranchComponentProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      component: Component,
-      leafComponent,
-      elements,
-      children,
-      ...rest
-    } = props
+const BranchComponent = forwardRef<any, BranchComponentProps>((props, ref) => {
+  const { component: Component, leafComponent, $id, ...rest } = props
 
-    const Leaf = useMemo(() => (
-      leafComponent || LeafComponent
-    ), [leafComponent]);
+  const elements = useAglynElementData($id, 'elements')
+  const Leaf = useMemo(() => leafComponent || LeafComponent, [leafComponent])
 
-    return (
-      <Component ref={ref} {...rest}>
-        {children}
-        {elements.map(($id) => (
-          <Leaf
-            key={$id}
-            $id={$id}
-            leafComponent={Leaf}
-          />
-        ))}
-      </Component>
-    )
-  },
-)
+  return Array.isArray(elements) && elements.length ? (
+    <Component ref={ref} {...rest}>
+      {elements.map(($id) => (
+        <Leaf key={`element-leaf-${$id}`} $id={$id} leafComponent={Leaf} />
+      ))}
+    </Component>
+  ) : null
+})
 
 BranchComponent.displayName = 'BranchComponent'
 BranchComponent.aglyn = true
 BranchComponent.defaultProps = {
   component: Fragment,
   children: null,
-  elements: [],
 }
 
-export {BranchComponent}
+export { BranchComponent }
 export default BranchComponent

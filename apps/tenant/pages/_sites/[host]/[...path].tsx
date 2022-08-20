@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import getTenantPageStaticPaths from '../../../utils/get-tenant-page-static-paths'
-import getTenantPageStaticProps from '../../../utils/get-tenant-page-static-props'
-
+import {
+  getTenantPageStaticPaths,
+  getTenantPageStaticProps,
+} from '@aglyn/tenant-feature-instance'
 
 export default function CatchAllPage(props) {
   return <>{JSON.stringify(props, null, 2)}</>

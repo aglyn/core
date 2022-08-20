@@ -22,8 +22,8 @@ import {
   mdiArrowExpandHorizontal,
   mdiArrowLeft,
   mdiArrowRight,
+  mdiArrowULeftTop,
   mdiArrowUp,
-  mdiArrowUpRight,
   mdiBookVariant,
   mdiBookVariantMultiple,
   mdiCalendar,
@@ -38,6 +38,7 @@ import {
   mdiCodeString,
   mdiCog,
   mdiContentDuplicate,
+  mdiContentSave,
   mdiCubeOutline,
   mdiCursorDefault,
   mdiCursorMove,
@@ -64,19 +65,19 @@ import {
   mdiPageNextOutline,
   mdiPaletteOutline,
   mdiPencil,
+  mdiPlus,
   mdiRedo,
-  mdiShapeSquareRoundedPlus,
   mdiShieldLock,
   mdiTablet,
   mdiThemeLightDark,
   mdiTune,
   mdiUndo,
   mdiVariable,
+  mdiVectorSquare,
   mdiWeatherNight,
   mdiWeb,
   mdiWhiteBalanceSunny,
 } from '@aglyn/shared-ui-mdi-jsx'
-
 
 // Data-Type
 export const ICON_VARIANT_ARRAY = mdiCodeArray
@@ -84,7 +85,8 @@ export const ICON_VARIANT_COLLECTION = mdiBookVariantMultiple
 export const ICON_VARIANT_DATE = mdiCalendar
 export const ICON_VARIANT_DATE_TIME = mdiCalendarClock
 export const ICON_VARIANT_DOCUMENT = mdiBookVariant
-export const ICON_VARIANT_ENTITY_BLOCK = mdiCubeOutline
+export const ICON_VARIANT_COMPONENT = mdiCubeOutline
+export const ICON_VARIANT_ELEMENT = mdiVectorSquare
 export const ICON_VARIANT_IDENTIFIER = mdiIdentifier
 export const ICON_VARIANT_OBJECT = mdiCodeBracesBox
 export const ICON_VARIANT_PRIMARY_KEY = mdiKeyVariant
@@ -96,13 +98,13 @@ export const ICON_VARIANT_TEXT = mdiAlphabetical
 export const ICON_VARIANT_CLOSE = mdiClose
 export const ICON_VARIANT_LEFT = mdiArrowLeft
 export const ICON_VARIANT_RIGHT = mdiArrowRight
-export const ICON_VARIANT_COLLAPSABLE_CLOSE = mdiChevronDown
-export const ICON_VARIANT_COLLAPSABLE_OPEN = mdiChevronRight
+export const ICON_VARIANT_COLLAPSIBLE_CLOSE = mdiChevronDown
+export const ICON_VARIANT_COLLAPSIBLE_OPEN = mdiChevronRight
 export const ICON_VARIANT_DOCK_BOTTOM_TOGGLE = mdiDockBottom
 export const ICON_VARIANT_DOCK_LEFT_TOGGLE = mdiDockLeft
 export const ICON_VARIANT_DOCK_RIGHT_TOGGLE = mdiDockRight
 export const ICON_VARIANT_MENU_DOWN = mdiMenuDown
-export const ICON_VARIANT_MODIFY_ADD = mdiShapeSquareRoundedPlus
+export const ICON_VARIANT_MODIFY_ADD = mdiPlus
 export const ICON_VARIANT_MODIFY_DELETE = mdiDeleteOutline
 export const ICON_VARIANT_MODIFY_DRAG = mdiDrag
 export const ICON_VARIANT_MODIFY_DUPLICATE = mdiContentDuplicate
@@ -113,8 +115,9 @@ export const ICON_VARIANT_MODIFY_MOVE_DOWN = mdiArrowDown
 export const ICON_VARIANT_MODIFY_MOVE_UP = mdiArrowUp
 export const ICON_VARIANT_MODIFY_REDO = mdiRedo
 export const ICON_VARIANT_MODIFY_UNDO = mdiUndo
+export const ICON_VARIANT_MODIFY_SAVE = mdiContentSave
 export const ICON_VARIANT_NEW_TAB = mdiOpenInNew
-export const ICON_VARIANT_SELECT_PARENT = mdiArrowUpRight
+export const ICON_VARIANT_SELECT_PARENT = mdiArrowULeftTop
 export const ICON_VARIANT_SHOW_DETAIL = mdiPageNextOutline
 
 // Areas + Pages

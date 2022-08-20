@@ -15,24 +15,21 @@
  * limitations under the License.
  */
 
-import {
-  type AglynElementHierarchy,
-  type ElementId,
-  getCanvasDenormalizedElementsStore,
-  getComponentElementHierarchy,
-} from '@aglyn/core-data-framework'
-import {useSubscribable} from '@aglyn/shared-ui-jsx'
-import {useAglynAppContext} from '../contexts/aglyn-app-context'
+import { getCanvasNormalizedNodesStore } from '@aglyn/core-data-app'
+import type { AglynNodeHierarchy, NodeId } from '@aglyn/core-data-foundation'
+import { getComponentElementHierarchy } from '@aglyn/core-util-app'
+import { useSubscribable } from '@aglyn/shared-ui-jsx'
+import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
-
-export function useAglynCanvasElementHierarchy<T extends ElementId>(
+export function useAglynCanvasElementHierarchy<T extends NodeId>(
   $id: T,
-): AglynElementHierarchy<T> {
+): AglynNodeHierarchy<T> {
   const app = useAglynAppContext()
   return useSubscribable(
-    getCanvasDenormalizedElementsStore(app), [] as any,
+    getCanvasNormalizedNodesStore(app),
+    [] as any,
     (state) => getComponentElementHierarchy($id, state),
     [$id, app],
-  ) as AglynElementHierarchy<T>
+  ) as AglynNodeHierarchy<T>
 }
 export default useAglynCanvasElementHierarchy

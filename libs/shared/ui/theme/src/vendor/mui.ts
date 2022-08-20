@@ -16,13 +16,14 @@
  */
 
 import type { OverridableComponent } from '@mui/material/OverridableComponent'
-import type { Theme } from '@mui/material/styles'
+import type { Theme as MuiTheme } from '@mui/material/styles'
 // eslint-disable-next-line no-restricted-imports
 import type { CSSProperties } from '@mui/material/styles/createMixins'
+import type { ExtraColorOptions } from '@mui/material/styles/createPalette'
 // eslint-disable-next-line no-restricted-imports
 import type { Shadows } from '@mui/material/styles/shadows'
-import type { WithStyles } from '@mui/styles'
-import type { ClassKeyInferable } from '@mui/styles/withStyles'
+// import type { WithStyles } from '@mui/styles'
+// import type { ClassKeyInferable } from '@mui/styles/withStyles'
 import * as React from 'react'
 import type { ColorPropOverrides, IActionStates } from '../lib/theme.types'
 // import type {ContainerTypeMap} from '@mui/material/Container'
@@ -47,7 +48,8 @@ declare module '@mui/material/Container' {
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  interface ContainerTypeMap<P = {}, D extends React.ElementType = 'div'> extends VariantProps {
+  interface ContainerTypeMap<P = {}, D extends React.ElementType = 'div'>
+    extends VariantProps {
     props: P & ContainerTypeMap['props']
     defaultComponent: D
   }
@@ -64,7 +66,9 @@ declare module '@mui/material/SvgIcon' {
   interface SvgIconPropsColorOverrides extends ColorPropOverrides {}
 }
 declare module '@mui/material/AppBar' {
-  interface AppBarPropsColorOverrides extends ColorPropOverrides {}
+  interface AppBarPropsColorOverrides extends ColorPropOverrides {
+    surface: true
+  }
 }
 declare module '@mui/material/IconButton' {
   interface AppBarPropsColorOverrides extends ColorPropOverrides {}
@@ -75,18 +79,21 @@ declare module '@mui/system/createTheme/shape' {
   }
 }
 declare module '@mui/material/styles/createPalette' {
-  interface TypeBackground {
-    secondary: string
+  type ExtraColor = PaletteColor
+  type ExtraColorOptions = PaletteColorOptions
+
+  interface TypeBackground {}
+
+  interface PaletteOptions {
+    tertiary?: ExtraColorOptions
+    quaternary?: ExtraColorOptions
+    surface?: ExtraColorOptions
   }
 
   interface Palette {
-    tertiary: Palette['primary']
-    quaternary: Palette['primary']
-  }
-
-  interface PaletteOptions {
-    tertiary?: PaletteOptions['primary']
-    quaternary?: PaletteOptions['primary']
+    tertiary: ExtraColor
+    quaternary: ExtraColor
+    surface: ExtraColor
   }
 }
 declare module '@mui/material/styles/zIndex' {
@@ -100,6 +107,9 @@ declare module '@mui/material/styles/createMixins' {
   }
 }
 declare module '@mui/material/styles' {
+  type ExtraColor = Palette['primary']
+  type ExtraColorOptions = PaletteOptions['primary']
+
   /**
    * START EXAMPLE – MODULE AUGMENTATION ↓
    * ⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄
@@ -146,8 +156,9 @@ declare module '@mui/material/styles' {
 
   interface PaletteOptions {
     background?: PaletteOptions['background']
-    tertiary?: PaletteOptions['primary']
-    quaternary?: PaletteOptions['primary']
+    tertiary?: ExtraColorOptions
+    quaternary?: ExtraColorOptions
+    surface?: ExtraColorOptions
     svgBackground?: IActionStates
     svgFilled?: IActionStates
     svgStroke?: IActionStates
@@ -156,8 +167,9 @@ declare module '@mui/material/styles' {
 
   interface Palette {
     background: Palette['background']
-    tertiary: Palette['primary']
-    quaternary: Palette['primary']
+    tertiary: ExtraColor
+    quaternary: ExtraColor
+    surface: ExtraColor
     svgBackground: IActionStates
     svgFilled: IActionStates
     svgStroke: IActionStates
@@ -173,17 +185,24 @@ declare module '@mui/material/styles' {
     shadowsInset: Shadows
   }
 
+  interface Theme {
+    vars: Omit<
+      Theme,
+      'typography' | 'mixins' | 'breakpoints' | 'direction' | 'transitions'
+    >
+  }
+
   interface DefaultTheme extends Theme {}
 
-  type ExtendPropsOfWithStyles<
-    P extends { classes?: ClassNameMap<string> },
-    StylesType extends ClassKeyInferable<any, any>,
-    IncludeTheme extends boolean | undefined = false
-  > = P & WithStyles<StylesType, IncludeTheme>
+  // type ExtendPropsOfWithStyles<
+  //   P extends { classes?: ClassNameMap<string> },
+  //   StylesType extends ClassKeyInferable<any, any>,
+  //   IncludeTheme extends boolean | undefined = false
+  // > = P & WithStyles<StylesType, IncludeTheme>
 }
 
 declare module '@mui/styles' {
-  interface DefaultTheme extends Theme {}
+  interface DefaultTheme extends MuiTheme {}
 }
 
 //   _______  ______   ___  ____ _____ ____
@@ -192,13 +211,12 @@ declare module '@mui/styles' {
 //  | |___ /  \|  __/| |_| |  _ < | |  ___) |
 //  |_____/_/\_\_|    \___/|_| \_\|_| |____/
 
-export { type Overwrite } from '@mui/types'
+export type { Overwrite } from '@mui/types'
 
 export {
   type ShapeOptions,
   type Spacing,
   type SpacingOptions,
-  type MuiStyledOptions as StyledOptions,
   type MuiStyledOptions,
   type SxProps,
   type BoxProps,
@@ -224,7 +242,7 @@ export {
   type Direction,
   type Duration,
   type Easing,
-  type ExtendPropsOfWithStyles,
+  // type ExtendPropsOfWithStyles,
   type Palette,
   type PaletteColor,
   type PaletteColorOptions,
@@ -262,6 +280,7 @@ export {
   useTheme,
   useThemeProps,
   experimental_sx as sx,
+  getInitColorSchemeScript,
 } from '@mui/material/styles'
 
 // eslint-disable-next-line no-restricted-imports
@@ -278,7 +297,7 @@ export { type TypographyOptions } from '@mui/material/styles/createTypography'
 // eslint-disable-next-line no-restricted-imports
 export { type Shadows } from '@mui/material/styles/shadows'
 
-export { type ClassKeyInferable, type CreateCSSProperties } from '@mui/styles/withStyles'
+// export { type ClassKeyInferable, type CreateCSSProperties } from '@mui/styles/withStyles'
 
 // eslint-disable-next-line no-restricted-imports
 export { type Shape } from '@mui/system/createTheme/shape'

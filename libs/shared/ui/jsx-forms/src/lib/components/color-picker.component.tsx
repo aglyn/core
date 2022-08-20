@@ -15,9 +15,19 @@
  * limitations under the License.
  */
 
-import {styled} from '@aglyn/shared-ui-theme'
-import {FormFieldGrid, validationError} from '@data-driven-forms/mui-component-mapper'
-import {useFieldApi, type UseFieldApiComponentConfig} from '@data-driven-forms/react-form-renderer'
+import {
+  ColorPicker as AglynColorPicker,
+  type ColorPickerProps as AglynColorPickerProps,
+} from '@aglyn/shared-ui-color-picker'
+import { styled } from '@aglyn/shared-ui-theme'
+import {
+  FormFieldGrid,
+  validationError,
+} from '@data-driven-forms/mui-component-mapper'
+import {
+  useFieldApi,
+  type UseFieldApiComponentConfig,
+} from '@data-driven-forms/react-form-renderer'
 import {
   Box,
   ClickAwayListener,
@@ -32,9 +42,14 @@ import {
   TextField as MuiTextField,
   type TextFieldProps,
 } from '@mui/material'
-import {forwardRef, useCallback, useId, useMemo, useRef, useState} from 'react'
-import {RGBColor, SketchPicker, SketchPickerProps} from 'react-color'
-
+import {
+  forwardRef,
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 interface TextFieldColorSwatchProps extends Partial<InputAdornmentProps> {
   color: string
@@ -43,28 +58,21 @@ interface TextFieldColorSwatchProps extends Partial<InputAdornmentProps> {
 
 const Swatch = styled('span', {
   shouldForwardProp: (propName) => propName !== 'color',
-})<{color: string}>(({theme, color}) => ({
-  width: 22, height: 22,
+})<{ color: string }>(({ theme, color }) => ({
+  width: 22,
+  height: 22,
   display: 'flex',
   backgroundColor: color,
   borderRadius: '50%',
 }))
 
 const TextFieldColorSwatch = forwardRef<any, TextFieldColorSwatchProps>(
-  function RefRenderFn(props, ref) {
-    const {color, IconButtonProps, ...rest} = props
+  (props, ref) => {
+    const { color, IconButtonProps, ...rest } = props
 
     return (
-      <InputAdornment
-        ref={ref}
-        position={'start'}
-        {...rest}
-      >
-        <IconButton
-          ref={ref}
-          edge="start"
-          {...IconButtonProps}
-        >
+      <InputAdornment ref={ref} position={'start'} {...rest}>
+        <IconButton ref={ref} edge="start" {...IconButtonProps}>
           <Box
             padding={0.35}
             border={1}
@@ -80,164 +88,167 @@ const TextFieldColorSwatch = forwardRef<any, TextFieldColorSwatchProps>(
 )
 TextFieldColorSwatch.displayName = 'AglynTextFieldColorSwatch'
 
-const FieldColorPicker = forwardRef<any, Partial<SketchPickerProps>>(
-  function RefRenderFn(props, ref) {
-    const {...rest} = props
-
-    return (
-      <SketchPicker
-        ref={ref}
-        width={null}
-        styles={{
-          // picker: {boxShadow: 'none'} as any,
-        }}
-        {...rest}
-      />
-    )
-  },
-)
-FieldColorPicker.displayName = 'AglynFieldColorPicker'
-
 type InternalColorPickerProps = Partial<TextFieldProps> & {
-  FormFieldGridProps?: GridProps;
-  ColorPickerProps?: Partial<SketchPickerProps>
+  FormFieldGridProps?: Partial<GridProps>
+  ColorPickerProps?: Partial<AglynColorPickerProps>
   FormControlProps?: Partial<MuiFormControlProps>
   PopperProps?: Partial<PopperProps>
   presetColors?: string[]
 }
 
-export type ColorPickerProps = InternalColorPickerProps & UseFieldApiComponentConfig
+export type ColorPickerProps = InternalColorPickerProps &
+  UseFieldApiComponentConfig
 
+type RGBColor = {
+  r: number
+  g: number
+  b: number
+  a: number
+}
 
 const getStrValue = (value: RGBColor | string) => {
   if (typeof value === 'string') return value
-  const {r, g, b, a} = {...value as RGBColor}
+  const { r, g, b, a } = { ...(value as RGBColor) }
   if (a < 1) return `rgba(${r || 0}, ${g || 0}, ${b || 0}, ${a || 0})`
   return `rgb(${r || 0}, ${g || 0}, ${b || 0})`
 }
 
-const ColorPickerComponent = forwardRef<any, ColorPickerProps>(
-  function RefRenderFn(props, ref) {
-    const {
-      input,
-      isReadOnly,
-      isDisabled,
-      placeholder,
-      isRequired,
-      label,
-      helperText,
-      description,
-      validateOnMount,
-      meta,
-      defaultValue,
-      onChange,
-      onBlur,
-      onFocus,
-      inputProps,
-      InputProps,
-      presetColors,
-      FormFieldGridProps,
-      FormControlProps,
-      ColorPickerProps,
-      PopperProps,
-      ...rest
-    } = useFieldApi(props as any)
+const ColorPickerComponent = forwardRef<any, ColorPickerProps>((props, ref) => {
+  const {
+    input,
+    isReadOnly,
+    isDisabled,
+    placeholder,
+    isRequired,
+    label,
+    helperText,
+    description,
+    validateOnMount,
+    meta,
+    defaultValue,
+    onChange,
+    onBlur,
+    onFocus,
+    inputProps,
+    InputProps,
+    presetColors,
+    FormFieldGridProps,
+    FormControlProps,
+    ColorPickerProps,
+    PopperProps,
+    ...rest
+  } = useFieldApi(props as any)
 
-    const id = `color-picker-${useId()}`
-    const invalid = validationError(meta, validateOnMount)
-    const hasError = Boolean(invalid)
+  const id = `color-picker-${useId()}`
+  const invalid = validationError(meta, validateOnMount)
+  const hasError = Boolean(invalid)
 
-    const value = input?.value || defaultValue || ''
+  const value = input?.value || defaultValue || ''
 
-    const handleChange = useCallback((value: RGBColor | string, e: any) => {
+  const handleChange = useCallback(
+    (value: RGBColor | string, e: any) => {
       const val = getStrValue(value || '') || ''
       input?.onChange && input?.onChange(val)
       inputProps?.onChange && inputProps?.onChange(e, val)
       onChange && onChange(e, val)
-    }, [input, inputProps, onChange])
+    },
+    [input, inputProps, onChange],
+  )
 
-    const handleTextChange = useCallback((e: any) => {
+  const handleTextChange = useCallback(
+    (e: any) => {
       handleChange(e.target.value, e)
-    }, [handleChange])
+    },
+    [handleChange],
+  )
 
-    const handleColorChange = useCallback((color: any, e: any) => {
+  const handleColorChange = useCallback(
+    (color: any, e: any) => {
       handleChange(color.rgb, e)
-    }, [handleChange])
+    },
+    [handleChange],
+  )
 
-    const popperRef = useRef<HTMLDivElement | null>(null)
-    const [fieldRef, setFieldRef] = useState<HTMLDivElement | null>(null)
-    const [open, setOpen] = useState(false)
+  const popperRef = useRef<HTMLDivElement | null>(null)
+  const [fieldRef, setFieldRef] = useState<HTMLDivElement | null>(null)
+  const [open, setOpen] = useState(false)
 
-    const handleClickAway = useCallback((e) => setOpen(false), [])
-    const handleFocus = useCallback((e) => {
+  const handleClickAway = useCallback((e) => setOpen(false), [])
+  const handleFocus = useCallback(
+    (e) => {
       setOpen(true)
       onFocus && onFocus(e)
-    }, [onFocus])
+    },
+    [onFocus],
+  )
 
-    const startAdornment = useMemo(() => (
+  const startAdornment = useMemo(
+    () => (
       <TextFieldColorSwatch
         color={value}
         IconButtonProps={{
           onClick: () => setOpen((prev) => !prev),
         }}
       />
-    ), [value])
+    ),
+    [value],
+  )
 
-    return (
-      <FormFieldGrid ref={ref} {...FormFieldGridProps}>
-        <ClickAwayListener onClickAway={handleClickAway}>
-          <div>
-            <MuiTextField
-              {...input}
-              fullWidth
-              error={hasError}
-              helperText={invalid || ((meta.touched || validateOnMount) && meta.warning) || helperText || description}
-              disabled={isDisabled}
-              label={label}
-              placeholder={placeholder || 'default'}
-              required={isRequired}
-              onChange={handleTextChange}
-              onFocus={handleFocus}
-              value={value}
-              inputProps={{
-                ...inputProps,
-                readOnly: isReadOnly,
-              }}
-              InputProps={{
-                startAdornment,
-                ref: setFieldRef,
-                ...InputProps,
-              }}
-              {...rest}
+  return (
+    <FormFieldGrid ref={ref} {...FormFieldGridProps}>
+      <ClickAwayListener onClickAway={handleClickAway}>
+        <div>
+          <MuiTextField
+            {...input}
+            fullWidth
+            error={hasError}
+            helperText={
+              invalid ||
+              ((meta.touched || validateOnMount) && meta.warning) ||
+              helperText ||
+              description
+            }
+            disabled={isDisabled}
+            label={label}
+            placeholder={placeholder || 'default'}
+            required={isRequired}
+            onChange={handleTextChange}
+            onFocus={handleFocus}
+            value={value}
+            inputProps={{
+              ...inputProps,
+              readOnly: isReadOnly,
+            }}
+            InputProps={{
+              startAdornment,
+              ref: setFieldRef,
+              ...InputProps,
+            }}
+            {...rest}
+          />
+          <Popper
+            id={id}
+            ref={popperRef}
+            open={Boolean(fieldRef && open)}
+            anchorEl={fieldRef}
+            sx={{ zIndex: 'tooltip', maxWidth: 280 }}
+            disablePortal
+            {...PopperProps}
+          >
+            <AglynColorPicker
+              {...ColorPickerProps}
+              color={value}
+              onChange={handleColorChange}
+              presetColors={presetColors}
             />
-            <Popper
-              id={id}
-              ref={popperRef}
-              open={Boolean(fieldRef && open)}
-              anchorEl={fieldRef}
-              sx={{zIndex: 'tooltip', maxWidth: 280}}
-              disablePortal
-              {...PopperProps}
-            >
-              <FieldColorPicker
-                {...ColorPickerProps}
-                color={value}
-                onChange={handleColorChange}
-                presetColors={presetColors}
-              />
-            </Popper>
-          </div>
-        </ClickAwayListener>
-      </FormFieldGrid>
-    )
-  },
-)
+          </Popper>
+        </div>
+      </ClickAwayListener>
+    </FormFieldGrid>
+  )
+})
 
-ColorPickerComponent.defaultProps = {
-  FormFieldGridProps: {},
-  PopperProps: {},
-  ColorPickerProps: {},
-}
+ColorPickerComponent.defaultProps = {}
 
-export {ColorPickerComponent}
+export { ColorPickerComponent }
 export default ColorPickerComponent

@@ -16,47 +16,63 @@
  */
 
 import {
-  type AglynElementDenormalized,
-  type ElementId,
-  type IAglynComponent,
-} from '@aglyn/core-data-framework'
-import {type InnerRefProp} from '@aglyn/shared-data-types'
-import {getDisplayName} from '@aglyn/shared-util-tools'
-import {hoistNonReactStatics} from '@aglyn/shared-util-vendor'
+  AglynExoticComponent,
+  AglynNodeItemDenormalized,
+  NodeId,
+} from '@aglyn/core-data-foundation'
+import { getDisplayName } from '@aglyn/shared-util-tools'
+import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import clsx from 'clsx'
-import {type ComponentType, forwardRef, type PropsWithoutRef, type  RefAttributes} from 'react'
+import {
+  type ComponentType,
+  forwardRef,
+  type PropsWithoutRef,
+  type RefAttributes,
+} from 'react'
 import useAglynComponent from './use-aglyn-component'
-import {useAglynElementData} from './use-aglyn-element-data'
+import { useAglynElementData } from './use-aglyn-element-data'
 import useAglynElementResolvedProps from './use-aglyn-element-resolved-props'
 
-
 export interface RequiredElementDataProps {
-  $id: ElementId
+  $id: NodeId
   className?: string
 }
 
-export interface OptionalElementDataProps extends InnerRefProp {
-  elementData: AglynElementDenormalized<any>
-  component: IAglynComponent<any>
+export interface OptionalElementDataProps
+  extends JSX.PropsWithForwardedRef<any> {
+  elementData: AglynNodeItemDenormalized<any>
+  component: AglynExoticComponent<any>
   elemProps: any
 }
 
-export interface ElementDataProps extends RequiredElementDataProps, OptionalElementDataProps {}
+export interface ElementDataProps
+  extends RequiredElementDataProps,
+    OptionalElementDataProps {}
 
-type WrappedComponent<U, T> = ComponentType<PropsWithoutRef<ElementDataProps & U> & RefAttributes<T>>
-type DecoratedComponent<U, T> = ComponentType<RequiredElementDataProps & U & RefAttributes<T>>
+type WrappedComponent<U, T> = ComponentType<
+  PropsWithoutRef<ElementDataProps & U> & RefAttributes<T>
+>
+type DecoratedComponent<U, T> = ComponentType<
+  RequiredElementDataProps & U & RefAttributes<T>
+>
 
 export function withAglynElementData<U = any, T = any>(
   WrappedComponent: WrappedComponent<U, T>,
 ): DecoratedComponent<U, T> {
-
   const displayName = getDisplayName(WrappedComponent)
   const WithAglynElementData = forwardRef<T, RequiredElementDataProps & U>(
-    function RefRenderFn(props, ref) {
-      const {$id, className: classNameProp, ...rest} = props
+    (props, ref) => {
+      const { $id, className: classNameProp, ...rest } = props
       const elementData = useAglynElementData($id)
-      const component = useAglynComponent(elementData.componentId, elementData.bundleId)
-      const {children, className: classNameElem, ...elemProps} = useAglynElementResolvedProps($id)
+      const component = useAglynComponent(
+        elementData.componentId,
+        elementData.bundleId,
+      )
+      const {
+        children,
+        className: classNameElem,
+        ...elemProps
+      } = useAglynElementResolvedProps($id)
       const className = clsx(classNameProp, classNameElem)
 
       return (

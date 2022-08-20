@@ -15,16 +15,21 @@
  * limitations under the License.
  */
 
-import type {PaletteOptions, Theme, ThemeOptions} from '../vendor/mui'
-import {buildFontFamilyList} from './constants'
-import type {IActionStates} from './theme.types'
+import { deepPurple, lightBlue } from '@mui/material/colors'
+import type { PaletteOptions, Theme, ThemeOptions } from '../vendor/mui'
+import { buildFontFamilyList } from './constants'
+import type { IActionStates } from './theme.types'
 import createResponsiveTheme from './util/create-responsive-theme'
-
 
 export type ColorVariant = 'light' | 'dark'
 export type BackgroundRecord = PaletteOptions['background']
-export type OrdinalIdentifier = 'primary' | 'secondary' | 'tertiary' | 'quaternary'
-export type OrdinalRecord<T extends OrdinalIdentifier = OrdinalIdentifier> = Pick<PaletteOptions, T>
+export type OrdinalIdentifier<K extends string = ''> =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'quaternary'
+export type OrdinalRecord<T extends OrdinalIdentifier = OrdinalIdentifier> =
+  Pick<PaletteOptions, T>
 export type PrimaryRecord = OrdinalRecord<'primary'>['primary']
 export type SecondaryRecord = OrdinalRecord<'secondary'>['secondary']
 export type TertiaryRecord = OrdinalRecord<'tertiary'>['tertiary']
@@ -78,78 +83,124 @@ export const shadesOfGrey = {
 
 export const backgroundsLight: BackgroundRecord = {
   default: '#F5F5F5',
-  secondary: `#F8F9FA`,
   paper: '#FFFFFF',
 }
 export const backgroundsDark: BackgroundRecord = {
-  default: '#1E242B',
-  secondary: `#404C5C`,
-  paper: '#2C3540',
+  default: '#161c21',
+  paper: '#2a3440',
+}
+
+const colorScheme = {
+  light: {
+    primary: {
+      main: `#404C5C`,
+      contrastText: '#000000',
+    },
+    secondary: {
+      main: lightBlue['800'],
+      contrastText: '#000000',
+    },
+    tertiary: {
+      main: deepPurple['A400'],
+      contrastText: '#FFFFFF',
+    },
+  },
+  dark: {
+    primary: {
+      main: `#2C3540`,
+      contrastText: '#FFFFFF',
+    },
+    secondary: {
+      main: lightBlue['A400'],
+      contrastText: '#000000',
+    },
+    tertiary: {
+      main: '#AB47BC',
+      contrastText: '#FFFFFF',
+    },
+  },
+}
+
+export const ordinalBgSecondaryLight: QuaternaryRecord = {
+  main: `#F8F9FA`,
+  contrastText: '#000000',
+}
+export const ordinalBgSecondaryDark: QuaternaryRecord = {
+  main: `#202934`,
+  contrastText: '#FFFFFF',
 }
 
 export const ordinalPrimaryLight: PrimaryRecord = {
   main: '#404C5C',
-  light: '#666F7C',
-  dark: '#2C3540',
-  contrastText: '#FFFFFF',
+  // light: '#666F7C',
+  // dark: '#2C3540',
+  // contrastText: '#FFFFFF',
 }
 export const ordinalPrimaryDark: PrimaryRecord = {
   main: '#2C3540',
-  light: '#3D4B5C',
-  dark: '#202830',
-  contrastText: '#FFFFFF',
+  // light: '#3D4B5C',
+  // dark: '#202830',
+  // contrastText: '#FFFFFF',
 }
 
 export const ordinalSecondaryLight: SecondaryRecord = {
-  main: '#039BE5',
-  light: '#40C4FF',
-  dark: '#0277BD',
-  contrastText: '#FFFFFF',
+  main: '#0091ea',
+  // contrastText: '#000000',
+  // light: '#40C4FF',
+  // dark: '#0277BD',
+  // contrastText: '#FFFFFF',
 }
 export const ordinalSecondaryDark: SecondaryRecord = {
-  main: '#03A9F4',
-  light: '#40C4FF',
-  dark: '#026CA0',
-  contrastText: '#FFFFFF',
+  main: '#00b0ff',
+  // contrastText: '#000000',
+  // light: '#40C4FF',
+  // dark: '#026CA0',
 }
 
 export const ordinalTertiaryLight: TertiaryRecord = {
-  main: '#9C27B0',
-  light: '#AF52BF',
-  dark: '#6D1B7B',
-  contrastText: '#FFFFFF',
+  main: '#E040FB',
+  // contrastText: '#FFFFFF',
+  // light: '#AF52BF',
+  // dark: '#6D1B7B',
 }
 export const ordinalTertiaryDark: TertiaryRecord = {
-  main: '#AB47BC',
-  light: '#BA68C8',
-  dark: '#9C27B0',
-  contrastText: '#FFFFFF',
+  main: '#E040FB',
+  // contrastText: '#FFFFFF',
+  // light: '#BA68C8',
+  // dark: '#9C27B0',
 }
 
 export const ordinalQuaternaryLight: QuaternaryRecord = {
-  main: '#E040FB',
-  light: '#E666FB',
-  dark: '#9C2CAF',
-  contrastText: '#FFFFFF',
+  main: '#673ab7',
+  // light: '#E666FB',
+  // dark: '#9C2CAF',
+  // contrastText: '#FFFFFF',
 }
 export const ordinalQuaternaryDark: QuaternaryRecord = {
-  main: '#E040FB',
-  light: '#E666FB',
-  dark: '#9C2CAF',
-  contrastText: '#FFFFFF',
+  main: '#673ab7',
+  // light: '#E666FB',
+  // dark: '#9C2CAF',
+  // contrastText: '#FFFFFF',
 }
 
 export const ordinalLight: OrdinalRecord = {
-  primary: {...ordinalPrimaryLight},
-  secondary: {...ordinalSecondaryLight},
-  tertiary: {...ordinalTertiaryLight},
-  quaternary: {...ordinalQuaternaryLight},
+  primary: { ...ordinalPrimaryLight },
+  secondary: { ...ordinalSecondaryLight },
+  tertiary: { ...ordinalTertiaryLight },
+  quaternary: { ...ordinalQuaternaryLight },
 }
 export const ordinalDark: OrdinalRecord = {
-  primary: {...ordinalPrimaryDark},
-  secondary: {...ordinalSecondaryDark},
-  tertiary: {...ordinalTertiaryDark},
-  quaternary: {...ordinalQuaternaryDark},
+  primary: { ...ordinalPrimaryDark },
+  secondary: { ...ordinalSecondaryDark },
+  tertiary: { ...ordinalTertiaryDark },
+  quaternary: { ...ordinalQuaternaryDark },
+}
+
+export const otherColorsLight = {
+  surface: { ...ordinalBgSecondaryLight },
+}
+export const otherColorsDark = {
+  surface: { ...ordinalBgSecondaryDark },
 }
 
 export const actionSvgBgLight: IActionStates = {
@@ -253,14 +304,14 @@ const baseOptions: ThemeOptions = {
       },
       // color: 'inherit', // Default color to inherit
       styleOverrides: {
-        root: ({theme}) => ({
+        root: ({ theme }) => ({
           padding: theme.spacing(1),
         }),
       },
       variants: [
         {
-          props: {variant: 'outlined'} as any, // @TODO ⚠️ fix typing
-          style: ({theme}) => ({
+          props: { variant: 'outlined' } as any, // @TODO ⚠️ fix typing
+          style: ({ theme }) => ({
             border: `1px solid`,
             borderColor: `inherit`,
           }),
@@ -284,7 +335,7 @@ const baseOptions: ThemeOptions = {
     MuiMenu: {},
     MuiToolbar: {
       styleOverrides: {
-        root: ({theme}) => ({
+        root: ({ theme }) => ({
           [theme.breakpoints.up('sm')]: {
             paddingLeft: theme.spacing(3),
             paddingRight: theme.spacing(3),
@@ -442,9 +493,10 @@ export const consoleOptions: ThemeOptions = {
   ...baseOptions,
   palette: {
     mode: 'light',
-    background: {...backgroundsLight},
-    grey: {...shadesOfGrey},
+    background: { ...backgroundsLight },
+    grey: { ...shadesOfGrey },
     ...ordinalLight,
+    ...otherColorsLight,
     ...actionsLight,
     ...status,
   },
@@ -453,19 +505,20 @@ export const consoleOptionsDark: ThemeOptions = {
   ...baseOptions,
   palette: {
     mode: 'dark',
-    background: {...backgroundsDark},
-    grey: {...shadesOfGrey},
+    background: { ...backgroundsDark },
+    grey: { ...shadesOfGrey },
     ...ordinalDark,
+    ...otherColorsDark,
     ...actionsDark,
     ...status,
   },
 }
 
 export const consoleThemeLight: Theme = createResponsiveTheme({
-  themeOptions: {...consoleOptions},
+  themeOptions: { ...consoleOptions },
 })
 export const consoleThemeDark: Theme = createResponsiveTheme({
-  themeOptions: {...consoleOptionsDark},
+  themeOptions: { ...consoleOptionsDark },
 })
 export const getConsoleTheme = (mode: 'light' | 'dark' = 'light') => {
   const theme = {

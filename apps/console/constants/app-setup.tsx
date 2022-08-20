@@ -15,75 +15,93 @@
  * limitations under the License.
  */
 
-import {bundle as muiBundle} from '@aglyn/addons-ui-mui-bundle'
-import {doesBesignerAppExist, initializeBesignerApp} from '@aglyn/core-data-besigner'
-import {registerBundle, registerComponent} from '@aglyn/core-data-framework'
-import {createAglynComponent} from '@aglyn/core-feature-renderer'
-import {IS_PRODUCTION} from '@aglyn/shared-data-enums'
-import {samplePageData} from './sample-data'
-
+import {
+  doesBesignerAppExist,
+  getBesignerApp,
+  IBesignerAppController,
+  initializeBesignerApp,
+} from '@aglyn/besigner-data-app'
+import { samplePageData } from '@aglyn/besigner-feature-app'
+import { registerBundle, registerComponent } from '@aglyn/core-data-app'
+import { createAglynComponent } from '@aglyn/core-feature-renderer'
+import { bundle as muiBundle } from '@aglyn/plugins-ui-mui'
+import { IS_PRODUCTION } from '@aglyn/shared-data-enums'
 
 const c1 = createAglynComponent(
   {
-    componentId: 'root',
-    displayName: 'Root Element',
-    title: 'Root element',
+    componentId: 'sample-element',
+    displayName: 'Sample Element',
+    title: 'Sample Element',
   },
-  'span',
+  'div',
 )
 
 const c2 = createAglynComponent(
   {
-    componentId: 'root1',
-    displayName: 'Root Element',
-    title: 'Root element',
+    componentId: 'sample-element-1',
+    displayName: 'Sample Element 1',
+    title: 'Sample Element 1',
   },
-  'span',
+  'div',
 )
 
 const c3 = createAglynComponent(
   {
-    componentId: 'root2',
-    displayName: 'Root Element',
-    title: 'Root element',
+    componentId: 'sample-element-2',
+    displayName: 'Sample Element 2',
+    title: 'Sample Element 2',
   },
-  'span',
+  'div',
 )
 
 const c4 = createAglynComponent(
   {
-    componentId: 'root3',
-    displayName: 'Root Element',
-    title: 'Root element',
+    componentId: 'sample-element-3',
+    displayName: 'Sample Element 3',
+    title: 'Sample Element 3',
   },
   'span',
 )
 
 const c5 = createAglynComponent(
   {
-    componentId: 'root4',
-    displayName: 'Root Element',
-    title: 'Root element',
-    templates: [
+    componentId: 'sample-element-4',
+    displayName: 'Sample Element 4',
+    title: 'Sample Element 4',
+    presets: [
       {
-        id: 'root4:1',
-        label: 'Root 4',
+        id: 'sample-element-4',
+        label: 'Sample Element 4',
         data: {
-          componentId: 'root4',
+          componentId: 'sample-element-4',
           props: {
-            children: 'First Root4',
+            children: 'Sample Element 4',
           },
         },
       },
     ],
   },
-  'span',
+  'div',
 )
 const components = [c1, c2, c3, c4, c5]
 
+declare global {
+  // eslint-disable-next-line no-var
+  var Aglyn: IBesignerAppController
+  // eslint-disable-next-line no-var
+  // var Aglyn: AglynAppControllerT
+
+  interface Window {
+    Aglyn?: IBesignerAppController
+  }
+}
+
+const hasWindow = typeof window !== 'undefined'
+let Aglyn = globalThis.Aglyn
+
 try {
-  if (!doesBesignerAppExist() && typeof window !== 'undefined') {
-    const app = initializeBesignerApp({
+  if (!Aglyn && !doesBesignerAppExist() && hasWindow) {
+    Aglyn = globalThis.Aglyn = initializeBesignerApp({
       logLevel: 'debug',
       modulesOptions: {
         canvas: {
@@ -93,18 +111,19 @@ try {
         },
       },
     })
-    console.log('initialize app', app)
-
-    if (typeof window !== 'undefined' && !IS_PRODUCTION) {
-      window['__AGLYN_APP__'] = app
+    console.log('set global Aglyn', Aglyn, globalThis)
+    if (!IS_PRODUCTION) {
+      // @ts-ignore
+      window.Aglyn = Aglyn
     }
 
-    components.forEach((i) => registerComponent(app, i))
-    registerBundle(app, muiBundle)
+    components.forEach((i) => registerComponent(Aglyn, i))
+    registerBundle(Aglyn, muiBundle)
+  } else if (!Aglyn && doesBesignerAppExist() && hasWindow) {
+    Aglyn = getBesignerApp()
   }
-}
-catch (e) {
+} catch (e) {
   console.error(e, 'initialize aglyn app')
 }
 
-export {}
+export { Aglyn }
