@@ -17,11 +17,14 @@
 
 import {
   mdiAccountSettings,
+  mdiAlignHorizontalDistribute,
+  mdiAlignVerticalCenter,
   mdiAlphabetical,
   mdiArrowDown,
   mdiArrowExpandHorizontal,
   mdiArrowLeft,
   mdiArrowRight,
+  mdiArrowRightBottom,
   mdiArrowULeftTop,
   mdiArrowUp,
   mdiBookVariant,
@@ -48,6 +51,13 @@ import {
   mdiDockRight,
   mdiDrag,
   mdiFileTree,
+  mdiFormatAlignCenter,
+  mdiFormatAlignJustify,
+  mdiFormatAlignLeft,
+  mdiFormatAlignRight,
+  mdiFormatHorizontalAlignCenter,
+  mdiFormatHorizontalAlignLeft,
+  mdiFormatHorizontalAlignRight,
   mdiFormDropdown,
   mdiGroup,
   mdiHomeVariant,
@@ -59,6 +69,7 @@ import {
   mdiLogoutVariant,
   mdiMathCompass,
   mdiMenuDown,
+  mdiMinus,
   mdiMonitor,
   mdiMonitorSmall,
   mdiOpenInNew,
@@ -93,6 +104,22 @@ export const ICON_VARIANT_PRIMARY_KEY = mdiKeyVariant
 export const ICON_VARIANT_PROPERTY = mdiVariable
 export const ICON_VARIANT_STRING = mdiCodeString
 export const ICON_VARIANT_TEXT = mdiAlphabetical
+
+// Flexbox
+export const ICON_VARIANT_FLEX_START = mdiFormatHorizontalAlignRight
+export const ICON_VARIANT_FLEX_END = mdiFormatHorizontalAlignLeft
+export const ICON_VARIANT_FLEX_CENTER = mdiFormatHorizontalAlignCenter
+export const ICON_VARIANT_FLEX_SPACE_EVENLY = mdiAlignHorizontalDistribute
+export const ICON_VARIANT_FLEX_SPACE_AROUND = mdiAlignHorizontalDistribute
+export const ICON_VARIANT_FLEX_SPACE_BETWEEN = mdiAlignVerticalCenter
+
+// Global CSS Values
+export const ICON_VARIANT_CSS_DEFAULT = mdiMinus
+export const ICON_VARIANT_CSS_INHERIT = mdiArrowRightBottom
+export const ICON_VARIANT_ALIGN_LEFT = mdiFormatAlignLeft
+export const ICON_VARIANT_ALIGN_CENTER = mdiFormatAlignCenter
+export const ICON_VARIANT_ALIGN_RIGHT = mdiFormatAlignRight
+export const ICON_VARIANT_ALIGN_JUSTIFY = mdiFormatAlignJustify
 
 // Action + Navigation
 export const ICON_VARIANT_CLOSE = mdiClose

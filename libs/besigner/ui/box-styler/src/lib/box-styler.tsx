@@ -199,6 +199,7 @@ const DimensionControl = (props: DimensionControlProps) => {
             value={parsed.quantity || ''}
             type={'number'}
             placeholder={'--'}
+            multiline
             onChange={(e) => handleChange('quantity')(e.target.value)}
             endAdornment={
               <InputAdornment position="end" sx={{ margin: 0 }}>

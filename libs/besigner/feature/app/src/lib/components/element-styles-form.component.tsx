@@ -24,11 +24,26 @@ import {
   useAglynSiteTheme,
 } from '@aglyn/core-feature-renderer'
 import {
+  ICON_VARIANT_ALIGN_CENTER,
+  ICON_VARIANT_ALIGN_JUSTIFY,
+  ICON_VARIANT_ALIGN_LEFT,
+  ICON_VARIANT_ALIGN_RIGHT,
+  ICON_VARIANT_CSS_INHERIT,
+} from '@aglyn/shared-data-enums'
+import {
   componentMapper,
   FormRenderer,
   type FormRendererProps,
 } from '@aglyn/shared-ui-jsx-forms'
+import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { objectFlatten } from '@aglyn/shared-util-vendor'
+import {
+  FormHelperText,
+  FormLabel,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+} from '@mui/material'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import { type ChangeEvent, forwardRef, useCallback, useMemo } from 'react'
@@ -69,39 +84,6 @@ const stylesSchema = (presetColors) => ({
         { value: 'unset', label: 'Unset' },
       ],
     },
-    // {
-    //   component: FieldComponentType.TOGGLE_BUTTON,
-    //   condition: {
-    //     when: 'Foo', // name of controlled field
-    //     is: 'Bar', // condition
-    //   },
-    //   name: 'alignItems',
-    //   label: 'Align Items',
-    //   description: 'The flex box align items',
-    //   exclusive: true,
-    //   options: [
-    //     {
-    //       value: 'start',
-    //       label: <MdiIcon path={mdiFormatHorizontalAlignRight.path} />,
-    //     },
-    //     {
-    //       value: 'space-evenly',
-    //       label: <MdiIcon path={mdiAlignHorizontalDistribute.path} />,
-    //     },
-    //     {
-    //       value: 'space-between',
-    //       label: <MdiIcon path={mdiAlignVerticalCenter.path} />,
-    //     },
-    //     {
-    //       value: 'center',
-    //       label: <MdiIcon path={mdiFormatHorizontalAlignCenter.path} />,
-    //     },
-    //     {
-    //       value: 'end',
-    //       label: <MdiIcon path={mdiFormatHorizontalAlignLeft.path} />,
-    //     },
-    //   ],
-    // },
     {
       component: FieldComponentType.COLOR_PICKER,
       name: 'color',
@@ -354,8 +336,103 @@ const stylesSchema = (presetColors) => ({
         { value: 'wrap-reverse', label: 'wrap-reverse' },
       ],
     },
+    // {
+    //   component: FieldComponentType.TOGGLE_BUTTON,
+    //   name: 'textAlign',
+    //   label: 'Text Alignment',
+    //   description:
+    //     'Sets the horizontal alignment of the inline-level content inside a block element or table-cell box.',
+    //   exclusive: true,
+    //   size: 'small',
+    //   fullWidth: true,
+    //   options: [
+    //     {
+    //       value: '',
+    //       children: (
+    //         <MdiIcon
+    //           fontSize={'inherit'}
+    //           path={ICON_VARIANT_CSS_DEFAULT.path}
+    //         />
+    //       ),
+    //     },
+    //     {
+    //       value: 'inherit',
+    //       children: (
+    //         <MdiIcon
+    //           fontSize={'inherit'}
+    //           path={ICON_VARIANT_CSS_INHERIT.path}
+    //         />
+    //       ),
+    //     },
+    //     {
+    //       value: 'left',
+    //       children: (
+    //         <MdiIcon fontSize={'inherit'} path={ICON_VARIANT_ALIGN_LEFT.path} />
+    //       ),
+    //     },
+    //     {
+    //       value: 'center',
+    //       children: (
+    //         <MdiIcon
+    //           fontSize={'inherit'}
+    //           path={ICON_VARIANT_ALIGN_CENTER.path}
+    //         />
+    //       ),
+    //     },
+    //     {
+    //       value: 'right',
+    //       children: (
+    //         <MdiIcon
+    //           fontSize={'inherit'}
+    //           path={ICON_VARIANT_ALIGN_RIGHT.path}
+    //         />
+    //       ),
+    //     },
+    //     {
+    //       value: 'justify',
+    //       children: (
+    //         <MdiIcon
+    //           fontSize={'inherit'}
+    //           path={ICON_VARIANT_ALIGN_JUSTIFY.path}
+    //         />
+    //       ),
+    //     },
+    //   ],
+    // },
   ],
 })
+
+const TextAlignToggleButtonGroup = (props) => {
+  const { onChange, value, field } = props
+
+  return (
+    <FormControl fullWidth>
+      <FormLabel htmlFor={field.name} sx={{ marginBottom: 1 }}>
+        {field.label}
+      </FormLabel>
+      <div>
+        <ToggleButtonGroup
+          id={field.name}
+          value={value || ''}
+          size="small"
+          color="secondary"
+          onChange={onChange}
+          fullWidth
+          exclusive
+        >
+          {field.options.map((option) => (
+            <ToggleButton value={option.value} size="small">
+              <Tooltip key={option.value} title={option.label}>
+                <MdiIcon path={option.icon} fontSize="inherit" />
+              </Tooltip>
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </div>
+      <FormHelperText>{field.description}</FormHelperText>
+    </FormControl>
+  )
+}
 
 export interface ElementStylesFormProps extends FormRendererProps {
   $id?: NodeId
@@ -406,6 +483,16 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
       [elemStyles, handleElementSave],
     )
 
+    const handleTextAlignChange = useCallback(
+      (e, value: string) => {
+        handleElementSave({
+          ...elemStyles,
+          textAlign: value || 'undefined',
+        })
+      },
+      [elemStyles, handleElementSave],
+    )
+
     const boxMeasurements = useMemo(
       () => ({
         marginTop: elemStyles?.['marginTop'],
@@ -425,6 +512,46 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
         <BoxStyler
           measurements={boxMeasurements}
           onChange={handleBoxStylerChange}
+        />
+
+        <TextAlignToggleButtonGroup
+          onChange={handleTextAlignChange}
+          value={elemStyles?.['textAlign']}
+          field={{
+            component: FieldComponentType.TOGGLE_BUTTON,
+            name: 'textAlign',
+            label: 'Text Alignment',
+            description:
+              'Sets the horizontal alignment of the inline-level content inside a block element or table-cell box.',
+            exclusive: true,
+            options: [
+              {
+                value: 'inherit',
+                icon: ICON_VARIANT_CSS_INHERIT.path,
+                label: 'Inherit',
+              },
+              {
+                value: 'left',
+                icon: ICON_VARIANT_ALIGN_LEFT.path,
+                label: 'Left',
+              },
+              {
+                value: 'center',
+                icon: ICON_VARIANT_ALIGN_CENTER.path,
+                label: 'Center',
+              },
+              {
+                value: 'right',
+                icon: ICON_VARIANT_ALIGN_RIGHT.path,
+                label: 'Right',
+              },
+              {
+                value: 'justify',
+                icon: ICON_VARIANT_ALIGN_JUSTIFY.path,
+                label: 'Justify',
+              },
+            ],
+          }}
         />
 
         <FormRenderer
