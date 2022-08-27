@@ -16,4 +16,3 @@
  */
 
 export * from './emit-manager'
-export { default as emitter } from './emit-manager'

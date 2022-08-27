@@ -15,5 +15,5 @@
  * limitations under the License.
  */
 
-export * from './log-manager'
-export { default as logger } from './log-manager'
+export * from './preset'
+export * as presets from './preset-manager'

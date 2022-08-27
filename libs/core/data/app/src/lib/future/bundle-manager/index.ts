@@ -15,14 +15,5 @@
  * limitations under the License.
  */
 
-import { Logger, LogLevelString } from '@aglyn/shared-util-logger'
-import { namespace } from '../constants'
-
-export function setLogLevel(logLevel: LogLevelString) {
-  singleton.setLogLevel(logLevel)
-}
-
-export class LogManager extends Logger {}
-
-const singleton = new Logger(namespace)
-export default singleton
+export * from './bundle'
+export * as bundles from './bundle-manager'

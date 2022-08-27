@@ -29,11 +29,10 @@ import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
 import type { ComponentClass, ComponentProps } from 'react'
+import type { BundleId } from '../bundle-manager'
 import type { NodeId, NodeSchema } from '../nodes-manager'
 
-export type BundleId = string
 export type ComponentId = string
-export type PresetId = string
 
 export enum FEATURE_FLAG {
   DEFAULT,
@@ -96,26 +95,6 @@ export type ComponentsLinealOrder = [
     | { bundles: Array<BundleId>; components?: Array<ComponentId> },
 ]
 
-export interface BundleSchema {
-  bundleId: BundleId
-  componentIds?: ComponentId[]
-  // Metadata
-  displayName?: string
-  title?: string
-  subtitle?: string
-  description?: string
-  icon?: MdiIconProps
-}
-export type PresetSchema = {
-  presetId: PresetId
-  label: string
-  componentId?: ComponentId
-  bundleId?: BundleId
-  description?: string
-  icon?: MdiIconProps
-  category?: string | ComponentCategory
-  data: NodePresetData
-}
 export interface AttributeSchema extends Dictionary<any> {
   name: string
   dataType?: DataType
@@ -202,11 +181,6 @@ export interface ComponentSchema<P = any> {
      */
     selfClosing?: FEATURE_FLAG
   }
-
-  /**
-   * Preset items are the available items to add to the canvas
-   */
-  presets?: PresetSchema[]
 }
 
 export type NodePresetData = Omit<NodeSchema, '$id' | 'nodes'> & {

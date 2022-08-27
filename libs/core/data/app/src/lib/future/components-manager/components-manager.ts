@@ -15,69 +15,31 @@
  * limitations under the License.
  */
 
+import { _hasOwnProperty } from '@aglyn/shared-util-guards'
+import { bundles } from '../bundle-manager'
 import { AglynEvent, emitter, lifecycleEvent } from '../emit-manager'
-import {
-  BundleId,
-  BundleSchema,
-  ComponentId,
-  ComponentSchema,
-  ComponentType,
-  PresetId,
-  PresetSchema,
-} from './component'
+import { ComponentId, ComponentSchema, ComponentType } from './component'
 
-export const bundles: Record<BundleId, BundleSchema> = {}
-export const components: Record<ComponentId, ComponentType> = {}
-export const componentSchemas: Record<ComponentId, ComponentSchema> = {}
-export const presets: Record<PresetId, PresetSchema> = {}
+export const factories: Record<ComponentId, ComponentType> = {}
+export const schemas: Record<ComponentId, ComponentSchema> = {}
 
-function buildId(componentId: ComponentId, bundleId?: BundleId): string {
-  return bundleId ? `${bundleId}:${componentId}` : componentId
+emitter.on(AglynEvent.COMPONENT_REGISTER, ({ component, schema }) => {
+  registerComponent(component, schema)
+})
+emitter.on(AglynEvent.COMPONENT_UNREGISTER, ({ componentId }) => {
+  unregisterComponent(componentId)
+})
+
+export function getFactory(componentId: ComponentId) {
+  return factories[componentId]
 }
 
-export function getBundle(bundleId: BundleId) {
-  return bundles[bundleId]
+export function getSchema(componentId: ComponentId) {
+  return schemas[componentId]
 }
 
-export function getComponent(componentId: ComponentId, bundleId?: BundleId) {
-  const key = buildId(componentId, bundleId)
-  return components[key]
-}
-
-export function getComponentSchema(
-  componentId: ComponentId,
-  bundleId?: BundleId,
-) {
-  const key = buildId(componentId, bundleId)
-  return componentSchemas[key]
-}
-
-export function getPreset(presetId: PresetId) {
-  return presets[presetId]
-}
-
-export function registerBundle(
-  schema: BundleSchema,
-  components: {
-    component: ComponentType
-    schema: ComponentSchema
-  }[],
-) {
-  const { bundleId } = schema
-  lifecycleEvent(
-    () => {
-      bundles[bundleId] = schema
-      for (const { component, schema } of components) {
-        registerComponent(component, { ...schema, bundleId })
-      }
-    },
-    {
-      startEvent: AglynEvent.COMPONENT_BUNDLE_REGISTERING,
-      startPayload: [{ bundleId }],
-      endEvent: AglynEvent.COMPONENT_BUNDLE_REGISTERED,
-      endPayload: [{ bundleId }],
-    },
-  )
+export function hasComponent(componentId: ComponentId) {
+  return componentId && _hasOwnProperty(componentId, schemas)
 }
 
 export function registerComponent(
@@ -85,115 +47,51 @@ export function registerComponent(
   schema: ComponentSchema,
 ) {
   const { componentId, bundleId } = schema
-  const key = buildId(schema.componentId, schema.bundleId)
 
   lifecycleEvent(
     () => {
       // TODO: throw errorFactory error
-      if (bundleId && !bundles[bundleId]) {
+      if (bundleId && !bundles.hasBundle(bundleId)) {
         throw new Error(`No bundle exists with ID ${bundleId}.`)
       } else if (bundleId) {
-        bundles[bundleId].componentIds.push(key)
+        const ids = (bundles[bundleId].componentIds ??= [])
+        ids.push(componentId)
       }
-      components[key] = component
-      componentSchemas[key] = schema
-      for (const preset of schema.presets || []) {
-        registerPreset(preset)
+      factories[componentId] = component
+      schemas[componentId] = schema
+    },
+    {
+      beforeEvent: AglynEvent.COMPONENT_REGISTERING,
+      beforePayload: [{ componentId, bundleId }],
+      afterEvent: AglynEvent.COMPONENT_REGISTERED,
+      afterPayload: [{ componentId, bundleId }],
+    },
+  )
+}
+
+export function unregisterComponent(componentId: ComponentId) {
+  lifecycleEvent(
+    () => {
+      if (!componentId || !hasComponent(componentId)) {
+        throw new Error(`No component exists with ID ${componentId}.`)
       }
-    },
-    {
-      startEvent: AglynEvent.COMPONENT_REGISTERING,
-      startPayload: [{ componentId, bundleId }],
-      endEvent: AglynEvent.COMPONENT_REGISTERED,
-      endPayload: [{ componentId, bundleId }],
-    },
-  )
-}
+      const { bundleId } = getSchema(componentId)
 
-export function registerPreset(preset: PresetSchema) {
-  const { presetId, bundleId, componentId } = preset
-  lifecycleEvent(
-    () => {
-      presets[presetId] = preset
-    },
-    {
-      startEvent: AglynEvent.COMPONENT_PRESET_REGISTERING,
-      startPayload: [{ bundleId, componentId, presetId }],
-      endEvent: AglynEvent.COMPONENT_PRESET_REGISTERED,
-      endPayload: [{ bundleId, componentId, presetId }],
-    },
-  )
-}
-
-export function unregisterPreset(presetId: PresetId) {
-  lifecycleEvent(
-    () => {
-      delete presets[presetId]
-    },
-    {
-      startEvent: AglynEvent.COMPONENT_PRESET_UNREGISTERING,
-      startPayload: [{ presetId }],
-      endEvent: AglynEvent.COMPONENT_PRESET_UNREGISTERED,
-      endPayload: [{ presetId }],
-    },
-  )
-}
-
-export function unregisterComponentPresets(componentId: ComponentId) {
-  const schema = componentSchemas[componentId]
-  for (const preset of schema?.presets || []) {
-    unregisterPreset(preset?.presetId)
-  }
-}
-
-export function unregisterComponent(
-  componentId: ComponentId,
-  bundleId?: BundleId,
-) {
-  lifecycleEvent(
-    () => {
-      // TODO: throw errorFactory error
-      if (bundleId && !bundles[bundleId]) {
+      if (bundleId && !bundles.hasBundle(bundleId)) {
         throw new Error(`No bundle exists with ID ${bundleId}.`)
       } else if (bundleId) {
         bundles[bundleId].componentIds = bundles[bundleId].componentIds.filter(
           (i) => i !== componentId,
         )
       }
-      const key = buildId(componentId, bundleId)
-      unregisterComponentPresets(key)
-      delete componentSchemas[key]
-      delete components[key]
+      delete schemas[componentId]
+      delete factories[componentId]
     },
     {
-      startEvent: AglynEvent.COMPONENT_UNREGISTERING,
-      startPayload: [{ bundleId, componentId }],
-      endEvent: AglynEvent.COMPONENT_UNREGISTERED,
-      endPayload: [{ bundleId, componentId }],
+      beforeEvent: AglynEvent.COMPONENT_UNREGISTERING,
+      beforePayload: [{ componentId }],
+      afterEvent: AglynEvent.COMPONENT_UNREGISTERED,
+      afterPayload: [{ componentId }],
     },
   )
 }
-
-export function unregisterBundle(bundleId: BundleId) {
-  const bundle = bundles[bundleId]
-  // TODO: throw errorFactory error
-  if (!bundle) throw new Error(`No bundle exists with ID ${bundleId}.`)
-  lifecycleEvent(
-    () => {
-      for (const componentId of bundle.componentIds) {
-        unregisterComponent(componentId, bundleId)
-      }
-      delete bundles[bundleId]
-    },
-    {
-      startEvent: AglynEvent.COMPONENT_BUNDLE_UNREGISTERING,
-      startPayload: [{ bundleId }],
-      endEvent: AglynEvent.COMPONENT_BUNDLE_UNREGISTERED,
-      endPayload: [{ bundleId }],
-    },
-  )
-}
-
-emitter.on(AglynEvent.REGISTER_COMPONENT, ({ component, schema }) => {
-  registerComponent(component, schema)
-})

@@ -56,4 +56,5 @@ export * from './lib/controllers/aglyn-contexts.controller'
 
 import * as Aglyn from './lib/future/aglyn'
 
+globalThis.Aglynn = Aglyn
 console.log('aglyn', Aglyn)

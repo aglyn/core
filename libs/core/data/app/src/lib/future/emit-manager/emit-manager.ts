@@ -15,34 +15,17 @@
  * limitations under the License.
  */
 
+import { Logger, LogLevelString } from '@aglyn/shared-util-logger'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { EventEmitter2 } from 'eventemitter2'
-import { logger } from '../log-manager/index'
-import { emitter } from './index'
+import { namespace } from '../constants'
 
-export function lifecycleEvent(
-  callbackFn: () => void,
-  options: {
-    startEvent: AglynEvent
-    startPayload: any[]
-    endEvent: AglynEvent
-    endPayload: any[]
-    onCatch?: (e: unknown) => void
-  },
-): void {
-  const { startEvent, startPayload, endEvent, endPayload, onCatch } = options
-  logger.debug(Timestamp.now().toJSON(), startEvent, startPayload)
-  emitter.emit(startEvent, Timestamp.now().toJSON(), ...startPayload)
-  try {
-    callbackFn()
-  } catch (e) {
-    logger.error(Timestamp.now().toJSON(), startEvent, startPayload, e)
-    onCatch && onCatch(e)
-  } finally {
-    logger.debug(Timestamp.now().toJSON(), startEvent, startPayload)
-    emitter.emit(endEvent, Timestamp.now().toJSON(), ...endPayload)
-  }
+export class LogManager extends Logger {}
+export function setLogLevel(logLevel: LogLevelString) {
+  logger.setLogLevel(logLevel)
 }
+
+export const logger = new Logger(namespace)
 
 export enum AglynEvent {
   APP_INITIALIZING = 'lifecycle.app.initializing',
@@ -54,23 +37,65 @@ export enum AglynEvent {
   APP_DESTROYING = 'lifecycle.app.destroying',
   APP_DESTROYED = 'lifecycle.app.destroyed',
 
-  COMPONENT_REGISTERING = 'lifecycle.components.component.registering',
-  COMPONENT_REGISTERED = 'lifecycle.components.component.registered',
-  COMPONENT_UNREGISTERING = 'lifecycle.components.component.unregistering',
-  COMPONENT_UNREGISTERED = 'lifecycle.components.component.unregistered',
-  COMPONENT_BUNDLE_REGISTERING = 'lifecycle.components.bundle.registering',
-  COMPONENT_BUNDLE_REGISTERED = 'lifecycle.components.bundle.registered',
-  COMPONENT_BUNDLE_UNREGISTERING = 'lifecycle.components.bundle.unregistering',
-  COMPONENT_BUNDLE_UNREGISTERED = 'lifecycle.components.bundle.unregistered',
-  COMPONENT_PRESET_REGISTERING = 'lifecycle.components.preset.registering',
-  COMPONENT_PRESET_REGISTERED = 'lifecycle.components.preset.registered',
-  COMPONENT_PRESET_UNREGISTERING = 'lifecycle.components.preset.unregistering',
-  COMPONENT_PRESET_UNREGISTERED = 'lifecycle.components.preset.unregistered',
+  COMPONENT_REGISTER = 'action.component.register',
+  COMPONENT_REGISTERING = 'lifecycle.component.registering',
+  COMPONENT_REGISTERED = 'lifecycle.component.registered',
 
-  REGISTER_COMPONENT = 'action.components.component.register',
+  COMPONENT_UNREGISTER = 'action.components.unregister',
+  COMPONENT_UNREGISTERING = 'lifecycle.component.unregistering',
+  COMPONENT_UNREGISTERED = 'lifecycle.component.unregistered',
+
+  PRESET_REGISTER = 'action.preset.register',
+  PRESET_REGISTERING = 'lifecycle.preset.registering',
+  PRESET_REGISTERED = 'lifecycle.preset.registered',
+
+  PRESET_UNREGISTER = 'action.preset.unregister',
+  PRESET_UNREGISTERING = 'lifecycle.preset.unregistering',
+  PRESET_UNREGISTERED = 'lifecycle.preset.unregistered',
+
+  BUNDLE_REGISTER = 'action.bundle.register',
+  BUNDLE_UNREGISTERING = 'lifecycle.bundle.unregistering',
+  BUNDLE_UNREGISTERED = 'lifecycle.bundle.unregistered',
+
+  BUNDLE_UNREGISTER = 'action.bundles.unregister',
+  BUNDLE_REGISTERING = 'lifecycle.bundle.registering',
+  BUNDLE_REGISTERED = 'lifecycle.bundle.registered',
+
+  BUNDLE_NONE = 'error.bundle.none',
+  ERROR_GENERAL = 'error.general',
 }
 
 export class EmitManager extends EventEmitter2 {}
 
-const singleton = new EmitManager()
-export default singleton
+export const emitter = new EmitManager()
+
+emitter.prependListener(['error', '**'], (...payload) => {
+  logger.error(Timestamp.now().toJSON(), ...payload)
+})
+
+export function lifecycleEvent(
+  callbackFn: () => void,
+  options: {
+    beforeEvent: AglynEvent
+    beforePayload: any[]
+    afterEvent: AglynEvent
+    afterPayload: any[]
+    onCatch?: (e: unknown) => void
+  },
+): void {
+  const { beforeEvent, beforePayload, afterEvent, afterPayload, onCatch } =
+    options
+  try {
+    logger.debug(Timestamp.now().toJSON(), beforeEvent, beforePayload)
+    emitter.emit(beforeEvent, Timestamp.now().toJSON(), ...beforePayload)
+    callbackFn()
+    logger.debug(Timestamp.now().toJSON(), afterEvent, afterPayload)
+    emitter.emit(afterEvent, Timestamp.now().toJSON(), ...afterPayload)
+  } catch (e) {
+    emitter.emit(AglynEvent.ERROR_GENERAL, {
+      message:
+        e?.message || `An error has occurred before event ${beforeEvent}`,
+    })
+    onCatch && onCatch(e)
+  }
+}
