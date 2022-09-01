@@ -17,27 +17,26 @@
 
 import { firebaseAdmin } from '@aglyn/core-data-admin'
 
-export async function getAllUsers(nextPageToken?: string) {
-  const data = { users: [] as any, nextPageToken: '', error: null }
+export async function getAllScreens(nextPageToken?: string) {
+  const data = { screens: [] as any, nextPageToken: '', error: null }
+  const firestore = firebaseAdmin.app().firestore()
 
   // List batch of users, 1000 at a time.
-  await firebaseAdmin
-    .app()
-    .auth()
-    .listUsers(5, nextPageToken)
-    .then((listUsersResult) => {
-      listUsersResult.users.forEach((userRecord) => {
-        data.users.push(userRecord.toJSON())
+  await firestore
+    .collection('screens')
+    .where('published', '==', true)
+    .limit(5)
+    .get()
+    .then((screens) => {
+      screens.forEach((screen) => {
+        data.screens.push(screen.data())
       })
-      if (listUsersResult.pageToken) {
-        data.nextPageToken = listUsersResult.pageToken
-      }
     })
     .catch((error) => {
-      console.log('Error listing users:', error)
+      console.error(error)
       data.error = error
     })
 
   return data
 }
-export default getAllUsers
+export default getAllScreens

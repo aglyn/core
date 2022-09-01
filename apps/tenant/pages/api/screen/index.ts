@@ -15,72 +15,37 @@
  * limitations under the License.
  */
 
+import { HttpRequestMethod } from '@aglyn/shared-data-enums'
 import {
-  createHttpRefCode,
-  HttpRefCodeSimple,
-  HttpRefCodeSubject,
-  HttpRefCodeTopic,
-  HttpRequestMethod,
-  HttpResponseStatus,
-  HttpStatusCode,
-} from '@aglyn/shared-data-enums'
-import {
-  csrfApiMiddleware,
   httpRequestMethodMiddleware,
-  nextHandleJsonResponse,
+  nextHandleJsonError,
+  nextHandleJsonSuccess,
 } from '@aglyn/shared-util-rest-api'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { use } from 'next-api-middleware'
-import getAllUsers from '../../../utils/get-all-users'
+import getAllScreens from '../../../utils/get-all-screens'
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {
   const {
     query: { nextPageToken },
   } = request
+  const token = Array.isArray(nextPageToken) ? nextPageToken[0] : nextPageToken
   let data = null
   let error = null
 
   // Start listing users from the beginning, 1000 at a time.
   try {
-    data = await getAllUsers(
-      Array.isArray(nextPageToken) ? nextPageToken[0] : nextPageToken,
-    )
+    data = await getAllScreens(token)
+    if (data?.error) error = data?.error
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err)
     error = err
   }
 
-  if (error || data?.error) {
-    const err = error || data?.error
-    return nextHandleJsonResponse(
-      response,
-      err?.['code'] ||
-        err?.['statusCode'] ||
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-      {
-        status: HttpResponseStatus.ERROR,
-        statusMessage:
-          err?.['message'] ||
-          err?.['statusMessage'] ||
-          HttpRefCodeSimple.INVALID_REQUEST,
-        error: err,
-        errorCode: createHttpRefCode(
-          HttpRefCodeSimple.INVALID_REQUEST,
-          HttpRefCodeSubject.INVALID_REQUEST,
-          HttpRefCodeTopic.FAIL_CSRF_TOKEN_CHECK,
-        ),
-      },
-    )
-  }
+  if (error) return nextHandleJsonError(response, error)
 
-  return nextHandleJsonResponse(response, HttpStatusCode.OK, {
-    status: HttpResponseStatus.SUCCESS,
-    data,
-  })
+  return nextHandleJsonSuccess(response, data)
 }
 
-export default use(
-  csrfApiMiddleware,
-  httpRequestMethodMiddleware(HttpRequestMethod.GET),
-)(handler)
+export default use(httpRequestMethodMiddleware(HttpRequestMethod.GET))(handler)

@@ -22,6 +22,28 @@ import {
 import type { GetStaticPathsContext, GetStaticPathsResult } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
 
+function mapTenants(sites: TenantSite[]) {
+  function mapPaths(
+    paths: TenantSite['paths'],
+    host: TenantSite['subdomain' | 'cname'],
+  ) {
+    return paths.map((pg: string) => ({
+      params: {
+        slug: pg.split('/').filter((i) => Boolean(i)),
+        host: host,
+      },
+    }))
+  }
+  return sites.reduce(
+    (prev, { subdomain, cname, paths }) => [
+      ...prev,
+      ...mapPaths(paths, subdomain),
+      ...(cname ? mapPaths(paths, cname) : []),
+    ],
+    [],
+  )
+}
+
 export interface StaticPaths extends ParsedUrlQuery, TenantSite {}
 
 /**
@@ -31,28 +53,6 @@ export interface StaticPaths extends ParsedUrlQuery, TenantSite {}
 export async function getTenantPageStaticPaths(
   context: GetStaticPathsContext,
 ): Promise<GetStaticPathsResult<StaticPaths>> {
-  function mapTenants(sites: TenantSite[]) {
-    function mapPaths(
-      paths: TenantSite['paths'],
-      host: TenantSite['subdomain' | 'cname'],
-    ) {
-      return paths.map((pg: string) => ({
-        params: {
-          slug: pg.split('/').filter((i) => Boolean(i)),
-          host: host,
-        },
-      }))
-    }
-    return sites.reduce(
-      (prev, { subdomain, cname, paths }) => [
-        ...prev,
-        ...mapPaths(paths, subdomain),
-        ...(cname ? mapPaths(paths, cname) : []),
-      ],
-      [],
-    )
-  }
-
   // build paths for each of the sites in the previous two lists
   const paths = mapTenants(mockDB)
 

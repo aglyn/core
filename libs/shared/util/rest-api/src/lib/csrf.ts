@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 import {
   createHttpRefCode,
   HttpRefCodeSimple,
@@ -24,17 +23,14 @@ import {
   HttpResponseStatus,
   HttpStatusCode,
 } from '@aglyn/shared-data-enums'
-import {HttpResponseError} from '@aglyn/shared-util-errors'
-import {
-  getApiRequestCookie,
-  nextHandleJsonResponse,
-  setApiResponseCookie,
-} from '@aglyn/shared-util-rest-api'
-import type {CookieSerializeOptions} from 'cookie'
-import {sign, unsign} from 'cookie-signature'
+import { HttpResponseError } from '@aglyn/shared-util-errors'
+import type { CookieSerializeOptions } from 'cookie'
+import { sign, unsign } from 'cookie-signature'
 import Tokens from 'csrf'
-import type {NextApiRequest, NextApiResponse} from 'next'
-
+import type { NextApiRequest, NextApiResponse } from 'next'
+import getApiRequestCookie from './get-api-request-cookie'
+import nextHandleJsonResponse from './next-handle-json-response'
+import setApiResponseCookie from './set-api-response-cookie'
 
 export interface CsrfOptions {
   secret: string
@@ -56,9 +52,10 @@ export interface CsrfMiddlewareOptions extends CsrfOptions {
 export const CSRF_SECRET = process.env.CSRF_SECRET || ''
 export const csrfTokens = new Tokens()
 
-
-const getCsrfTokenHeader = (req: NextApiRequest, tokenKey: string): string | string[] =>
-  req.headers[tokenKey.toLowerCase()] || ''
+const getCsrfTokenHeader = (
+  req: NextApiRequest,
+  tokenKey: string,
+): string | string[] => req.headers[tokenKey.toLowerCase()] || ''
 
 export function CsrfApiMiddleware(options: CsrfMiddlewareOptions) {
   const {
@@ -70,7 +67,11 @@ export function CsrfApiMiddleware(options: CsrfMiddlewareOptions) {
     cookieOptions,
   } = options
 
-  return async function(req: NextApiRequest, res: NextApiResponse<any>, next: () => any) {
+  return async function (
+    req: NextApiRequest,
+    res: NextApiResponse<any>,
+    next: () => any,
+  ) {
     try {
       // 1. extract secret and token from their cookies
       const tokenFromCookie = getApiRequestCookie(tokenKey, req)
@@ -99,10 +100,7 @@ export function CsrfApiMiddleware(options: CsrfMiddlewareOptions) {
       }
 
       const tokenFromCookieUnsigned = unsign(tokenFromCookie, secret)
-      const tokenFromHeadersUnsigned = unsign(
-        <string>tokenFromHeaders,
-        secret,
-      )
+      const tokenFromHeadersUnsigned = unsign(<string>tokenFromHeaders, secret)
 
       // 3. verify signature
       if (!tokenFromCookieUnsigned || !tokenFromHeadersUnsigned) {
@@ -126,15 +124,14 @@ export function CsrfApiMiddleware(options: CsrfMiddlewareOptions) {
       setApiResponseCookie(res, tokenKey, newReqCsrfTokenSigned, cookieOptions)
 
       return await next()
-    }
-    catch (error: any) {
-
+    } catch (error: any) {
       return nextHandleJsonResponse(
         res,
         error?.['code'] || HttpStatusCode.INTERNAL_SERVER_ERROR,
         {
           status: HttpResponseStatus.ERROR,
-          statusMessage: error?.['message'] || HttpRefCodeSimple.INVALID_REQUEST,
+          statusMessage:
+            error?.['message'] || HttpRefCodeSimple.INVALID_REQUEST,
           error: error,
           errorCode: createHttpRefCode(
             HttpRefCodeSimple.INVALID_REQUEST,
@@ -147,7 +144,6 @@ export function CsrfApiMiddleware(options: CsrfMiddlewareOptions) {
   }
 }
 
-
 const defaultOptions = {
   tokenKey: 'XSRF-TOKEN',
   csrfErrorMessage: 'Invalid CSRF token',
@@ -159,13 +155,13 @@ const defaultOptions = {
   },
 }
 export function csrfApiMiddlewareFactory(options: CsrfOptions) {
-  const opts = {...defaultOptions, ...options}
+  const opts = { ...defaultOptions, ...options }
   // generate CSRF secret
   const csrfSecret = csrfTokens.secretSync()
   // generate CSRF token
   const csrfToken = sign(csrfTokens.create(csrfSecret), opts.secret)
   // generate options for the csrf middleware
-  const csrfOptions = {...opts, csrfSecret}
+  const csrfOptions = { ...opts, csrfSecret }
   // generate middleware to verify CSRF token with the CSRF as parameter
   const csrfApiMiddleware = CsrfApiMiddleware(csrfOptions)
 
@@ -175,9 +171,6 @@ export function csrfApiMiddlewareFactory(options: CsrfOptions) {
   }
 }
 
-export const {
-  csrfToken,
-  csrfApiMiddleware,
-} = csrfApiMiddlewareFactory({
+export const { csrfToken, csrfApiMiddleware } = csrfApiMiddlewareFactory({
   secret: CSRF_SECRET,
 })
