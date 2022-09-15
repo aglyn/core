@@ -16,24 +16,19 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
 import '@aglyn/aglyn-plugin-mui'
 import type {
   AglynHost,
   AglynScreen,
   AglynScreenVersion,
 } from '@aglyn/core-data-foundation'
-import { styled } from '@aglyn/shared-ui-theme'
-import cloneDeep from 'lodash-es/cloneDeep'
-import type { GetStaticPaths, GetStaticProps, PreviewData } from 'next/types'
+import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
-import { Fragment, useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import getHost from '../../../utils/get-host'
 import getScreen from '../../../utils/get-screen'
 import getScreenVersion from '../../../utils/get-screen-version'
-
-const DefaultComponent = styled('div')({})
-
-type StaticPreviewData = PreviewData
 
 interface StaticPathsCtx extends ParsedUrlQuery {}
 
@@ -45,6 +40,7 @@ interface Props {
       version?: AglynScreenVersion
     }
   }
+  nodes: Record<Aglyn.NodeId, Aglyn.NodeSchema>
 }
 
 export const getStaticPaths: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
@@ -101,19 +97,37 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       screenRes.screen.versionId,
     )
     console.debug('versionRes', versionRes)
+    const nodes = versionRes.version.nodes
+    const isNested = Array.isArray(nodes)
+    const denormalized = !isNested
+      ? (nodes as unknown as Record<Aglyn.NodeId, Aglyn.NodeSchema>)
+      : Aglyn.screen.denormalizeNodes(
+          [
+            {
+              $id: Aglyn.NODE_ROOT_ID,
+              componentId: 'div',
+              nodes: [...nodes],
+            },
+          ],
+          null,
+        )
+    Aglyn.screen.setNodes(denormalized)
+
+    const props = {
+      data: JSON.parse(
+        JSON.stringify({
+          host: hostRes.host,
+          screen: {
+            data: screenRes.screen,
+            version: versionRes.version,
+          },
+        }),
+      ),
+      nodes: denormalized,
+    }
 
     return {
-      props: {
-        data: JSON.parse(
-          JSON.stringify({
-            host: hostRes.host,
-            screen: {
-              data: screenRes.screen,
-              version: versionRes.version,
-            },
-          }),
-        ),
-      },
+      props: props,
       revalidate: false, // never=false, always=1, since=SECONDS
     }
   } catch (e) {
@@ -121,134 +135,20 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
   }
 }
 
-function Leaf(props: {
-  component: any
-  children?: any
-  nodeSchema: Aglyn.NodeSchema
-  cmpSchema?: Aglyn.ComponentSchema
-}) {
-  const {
-    component: Component = 'div',
-    children,
-    nodeSchema,
-    cmpSchema,
-  } = props
-
-  const resolved = useMemo(() => {
-    const data = cmpSchema?.resolveProps && cmpSchema?.resolveProps(nodeSchema)
-    return data || nodeSchema.props
-  }, [cmpSchema, nodeSchema])
-  const merged = useMemo(() => {
-    const { sx } = { ...nodeSchema }
-    return { ...resolved, sx: sx }
-  }, [resolved])
-
-  console.log('node shcema', nodeSchema.componentId, props)
-
-  return (
-    <Component
-      key={nodeSchema.$id}
-      data-aglyn={`leaf:${nodeSchema.$id}`}
-      {...merged}
-    >
-      {children || nodeSchema.props?.children}
-    </Component>
-  )
-}
-
-function Stem(props: { nodeId: Aglyn.NodeId }) {
-  const { nodeId } = props
-
-  if (!Aglyn.screen.hasNode(nodeId)) {
-    console.error(`Error rendering ${nodeId}`)
-    return <div></div>
-  }
-
-  const nodeSchema = Aglyn.screen.getNode(nodeId)
-  let cmpFactory: Aglyn.ComponentType = cloneDeep(DefaultComponent)
-  let cmpSchema: Aglyn.ComponentSchema = null
-
-  if (Aglyn.components.hasComponent(nodeSchema.componentId)) {
-    cmpFactory = Aglyn.components.getFactory(nodeSchema.componentId)
-    cmpSchema = Aglyn.components.getSchema(nodeSchema.componentId)
-  }
-
-  return (
-    <Leaf
-      key={nodeSchema.$id}
-      component={cmpFactory}
-      nodeSchema={nodeSchema}
-      cmpSchema={cmpSchema}
-    >
-      {!nodeSchema.nodes?.length ? null : (
-        <Branch
-          key={nodeSchema.$id}
-          parentId={nodeSchema.$id}
-          nodeIds={nodeSchema.nodes}
-        />
-      )}
-    </Leaf>
-  )
-}
-
-function Branch(props: { nodeIds: Aglyn.NodeId[]; parentId: Aglyn.NodeId }) {
-  const { nodeIds, parentId } = props
-  return (
-    <Fragment key={parentId}>
-      {nodeIds.map((nodeId) => (
-        <Stem key={nodeId} nodeId={nodeId} />
-      ))}
-    </Fragment>
-  )
-}
-
-function Trunk(props: { nodeId: Aglyn.NodeId }) {
-  const { nodeId } = props
-  return <Stem key={nodeId} nodeId={nodeId} />
-}
-
-function TreeRoot(props: { nodeId: Aglyn.NodeId }) {
-  const { nodeId } = props
-  return <Trunk nodeId={nodeId} />
-}
-
 export default function CatchAllPage(props: Props) {
   // const props = { data: exampleData }
-  const nodes = props.data.screen.version.nodes
-  const isNested = Array.isArray(nodes)
-  const nested = isNested
-    ? (nodes as unknown as Aglyn.NodeSchemaNested)
-    : Aglyn.screen.nestNodes(nodes, nodes[Aglyn.NODE_ROOT_ID])
-  const denormalized = !isNested
-    ? (nodes as unknown as Record<Aglyn.NodeId, Aglyn.NodeSchema>)
-    : Aglyn.screen.denormalizeNodes(
-        [
-          {
-            $id: Aglyn.NODE_ROOT_ID,
-            componentId: 'div',
-            nodes: [...nodes],
-          },
-        ],
-        null,
-      )
+  const nodes = props.nodes
+  //
 
-  console.log('!!!!!CatchAllPage')
+  console.log('!!!!!CatchAllPage', props)
 
-  useEffect(() => {
-    // console.log('Aglynn', globalThis.Aglynn, Aglyn)
-    // if (typeof Aglyn !== 'undefined') {
-    //   Aglyn.Aglynn?.canvas.setElements({
-    //     type: Array.isArray(props.screen.version) ? 'normal' : 'denormal',
-    //     elements: props.screen.version,
-    //   })
-    // }
-    // Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: denormalized })
-    Aglyn.screen.setNodes(denormalized)
-  }, [denormalized])
+  const rendered = useMemo(() => {
+    return Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: nodes })
+  }, [nodes])
 
   return (
     <>
-      <TreeRoot nodeId={Aglyn.NODE_ROOT_ID} />
+      <AglynNodeRenderer nodeId={Aglyn.NODE_ROOT_ID} />
     </>
   )
 }

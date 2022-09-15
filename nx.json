@@ -71,7 +71,8 @@
         "linter": "eslint"
       },
       "application": {
-        "swc": true
+        "swc": true,
+        "babel": true
       }
     },
     "@nrwl/next": {
