@@ -90,7 +90,12 @@ export const middleware: NextMiddleware = (req, event) => {
       tenant = reqHost.replace(`.localhost:4500`, '') || 'tenant'
       break
     default:
-      console.log('REDIR!!', req.nextUrl.pathname, 'https://console.aglyn.io')
+      console.log(
+        'REDIR!!',
+        reqHost,
+        req.nextUrl.pathname,
+        'https://console.aglyn.io',
+      )
       return NextResponse.redirect('https://console.aglyn.io')
   }
 
