@@ -356,10 +356,14 @@ function withAglyn(nextConfig = {}) {
       //   : userConfig.webpack5,
 
       generateBuildId: async () => {
-        console.log('merged?.generateBuildId', merged?.generateBuildId())
-        return await ((typeof merged?.generateBuildId === 'function' &&
-          merged.generateBuildId()) ||
-          getCommitRef())
+        let buildId
+        if (typeof merged?.generateBuildId === 'function') {
+          const response = await merged?.generateBuildId?.()
+          if (response) buildId = response
+        }
+        if (!buildId) buildId = await getCommitRef()
+        console.log('generateBuildId', buildId)
+        return buildId
       },
 
       headers: async () => {
