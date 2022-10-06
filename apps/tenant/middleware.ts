@@ -25,8 +25,14 @@ import { NextResponse } from 'next/server'
  *
  * The reason we do this is to prevent the TOFIXmiddleware from matching
  * absolute paths like "demo.vercel.pub/_sites/steven" and have the content
- * from
- * `steven` be served.
+ * from `steven` be served.
+
+ * Match all paths except for:
+ * 1 /api routes
+ * 2 /_next (Next.js internals)
+ * 3 /fonts (inside /public)
+ * 4 /examples (inside /public)
+ * 5 all root files inside /public (e.g. /favicon.ico)
  *
  * Here's a breakdown of each matcher item:
  * @example
@@ -43,11 +49,12 @@ import { NextResponse } from 'next/server'
 export const config = {
   // prettier-ignore
   matcher: [
-    '/',
-    '/([^/.]*)',
+    // '/',
+    // '/([^/.]*)',
     // '/(\\?\\!favicon.ico|robots.txt)',
     // '/(\\?\\!_next|_static|api)/:path*',
-    '/_sites/:path*',
+    // '/_sites/:path*',
+    '/((?!api|_next|fonts|examples|[\\\\w-]+\\\\.\\\\w+).*)',
   ],
 }
 
@@ -70,24 +77,24 @@ export const middleware: NextMiddleware = (req, event) => {
   // If localhost, assign the host value manually
   // If prod, get the custom domain/subdomain value by removing the root URL
   // (in the case of "test.vercel.app", "vercel.app" is the root URL)
-  let tenant: string
+  let tenantHost: string
 
   switch (true) {
     case isProdVercel && reqHost === AGLYN_TENANT_HOST_CNAME:
     case isProdVercel && reqHost.endsWith(`.${AGLYN_TENANT_HOST_CNAME}`):
-      tenant = AGLYN_TENANT_HOST_CNAME
+      tenantHost = AGLYN_TENANT_HOST_CNAME
       break
     case isProdVercel && reqHost.endsWith(`.aglyn.app`):
-      tenant = reqHost.replace(`.aglyn.app`, '')
+      tenantHost = reqHost.replace(`.aglyn.app`, '')
       break
     case /*PREV_VERCEL_ENV && */ reqHost.endsWith(`.vercel.app`):
     case reqHost === 'console.aglyn.io':
     case reqHost === 'localhost:4500':
-      tenant = 'tenant'
+      tenantHost = 'tenant'
       break
     case reqHost.endsWith(`.localhost:4500`):
       // Development and testing (localhost:4500)
-      tenant = reqHost.replace(`.localhost:4500`, '') || 'tenant'
+      tenantHost = reqHost.replace(`.localhost:4500`, '') || 'tenant'
       break
     default:
       console.log(
@@ -110,7 +117,7 @@ export const middleware: NextMiddleware = (req, event) => {
 
   // rewrite to the current hostname under the pages/_sites folder
   // the main logic component will happen in pages/_sites/[host]/[...path].tsx
-  const rewrite = `/_sites/${tenant}${req.nextUrl.pathname}`
+  const rewrite = `/_sites/${tenantHost}${req.nextUrl.pathname}`
   console.log('REWR!!', req.nextUrl.pathname, '', rewrite)
   return NextResponse.rewrite(new URL(rewrite, req.url))
 }

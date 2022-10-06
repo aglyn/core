@@ -54,37 +54,52 @@ export const getStaticPaths: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
 export const getStaticProps: GetStaticProps<Props> = async (context) => {
   console.debug('!!!!!getStaticProps', context)
 
-  const { params } = context
-
   try {
-    const host = params.host as string
-    const hostRes = await getHost({
-      host: host,
-    })
-    console.debug('hostRes', hostRes)
+    const { params } = context
+    const path = ((params.slug || ['/']) as string[]).join('/')
+    const host = (params.host || 'tenant') as string
+
+    /*==========================================
+     *
+     * MARK - GET HOST
+     *
+     *=========================================*/
+
+    const hostRes = await getHost({ host })
+    console.debug('hostRes', hostRes, params)
 
     if (hostRes.error || !hostRes.host) {
       return {
         notFound: true,
-        revalidate: false, // never=false, always=1, since=SECONDS
+        revalidate: 360, // never=false, always=1, since=SECONDS
       }
     }
 
+    /*==========================================
+     *
+     * MARK - FIND SCREEN ID FROM SLUG
+     *
+     *=========================================*/
+
     const hostId = hostRes.host.$id
-    const screenEntry = Object.entries(hostRes.host.screens || {}).find(
-      ([screenId, slug]) => {
-        const currentPath = (params.slug as string[]).join('/')
-        return slug === currentPath || slug === `/${currentPath || ''}`
-      },
-    )
+    const pathsByScreenId = hostRes.host.screens || {}
+    const screenEntry = Object.entries(pathsByScreenId).find(([, slug]) => {
+      return slug === path
+    })
     console.debug('screenEntry', screenEntry)
 
     if (!Array.isArray(screenEntry)) {
       return {
         notFound: true,
-        revalidate: false, // never=false, always=1, since=SECONDS
+        revalidate: 360, // never=false, always=1, since=SECONDS
       }
     }
+
+    /*==========================================
+     *
+     * MARK - GET SCREEN
+     *
+     *=========================================*/
 
     const screenId = screenEntry[0]
     const screenRes = await getScreen({ hostId, screenId })
@@ -93,9 +108,15 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     if (screenRes.error || !screenRes.screen) {
       return {
         notFound: true,
-        revalidate: false, // never=false, always=1, since=SECONDS
+        revalidate: 360, // never=false, always=1, since=SECONDS
       }
     }
+
+    /*==========================================
+     *
+     * MARK - GET SCREEN VERSION
+     *
+     *=========================================*/
 
     const versionRes = await getScreenVersion({
       hostId,
@@ -103,6 +124,20 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       versionId: screenRes.screen.versionId,
     })
     console.debug('versionRes', versionRes)
+
+    if (versionRes.error || !versionRes.version) {
+      return {
+        notFound: true,
+        revalidate: 360, // never=false, always=1, since=SECONDS
+      }
+    }
+
+    /*==========================================
+     *
+     * MARK - FORMAT NODES
+     *
+     *=========================================*/
+
     const nodes = versionRes.version.nodes
     const isNested = Array.isArray(nodes)
     const denormalized = !isNested
@@ -141,6 +176,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
     return {
       // props: {},
       notFound: true,
+      revalidate: 360,
     }
   }
 }
