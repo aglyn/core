@@ -114,7 +114,7 @@ export function removeNodeFromParent(
 export function addNodeToParent(
   node: NodeSchema<any>,
   parent: NodeSchema<any>,
-  index: number,
+  index = NaN,
 ) {
   if (!node || !parent || parent.nodes.some((id) => id !== node.$id)) return
   node.parentId = parent.$id
@@ -151,7 +151,7 @@ export function reparentNode(
   node: NodeSchema<any>,
   oldParent: NodeSchema<any>,
   newParent: NodeSchema<any>,
-  index: number,
+  index = NaN,
 ) {
   removeNodeFromParent(node, oldParent)
   addNodeToParent(node, newParent, index)
@@ -208,7 +208,7 @@ export function denormalizeNodes(
   parentId: NodeId,
   accumulator: Record<NodeId, NodeSchema<any>> = {},
 ): Record<NodeId, NodeSchema<any>> {
-  for (const nestedNode of nodes) {
+  for (const nestedNode of nodes || []) {
     // TODO: Remove after migration to nodes property
     if (nestedNode['elements']) {
       nestedNode.nodes = nestedNode['elements']
@@ -222,8 +222,8 @@ export function denormalizeNodes(
     const node = cloneDeep(nestedNode) as unknown as NodeSchema<any>
 
     node.parentId = parentId
-    node.nodes = (node as unknown as NodeSchemaNested<any>).nodes.map(
-      (child) => child.$id,
+    node.nodes = ((node as unknown as NodeSchemaNested<any>)?.nodes || []).map(
+      (child) => child?.$id,
     )
     denormalizeNodes(nestedNode.nodes, node.$id, accumulator)
     accumulator[node.$id] = node

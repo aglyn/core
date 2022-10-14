@@ -83,6 +83,22 @@ export function useLeafDrag<T extends BesignerDraggableItem>(
         if (!monitor.didDrop()) return
         if (!dropItem) return
         if (type === DndDragType.TEMPLATE) {
+          const parent =
+            Aglyn.screen.getNode(dropItem?.$id) ||
+            Aglyn.screen.getNode(Aglyn.NODE_ROOT_ID)
+          const templateData = {
+            ...(dragItem?.data as any),
+            $id: Aglyn.createNodeId(),
+            parentId: parent?.$id,
+          }
+          Aglyn.screen.setNodes(
+            Aglyn.screen.denormalizeNodes([templateData as any], parent?.$id),
+          )
+          Aglyn.screen.addNodeToParent(
+            Aglyn.screen.getNode(templateData.$id),
+            parent,
+            NaN,
+          )
           const newElement = {
             index: NaN,
             parentId: dropItem?.$id || CANVAS_ROOT_ELEMENT_ID,
@@ -91,6 +107,13 @@ export function useLeafDrag<T extends BesignerDraggableItem>(
           addCanvasElement(app, newElement)
           setSelected({ $id: newElement.element.$id })
         } else {
+          const node = Aglyn.screen.getNode(dragItem?.$id)
+          Aglyn.screen.reparentNode(
+            node,
+            Aglyn.screen.getNode(node?.parentId),
+            Aglyn.screen.getNode(dropItem?.$id),
+            NaN,
+          )
           moveCanvasElement(app, {
             $id: dragItem.$id,
             parentId: dropItem?.$id,
