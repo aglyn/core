@@ -137,7 +137,9 @@ function DashboardLayout(props: DashboardLayoutProps) {
 }
 DashboardLayout.displayName = 'DashboardLayout'
 DashboardLayout.aglyn = true
-DashboardLayout.defaultProps = {}
+DashboardLayout.defaultProps = {
+  disableDefaultBreadcrumb: false,
+}
 
 export { DashboardLayout }
 export default DashboardLayout

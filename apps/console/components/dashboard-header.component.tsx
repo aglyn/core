@@ -158,7 +158,6 @@ DashboardHeaderComponent.aglyn = true
 DashboardHeaderComponent.defaultProps = {
   breadcrumbItems: [],
   disableBreadcrumbs: false,
-  disableDefaultBreadcrumb: false,
 }
 
 export { DashboardHeaderComponent }

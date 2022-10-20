@@ -123,7 +123,7 @@ function Screens(props) {
   }, [])
   const [pageSize, setPageSize] = useState<number>(5)
   const firestore = useFirestore()
-  const screensCollection = collection(firestore, 'screens')
+  const screensCollection = collection(firestore, 'hosts', hostId, 'screens')
   const screensQuery = query(screensCollection, limit(pageSize))
   const { status, data } = useFirestoreCollectionData(screensQuery, {
     idField: '$id',

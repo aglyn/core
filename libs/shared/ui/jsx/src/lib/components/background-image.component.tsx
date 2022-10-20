@@ -32,16 +32,25 @@ export type BackgroundImageComponentProps = MuiBoxProps<any, OverrideProps>
 const BackgroundImageComponent = styled(Box, {
   name: 'BackgroundImage',
   shouldForwardProp(propName) {
-    return !_isEqualitySameType(propName, 'url', 'parallax', 'bgPosition', 'bgSize')
+    return !_isEqualitySameType(
+      propName,
+      'url',
+      'parallax',
+      'bgPosition',
+      'bgSize',
+      'bgRepeat',
+    )
   },
-})<BackgroundImageComponentProps>(({ url, parallax, bgRepeat, bgPosition, bgSize }) => ({
-  backgroundColor: 'inherit',
-  backgroundRepeat: bgRepeat,
-  backgroundPosition: bgPosition,
-  backgroundSize: bgSize,
-  backgroundImage: `url(${url})`,
-  backgroundAttachment: parallax ? 'fixed' : undefined,
-}))
+})<BackgroundImageComponentProps>(
+  ({ url, parallax, bgRepeat, bgPosition, bgSize }) => ({
+    backgroundColor: 'inherit',
+    backgroundRepeat: bgRepeat,
+    backgroundPosition: bgPosition,
+    backgroundSize: bgSize,
+    backgroundImage: `url(${url})`,
+    backgroundAttachment: parallax ? 'fixed' : undefined,
+  }),
+)
 
 BackgroundImageComponent.displayName = 'BackgroundImageComponent'
 BackgroundImageComponent.aglyn = true
