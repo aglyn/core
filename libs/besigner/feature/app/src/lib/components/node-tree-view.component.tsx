@@ -389,43 +389,46 @@ const TreeViewContext = createContext<{
 const TreeViewContent = observer(() => {
   const selected = Besigner.focus.state.selected
   const lastSelected = Besigner.focus.state.lastSelected
-  const expanded = Besigner.focus.state.expanded
+  const allExpanded = Besigner.focus.state.allExpanded
 
-  const allExpanded = useMemo(() => {
-    return [...expanded, ...selected]?.reduce(
-      (accumulator, current) => [
-        ...accumulator,
-        ...(current?.breadcrumbPath || []),
-      ],
+  const expanded = useMemo(() => {
+    return allExpanded.reduce(
+      (acc, item) => [...acc, ...(item?.breadcrumbPath || [])],
       [],
     )
-  }, [selected, expanded])
+  }, [allExpanded])
 
-  const handleTreeItemSelect = useCallback((e, $id) => {
+  console.log('selected tree', selected)
+  console.log('expanded tree', expanded)
+  console.log('expanded allExpanded', allExpanded)
+
+  const handleTreeItemToggle = useCallback((e, $id: Aglyn.NodeId) => {
     e.stopPropagation()
     e.preventDefault()
-    Besigner.focus.handleNodeSelection(Aglyn.screen.getNode($id))
+    Besigner.focus.toggleNodeExpansion(Aglyn.screen.getNode($id))
   }, [])
 
-  const handleTreeItemHover = useCallback((e, $id) => {
+  const handleTreeItemSelect = useCallback((e, $id: Aglyn.NodeId) => {
+    e.stopPropagation()
+    e.preventDefault()
+    const node = Aglyn.screen.getNode($id)
+    Besigner.focus.toggleNodeExpansion(node)
+    Besigner.focus.handleNodeSelection(node)
+  }, [])
+
+  const handleTreeItemHover = useCallback((e, $id: Aglyn.NodeId) => {
     Besigner.focus.setHoveredNode(Aglyn.screen.getNode($id))
   }, [])
 
-  const handleTreeItemFocus = useCallback((e, $id) => {
+  const handleTreeItemFocus = useCallback((e, $id: Aglyn.NodeId) => {
     e.stopPropagation()
     Besigner.focus.setHoveredNode(Aglyn.screen.getNode($id))
-  }, [])
-
-  const handleTreeItemToggle = useCallback((e, id: Aglyn.NodeId) => {
-    e.stopPropagation()
-    e.preventDefault()
-    Besigner.focus.toggleNodeExpansion(Aglyn.screen.getNode(id))
   }, [])
 
   return (
     <TreeViewContext.Provider
       value={{
-        expanded: allExpanded,
+        expanded: expanded,
         selected: lastSelected?.$id,
         closeIcon: (
           <MdiIcon

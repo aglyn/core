@@ -37,6 +37,7 @@ interface FocusState {
    * The current expanded node in tree views
    */
   expanded: ExpandedNodes
+  allExpanded: ExpandedNodes & SelectedNodes
   /**
    * The computed last selected node
    */
@@ -52,13 +53,22 @@ export const state = observable<FocusState>({
   selected: [],
   expanded: [],
 
+  get allExpanded(): Aglyn.NodeSchema<any>[] {
+    const res = []
+    this.expanded.forEach((i) => {
+      res.push(i)
+    })
+    this.selected.forEach((i) => {
+      res.push(i)
+    })
+    return res
+  },
   get lastSelected(): Aglyn.NodeSchema<any> | undefined {
     return this.selected[this.selected.length - 1]
   },
 
   isNodeSelected: computedFn((node: Aglyn.NodeSchema<any>): boolean => {
     if (!node) return false
-    console.log('this undefined isNodeSelected', state)
     return state.selected.some((i) => i?.$id === node?.$id)
   }),
   isNodeHovered: computedFn((node: Aglyn.NodeSchema<any>): boolean => {
@@ -103,14 +113,14 @@ export function clearHover() {
 }
 
 export function expandNode(node: Aglyn.NodeSchema<any>) {
-  if (!node || isNodeExpanded(node)) return
+  if (!node) return
   runInAction(() => {
     state.expanded.push(node)
   })
 }
 
 export function collapseNode(node: Aglyn.NodeSchema<any>) {
-  if (!node || !isNodeExpanded(node)) return
+  if (!node) return
   runInAction(() => {
     const index = state.expanded.findIndex((i) => i?.$id === node?.$id)
     state.expanded.splice(index, 1)
