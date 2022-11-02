@@ -16,7 +16,60 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { observable } from 'mobx'
+import { observable, runInAction } from 'mobx'
+
+export interface DndStatus {
+  /**
+   * The current drag object
+   */
+  drag?: Aglyn.NodeSchema | null
+  /**
+   * The current drop object
+   */
+  drop?: Aglyn.NodeSchema | null
+  /**
+   * Computed guard to check if dragging
+   */
+  readonly isDragging?: boolean
+  /**
+   * Computed guard to check if drop target available
+   */
+  readonly hasDropTarget?: boolean
+  /**
+   * Computed drop object breadcrumb path
+   */
+  readonly dragBreadcrumbs?: Aglyn.NodeBreadcrumbPath | false
+  /**
+   * Computed drop object breadcrumb path
+   */
+  readonly dropBreadcrumbs?: Aglyn.NodeBreadcrumbPath | false
+  /**
+   * Guard to check if provided node is dragging
+   */
+  isDraggingNode(node: Aglyn.NodeSchema<any>): boolean
+}
+
+export const dndStatus = observable<DndStatus>({
+  drag: null,
+  drop: null,
+  get isDragging(): boolean {
+    return Boolean(this.drag)
+  },
+  get hasDropTarget(): boolean {
+    return Boolean(this.drop)
+  },
+  get dragBreadcrumbs(): Aglyn.NodeBreadcrumbPath | false {
+    if (!this.isDragging) return false
+    return Aglyn.screen.getNodeBreadcrumbPath(this.drag as Aglyn.NodeSchema)
+  },
+  get dropBreadcrumbs(): Aglyn.NodeBreadcrumbPath | false {
+    if (!this.hasDropTarget) return false
+    return Aglyn.screen.getNodeBreadcrumbPath(this.drop as Aglyn.NodeSchema)
+  },
+  isDraggingNode(node: Aglyn.NodeSchema<any>): boolean {
+    return isDraggingNode(node)
+  },
+})
 
 export enum InteractionModeFlag {
   SELECT = 0x1,
@@ -48,7 +101,7 @@ export enum BesignerDeviceFlag {
   XL = 0x7,
 }
 
-export enum DndDragType {
+export enum DragType {
   CANVAS = 'canvas',
   TEMPLATE = 'template',
   TREE = 'tree',
@@ -60,42 +113,37 @@ export enum DndDropType {
   AFTER = 0x3,
 }
 
-export const dndStatus: {
-  drag?: Aglyn.NodeSchema | null
-  drop?: Aglyn.NodeSchema | null
-} = observable({
-  drag: null,
-  drop: null,
-  get isDragging(): boolean {
-    return Boolean(this.drag)
-  },
-  get hasDropTarget(): boolean {
-    return Boolean(this.drop)
-  },
-  get dragBreadcrumbs(): Aglyn.NodeBreadcrumbPath | false {
-    if (!this.isDragging) return false
-    return Aglyn.screen.getNodeBreadcrumbPath(this.drag as Aglyn.NodeSchema)
-  },
-  get dropBreadcrumbs(): Aglyn.NodeBreadcrumbPath | false {
-    if (!this.hasDropTarget) return false
-    return Aglyn.screen.getNodeBreadcrumbPath(this.drop as Aglyn.NodeSchema)
-  },
-})
-
 export function clearDndStatus() {
-  dndStatus.drag = null
-  dndStatus.drop = null
+  runInAction(() => {
+    dndStatus.drag = null
+    dndStatus.drop = null
+  })
 }
 
-export function dragNode(node: Aglyn.NodeSchema) {
-  dndStatus.drag = node
+export function setDragNode(dragNode: Aglyn.NodeSchema<any> | null) {
+  runInAction(() => {
+    dndStatus.drag = dragNode
+  })
 }
 
-export function dragNodeOver(node: Aglyn.NodeSchema) {
-  dndStatus.drop = node
+export function setDropNode(dropNode: Aglyn.NodeSchema<any> | null) {
+  runInAction(() => {
+    dndStatus.drop = dropNode
+  })
 }
 
-export function endDnd(drag: Aglyn.NodeSchema, drop: Aglyn.NodeSchema) {
-  // dndStatus.drag = drag
-  // dndStatus.drop = drop
+export function isDraggingNode(node: Aglyn.NodeSchema<any>): boolean {
+  if (!node) return false
+  return node?.$id === dndStatus.drag?.$id
+}
+
+export function isDraggingDropNode(node: Aglyn.NodeSchema<any>): boolean {
+  if (!node) return false
+  return node?.$id === dndStatus.drop?.$id
+}
+
+export function isDraggingOverDropNode(node: Aglyn.NodeSchema<any>): boolean {
+  if (!node) return false
+  const breadcrumbs = dndStatus.dropBreadcrumbs
+  return Array.isArray(breadcrumbs) && breadcrumbs.indexOf(node?.$id) >= 0
 }

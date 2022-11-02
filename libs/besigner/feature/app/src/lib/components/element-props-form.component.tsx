@@ -16,9 +16,6 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { updateCanvasElement } from '@aglyn/core-data-app'
-import type { NodeId } from '@aglyn/core-data-foundation'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import {
   FormRenderer,
   type FormRendererProps,
@@ -94,17 +91,15 @@ ElementPropsFormTemplate.displayName = 'ElementPropsFormTemplate'
 ElementPropsFormTemplate.aglyn = true
 
 export interface ElementPropsFormProps extends FormRendererProps {
-  $id?: NodeId
+  node?: Aglyn.NodeSchema<any>
 }
 
 const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
   (props, ref) => {
-    const { $id, ...rest } = props
-    const node = Aglyn.screen.getNode($id)
+    const { node, ...rest } = props
     const schema = Aglyn.components.getSchema(node?.componentId)
     const nodeProps = node?.props
-    const app = useAglynAppContext()
-    const deleteElementCallback = useDeleteElementCallback({ $id })
+    const deleteElementCallback = useDeleteElementCallback({ $id: node?.$id })
     const attributes = schema?.attributes || []
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
@@ -113,14 +108,8 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
         if (node) {
           node.props = { ...values }
         }
-        updateCanvasElement(app, {
-          $id,
-          update: (element) => {
-            return { ...element, props: { ...values } }
-          },
-        })
       },
-      [$id, app],
+      [node],
     )
     const handleDeleteElement = useCallback(
       (e: ChangeEvent<unknown>) => {

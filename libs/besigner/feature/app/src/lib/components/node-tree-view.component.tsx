@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { DndDragType } from '@aglyn/besigner-data-app'
+import * as Besigner from '@aglyn/besigner'
 import { type NodeId } from '@aglyn/core-data-foundation'
 import {
   ICON_VARIANT_COLLAPSIBLE_CLOSE,
@@ -25,9 +25,11 @@ import {
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { alpha, styled } from '@aglyn/shared-ui-theme'
+import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
 import noop from '@aglyn/shared-util-tools/noop'
 import {
   Box,
+  BoxProps,
   Collapse,
   Divider,
   IconButton,
@@ -43,6 +45,7 @@ import {
   type ListProps as MuiListProps,
   Stack,
 } from '@mui/material'
+import clsx from 'clsx'
 import { observer } from 'mobx-react-lite'
 import {
   type ChangeEvent,
@@ -53,11 +56,21 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
-import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 import useLeafDrag from '../hooks/use-leaf-drag'
 import useLeafDrop from '../hooks/use-leaf-drop'
 import ElementIconComponent from './element-icon.component'
+
+const classKey = generateComponentClassKeys('TreeView', [
+  'root',
+  'subTreeView',
+  'treeItem',
+  'treeListItem',
+  'dragHandle',
+  'itemSelected',
+  'itemHovered',
+  'itemIsDragging',
+  'itemIsDragOver',
+])
 
 const TreeView = styled(MuiList)<MuiListProps>({
   alignItems: 'stretch',
@@ -65,6 +78,7 @@ const TreeView = styled(MuiList)<MuiListProps>({
   width: 'fit-content',
   minWidth: '100%',
 })
+TreeView.displayName = 'TreeView'
 
 const TreeItem = styled(MuiListItem, {
   shouldForwardProp(propName) {
@@ -80,22 +94,22 @@ const TreeItem = styled(MuiListItem, {
     borderTopLeftRadius: 4,
     borderBottomLeftRadius: 4,
 
-    [`&:has(.node-tree-sub-list):has(.${listItemClasses.selected})`]: {
+    [`&:has(.${classKey.subTreeView}):has(.${listItemClasses.selected})`]: {
       backgroundColor: alpha(
         theme.palette.common.black,
         depthOpacity < 0 ? 0 : depthOpacity,
       ),
     },
 
-    [`> .tree-list-item`]: {
+    [`> .${classKey.treeListItem}`]: {
       borderTopLeftRadius: 4,
       borderBottomLeftRadius: 4,
-      ['& .drag-handle']: {
+      [`& .${classKey.dragHandle}`]: {
         visibility: 'hidden',
       },
 
-      [`&:hover`]: {
-        ['& .drag-handle']: {
+      [`&:hover, &.${classKey.itemHovered}`]: {
+        [`& .${classKey.dragHandle}`]: {
           visibility: 'visible',
         },
         backgroundColor: alpha(
@@ -116,14 +130,14 @@ const TreeItem = styled(MuiListItem, {
         ),
       },
     },
-    [`&.${listItemClasses.selected}`]: {
-      [`> .tree-list-item`]: {
+    [`&.${listItemClasses.selected}, &.${classKey.itemSelected}`]: {
+      [`> .${classKey.treeListItem}`]: {
         backgroundColor: alpha(
           theme.palette.tertiary.main,
           theme.palette.action.selectedOpacity,
         ),
 
-        [`&:hover`]: {
+        [`&:hover, &.${classKey.itemHovered}`]: {
           backgroundColor: alpha(
             theme.palette.tertiary.main,
             theme.palette.action.selectedOpacity + 0.2,
@@ -146,6 +160,7 @@ const TreeItem = styled(MuiListItem, {
     },
   }
 })
+TreeItem.displayName = 'TreeItem'
 
 const TreeItemButton = styled(MuiListItemButton, {
   shouldForwardProp(propName) {
@@ -165,11 +180,13 @@ const TreeItemButton = styled(MuiListItemButton, {
       `&:hover`,
       `&.${listItemButtonClasses.focusVisible}`,
       `&.${listItemButtonClasses.selected}`,
+      `&.${classKey.itemSelected}`,
     ].join(',')]: {
       backgroundColor: 'transparent',
     },
   }
 })
+TreeItemButton.displayName = 'TreeItemButton'
 
 interface NodeTreeItemProps
   extends Omit<JSX.ComponentProps<typeof TreeItem>, 'depth'> {
@@ -177,7 +194,7 @@ interface NodeTreeItemProps
 }
 
 const NodeTreeItem = observer((props: NodeTreeItemProps) => {
-  const { nodeId, ...rest } = props
+  const { nodeId, className, ...rest } = props
   const {
     expanded,
     selected,
@@ -196,7 +213,7 @@ const NodeTreeItem = observer((props: NodeTreeItemProps) => {
   const isRootNode = Aglyn.screen.isRootNode(node)
   const dragAllowed = Aglyn.isFeatureEnabled(schema?.flags?.dragging)
   const collapseIn = expanded?.some((i) => i === nodeId)
-  const isSelected = selected === nodeId
+  const isSelected = Besigner.focus.isNodeSelected(node)
   const dragDisabled = Boolean(isRootNode || !dragAllowed)
   const dndData = {
     $id: node?.$id,
@@ -210,142 +227,146 @@ const NodeTreeItem = observer((props: NodeTreeItemProps) => {
   }
   const [{ isDragging }, dragHandle, dragPreview] = useLeafDrag(
     dndData,
-    DndDragType.TREE,
+    Besigner.dnd.DragType.TREE,
   )
-  const [, dropRef] = useLeafDrop(dndData)
+  const [{ isOver }, dropRef] = useLeafDrop(dndData)
 
   return (
-    <>
-      <TreeItem
-        // ref={mouseEnterRef}
-        data-aglyn-node={nodeId}
-        depth={depth}
-        selected={isSelected}
-        onMouseEnter={(e) => {
-          onItemHover(e, nodeId)
+    <TreeItem
+      // ref={mouseEnterRef}
+      data-aglyn-node={nodeId}
+      depth={depth}
+      selected={isSelected}
+      onMouseEnter={(e) => {
+        onItemHover(e, nodeId)
+      }}
+      onFocus={(e) => {
+        onItemFocus(e, nodeId)
+      }}
+      className={clsx(className, classKey.treeItem, {
+        [classKey.itemSelected]: Besigner.focus.isNodeSelected(node),
+        [classKey.itemHovered]: Besigner.focus.isNodeHovered(node),
+        [classKey.itemIsDragging]: isDragging,
+        [classKey.itemIsDragOver]: isOver,
+      })}
+      disablePadding
+      sx={{ opacity: isDragging ? 0.5 : undefined }}
+      {...rest}
+    >
+      <Stack
+        ref={(e) => {
+          dropRef(dragPreview(e as any))
         }}
-        onFocus={(e) => {
-          onItemFocus(e, nodeId)
-        }}
-        disablePadding
-        sx={{ opacity: isDragging ? 0.5 : undefined }}
-        {...rest}
+        className={classKey.treeListItem}
+        direction="row"
       >
-        <Stack
-          ref={(e) => {
-            dropRef(dragPreview(e as any))
-          }}
-          className="tree-list-item"
-          direction="row"
-        >
-          {!isRootNode && (
-            <MuiListItemIcon
-              ref={dragHandle}
-              className="drag-handle"
-              draggable
-              sx={{
-                minWidth: 23,
-                padding: 0.75,
-                pl: 0,
-                borderRadius: '4px',
-                cursor: 'move',
-                pointerEvents: dragDisabled ? 'none' : undefined,
-                opacity: dragDisabled ? 0.5 : undefined,
-                zIndex: 1,
-              }}
-            >
-              <MdiIcon
-                color="inherit"
-                fontSize="inherit"
-                path={ICON_VARIANT_MODIFY_DRAG.path}
-              />
-            </MuiListItemIcon>
-          )}
-          <TreeItemButton
-            // ref={}
-            depth={depth}
-            onClick={(e) => {
-              onItemSelect(e, nodeId)
+        {!isRootNode && (
+          <MuiListItemIcon
+            ref={dragHandle}
+            className={classKey.dragHandle}
+            draggable
+            sx={{
+              minWidth: 23,
+              padding: 0.75,
+              pl: 0,
+              borderRadius: '4px',
+              cursor: 'move',
+              pointerEvents: dragDisabled ? 'none' : undefined,
+              opacity: dragDisabled ? 0.5 : undefined,
+              zIndex: 1,
             }}
-            onMouseOver={(e) => {
-              // e.stopPropagation()
-              // e.preventDefault()
-              onItemHover(e, nodeId)
-            }}
-            dense
           >
-            <MuiListItemIcon sx={{ minWidth: 20, mr: '1px' }}>
-              <IconButton
-                color="default"
-                sx={{
-                  padding: '2px',
-                  visibility: !node?.hasNodes ? 'hidden' : 'visible',
-                }}
-                disabled={!node?.hasNodes}
-                onClick={(e) => onItemToggle(e, nodeId)}
-              >
-                {collapseIn ? closeIcon : expandIcon}
-              </IconButton>
-            </MuiListItemIcon>
-            <MuiListItemIcon
-              sx={{
-                minWidth: 20,
-                mr: 0.5,
-                fontSize: 14,
-                padding: 0.2,
-                borderRadius: '0.25em',
-                backgroundColor: 'background.default',
-                border: 1,
-                borderColor: 'divider',
-                boxShadow: 1,
-                color: 'tertiary',
-                display: 'flex',
-                alignItems: 'center',
-                flexDirection: 'column',
-              }}
-            >
-              <ElementIconComponent $id={nodeId} />
-            </MuiListItemIcon>
-            <MuiListItemText
-              primary={nodeLabel}
-              primaryTypographyProps={{
-                noWrap: true,
-                maxWidth: '180px',
-                width: 'fit-content',
-                textOverflow: 'ellipsis',
-              }}
+            <MdiIcon
+              color="inherit"
+              fontSize="inherit"
+              path={ICON_VARIANT_MODIFY_DRAG.path}
             />
-          </TreeItemButton>
-        </Stack>
-
-        {node?.hasNodes && (
-          <Box className="node-tree-sub-list" sx={{ position: 'relative' }}>
-            <Divider
-              orientation="vertical"
-              sx={{
-                position: 'absolute',
-                height: 1,
-                left: `${
-                  depth <= 1 ? (depth < 1 ? 20 - 9 : 34) : depth * 23 + 11
-                }px`,
-                zIndex: 0,
-                pointerEvents: 'none',
-              }}
-              // flexItem
-            />
-            <Collapse unmountOnExit in={collapseIn}>
-              <TreeView disablePadding>
-                {node?.nodes?.map((nodeId) => (
-                  <NodeTreeItem key={nodeId} nodeId={nodeId} />
-                ))}
-              </TreeView>
-            </Collapse>
-          </Box>
+          </MuiListItemIcon>
         )}
-      </TreeItem>
-    </>
+        <TreeItemButton
+          depth={depth}
+          onClick={(e) => {
+            onItemSelect(e, nodeId)
+          }}
+          onMouseOver={(e) => {
+            // e.stopPropagation()
+            // e.preventDefault()
+            onItemHover(e, nodeId)
+          }}
+          dense
+        >
+          <MuiListItemIcon sx={{ minWidth: 20, mr: '1px' }}>
+            <IconButton
+              color="default"
+              sx={{
+                padding: '2px',
+                visibility: !node?.hasNodes ? 'hidden' : 'visible',
+              }}
+              disabled={!node?.hasNodes}
+              onClick={(e) => onItemToggle(e, nodeId)}
+            >
+              {collapseIn ? closeIcon : expandIcon}
+            </IconButton>
+          </MuiListItemIcon>
+          <MuiListItemIcon
+            sx={{
+              minWidth: 20,
+              mr: 0.5,
+              fontSize: 14,
+              padding: 0.2,
+              borderRadius: '0.25em',
+              backgroundColor: 'background.default',
+              border: 1,
+              borderColor: 'divider',
+              boxShadow: 1,
+              color: 'tertiary',
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: 'column',
+            }}
+          >
+            <ElementIconComponent component={schema} />
+          </MuiListItemIcon>
+          <MuiListItemText
+            primary={nodeLabel}
+            primaryTypographyProps={{
+              noWrap: true,
+              maxWidth: '180px',
+              width: 'fit-content',
+              textOverflow: 'ellipsis',
+            }}
+          />
+        </TreeItemButton>
+      </Stack>
+
+      {node?.hasNodes && (
+        <Box className={classKey.subTreeView} sx={{ position: 'relative' }}>
+          <Divider
+            orientation="vertical"
+            sx={{
+              position: 'absolute',
+              height: 1,
+              left: `${
+                depth <= 1 ? (depth < 1 ? 20 - 9 : 34) : depth * 23 + 11
+              }px`,
+              zIndex: 0,
+              pointerEvents: 'none',
+            }}
+            // flexItem
+          />
+          <Collapse unmountOnExit in={collapseIn}>
+            <TreeView disablePadding>
+              {node?.nodes?.map((nodeId) => (
+                <NodeTreeItem key={nodeId} nodeId={nodeId} />
+              ))}
+            </TreeView>
+          </Collapse>
+        </Box>
+      )}
+    </TreeItem>
   )
 })
+NodeTreeItem.displayName = 'NodeTreeItem'
 
 const TreeViewContext = createContext<{
   expanded: Aglyn.NodeId[]
@@ -367,90 +388,87 @@ const TreeViewContext = createContext<{
   onItemFocus: noop,
 })
 
-export interface NodeTreeViewProps
-  extends Partial<Omit<JSX.ComponentProps<typeof TreeView>, 'children'>> {}
+const TreeViewContent = observer(() => {
+  const selected = Besigner.focus.focusStatus.selected
+  const lastSelected = Besigner.focus.focusStatus.lastSelected
+  const [manuallyExpanded, setManuallyExpanded] = useState<NodeId[]>([])
+
+  const allExpanded = useMemo(() => {
+    return selected?.reduce(
+      (accumulator, current) => [...accumulator, ...current.breadcrumbPath],
+      [...manuallyExpanded],
+    )
+  }, [selected, manuallyExpanded])
+
+  const handleTreeItemSelect = useCallback((e, $id) => {
+    e.stopPropagation()
+    e.preventDefault()
+    Besigner.focus.handleNodeSelection(Aglyn.screen.getNode($id))
+  }, [])
+
+  const handleTreeItemHover = useCallback((e, $id) => {
+    Besigner.focus.setHoveredNode(Aglyn.screen.getNode($id))
+  }, [])
+
+  const handleTreeItemFocus = useCallback((e, $id) => {
+    e.stopPropagation()
+    Besigner.focus.setHoveredNode(Aglyn.screen.getNode($id))
+  }, [])
+
+  const handleTreeItemToggle = useCallback((e, id: NodeId) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setManuallyExpanded((prev) => {
+      if (prev.some((i) => i === id)) {
+        return [...prev].filter((i) => i !== id)
+      }
+      return [...prev, id]
+    })
+  }, [])
+
+  return (
+    <TreeViewContext.Provider
+      value={{
+        expanded: allExpanded,
+        selected: lastSelected?.$id,
+        closeIcon: (
+          <MdiIcon
+            fontSize="small"
+            path={ICON_VARIANT_COLLAPSIBLE_CLOSE.path}
+          />
+        ),
+        expandIcon: (
+          <MdiIcon fontSize="small" path={ICON_VARIANT_COLLAPSIBLE_OPEN.path} />
+        ),
+        onItemFocus: handleTreeItemFocus,
+        onItemHover: handleTreeItemHover,
+        onItemSelect: handleTreeItemSelect,
+        onItemToggle: handleTreeItemToggle,
+      }}
+    >
+      <NodeTreeItem nodeId={Aglyn.NODE_ROOT_ID} />
+    </TreeViewContext.Provider>
+  )
+})
+
+export interface NodeTreeViewProps extends BoxProps {
+  TreeViewProps?: Partial<Omit<JSX.ComponentProps<typeof TreeView>, 'children'>>
+}
 
 export const NodeTreeViewComponent = forwardRef<any, NodeTreeViewProps>(
   (props, ref) => {
-    const { ...rest } = props
-    const [selected, setSelected] = useAglynCanvasSelected()
-    const setHovered = useAglynCanvasSetHovered()
-    const hierarchy = Aglyn.screen.getNodeBreadcrumbPath(selected?.$id)
-    const [manuallyExpanded, setManuallyExpanded] = useState<NodeId[]>([])
-
-    const allExpanded = useMemo(
-      () => [...hierarchy, ...manuallyExpanded],
-      [hierarchy, manuallyExpanded],
-    )
-
-    const handleTreeItemSelect = useCallback(
-      (e, $id) => {
-        e.stopPropagation()
-        e.preventDefault()
-        setSelected((prev) => ({
-          $id: $id && prev?.$id === $id ? undefined : $id,
-        }))
-      },
-      [setSelected],
-    )
-
-    const handleTreeItemHover = useCallback(
-      (e, $id) => {
-        setHovered({ $id })
-      },
-      [setHovered],
-    )
-
-    const handleTreeItemFocus = useCallback(
-      (e, $id) => {
-        e.stopPropagation()
-        setHovered({ $id })
-      },
-      [setHovered],
-    )
-
-    const handleTreeItemToggle = useCallback((e, id: NodeId) => {
-      e.stopPropagation()
-      e.preventDefault()
-      setManuallyExpanded((prev) => {
-        if (prev.some((i) => i === id)) {
-          return [...prev].filter((i) => i !== id)
-        }
-        return [...prev, id]
-      })
-    }, [])
+    const { TreeViewProps, ...rest } = props
 
     return (
       <Box
+        ref={ref}
         component="nav"
         id={'aglyn:node-tree-view'}
         aria-label="canvas nodes navigator"
+        {...rest}
       >
-        <TreeView ref={ref} {...rest}>
-          <TreeViewContext.Provider
-            value={{
-              expanded: allExpanded,
-              selected: selected?.$id,
-              closeIcon: (
-                <MdiIcon
-                  fontSize="small"
-                  path={ICON_VARIANT_COLLAPSIBLE_CLOSE.path}
-                />
-              ),
-              expandIcon: (
-                <MdiIcon
-                  fontSize="small"
-                  path={ICON_VARIANT_COLLAPSIBLE_OPEN.path}
-                />
-              ),
-              onItemFocus: handleTreeItemFocus,
-              onItemHover: handleTreeItemHover,
-              onItemSelect: handleTreeItemSelect,
-              onItemToggle: handleTreeItemToggle,
-            }}
-          >
-            <NodeTreeItem nodeId={Aglyn.NODE_ROOT_ID} />
-          </TreeViewContext.Provider>
+        <TreeView className={classKey.root} {...TreeViewProps}>
+          <TreeViewContent />
         </TreeView>
       </Box>
     )

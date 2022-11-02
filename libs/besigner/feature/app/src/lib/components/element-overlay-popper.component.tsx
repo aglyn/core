@@ -15,15 +15,11 @@
  * limitations under the License.
  */
 
-import type {
-  BesignerCanvasItemValue,
-  BesignerCanvasState,
-} from '@aglyn/besigner-data-app'
-import useAglynCanvasElementStatus from '@aglyn/besigner-feature-app/hooks/use-aglyn-canvas-element-status'
+import * as Aglyn from '@aglyn/aglyn'
+import * as Besigner from '@aglyn/besigner'
 import type { NodeId } from '@aglyn/core-data-foundation'
 import { ICON_VARIANT_MODIFY_ADD } from '@aglyn/shared-data-enums'
 import type { KeyOf } from '@aglyn/shared-data-types'
-import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import MdiIcon from '@aglyn/shared-ui-mdi-jsx/components/mdi-icon'
 import { styled } from '@aglyn/shared-ui-theme'
 import {
@@ -32,10 +28,10 @@ import {
   Popper as MuiPopper,
   type PopperProps as MuiPopperProps,
 } from '@mui/material'
-import { forwardRef, useMemo, useState } from 'react'
+import { observer } from 'mobx-react-lite'
+import { ForwardedRef, useMemo, useState } from 'react'
 import { useRenderedCanvasElementRef } from '../contexts/rendered-canvas-elements'
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
-import useBesignerAppContext from '../hooks/use-besigner-app-context'
 import ElementOverlayActionsComponent from './element-overlay-actions.component'
 import ElementOverlayLabelComponent from './element-overlay-label.component'
 import ElementOverlayOutlineComponent from './element-overlay-outline.component'
@@ -132,8 +128,11 @@ const innerModifiers = [
   },
 ]
 
-const variantToStoreName: Record<PopperVariant, KeyOf<BesignerCanvasState>> = {
-  selectedOverlay: 'selected',
+const variantToStoreName: Record<
+  PopperVariant,
+  KeyOf<Pick<typeof Besigner.focus.focusStatus, 'lastSelected' | 'hovered'>>
+> = {
+  selectedOverlay: 'lastSelected',
   hoveredOverlay: 'hovered',
 }
 
@@ -144,22 +143,17 @@ export interface ElementOverlayPopperComponentProps
   variant: PopperVariant
 }
 
-const ElementOverlayPopperComponent = forwardRef<
-  any,
-  ElementOverlayPopperComponentProps
->((props, ref) => {
+const ElementOverlayPopper = (
+  props: ElementOverlayPopperComponentProps,
+  ref: ForwardedRef<any>,
+) => {
   const { variant, ...rest } = props || {}
 
-  const app = useBesignerAppContext()
-  const state = useSubscribable<BesignerCanvasItemValue>(
-    app.interface?.canvas,
-    undefined,
-    (canvas) => canvas?.[variantToStoreName[variant]],
-    [variant, app],
-  )
-
+  const state = Besigner.focus.focusStatus[variantToStoreName[variant]]
   const $id = state?.$id
-  const { isSelfSelected } = useAglynCanvasElementStatus($id)
+  const node = Aglyn.screen.getNode($id)
+
+  const isSelected = Besigner.focus.isNodeSelected(node)
   const elementRef = useRenderedCanvasElementRef({ $id })
   const isOpen = Boolean(elementRef?.node)
   const [outline, setOutline] = useState()
@@ -171,24 +165,24 @@ const ElementOverlayPopperComponent = forwardRef<
     return <ElementOverlayLabelComponent $id={$id} />
   }, [$id, variant])
 
-  const addHelperOpen = isOpen && !isSelfSelected
+  const addHelperOpen = isOpen && !isSelected
 
   return (
     <>
-      <MuiPopper
-        anchorEl={() => elementRef?.node}
-        data-aglyn-node={$id}
-        data-aglyn-kind={'overlay-popper-new'}
-        placement={'bottom'}
-        modifiers={innerModifiers}
-        open={addHelperOpen}
-        disablePortal
-        {...rest}
-      >
-        <div>
-          <AddElementOverlay $id={$id} active={addHelperOpen} />
-        </div>
-      </MuiPopper>
+      {/*<MuiPopper*/}
+      {/*  anchorEl={() => elementRef?.node}*/}
+      {/*  data-aglyn-node={$id}*/}
+      {/*  data-aglyn-kind={'overlay-popper-new'}*/}
+      {/*  placement={'bottom'}*/}
+      {/*  modifiers={innerModifiers}*/}
+      {/*  open={addHelperOpen}*/}
+      {/*  disablePortal*/}
+      {/*  {...rest}*/}
+      {/*>*/}
+      {/*  <div>*/}
+      {/*    <AddElementOverlay $id={$id} active={addHelperOpen} />*/}
+      {/*  </div>*/}
+      {/*</MuiPopper>*/}
       <MuiPopper
         ref={ref}
         anchorEl={() => elementRef?.node}
@@ -242,12 +236,16 @@ const ElementOverlayPopperComponent = forwardRef<
       </MuiPopper>
     </>
   )
-})
-ElementOverlayPopperComponent.displayName = 'ElementOverlayPopperComponent'
-ElementOverlayPopperComponent.aglyn = true
-ElementOverlayPopperComponent.defaultProps = {
+}
+
+ElementOverlayPopper.displayName = 'ElementOverlayPopperComponent'
+ElementOverlayPopper.aglyn = true
+ElementOverlayPopper.defaultProps = {
   variant: 'hoveredOverlay',
 }
+const ElementOverlayPopperComponent = observer(ElementOverlayPopper, {
+  forwardRef: true,
+})
 
 export { ElementOverlayPopperComponent }
 export default ElementOverlayPopperComponent

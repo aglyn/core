@@ -119,33 +119,33 @@ describe('Aglyn: Screen Manager', () => {
   })
 
   it('Normalize Nodes', () => {
-    const normal = denormalizeNodes(denormalized)
+    const normal = denormalizeNodes(denormalized, NODE_ROOT_ID)
     expect(normal).toEqual(nodes)
   })
 
   it('Normalize Nodes then Denormalize', () => {
-    const normal = denormalizeNodes(denormalized)
+    const normal = denormalizeNodes(denormalized, NODE_ROOT_ID)
     const denormal = nestNodes(normal, normal[NODE_ROOT_ID])
     expect(denormal).toEqual(denormalized[0])
   })
 
   it('Denormalize Nodes then Normalize', () => {
     const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
-    const normal = denormalizeNodes([denormal])
+    const normal = denormalizeNodes([denormal], NODE_ROOT_ID)
     expect(normal).toEqual(nodes)
   })
 
   it('Denormalize Nodes then Normalize then Denormalize again', () => {
     const denormal = nestNodes(nodes, nodes[NODE_ROOT_ID])
-    const normal = denormalizeNodes([denormal])
+    const normal = denormalizeNodes([denormal], NODE_ROOT_ID)
     const denormal2 = nestNodes(normal, normal[NODE_ROOT_ID])
     expect(denormal2).toEqual(denormalized[0])
   })
 
   it('Normalize Nodes then Denormalize then Normalize again', () => {
-    const normal = denormalizeNodes(denormalized)
+    const normal = denormalizeNodes(denormalized, NODE_ROOT_ID)
     const denormal = nestNodes(normal, normal[NODE_ROOT_ID])
-    const normal2 = denormalizeNodes([denormal])
+    const normal2 = denormalizeNodes([denormal], NODE_ROOT_ID)
     expect(normal2).toEqual(nodes)
   })
 })

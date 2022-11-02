@@ -16,11 +16,10 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { DndDragType } from '@aglyn/besigner-data-app'
+import * as Besigner from '@aglyn/besigner'
 import {
   LeafComponent,
   type LeafComponentProps,
-  useAglynCanvasElementHierarchy,
 } from '@aglyn/core-feature-renderer'
 import { useForkedRefs } from '@aglyn/shared-ui-jsx'
 import {
@@ -32,9 +31,6 @@ import {
   useState,
 } from 'react'
 import { useRenderedCanvasElements } from '../contexts/rendered-canvas-elements'
-import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
-import useAglynCanvasElementIsSelected from '../hooks/use-aglyn-canvas-is-element-selected'
-import { useAglynCanvasSetSelected } from '../hooks/use-aglyn-canvas-selected'
 import useLeafDrag from '../hooks/use-leaf-drag'
 import useLeafDrop from '../hooks/use-leaf-drop'
 
@@ -44,23 +40,23 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
   (props, forwardRef) => {
     const { $id, leafComponent, ...rest } = props
     const node = Aglyn.screen.getNode($id)
-    const schema = Aglyn.components.getSchema(node?.componentId)
-    const componentId = schema?.componentId
-    const pluginId = schema?.pluginId
-    const trail = useAglynCanvasElementHierarchy($id)
+    const isSelected = Besigner.focus.isNodeSelected(node)
     const dndData = useMemo(
       () => ({
         $id,
-        componentId,
-        pluginId,
-        componentSchema: schema,
-        restrictParent: schema?.restrictParent,
-        restrictChildren: schema?.restrictChildren,
-        trail,
+        componentId: node?.componentId,
+        pluginId: node?.componentSchema?.pluginId,
+        componentSchema: node?.componentSchema,
+        restrictParent: node?.componentSchema?.restrictParent,
+        restrictChildren: node?.componentSchema?.restrictChildren,
+        trail: node?.breadcrumbPath,
       }),
-      [$id, componentId, pluginId, schema, trail],
+      [$id, node],
     )
-    const [, dragHandle, dragPreview] = useLeafDrag(dndData, DndDragType.CANVAS)
+    const [, dragHandle, dragPreview] = useLeafDrag(
+      dndData,
+      Besigner.dnd.DragType.CANVAS,
+    )
     const [, dropRef] = useLeafDrop(dndData)
     const [nodeRef, setNodeRef] = useState<HTMLElement>()
     const { setElementRef, deleteElementRef } = useRenderedCanvasElements()
@@ -70,9 +66,6 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
       dropRef,
       setNodeRef,
     )
-    const isSelected = useAglynCanvasElementIsSelected($id)
-    const setHovered = useAglynCanvasSetHovered()
-    const setSelected = useAglynCanvasSetSelected()
 
     /**
      * Update context element ref
@@ -89,19 +82,17 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
       (e: ChangeEvent<any>) => {
         e.preventDefault()
         e.stopPropagation()
-        setHovered({ $id })
+        Besigner.focus.setHoveredNode(node)
       },
-      [$id, setHovered],
+      [node],
     )
     const handleOnMouseDown = useCallback(
       (e: ChangeEvent<any>) => {
         e.preventDefault()
         e.stopPropagation()
-        setSelected((prev) => ({
-          $id: $id && prev?.$id === $id ? undefined : $id,
-        }))
+        Besigner.focus.handleNodeSelection(node)
       },
-      [$id, setSelected],
+      [node],
     )
 
     // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
@@ -115,8 +106,8 @@ const ElementLeafComponent = forwardRef<any, ElementLeafComponentProps>(
         onMouseOver={handleOnMouseOver}
         onMouseDown={handleOnMouseDown}
         data-aglyn-node={$id}
-        data-aglyn-component={componentId}
-        data-aglyn-bundle={pluginId}
+        data-aglyn-component={node?.componentId}
+        data-aglyn-bundle={node?.componentSchema?.pluginId}
         data-aglyn-status={isSelected ? 'selected' : 'none'}
         {...rest}
       />

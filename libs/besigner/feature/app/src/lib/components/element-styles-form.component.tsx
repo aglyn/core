@@ -17,12 +17,8 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { BoxStyler, Measurements } from '@aglyn/besigner-ui-box-styler'
-import { updateCanvasElement } from '@aglyn/core-data-app'
-import { FieldComponentType, type NodeId } from '@aglyn/core-data-foundation'
-import {
-  useAglynAppContext,
-  useAglynSiteTheme,
-} from '@aglyn/core-feature-renderer'
+import { FieldComponentType } from '@aglyn/core-data-foundation'
+import { useAglynSiteTheme } from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_ALIGN_CENTER,
   ICON_VARIANT_ALIGN_JUSTIFY,
@@ -435,15 +431,13 @@ const TextAlignToggleButtonGroup = (props) => {
 }
 
 export interface ElementStylesFormProps extends FormRendererProps {
-  $id?: NodeId
+  node?: Aglyn.NodeSchema
 }
 
 const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
   (props, ref) => {
-    const { $id, ...rest } = props
-    const app = useAglynAppContext()
-    const deleteElementCallback = useDeleteElementCallback({ $id })
-    const node = Aglyn.screen.getNode($id)
+    const { node, ...rest } = props
+    const deleteElementCallback = useDeleteElementCallback({ $id: node?.$id })
     const nodeSx = node?.sx
     const siteTheme = useAglynSiteTheme()
 
@@ -461,14 +455,8 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
         if (node) {
           node.sx = { ...values }
         }
-        updateCanvasElement(app, {
-          $id,
-          update: (element) => {
-            return { ...element, sx: { ...values } }
-          },
-        })
       },
-      [$id, app, node],
+      [node],
     )
     const handleDeleteElement = useCallback(
       (e: ChangeEvent<unknown>) => {

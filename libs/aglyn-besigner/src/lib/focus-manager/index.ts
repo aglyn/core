@@ -15,9 +15,4 @@
  * limitations under the License.
  */
 
-export * from './dnd-manager'
-export * from './focus-manager'
-
-export function aglynBesigner(): string {
-  return 'aglyn-besigner'
-}
+export * as focus from './focus-manager'

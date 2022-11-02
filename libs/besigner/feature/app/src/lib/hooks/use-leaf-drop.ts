@@ -16,10 +16,10 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as Besigner from '@aglyn/besigner'
 import {
   type BesignerDraggableItem,
   type BesignerDroppableItem,
-  DndDragType,
 } from '@aglyn/besigner-data-app'
 import { addCanvasElement } from '@aglyn/core-data-app'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
@@ -30,10 +30,6 @@ import {
 } from '@aglyn/core-util-app'
 import isEqual from 'lodash-es/isEqual'
 import { type ConnectDropTarget, useDrop } from 'react-dnd'
-import { useAglynCanvasSetHovered } from './use-aglyn-canvas-hovered'
-import { useAglynCanvasSetSelected } from './use-aglyn-canvas-selected'
-import { useAglynDndSetActive } from './use-aglyn-dnd-active'
-import { useAglynDndSetOver } from './use-aglyn-dnd-over'
 
 export type DropCollected = {
   canDrop?: boolean
@@ -47,13 +43,9 @@ export type DropCollected = {
 
 export function useLeafDrop<T extends BesignerDroppableItem>(
   dropObject: T,
-  accept: DndDragType[] = Object.values(DndDragType),
+  accept: Besigner.dnd.DragType[] = Object.values(Besigner.dnd.DragType),
 ): [DropCollected, ConnectDropTarget] {
   const app = useAglynAppContext()
-  const setSelected = useAglynCanvasSetSelected()
-  const setHovered = useAglynCanvasSetHovered()
-  const setDndActive = useAglynDndSetActive()
-  const setDndOver = useAglynDndSetOver()
   const deps = [dropObject, app, ...(Array.isArray(accept) ? accept : [accept])]
 
   return useDrop<BesignerDraggableItem, T, DropCollected>(
@@ -73,10 +65,8 @@ export function useLeafDrop<T extends BesignerDroppableItem>(
         const isOverDragItem = trail.indexOf(dragObject?.$id) >= 0
         const isOverSelf = monitor.isOver({ shallow: true })
 
-        setDndActive(undefined)
-        setDndOver(undefined)
-        setSelected({})
-        setHovered({})
+        Besigner.dnd.clearDndStatus()
+        Besigner.focus.clearFocusStatus()
         console.log('end drag ', dragObject, dragObject, dropObject)
 
         if (!isOverSelf || isOverDragItem) return
@@ -90,7 +80,7 @@ export function useLeafDrop<T extends BesignerDroppableItem>(
 
         if (!dropAllowed || !validRelationship) return
 
-        if (dragType === DndDragType.TEMPLATE) {
+        if (dragType === Besigner.dnd.DragType.TEMPLATE) {
           const parent =
             Aglyn.screen.getNode(dropObject?.$id) ||
             Aglyn.screen.getNode(Aglyn.NODE_ROOT_ID)
@@ -102,18 +92,17 @@ export function useLeafDrop<T extends BesignerDroppableItem>(
           Aglyn.screen.setNodes(
             Aglyn.screen.denormalizeNodes([templateData as any], parent?.$id),
           )
-          Aglyn.screen.addNodeToParent(
-            Aglyn.screen.getNode(templateData.$id),
-            parent,
-            NaN,
-          )
+
+          const node = Aglyn.screen.getNode(templateData.$id)
+          Aglyn.screen.addNodeToParent(node, parent, NaN)
+
           const newElement = {
             index: NaN,
             parentId: dropObject?.$id || CANVAS_ROOT_ELEMENT_ID,
             element: createComponentElementData(dragObject as any),
           }
           addCanvasElement(app, newElement)
-          setSelected({ $id: newElement.element.$id })
+          Besigner.focus.setSelectedNode(node)
         } else {
           const node = Aglyn.screen.getNode(dragObject?.$id)
           Aglyn.screen.reparentNode(
@@ -122,7 +111,7 @@ export function useLeafDrop<T extends BesignerDroppableItem>(
             Aglyn.screen.getNode(dropObject?.$id),
             NaN,
           )
-          setSelected({ $id: node?.$id })
+          Besigner.focus.setSelectedNode(node)
         }
 
         /**
@@ -134,8 +123,8 @@ export function useLeafDrop<T extends BesignerDroppableItem>(
       hover: (dragItem, monitor) => {
         // Make sure not to bubble up for parents
         if (!monitor.isOver({ shallow: true })) return
-        setHovered({ $id: dropObject?.$id })
-        setDndOver(dropObject)
+        Besigner.focus.setHoveredNode(Aglyn.screen.getNode(dropObject?.$id))
+        Besigner.dnd.setDropNode(Aglyn.screen.getNode(dropObject?.$id))
       },
       collect: (monitor) => {
         const canDrop = monitor.canDrop()

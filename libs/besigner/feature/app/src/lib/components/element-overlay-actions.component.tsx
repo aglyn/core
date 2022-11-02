@@ -16,12 +16,13 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as Besigner from '@aglyn/besigner'
 import {
   BesignerPanelTabFlag,
   setBesignerPanels,
 } from '@aglyn/besigner-data-app'
 import useDeleteElementCallback from '@aglyn/besigner-feature-app/hooks/use-delete-element-callback'
-import { duplicateCanvasElement, moveCanvasElement } from '@aglyn/core-data-app'
+import { moveCanvasElement } from '@aglyn/core-data-app'
 import { isRootElementId } from '@aglyn/core-util-app'
 import {
   ICON_VARIANT_MODIFY_DELETE,
@@ -55,8 +56,6 @@ import {
 import { observer } from 'mobx-react-lite'
 import { type ChangeEvent, forwardRef, useCallback, useState } from 'react'
 import { useRenderedCanvasElementRef } from '../contexts/rendered-canvas-elements'
-import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
-import { useAglynCanvasSetSelected } from '../hooks/use-aglyn-canvas-selected'
 import useBesignerAppContext from '../hooks/use-besigner-app-context'
 
 export interface BadgeButtonProps extends Omit<TooltipProps, 'children'> {
@@ -70,16 +69,15 @@ export const BadgeButton = forwardRef<any, BadgeButtonProps>((props, ref) => {
   const { children, ButtonProps, icon, SrOnlyProps, ...rest } = props
 
   return (
-    <MuiTooltip ref={ref} disableInteractive {...rest}>
+    <MuiTooltip ref={ref} {...rest}>
       <MuiButton
         {...ButtonProps}
         sx={mergeSxProps(
           {
-            pt: 0.5,
-            pb: 0.5,
-            pl: 0.585,
-            pr: 0.585,
+            py: 0.5,
+            px: 0.585,
             fontSize: 16,
+            minWidth: 24,
             '&.MuiButtonGroup-grouped': { minWidth: 30 },
           },
           ButtonProps?.sx,
@@ -122,6 +120,7 @@ const MoveUpButton = observer(({ $id }: { $id: Aglyn.NodeId }) => {
       children={'move up'}
       ButtonProps={{ onClick: handleMoveUp }}
       icon={{ path: ICON_VARIANT_MODIFY_MOVE_UP.path }}
+      disableInteractive
     />
   ) : null
 })
@@ -152,6 +151,7 @@ const MoveDownButton = observer(({ $id }: { $id: Aglyn.NodeId }) => {
       children={'move down'}
       ButtonProps={{ onClick: handleMoveDown }}
       icon={{ path: ICON_VARIANT_MODIFY_MOVE_DOWN.path }}
+      disableInteractive
     />
   ) : null
 })
@@ -167,10 +167,8 @@ const ElementOverlayActionsComponent = forwardRef<
   const { $id, ...rest } = props
 
   const app = useBesignerAppContext()
-  const setHovered = useAglynCanvasSetHovered()
-  const setSelected = useAglynCanvasSetSelected()
   const node = Aglyn.screen.getNode($id)
-  const parentId = node?.parentId
+  const parent = node?.parent
   const elementRef = useRenderedCanvasElementRef({ $id })
   const [moreOpen, setMoreOpen] = useState(false)
   const [moreButton, moreButtonRef] = useState(null)
@@ -178,18 +176,11 @@ const ElementOverlayActionsComponent = forwardRef<
   const closeMore = useCallback(() => setMoreOpen(false), [])
   const openMore = useCallback(() => setMoreOpen(true), [])
 
-  const handleParentOnMouseLeave = useCallback(
-    (e: ChangeEvent<unknown>) => {
-      setHovered(undefined)
-    },
-    [setHovered],
-  )
-
   const handleDuplicateClick = useCallback(
     (e: ChangeEvent<unknown>) => {
-      duplicateCanvasElement(app, { $id })
+      Aglyn.screen.duplicateNode(node)
     },
-    [$id, app],
+    [node],
   )
 
   const handleModifyClick = useCallback(
@@ -210,17 +201,20 @@ const ElementOverlayActionsComponent = forwardRef<
 
   const handleParentOnClick = useCallback(
     (e: ChangeEvent<unknown>) => {
-      setSelected({ $id: parentId })
+      Besigner.focus.setSelectedNode(parent)
     },
-    [parentId, setSelected],
+    [parent],
   )
 
   const handleParentOnMouseEnter = useCallback(
     (e: ChangeEvent<unknown>) => {
-      setHovered({ $id: parentId })
+      Besigner.focus.setHoveredNode(parent)
     },
-    [parentId, setHovered],
+    [parent],
   )
+  const handleParentOnMouseLeave = useCallback((e: ChangeEvent<unknown>) => {
+    Besigner.focus.clearHover()
+  }, [])
 
   const deleteElementCallback = useDeleteElementCallback({ $id })
   const handleDeleteClick = useCallback((e: ChangeEvent<unknown>) => {
@@ -254,6 +248,7 @@ const ElementOverlayActionsComponent = forwardRef<
               sx: { '&, &:hover, &:focus': { cursor: 'move' } },
             }}
             icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}
+            disableInteractive
           />
         )}
 
@@ -263,6 +258,7 @@ const ElementOverlayActionsComponent = forwardRef<
             children="duplicate"
             ButtonProps={{ onClick: handleDuplicateClick }}
             icon={{ path: ICON_VARIANT_MODIFY_DUPLICATE.path }}
+            disableInteractive
           />
         )}
 
@@ -276,6 +272,7 @@ const ElementOverlayActionsComponent = forwardRef<
               onMouseLeave: handleParentOnMouseLeave,
             }}
             icon={{ path: ICON_VARIANT_SELECT_PARENT.path }}
+            disableInteractive
           />
         )}
 
@@ -292,6 +289,7 @@ const ElementOverlayActionsComponent = forwardRef<
             // onMouseLeave: handleParentOnMouseLeave,
           }}
           icon={{ path: ICON_VARIANT_SHOW_MORE.path }}
+          disableInteractive
         />
       </MuiButtonGroup>
       <Popper

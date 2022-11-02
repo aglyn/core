@@ -16,11 +16,11 @@
  */
 
 import type { PartialKeys } from '@aglyn/shared-data-types'
-import _isArr from '@aglyn/shared-util-guards/_is-arr'
 import _isObj from '@aglyn/shared-util-guards/_is-obj'
 import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
+import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
 import cloneDeep from 'lodash-es/cloneDeep'
-import { observable, runInAction, toJS } from 'mobx'
+import { makeAutoObservable, observable, runInAction, toJS } from 'mobx'
 import {
   type ComponentSchema,
   getComponentLabel,
@@ -30,7 +30,7 @@ import { createIdUrlSafe } from '../constants'
 import { AglynEvent, emitter } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'
 
-export const nodes: Record<NodeId, NodeSchema<any>> = observable({})
+export const nodes = observable<Record<NodeId, NodeSchema<any>>>({})
 export const NODE_ROOT_ID = '_@_'
 export const NODE_ID_LENGTH = 10
 export const NODE_ROOT_LABEL = 'Document'
@@ -48,8 +48,8 @@ emitter.on(AglynEvent.NODE_CLEAR_ITEMS, () => {
 emitter.on(AglynEvent.NODE_SET_ITEMS, ({ nodes }) => {
   setNodes(nodes)
 })
-emitter.on(AglynEvent.NODE_SET, ({ node }) => {
-  setNodeItem(node)
+emitter.on(AglynEvent.NODE_SET, ({ node, create }) => {
+  setNode(node, create)
 })
 emitter.on(AglynEvent.NODE_DELETE, ({ node }) => {
   deleteNode(node)
@@ -113,33 +113,28 @@ export interface NodeSchema<P = JSX.AnyProps> extends NodeModel<NType.NODE> {
   /**
    * The computed node parent (only for type completion)
    */
-  parent?: NodeSchema<any> | null
+  readonly parent?: NodeSchema<any> | null
   /**
    * The computed index in parent nodes (only for type completion)
    */
-  index?: number | null
+  readonly index?: number | null
   /**
    * The computed label (only for type completion)
    */
-  labelShort?: string | undefined
+  readonly labelShort?: string | undefined
   /**
    * The computed breadcrumb path (only for type completion)
    */
-  breadcrumbPath?: NodeBreadcrumbPath
+  readonly breadcrumbPath?: NodeBreadcrumbPath
   /**
    * The computed component schema (only for type completion)
    */
-  componentSchema?: ComponentSchema | undefined
+  readonly componentSchema?: ComponentSchema | undefined
   /**
    * The computed guard for of child nodes (only for type completion)
    */
-  hasNodes?: boolean
+  readonly hasNodes?: boolean
 }
-
-export type NodeSchemaNested<P = JSX.AnyProps> = Omit<
-  NodeSchema<P>,
-  'nodes'
-> & { nodes?: NodeSchemaNested<any>[] }
 
 export type NodeSchemaJSON<P = JSX.AnyProps> = Omit<
   NodeSchema<P>,
@@ -150,6 +145,11 @@ export type NodeSchemaJSON<P = JSX.AnyProps> = Omit<
   | 'componentSchema'
   | 'hasNodes'
 >
+
+export type NodeSchemaNested<P = JSX.AnyProps> = Omit<
+  NodeSchemaJSON<P>,
+  'nodes'
+> & { nodes?: NodeSchemaNested<any>[] }
 
 export type NodeBreadcrumbPath = [
   root: string & typeof NODE_ROOT_ID,
@@ -167,7 +167,7 @@ export function isRootNodeId(id: NodeId): id is typeof NODE_ROOT_ID {
 export function nodeFactory<P = JSX.AnyProps>(
   schema: NodeSchema<P>,
 ): NodeSchema<P> {
-  return observable({
+  return makeAutoObservable({
     $id: schema.$id,
     componentId: schema.componentId,
     pluginId: schema.pluginId,
@@ -200,7 +200,7 @@ export function nodeFactory<P = JSX.AnyProps>(
   })
 }
 
-export function isRootNode(node: NodeSchema): boolean {
+export function isRootNode(node: NodeSchema<any>): boolean {
   return node?.$id === NODE_ROOT_ID
 }
 
@@ -216,27 +216,43 @@ export function nodeToJSON<P = JSX.AnyProps>(
   return toJS(node)
 }
 
+export function clearNodes() {
+  runInAction(() => {
+    for (const nodeId in nodes) delete nodes[nodeId]
+  })
+}
+
 export function createNode<P = JSX.AnyProps>(
   schema: PartialKeys<NodeSchema<P>, '$id'>,
 ): NodeSchema<P> {
   return nodeFactory({ ...schema, $id: schema?.$id ?? createNodeId() })
 }
 
-export function clearNodes() {
+export function setNode(node: NodeSchema<any>, create = false) {
+  if (!node || (!create && !node.$id)) throw new Error('Invalid node')
+  return runInAction(
+    () => (nodes[node?.$id] = create ? createNode(node) : node),
+  )
+}
+
+export function createAndSetNode(node: NodeSchema<any>) {
+  if (!node) throw new Error('Invalid node')
   runInAction(() => {
-    for (const key in nodes) delete nodes[key]
+    nodes[node.$id] = createNode(node)
   })
 }
 
-export function setNodes<P = JSX.AnyProps>(
-  values: Record<NodeId, NodeSchema<P>>,
-) {
+export function setNodes(values: Record<NodeId, NodeSchema<any>>) {
+  if (!values) return
   runInAction(() => {
-    Object.entries(values).forEach(([id, node]) => {
-      nodes[id] = createNode(node)
-    })
+    for (const nodeId in values) {
+      const node = values[nodeId]
+      if (!node) continue
+      setNode(createNode(node))
+    }
   })
 }
+
 export function hasNode($id: NodeId): boolean {
   return Object.hasOwn(nodes, $id)
 }
@@ -258,80 +274,31 @@ export function isNodeFirstIndex(node: NodeSchema<any>) {
 
 export function isNodeLastIndex(node: NodeSchema<any>) {
   const parent = getNode(node?.parentId)
-  return getNodeIndex(node) + 1 === parent?.nodes?.length
+  return getNodeIndex(node) + 1 === (parent?.nodes || []).length
 }
 
 export function getNodeComponentSchema(node: NodeSchema<any>): ComponentSchema {
   return getSchema(node?.componentId)
 }
 
-export function setNodeItem<P = JSX.AnyProps>(node: NodeSchema<P>) {
-  runInAction(() => {
-    nodes[node.$id] = createNode(node)
-  })
-}
-
 export function deleteNode<P = JSX.AnyProps>(node: NodeSchema<P>) {
-  if (!node || node.$id === NODE_ROOT_ID) return
+  if (!node || isRootNode(node)) return
   runInAction(() => {
+    removeNodeFromParent(node)
     deleteChildNodes(node)
-    removeNodeFromParent(node, getNode(node.parentId))
+
     delete nodes[node.$id]
   })
 }
 
-export function removeNodeFromParent(
-  node: NodeSchema<any>,
-  parent: NodeSchema<any>,
-) {
-  if (!node || !parent || !parent.nodes.some((id) => id === node.$id)) return
-
+function deleteChildNodes(node: NodeSchema<any>) {
+  const childNodes = Array.isArray(node.nodes) ? node.nodes : []
   runInAction(() => {
-    parent.nodes = [...parent.nodes].filter((id) => id !== node.$id)
-    nodes[parent.$id] = parent
-    node.parentId = null
-  })
-}
-
-export function addNodeToParent(
-  node: NodeSchema<any>,
-  parent: NodeSchema<any>,
-  index = NaN,
-) {
-  if (!node || !parent || parent.nodes.some((id) => id === node.$id)) return
-  runInAction(() => {
-    if (isNaN(index)) {
-      parent.nodes = [...parent.nodes, node.$id]
-    } else {
-      parent.nodes.splice(index, 0, node.$id)
+    for (const childId of childNodes) {
+      const child = getNode(childId)
+      if (child) deleteNode(child)
     }
-
-    node.parentId = parent.$id
-    nodes[parent.$id] = parent
-    nodes[node.$id] = node
   })
-}
-
-function deleteChildNodes<P = JSX.AnyProps>(node: NodeSchema<P>) {
-  const children = Array.isArray(node.nodes) ? node.nodes : []
-  for (const childId of children) {
-    const child = getNode(childId)
-    if (child) {
-      deleteChildNodes(child)
-      deleteNode(child)
-    }
-  }
-}
-
-export function duplicateNode<P = JSX.AnyProps>(
-  node: NodeSchema<P>,
-): NodeSchema<P> {
-  const parentId = node.parentId
-  const parent = nodes[parentId]
-  const oldIndex = parent.nodes.indexOf(node.$id)
-  const newNode = duplicateNodeAndChildren(node, parentId)
-  parent.nodes.splice(oldIndex + 1, 0, newNode.$id)
-  return newNode
 }
 
 export function reparentNode(
@@ -340,30 +307,76 @@ export function reparentNode(
   newParent: NodeSchema<any>,
   index = NaN,
 ) {
-  removeNodeFromParent(node, oldParent)
+  removeNodeFromParent(node)
   addNodeToParent(node, newParent, index)
+}
+
+export function removeNodeFromParent(node: NodeSchema<any>) {
+  const parent = getNode(node?.parentId)
+  const index = getNodeIndex(node)
+  if (!node || !parent || !(index >= 0)) return
+
+  runInAction(() => {
+    node.parentId = null
+    parent.nodes.splice(node?.index, 1)
+  })
+}
+
+export function addNodeToParent(
+  node: NodeSchema<any>,
+  parent: NodeSchema<any>,
+  index = NaN,
+) {
+  if (!node || !parent || parent.nodes?.some((id) => id === node.$id)) return
+  runInAction(() => {
+    if (isNaN(index)) {
+      parent.nodes.push(node.$id)
+    } else {
+      parent.nodes.splice(index, 0, node.$id)
+    }
+
+    node.parentId = parent.$id
+    setNode(node)
+  })
+}
+
+export function duplicateNode<P = JSX.AnyProps>(
+  node: NodeSchema<P>,
+): NodeSchema<P> {
+  if (!node) throw new Error('Invalid node')
+  const parent = getNode(node?.parentId)
+  const index = (getNodeIndex(node) || 0) + 1
+  const newNode = duplicateNodeAndChildren(node, node?.parentId)
+  parent.nodes.splice(index, 0, newNode.$id)
+  return newNode
 }
 
 function duplicateNodeAndChildren<P = JSX.AnyProps>(
   node: NodeSchema<P>,
   parentId: NodeId,
 ): NodeSchema<P> {
-  const copied = nodeToJSON(node)
-  const newNode = createNode({
-    ...copied,
-    $id: createNodeId(),
-    parentId: parentId,
-    nodes: [],
-  })
-  for (const childId of _isArr(node.nodes) ? node.nodes : []) {
-    const oldChild = getNode(childId)
-    if (oldChild) {
-      const newChild = duplicateNodeAndChildren(oldChild, newNode.$id)
-      newNode.nodes.push(newChild.$id)
-    }
+  if (!node) return
+  const json = nodeToJSON(node)
+  const newNode = setNode(
+    createNode({
+      ...json,
+      $id: createNodeId(),
+      parentId,
+      nodes: [],
+    }),
+  )
+
+  for (const childId of arraySafe(json?.nodes)) {
+    const childNode = duplicateNodeAndChildren(getNode(childId), newNode.$id)
+    if (!childNode) continue
+    runInAction(() => {
+      newNode.nodes.push(childNode?.$id)
+    })
   }
-  setNodeItem(newNode)
-  return newNode as NodeSchema<P>
+
+  console.log('node node', node, newNode, json)
+
+  return newNode
 }
 
 export function nestNodes(

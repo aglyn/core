@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-import { NodeId } from '@aglyn/core-data-foundation'
-import { useAglynElementLabel } from '@aglyn/core-feature-renderer'
+import * as Aglyn from '@aglyn/aglyn'
+import useAddElementDrawerCallback from '@aglyn/besigner-feature-app/hooks/use-add-element-drawer-callback'
+import { ICON_VARIANT_MODIFY_ADD } from '@aglyn/shared-data-enums'
 import { styled } from '@aglyn/shared-ui-theme'
 import { Divider, Stack, type StackProps, Typography } from '@mui/material'
-import { forwardRef } from 'react'
+import { observer } from 'mobx-react-lite'
 import ElementIconComponent from './element-icon.component'
+import { BadgeButton } from './element-overlay-actions.component'
 
 const ElementLabelWrapper = styled(Stack, {
   name: 'AglynElementLabelWrapper',
@@ -46,18 +48,16 @@ const ElementLabelWrapper = styled(Stack, {
 }))
 
 export interface ElementOverlayLabelProps extends StackProps {
-  $id: NodeId
+  $id: Aglyn.NodeId
 }
 
-const ElementOverlayLabelComponent = forwardRef<
-  HTMLDivElement,
-  ElementOverlayLabelProps
->((props, ref) => {
+const ElementOverlayLabel = (props: ElementOverlayLabelProps) => {
   const { $id, children, ...rest } = props
-  const badgeLabel = useAglynElementLabel($id)
+  const node = Aglyn.screen.getNode($id)
+  const label = Aglyn.screen.getNodeLabelShort(node)
+  const handleAddElementClick = useAddElementDrawerCallback({ $id })
   return (
-    <ElementLabelWrapper
-      ref={ref}
+    <Stack
       id="aglyn:element-overlay-label"
       data-aglyn-node={$id}
       data-aglyn-kind="overlay-label"
@@ -65,23 +65,38 @@ const ElementOverlayLabelComponent = forwardRef<
       justifyContent="flex-start"
       alignItems="center"
       spacing={0.35}
-      fontSize={6}
-      lineHeight={1}
-      fontWeight={600}
-      letterSpacing={-0.25}
+      sx={{
+        fontSize: 12,
+        lineHeight: 1,
+        fontWeight: 600,
+        letterSpacing: 0.25,
+        // pointerEvents: 'none',
+        marginLeft: '-2px',
+        marginBottom: '1px',
+        backgroundColor: 'primary.light',
+        color: 'primary.contrastText',
+        px: 0.5,
+        py: 0.35,
+        maxWidth: 140,
+      }}
       divider={
         <Divider orientation="vertical" variant="fullWidth" light flexItem />
       }
       {...rest}
     >
-      <div className={'icon-wrapper'}>
+      <Stack
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        sx={{ fontSize: 12 }}
+      >
         <ElementIconComponent
-          $id={$id}
-          sx={{ color: 'inherit' }}
+          component={node?.componentSchema}
           color="inherit"
           fontSize="inherit"
+          sx={{ color: 'inherit' }}
         />
-      </div>
+      </Stack>
       <Typography
         component="div"
         textOverflow="ellipsis"
@@ -89,14 +104,27 @@ const ElementOverlayLabelComponent = forwardRef<
         whiteSpace="nowrap"
         fontSize="inherit"
         color="inherit"
-        children={badgeLabel}
+        children={label}
       />
-    </ElementLabelWrapper>
+      <BadgeButton
+        title="Add"
+        children={'add'}
+        disableInteractive={false}
+        ButtonProps={{
+          onClick: (e) => handleAddElementClick(e, { $id }),
+          variant: 'contained',
+          color: 'primary',
+          sx: { borderRadius: `0.2em`, ml: -0.2, pointerEvent: 'unset' },
+        }}
+        icon={{ path: ICON_VARIANT_MODIFY_ADD.path }}
+      />
+    </Stack>
   )
-})
-ElementOverlayLabelComponent.displayName = 'ElementOverlayLabelComponent'
-ElementOverlayLabelComponent.aglyn = true
-ElementOverlayLabelComponent.defaultProps = {}
+}
+ElementOverlayLabel.displayName = 'ElementOverlayLabelComponent'
+ElementOverlayLabel.aglyn = true
+ElementOverlayLabel.defaultProps = {}
+const ElementOverlayLabelComponent = observer(ElementOverlayLabel)
 
 export { ElementOverlayLabelComponent }
 export default ElementOverlayLabelComponent

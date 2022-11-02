@@ -16,10 +16,10 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as Besigner from '@aglyn/besigner'
 import {
   type BesignerDraggableItem,
   type BesignerDroppableItem,
-  DndDragType,
 } from '@aglyn/besigner-data-app'
 import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import {
@@ -27,10 +27,6 @@ import {
   type ConnectDragSource,
   useDrag,
 } from 'react-dnd'
-import { useAglynCanvasSetHovered } from './use-aglyn-canvas-hovered'
-import { useAglynCanvasSetSelected } from './use-aglyn-canvas-selected'
-import { useAglynDndSetActive } from './use-aglyn-dnd-active'
-import { useAglynDndSetOver } from './use-aglyn-dnd-over'
 
 export type DragCollected = {
   isDragging: boolean
@@ -38,34 +34,25 @@ export type DragCollected = {
 
 export function useLeafDrag<T extends BesignerDraggableItem>(
   dragObject?: T,
-  type: DndDragType = DndDragType.CANVAS,
+  type: Besigner.dnd.DragType = Besigner.dnd.DragType.CANVAS,
 ): [DragCollected, ConnectDragSource, ConnectDragPreview] {
   const app = useAglynAppContext()
-  const setSelected = useAglynCanvasSetSelected()
-  const setHovered = useAglynCanvasSetHovered()
-  const setDndActive = useAglynDndSetActive()
-  const setDndOver = useAglynDndSetOver()
   const isRootNode = Aglyn.screen.isRootNodeId(dragObject?.$id)
   const schema = Aglyn.components.getSchema(dragObject?.componentId)
   const canDrag = !isRootNode && Aglyn.isFeatureEnabled(schema?.flags?.dragging)
 
-  const deps = [
-    dragObject,
-    canDrag,
-    app,
-    type,
-    setDndActive,
-    setDndOver,
-    setSelected,
-    setHovered,
-  ]
+  const deps = [dragObject, canDrag, app, type]
 
   // console.log('dragItem item canDrag', dragItem, $id, type, canDrag, flags)
 
   return useDrag<T, BesignerDroppableItem, DragCollected>(
     /*() => */ {
       type: type,
-      item: dragObject,
+      item: () => {
+        // Besigner.focus.setHoveredNode(Aglyn.screen.getNode(dropObject?.$id))
+        Besigner.dnd.setDragNode(Aglyn.screen.getNode(dragObject?.$id))
+        return dragObject
+      },
       canDrag: canDrag,
       options: {
         dropEffect: 'move',

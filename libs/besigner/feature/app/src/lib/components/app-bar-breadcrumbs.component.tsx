@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { useForkedRefs } from '@aglyn/shared-ui-jsx'
+import * as Besigner from '@aglyn/besigner'
 import {
   generateComponentClassKeys,
   mergeSxProps,
@@ -35,11 +35,8 @@ import {
   Toolbar as MuiToolbar,
 } from '@mui/material'
 import clsx from 'clsx'
+import { observer } from 'mobx-react-lite'
 import { forwardRef, useCallback, useMemo } from 'react'
-import { useAglynCanvasSetHovered } from '../hooks/use-aglyn-canvas-hovered'
-import useAglynCanvasSelected, {
-  useAglynCanvasSetSelected,
-} from '../hooks/use-aglyn-canvas-selected'
 import useLeafDrop from '../hooks/use-leaf-drop'
 
 const breadcrumbItemClassKey = generateComponentClassKeys('BreadcrumbItem', [
@@ -102,82 +99,66 @@ export interface BreadcrumbItemProps extends Partial<LinkProps<'button'>> {
   lastItem?: boolean
 }
 
-const BreadcrumbItem = forwardRef<any, BreadcrumbItemProps>(
-  (props, forwardRef) => {
-    const { children, nodeId, lastItem, ...rest } = props
-    const node = Aglyn.screen.getNode(nodeId)
-    const nodeLabel = Aglyn.screen.getNodeLabelShort(node)
-    const hierarchy = Aglyn.screen.getNodeBreadcrumbPath(node)
-    const schema = Aglyn.components.getSchema(node?.componentId)
-    const setSelected = useAglynCanvasSetSelected()
-    const setHovered = useAglynCanvasSetHovered()
-    const dndData = useMemo(() => {
-      return {
-        $id: nodeId,
-        componentId: node?.componentId,
-        pluginId: schema?.pluginId,
-        trail: hierarchy,
-        restrictParent: schema?.restrictParent,
-        restrictChildren: schema?.restrictChildren,
-      }
-    }, [nodeId, node, hierarchy, schema])
-    const [, dropRef] = useLeafDrop(dndData)
-    const ref = useForkedRefs<any>(forwardRef, dropRef)
+const BreadcrumbItem = observer((props: BreadcrumbItemProps) => {
+  const { children, nodeId, lastItem, ...rest } = props
+  const node = Aglyn.screen.getNode(nodeId)
+  const schema = node?.componentSchema
+  const dndData = useMemo(() => {
+    return {
+      $id: nodeId,
+      componentId: node?.componentId,
+      pluginId: schema?.pluginId,
+      trail: node?.breadcrumbPath,
+      restrictParent: schema?.restrictParent,
+      restrictChildren: schema?.restrictChildren,
+    }
+  }, [nodeId, node, schema])
+  const [, dropRef] = useLeafDrop(dndData)
 
-    const handleClick = useCallback(
-      (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        if (!lastItem) {
-          setSelected({ $id: nodeId })
-        }
-      },
-      [nodeId, lastItem, setSelected],
-    )
+  const handleClick = useCallback(
+    (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!lastItem) Besigner.focus.setSelectedNode(node)
+    },
+    [lastItem, node],
+  )
 
-    const handleMouseEnter = useCallback(() => {
-      setHovered({ $id: nodeId })
-    }, [nodeId, setHovered])
+  const handleMouseEnter = useCallback(() => {
+    Besigner.focus.setHoveredNode(node)
+  }, [node])
 
-    return (
-      <BreadcrumbLink
-        ref={ref as any}
-        color="textSecondary"
-        {...({ component: 'button' } as any)}
-        fontSize="inherit"
-        underline={lastItem ? 'none' : undefined}
-        onClick={handleClick}
-        onMouseEnter={handleMouseEnter}
-        className={clsx(breadcrumbItemClassKey.root, {
-          [breadcrumbItemClassKey.lastItem]: Boolean(lastItem),
-        })}
-        {...rest}
-      >
-        <>
-          {nodeLabel}
-          {children}
-        </>
-      </BreadcrumbLink>
-    )
-  },
-)
+  return (
+    <BreadcrumbLink
+      ref={dropRef}
+      color="textSecondary"
+      {...({ component: 'button' } as any)}
+      fontSize="inherit"
+      underline={lastItem ? 'none' : undefined}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      className={clsx(breadcrumbItemClassKey.root, {
+        [breadcrumbItemClassKey.lastItem]: Boolean(lastItem),
+      })}
+      {...rest}
+    >
+      <>
+        {node?.labelShort}
+        {children}
+      </>
+    </BreadcrumbLink>
+  )
+})
 
 interface BreadcrumbsProps extends Partial<MuiBreadcrumbsProps> {}
 
-const Breadcrumbs = forwardRef<any, BreadcrumbsProps>((props, ref) => {
+const Breadcrumbs = observer((props: BreadcrumbsProps) => {
   const { children, sx, ...rest } = props
-  const [selected] = useAglynCanvasSelected()
-  const hierarchy = Aglyn.screen.getNodeBreadcrumbPath(selected?.$id)
+  const lastSelected = Besigner.focus.focusStatus.lastSelected
 
   return (
-    <StyledBreadcrumbs
-      ref={ref}
-      separator="›"
-      aria-label="breadcrumb"
-      sx={sx}
-      {...rest}
-    >
-      {hierarchy.map(($id, index, arr) => (
+    <StyledBreadcrumbs separator="›" aria-label="breadcrumb" sx={sx} {...rest}>
+      {lastSelected?.breadcrumbPath.map(($id, index, arr) => (
         <BreadcrumbItem
           key={$id ?? index}
           nodeId={$id}

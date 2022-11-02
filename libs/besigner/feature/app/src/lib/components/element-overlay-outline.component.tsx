@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
+import * as Besigner from '@aglyn/besigner'
 import type { NodeId } from '@aglyn/core-data-foundation'
 import '@aglyn/shared-data-jsx'
 import {
@@ -24,10 +26,9 @@ import {
 } from '@aglyn/shared-ui-theme'
 import { getElementClientRectBounding } from '@aglyn/shared-util-dom'
 import clsx from 'clsx'
-import { forwardRef, useMemo } from 'react'
+import { observer } from 'mobx-react-lite'
+import { useMemo } from 'react'
 import { useRenderedCanvasElementRef } from '../contexts/rendered-canvas-elements'
-import useAglynCanvasElementStatus from '../hooks/use-aglyn-canvas-element-status'
-import useAglynDndElementStatus from '../hooks/use-aglyn-dnd-element-status'
 
 const classKeys = generateComponentClassKeys('AglynElementOverlayOutline', [
   'hoveringSelf',
@@ -91,47 +92,52 @@ export interface ElementOverlayOutlineProps
   $id: NodeId
 }
 
-const ElementOverlayOutlineComponent = forwardRef<
-  any,
-  ElementOverlayOutlineProps
->((props, ref) => {
-  const { className, $id, ...rest } = props
-  const [isDragging, isDraggingOver] = useAglynDndElementStatus($id)
-  const { isSelfSelected, isSelfHovered } = useAglynCanvasElementStatus($id)
-  const elementRef = useRenderedCanvasElementRef({ $id })
-  const rect = getElementClientRectBounding(elementRef?.node)
-  const style = useMemo(
-    () => ({
-      width: rect?.width,
-      height: rect?.height,
-    }),
-    [rect],
-  )
+const ElementOverlayOutlineComponent = observer<
+  ElementOverlayOutlineProps,
+  any
+>(
+  (props, ref) => {
+    const { className, $id, ...rest } = props
+    const node = Aglyn.screen.getNode($id)
+    const isSelected = Besigner.focus.isNodeSelected(node)
+    const isHovered = Besigner.focus.isNodeHovered(node)
+    const isDragging = Besigner.dnd.dndStatus.isDraggingNode(node)
+    const isDraggingOver = Besigner.dnd.isDraggingOverDropNode(node)
+    const elementRef = useRenderedCanvasElementRef({ $id })
+    const rect = getElementClientRectBounding(elementRef?.node)
+    const style = useMemo(
+      () => ({
+        width: rect?.width,
+        height: rect?.height,
+      }),
+      [rect],
+    )
 
-  return (
-    <ElementOutlineWrapper
-      ref={ref as any}
-      id="aglyn:element-overlay-outline"
-      data-aglyn-node={$id}
-      data-aglyn-kind="overlay-outline"
-      style={style}
-      className={clsx(
-        {
-          [classKeys.selectedSelf]: Boolean(isSelfSelected),
-          [classKeys.hoveringSelf]: Boolean(isSelfHovered),
-          [classKeys.draggingSelf]: Boolean(isDragging),
-          [classKeys.draggingOver]: Boolean(isDraggingOver),
-        },
-        className,
-      )}
-      {...rest}
-    />
-  )
-})
+    return (
+      <ElementOutlineWrapper
+        ref={ref as any}
+        id="aglyn:element-overlay-outline"
+        data-aglyn-node={$id}
+        data-aglyn-kind="overlay-outline"
+        style={style}
+        className={clsx(
+          {
+            [classKeys.selectedSelf]: Boolean(isSelected),
+            [classKeys.hoveringSelf]: Boolean(isHovered),
+            [classKeys.draggingSelf]: Boolean(isDragging),
+            [classKeys.draggingOver]: Boolean(isDraggingOver),
+          },
+          className,
+        )}
+        {...rest}
+      />
+    )
+  },
+  { forwardRef: true },
+)
 
 ElementOverlayOutlineComponent.displayName = 'ElementOverlayOutlineComponent'
 ElementOverlayOutlineComponent.aglyn = true
-ElementOverlayOutlineComponent.defaultProps = {}
 
 export { ElementOverlayOutlineComponent }
 export default ElementOverlayOutlineComponent

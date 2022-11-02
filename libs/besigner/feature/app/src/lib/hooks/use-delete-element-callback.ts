@@ -16,10 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import {
-  setBesignerCanvasHovered,
-  setBesignerCanvasSelected,
-} from '@aglyn/besigner-data-app'
+import * as Besigner from '@aglyn/besigner'
 import { deleteCanvasElement } from '@aglyn/core-data-app'
 import type { NodeId } from '@aglyn/core-data-foundation'
 import { useAglynAppContext } from '@aglyn/core-feature-renderer'
@@ -60,10 +57,21 @@ export const useDeleteElementCallback = (
       })
         .then(
           (res) => {
-            const node = Aglyn.screen.getNode(opts?.$id || $id)
-            setBesignerCanvasSelected(app, { selected: () => ({}) })
-            setBesignerCanvasHovered(app, { hovered: () => ({}) })
-            console.log('delete node', node, opts, $id, options)
+            const node =
+              (opts?.$id && Aglyn.screen.getNode(opts?.$id)) ||
+              Aglyn.screen.getNode($id)
+
+            Besigner.focus.clearFocusStatus()
+            console.log(
+              'delete node',
+              node,
+              'opts',
+              opts,
+              '$id',
+              $id,
+              'res',
+              res,
+            )
             if (node) {
               Aglyn.screen.deleteNode(node)
               deleteCanvasElement(app, { $id: opts?.$id || $id })

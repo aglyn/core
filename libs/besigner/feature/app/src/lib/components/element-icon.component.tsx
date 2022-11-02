@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-import type { NodeId } from '@aglyn/core-data-foundation'
-import { useAglynElementComponentSchema } from '@aglyn/core-feature-renderer'
+import * as Aglyn from '@aglyn/aglyn'
 import { ICON_VARIANT_ELEMENT } from '@aglyn/shared-data-enums'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
-import { forwardRef, useMemo } from 'react'
+import { observer } from 'mobx-react-lite'
+import { useMemo } from 'react'
 
 export interface ElementIconProps extends MdiIconProps {
-  $id: NodeId
+  component: Aglyn.ComponentSchema
 }
 
-const ElementIconComponent = forwardRef<any, ElementIconProps>((props, ref) => {
-  const { $id, sx, ...rest } = props
-  const icon = useAglynElementComponentSchema($id)?.icon
+const ElementIcon = (props: ElementIconProps, ref: any) => {
+  const { component, sx, ...rest } = props
+  const icon = component?.icon
   const iconProps = useMemo(
     () => ({
       ...icon,
@@ -47,9 +47,11 @@ const ElementIconComponent = forwardRef<any, ElementIconProps>((props, ref) => {
       {...rest}
     />
   )
-})
-ElementIconComponent.displayName = 'ElementIconComponent'
-ElementIconComponent.defaultProps = {}
+}
+ElementIcon.displayName = 'ElementIconComponent'
+ElementIcon.defaultProps = {}
+
+const ElementIconComponent = observer(ElementIcon, { forwardRef: true })
 
 export { ElementIconComponent }
 export default ElementIconComponent

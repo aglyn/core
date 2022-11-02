@@ -16,19 +16,13 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { addCanvasElement } from '@aglyn/core-data-app'
-import {
-  CANVAS_ROOT_ELEMENT_ID,
-  type NodeId,
-} from '@aglyn/core-data-foundation'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
-import { createComponentElementData } from '@aglyn/core-util-app'
+import * as Besigner from '@aglyn/besigner'
+import { type NodeId } from '@aglyn/core-data-foundation'
 import { useCallback } from 'react'
 import {
   type ElementDrawerOptions,
   useElementDrawerContext,
 } from '../contexts/element-drawer-context'
-import useAglynCanvasSelected from './use-aglyn-canvas-selected'
 
 export interface UseAddElementCallbackOptions {
   onComplete?: (data: unknown) => void
@@ -45,9 +39,6 @@ export function useAddElementDrawerCallback(
   options?: UseAddElementCallbackOptions,
 ): AddElementCallback {
   const { elementDrawer } = useElementDrawerContext()
-  const [selected, setSelected] = useAglynCanvasSelected()
-  const { $id } = selected || {}
-  const app = useAglynAppContext()
 
   return useCallback(
     async (e, callback) => {
@@ -62,8 +53,12 @@ export function useAddElementDrawerCallback(
           return data
         })
         .then((data: any) => {
+          const $id =
+            callback?.$id ||
+            Besigner.focus.focusStatus.lastSelected?.$id ||
+            Aglyn.NODE_ROOT_ID
           const parent =
-            Aglyn.screen.getNode(callback?.$id || $id) ||
+            Aglyn.screen.getNode($id) ||
             Aglyn.screen.getNode(Aglyn.NODE_ROOT_ID)
           const templateData = {
             ...(data as any),
@@ -73,20 +68,12 @@ export function useAddElementDrawerCallback(
           Aglyn.screen.setNodes(
             Aglyn.screen.denormalizeNodes([templateData as any], parent?.$id),
           )
-          Aglyn.screen.addNodeToParent(
-            Aglyn.screen.getNode(templateData.$id),
-            parent,
-            NaN,
-          )
 
-          const newElement = {
-            index: NaN,
-            parentId: callback?.$id || $id || CANVAS_ROOT_ELEMENT_ID,
-            element: createComponentElementData({ data }),
-          }
-          console.log('Add New Element ', data, newElement)
-          addCanvasElement(app, newElement)
-          setSelected({ $id: newElement.element.$id })
+          const node = Aglyn.screen.getNode(templateData.$id)
+          console.log('Add New Element ', data, templateData)
+
+          Aglyn.screen.addNodeToParent(node, parent, NaN)
+          Besigner.focus.setSelectedNode(node)
 
           options?.onComplete?.(data)
           callback?.onComplete?.(data)
@@ -96,7 +83,7 @@ export function useAddElementDrawerCallback(
           callback?.onError?.(reason)
         })
     },
-    [elementDrawer, options, $id, app, setSelected],
+    [elementDrawer, options],
   )
 }
 

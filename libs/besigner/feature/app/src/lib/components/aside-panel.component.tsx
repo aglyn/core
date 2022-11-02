@@ -16,13 +16,13 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as Besigner from '@aglyn/besigner'
 import {
   type BesignerPanelKey,
   BesignerPanelTabFlag,
-  DndDragType,
 } from '@aglyn/besigner-data-app'
 import { getBundle } from '@aglyn/core-data-app'
-import type { AglynNodePresetSchema, NodeId } from '@aglyn/core-data-foundation'
+import type { AglynNodePresetSchema } from '@aglyn/core-data-foundation'
 import { useAglynComponentsContext } from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_ELEMENT,
@@ -71,7 +71,6 @@ import {
 } from 'react'
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
 import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
-import useAglynCanvasSelected from '../hooks/use-aglyn-canvas-selected'
 import useBesignerAppContext from '../hooks/use-besigner-app-context'
 import useLeafDrag from '../hooks/use-leaf-drag'
 import AccordionListComponent from './accordion-list.component'
@@ -97,8 +96,11 @@ const TabPanelInner = styled('div', {
   width: '100%',
 }))
 
-const ElementInfo = function ElementInfo({ $id }: { $id: NodeId }) {
-  const node = Aglyn.screen.getNode($id)
+const ElementInfo = function ElementInfo({
+  node,
+}: {
+  node: Aglyn.NodeSchema<any>
+}) {
   const schema = Aglyn.components.getSchema(node?.componentId)
   const failoverText = 'n/a'
   const details = useMemo(
@@ -137,7 +139,7 @@ const ElementInfo = function ElementInfo({ $id }: { $id: NodeId }) {
           {
             key: 'element-id',
             label: 'Element ID',
-            value: $id,
+            value: node.$id,
           },
           {
             key: 'parent-id',
@@ -158,7 +160,7 @@ const ElementInfo = function ElementInfo({ $id }: { $id: NodeId }) {
         ],
       },
     ],
-    [schema, $id, node],
+    [schema, node],
   )
   const [expanded, setExpanded] = useState<string | false>(details[0].key)
   const handleChange =
@@ -241,9 +243,8 @@ const defaultTabContent = (
 )
 
 const withSelectedElement = (Component) => () => {
-  const [selected] = useAglynCanvasSelected()
-  const $id = selected?.$id
-  return !$id ? (
+  const lastSelected = Besigner.focus.focusStatus.lastSelected
+  return !lastSelected ? (
     <Stack
       direction="column"
       justifyContent="center"
@@ -254,7 +255,7 @@ const withSelectedElement = (Component) => () => {
       {defaultTabContent}
     </Stack>
   ) : (
-    <Component $id={$id} />
+    <Component node={lastSelected} />
   )
 }
 
@@ -307,7 +308,7 @@ const ComponentGridItem = forwardRef<any, ComponentGridItemProps>(
     }, [item, schema])
     const [{ isDragging }, dragHandle, dragPreview] = useLeafDrag(
       dndData,
-      DndDragType.TEMPLATE,
+      Besigner.dnd.DragType.TEMPLATE,
     )
     const ref = useForkedRefs(forwardRef, dragHandle)
 
