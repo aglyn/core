@@ -21,7 +21,6 @@ import {
   type BesignerPanelKey,
   BesignerPanelTabFlag,
 } from '@aglyn/besigner-data-app'
-import { useAglynComponentsContext } from '@aglyn/core-feature-renderer'
 import {
   ICON_VARIANT_ELEMENT,
   ICON_VARIANT_ELEMENT_BROWSE,
@@ -39,7 +38,6 @@ import {
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import {
-  arraySortBy,
   getDisplayName,
   numberFromHexadecimal,
   numberToHexadecimal,
@@ -57,7 +55,6 @@ import {
   BoxProps,
   Button,
   Grid,
-  type ListProps,
   Stack,
   Tab as MuiTab,
   Typography,
@@ -73,9 +70,11 @@ import {
 } from 'react'
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
 import useAglynBesignerPanel from '../hooks/use-aglyn-besigner-panel'
-import useBesignerAppContext from '../hooks/use-besigner-app-context'
 import useLeafDrag from '../hooks/use-leaf-drag'
-import AccordionListComponent from './accordion-list.component'
+import AccordionListComponent, {
+  AccordionListItem,
+  type AccordionListProps,
+} from './accordion-list.component'
 import ElementPropsForm from './element-props-form.component'
 import ElementStylesForm from './element-styles-form.component'
 import NodeTreeViewComponent, {
@@ -97,6 +96,29 @@ const TabPanelInner = styled('div', {
 })(({ theme }) => ({
   width: '100%',
 }))
+
+const emptyView = (
+  <Stack
+    direction="column"
+    justifyContent="center"
+    height={1}
+    component={TabPanelInner}
+    sx={{ p: 2 }}
+  >
+    <Typography
+      color="textSecondary"
+      variant="overline"
+      component="div"
+      align="center"
+    >
+      <MdiIcon
+        sx={{ opacity: 0.3, fontSize: 80 }}
+        path={ICON_VARIANT_ELEMENT.path}
+      />
+      <div>{'Select an element'}</div>
+    </Typography>
+  </Stack>
+)
 
 const ElementInfo = function ElementInfo({
   node,
@@ -227,38 +249,10 @@ const ElementInfo = function ElementInfo({
   )
 }
 
-const defaultTabContent = (
-  <>
-    <Typography
-      color="textSecondary"
-      variant="overline"
-      component="div"
-      align="center"
-    >
-      <MdiIcon
-        sx={{ opacity: 0.3, fontSize: 80 }}
-        path={ICON_VARIANT_ELEMENT.path}
-      />
-      <div>{'Select an element'}</div>
-    </Typography>
-  </>
-)
-
 function withLastSelectedNode<P>(
   WrappedComponent: JSX.ComponentType<P & { node: Besigner.LastSelectedNode }>,
 ) {
   const displayName = getDisplayName(WrappedComponent)
-  const empty = (
-    <Stack
-      direction="column"
-      justifyContent="center"
-      height={1}
-      component={TabPanelInner}
-      sx={{ p: 2 }}
-    >
-      {defaultTabContent}
-    </Stack>
-  )
 
   const WithLastSelectedNode = observer((props: P) => {
     const { ...rest } = props
@@ -267,7 +261,7 @@ function withLastSelectedNode<P>(
     return (
       <>
         {!lastSelected ? (
-          empty
+          emptyView
         ) : (
           <WrappedComponent node={lastSelected} {...rest} />
         )}
@@ -409,96 +403,60 @@ const ComponentGroupDetails = forwardRef<any, ComponentGroupDetailsProps>(
   },
 )
 
-const ComponentsList = forwardRef<any, ListProps>((props, ref) => {
-  const { ...rest } = props
-  const app = useBesignerAppContext()
-  const { nodePresets } = useAglynComponentsContext()
-  const sortedItems = useMemo(
-    () => arraySortBy(nodePresets, (i) => i.label),
-    [nodePresets],
-  )
-  const allItem = useMemo(
-    () => ({
-      id: 'all',
-      order: 99,
-      labelPrimary: 'All',
-      labelSecondary: 'All items sorted A-Z',
-      icon: { path: ICON_VARIANT_ELEMENT_BROWSE.path },
-      items: [...sortedItems],
-    }),
-    [sortedItems],
-  )
+const ComponentsList = observer(
+  <T extends AccordionListItem = AccordionListItem>(
+    props: AccordionListProps<T>,
+  ) => {
+    const { ...rest } = props
+    const presets = Aglyn.presets.state
+    const schemas = Aglyn.components.schemas
 
-  const items = useMemo<ComponentGridGroupItemData[]>(() => {
-    const bundles = []
-    const cats = []
-    const presets = Object.values(Aglyn.presets.state)
-    const schemas = Object.values(Aglyn.components.schemas)
-    const allItems = [...presets, ...schemas]
-    const grouped = groupBy(allItems, (i) => {
-      if (i?.type === Aglyn.NodeType.PRESET) {
-        return i?.meta?.category
-      }
-      return 'Uncategorized'
-    })
-    const mapped = Object.entries({ ...grouped, All: allItems }).map(
-      ([groupId, group]) => {
-        return {
-          id: groupId,
-          labelPrimary: groupId,
-          labelSecondary: 'Category',
-          icon: {
-            path: ICON_VARIANT_ELEMENT.path,
-          },
-          items: group,
-          order: 0,
-        }
-      },
-    )
+    const items = useMemo<ComponentGridGroupItemData[]>(() => {
+      const allItems = [
+        ...Object.values(presets || {}),
+        ...Object.values(schemas || {}),
+      ]
 
-    console.log('aside panel group components', mapped)
+      const grouped = groupBy(allItems, (i) => {
+        return i?.category || i?.meta?.category || 'Uncategorized'
+      })
 
-    return mapped
+      const mapped = Object.entries({ ...grouped, All: allItems })
+        .sort(([aId], [bId]) => {
+          switch (true) {
+            case aId === 'All' && bId === 'Uncategorized':
+              return 1
+            case aId === 'Uncategorized' && bId === 'All':
+              return -1
+            case aId === 'All':
+            case aId === 'Uncategorized':
+              return 1
+            case bId === 'All':
+            case bId === 'Uncategorized':
+              return -1
+            default:
+              return aId.localeCompare(bId)
+          }
+        })
+        .map(([groupId, group]) => {
+          return {
+            id: groupId,
+            labelPrimary: groupId,
+            labelSecondary: 'Category',
+            icon: {
+              path: ICON_VARIANT_ELEMENT.path,
+            },
+            items: group,
+            order: 0,
+          }
+        })
 
-    // sortedItems.forEach((item) => {
-    //   const { category, data } = item || {}
-    //   const { pluginId } = data || {}
-    //   const bundled = pluginId && bundles.find((i) => i.$id === pluginId)
-    //   const categorized = category && cats.find((i) => i.$id === category)
-    //
-    //   if (bundled) bundled?.items?.push(item)
-    //   if (categorized) categorized?.items?.push(item)
-    //   if (!bundled && pluginId) {
-    //     const bundle = getBundle(app, { pluginId })
-    //     bundles.push({
-    //       id: pluginId,
-    //       order: 49,
-    //       labelPrimary: bundle?.displayName ?? pluginId,
-    //       labelSecondary: bundle?.subtitle || 'Category',
-    //       icon: {
-    //         path: ICON_VARIANT_ELEMENT.path,
-    //         ...bundle?.icon,
-    //       },
-    //       items: [item],
-    //     })
-    //   }
-    //   if (!categorized && category) {
-    //     cats.push({
-    //       id: category,
-    //       order: 5,
-    //       labelPrimary: category,
-    //       labelSecondary: 'Bundle',
-    //       icon: { path: ICON_VARIANT_ELEMENT.path },
-    //       items: [item],
-    //     })
-    //   }
-    // })
-    //
-    // return arraySortBy([...cats, ...bundles, allItems], (i) => i.order ?? 0)
-  }, [])
+      console.log('aside panel group components', mapped)
 
-  return (
-    <>
+      return mapped
+    }, [presets, schemas])
+
+    return (
       <AccordionListComponent
         unique
         items={items}
@@ -507,10 +465,11 @@ const ComponentsList = forwardRef<any, ListProps>((props, ref) => {
           <>{item?.labelPrimary}</>
         )}
         DetailsContentComponent={ComponentGroupDetails}
+        {...rest}
       />
-    </>
-  )
-})
+    )
+  },
+)
 
 const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
   panelLeft: {

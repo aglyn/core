@@ -17,7 +17,7 @@
 
 import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { observable, runInAction } from 'mobx'
-import { ComponentCategory } from '../components-manager'
+import type { ComponentCategory } from '../components-manager'
 import { createIdUrlSafe } from '../constants'
 import { AglynEvent, emitter, lifecycleEvent } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'

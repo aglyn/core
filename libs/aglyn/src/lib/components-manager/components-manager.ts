@@ -89,6 +89,7 @@ export interface ComponentSchema<P = any> {
   title?: string
   subtitle?: string
   description?: string
+  category?: string | ComponentCategory
 
   /**
    * Icon props for display around besigner
