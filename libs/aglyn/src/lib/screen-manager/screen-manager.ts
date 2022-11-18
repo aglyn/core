@@ -16,6 +16,7 @@
  */
 
 import type { PartialKeys } from '@aglyn/shared-data-types'
+import _isArrEmpty from '@aglyn/shared-util-guards/_is-arr-empty'
 import _isObj from '@aglyn/shared-util-guards/_is-obj'
 import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
@@ -268,7 +269,8 @@ export function getNode<P = JSX.AnyProps>(
 }
 
 export function getNodeIndex(node: NodeSchema<any>) {
-  const parent = getNode(node?.parentId)
+  const parent = node?.parent
+  if (!node || !parent) return
   return parent?.nodes?.indexOf(node.$id)
 }
 
@@ -277,7 +279,8 @@ export function isNodeFirstIndex(node: NodeSchema<any>) {
 }
 
 export function isNodeLastIndex(node: NodeSchema<any>) {
-  const parent = getNode(node?.parentId)
+  const parent = node?.parent
+  if (!node || !parent) return
   return getNodeIndex(node) + 1 === (parent?.nodes || []).length
 }
 
@@ -287,22 +290,27 @@ export function getNodeComponentSchema(node: NodeSchema<any>): ComponentSchema {
 
 export function deleteNode<P = JSX.AnyProps>(node: NodeSchema<P>) {
   if (!node || isRootNode(node)) return
-  runInAction(() => {
-    removeNodeFromParent(node)
-    deleteChildNodes(node)
+  if (!_isArrEmpty(node.nodes)) {
+    for (const childId of node.nodes) {
+      deleteNode(getNode(childId))
+    }
+  }
 
+  runInAction(() => {
+    const index = node.parent.nodes.indexOf(node.$id)
+    if (index >= 0) node.parent.nodes.splice(index, 1)
     delete nodes[node.$id]
   })
 }
 
 function deleteChildNodes(node: NodeSchema<any>) {
   const childNodes = Array.isArray(node.nodes) ? node.nodes : []
-  runInAction(() => {
-    for (const childId of childNodes) {
+  for (const childId of childNodes) {
+    runInAction(() => {
       const child = getNode(childId)
       if (child) deleteNode(child)
-    }
-  })
+    })
+  }
 }
 
 export function reparentNode(

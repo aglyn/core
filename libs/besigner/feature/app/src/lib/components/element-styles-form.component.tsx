@@ -437,7 +437,7 @@ export interface ElementStylesFormProps extends FormRendererProps {
 const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
   (props, ref) => {
     const { node, ...rest } = props
-    const deleteElementCallback = useDeleteElementCallback({ $id: node?.$id })
+    const deleteElementCallback = useDeleteElementCallback()
     const nodeSx = node?.sx
     const siteTheme = useAglynSiteTheme()
 
@@ -559,7 +559,7 @@ const ElementStylesForm = forwardRef<any, ElementStylesFormProps>(
 
         <FormControl margin="none" fullWidth>
           <Button
-            onClick={handleDeleteElement}
+            onClick={() => deleteElementCallback(node)}
             sx={{ mt: 2, color: 'error.main' }}
             fullWidth
           >

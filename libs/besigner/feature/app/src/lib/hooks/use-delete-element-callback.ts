@@ -17,36 +17,23 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
-import { deleteCanvasElement } from '@aglyn/core-data-app'
-import type { NodeId } from '@aglyn/core-data-foundation'
-import { useAglynAppContext } from '@aglyn/core-feature-renderer'
 import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
-import { type ChangeEvent, useCallback } from 'react'
+import { useCallback } from 'react'
 
-export interface UseDeleteElementCallbackOptions {
-  $id?: NodeId
-  onFulfilled?: (value: unknown) => void | PromiseLike<void>
-  onRejected?: (reason: any) => void | PromiseLike<void>
-  onCatch?: (error: unknown) => void | PromiseLike<void>
-}
-
-export type UseDeleteElementCallback = {
-  (
-    e: ChangeEvent<unknown>,
-    callbackOptions?: UseDeleteElementCallbackOptions,
-  ): void
-}
-
-export const useDeleteElementCallback = (
-  options?: UseDeleteElementCallbackOptions,
-): UseDeleteElementCallback => {
-  const { $id, onFulfilled, onRejected, onCatch } = { ...options }
+export function useDeleteElementCallback(): (
+  node: Aglyn.NodeSchema,
+) => Promise<void> {
   const { confirm } = useConfirmationContext()
-  const app = useAglynAppContext()
 
   return useCallback(
-    (e: ChangeEvent<unknown>, opts?: UseDeleteElementCallbackOptions) => {
-      confirm({
+    (node: Aglyn.NodeSchema) => {
+      function handleDelete() {
+        console.log('delete node', node)
+        Besigner.focus.clearFocusStatus()
+        Aglyn.screen.deleteNode(node)
+      }
+
+      return confirm({
         title: 'Are you sure?',
         description:
           "You are about to delete an element from the canvas, please confirm the desired option. Press 'Delete' to confirm and delete the item. Press 'Cancel' to void the operation and close this dialog.",
@@ -55,43 +42,10 @@ export const useDeleteElementCallback = (
           color: 'error',
         },
       })
-        .then(
-          (res) => {
-            const node =
-              (opts?.$id && Aglyn.screen.getNode(opts?.$id)) ||
-              Aglyn.screen.getNode($id)
-
-            Besigner.focus.clearFocusStatus()
-            console.log(
-              'delete node',
-              node,
-              'opts',
-              opts,
-              '$id',
-              $id,
-              'res',
-              res,
-            )
-            if (node) {
-              Aglyn.screen.deleteNode(node)
-              deleteCanvasElement(app, { $id: opts?.$id || $id })
-            }
-            opts?.onFulfilled && opts?.onFulfilled(res)
-            onFulfilled && onFulfilled(res)
-          },
-          (reason) => {
-            console.warn('rejected', reason)
-            opts?.onRejected && opts?.onRejected(reason)
-            onRejected && onRejected(reason)
-          },
-        )
-        .catch((e) => {
-          console.error('caught error', e)
-          opts?.onCatch && opts?.onCatch(e)
-          onCatch && onCatch(e)
-        })
+        .then(handleDelete)
+        .catch(console.log)
     },
-    [confirm, $id, app, options, onFulfilled, onRejected, onCatch],
+    [confirm],
   )
 }
 

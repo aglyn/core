@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-
-import {_hasOwnProperty} from './_has-own-property'
-
+import { _hasOwnProperty } from './_has-own-property'
 
 export enum Equality {
   STRICT,
@@ -50,7 +48,7 @@ export function _isEqualitySameType<T, U extends T>(
     _withOptions = _hasOwnProperty('equality', _lastItem),
     _options = {
       truthiness: Equality.DEFAULT,
-      ..._withOptions ? _lastItem : undefined,
+      ...(_withOptions ? _lastItem : undefined),
     }
   if (!_withOptions) {
     possibilities.push(_lastItem as U)
@@ -63,3 +61,4 @@ export function _isEqualitySameType<T, U extends T>(
     return possibility === value
   })
 }
+export default _isEqualitySameType

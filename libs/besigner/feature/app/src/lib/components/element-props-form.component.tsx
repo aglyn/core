@@ -30,7 +30,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
-import { type ChangeEvent, forwardRef, useCallback } from 'react'
+import { forwardRef, useCallback } from 'react'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
 /**
@@ -99,7 +99,7 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
     const { node, ...rest } = props
     const schema = Aglyn.components.getSchema(node?.componentId)
     const nodeProps = node?.props
-    const deleteElementCallback = useDeleteElementCallback({ $id: node?.$id })
+    const deleteElementCallback = useDeleteElementCallback()
     const attributes = schema?.attributes || []
 
     const handleFormCancel = useCallback((e, reason) => {}, [])
@@ -110,12 +110,6 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
         }
       },
       [node],
-    )
-    const handleDeleteElement = useCallback(
-      (e: ChangeEvent<unknown>) => {
-        deleteElementCallback(e)
-      },
-      [deleteElementCallback],
     )
 
     console.log('attributes', attributes)
@@ -142,7 +136,7 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
 
                 <FormControl margin="none" fullWidth>
                   <Button
-                    onClick={handleDeleteElement}
+                    onClick={() => deleteElementCallback(node)}
                     sx={{ mt: 2, color: 'error.main' }}
                     fullWidth
                   >

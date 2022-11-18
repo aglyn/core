@@ -116,13 +116,13 @@ const NodeContextMenuRaw = (props: NodeContextMenuProps) => {
   )
   const handleParentOnMouseLeave = useCallback(
     (e: ChangeEvent<unknown>) => {
-      return
+      if (isRootNode) return
       Besigner.focus.clearHover()
     },
     [isRootNode],
   )
 
-  const deleteElementCallback = useDeleteElementCallback({ $id: node?.$id })
+  const deleteElementCallback = useDeleteElementCallback()
 
   return (
     <Paper sx={{ width: 240 }} {...rest}>
@@ -170,7 +170,10 @@ const NodeContextMenuRaw = (props: NodeContextMenuProps) => {
           </ListItemIcon>
           <ListItemText>Duplicate</ListItemText>
         </MenuItem>
-        <MenuItem disabled={isRootNode} onClick={deleteElementCallback}>
+        <MenuItem
+          disabled={isRootNode}
+          onClick={() => deleteElementCallback(node)}
+        >
           <ListItemIcon>
             <MdiIcon
               fontSize="inherit"

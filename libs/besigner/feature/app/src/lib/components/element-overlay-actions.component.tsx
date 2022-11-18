@@ -187,7 +187,7 @@ const ElementOverlayActionsComponent = observer(
       Besigner.focus.clearHover()
     }, [])
 
-    const deleteElementCallback = useDeleteElementCallback({ $id })
+    const deleteElementCallback = useDeleteElementCallback()
 
     return (
       <>
@@ -292,7 +292,10 @@ const ElementOverlayActionsComponent = observer(
                     )}
 
                     {!isRootElementId($id) && (
-                      <MenuItem dense onClick={deleteElementCallback}>
+                      <MenuItem
+                        dense
+                        onClick={() => deleteElementCallback(node)}
+                      >
                         <ListItemIcon>
                           <MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />
                         </ListItemIcon>
