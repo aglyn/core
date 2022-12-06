@@ -16,13 +16,11 @@
  */
 
 import { alpha, styled } from '@aglyn/shared-ui-theme'
-import { Stack, type StackProps as MuiStackProps } from '@mui/material'
 import { forwardRef } from 'react'
 
-const AglynViewport = styled(Stack, {
+const AglynViewport = styled('div', {
   name: 'AglynViewport',
-  // shouldForwardProp(propName) {return propName !== 'panelLeftWidth'},
-})<ViewportRootComponentProps>(({ theme }) => {
+})(({ theme }) => {
   const o = 'transparent'
   const bg = theme.palette.background.default
   const base = theme.palette.divider
@@ -40,6 +38,9 @@ const AglynViewport = styled(Stack, {
   return {
     flexGrow: 1,
     overflow: 'hidden',
+    flexDirection: 'column',
+    alignItems: 'center',
+    display: 'flex',
     // position: 'relative',
     boxShadow: theme.shadowsInset[3],
     // minHeight: '100%',
@@ -69,7 +70,8 @@ const AglynViewport = styled(Stack, {
   }
 })
 
-export interface ViewportRootComponentProps extends MuiStackProps {
+export interface ViewportRootComponentProps
+  extends JSX.ComponentProps<typeof AglynViewport> {
   // drawerWidth?: number
   component?
 }
@@ -83,9 +85,6 @@ const ViewportRootComponent = forwardRef<any, ViewportRootComponentProps>(
         ref={ref}
         id="aglyn:viewport-root"
         aria-label="besigner viewport root"
-        direction="column"
-        alignItems="center"
-        spacing={0}
         component="main"
         // drawerWidth={left?.drawerWidth}
         {...rest}

@@ -17,12 +17,9 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
-import {
-  type ConnectDragPreview,
-  type ConnectDragSource,
-  useDrag,
-} from 'react-dnd'
-import { type NodeDropArea } from './use-leaf-drop'
+import { useDraggable } from '@dnd-kit/core'
+import { useDrag } from 'react-dnd'
+import type { NodeDropArea } from './use-leaf-drop'
 
 export type DragCollected = {
   isDragging: boolean
@@ -35,9 +32,17 @@ export type NodeDragItem = {
 export function useLeafDrag(
   node: NodeDragItem['node'],
   type: Besigner.DragType,
-): [DragCollected, ConnectDragSource, ConnectDragPreview] {
+): ReturnType<typeof useDraggable> {
+  return useDraggable({
+    id: `${type}:${node?.$id}`,
+    data: {
+      type,
+      node,
+    },
+  })
+
   return useDrag<NodeDragItem, NodeDropArea, DragCollected>(
-    /*() => */ {
+    {
       type: type,
       item: () => {
         Besigner.dnd.setDragNode(node)
@@ -56,9 +61,11 @@ export function useLeafDrag(
         const dragNode = monitor.getItem().node
         return Boolean(node?.$id && node?.$id === dragNode?.$id)
       },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
-      }),
+      collect: (monitor) => {
+        return {
+          isDragging: monitor.isDragging(),
+        }
+      },
     },
     [type],
   )

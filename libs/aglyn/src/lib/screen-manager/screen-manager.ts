@@ -119,6 +119,10 @@ export interface NodeSchema<P = JSX.AnyProps>
    * The computed guard for of child nodes (only for type completion)
    */
   readonly hasNodes?: boolean
+  /**
+   * The computed property for the resolved props from component schema
+   */
+  readonly resolvedProps?: P
 }
 
 export type NodeSchemaJSON<P = JSX.AnyProps> = Omit<
@@ -202,6 +206,7 @@ export interface ScreenState {
     parent: NodeSchema<any>,
     index?: number,
   ): NodeSchema<any>
+  updateNodeProps(node: NodeSchema<any>, props: NodeSchema<any>['props']): void
 }
 
 export const state = observable<ScreenState>({
@@ -430,6 +435,14 @@ export const state = observable<ScreenState>({
 
     return this.getNode(duplicate.$id)
   },
+  updateNodeProps(
+    node: NodeSchema<any>,
+    props: NodeSchema<any>['props'],
+  ): void {
+    if (!node) throw new Error('Invalid node')
+    this.saveHistory()
+    node.props = { ...props }
+  },
 })
 
 export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
@@ -469,6 +482,13 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
   }
   get hasNodes(): boolean {
     return Array.isArray(this.nodes) && this.nodes.length > 0
+  }
+  get resolvedProps(): P {
+    const resolveProps = this.componentSchema?.resolveProps
+    if (typeof resolveProps === 'function') {
+      return (resolveProps(this) || {}) as P
+    }
+    return this.props
   }
 
   constructor(schema: NodeSchema<P>) {
@@ -614,6 +634,12 @@ export function addNodeFromPreset(
 
 export function duplicateNode(node: NodeSchema<any>): NodeSchema<any> {
   return runInAction(() => state.duplicateNode(node))
+}
+export function updateNodeProps(
+  node: NodeSchema<any>,
+  props: NodeSchema<any>['props'],
+): void {
+  return runInAction(() => state.updateNodeProps(node, props))
 }
 
 export function nestNodes(

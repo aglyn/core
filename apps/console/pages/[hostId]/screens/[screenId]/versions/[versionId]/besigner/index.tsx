@@ -107,7 +107,12 @@ function BesignerPage(props) {
   const notFound = status === 'success' && !data
 
   const handleSave = useCallback(async () => {
-    if (saveAvailable) enqueueSnackbar('Already saved', { variant: 'info' })
+    if (!saveAvailable) {
+      return enqueueSnackbar('Already saved', {
+        variant: 'info',
+        persist: false,
+      })
+    }
     const dequeueLoading = queueLoading()
 
     const nodes = Aglyn.screen.nodesToJSON()

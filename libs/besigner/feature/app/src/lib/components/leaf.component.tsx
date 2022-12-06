@@ -18,102 +18,126 @@
 import { Leaf, type LeafProps } from '@aglyn/aglyn-node-renderer'
 import * as Besigner from '@aglyn/besigner'
 import { useForkedRefs, useIsomorphicLayoutEffect } from '@aglyn/shared-ui-jsx'
+import { Box } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import {
-  type MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { useRenderedCanvasElements } from '../contexts/rendered-canvas-elements'
 import useLeafDrag from '../hooks/use-leaf-drag'
 import useLeafDrop from '../hooks/use-leaf-drop'
 
 export interface ElementLeafComponentProps extends LeafProps {}
 
-function RawLeafComponent(
-  props: ElementLeafComponentProps,
-  forwardRef: MutableRefObject<any>,
-) {
-  const { node, ...rest } = props
+const RawLeafComponent = forwardRef<any, ElementLeafComponentProps>(
+  (props, forwardRef) => {
+    const { node, ...rest } = props
+    const localRef = useRef<HTMLElement>(null)
+    const [nodeRef, setNodeRef] = useState<HTMLElement>()
 
-  const [, dragHandle, dragPreview] = useLeafDrag(
-    node,
-    Besigner.DragType.CANVAS,
-  )
-  const [, dropRef] = useLeafDrop(node)
-  const localRef = useRef<HTMLElement>(null)
-  const [nodeRef, setNodeRef] = useState<HTMLElement>()
-  const { setElementRef, deleteElementRef } = useRenderedCanvasElements()
-  const ref = useForkedRefs<HTMLElement>(
-    forwardRef,
-    dragPreview,
-    dropRef,
-    setNodeRef,
-    localRef,
-  )
+    const {
+      setNodeRef: setDraggableNodeRef,
+      attributes,
+      listeners,
+      transform,
+    } = useLeafDrag(node, Besigner.DragType.CANVAS)
+    const { setNodeRef: setDroppableNodeRef } = useLeafDrop(node)
+    const { setElementRef, deleteElementRef } = useRenderedCanvasElements()
+    const ref = useForkedRefs<HTMLElement>(
+      forwardRef,
+      setDraggableNodeRef,
+      setDroppableNodeRef,
+      // dragPreview,
+      // dropRef,
+      setNodeRef,
+      localRef,
+    )
+    const style = transform
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+          cursor: 'grab',
+        }
+      : undefined
 
-  /**
-   * Update context element ref
-   */
-  useEffect(() => {
-    setElementRef(node?.$id, { $id: node?.$id, node: nodeRef, dragHandle })
-    return () => {
-      deleteElementRef(node?.$id)
-    }
-  })
-
-  const handleOnMouseOver = useCallback(
-    (e: Event) => {
-      e.preventDefault()
-      e.stopPropagation()
-      Besigner.focus.setHoveredNode(node)
-    },
-    [node],
-  )
-  const handleOnMouseDown = useCallback(
-    (e: Event) => {
-      e.preventDefault()
-      e.stopPropagation()
-      Besigner.focus.handleNodeSelection(node)
-    },
-    [node],
-  )
-  const isSelected = Besigner.focus.isNodeSelected(node)
-
-  useIsomorphicLayoutEffect(() => {
-    const el = localRef.current
-    if (el) {
-      el.addEventListener('mouseover', handleOnMouseOver)
-      el.addEventListener('mousedown', handleOnMouseDown)
-
+    /**
+     * Update context element ref
+     */
+    useEffect(() => {
+      setElementRef(node?.$id, {
+        $id: node?.$id,
+        node: nodeRef,
+        dragHandle: {
+          ...listeners,
+          style: transform ? { cursor: 'grab' } : { cursor: 'move' },
+        },
+      })
       return () => {
-        el.removeEventListener('mouseover', handleOnMouseOver)
-        el.removeEventListener('mousedown', handleOnMouseDown)
+        deleteElementRef(node?.$id)
       }
-    }
-  }, [nodeRef, handleOnMouseOver, handleOnMouseDown])
+    })
 
-  // console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-  // console.log('element attributes', elementAttributes)
+    const handleOnMouseOver = useCallback(
+      (e: Event) => {
+        e.preventDefault()
+        e.stopPropagation()
+        Besigner.focus.setHoveredNode(node)
+      },
+      [node],
+    )
+    const handleOnMouseDown = useCallback(
+      (e: Event) => {
+        e.preventDefault()
+        e.stopPropagation()
+        Besigner.focus.handleNodeSelection(node)
+      },
+      [node],
+    )
+    const isSelected = Besigner.focus.isNodeSelected(node)
 
-  return (
-    <Leaf
-      ref={ref}
-      node={node}
-      data-aglyn-selected={isSelected ? 'selected' : undefined}
-      {...rest}
-    />
-  )
-}
+    useIsomorphicLayoutEffect(() => {
+      const el = localRef.current
+      if (el) {
+        el.addEventListener('mouseover', handleOnMouseOver)
+        el.addEventListener('mousedown', handleOnMouseDown)
+
+        return () => {
+          el.removeEventListener('mouseover', handleOnMouseOver)
+          el.removeEventListener('mousedown', handleOnMouseDown)
+        }
+      }
+    }, [handleOnMouseOver, handleOnMouseDown])
+
+    return (
+      <>
+        <Leaf
+          ref={ref}
+          node={node}
+          data-aglyn-selected={isSelected ? 'selected' : undefined}
+          style={style}
+          {...attributes}
+          {...rest}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            pointerEvents: 'none',
+            top: 0,
+            left: 0,
+            opacity: 0.2,
+            width: () => nodeRef?.offsetWidth,
+            height: () => nodeRef?.offsetHeight,
+            transform: () =>
+              `translate3d(${nodeRef?.offsetLeft}px,${nodeRef?.offsetTop}px,0)`,
+          }}
+        >
+          <Box sx={{}}>top</Box>
+        </Box>
+      </>
+    )
+  },
+)
 RawLeafComponent.displayName = 'BesignerLeafComponent'
 RawLeafComponent.aglyn = true
 
-const LeafComponent = observer<ElementLeafComponentProps, any>(
+export const LeafComponent = observer<ElementLeafComponentProps, any>(
   RawLeafComponent,
-  { forwardRef: true },
 )
-
-export { LeafComponent }
 export default LeafComponent

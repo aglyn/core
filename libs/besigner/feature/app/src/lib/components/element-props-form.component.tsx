@@ -30,6 +30,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import Grid from '@mui/material/Grid'
+import { observer } from 'mobx-react-lite'
 import { forwardRef, useCallback } from 'react'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
@@ -94,10 +95,10 @@ export interface ElementPropsFormProps extends FormRendererProps {
   node?: Aglyn.NodeSchema<any>
 }
 
-const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
+const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
   (props, ref) => {
     const { node, ...rest } = props
-    const schema = Aglyn.components.getSchema(node?.componentId)
+    const schema = node?.componentSchema
     const nodeProps = node?.props
     const deleteElementCallback = useDeleteElementCallback()
     const attributes = schema?.attributes || []
@@ -105,9 +106,8 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
     const handleFormCancel = useCallback((e, reason) => {}, [])
     const handleElementSave = useCallback(
       (values) => {
-        if (node) {
-          node.props = { ...values }
-        }
+        console.log('Update node props', { ...node?.props }, values)
+        Aglyn.screen.updateNodeProps(node, values)
       },
       [node],
     )
@@ -151,8 +151,8 @@ const ElementPropsForm = forwardRef<any, ElementPropsFormProps>(
     )
   },
 )
-ElementPropsForm.displayName = 'ElementPropsForm'
-ElementPropsForm.aglyn = true
+ElementPropsFormRaw.displayName = 'ElementPropsForm'
+ElementPropsFormRaw.aglyn = true
 
-export { ElementPropsForm }
+export const ElementPropsForm = observer(ElementPropsFormRaw)
 export default ElementPropsForm

@@ -18,8 +18,9 @@
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
+import { useDroppable } from '@dnd-kit/core'
 import isEqual from 'lodash-es/isEqual'
-import { type ConnectDropTarget, useDrop } from 'react-dnd'
+import { useDrop } from 'react-dnd'
 import type { NodeDragItem } from './use-leaf-drag'
 
 export type DropCollected = {
@@ -41,7 +42,15 @@ const acceptAll = Object.values(Besigner.DragType)
 export function useLeafDrop(
   node: Aglyn.NodeSchema<any>,
   accept: Besigner.DragType[] = acceptAll,
-): [DropCollected, ConnectDropTarget] {
+): ReturnType<typeof useDroppable> {
+  return useDroppable({
+    id: `${accept.join()}:${node?.$id}`,
+    data: {
+      accept,
+      node,
+    },
+  })
+
   return useDrop<NodeDragItem, NodeDropArea, DropCollected>(
     {
       accept: accept,

@@ -23,7 +23,7 @@ import {
   type PopperProps as MuiPopperProps,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { type MutableRefObject, useMemo } from 'react'
+import { forwardRef, type MutableRefObject, useMemo } from 'react'
 import { useRenderedCanvasElementRef } from '../contexts/rendered-canvas-elements'
 import ElementOverlayActionsComponent from './element-overlay-actions.component'
 import ElementOverlayLabelComponent from './element-overlay-label.component'
@@ -90,10 +90,10 @@ export interface ElementOverlayPopperComponentProps
   variant: PopperVariant
 }
 
-const ElementOverlayPopper = (
-  props: ElementOverlayPopperComponentProps,
-  ref: MutableRefObject<any>,
-) => {
+const ElementOverlayPopper = forwardRef<
+  any,
+  ElementOverlayPopperComponentProps
+>((props: ElementOverlayPopperComponentProps, ref: MutableRefObject<any>) => {
   const { variant, ...rest } = props || {}
 
   const state = Besigner.focus.state[variantToStoreName[variant] || 'hovered']
@@ -112,70 +112,61 @@ const ElementOverlayPopper = (
   }, [$id, node, variant])
 
   return (
-    <>
-      <MuiPopper
-        ref={ref}
-        anchorEl={() => elementRef?.node}
-        placement="top-start"
-        modifiers={outerModifiers}
-        data-aglyn-node={$id}
-        data-aglyn-kind={'overlay-popper-out'}
-        open={isOpen}
-        keepMounted
-        disablePortal
-        {...rest}
-      >
-        {({ placement, TransitionProps }) => {
-          return (
-            <>
-              <ElementOverlayOutlineComponent $id={$id} />
+    <MuiPopper
+      ref={ref}
+      anchorEl={() => elementRef?.node}
+      placement="top-start"
+      modifiers={outerModifiers}
+      data-aglyn-node={$id}
+      data-aglyn-kind={'overlay-popper-out'}
+      open={isOpen}
+      keepMounted
+      disablePortal
+      {...rest}
+    >
+      {({ placement, TransitionProps }) => {
+        return (
+          <>
+            <ElementOverlayOutlineComponent $id={$id} />
 
-              <MuiPopper
-                anchorEl={() => elementRef?.node}
-                data-aglyn-node={$id}
-                data-aglyn-kind={'overlay-popper-in'}
-                placement={
-                  variant === 'hoveredOverlay' ? 'top-start' : undefined
-                }
-                modifiers={innerModifiers}
-                open={isOpen}
-                sx={{
-                  ['&[data-popper-placement^=top] #aglyn\\:element-overlay-label']:
-                    {
-                      borderTopLeftRadius: 3,
-                      borderTopRightRadius: 3,
-                      borderBottomLeftRadius: 0,
-                      borderBottomRightRadius: 0,
-                    },
-                  ['&[data-popper-placement^=bottom] #aglyn\\:element-overlay-label']:
-                    {
-                      borderTopLeftRadius: 0,
-                      borderTopRightRadius: 0,
-                      borderBottomLeftRadius: 3,
-                      borderBottomRightRadius: 3,
-                    },
-                }}
-                disablePortal
-                {...rest}
-              >
-                <div>{badgeElement}</div>
-              </MuiPopper>
-            </>
-          )
-        }}
-      </MuiPopper>
-    </>
+            <MuiPopper
+              anchorEl={() => elementRef?.node}
+              data-aglyn-node={$id}
+              data-aglyn-kind={'overlay-popper-in'}
+              placement={variant === 'hoveredOverlay' ? 'top-start' : undefined}
+              modifiers={innerModifiers}
+              open={isOpen}
+              sx={{
+                ['&[data-popper-placement^=top] #aglyn\\:element-overlay-label']:
+                  {
+                    borderTopLeftRadius: 3,
+                    borderTopRightRadius: 3,
+                    borderBottomLeftRadius: 0,
+                    borderBottomRightRadius: 0,
+                  },
+                ['&[data-popper-placement^=bottom] #aglyn\\:element-overlay-label']:
+                  {
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 0,
+                    borderBottomLeftRadius: 3,
+                    borderBottomRightRadius: 3,
+                  },
+              }}
+              disablePortal
+              {...rest}
+            >
+              <div>{badgeElement}</div>
+            </MuiPopper>
+          </>
+        )
+      }}
+    </MuiPopper>
   )
-}
+})
 
 ElementOverlayPopper.displayName = 'ElementOverlayPopperComponent'
 ElementOverlayPopper.aglyn = true
 
-export const ElementOverlayPopperComponent = observer<
-  ElementOverlayPopperComponentProps,
-  any
->(ElementOverlayPopper, {
-  forwardRef: true,
-})
+export const ElementOverlayPopperComponent = observer(ElementOverlayPopper)
 
 export default ElementOverlayPopperComponent

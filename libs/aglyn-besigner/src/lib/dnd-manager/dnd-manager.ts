@@ -63,6 +63,7 @@ export interface DndState {
    * Computed check for valid lineal relationship
    */
   readonly isValidLinealRelationship: boolean
+
   /**
    * Computed guard fn if node is dragging
    */
@@ -75,6 +76,13 @@ export interface DndState {
    * Computed guard fn if node is dragging the drop target
    */
   readonly isDraggingOverDropNode: (node: DraggableNode) => boolean
+
+  /**
+   * Computed guard fn if node can drag
+   */
+  readonly canDragNode: (node: Aglyn.AbstractNodeSchema) => boolean
+
+  clearDndStatus(): void
 }
 
 export const state = observable<DndState>({
@@ -145,13 +153,30 @@ export const state = observable<DndState>({
     const breadcrumbs = state.dropBreadcrumbs
     return Array.isArray(breadcrumbs) && breadcrumbs.indexOf(node?.$id) >= 0
   }),
+  canDragNode: computedFn((node: Aglyn.AbstractNodeSchema): boolean => {
+    if (!node) throw new Error('Invalid node')
+    switch (true) {
+      case Aglyn.screen.isRootNode(node):
+        return false
+      case node?.type === Aglyn.NodeType.PRESET:
+        return true
+      case node?.type === Aglyn.NodeType.NODE:
+        return Aglyn.components.isFeatureEnabled(
+          (node as Aglyn.NodeSchema<any>)?.componentSchema?.flags?.dragging,
+        )
+      default:
+        return false
+    }
+  }),
+
+  clearDndStatus(): void {
+    this.drag = null
+    this.drop = null
+  },
 })
 
 export function clearDndStatus() {
-  runInAction(() => {
-    state.drag = null
-    state.drop = null
-  })
+  return runInAction(() => state.clearDndStatus())
 }
 
 export function setDragNode<T extends DraggableNode>(dragNode: T): T {
@@ -175,19 +200,5 @@ export function isDraggingOverDropNode(node: DraggableNode): boolean {
 }
 
 export function canDragNode(node: Aglyn.AbstractNodeSchema): boolean {
-  if (!node) throw new Error('Invalid node')
-  switch (true) {
-    case !node:
-      throw new Error('Invalid node')
-    case Aglyn.screen.isRootNode(node):
-      return false
-    case node?.type === Aglyn.NodeType.PRESET:
-      return true
-    case node?.type === Aglyn.NodeType.NODE:
-      return Aglyn.components.isFeatureEnabled(
-        (node as Aglyn.NodeSchema<any>)?.componentSchema?.flags?.dragging,
-      )
-    default:
-      return false
-  }
+  return state.canDragNode(node)
 }

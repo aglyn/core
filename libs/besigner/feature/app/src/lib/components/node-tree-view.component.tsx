@@ -224,12 +224,12 @@ const NodeTreeItem = observer((props: NodeTreeItemProps) => {
     onItemToggle,
     onItemFocus,
   } = useContext(TreeViewContext)
-  console.log(
-    'get node',
-    nodeId,
-    Aglyn.screen.getNode(nodeId),
-    Aglyn.screen.state.nodes[nodeId],
-  )
+  // console.log(
+  //   'get node',
+  //   nodeId,
+  //   Aglyn.screen.getNode(nodeId),
+  //   Aglyn.screen.state.nodes[nodeId],
+  // )
   const node = Aglyn.screen.getNode(nodeId)
   const schema = node?.componentSchema
   const nodeLabel = node?.labelShort
@@ -239,18 +239,30 @@ const NodeTreeItem = observer((props: NodeTreeItemProps) => {
   const dragAllowed = Aglyn.components.isFeatureEnabled(schema?.flags?.dragging)
   const collapseIn = expanded?.some((i) => i === nodeId)
   const isSelected = Besigner.focus.isNodeSelected(node)
+  const isHovered = Besigner.focus.isNodeHovered(node)
   const dragDisabled = Boolean(isRootNode || !dragAllowed)
 
-  const [dragCollect, dragRef, previewRef] = useLeafDrag(
-    node,
-    Besigner.DragType.TREE,
-  )
-  const [dropCollect, dropRef] = useLeafDrop(node)
+  const {
+    attributes: dragAttributes,
+    transform,
+    isDragging,
+    setNodeRef: setDraggableNodeRef,
+    listeners: draggableListeners,
+  } = useLeafDrag(node, Besigner.DragType.TREE)
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        cursor: 'grab',
+        opacity: 0.5,
+      }
+    : undefined
+  const { setNodeRef: setDroppableNodeRef, isOver } = useLeafDrop(node)
 
   return (
     <TreeItem
-      // ref={mouseEnterRef}
+      // ref={setDraggableNodeRef}
       data-aglyn-node={nodeId}
+      {...dragAttributes}
       depth={depth}
       onMouseEnter={(e) => {
         onItemHover(e, nodeId)
@@ -259,23 +271,26 @@ const NodeTreeItem = observer((props: NodeTreeItemProps) => {
         onItemFocus(e, nodeId)
       }}
       className={clsx(className, classKey.treeItem, {
-        [classKey.itemSelected]: Besigner.focus.isNodeSelected(node),
-        [classKey.itemHovered]: Besigner.focus.isNodeHovered(node),
-        [classKey.itemIsDragging]: dragCollect.isDragging,
-        [classKey.itemIsDragOver]: dropCollect.isOver,
+        [classKey.itemSelected]: isSelected,
+        [classKey.itemHovered]: isHovered,
+        [classKey.itemIsDragging]: isDragging,
+        [classKey.itemIsDragOver]: isOver,
       })}
       disablePadding
-      style={{ opacity: dragCollect.isDragging ? 0.5 : undefined }}
+      style={style}
       {...rest}
     >
       <Stack
-        ref={(e: any) => dropRef(previewRef(e))}
+        ref={(e: any) => {
+          setDraggableNodeRef(e)
+          setDroppableNodeRef(e)
+        }}
         className={classKey.treeListItem}
         direction="row"
       >
         {!isRootNode && (
           <MuiListItemIcon
-            ref={dragRef}
+            {...draggableListeners}
             className={classKey.dragHandle}
             draggable
             sx={{

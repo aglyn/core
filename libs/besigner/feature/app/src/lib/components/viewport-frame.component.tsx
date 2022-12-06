@@ -133,8 +133,8 @@ const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
   return (
     <Box
       ref={ref}
-      key="aglyn:site-overlays"
-      id="aglyn:site-overlays"
+      key="aglyn:node-overlays"
+      id="aglyn:node-overlays"
       sx={{
         position: 'relative',
         zIndex: 'tooltip',

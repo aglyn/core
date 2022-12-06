@@ -57,10 +57,20 @@ function ComponentGridItemRaw(
 
   console.log('item', item)
 
-  const [, dragHandle] = useLeafDrag(
-    isPreset ? item : item,
-    Besigner.DragType.PRESET,
-  )
+  const {
+    attributes: dragAttributes,
+    transform,
+    isDragging,
+    setNodeRef: setDraggableNodeRef,
+    listeners: draggableListeners,
+  } = useLeafDrag(isPreset ? item : item, Besigner.DragType.PRESET)
+  const style = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        cursor: 'grab',
+        opacity: 0.5,
+      }
+    : undefined
 
   console.log('ComponentGridItem', label, item?.$id, item)
 
@@ -68,7 +78,10 @@ function ComponentGridItemRaw(
     <CardListItem
       ref={ref}
       ContentBoxProps={{
-        ref: dragHandle,
+        ref: setDraggableNodeRef,
+        style: style,
+        ...draggableListeners,
+        ...dragAttributes,
       }}
       item={item}
       label={label}

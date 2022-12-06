@@ -85,7 +85,7 @@ function JsonModal(props: JsonModalProps) {
 
   return (
     <Dialog maxWidth="lg" fullWidth onClose={handleClose} {...rest}>
-      <DialogTitle>Screen Raw JSON</DialogTitle>
+      <DialogTitle>Raw JSON</DialogTitle>
       <DialogContent sx={{ position: 'relative', p: 0 }}>
         <CodeMirror value={value} onChange={handleChange} />
         {warnOpen && (

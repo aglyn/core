@@ -19,7 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import { styled } from '@aglyn/shared-ui-theme'
 import mergeSxProps from '@aglyn/shared-ui-theme/util/merge-sx-props'
 import { observer } from 'mobx-react-lite'
-import { HTMLAttributes, type MutableRefObject, useMemo } from 'react'
+import { forwardRef, type HTMLAttributes, useMemo } from 'react'
 import { isValidElementType } from 'react-is'
 
 const DefaultComponent = styled('div')({})
@@ -30,41 +30,33 @@ export interface LeafProps extends HTMLAttributes<any> {
   sx?: JSX.SxProps
 }
 
-function LeafRaw(props: LeafProps, ref: MutableRefObject<any>) {
+const LeafRaw = forwardRef<any, LeafProps>((props, ref) => {
   const { children, node, sx, ...rest } = props
 
   const componentSchema = node?.componentSchema
-  const resolveProps = componentSchema?.resolveProps
+  const resolvedProps = node?.resolvedProps
   const Factory = Aglyn.components.getFactory(componentSchema?.$id)
 
   const Component = useMemo(() => {
     return isValidElementType(Factory) ? Factory : DefaultComponent
   }, [Factory])
 
-  const resolved = useMemo(() => {
-    const resolved = resolveProps && resolveProps(node)
-    return resolved || node.props
-  }, [resolveProps, node])
-
-  const merged = useMemo(() => {
-    return { ...resolved, sx: mergeSxProps(sx, node?.sx) }
-  }, [resolved, sx, node])
-
   return (
     <Component
       key={node?.$id}
       ref={ref}
       data-aglyn={`leaf:${node?.$id}`}
+      sx={mergeSxProps(sx, node?.sx, resolvedProps?.sx)}
+      {...resolvedProps}
       {...rest}
-      {...merged}
     >
       {children}
-      {merged?.['children']}
+      {resolvedProps?.['children']}
     </Component>
   )
-}
+})
 LeafRaw.displayName = 'Leaf'
 LeafRaw.aglyn = true
 
-const Leaf = observer<LeafProps, any>(LeafRaw, { forwardRef: true })
+export const Leaf = observer(LeafRaw)
 export default Leaf

@@ -18,7 +18,7 @@
 import { LOADING_OVERLAY_ELEMENT } from '@aglyn/shared-ui-jsx'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
 import { _isFnT } from '@aglyn/shared-util-guards'
-import { Stack, type StackProps } from '@mui/material'
+import { Stack } from '@mui/material'
 import clsx from 'clsx'
 import dynamic from 'next/dynamic'
 import { ChangeEvent, forwardRef, useCallback, useRef } from 'react'
@@ -38,7 +38,7 @@ const PanelLeftComponent = dynamic<AsidePanelComponentProps>(
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
 
-const WorkspaceEditor = styled(Stack, {
+const WorkspaceEditor = styled('div', {
   name: 'AglynWorkspaceEditor',
 })({
   // position: 'absolute',
@@ -49,12 +49,17 @@ const WorkspaceEditor = styled(Stack, {
   height: '100%',
   width: '100%',
   overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  alignContent: 'stretch',
+  alignItems: 'stretch',
   [`&.${classKeys.panelLeftOpen}`]: {},
   [`&.${classKeys.panelBottomOpen}`]: {},
   [`&.${classKeys.panelRightOpen}`]: {},
 })
 
-export interface WorkspaceEditorComponentProps extends StackProps {}
+export interface WorkspaceEditorComponentProps
+  extends JSX.ComponentProps<typeof WorkspaceEditor> {}
 
 const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
   (props, ref) => {
@@ -97,10 +102,6 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
       <WorkspaceEditor
         ref={ref}
         id="aglyn:besigner-workspace"
-        direction="column"
-        alignContent="stretch"
-        alignItems="stretch"
-        spacing={0}
         className={elemClassName}
         {...rest}
       >

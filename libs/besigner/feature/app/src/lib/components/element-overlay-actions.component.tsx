@@ -212,7 +212,8 @@ const ElementOverlayActionsComponentRaw = (
             sx={{ '&, &:hover, &:focus': { cursor: 'move' } }}
             // ref={dragHandleRef}
             ButtonProps={{
-              ref: elementRef?.dragHandle,
+              // ref: elementRef?.dragHandle,
+              ...elementRef?.dragHandle,
               sx: { '&, &:hover, &:focus': { cursor: 'move' } },
             }}
             icon={{ path: ICON_VARIANT_MODIFY_DRAG.path }}

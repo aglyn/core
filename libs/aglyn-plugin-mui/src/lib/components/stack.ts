@@ -47,6 +47,22 @@ export const schema: Aglyn.ComponentSchema = {
       ],
     },
     {
+      name: 'justifyContent',
+      label: 'Justify Content',
+      description:
+        'Defines how the browser distributes space between and around content items along the main-axis of the container.',
+      component: Aglyn.FieldComponentType.SELECT,
+      options: [
+        { value: '', label: 'Default' },
+        { value: 'flex-start', label: 'Flex Start' },
+        { value: 'center', label: 'Center' },
+        { value: 'flex-end', label: 'Flex End' },
+        { value: 'space-between', label: 'Space Between' },
+        { value: 'space-around', label: 'Space Around' },
+        { value: 'space-evenly', label: 'Space Evenly' },
+      ],
+    },
+    {
       name: 'spacing',
       label: 'Spacing',
       description: 'Defines the space/gap between its immediate children.',

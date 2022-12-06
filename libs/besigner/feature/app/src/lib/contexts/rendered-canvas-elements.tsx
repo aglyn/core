@@ -24,13 +24,11 @@ import {
   useMemo,
   useRef,
 } from 'react'
-import type { DragElementWrapper, DragSourceOptions } from 'react-dnd'
 
-export type ElementDragHandle = DragElementWrapper<DragSourceOptions>
 export type ElementCanvasRefObject = Dictionary & {
   $id: NodeId
   node: Element
-  dragHandle: ElementDragHandle
+  dragHandle: any
 }
 
 export type RenderedCanvasElementsType = {

@@ -113,7 +113,7 @@ const BreadcrumbItem = observer((props: BreadcrumbItemProps) => {
   //     restrictChildren: schema?.restrictChildren,
   //   }
   // }, [nodeId, node, schema])
-  const [, dropRef] = useLeafDrop(node)
+  const { setNodeRef: setDroppableNodeRef } = useLeafDrop(node)
 
   const handleClick = useCallback(
     (e) => {
@@ -130,7 +130,7 @@ const BreadcrumbItem = observer((props: BreadcrumbItemProps) => {
 
   return (
     <BreadcrumbLink
-      ref={dropRef}
+      ref={setDroppableNodeRef}
       color="textSecondary"
       {...({ component: 'button' } as any)}
       fontSize="inherit"
