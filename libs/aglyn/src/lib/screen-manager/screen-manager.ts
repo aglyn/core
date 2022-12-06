@@ -178,8 +178,8 @@ export interface ScreenState {
   ) => NodeBreadcrumbPath
   getNodeLabelShort: (node: NodeSchema<any>) => any
   nestNodes: (
-    nodes?: NodesMap,
-    rootNode?: NodeSchema<any>,
+    nodes: NodesMap,
+    rootNode: NodeSchema<any>,
   ) => NodeSchemaNested<any>
   redo(): void
   undo(): void
@@ -234,7 +234,10 @@ export const state = observable<ScreenState>({
     return this._history[this._activeIndex][NODE_ROOT_ID]
   },
   get nestedNodes(): NodeSchemaNested<any> {
-    return this.nestNodes(this.nodes, this.rootNode)
+    const rootNode = this.rootNode
+    const nodes = this.nodes
+    if (!nodes || !rootNode) return {} as any
+    return this.nestNodes(nodes, rootNode)
   },
 
   hasNode: computedFn(($id: NodeId): boolean => {
@@ -283,35 +286,17 @@ export const state = observable<ScreenState>({
   }),
   nestNodes: computedFn(
     (nodes: NodesMap, rootNode: NodeSchema<any>): NodeSchemaNested<any> => {
-      console.log('nestNodes', rootNode, toJS(nodes))
       if (!nodes) throw new Error('Invalid nodes')
       if (!rootNode) throw new Error('Invalid root node')
 
-      function nest(
-        nodes?: NodesMap,
-        rootNode?: NodeSchema<any>,
-      ): NodeSchemaNested<any> {
-        const parent = toJS(rootNode) as unknown as NodeSchemaNested<any>
-
-        // TODO: Remove after migration to nodes property
-        if (parent['elements']) {
-          parent.nodes = parent['elements']
-          delete parent['elements']
-        }
-        if (parent['bundleId']) {
-          parent.pluginId = parent['bundleId']
-          delete parent['bundleId']
-        }
-
-        parent.nodes = (parent.nodes ||= []).map((id) => {
-          const child = nodes[id as unknown as string]
-          return nest(nodes, child)
-        })
-
-        return parent
+      const node = toJS(rootNode) as unknown as NodeSchemaNested<any>
+      const childNodes = []
+      for (const childId of (node.nodes ||= []) as unknown as NodeId[]) {
+        if (!Object.hasOwn(nodes, childId)) continue
+        childNodes.push(state.nestNodes(nodes, nodes[childId]))
       }
-
-      return nest(nodes, rootNode)
+      node.nodes = childNodes
+      return node
     },
   ),
 

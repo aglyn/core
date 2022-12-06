@@ -24,6 +24,7 @@ import {
   withBesignerContext,
   type WorkspaceEditorComponentProps,
 } from '@aglyn/besigner-feature-app'
+import { BesignerJsonEditor } from '@aglyn/besigner-json-editor'
 // import '@aglyn/foundation-feature-singleton'
 import {
   HAS_BROWSER,
@@ -32,7 +33,6 @@ import {
   ICON_VARIANT_MODIFY_SAVE,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
-import { iJSON } from '@aglyn/shared-data-types'
 import {
   AppLink,
   LOADING_OVERLAY_ELEMENT,
@@ -41,26 +41,11 @@ import {
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { useScreenVersion } from '@aglyn/tenant-feature-instance'
-import { json as codeMirrorJson } from '@codemirror/lang-json'
-import {
-  Alert,
-  AlertTitle,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  type DialogProps,
-  DialogTitle,
-  Stack,
-  Typography,
-} from '@mui/material'
-import { githubDark } from '@uiw/codemirror-theme-github'
-import CodeEditor from '@uiw/react-codemirror'
+import { Stack, Typography } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
@@ -88,72 +73,6 @@ const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
     ),
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
-
-interface JsonEditorDialogProps extends Omit<DialogProps, 'defaultValue'> {
-  onSave?: {
-    bivarianceHack(event: object, value: iJSON): void
-  }['bivarianceHack']
-  defaultValue?: iJSON
-}
-
-function JsonEditorModal(props: JsonEditorDialogProps) {
-  const { onClose, onSave, defaultValue, ...rest } = props
-  const [data, setData] = useState(defaultValue)
-  const value = useMemo(() => JSON.stringify(defaultValue, null, 2), [data])
-
-  const handleChange = useCallback((value) => {
-    try {
-      const json = JSON.parse(value)
-      setData(json)
-    } catch (e) {
-      console.warn(e)
-    }
-  }, [])
-  const handleSave = useCallback(
-    (event) => {
-      console.log('handleSave', data)
-      onSave && onSave(event, data)
-    },
-    [onSave, data],
-  )
-
-  return (
-    <>
-      <Dialog maxWidth="lg" fullWidth onClose={onClose} {...rest}>
-        <DialogTitle>Screen Raw JSON</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            <Alert severity="warning">
-              <AlertTitle>Warning: Advanced Feature Ahead!</AlertTitle>
-              Using the raw json editor is highly discouraged and should only be
-              used by individuals who understand the consequences. Changes may
-              potentially result in undesired outcomes which are{' '}
-              <strong>destructive and irreversible</strong>.
-            </Alert>
-          </DialogContentText>
-          <br />
-          <CodeEditor
-            // initialState={{ json: JSON.stringify(data, null, 2) }}
-            value={value}
-            onChange={handleChange}
-            theme={githubDark}
-            extensions={[codeMirrorJson() /*linter,*/ /*lintGutter()*/]}
-            height="50vh"
-            basicSetup={{
-              lintKeymap: true,
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" onClick={onClose as any}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>Save JSON</Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  )
-}
 
 function setLocalNodes(value: Aglyn.ProcessableNodes) {
   const parsed = Aglyn.screen.processNodesToDenormalized(value)
@@ -407,19 +326,12 @@ function BesignerPage(props) {
           setScreenDialog(false)
         }}
       />
-      {Aglyn.screen.state.rootNode && (
-        <JsonEditorModal
-          open={jsonOpen}
-          onClose={closeJsonEditor}
-          onSave={handleJsonSave}
-          defaultValue={
-            Aglyn.screen.nestNodes(
-              Aglyn.screen.state.nodes,
-              Aglyn.screen.state.rootNode,
-            ) as iJSON
-          }
-        />
-      )}
+      <BesignerJsonEditor
+        open={Boolean(Aglyn.screen.state.rootNode && jsonOpen)}
+        onClose={closeJsonEditor}
+        onSave={handleJsonSave}
+        defaultValue={Aglyn.screen.state.nestedNodes as any}
+      />
     </>
   )
 }

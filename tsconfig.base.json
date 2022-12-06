@@ -50,6 +50,7 @@
       "@aglyn/besigner-feature-app/*": ["libs/besigner/feature/app/src/lib/*"],
       "@aglyn/besigner-feature-canvas-designer": ["libs/besigner/feature/canvas-designer/src/index.ts"],
       "@aglyn/besigner-feature-canvas-designer/*": ["libs/besigner/feature/canvas-designer/src/lib/*"],
+      "@aglyn/besigner-json-editor": ["libs/besigner-json-editor/src/index.ts"],
       "@aglyn/besigner-ui-box-styler": ["libs/besigner/ui/box-styler/src/index.ts"],
       "@aglyn/besigner-ui-color-picker": ["libs/besigner/ui/color-picker/src/index.ts"],
       "@aglyn/besigner-ui-color-picker/*": ["libs/besigner/ui/color-picker/src/lib/*"],
