@@ -421,7 +421,7 @@ function MainLayout(props: MainLayoutProps) {
                 {
                   children: 'Settings',
                   component: AppLink,
-                  href: Route.ACCOUNT_MANAGE_SETTINGS,
+                  href: Route.MANAGE_ACCOUNT_SETTINGS,
                   icon: { path: ICON_VARIANT_USER_SETTINGS.path },
                 },
                 {

@@ -123,14 +123,9 @@ export const appLinkClassKey = generateComponentClassKeys('AglynAppLink', [
  */
 const AppLink = forwardRef(
   <T extends AppLinkVariant>(props: AppLinkProps<T>, ref) => {
-    const {
-      className,
-      componentVariant: variant,
-      href,
-      hrefAs,
-      ...rest
-    } = props
+    const { className, componentVariant, href, hrefAs, ...rest } = props
 
+    const variant = componentVariant
     const { pathname, asPath } = useRouter()
     const [active, activeAsAncestor] = useMemo(() => {
       const hrefPath = _isObj(href) ? href['pathname'] : href,
