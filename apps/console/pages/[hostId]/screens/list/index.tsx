@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  AccordionListComponent,
-  type AccordionRenderProps,
-} from '@aglyn/besigner-feature-app'
+import { type AccordionRenderProps } from '@aglyn/besigner-feature-app'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
 import { createResourceUid } from '@aglyn/core-util-app'
 import {
@@ -374,14 +371,14 @@ function Screens(props) {
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <WidgetCardComponent>
-            <AccordionListComponent
-              unique
-              items={screens}
-              AccordionSummaryProps={{ dense: true }}
-              DetailsContentComponent={DetailsContentComponent as any}
-              SummaryContentComponent={SummaryContentComponent as any}
-              getItemId={(item) => item.$id}
-            />
+            {/*<AccordionListComponent*/}
+            {/*  unique*/}
+            {/*  items={screens}*/}
+            {/*  AccordionSummaryProps={{ dense: true }}*/}
+            {/*  DetailsContentComponent={DetailsContentComponent as any}*/}
+            {/*  SummaryContentComponent={SummaryContentComponent as any}*/}
+            {/*  getItemId={(item) => item.$id}*/}
+            {/*/>*/}
             <DataTableComponent
               rowHeight={TABLE_ROW_HEIGHT}
               getRowId={(row) => row.$id}
