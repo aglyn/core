@@ -50,7 +50,7 @@ import {
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import WidgetCardComponent from '../../../components/widget-card.component'
+import CardDisplay from '../../../components/card-display'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
@@ -74,7 +74,7 @@ const FormTemplate = forwardRef<any, FormTemplateRenderProps>((props, ref) => {
   const { handleSubmit } = useFormApi()
   const isLoading = status === 'loading'
   return (
-    <WidgetCardComponent
+    <CardDisplay
       contentGutterY
       contentGutterX
       header={schema.title}
@@ -101,7 +101,7 @@ const FormTemplate = forwardRef<any, FormTemplateRenderProps>((props, ref) => {
           {formFields as any}
         </Grid>
       </form>
-    </WidgetCardComponent>
+    </CardDisplay>
   )
 })
 FormTemplate.displayName = 'FormTemplate'
@@ -213,7 +213,7 @@ const ManageUser: NextPageWithLayout = (props) => {
                   xs: 12,
                   sm: 3,
                   children: (
-                    <WidgetCardComponent header="Navigation">
+                    <CardDisplay header="Navigation">
                       <TabList
                         orientation="vertical"
                         textColor="secondary"
@@ -234,7 +234,7 @@ const ManageUser: NextPageWithLayout = (props) => {
                           />
                         ))}
                       </TabList>
-                    </WidgetCardComponent>
+                    </CardDisplay>
                   ),
                 },
                 {

@@ -23,7 +23,7 @@ import DataTableComponent from '../../components/data-table.component'
 import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
-import WidgetCardComponent from '../../components/widget-card.component'
+import CardDisplay from '../../components/card-display'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
 
@@ -70,7 +70,7 @@ const Index: NextPageWithLayout = (props) => {
               xs: 12,
               md: 6,
               children: (
-                <WidgetCardComponent header={'Users'}>
+                <CardDisplay header={'Users'}>
                   <DataTableComponent
                     rowHeight={40}
                     getRowId={(row) => row.uid}
@@ -105,14 +105,14 @@ const Index: NextPageWithLayout = (props) => {
                     ]}
                     rows={[]}
                   />
-                </WidgetCardComponent>
+                </CardDisplay>
               ),
             },
             {
               xs: 12,
               md: 6,
               children: (
-                <WidgetCardComponent contentGutterX>hello</WidgetCardComponent>
+                <CardDisplay contentGutterX>hello</CardDisplay>
               ),
             },
           ]}

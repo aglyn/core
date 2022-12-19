@@ -30,7 +30,7 @@ import {
 import clsx from 'clsx'
 import { forwardRef } from 'react'
 
-const classKeys = generateComponentClassKeys('AglynWidgetCard', [
+const classKeys = generateComponentClassKeys('CardDisplay', [
   'contentGutterX',
   'contentGutterY',
   'headerCentered',
@@ -38,7 +38,7 @@ const classKeys = generateComponentClassKeys('AglynWidgetCard', [
   'actionsBordered',
 ])
 
-const Card = styled(MuiCard)(({ theme }) => ({
+const Card = styled(MuiCard )(({ theme }) => ({
   '.MuiCardContent-root': {
     padding: 0,
     borderWidth: 0,
@@ -86,7 +86,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   },
 }))
 
-export interface WidgetCardProps extends CardProps {
+export interface CardDisplayProps extends CardProps {
   contentGutterX?: boolean
   contentGutterY?: boolean
   contentBordered?: 'all' | 'top' | 'bottom' | undefined
@@ -100,7 +100,7 @@ export interface WidgetCardProps extends CardProps {
   ActionProps?: CardActionsProps
 }
 
-const WidgetCardComponent = forwardRef<any, WidgetCardProps>((props, ref) => {
+const CardDisplay = forwardRef<any, CardDisplayProps>((props, ref) => {
   const {
     actions,
     classes,
@@ -162,8 +162,7 @@ const WidgetCardComponent = forwardRef<any, WidgetCardProps>((props, ref) => {
   )
 })
 
-WidgetCardComponent.displayName = 'WidgetCardComponent'
-WidgetCardComponent.aglyn = true
+CardDisplay.displayName = 'CardDisplayComponent'
 
-export { WidgetCardComponent }
-export default WidgetCardComponent
+export { CardDisplay }
+export default CardDisplay

@@ -33,7 +33,7 @@ import { useEffect, useMemo } from 'react'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
-import WidgetCardComponent from '../../../../../../../components/widget-card.component'
+import CardDisplay from '../../../../../../../components/card-display'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
 
@@ -178,7 +178,7 @@ function ScreenDetails(props) {
                 md: 6,
                 lg: 4,
                 children: (
-                  <WidgetCardComponent
+                  <CardDisplay
                     header={'Basic Details'}
                     // contentGutterX
                     contentGutterY
@@ -214,7 +214,7 @@ function ScreenDetails(props) {
                         ),
                       )}
                     </List>
-                  </WidgetCardComponent>
+                  </CardDisplay>
                 ),
               },
               {
@@ -222,14 +222,14 @@ function ScreenDetails(props) {
                 md: 6,
                 lg: 8,
                 children: (
-                  <WidgetCardComponent
+                  <CardDisplay
                     header={'Raw JSON'}
                     contentGutterX
                     contentGutterY
                     contentBordered="all"
                   >
                     <pre>{JSON.stringify(screen, null, 2)}</pre>
-                  </WidgetCardComponent>
+                  </CardDisplay>
                 ),
               },
             ]}

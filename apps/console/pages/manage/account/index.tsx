@@ -21,7 +21,7 @@ import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import WidgetCardComponent from '../../../components/widget-card.component'
+import CardDisplay from '../../../components/card-display'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
@@ -63,18 +63,18 @@ const Settings: NextPageWithLayout = (props) => {
                 xs: 12,
                 md: 6,
                 children: (
-                  <WidgetCardComponent header={'Login'}>
+                  <CardDisplay header={'Login'}>
                     hello
-                  </WidgetCardComponent>
+                  </CardDisplay>
                 ),
               },
               {
                 xs: 12,
                 md: 6,
                 children: (
-                  <WidgetCardComponent header={'Profile Details'}>
+                  <CardDisplay header={'Profile Details'}>
                     hello
-                  </WidgetCardComponent>
+                  </CardDisplay>
                 ),
               },
             ]}

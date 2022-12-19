@@ -53,11 +53,11 @@ import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../../components/auth-form-template.component'
+import CardDisplay from '../../../../components/card-display'
 import DataTableComponent from '../../../../components/data-table.component'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
-import WidgetCardComponent from '../../../../components/widget-card.component'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import {
   CONTENT_MAX_WIDTH,
@@ -370,7 +370,7 @@ function Screens(props) {
         }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <WidgetCardComponent>
+          <CardDisplay>
             {/*<AccordionListComponent*/}
             {/*  unique*/}
             {/*  items={screens}*/}
@@ -391,7 +391,7 @@ function Screens(props) {
               rowsPerPageOptions={[5, 10, 15]}
               pagination
             />
-          </WidgetCardComponent>
+          </CardDisplay>
         </Container>
       </DashboardLayout>
     </>
