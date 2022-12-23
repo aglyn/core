@@ -16,7 +16,6 @@
  */
 
 import type { IconId } from '@aglyn/shared-data-mdi'
-import { _isStrT } from '@aglyn/shared-util-guards'
 import { forwardRef } from 'react'
 import { useMdiIcon } from '../hooks/use-mdi-icon'
 import MdiIcon, { type MdiIconProps } from './mdi-icon'
@@ -25,15 +24,13 @@ export interface MdiSvgIconProps extends MdiIconProps {
   iconId?: IconId
 }
 
-const MdiSvgIcon = forwardRef<any, MdiSvgIconProps>((props, ref) => {
+export const MdiIconFromId = forwardRef<any, MdiSvgIconProps>((props, ref) => {
   const { iconId, ...rest } = props
-  const icon = useMdiIcon(_isStrT(iconId) ? iconId : null)
 
-  return <MdiIcon ref={ref} path={icon?.path} {...rest} />
+  return <MdiIcon ref={ref} path={useMdiIcon(iconId)} {...rest} />
 })
 
-MdiSvgIcon.displayName = 'MdiSvgIcon'
-MdiSvgIcon.aglyn = true
+MdiIconFromId.displayName = 'MdiIconFromId'
+MdiIconFromId.aglyn = true
 
-export { MdiSvgIcon }
-export default MdiSvgIcon
+export default MdiIconFromId

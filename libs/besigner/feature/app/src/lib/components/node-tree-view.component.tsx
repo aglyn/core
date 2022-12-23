@@ -236,7 +236,7 @@ const NodeTreeItem = observer((props: NodeTreeItemProps) => {
   const breadcrumbPath = node?.breadcrumbPath
   const depth = breadcrumbPath?.length - 1
   const isRootNode = Aglyn.screen.isRootNode(node)
-  const dragAllowed = Aglyn.components.isFeatureEnabled(schema?.flags?.dragging)
+  const dragAllowed = Aglyn.isFeatureEnabled(schema?.flags?.dragging)
   const collapseIn = expanded?.some((i) => i === nodeId)
   const isSelected = Besigner.focus.isNodeSelected(node)
   const isHovered = Besigner.focus.isNodeHovered(node)

@@ -80,9 +80,7 @@ export function useLeafDrop(
           return
         }
 
-        const dropAllowed = Aglyn.components.isFeatureEnabled(
-          dropSchema?.flags?.dropping,
-        )
+        const dropAllowed = Aglyn.isFeatureEnabled(dropSchema?.flags?.dropping)
 
         if (!dropAllowed || !validRelationship) {
           Besigner.dnd.clearDndStatus()

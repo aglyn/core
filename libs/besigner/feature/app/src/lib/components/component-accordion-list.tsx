@@ -21,13 +21,13 @@ import AccordionListComponent, {
   AccordionListProps,
 } from '@aglyn/besigner-feature-app/components/accordion-list.component'
 import useLeafDrag from '@aglyn/besigner-feature-app/hooks/use-leaf-drag'
+import ListItemText from '@aglyn/plugins-ui-mui/components/list-item-text'
 import { ICON_VARIANT_ELEMENT } from '@aglyn/shared-data-enums'
-import { CardListItem, CardListItemProps } from '@aglyn/shared-ui-jsx'
+import { CardListItemProps, useForkedRefs } from '@aglyn/shared-ui-jsx'
 import { MdiIcon, MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { mergeSxProps } from '@aglyn/shared-ui-theme'
-import { Box, Grid } from '@mui/material'
+import { Box, Card, Grid, ListItemAvatar, Stack } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { MutableRefObject, useMemo } from 'react'
+import { forwardRef, useMemo } from 'react'
 
 export type ComponentGridItemData =
   | Aglyn.PresetSchema<any>
@@ -43,143 +43,123 @@ export type ComponentGridGroupItemData = {
 export type ComponentGridItemProps = Partial<CardListItemProps> & {
   item: ComponentGridGroupItemData
 }
-function ComponentGridItemRaw(
-  props: ComponentGridItemProps,
-  ref: MutableRefObject<any>,
-) {
-  const { item, ...rest } = props
-  const isPreset = item?.type === Aglyn.NodeType.PRESET
-  const label =
-    item?.label ||
-    item?.displayName ||
-    Aglyn.components.getComponentLabel(item?.$id) ||
-    item?.$id
+const ComponentGridItem = observer(
+  forwardRef<any, ComponentGridItemProps>((props, ref) => {
+    const { item, ...rest } = props
+    const isPreset = item?.type === Aglyn.NodeType.PRESET
+    const label =
+      item?.label ||
+      item?.displayName ||
+      Aglyn.components.getLabel(item?.$id) ||
+      item?.$id
 
-  console.log('item', item)
+    console.log('item', item)
 
-  const {
-    attributes: dragAttributes,
-    transform,
-    isDragging,
-    setNodeRef: setDraggableNodeRef,
-    listeners: draggableListeners,
-  } = useLeafDrag(isPreset ? item : item, Besigner.DragType.PRESET)
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        cursor: 'grab',
-        opacity: 0.5,
-      }
-    : undefined
+    const {
+      attributes: dragAttributes,
+      transform,
+      isDragging,
+      setNodeRef: setDraggableNodeRef,
+      listeners: draggableListeners,
+    } = useLeafDrag(isPreset ? item : item, Besigner.DragType.PRESET)
+    const style = transform
+      ? {
+          transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+          cursor: 'grab',
+          opacity: 0.5,
+        }
+      : undefined
 
-  console.log('ComponentGridItem', label, item?.$id, item)
-
-  return (
-    <CardListItem
-      ref={ref}
-      ContentBoxProps={{
-        ref: setDraggableNodeRef,
-        style: style,
-        ...draggableListeners,
-        ...dragAttributes,
-      }}
-      item={item}
-      label={label}
-      {...rest}
-    >
-      {!item?.icon?.path && item?.icon ? (
-        (item?.icon as any)
-      ) : (
-        <MdiIcon
-          color="tertiary"
-          {...item?.icon}
-          path={item?.icon?.path || ICON_VARIANT_ELEMENT.path}
-          sx={mergeSxProps(
-            {
-              fontSize: { xs: `5ch`, sm: `4ch` },
-              padding: `0.15ch`,
-              color: 'tertiary.main',
-              overflow: 'visible',
-            },
-            item?.icon?.sx,
-          )}
-        />
-      )}
-    </CardListItem>
-  )
-}
-ComponentGridItemRaw.displayName = 'ComponentGridItem'
-
-const ComponentGridItem = observer<ComponentGridItemProps, any>(
-  ComponentGridItemRaw,
-  { forwardRef: true },
+    return (
+      <Card
+        ref={useForkedRefs(ref, setDraggableNodeRef)}
+        variant="outlined"
+        style={style}
+        sx={{ height: 1, minHeight: 100 }}
+        {...rest}
+        {...draggableListeners}
+        {...dragAttributes}
+      >
+        <Stack
+          height={1}
+          minHeight={100}
+          alignItems="center"
+          justifyContent="space-evenly"
+          textAlign="center"
+          p={0.25}
+          spacing={0.5}
+        >
+          <ListItemAvatar
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <MdiIcon
+              {...item?.icon}
+              sx={{ fontSize: '2rem' }}
+              color="inherit"
+              path={item?.icon?.path || ICON_VARIANT_ELEMENT.path}
+            />
+          </ListItemAvatar>
+          <div>
+            <ListItemText
+              primaryTypographyProps={{
+                fontWeight: 'fontWeightBold',
+                lineHeight: 'normal',
+                fontSize: 'subtitle2.fontSize',
+              }}
+            >
+              {label}
+            </ListItemText>
+          </div>
+        </Stack>
+      </Card>
+    )
+  }),
 )
+ComponentGridItem.displayName = 'ComponentGridItem'
 
 interface ComponentAccordionListProp
   extends AccordionListProps<ComponentGridGroupItemData> {}
 
 function ComponentAccordionListRaw(props: ComponentAccordionListProp) {
   const { ...rest } = props
-  const presets = Aglyn.components.state.presets
-  const schemas = Aglyn.components.state.schemas
-  const allItems = [
-    ...Object.values(presets || {}),
-    ...Object.values(schemas || {}),
-  ]
+  const byCategory = Aglyn.components.schemasByCategory
 
-  const items = useMemo<ComponentGridGroupItemData[]>(() => {
-    const grouped = allItems.reduce(
-      (acc, item) => {
-        const category = item?.category
-        if (!category) {
-          ;(acc[Aglyn.ComponentCategory.UNCATEGORIZED] ??= []).push(item)
-        } else {
-          ;(acc[category] ??= []).push(item)
-        }
-        return acc
-      },
-      { All: allItems },
-    )
-
-    return Object.entries(grouped)
-      .sort(([aId], [bId]) => {
+  const itemsByCategory = useMemo(() => {
+    return Object.entries(byCategory)
+      .map(([k, v]) => ({
+        $id: k,
+        label: k,
+        items: v,
+      }))
+      .sort(({ label: a }, { label: b }) => {
         switch (true) {
-          case aId === 'All' && bId === 'Uncategorized':
+          case a === 'All' && b === 'Uncategorized':
             return 1
-          case aId === 'Uncategorized' && bId === 'All':
+          case a === 'Uncategorized' && b === 'All':
             return -1
-          case aId === 'All':
-          case aId === 'Uncategorized':
+          case a === 'All':
+          case a === 'Uncategorized':
             return 1
-          case bId === 'All':
-          case bId === 'Uncategorized':
+          case b === 'All':
+          case b === 'Uncategorized':
             return -1
           default:
-            return aId.localeCompare(bId)
+            return a.localeCompare(b)
         }
       })
-      .map(
-        ([groupId, group]): ComponentGridGroupItemData => ({
-          $id: groupId,
-          label: groupId,
-          icon: {
-            path: ICON_VARIANT_ELEMENT.path,
-          },
-          items: group,
-          order: 0,
-        }),
-      )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, allItems)
+  }, [byCategory])
 
   return (
     <AccordionListComponent
       unique
-      items={items}
+      items={itemsByCategory}
       getItemId={(item) => item?.$id}
-      AccordionSummaryProps={{ dense: true }}
-      SummaryContentComponent={({ item }) => <>{item?.label}</>}
-      DetailsContentComponent={({ id, isOpen, item, openItems, ...rest }) => (
+      renderSummary={(item) => <>{item?.label}</>}
+      renderDetails={(item) => (
         <Box {...rest}>
           <Grid container spacing={2}>
             {item?.items?.map((i, index) => (

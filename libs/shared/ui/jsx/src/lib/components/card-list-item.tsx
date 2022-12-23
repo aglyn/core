@@ -17,6 +17,7 @@
 
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
 import {
+  Box,
   Card as MuiCard,
   type CardActionAreaProps as MuiCardActionAreaProps,
   type CardProps as MuiCardProps,
@@ -106,59 +107,53 @@ export const CardListItem = forwardRef<any, CardListItemProps>(
 
     const isSelected = Boolean(selected)
 
-    const innerContent = (
-      <CardBox
-        {...WrapperBoxProps}
-        className={clsx(cardClasses.wrapper, WrapperBoxProps?.className)}
-      >
-        <CardBox
-          {...ContentBoxProps}
-          className={clsx(cardClasses.content, ContentBoxProps?.className)}
-        >
-          <ChildrenFunctionProp
-            childrenProp={children}
-            args={{ item, selected: isSelected }}
-          />
-
-          {label && (
-            <Typography
-              component="span"
-              display="block"
-              variant="subtitle2"
-              {...LabelTypographyProps}
-              className={clsx(
-                cardClasses.label,
-                LabelTypographyProps?.className,
-              )}
-            >
-              {label}
-            </Typography>
-          )}
-        </CardBox>
-      </CardBox>
-    )
-
     return (
       <Card
         ref={ref}
         className={clsx({ [cardClasses.selected]: isSelected }, className)}
         {...rest}
       >
-        <CardBox
+        <Box
           className={clsx(
             cardClasses.aspectContainer,
             CardActionAreaProps?.className,
           )}
         >
-          {innerContent}
-        </CardBox>
+          <Box
+            {...WrapperBoxProps}
+            className={clsx(cardClasses.wrapper, WrapperBoxProps?.className)}
+          >
+            <Box
+              {...ContentBoxProps}
+              className={clsx(cardClasses.content, ContentBoxProps?.className)}
+            >
+              <ChildrenFunctionProp
+                childrenProp={children}
+                args={{ item, selected: isSelected }}
+              />
+
+              {label && (
+                <Typography
+                  component="span"
+                  display="block"
+                  variant="subtitle2"
+                  {...LabelTypographyProps}
+                  className={clsx(
+                    cardClasses.label,
+                    LabelTypographyProps?.className,
+                  )}
+                >
+                  {label}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        </Box>
       </Card>
     )
   },
 )
 
 CardListItem.displayName = 'CardListItem'
-CardListItem.aglyn = true
-CardListItem.defaultProps = {}
 
 export default CardListItem

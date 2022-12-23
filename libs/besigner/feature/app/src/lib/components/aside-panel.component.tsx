@@ -187,9 +187,8 @@ const ElementInfo = function ElementInfo({
         unique
         items={details}
         getItemId={(item) => item.key}
-        AccordionSummaryProps={{ dense: true }}
-        SummaryContentComponent={({ item }) => <>{item?.label}</>}
-        DetailsContentComponent={({ label, item }) => (
+        renderSummary={(item) => <>{item?.label}</>}
+        renderDetails={(item) => (
           <>
             {item?.items?.map(
               ({

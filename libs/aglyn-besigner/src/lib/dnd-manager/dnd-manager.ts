@@ -161,7 +161,7 @@ export const state = observable<DndState>({
       case node?.type === Aglyn.NodeType.PRESET:
         return true
       case node?.type === Aglyn.NodeType.NODE:
-        return Aglyn.components.isFeatureEnabled(
+        return Aglyn.isFeatureEnabled(
           (node as Aglyn.NodeSchema<any>)?.componentSchema?.flags?.dragging,
         )
       default:

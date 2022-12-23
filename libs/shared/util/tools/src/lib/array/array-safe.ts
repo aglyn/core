@@ -20,11 +20,9 @@ import { _isArr } from '@aglyn/shared-util-guards'
 /**
  * Safe array, will always return an array
  */
-export function arraySafe<T = any>(
-  val: T[] | unknown,
-  or?: T[] | unknown,
-): T[] {
+export function arraySafe<T>(val: T[] | T, or?: any[], wrapValid = false): T[] {
   if (_isArr(val)) return val
+  if (wrapValid && val) return [val]
   if (_isArr(or)) return or
   return []
 }

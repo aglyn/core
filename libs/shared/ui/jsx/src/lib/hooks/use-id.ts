@@ -15,16 +15,14 @@
  * limitations under the License.
  */
 
-export * as DoD from './lib/dod'
-export * from './lib/arithmetic'
-export * from './lib/basic'
-export * from './lib/crud'
-export * from './lib/fallback'
-export * from './lib/initializable'
-export * from './lib/iteratable'
-export * from './lib/lifecycle'
-export * from './lib/normalized'
-export * from './lib/semantic'
-export * from './lib/serializable'
-export * from './lib/string'
-export * from './lib/tuples'
+import { useId as useReactId, useMemo } from 'react'
+
+/**
+ * Use the provided
+ */
+export function useId(id: JSX.Key): JSX.Key {
+  const serverId = useReactId()
+  return useMemo(() => id || serverId, [id, serverId])
+}
+
+export default useId

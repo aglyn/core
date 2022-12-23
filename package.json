@@ -60,6 +60,7 @@
     "@emotion/react": "11.10.5",
     "@emotion/server": "11.10.0",
     "@emotion/styled": "11.10.5",
+    "@mdi/js": "^7.1.96",
     "@msgpack/msgpack": "^2.7.2",
     "@mui/icons-material": "^5.8.4",
     "@mui/joy": "latest",

@@ -15,16 +15,15 @@
  * limitations under the License.
  */
 
-export * as DoD from './lib/dod'
-export * from './lib/arithmetic'
-export * from './lib/basic'
-export * from './lib/crud'
-export * from './lib/fallback'
-export * from './lib/initializable'
-export * from './lib/iteratable'
-export * from './lib/lifecycle'
-export * from './lib/normalized'
-export * from './lib/semantic'
-export * from './lib/serializable'
-export * from './lib/string'
-export * from './lib/tuples'
+
+type BuildTuple<L extends number, T extends any[] = []> =
+  T extends {length: L} ? T : BuildTuple<L, [...T, any]>
+
+type Length<T extends any[]> =
+  T extends {length: infer L} ? L : never
+
+export type Add<A extends number, B extends number> =
+  Length<[...BuildTuple<A>, ...BuildTuple<B>]>
+
+export type Subtract<A extends number, B extends number, > =
+  BuildTuple<A> extends [...infer U, ...BuildTuple<B>] ? Length<U> : never

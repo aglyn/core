@@ -27,11 +27,10 @@ import { computedFn } from 'mobx-utils'
 import * as Aglyn from '../../index'
 import {
   type ComponentId,
+  components,
   type ComponentSchema,
-  getComponentLabel,
-  getSchema,
   type PresetSchema,
-} from '../components-manager/components-manager'
+} from '../components-manager'
 import { createIdUrlSafe } from '../constants'
 import { AglynEvent, emitter } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'
@@ -286,7 +285,7 @@ export const state = observable<ScreenState>({
   ),
   getNodeLabelShort: computedFn((node: NodeSchema<any>): any => {
     if (isRootNode(node)) return NODE_ROOT_LABEL
-    const componentLabel = getComponentLabel(node?.componentId)
+    const componentLabel = components.getLabel(node?.componentId)
     return node?.name || componentLabel || node?.$id
   }),
   nestNodes: computedFn(
@@ -591,7 +590,7 @@ export function getNodeIndex(node: NodeSchema<any>) {
 }
 
 export function getNodeComponentSchema(node: NodeSchema<any>): ComponentSchema {
-  return getSchema(node?.componentId)
+  return components.getSchema(node?.componentId)
 }
 
 export function deleteNode(node: NodeSchema<any>) {

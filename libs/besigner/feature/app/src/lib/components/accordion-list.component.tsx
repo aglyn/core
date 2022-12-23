@@ -16,28 +16,18 @@
  */
 
 import { ICON_VARIANT_COLLAPSIBLE_OPEN } from '@aglyn/shared-data-enums'
-import type { AnyObj } from '@aglyn/shared-data-types'
 import { MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
-import { _isArrEmpty, _isUndOrNull } from '@aglyn/shared-util-guards'
 import {
   Accordion as MuiAccordion,
   AccordionDetails as MuiAccordionDetails,
-  type AccordionDetailsProps as MuiAccordionDetailsProps,
-  type AccordionProps as MuiAccordionProps,
+  AccordionDetailsProps,
   AccordionSummary as MuiAccordionSummary,
-  type AccordionSummaryProps as MuiAccordionSummaryProps,
+  AccordionSummaryProps,
 } from '@mui/material'
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 
-const Accordion = styled((props: MuiAccordionProps) => {
-  const { children, ...rest } = props
-  return (
-    <MuiAccordion disableGutters elevation={0} square {...rest}>
-      {children}
-    </MuiAccordion>
-  )
-})<Partial<MuiAccordionProps>>(({ theme }) => ({
+const Accordion = styled(MuiAccordion)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   borderLeft: 0,
   borderRight: 0,
@@ -47,174 +37,104 @@ const Accordion = styled((props: MuiAccordionProps) => {
   '&:before': {
     display: 'none',
   },
-}))
-export interface AccordionSummaryProps
-  extends Partial<MuiAccordionSummaryProps> {
-  dense?: boolean
-}
-const AccordionSummary = styled(
-  (props: MuiAccordionSummaryProps) => (
-    <MuiAccordionSummary
-      expandIcon={
-        <MdiIcon
-          path={ICON_VARIANT_COLLAPSIBLE_OPEN.path}
-          sx={{ fontSize: '0.9rem' }}
-        />
-      }
-      {...props}
-    />
-  ),
-  {
-    shouldForwardProp(propName: PropertyKey) {
-      return propName !== 'dense'
+
+  '& .MuiAccordionSummary-root': {
+    textTransform: 'uppercase',
+    backgroundColor: theme.palette.surface.main,
+    flexDirection: 'row-reverse',
+    minHeight: 38,
+    fontSize: theme.typography.pxToRem(14),
+
+    '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+      transform: 'rotate(90deg)',
     },
+    '& .MuiAccordionSummary-content': {
+      marginLeft: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      marginTop: theme.spacing(1),
+    },
+    '&': {},
   },
-)<AccordionSummaryProps>(({ theme, dense }) => ({
-  textTransform: 'uppercase',
-  backgroundColor: theme.palette.surface.main,
-  flexDirection: 'row-reverse',
-  '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
-    transform: 'rotate(90deg)',
-  },
-  '& .MuiAccordionSummary-content': {
-    marginLeft: theme.spacing(1),
-  },
-  ...(dense
-    ? {
-        '&': {
-          minHeight: 38,
-          fontSize: theme.typography.pxToRem(14),
-        },
-        '& .MuiAccordionSummary-content': {
-          marginBottom: theme.spacing(1),
-          marginTop: theme.spacing(1),
-        },
-      }
-    : {}),
-}))
-export interface AccordionDetailsProps
-  extends Partial<MuiAccordionDetailsProps> {}
-const AccordionDetails = styled(MuiAccordionDetails)<AccordionDetailsProps>(
-  ({ theme }) => ({
+  '& .MuiAccordionDetails-root': {
     padding: theme.spacing(2),
-    borderTop: '1px solid rgba(0, 0, 0, .125)',
-  }),
-)
+    borderTop: `1px solid ${theme.palette.divider}`,
+  },
+}))
 
-export interface AccordionListItem extends AnyObj {
-  id?: JSX.Key
-  key?: JSX.Key
-}
-export interface AccordionRenderProps<
-  T extends AccordionListItem = AccordionListItem,
-> extends AnyObj {
-  id: JSX.Key
-  item: T
-  isOpen: boolean
-  openItems: JSX.Key[]
-}
-
-export interface AccordionListProps<T extends AccordionListItem> {
+export interface AccordionListProps<T = any> {
   items: T[]
   unique?: boolean
   defaultExpanded?: JSX.Key[]
-  SummaryContentComponent?: JSX.ElementType<AccordionRenderProps<T>>
-  DetailsContentComponent?: JSX.ElementType<AccordionRenderProps<T>>
-  AccordionSummaryProps?: Partial<AccordionSummaryProps>
-  AccordionDetailsProps?: Partial<AccordionDetailsProps>
-  getItemId(item: T): string | number
+  AccordionSummaryProps?: AccordionSummaryProps
+  AccordionDetailsProps?: AccordionDetailsProps
+  renderSummary: (item: T) => JSX.Children
+  renderDetails: (item: T) => JSX.Children
+  getItemId: (item: T) => string | number
 }
 
-function AccordionListComponent<T extends AccordionListItem>(
-  props: AccordionListProps<T>,
-) {
+function AccordionListComponent<T = any>(props: AccordionListProps<T>) {
   const {
     items,
-    defaultExpanded: initial,
-    SummaryContentComponent,
-    DetailsContentComponent,
+    defaultExpanded,
+    renderSummary,
+    renderDetails,
     AccordionSummaryProps,
     AccordionDetailsProps,
     unique,
     getItemId,
   } = props
-  const [openItems, setOpenItems] = useState<JSX.Key[]>(() => {
-    if (!_isArrEmpty(initial)) return [...initial]
-    const first = items[0]
-    if (!_isUndOrNull(first?.id)) return [first?.id]
-    if (!_isUndOrNull(first?.key)) return [first?.key]
-    return []
-  })
+
+  const [expanded, setExpanded] = useState<JSX.Key[]>(() => [
+    ...(defaultExpanded || []),
+  ])
   const handleToggle = useCallback(
-    (id: JSX.Key) => (event: any, expand: boolean) => {
-      setOpenItems((prev) => {
-        const exists = prev.indexOf(id) >= 0
-        if (expand && unique) return [id]
-        if (!expand && unique) return []
-        if (expand && exists) return prev
-        if (expand && !exists) return [...prev, id]
-        if (!expand && exists) return prev.filter((i) => i !== id)
-        return prev
+    (id: JSX.Key) => (e, expanded: boolean) => {
+      setExpanded((prev) => {
+        if (unique && expanded) return [id]
+        if (unique && !expanded) return []
+        const data = [...prev].filter((i) => i !== id)
+        if (expanded) data.push(id)
+        return data
       })
     },
     [unique],
   )
 
-  const getItemIdRef = useRef(getItemId)
-
-  const getId = useCallback((item: AccordionListProps<T>['items'][number]) => {
-    const current = getItemIdRef.current
-    if (current) return current(item)
-    return item
-  }, [])
-
-  useEffect(() => {
-    getItemIdRef.current = getItemId
-  }, [getItemId])
-
-  function isOpen(id: JSX.Key) {
-    return unique
-      ? openItems[openItems.length - 1] === id
-      : openItems.indexOf(id) >= 0
-  }
-
   return (
-    <Fragment>
+    <>
       {items.map((item) => {
-        const itemId = getId(item)
-        const itemOpen = isOpen(itemId)
-        const onToggle = handleToggle(itemId)
+        const id = getItemId(item)
+        const isExpanded = expanded.some((i) => i === id)
         return (
-          <Accordion key={itemId} expanded={itemOpen} onChange={onToggle}>
-            <AccordionSummary {...AccordionSummaryProps}>
-              <SummaryContentComponent
-                id={itemId}
-                isOpen={itemOpen}
-                item={item}
-                openItems={openItems}
-              />
-            </AccordionSummary>
-            <AccordionDetails {...AccordionDetailsProps}>
-              <DetailsContentComponent
-                id={itemId}
-                isOpen={itemOpen}
-                item={item}
-                openItems={openItems}
-              />
-            </AccordionDetails>
+          <Accordion
+            key={id}
+            expanded={isExpanded}
+            onChange={handleToggle(id)}
+            disableGutters
+            elevation={0}
+            square
+          >
+            <MuiAccordionSummary
+              expandIcon={
+                <MdiIcon
+                  path={ICON_VARIANT_COLLAPSIBLE_OPEN.path}
+                  sx={{ fontSize: '0.9rem' }}
+                />
+              }
+              {...AccordionSummaryProps}
+            >
+              {renderSummary(item)}
+            </MuiAccordionSummary>
+            <MuiAccordionDetails {...AccordionDetailsProps}>
+              {renderDetails(item)}
+            </MuiAccordionDetails>
           </Accordion>
         )
       })}
-    </Fragment>
+    </>
   )
 }
 AccordionListComponent.displayName = 'AccordionListComponent'
-AccordionListComponent.aglyn = true
-AccordionListComponent.defaultProps = {
-  unique: false,
-  RenderSummaryComponent: (({ id }) => id) as any,
-  RenderDetailsComponent: (({ id }) => id) as any,
-}
 
 export { AccordionListComponent }
 export default AccordionListComponent

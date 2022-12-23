@@ -15,16 +15,5 @@
  * limitations under the License.
  */
 
-export * as components from './components-manager'
-export {
-  type AttributeSchema,
-  ComponentCategory,
-  type ComponentFactory,
-  type ComponentId,
-  type ComponentSchema,
-  type ComponentsLinealOrder,
-  type ComponentState,
-  type NodePresetData,
-  type PresetId,
-  type PresetSchema,
-} from './components-manager'
+export { default as components } from './components-manager'
+export * from './components-manager'
