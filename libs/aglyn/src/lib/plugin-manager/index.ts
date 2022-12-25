@@ -15,5 +15,5 @@
  * limitations under the License.
  */
 
+export { default } from './plugin-manager'
 export * from './plugin-manager'
-export * as plugins from './plugin-manager'

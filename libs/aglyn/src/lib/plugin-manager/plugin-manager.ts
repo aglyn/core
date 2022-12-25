@@ -16,8 +16,9 @@
  */
 
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
-import { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
-import { AglynEvent, emitter, lifecycleEvent } from '../emit-manager'
+import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
+import { makeAutoObservable } from 'mobx'
+import { AglynEvent, lifecycleEvent } from '../emit-manager'
 
 export enum PluginStatus {
   WAITING = 'waiting',
@@ -45,12 +46,6 @@ export interface Plugin {
   destroy?(...args: any[]): void
 }
 
-emitter.on(AglynEvent.PLUGIN_REGISTER, ({ plugin }) => {
-  addDependency(plugin)
-})
-emitter.on(AglynEvent.PLUGIN_UNREGISTER, ({ pluginId }) => {
-  removeDependency(pluginId)
-})
 // export const plugins: Record<PluginId, Plugin> = {}
 //
 // export function getBundle(pluginId: PluginId) {
@@ -100,268 +95,274 @@ emitter.on(AglynEvent.PLUGIN_UNREGISTER, ({ pluginId }) => {
 //   )
 // }
 
-//     ____  __________  _______   _______________________
-//    / __ \/ ____/ __ \/ ____/ | / / ____/  _/ ____/ ___/
-//   / / / / __/ / /_/ / __/ /  |/ / /    / // __/  \__ \
-//  / /_/ / /___/ ____/ /___/ /|  / /____/ // /___ ___/ /
-// /_____/_____/_/   /_____/_/ |_/\____/___/_____//____/
-//
+export class PluginManager {
+  //     ____  __________  _______   _______________________
+  //    / __ \/ ____/ __ \/ ____/ | / / ____/  _/ ____/ ___/
+  //   / / / / __/ / /_/ / __/ /  |/ / /    / // __/  \__ \
+  //  / /_/ / /___/ ____/ /___/ /|  / /____/ // /___ ___/ /
+  // /_____/_____/_/   /_____/_/ |_/\____/___/_____//____/
+  //
 
-export const dependencies: PluginsById = {}
-export const dependencyStatusById: PluginStatusById = {}
-export const dependencyDependentsById: PluginDependents = {}
+  public dependencies: PluginsById = {}
+  public dependencyStatusById: PluginStatusById = {}
+  public dependencyDependentsById: PluginDependents = {}
 
-export function getDependency(dependencyId: PluginId): Plugin | undefined {
-  return dependencies[dependencyId]
-}
+  constructor() {
+    makeAutoObservable(this)
+  }
 
-export function getDependencyDependents(
-  dependencyId: PluginId,
-): Dependents | undefined {
-  return dependencyDependentsById[dependencyId]
-}
+  public getDependency(dependencyId: PluginId): Plugin | undefined {
+    return this.dependencies[dependencyId]
+  }
 
-export function getDependencyStatus(
-  dependencyId: PluginId,
-): PluginStatus | undefined {
-  return dependencyStatusById[dependencyId]
-}
+  public getDependencyDependents(
+    dependencyId: PluginId,
+  ): Dependents | undefined {
+    return this.dependencyDependentsById[dependencyId]
+  }
 
-export function hasDependency(dependencyId: PluginId): boolean {
-  return Boolean(dependencyId && getDependency(dependencyId))
-}
+  public getDependencyStatus(dependencyId: PluginId): PluginStatus | undefined {
+    return this.dependencyStatusById[dependencyId]
+  }
 
-export function isDependencyWaiting(dependencyId: PluginId): boolean {
-  return getDependencyStatus(dependencyId) === PluginStatus.WAITING
-}
+  public hasDependency(dependencyId: PluginId): boolean {
+    return Boolean(dependencyId && this.getDependency(dependencyId))
+  }
 
-export function isDependencyLoading(dependencyId: PluginId): boolean {
-  return getDependencyStatus(dependencyId) === PluginStatus.LOADING
-}
+  public isDependencyWaiting(dependencyId: PluginId): boolean {
+    return this.getDependencyStatus(dependencyId) === PluginStatus.WAITING
+  }
 
-export function isDependencyLoaded(dependencyId: PluginId): boolean {
-  return getDependencyStatus(dependencyId) === PluginStatus.LOADED
-}
+  public isDependencyLoading(dependencyId: PluginId): boolean {
+    return this.getDependencyStatus(dependencyId) === PluginStatus.LOADING
+  }
 
-export function isDependencyUnloading(dependencyId: PluginId): boolean {
-  return getDependencyStatus(dependencyId) === PluginStatus.UNLOADING
-}
+  public isDependencyLoaded(dependencyId: PluginId): boolean {
+    return this.getDependencyStatus(dependencyId) === PluginStatus.LOADED
+  }
 
-export function areAllDependenciesLoaded(dependentId: PluginId): boolean {
-  for (const dependencyId of Object.keys(
-    getDependency(dependentId)?.dependencies || {},
-  )) {
-    if (!isDependencyLoaded(dependencyId)) {
-      return false
+  public isDependencyUnloading(dependencyId: PluginId): boolean {
+    return this.getDependencyStatus(dependencyId) === PluginStatus.UNLOADING
+  }
+
+  public areAllDependenciesLoaded(dependentId: PluginId): boolean {
+    for (const dependencyId of Object.keys(
+      this.getDependency(dependentId)?.dependencies || {},
+    )) {
+      if (!this.isDependencyLoaded(dependencyId)) {
+        return false
+      }
+    }
+    return true
+  }
+
+  public addDependency(dependency: Plugin) {
+    lifecycleEvent(
+      () => {
+        this.handleAddingDependencyAndDependents(dependency)
+      },
+      {
+        beforeEvent: AglynEvent.PLUGIN_REGISTERING,
+        beforePayload: [{ schema: dependency }],
+        afterEvent: AglynEvent.PLUGIN_REGISTERED,
+        afterPayload: [{ schema: dependency }],
+      },
+    )
+    return
+  }
+
+  public addDependencies(dependencies?: Array<Plugin>) {
+    const _dependencies = Array.isArray(dependencies) ? dependencies : []
+    for (const dependency of _dependencies) {
+      this.addDependency(dependency)
     }
   }
-  return true
-}
 
-export function addDependency(dependency: Plugin) {
-  lifecycleEvent(
-    () => {
-      handleAddingDependencyAndDependents(dependency)
-    },
-    {
-      beforeEvent: AglynEvent.PLUGIN_REGISTERING,
-      beforePayload: [{ schema: dependency }],
-      afterEvent: AglynEvent.PLUGIN_REGISTERED,
-      afterPayload: [{ schema: dependency }],
-    },
-  )
-  return
-}
-
-export function addDependencies(dependencies?: Array<Plugin>) {
-  const _dependencies = Array.isArray(dependencies) ? dependencies : []
-  for (const dependency of _dependencies) {
-    addDependency(dependency)
-  }
-}
-
-export function destroyDependencies() {
-  const dependencyIds = Object.keys(dependencies)
-  for (const $id of dependencyIds) {
-    removeDependency($id)
-  }
-}
-
-export function removeDependency($id: PluginId) {
-  lifecycleEvent(
-    () => {
-      handleRemovingDependencyAndDependents($id)
-    },
-    {
-      beforeEvent: AglynEvent.PLUGIN_UNREGISTERING,
-      beforePayload: [{ $id }],
-      afterEvent: AglynEvent.PLUGIN_UNREGISTERED,
-      afterPayload: [{ $id }],
-    },
-  )
-  return
-}
-
-export function loadDependency($id: PluginId) {
-  return handleLoadingDependencyAndDependents($id)
-}
-
-export function unloadDependency($id: PluginId) {
-  return handleUnloadingDependencyAndDependents($id)
-}
-
-export function getDependencyCopy(
-  dependencyId: PluginId,
-): Readonly<Plugin> | undefined {
-  const dependency = getDependency(dependencyId)
-  return dependency ? { ...dependency } : undefined
-}
-
-//     ____  __________  _____             ____ _    ________
-//    / __ \/ ____/ __ \/ ___/            / __ \ |  / /_  __/
-//   / / / / __/ / /_/ /\__ \   ______   / /_/ / | / / / /
-//  / /_/ / /___/ ____/___/ /  /_____/  / ____/| |/ / / /
-// /_____/_____/_/    /____/           /_/     |___/ /_/
-// 👇
-
-function handleSettingDependencyProperties(
-  dependencyId: PluginId,
-  dependency: Plugin,
-) {
-  dependencyStatusById[dependencyId] = PluginStatus.WAITING
-  dependencyDependentsById[dependencyId] ||= {}
-  dependencies[dependencyId] = dependency
-  return
-}
-
-function handleSettingDependencyDependents(dependencyId: PluginId) {
-  for (const dependentId of Object.keys(
-    getDependency(dependencyId)?.dependencies || {},
-  )) {
-    const dependents = (dependencyDependentsById[dependentId] ||= {})
-    dependents[dependencyId] = true
-  }
-  return
-}
-
-function handleRemovingDependencyDependents(dependencyId: PluginId) {
-  for (const dependentId of Object.keys(
-    getDependency(dependencyId)?.dependencies || {},
-  )) {
-    delete dependencyDependentsById[dependentId]?.[dependencyId]
-  }
-  return
-}
-
-function handleRemovingDependencyProperties(dependencyId: PluginId) {
-  delete dependencyDependentsById[dependencyId]
-  delete dependencyStatusById[dependencyId]
-  delete dependencies[dependencyId]
-  return
-}
-
-function handleLoadingDependencyDependents(dependencyId: PluginId) {
-  for (const dependentId of Object.keys(
-    getDependencyDependents(dependencyId) || {},
-  )) {
-    if (!isDependencyLoaded(dependentId)) {
-      handleLoadingDependencyAndDependents(dependentId)
+  public destroyDependencies() {
+    const dependencyIds = Object.keys(this.dependencies)
+    for (const $id of dependencyIds) {
+      this.removeDependency($id)
     }
   }
-  return
-}
 
-function handleLoadingDependency(dependencyId: PluginId) {
-  if (isDependencyWaiting(dependencyId)) {
-    dependencyStatusById[dependencyId] = PluginStatus.LOADING
-    getDependency(dependencyId)?.load?.()
-    dependencyStatusById[dependencyId] = PluginStatus.LOADED
+  public removeDependency($id: PluginId) {
+    lifecycleEvent(
+      () => {
+        this.handleRemovingDependencyAndDependents($id)
+      },
+      {
+        beforeEvent: AglynEvent.PLUGIN_UNREGISTERING,
+        beforePayload: [{ $id }],
+        afterEvent: AglynEvent.PLUGIN_UNREGISTERED,
+        afterPayload: [{ $id }],
+      },
+    )
+    return
   }
-  return
-}
 
-function handleUnloadingDependencyDependents(dependencyId: PluginId) {
-  for (const dependentId of Object.keys(
-    getDependencyDependents(dependencyId) || {},
-  )) {
-    handleUnloadingDependencyAndDependents(dependentId)
+  public loadDependency($id: PluginId) {
+    return this.handleLoadingDependencyAndDependents($id)
   }
-  return
-}
 
-function handleUnloadingDependency(dependencyId: PluginId) {
-  if (isDependencyLoaded(dependencyId)) {
-    dependencyStatusById[dependencyId] = PluginStatus.UNLOADING
-    getDependency(dependencyId)?.destroy?.()
-    dependencyStatusById[dependencyId] = PluginStatus.WAITING
+  public unloadDependency($id: PluginId) {
+    return this.handleUnloadingDependencyAndDependents($id)
   }
-  return
+
+  public getDependencyCopy(
+    dependencyId: PluginId,
+  ): Readonly<Plugin> | undefined {
+    const dependency = this.getDependency(dependencyId)
+    return dependency ? { ...dependency } : undefined
+  }
+
+  //     ____  __________  _____             ____ _    ________
+  //    / __ \/ ____/ __ \/ ___/            / __ \ |  / /_  __/
+  //   / / / / __/ / /_/ /\__ \   ______   / /_/ / | / / / /
+  //  / /_/ / /___/ ____/___/ /  /_____/  / ____/| |/ / / /
+  // /_____/_____/_/    /____/           /_/     |___/ /_/
+  // 👇
+
+  private handleSettingDependencyProperties(
+    dependencyId: PluginId,
+    dependency: Plugin,
+  ) {
+    this.dependencyStatusById[dependencyId] = PluginStatus.WAITING
+    this.dependencyDependentsById[dependencyId] ||= {}
+    this.dependencies[dependencyId] = dependency
+    return
+  }
+
+  private handleSettingDependencyDependents(dependencyId: PluginId) {
+    for (const dependentId of Object.keys(
+      this.getDependency(dependencyId)?.dependencies || {},
+    )) {
+      const dependents = (this.dependencyDependentsById[dependentId] ||= {})
+      dependents[dependencyId] = true
+    }
+    return
+  }
+
+  private handleRemovingDependencyDependents(dependencyId: PluginId) {
+    for (const dependentId of Object.keys(
+      this.getDependency(dependencyId)?.dependencies || {},
+    )) {
+      delete this.dependencyDependentsById[dependentId]?.[dependencyId]
+    }
+    return
+  }
+
+  private handleRemovingDependencyProperties(dependencyId: PluginId) {
+    delete this.dependencyDependentsById[dependencyId]
+    delete this.dependencyStatusById[dependencyId]
+    delete this.dependencies[dependencyId]
+    return
+  }
+
+  private handleLoadingDependencyDependents(dependencyId: PluginId) {
+    for (const dependentId of Object.keys(
+      this.getDependencyDependents(dependencyId) || {},
+    )) {
+      if (!this.isDependencyLoaded(dependentId)) {
+        this.handleLoadingDependencyAndDependents(dependentId)
+      }
+    }
+    return
+  }
+
+  private handleLoadingDependency(dependencyId: PluginId) {
+    if (this.isDependencyWaiting(dependencyId)) {
+      this.dependencyStatusById[dependencyId] = PluginStatus.LOADING
+      this.getDependency(dependencyId)?.load?.()
+      this.dependencyStatusById[dependencyId] = PluginStatus.LOADED
+    }
+    return
+  }
+
+  private handleUnloadingDependencyDependents(dependencyId: PluginId) {
+    for (const dependentId of Object.keys(
+      this.getDependencyDependents(dependencyId) || {},
+    )) {
+      this.handleUnloadingDependencyAndDependents(dependentId)
+    }
+    return
+  }
+
+  private handleUnloadingDependency(dependencyId: PluginId) {
+    if (this.isDependencyLoaded(dependencyId)) {
+      this.dependencyStatusById[dependencyId] = PluginStatus.UNLOADING
+      this.getDependency(dependencyId)?.destroy?.()
+      this.dependencyStatusById[dependencyId] = PluginStatus.WAITING
+    }
+    return
+  }
+
+  private handleAddingDependencyAndDependents(dependency: Plugin) {
+    const dependencyId: PluginId = dependency.$id
+    if (!dependency) throw new Error('Invalid dependency')
+    if (!dependencyId) throw new Error('Invalid dependencyId')
+    /**
+     * Set properties on local dependencies object
+     */
+    this.handleSettingDependencyProperties(dependencyId, dependency)
+    /**
+     * Set dependencies' dependent relationships
+     */
+    this.handleSettingDependencyDependents(dependencyId)
+    /**
+     * Load applicable dependencies
+     */
+    this.handleLoadingDependencyAndDependents(dependencyId)
+    return
+  }
+
+  private handleLoadingDependencyAndDependents(dependencyId: PluginId) {
+    if (!this.hasDependency(dependencyId)) return
+    /**
+     * Verify all dependencies are loaded
+     */
+    if (!this.areAllDependenciesLoaded(dependencyId)) return
+    /**
+     * Load the self dependency
+     */
+    this.handleLoadingDependency(dependencyId)
+    /**
+     * Load waiting dependents
+     */
+    this.handleLoadingDependencyDependents(dependencyId)
+    return
+  }
+
+  private handleUnloadingDependencyAndDependents(dependencyId: PluginId) {
+    if (!this.hasDependency(dependencyId)) return
+    /**
+     * Unload all dependents of the dependency
+     */
+    this.handleUnloadingDependencyDependents(dependencyId)
+    /**
+     * Unload self dependency
+     */
+    this.handleUnloadingDependency(dependencyId)
+    return
+  }
+
+  private handleRemovingDependencyAndDependents(dependencyId: PluginId) {
+    if (!this.hasDependency(dependencyId)) return
+    /**
+     * Unload dependency and its dependents
+     */
+    this.handleUnloadingDependencyAndDependents(dependencyId)
+
+    /**
+     * Remove dependencies dependent relationships
+     */
+    this.handleRemovingDependencyDependents(dependencyId)
+
+    /**
+     * Remove self from local dependencies property
+     */
+    this.handleRemovingDependencyProperties(dependencyId)
+    return
+  }
 }
 
-function handleAddingDependencyAndDependents(dependency: Plugin) {
-  const dependencyId: PluginId = dependency.$id
-  if (!dependency) throw new Error('Invalid dependency')
-  if (!dependencyId) throw new Error('Invalid dependencyId')
-  /**
-   * Set properties on local dependencies object
-   */
-  handleSettingDependencyProperties(dependencyId, dependency)
-  /**
-   * Set dependencies' dependent relationships
-   */
-  handleSettingDependencyDependents(dependencyId)
-  /**
-   * Load applicable dependencies
-   */
-  handleLoadingDependencyAndDependents(dependencyId)
-  return
-}
-
-function handleLoadingDependencyAndDependents(dependencyId: PluginId) {
-  if (!hasDependency(dependencyId)) return
-  /**
-   * Verify all dependencies are loaded
-   */
-  if (!areAllDependenciesLoaded(dependencyId)) return
-  /**
-   * Load the self dependency
-   */
-  handleLoadingDependency(dependencyId)
-  /**
-   * Load waiting dependents
-   */
-  handleLoadingDependencyDependents(dependencyId)
-  return
-}
-
-function handleUnloadingDependencyAndDependents(dependencyId: PluginId) {
-  if (!hasDependency(dependencyId)) return
-  /**
-   * Unload all dependents of the dependency
-   */
-  handleUnloadingDependencyDependents(dependencyId)
-  /**
-   * Unload self dependency
-   */
-  handleUnloadingDependency(dependencyId)
-  return
-}
-
-function handleRemovingDependencyAndDependents(dependencyId: PluginId) {
-  if (!hasDependency(dependencyId)) return
-  /**
-   * Unload dependency and its dependents
-   */
-  handleUnloadingDependencyAndDependents(dependencyId)
-
-  /**
-   * Remove dependencies dependent relationships
-   */
-  handleRemovingDependencyDependents(dependencyId)
-
-  /**
-   * Remove self from local dependencies property
-   */
-  handleRemovingDependencyProperties(dependencyId)
-  return
-}
+export default PluginManager

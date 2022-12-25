@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import { ComponentManager } from './components-manager'
+import ComponentManager from './components-manager'
 import { AglynEvent, emitter } from './emit-manager'
-import { ScreenManager } from './screen-manager'
-import { UAManager } from './ua-manager'
+import PluginManager from './plugin-manager'
+import ScreenManager from './screen-manager'
+import UAManager from './ua-manager'
 
 export * from './constants'
 export * from './types'
@@ -29,6 +30,15 @@ export * from './emit-manager'
 export * from './plugin-manager'
 export * from './screen-manager'
 export * from './ua-manager'
+
+export const plugins = new PluginManager()
+
+emitter.on(AglynEvent.PLUGIN_REGISTER, ({ plugin }) => {
+  plugins.addDependency(plugin)
+})
+emitter.on(AglynEvent.PLUGIN_UNREGISTER, ({ pluginId }) => {
+  plugins.removeDependency(pluginId)
+})
 
 export const components = new ComponentManager()
 
