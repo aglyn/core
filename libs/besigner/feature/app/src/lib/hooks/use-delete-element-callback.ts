@@ -30,7 +30,7 @@ export function useDeleteElementCallback(): (
       function handleDelete() {
         console.log('delete node', node)
         Besigner.focus.clearFocusStatus()
-        Aglyn.screen.deleteNode(node)
+        Aglyn.canvas.deleteNode(node)
       }
 
       return confirm({

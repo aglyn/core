@@ -91,11 +91,11 @@ export function useLeafDrop(
 
         if (dragType === Besigner.DragType.PRESET) {
           const dragNode = drag?.node as Aglyn.PresetSchema<any>
-          const newNode = Aglyn.screen.addNodeFromPreset(dragNode, node, NaN)
+          const newNode = Aglyn.canvas.addNodeFromPreset(dragNode, node, NaN)
           Besigner.focus.setSelectedNode(newNode)
         } else {
           const dragNode = drag?.node as Aglyn.NodeSchema<any>
-          Aglyn.screen.reparentNode(dragNode, node, NaN)
+          Aglyn.canvas.reparentNode(dragNode, node, NaN)
           Besigner.focus.setSelectedNode(dragNode)
         }
 

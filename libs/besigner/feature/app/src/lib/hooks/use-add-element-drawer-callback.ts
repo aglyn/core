@@ -48,19 +48,19 @@ export function useAddElementDrawerCallback(): Response {
           return res.option
         })
         .then((preset) => {
-          const parentNode = parent || Aglyn.screen.getNode(Aglyn.NODE_ROOT_ID)
-          const node = Aglyn.screen.addNodeFromPreset(preset, parentNode, NaN)
+          const parentNode = parent || Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)
+          const node = Aglyn.canvas.addNodeFromPreset(preset, parentNode, NaN)
 
           // const templateData = {
           //   ...(data as any),
           //   $id: Aglyn.createNodeId(),
           //   parentId: parent?.$id,
           // }
-          // Aglyn.screen.setNodes(
-          //   Aglyn.screen.denormalizeNodes([templateData as any], parent?.$id),
+          // Aglyn.canvas.setNodes(
+          //   Aglyn.canvas.denormalizeNodes([templateData as any], parent?.$id),
           // )
           //
-          // const node = Aglyn.screen.getNode(templateData.$id)
+          // const node = Aglyn.canvas.getNode(templateData.$id)
           console.log('Add New Element ', node)
 
           Besigner.focus.setSelectedNode(node)

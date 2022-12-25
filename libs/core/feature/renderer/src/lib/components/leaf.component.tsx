@@ -36,7 +36,7 @@ const LeafComponent = forwardRef<any, LeafComponentProps>(function RefRenderFn(
   ref,
 ) {
   const { $id, leafComponent, children, className, sx, ...rest } = props
-  const node = Aglyn.screen.getNode($id)
+  const node = Aglyn.canvas.getNode($id)
   const factory = Aglyn.components.getFactory(node?.componentId)
   const Component = useMemo(() => {
     return isValidElementType(factory) ? factory : Box

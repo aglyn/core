@@ -15,5 +15,5 @@
  * limitations under the License.
  */
 
-export { default } from './screen-manager'
-export * from './screen-manager'
+export { default } from './canvas-manager'
+export * from './canvas-manager'

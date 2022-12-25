@@ -42,8 +42,8 @@ function HistoryControls(
         <span>
           <MuiIconButton
             aria-label="undo action"
-            onClick={() => Aglyn.screen.undo()}
-            disabled={!Aglyn.screen.canUndo}
+            onClick={() => Aglyn.canvas.undo()}
+            disabled={!Aglyn.canvas.canUndo}
           >
             <MdiIcon fontSize="small" path={ICON_VARIANT_MODIFY_UNDO.path} />
           </MuiIconButton>
@@ -53,8 +53,8 @@ function HistoryControls(
         <span>
           <MuiIconButton
             aria-label="redo action"
-            onClick={() => Aglyn.screen.redo()}
-            disabled={!Aglyn.screen.canRedo}
+            onClick={() => Aglyn.canvas.redo()}
+            disabled={!Aglyn.canvas.canRedo}
           >
             <MdiIcon fontSize="small" path={ICON_VARIANT_MODIFY_REDO.path} />
           </MuiIconButton>

@@ -98,7 +98,7 @@ const ElementOverlayPopper = forwardRef<
 
   const state = Besigner.focus.state[variantToStoreName[variant] || 'hovered']
   const $id = state?.$id
-  const node = Aglyn.screen.getNode($id)
+  const node = Aglyn.canvas.getNode($id)
 
   const isSelected = Besigner.focus.isNodeSelected(node)
   const elementRef = useRenderedCanvasElementRef({ $id })

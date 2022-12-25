@@ -28,7 +28,7 @@ export interface BranchComponentProps extends JSX.OverrideableComponentProps {
 const BranchComponent = forwardRef<any, BranchComponentProps>((props, ref) => {
   const { component: Component, leafComponent, $id, ...rest } = props
 
-  const node = Aglyn.screen.getNode($id)
+  const node = Aglyn.canvas.getNode($id)
   const Leaf = useMemo(() => leafComponent || LeafComponent, [leafComponent])
 
   return Array.isArray(node?.nodes) && node?.nodes.length ? (

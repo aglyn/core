@@ -156,7 +156,7 @@ export const state = observable<DndState>({
   canDragNode: computedFn((node: Aglyn.AbstractNodeSchema): boolean => {
     if (!node) throw new Error('Invalid node')
     switch (true) {
-      case Aglyn.screen.isRootNode(node):
+      case Aglyn.canvas.isRootNode(node):
         return false
       case node?.type === Aglyn.NodeType.PRESET:
         return true

@@ -95,7 +95,7 @@ BadgeButton.displayName = 'AglynBadgeButton'
 const MoveUpButton = observer(({ node }: { node: Aglyn.NodeSchema }) => {
   const handleMoveUp = useCallback(
     (e: ChangeEvent<unknown>) => {
-      Aglyn.screen.reorderNode(node, node?.index - 1)
+      Aglyn.canvas.reorderNode(node, node?.index - 1)
     },
     [node],
   )
@@ -113,7 +113,7 @@ const MoveUpButton = observer(({ node }: { node: Aglyn.NodeSchema }) => {
 const MoveDownButton = observer(({ node }: { node: Aglyn.NodeSchema }) => {
   const handleMoveDown = useCallback(
     (e: ChangeEvent<unknown>) => {
-      Aglyn.screen.reorderNode(node, node?.index + 1)
+      Aglyn.canvas.reorderNode(node, node?.index + 1)
     },
     [node],
   )
@@ -139,7 +139,7 @@ const ElementOverlayActionsComponentRaw = (
   const { $id, ...rest } = props
 
   const app = useBesignerAppContext()
-  const node = Aglyn.screen.getNode($id)
+  const node = Aglyn.canvas.getNode($id)
   const parent = node?.parent
   const elementRef = useRenderedCanvasElementRef({ $id })
   const [moreOpen, setMoreOpen] = useState(false)
@@ -150,7 +150,7 @@ const ElementOverlayActionsComponentRaw = (
 
   const handleDuplicateClick = useCallback(
     (e: ChangeEvent<unknown>) => {
-      Aglyn.screen.duplicateNode(node)
+      Aglyn.canvas.duplicateNode(node)
     },
     [node],
   )

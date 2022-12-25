@@ -51,7 +51,7 @@ export interface NodeContextMenuProps extends PaperProps {
 const NodeContextMenuRaw = (props: NodeContextMenuProps) => {
   const { node, ...rest } = props
 
-  const isRootNode = Aglyn.screen.isRootNode(node)
+  const isRootNode = Aglyn.canvas.isRootNode(node)
   const app = useBesignerAppContext()
   const handleAddElementClick = useAddElementDrawerCallback()
   const elementRef = useRenderedCanvasElementRef({ $id: node?.$id })
@@ -64,7 +64,7 @@ const NodeContextMenuRaw = (props: NodeContextMenuProps) => {
   const handleDuplicateClick = useCallback(
     (e: ChangeEvent<unknown>) => {
       if (isRootNode) return
-      Aglyn.screen.duplicateNode(node)
+      Aglyn.canvas.duplicateNode(node)
     },
     [node, isRootNode],
   )
@@ -87,14 +87,14 @@ const NodeContextMenuRaw = (props: NodeContextMenuProps) => {
   const handleMoveUp = useCallback(
     (e: ChangeEvent<unknown>) => {
       if (isRootNode) return
-      Aglyn.screen.reorderNode(node, node?.index - 1)
+      Aglyn.canvas.reorderNode(node, node?.index - 1)
     },
     [node, isRootNode],
   )
   const handleMoveDown = useCallback(
     (e: ChangeEvent<unknown>) => {
       if (isRootNode) return
-      Aglyn.screen.reorderNode(node, node?.index + 1)
+      Aglyn.canvas.reorderNode(node, node?.index + 1)
     },
     [node, isRootNode],
   )

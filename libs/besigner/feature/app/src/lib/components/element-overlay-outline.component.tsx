@@ -98,7 +98,7 @@ const ElementOverlayOutlineComponent = observer<
 >(
   (props, ref) => {
     const { className, $id, ...rest } = props
-    const node = Aglyn.screen.getNode($id)
+    const node = Aglyn.canvas.getNode($id)
     const isSelected = Besigner.focus.isNodeSelected(node)
     const isHovered = Besigner.focus.isNodeHovered(node)
     const isDragging = Besigner.dnd.state.isDraggingNode(node)

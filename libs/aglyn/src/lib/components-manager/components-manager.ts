@@ -32,6 +32,12 @@ import { makeAutoObservable, toJS } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { ComponentClass, ComponentProps } from 'react'
 import { type Aglyn, lifecycleEvent } from '../aglyn'
+import type { NodeSchema } from '../canvas-manager'
+import {
+  type AbstractNodeSchema,
+  type NodeSchemaNested,
+  NodeType,
+} from '../canvas-manager'
 import {
   createIdUrlSafe,
   FEATURE_FLAG,
@@ -40,12 +46,6 @@ import {
 } from '../constants'
 import { AglynEvent } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'
-import type { NodeSchema } from '../screen-manager'
-import {
-  type AbstractNodeSchema,
-  type NodeSchemaNested,
-  NodeType,
-} from '../screen-manager'
 
 export enum ComponentCategory {
   INPUT = 'Input',

@@ -25,7 +25,7 @@ function defaultPropsResolver(node: Aglyn.NodeSchema) {
 }
 
 export function useAglynElementResolvedProps($id: NodeId) {
-  const node = Aglyn.screen.getNode($id)
+  const node = Aglyn.canvas.getNode($id)
   const schema = Aglyn.components.getSchema(node?.componentId)
   const resolveProps = schema?.resolveProps
 

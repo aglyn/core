@@ -30,8 +30,9 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material'
+import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
-import { forwardRef, useCallback, useMemo, useState } from 'react'
+import { forwardRef, useCallback, useState } from 'react'
 import type { CodeMirrorProps } from './code-mirror'
 
 const CodeMirror = dynamic(
@@ -53,14 +54,15 @@ export interface BesignerJsonEditorProps
   }['bivarianceHack']
 }
 
-const BesignerJsonEditor = forwardRef<any, BesignerJsonEditorProps>(
+const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
   (props, ref) => {
     const { onClose, onSave, defaultValue, open, ...rest } = props
     const [data, setData] = useState(defaultValue)
     const [warnOpen, setWarnOpen] = useState(true)
     const closeWarn = useCallback(() => setWarnOpen(false), [])
 
-    const value = useMemo(() => JSON.stringify(defaultValue, null, 2), [data])
+    console.log('default value', data)
+    const value = JSON.stringify(data, null, 2)
 
     const handleChange = useCallback((value: any) => {
       try {
@@ -91,6 +93,7 @@ const BesignerJsonEditor = forwardRef<any, BesignerJsonEditorProps>(
         maxWidth="lg"
         fullWidth
         onClose={handleClose}
+        keepMounted
         {...rest}
       >
         <DialogTitle>Raw JSON</DialogTitle>
@@ -137,7 +140,7 @@ const BesignerJsonEditor = forwardRef<any, BesignerJsonEditorProps>(
             variant="contained"
             onClick={(e) => handleClose(e, 'cancelClick')}
           >
-            Cancel
+            {'Cancel'}
           </Button>
           <Button variant="contained" onClick={handleSave}>
             {'Save JSON'}
@@ -147,7 +150,8 @@ const BesignerJsonEditor = forwardRef<any, BesignerJsonEditorProps>(
     )
   },
 )
-BesignerJsonEditor.displayName = 'BesignerJsonEditor'
+BesignerJsonEditorRaw.displayName = 'BesignerJsonEditor'
 
-export { BesignerJsonEditor }
+export const BesignerJsonEditor = observer(BesignerJsonEditorRaw)
+
 export default BesignerJsonEditor

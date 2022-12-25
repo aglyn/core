@@ -22,7 +22,7 @@ import {
   NodeId,
   NodeSchema,
   NodeSchemaNested,
-} from './screen-manager'
+} from './canvas-manager'
 
 describe('Aglyn: Screen Manager', () => {
   const nodes: Record<NodeId, NodeSchema> = {

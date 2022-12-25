@@ -75,8 +75,8 @@ const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
 )
 
 function setLocalNodes(value: Aglyn.ProcessableNodes) {
-  const parsed = Aglyn.screen.processNodesToDenormalized(value)
-  const nodes = Aglyn.screen.setNodes(parsed)
+  const parsed = Aglyn.canvas.processNodesToDenormalized(value)
+  const nodes = Aglyn.canvas.setNodes(parsed)
   return nodes
 }
 
@@ -86,7 +86,7 @@ function BesignerPage(props) {
   } = useRouter()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
-  const saveAvailable = !Aglyn.screen.isInitialSame
+  const saveAvailable = !Aglyn.canvas.isInitialSame
   const [screenDialog, setScreenDialog] = useState(false)
   const handleAddElementClick = useAddElementDrawerCallback()
   const detailUrl = buildRoute(Route.SCREEN_DETAILS, {
@@ -115,11 +115,11 @@ function BesignerPage(props) {
     }
     const dequeueLoading = queueLoading()
 
-    const nodes = Aglyn.screen.nodesToJSON()
+    const nodes = Aglyn.canvas.nodesToJSON()
     await updateScreen({ nodes: nodes }, { merge: true })
       .then((...args) => {
         console.log('updaye screen then promise', args)
-        Aglyn.screen.updateInitialNodes(nodes)
+        Aglyn.canvas.updateInitialNodes(nodes)
       })
       .catch((e) => {
         enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
@@ -141,11 +141,11 @@ function BesignerPage(props) {
   }, [])
 
   useEffect(() => {
-    if (nodes && !Aglyn.screen.didSetInitial) {
+    if (nodes && !Aglyn.canvas.didSetInitial) {
       console.log('decoded update', nodes)
       console.log('decoded update previous nodes', sss)
       const updated = setLocalNodes(nodes)
-      Aglyn.screen.updateInitialNodes(updated)
+      Aglyn.canvas.updateInitialNodes(updated)
     }
   }, [nodes, sss])
 
@@ -176,7 +176,10 @@ function BesignerPage(props) {
     }
   }, [enqueueSnackbar, hasError, error, notFound])
 
-  console.log('Aglyn.screen.nodes', Aglyn.screen.rootNode)
+  console.log(
+    'Aglyn.screen.nestedNodes as any',
+    Aglyn.canvas.nestedNodes as any,
+  )
 
   return (
     <>
@@ -258,15 +261,15 @@ function BesignerPage(props) {
               {
                 id: 'center-nav-edit-undo',
                 children: 'Undo',
-                onClick: () => Aglyn.screen.undo(),
-                disabled: !Aglyn.screen.canUndo,
+                onClick: () => Aglyn.canvas.undo(),
+                disabled: !Aglyn.canvas.canUndo,
                 ListItemTextProps: { inset: true },
               },
               {
                 id: 'center-nav-edit-redo',
                 children: 'Redo',
-                onClick: () => Aglyn.screen.redo(),
-                disabled: !Aglyn.screen.canRedo,
+                onClick: () => Aglyn.canvas.redo(),
+                disabled: !Aglyn.canvas.canRedo,
                 ListItemTextProps: { inset: true },
               },
               {
@@ -332,10 +335,10 @@ function BesignerPage(props) {
         }}
       />
       <BesignerJsonEditor
-        open={Boolean(Aglyn.screen.rootNode && jsonOpen)}
+        open={Boolean(Aglyn.canvas.rootNode && jsonOpen)}
         onClose={closeJsonEditor}
         onSave={handleJsonSave}
-        defaultValue={Aglyn.screen.nestedNodes as any}
+        defaultValue={Aglyn.canvas.nestedNodes as any}
       />
     </>
   )

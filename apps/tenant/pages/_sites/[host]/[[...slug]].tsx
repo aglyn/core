@@ -146,8 +146,8 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
      *=========================================*/
 
     const nodes = versionRes.version.nodes
-    const denormalized = Aglyn.screen.processNodesToDenormalized(nodes)
-    Aglyn.screen.setNodes(denormalized)
+    const denormalized = Aglyn.canvas.processNodesToDenormalized(nodes)
+    Aglyn.canvas.setNodes(denormalized)
 
     const props = {
       data: JSON.parse(
@@ -188,7 +188,7 @@ export default function CatchAllPage(props: Props) {
 
   return (
     <>
-      <AglynNodeRenderer node={Aglyn.screen.getNode(Aglyn.NODE_ROOT_ID)} />
+      <AglynNodeRenderer node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)} />
     </>
   )
 }

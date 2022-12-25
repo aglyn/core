@@ -116,7 +116,7 @@ const SiteContainer = observer(
           <ThemedElementContainer>
             <FramePaper>
               <AglynNodeRenderer
-                node={Aglyn.screen.getNode(Aglyn.NODE_ROOT_ID)}
+                node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)}
                 LeafComponent={LeafComponent}
               />
             </FramePaper>

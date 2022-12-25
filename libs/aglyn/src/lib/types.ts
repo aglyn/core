@@ -17,7 +17,7 @@
 
 import type { HttpStatusCode } from '@aglyn/shared-data-enums'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
-import type { NodeId, NodeSchema } from './screen-manager'
+import type { NodeId, NodeSchema } from './canvas-manager'
 
 export enum HostScreenStatus {
   UNPUBLISHED = 0x1 << 0x1,

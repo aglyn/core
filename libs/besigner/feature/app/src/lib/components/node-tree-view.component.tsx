@@ -227,15 +227,15 @@ const NodeTreeItem = observer((props: NodeTreeItemProps) => {
   // console.log(
   //   'get node',
   //   nodeId,
-  //   Aglyn.screen.getNode(nodeId),
-  //   Aglyn.screen.nodes[nodeId],
+  //   Aglyn.canvas.getNode(nodeId),
+  //   Aglyn.canvas.nodes[nodeId],
   // )
-  const node = Aglyn.screen.getNode(nodeId)
+  const node = Aglyn.canvas.getNode(nodeId)
   const schema = node?.componentSchema
   const nodeLabel = node?.labelShort
   const breadcrumbPath = node?.breadcrumbPath
   const depth = breadcrumbPath?.length - 1
-  const isRootNode = Aglyn.screen.isRootNode(node)
+  const isRootNode = Aglyn.canvas.isRootNode(node)
   const dragAllowed = Aglyn.isFeatureEnabled(schema?.flags?.dragging)
   const collapseIn = expanded?.some((i) => i === nodeId)
   const isSelected = Besigner.focus.isNodeSelected(node)
@@ -440,24 +440,24 @@ const NodeTreeViewRaw = (
   const handleTreeItemToggle = useCallback((e, $id: Aglyn.NodeId) => {
     e.stopPropagation()
     e.preventDefault()
-    Besigner.focus.toggleNodeExpansion(Aglyn.screen.getNode($id))
+    Besigner.focus.toggleNodeExpansion(Aglyn.canvas.getNode($id))
   }, [])
 
   const handleTreeItemSelect = useCallback((e, $id: Aglyn.NodeId) => {
     e.stopPropagation()
     e.preventDefault()
-    const node = Aglyn.screen.getNode($id)
+    const node = Aglyn.canvas.getNode($id)
     Besigner.focus.toggleNodeExpansion(node)
     Besigner.focus.handleNodeSelection(node)
   }, [])
 
   const handleTreeItemHover = useCallback((e, $id: Aglyn.NodeId) => {
-    Besigner.focus.setHoveredNode(Aglyn.screen.getNode($id))
+    Besigner.focus.setHoveredNode(Aglyn.canvas.getNode($id))
   }, [])
 
   const handleTreeItemFocus = useCallback((e, $id: Aglyn.NodeId) => {
     e.stopPropagation()
-    Besigner.focus.setHoveredNode(Aglyn.screen.getNode($id))
+    Besigner.focus.setHoveredNode(Aglyn.canvas.getNode($id))
   }, [])
 
   return (

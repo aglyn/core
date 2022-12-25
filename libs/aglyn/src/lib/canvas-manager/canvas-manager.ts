@@ -207,7 +207,11 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     return this.props
   }
 
-  constructor(schema: NodeSchema<P>, private screen: ScreenManager) {
+  get asJSON(): NodeSchemaJSON<P> {
+    return this.toJSON()
+  }
+
+  constructor(schema: NodeSchema<P>, public screen: CanvasManager) {
     this.$id = schema.$id
     this.name = schema.name
     this.type = schema.type || NodeType.NODE
@@ -219,20 +223,21 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     this.props = { ...schema.props } as P
     this.sx = Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx }
 
-    makeAutoObservable(this)
+    makeAutoObservable(this, {
+      screen: false,
+    })
   }
 
-  public toJSON(): NodeSchemaJSON<P> {
-    return toJS(this)
-  }
+  public toJSON = computedFn((): NodeSchemaJSON<P> => {
+    const { screen, ...node } = toJS(this)
+    return node
+  })
 }
 
-export class ScreenManager {
+export class CanvasManager {
   private _initial = null
   private _history = [{}]
   private _activeIndex = 0
-
-  state = this
 
   public get nodes() {
     console.log(
@@ -259,10 +264,7 @@ export class ScreenManager {
     return this._history[this._activeIndex][NODE_ROOT_ID]
   }
   public get nestedNodes(): NodeSchemaNested<any> {
-    const rootNode = this.rootNode
-    const nodes = this.nodes
-    if (!nodes || !rootNode) return {} as any
-    return this.nestNodes(nodes, rootNode)
+    return this.makeNested(this.rootNode)
   }
 
   public hasNode = computedFn(($id: NodeId): boolean => {
@@ -315,21 +317,19 @@ export class ScreenManager {
     const componentLabel = this.aglyn.components.getLabel(node?.componentId)
     return node?.name || componentLabel || node?.$id
   })
-  public nestNodes = computedFn(
-    (nodes: NodesMap, rootNode: NodeSchema<any>): NodeSchemaNested<any> => {
-      if (!nodes) throw new Error('Invalid nodes')
-      if (!rootNode) throw new Error('Invalid root node')
+  public makeNested = computedFn((node: NodeSchema<any>) => {
+    if (!node) return null
+    const newNode = toJS(node) as unknown as NodeSchemaNested<any>
 
-      const node = toJS(rootNode) as unknown as NodeSchemaNested<any>
-      const childNodes = []
-      for (const childId of (node.nodes ||= []) as unknown as NodeId[]) {
-        if (!Object.hasOwn(nodes, childId)) continue
-        childNodes.push(this.nestNodes(nodes, nodes[childId]))
-      }
-      node.nodes = childNodes
-      return node
-    },
-  )
+    const childNodes = []
+    for (const childId of (newNode.nodes ||= []) as unknown as NodeId[]) {
+      const child = this.getNode(childId)
+      if (child) childNodes.push(this.makeNested(child))
+    }
+    newNode.nodes = childNodes
+
+    return newNode
+  })
 
   constructor(public aglyn?: Aglyn) {
     makeAutoObservable(this)
@@ -617,7 +617,7 @@ export class ScreenManager {
   }
 }
 
-export default ScreenManager
+export default CanvasManager
 
 // export function getNodeBreadcrumbPath(nodeId: NodeId): NodeBreadcrumbPath
 // export function getNodeBreadcrumbPath(node: NodeSchema<any>): NodeBreadcrumbPath
