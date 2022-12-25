@@ -31,13 +31,14 @@ import type { MuiStyledOptions } from '@aglyn/shared-ui-theme'
 import { makeAutoObservable, toJS } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { ComponentClass, ComponentProps } from 'react'
+import { type Aglyn, lifecycleEvent } from '../aglyn'
 import {
   createIdUrlSafe,
   FEATURE_FLAG,
   FieldComponentType,
   LinealDirectiveFlag,
 } from '../constants'
-import { AglynEvent, lifecycleEvent } from '../emit-manager'
+import { AglynEvent } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'
 import type { NodeSchema } from '../screen-manager'
 import {
@@ -234,7 +235,7 @@ export class ComponentManager {
     return schema?.displayName || schema?.title || schema?.$id
   })
 
-  constructor() {
+  constructor(protected aglyn?: Aglyn) {
     makeAutoObservable(this)
   }
 

@@ -15,17 +15,7 @@
  * limitations under the License.
  */
 
-import { Logger, LogLevelString } from '@aglyn/shared-util-logger'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
-import { EventEmitter2 } from 'eventemitter2'
-import { namespace } from '../constants'
-
-export class LogManager extends Logger {}
-export function setLogLevel(logLevel: LogLevelString) {
-  logger.setLogLevel(logLevel)
-}
-
-export const logger = new LogManager(namespace)
+import EventEmitter2, { type ConstructorOptions } from 'eventemitter2'
 
 export enum AglynEvent {
   APP_INITIALIZING = 'lifecycle.app.initializing',
@@ -71,37 +61,10 @@ export enum AglynEvent {
   ERROR_GENERAL = 'error.general',
 }
 
-export class EmitManager extends EventEmitter2 {}
-
-export const emitter = new EmitManager()
-
-emitter.prependListener(['error', '**'], (...payload) => {
-  logger.error(Timestamp.now().toJSON(), ...payload)
-})
-
-export function lifecycleEvent(
-  callbackFn: () => void,
-  options: {
-    beforeEvent: AglynEvent
-    beforePayload: any[]
-    afterEvent: AglynEvent
-    afterPayload: any[]
-    onCatch?: (e: unknown) => void
-  },
-): void {
-  const { beforeEvent, beforePayload, afterEvent, afterPayload, onCatch } =
-    options
-  try {
-    logger.debug(Timestamp.now().toJSON(), beforeEvent, beforePayload)
-    emitter.emit(beforeEvent, Timestamp.now().toJSON(), ...beforePayload)
-    callbackFn()
-    logger.debug(Timestamp.now().toJSON(), afterEvent, afterPayload)
-    emitter.emit(afterEvent, Timestamp.now().toJSON(), ...afterPayload)
-  } catch (e) {
-    emitter.emit(AglynEvent.ERROR_GENERAL, {
-      message:
-        e?.message || `An error has occurred before event ${beforeEvent}`,
-    })
-    onCatch && onCatch(e)
+export class EmitManager extends EventEmitter2 {
+  constructor(options?: ConstructorOptions) {
+    super(options)
   }
 }
+
+export default EmitManager

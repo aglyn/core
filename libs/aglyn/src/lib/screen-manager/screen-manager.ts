@@ -24,15 +24,15 @@ import cloneDeep from 'lodash-es/cloneDeep'
 import isEqual from 'lodash-es/isEqual'
 import { makeAutoObservable, toJS } from 'mobx'
 import { computedFn } from 'mobx-utils'
-import { components } from '../aglyn'
+import { type Aglyn } from '../aglyn'
 import {
-  type ComponentId,
-  type ComponentSchema,
-  type PresetSchema,
+  ComponentId,
+  ComponentSchema,
+  PresetSchema,
 } from '../components-manager'
 import { createIdUrlSafe } from '../constants'
 import type { PluginId } from '../plugin-manager'
-import { HostUid } from '../types'
+import type { HostUid } from '../types'
 
 export enum NodeType {
   NODE = 'node',
@@ -194,7 +194,7 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     return this.screen.getNodeBreadcrumbPath(this)
   }
   get componentSchema(): ComponentSchema | undefined {
-    return getNodeComponentSchema(this)
+    return this.screen.aglyn.components.getSchema(this.componentId)
   }
   get hasNodes(): boolean {
     return Array.isArray(this.nodes) && this.nodes.length > 0
@@ -312,7 +312,7 @@ export class ScreenManager {
   )
   public getNodeLabelShort = computedFn((node: NodeSchema<any>): any => {
     if (this.isRootNode(node)) return NODE_ROOT_LABEL
-    const componentLabel = components.getLabel(node?.componentId)
+    const componentLabel = this.aglyn.components.getLabel(node?.componentId)
     return node?.name || componentLabel || node?.$id
   })
   public nestNodes = computedFn(
@@ -331,7 +331,7 @@ export class ScreenManager {
     },
   )
 
-  constructor() {
+  constructor(public aglyn?: Aglyn) {
     makeAutoObservable(this)
   }
 
@@ -618,10 +618,6 @@ export class ScreenManager {
 }
 
 export default ScreenManager
-
-export function getNodeComponentSchema(node: NodeSchema<any>): ComponentSchema {
-  return components.getSchema(node?.componentId)
-}
 
 // export function getNodeBreadcrumbPath(nodeId: NodeId): NodeBreadcrumbPath
 // export function getNodeBreadcrumbPath(node: NodeSchema<any>): NodeBreadcrumbPath

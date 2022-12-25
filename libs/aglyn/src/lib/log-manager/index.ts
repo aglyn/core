@@ -15,5 +15,5 @@
  * limitations under the License.
  */
 
-export { default } from './emit-manager'
-export * from './emit-manager'
+export { default } from './log-manager'
+export * from './log-manager'

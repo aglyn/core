@@ -15,8 +15,11 @@
  * limitations under the License.
  */
 
+import Timestamp from '@aglyn/shared-util-timestamp/timestamp'
 import ComponentManager from './components-manager'
-import { AglynEvent, emitter } from './emit-manager'
+import { namespace } from './constants'
+import EmitManager, { AglynEvent } from './emit-manager'
+import LogManager from './log-manager'
 import PluginManager from './plugin-manager'
 import ScreenManager from './screen-manager'
 import UAManager from './ua-manager'
@@ -31,7 +34,49 @@ export * from './plugin-manager'
 export * from './screen-manager'
 export * from './ua-manager'
 
-export const plugins = new PluginManager()
+export class Aglyn extends EmitManager {
+  logger = new LogManager(namespace)
+  emitter = this
+  ua = new UAManager()
+  plugins = new PluginManager(this)
+  components = new ComponentManager(this)
+  screen = new ScreenManager(this)
+}
+
+export const aglyn = new Aglyn()
+
+export const { logger, components, ua, emitter, screen, plugins } = aglyn
+
+emitter.prependListener(['error', '**'], (...payload) => {
+  logger.error(Timestamp.now().toJSON(), ...payload)
+})
+
+export function lifecycleEvent(
+  callbackFn: () => void,
+  options: {
+    beforeEvent: AglynEvent
+    beforePayload: any[]
+    afterEvent: AglynEvent
+    afterPayload: any[]
+    onCatch?: (e: unknown) => void
+  },
+): void {
+  const { beforeEvent, beforePayload, afterEvent, afterPayload, onCatch } =
+    options
+  try {
+    logger.debug(Timestamp.now().toJSON(), beforeEvent, beforePayload)
+    emitter.emit(beforeEvent, Timestamp.now().toJSON(), ...beforePayload)
+    callbackFn()
+    logger.debug(Timestamp.now().toJSON(), afterEvent, afterPayload)
+    emitter.emit(afterEvent, Timestamp.now().toJSON(), ...afterPayload)
+  } catch (e) {
+    emitter.emit(AglynEvent.ERROR_GENERAL, {
+      message:
+        e?.message || `An error has occurred before event ${beforeEvent}`,
+    })
+    onCatch && onCatch(e)
+  }
+}
 
 emitter.on(AglynEvent.PLUGIN_REGISTER, ({ plugin }) => {
   plugins.addDependency(plugin)
@@ -39,8 +84,6 @@ emitter.on(AglynEvent.PLUGIN_REGISTER, ({ plugin }) => {
 emitter.on(AglynEvent.PLUGIN_UNREGISTER, ({ pluginId }) => {
   plugins.removeDependency(pluginId)
 })
-
-export const components = new ComponentManager()
 
 emitter.on(AglynEvent.COMPONENT_REGISTER, ({ component, schema }) => {
   components.registerComponent(component, schema)
@@ -55,8 +98,6 @@ emitter.on(AglynEvent.PRESET_REGISTER, ({ preset }) => {
 emitter.on(AglynEvent.PRESET_UNREGISTER, ({ presetId }) => {
   components.unregisterPreset(presetId)
 })
-
-export const screen = new ScreenManager()
 
 emitter.on(AglynEvent.NODE_CLEAR_ITEMS, () => {
   screen.clearNodes()
@@ -77,6 +118,4 @@ emitter.on(AglynEvent.NODE_REPARENT, ({ node, newParent, index }) => {
   screen.reparentNode(node, newParent, index)
 })
 
-export const ua = new UAManager()
-
-console.log('this/ aglyn', this)
+console.log('this/ aglyn', this, aglyn)

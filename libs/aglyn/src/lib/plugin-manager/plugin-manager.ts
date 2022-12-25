@@ -18,7 +18,8 @@
 // eslint-disable-next-line @nrwl/nx/enforce-module-boundaries
 import type { MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { makeAutoObservable } from 'mobx'
-import { AglynEvent, lifecycleEvent } from '../emit-manager'
+import { type Aglyn, lifecycleEvent } from '../aglyn'
+import { AglynEvent } from '../emit-manager'
 
 export enum PluginStatus {
   WAITING = 'waiting',
@@ -107,7 +108,7 @@ export class PluginManager {
   public dependencyStatusById: PluginStatusById = {}
   public dependencyDependentsById: PluginDependents = {}
 
-  constructor() {
+  constructor(protected aglyn?: Aglyn) {
     makeAutoObservable(this)
   }
 

@@ -15,5 +15,13 @@
  * limitations under the License.
  */
 
-export { default } from './emit-manager'
-export * from './emit-manager'
+import { Logger } from '@aglyn/shared-util-logger'
+import { type Aglyn } from '../aglyn'
+
+export class LogManager extends Logger {
+  constructor(name?: string, protected aglyn?: Aglyn) {
+    super(name)
+  }
+}
+
+export default LogManager
