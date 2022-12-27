@@ -109,6 +109,7 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
 
   return isMenu ? (
     <Menu
+      dense
       key={itemKey}
       items={items}
       {...MenuProps}

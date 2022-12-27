@@ -14,28 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { json } from '@codemirror/lang-json'
 import { githubDark } from '@uiw/codemirror-theme-github'
 import ReactCodeMirror, {
   type ReactCodeMirrorProps,
 } from '@uiw/react-codemirror'
+import { forwardRef } from 'react'
 
 export interface CodeMirrorProps extends ReactCodeMirrorProps {}
 
-function CodeMirror(props: ReactCodeMirrorProps) {
-  return (
-    <ReactCodeMirror
-      // initialState={{ json: JSON.stringify(data, null, 2) }}
-      theme={githubDark}
-      extensions={[json() /*linter,*/ /*lintGutter()*/]}
-      height="50vh"
-      basicSetup={{ lintKeymap: true }}
-      autoFocus
-      {...props}
-    />
-  )
-}
-CodeMirror.displayName = 'CodeMirror'
+export const CodeMirrorEditor = forwardRef<any, CodeMirrorProps>(
+  (props, ref) => {
+    const { ...rest } = props
+    return (
+      <ReactCodeMirror
+        ref={ref}
+        // initialState={{ json: JSON.stringify(data, null, 2) }}
+        theme={githubDark}
+        extensions={[json() /*linter,*/ /*lintGutter()*/]}
+        basicSetup={{ lintKeymap: true }}
+        autoFocus
+        {...rest}
+      />
+    )
+  },
+)
+CodeMirrorEditor.displayName = 'CodeMirrorEditor'
 
-export { CodeMirror }
-export default CodeMirror
+export default CodeMirrorEditor

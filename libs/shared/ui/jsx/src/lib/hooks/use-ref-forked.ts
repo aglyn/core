@@ -15,57 +15,78 @@
  * limitations under the License.
  */
 
-import { _isFnT, _isObj } from '@aglyn/shared-util-guards'
 import {
+  type ForwardedRef,
   type MutableRefObject,
-  type Ref,
   type RefCallback,
   type RefObject,
   useMemo,
   useRef,
 } from 'react'
 
-export type RefParam<T> = Ref<T> | null | undefined
+/**
+ * Check if value is of type function similar to a ref callback
+ */
+export function isRefCallback<T>(val: ForwardedRef<T>): val is RefCallback<T> {
+  return typeof val === 'function'
+}
 
-export const isRefCallback = <T>(val: unknown): val is RefCallback<T> =>
-  _isFnT(val)
-export const isRefObject = <T>(val: unknown): val is RefObject<T> => _isObj(val)
+/**
+ * Check if value is of mutable ref object
+ */
+export function isRefObject<T>(
+  val: ForwardedRef<T>,
+): val is MutableRefObject<T> {
+  return Boolean(val) && 'current' in val
+}
 
 /**
  * Assign a React ref object, could be a RefCallback or RefObject
  */
-export function assignRef<T>(ref: Ref<T>, value: T): T {
+export function assignRef<T>(ref: ForwardedRef<T>, value: T): T {
   if (isRefCallback(ref)) ref(value)
   else if (isRefObject(ref)) (ref as MutableRefObject<T>).current = value
   return value
 }
 
 /**
+ * Merges multiple refs into one. Works with either callback or object refs.
+ */
+export function mergeRefs<T>(...refs: ForwardedRef<T>[]): RefCallback<T> {
+  return (value: T) => {
+    for (const ref of refs) {
+      assignRef(ref, value)
+    }
+    return value
+  }
+}
+
+/**
  * Combines multiple RefCallback|RefObject into one.
  */
 export function useRefForked<Instance>(
-  refB: RefParam<Instance>,
+  refB: ForwardedRef<Instance>,
 ): [RefCallback<Instance>, RefObject<Instance>]
 export function useRefForked<Instance>(
-  refB: RefParam<Instance>,
-  refC: RefParam<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC: ForwardedRef<Instance>,
 ): [RefCallback<Instance>, RefObject<Instance>]
 export function useRefForked<Instance>(
-  refB: RefParam<Instance>,
-  refC: RefParam<Instance>,
-  refD: RefParam<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC: ForwardedRef<Instance>,
+  refD: ForwardedRef<Instance>,
 ): [RefCallback<Instance>, RefObject<Instance>]
 export function useRefForked<Instance>(
-  refB: RefParam<Instance>,
-  refC: RefParam<Instance>,
-  refD: RefParam<Instance>,
-  refE: RefParam<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC: ForwardedRef<Instance>,
+  refD: ForwardedRef<Instance>,
+  refE: ForwardedRef<Instance>,
 ): [RefCallback<Instance>, RefObject<Instance>]
 export function useRefForked<Instance>(
-  refB: RefParam<Instance>,
-  refC?: RefParam<Instance>,
-  refD?: RefParam<Instance>,
-  refE?: RefParam<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC?: ForwardedRef<Instance>,
+  refD?: ForwardedRef<Instance>,
+  refE?: ForwardedRef<Instance>,
 ): [RefCallback<Instance>, RefObject<Instance>] {
   const refObject = useRef<Instance>()
   const refCallback = useForkedRefs(refObject, refB, refC, refD, refE)
@@ -73,33 +94,33 @@ export function useRefForked<Instance>(
 }
 
 export function useForkedRefs<Instance>(
-  refA: RefParam<Instance>,
-  refB: RefParam<Instance>,
+  refA: ForwardedRef<Instance>,
+  refB: ForwardedRef<Instance>,
 ): RefCallback<Instance> | null
 export function useForkedRefs<Instance>(
-  refA: RefParam<Instance>,
-  refB: RefParam<Instance>,
-  refC: RefParam<Instance>,
+  refA: ForwardedRef<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC: ForwardedRef<Instance>,
 ): RefCallback<Instance> | null
 export function useForkedRefs<Instance>(
-  refA: RefParam<Instance>,
-  refB: RefParam<Instance>,
-  refC: RefParam<Instance>,
-  refD: RefParam<Instance>,
+  refA: ForwardedRef<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC: ForwardedRef<Instance>,
+  refD: ForwardedRef<Instance>,
 ): RefCallback<Instance> | null
 export function useForkedRefs<Instance>(
-  refA: RefParam<Instance>,
-  refB: RefParam<Instance>,
-  refC: RefParam<Instance>,
-  refD: RefParam<Instance>,
-  refE: RefParam<Instance>,
+  refA: ForwardedRef<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC: ForwardedRef<Instance>,
+  refD: ForwardedRef<Instance>,
+  refE: ForwardedRef<Instance>,
 ): RefCallback<Instance> | null
 export function useForkedRefs<Instance>(
-  refA: RefParam<Instance>,
-  refB: RefParam<Instance>,
-  refC?: RefParam<Instance>,
-  refD?: RefParam<Instance>,
-  refE?: RefParam<Instance>,
+  refA: ForwardedRef<Instance>,
+  refB: ForwardedRef<Instance>,
+  refC?: ForwardedRef<Instance>,
+  refD?: ForwardedRef<Instance>,
+  refE?: ForwardedRef<Instance>,
 ): RefCallback<Instance> | null {
   /**
    * This will create a new function if the ref props change and are defined.

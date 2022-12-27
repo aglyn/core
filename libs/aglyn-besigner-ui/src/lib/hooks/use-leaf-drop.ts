@@ -44,7 +44,7 @@ export function useLeafDrop(
   accept: Besigner.DragType[] = acceptAll,
 ): ReturnType<typeof useDroppable> {
   return useDroppable({
-    id: `${accept.join()}:${node?.$id}`,
+    id: `drop:${node?.$id}:${accept}`,
     data: {
       accept,
       node,

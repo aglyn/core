@@ -279,10 +279,11 @@ const ElementOverlayActionsComponentRaw = (
                 <MenuList
                   color="secondary"
                   id="split-button-menu"
+                  dense
                   autoFocusItem
                 >
                   {!isRootElementId($id) && (
-                    <MenuItem dense onClick={handleModifyClick}>
+                    <MenuItem onClick={handleModifyClick}>
                       <ListItemIcon>
                         <MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />
                       </ListItemIcon>
@@ -291,7 +292,7 @@ const ElementOverlayActionsComponentRaw = (
                   )}
 
                   {!isRootElementId($id) && (
-                    <MenuItem dense onClick={() => deleteElementCallback(node)}>
+                    <MenuItem onClick={() => deleteElementCallback(node)}>
                       <ListItemIcon>
                         <MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} />
                       </ListItemIcon>

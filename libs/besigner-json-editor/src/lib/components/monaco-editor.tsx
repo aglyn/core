@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-import { useId as useReactId, useMemo } from 'react'
+import ReactMonacoEditor, { EditorProps } from '@monaco-editor/react'
 
-/**
- * Use the provided
- */
-export function useId(id?: JSX.Key): JSX.Key {
-  const serverId = useReactId()
-  return useMemo(() => id || serverId, [id, serverId])
+export interface MonacoEditorProps extends EditorProps {}
+
+export const MonacoEditor = (props: MonacoEditorProps) => {
+  const { ...rest } = props
+  return <ReactMonacoEditor defaultLanguage="json" {...rest} />
 }
+MonacoEditor.displayName = 'MonacoEditor'
 
-export default useId
+export default MonacoEditor

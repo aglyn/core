@@ -33,10 +33,11 @@ import {
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import { forwardRef, useCallback, useState } from 'react'
-import type { CodeMirrorProps } from './code-mirror'
+import { Else, If, Then, When } from 'react-if'
+import type { CodeMirrorProps } from './components/code-mirror-editor'
 
-const CodeMirror = dynamic(
-  async () => await import('./code-mirror').then((mod) => mod.CodeMirror),
+const Editor = dynamic(
+  () => import('./components/monaco-editor').then((mod) => mod.default),
   { ssr: false },
 )
 
@@ -48,7 +49,7 @@ export interface BesignerJsonEditorProps
   }['bivarianceHack']
   onClose?: {
     bivarianceHack(
-      event: {},
+      event: Record<string, never>,
       reason: 'backdropClick' | 'escapeKeyDown' | 'saveClick' | 'cancelClick',
     ): void
   }['bivarianceHack']
@@ -62,7 +63,7 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
     const closeWarn = useCallback(() => setWarnOpen(false), [])
 
     // console.log('default value', data)
-    const value = JSON.stringify(data, null, 2)
+    const value = JSON.stringify(defaultValue, null, 2)
 
     const handleChange = useCallback((value: any) => {
       try {
@@ -93,52 +94,59 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
         maxWidth="lg"
         fullWidth
         onClose={handleClose}
-        keepMounted
+        // keepMounted
         {...rest}
       >
         <DialogTitle>Raw JSON</DialogTitle>
         <DialogContent sx={{ position: 'relative', p: 0 }}>
-          {open && <CodeMirror value={value} onChange={handleChange} />}
-          {warnOpen && (
-            <Box
-              sx={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-                bgcolor: 'action.disabled',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backdropFilter: 'blur(2px)',
-                p: { xs: 2, sm: 3 },
-              }}
-            >
-              <Alert
-                severity="warning"
-                sx={{
-                  maxWidth: 620,
-                }}
-                action={
-                  <IconButton onClick={closeWarn} color="inherit">
-                    <MdiIcon path={ICON_VARIANT_CLOSE.path} />
-                  </IconButton>
-                }
-              >
-                <AlertTitle>Warning: Advanced Feature Ahead!</AlertTitle>
-                Using the raw json editor is highly discouraged and should only
-                be used by individuals who understand the consequences. Changes
-                may potentially result in undesired outcomes which are{' '}
-                <strong>destructive and irreversible</strong>.
-              </Alert>
-            </Box>
-          )}
+          <When condition={open}>
+            <If condition={warnOpen}>
+              <Then>
+                <Box
+                  height="50vh"
+                  sx={{
+                    position: 'relative',
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    bgcolor: 'action.disabled',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backdropFilter: 'blur(2px)',
+                    p: { xs: 2, sm: 3 },
+                  }}
+                >
+                  <Alert
+                    severity="warning"
+                    sx={{
+                      maxWidth: 620,
+                    }}
+                    action={
+                      <IconButton onClick={closeWarn} color="inherit">
+                        <MdiIcon path={ICON_VARIANT_CLOSE.path} />
+                      </IconButton>
+                    }
+                  >
+                    <AlertTitle>Warning: Advanced Feature Ahead!</AlertTitle>
+                    Using the raw json editor is highly discouraged and should
+                    only be used by individuals who understand the consequences.
+                    Changes may potentially result in undesired outcomes which
+                    are <strong>destructive and irreversible</strong>.
+                  </Alert>
+                </Box>
+              </Then>
+              <Else>
+                <Editor height="50vh" value={value} onChange={handleChange} />
+              </Else>
+            </If>
+          </When>
         </DialogContent>
         <DialogActions>
           <Button
             variant="contained"
-            onClick={(e) => handleClose(e, 'cancelClick')}
+            onClick={(e) => handleClose(e as any, 'cancelClick')}
           >
             {'Cancel'}
           </Button>

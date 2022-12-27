@@ -26,7 +26,7 @@ import useLeafDrop from '../hooks/use-leaf-drop'
 export interface ElementLeafComponentProps extends LeafProps {}
 
 const RawLeafComponent = forwardRef<any, ElementLeafComponentProps>(
-  (props, forwardRef) => {
+  (props, ref) => {
     const { node, ...rest } = props
     const localRef = useRef<HTMLElement>(null)
     const isSelected = Besigner.focus.isNodeSelected(node)
@@ -80,7 +80,7 @@ const RawLeafComponent = forwardRef<any, ElementLeafComponentProps>(
       <>
         <Leaf
           ref={useForkedRefs<HTMLElement>(
-            forwardRef,
+            ref,
             localRef,
             setDraggableNodeRef,
             setDroppableNodeRef,
@@ -96,6 +96,10 @@ const RawLeafComponent = forwardRef<any, ElementLeafComponentProps>(
           {...attributes}
           {...rest}
         />
+
+        {/*<Draggable node={node} type={DragType.CANVAS}>*/}
+        {/*  <Box sx={{ h: 100, w: 100 }}>Move me! ;)</Box>*/}
+        {/*</Draggable>*/}
       </>
     )
   },

@@ -59,8 +59,6 @@ const ComponentGridItem = observer(
       Aglyn.components.getLabel(item?.$id) ||
       item?.$id
 
-    console.log('item', item)
-
     const {
       attributes: dragAttributes,
       transform,

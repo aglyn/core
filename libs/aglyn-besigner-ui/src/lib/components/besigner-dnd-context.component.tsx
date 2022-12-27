@@ -18,13 +18,12 @@
 import * as Besigner from '@aglyn/besigner'
 import {
   DndContext,
-  type DragCancelEvent,
   type DragEndEvent,
   type DragMoveEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
 import type { BackendFactory } from 'dnd-core'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { DndProvider } from 'react-dnd'
 // import {TouchBackend} from 'react-dnd-touch-backend'
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -108,29 +107,37 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
     [options],
   )
 
-  const handleDragStart = useCallback((e: DragStartEvent) => {
-    const node = e.active?.data.current.node
+  const handleDragStart = ({ active }: DragStartEvent) => {
+    const node = active?.data.current.node
     console.log('handleDragStart', node)
     Besigner.dnd.setDragNode(node)
-  }, [])
-  const handleDragMove = useCallback((e: DragMoveEvent) => {
+  }
+
+  const handleDragMove = (e: DragMoveEvent) => {
     e.activatorEvent.stopPropagation()
-    const node = e.over?.data.current.node
-    console.log('handleDragOver', node)
-    Besigner.dnd.setDragNode(node)
-  }, [])
-  const handleDragEnd = useCallback((e: DragEndEvent) => {
-    const dropNode = e.over?.data.current.node
+    const drag = e.active
+    const drop = e.over
+    const delta = e.delta
+    e.activatorEvent.composedPath()
+    console.log(
+      'onDragMove event',
+      drop?.id,
+      drop?.rect,
+      delta,
+      e.activatorEvent,
+    )
+    Besigner.dnd.setDropNode(drop?.data.current.node)
+  }
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    e.activatorEvent.stopPropagation()
     const dragNode = e.active?.data.current.node
-    console.log('handleDragEnd dropNode', dropNode)
+    const dropNode = e.over?.data.current.node
     console.log('handleDragEnd dragNode', dragNode)
-    console.log('handleDragEnd dragNode', e.collisions)
+    console.log('handleDragEnd dropNode', dropNode)
+    console.log('handleDragEnd collisions', e.collisions)
     Besigner.dnd.clearDndStatus()
-  }, [])
-  const handleDragCancel = useCallback((e: DragCancelEvent) => {
-    console.log('handleDragCancel')
-    Besigner.dnd.clearDndStatus()
-  }, [])
+  }
 
   return (
     <DndProvider backend={HTML5Backend} options={opts} {...rest} debugMode>
@@ -138,8 +145,9 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
         onDragStart={handleDragStart}
         onDragMove={handleDragMove}
         onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-        collisionDetection={circleIntersection}
+        onDragCancel={(e) => console.log('handleDragCancel', e)}
+
+        // collisionDetection={circleIntersection}
       >
         {children}
       </DndContext>

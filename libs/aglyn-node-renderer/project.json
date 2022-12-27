@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/aglyn-node-renderer/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:lib", "scope:feature","scope:aglyn"],
   "targets": {
     "build": {
       "executor": "@nrwl/rollup:rollup",
