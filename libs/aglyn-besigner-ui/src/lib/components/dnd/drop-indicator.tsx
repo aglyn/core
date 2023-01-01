@@ -26,8 +26,10 @@ import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { REGION } from '../../utils/droppable-region-utils'
 
-type Orientation = 'vertical' | 'horizontal'
-
+type State = {
+  rect: ClientRect
+  region: REGION
+}
 const DEFAULT = {
   region: REGION.CHILDREN,
   rect: {
@@ -47,8 +49,10 @@ export const DropIndicator = observer(function DropIndicator(
 ) {
   const { ...rest } = props
   const [dragging, setDragging] = useState(false)
-  const [region, setRegion] = useState<REGION>(REGION.CHILDREN)
-  const [rect, setRect] = useState<ClientRect>({} as any)
+  const [{ rect, region }, setRect] = useState<State>({
+    rect: {} as ClientRect,
+    region: REGION.CHILDREN,
+  })
   const before = region === REGION.LEFT || region === REGION.TOP
   const after = region === REGION.RIGHT || region === REGION.BOTTOM
   const asChild = region === REGION.CHILDREN
@@ -62,8 +66,10 @@ export const DropIndicator = observer(function DropIndicator(
     },
     onDragMove(event: DragMoveEvent): void {
       const droppable = event.over
-      setRect(droppable?.rect || DEFAULT.rect)
-      setRegion(droppable?.data.current.region || DEFAULT.region)
+      setRect({
+        rect: droppable?.rect || DEFAULT.rect,
+        region: droppable?.data.current.region || DEFAULT.region,
+      })
     },
   })
 
