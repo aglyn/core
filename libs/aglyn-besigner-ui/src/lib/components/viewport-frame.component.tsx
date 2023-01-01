@@ -37,6 +37,7 @@ import {
   HTMLAttributes,
   useCallback,
 } from 'react'
+import DropIndicator from './dnd/drop-indicator'
 import LeafComponent from './leaf.component'
 import NodeOverlay from './node-overlay'
 
@@ -135,13 +136,14 @@ const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
       ref={ref}
       data-aglyn="viewport:popover"
       sx={{
-        position: 'relative',
+        // position: 'relative',
         zIndex: 'tooltip',
       }}
       {...rest}
     >
       <NodeOverlay data-aglyn="overlay:selected" variant="selected" />
       <NodeOverlay data-aglyn="overlay:hovered" variant="hovered" />
+      <DropIndicator />
     </Box>
   )
 })

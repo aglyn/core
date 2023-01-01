@@ -44,10 +44,6 @@ const RawLeafComponent = forwardRef<any, ElementLeafComponentProps>(
             {...rest}
           />
         </DraggableDroppable>
-
-        {/*<Draggable node={node} type={DragType.CANVAS}>*/}
-        {/*  <Box sx={{ h: 100, w: 100 }}>Move me! ;)</Box>*/}
-        {/*</Draggable>*/}
       </>
     )
   },
