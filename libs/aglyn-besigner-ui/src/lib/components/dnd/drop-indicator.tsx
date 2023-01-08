@@ -14,56 +14,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import mergeSxProps from '@aglyn/shared-ui-theme/util/merge-sx-props'
-import {
-  type ClientRect,
-  type DragEndEvent,
-  type DragMoveEvent,
-  type DragStartEvent,
-  useDndMonitor,
-} from '@dnd-kit/core'
-import { type BoxProps, Stack } from '@mui/material'
-import { observer } from 'mobx-react-lite'
-import { forwardRef, useState } from 'react'
+
+import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
+import _isEqualitySameType from '@aglyn/shared-util-guards/_is-equality-same-type'
+import { type ClientRect } from '@dnd-kit/core'
+import { styled } from '@mui/material'
+import clsx from 'clsx'
+import { forwardRef, HTMLProps } from 'react'
 import { REGION } from '../../utils/droppable-region-utils'
 
-type State = {
+const classes = generateComponentClassKeys('DropIndicator', [
+  'root',
+  'line',
+  'handle',
+])
+
+type IndicatorProps = HTMLProps<HTMLDivElement> & {
+  variant?: 'vertical' | 'horizontal'
+}
+
+const Indicator = styled('div', {
+  name: 'DropIndicator',
+  shouldForwardProp: (propName) =>
+    !_isEqualitySameType(propName, null, 'variant', 'visible'),
+})<IndicatorProps>(({ theme, variant }) => {
+  const vertical = variant === 'vertical'
+
+  return {
+    position: 'absolute',
+    display: 'flex',
+    flexDirection: vertical ? 'column' : 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    [`& .${classes.line}`]: {
+      backgroundColor: theme.palette.secondary.main,
+      flexGrow: 1,
+      width: !vertical ? undefined : 3,
+      height: !vertical ? 3 : undefined,
+      display: 'block',
+      content: '""',
+    },
+    [`& .${classes.handle}`]: {
+      backgroundColor: theme.palette.surface.main,
+      borderRadius: 8,
+      border: `1px solid ${theme.palette.secondary.dark}`,
+      width: 8,
+      height: 8,
+      display: 'block',
+      content: '""',
+    },
+  }
+})
+
+export interface DropIndicatorProps
+  extends JSX.ComponentProps<typeof Indicator> {
+  visible?: boolean
   rect: ClientRect
   region: REGION
 }
-const DEFAULT = {
-  region: REGION.CHILDREN,
-  rect: {
-    left: 0,
-    top: 0,
-    height: 0,
-    right: 0,
-    bottom: 0,
-    width: 0,
-  } as ClientRect,
-}
 
-export interface DropIndicatorProps extends Partial<BoxProps> {}
-
-export const DropIndicator = observer(
-  forwardRef<HTMLDivElement, DropIndicatorProps>((props, ref) => {
-    const { style, sx, ...rest } = props
-    const [visible, setVisible] = useState(false)
-    const [{ rect, region }, setRect] = useState<State>({
-      rect: { ...DEFAULT.rect } as ClientRect,
-      region: REGION.CHILDREN,
-    })
-    const vertical = region === REGION.LEFT || region === REGION.RIGHT
-
-    useDndMonitor({
-      onDragStart: (event: DragStartEvent) => setVisible(true),
-      onDragEnd: (event: DragEndEvent) => setVisible(false),
-      onDragMove: (event: DragMoveEvent) =>
-        setRect({
-          rect: event.over?.rect || DEFAULT.rect,
-          region: event.over?.data.current.region || DEFAULT.region,
-        }),
-    })
+export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
+  (props, ref) => {
+    const { style, visible, region, rect, ...rest } = props
 
     const styles = {
       [REGION.LEFT]: {
@@ -93,50 +106,26 @@ export const DropIndicator = observer(
       },
     }
 
+    const vertical = region === REGION.LEFT || region === REGION.RIGHT
+
     return (
-      <Stack
+      <Indicator
         ref={ref}
-        direction={!vertical ? 'row' : 'column'}
+        className={clsx(classes.root)}
+        variant={vertical ? 'vertical' : 'horizontal'}
         style={{
-          visibility: visible ? 'visible' : 'hidden',
-          position: 'absolute',
           ...styles[region],
+          visibility: visible ? 'visible' : 'hidden',
           ...style,
         }}
-        alignItems="center"
-        justifyContent="center"
-        sx={mergeSxProps(
-          {
-            ['& .vectorLine']: {
-              bgcolor: 'secondary.main',
-              flexGrow: 1,
-              width: !vertical ? undefined : 3,
-              height: !vertical ? 3 : undefined,
-              display: 'block',
-              content: '""',
-            },
-            ['& .vectorPoint']: {
-              bgcolor: 'surface.main',
-              borderRadius: 8,
-              borderWidth: 1,
-              borderStyle: 'solid',
-              borderColor: 'secondary.dark',
-              width: 8,
-              height: 8,
-              display: 'block',
-              content: '""',
-            },
-          },
-          sx,
-        )}
         {...rest}
       >
-        <div className={'vectorPoint'} />
-        <div className={'vectorLine'} />
-        <div className={'vectorPoint'} />
-      </Stack>
+        <div className={classes.handle} />
+        <div className={classes.line} />
+        <div className={classes.handle} />
+      </Indicator>
     )
-  }),
+  },
 )
 DropIndicator.displayName = 'DropIndicator'
 

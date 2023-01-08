@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ interface WorkspacePanelProps extends MuiBoxProps {
 const WorkspacePanel = styled(Box, {
   name: 'AglynWorkspacePanel',
   shouldForwardProp(propName: any) {
-    return !_isEqualitySameType(propName, 'size')
+    return !_isEqualitySameType(propName, null, 'size')
   },
 })<WorkspacePanelProps>(({ theme, size }) => {
   const calcSize = size || DEFAULT_LEFT_DRAWER_WIDTH
