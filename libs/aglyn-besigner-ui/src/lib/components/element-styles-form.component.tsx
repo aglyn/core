@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import {
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
 import { observer } from 'mobx-react-lite'
-import { type ChangeEvent, forwardRef, useCallback, useMemo } from 'react'
+import { forwardRef, useCallback, useMemo } from 'react'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 import { ElementPropsFormTemplate } from './element-props-form.component'
 
@@ -459,12 +459,6 @@ const ElementStylesForm = observer(
       },
       [node],
     )
-    const handleDeleteElement = useCallback(
-      (e: ChangeEvent<unknown>) => {
-        deleteElementCallback(e)
-      },
-      [deleteElementCallback],
-    )
 
     const handleBoxStylerChange = useCallback(
       (dimensions: Measurements) => {
@@ -488,14 +482,14 @@ const ElementStylesForm = observer(
 
     const boxMeasurements = useMemo(
       () => ({
-        marginTop: nodeSx?.['marginTop'],
-        marginLeft: nodeSx?.['marginLeft'],
-        marginRight: nodeSx?.['marginRight'],
-        marginBottom: nodeSx?.['marginBottom'],
-        paddingTop: nodeSx?.['paddingTop'],
-        paddingLeft: nodeSx?.['paddingLeft'],
-        paddingRight: nodeSx?.['paddingRight'],
-        paddingBottom: nodeSx?.['paddingBottom'],
+        marginTop: nodeSx?.['marginTop'] ?? undefined,
+        marginLeft: nodeSx?.['marginLeft'] ?? undefined,
+        marginRight: nodeSx?.['marginRight'] ?? undefined,
+        marginBottom: nodeSx?.['marginBottom'] ?? undefined,
+        paddingTop: nodeSx?.['paddingTop'] ?? undefined,
+        paddingLeft: nodeSx?.['paddingLeft'] ?? undefined,
+        paddingRight: nodeSx?.['paddingRight'] ?? undefined,
+        paddingBottom: nodeSx?.['paddingBottom'] ?? undefined,
       }),
       [nodeSx],
     )
