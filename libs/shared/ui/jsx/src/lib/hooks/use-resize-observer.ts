@@ -17,38 +17,47 @@
 
 import { useCallback, useRef } from 'react'
 import ResizeObserver from 'resize-observer-polyfill'
+import useCallbackParamRef from './use-callback-param-ref'
 
 export function useResizeObserver(
-  callback: ResizeObserverCallback,
+  ctorCallback: ResizeObserverCallback,
 ): [
   observe: ResizeObserver['observe'],
   unobserve: ResizeObserver['unobserve'],
   disconnect: ResizeObserver['disconnect'],
   getObserver: () => ResizeObserver,
 ] {
-  const ref = useRef<ResizeObserver>(null)
+  const callback = useCallbackParamRef(ctorCallback)
+  const observer = useRef<ResizeObserver>(null)
 
   // This avoids creating an expensive object until it’s truly needed for the
   // first time. If you use Flow or TypeScript, you can also give getObserver()
   // a non-nullable type for convenience.
   const getObserver = useCallback(
-    () => (ref.current ??= new ResizeObserver(callback)),
-    [callback],
+    () => (observer.current ??= new ResizeObserver(callback.current)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   const observe = useCallback(
-    (target: Element) => getObserver()?.observe(target),
-    [getObserver],
+    (...args: Parameters<ResizeObserver['observe']>) =>
+      getObserver()?.observe(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   const unobserve = useCallback(
-    (target: Element) => getObserver()?.unobserve(target),
-    [getObserver],
+    (...args: Parameters<ResizeObserver['unobserve']>) =>
+      getObserver()?.unobserve(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   const disconnect = useCallback(
-    () => getObserver()?.disconnect(),
-    [getObserver],
+    (...args: Parameters<ResizeObserver['disconnect']>) =>
+      getObserver()?.disconnect(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   return [observe, unobserve, disconnect, getObserver]

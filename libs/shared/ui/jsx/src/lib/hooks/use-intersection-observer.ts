@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useRef } from 'react'
+import useCallbackParamRef from './use-callback-param-ref'
 
 // Create an observer instance linked to the callback function
 // const Observer = new MutationObserver(callback)
@@ -23,7 +24,7 @@ import { useCallback, useRef } from 'react'
 // const observerCtx = createContext(observer)
 
 export function useIntersectionObserver(
-  callback: IntersectionObserverCallback,
+  ctorCallback: IntersectionObserverCallback,
   options?: IntersectionObserverInit,
 ): [
   observe: IntersectionObserver['observe'],
@@ -32,28 +33,38 @@ export function useIntersectionObserver(
   takeRecords: IntersectionObserver['takeRecords'],
   getObserver: () => IntersectionObserver,
 ] {
+  const callback = useCallbackParamRef(ctorCallback)
   const ref = useRef<IntersectionObserver>(null)
 
   // This avoids creating an expensive object until it’s truly needed for the first time.
   const getObserver = useCallback((): IntersectionObserver => {
-    return (ref.current ??= new IntersectionObserver(callback, options))
-  }, [callback, options])
+    return (ref.current ??= new IntersectionObserver(callback.current, options))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options])
 
   const observe = useCallback(
-    (target: Element) => getObserver()?.observe(target),
-    [getObserver],
+    (...args: Parameters<IntersectionObserver['observe']>) =>
+      getObserver()?.observe(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
   const unobserve = useCallback(
-    (target: Element) => getObserver()?.unobserve(target),
-    [getObserver],
+    (...args: Parameters<IntersectionObserver['unobserve']>) =>
+      getObserver()?.unobserve(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
   const disconnect = useCallback(
-    () => getObserver()?.disconnect(),
-    [getObserver],
+    (...args: Parameters<IntersectionObserver['disconnect']>) =>
+      getObserver()?.disconnect(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
   const takeRecords = useCallback(
-    () => getObserver()?.takeRecords(),
-    [getObserver],
+    (...args: Parameters<IntersectionObserver['takeRecords']>) =>
+      getObserver()?.takeRecords(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   return [observe, unobserve, disconnect, takeRecords, getObserver]
