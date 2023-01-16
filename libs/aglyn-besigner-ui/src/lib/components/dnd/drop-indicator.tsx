@@ -82,7 +82,7 @@ export interface DropIndicatorProps
 
 export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
   (props, ref) => {
-    const { style, visible, region, rect, ...rest } = props
+    const { visible, region, rect, className, ...rest } = props
 
     const styles = {
       [REGION.LEFT]: {
@@ -122,9 +122,8 @@ export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
     return (
       <Indicator
         ref={ref}
-        className={clsx(classes.root)}
+        className={clsx(classes.root, className)}
         variant={vertical ? 'vertical' : 'horizontal'}
-        style={style}
         animate={{
           ...styles[region],
           visibility: visible ? 'visible' : 'hidden',
