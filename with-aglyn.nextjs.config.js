@@ -234,7 +234,7 @@ const AGLYN_CONFIG = {
    * the necessary files for a production deployment including select files in
    * node_modules
    */
-  output: 'standalone',
+  // output: 'standalone',
 
   pageExtensions: ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'],
   generateEtags: true,
