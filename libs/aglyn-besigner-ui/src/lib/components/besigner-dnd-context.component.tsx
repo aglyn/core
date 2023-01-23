@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ import {
   DndContext,
   KeyboardSensor,
   MeasuringStrategy,
+  MouseSensor,
   PointerSensor,
   pointerWithin,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -37,7 +39,7 @@ export interface BesignerDndContextProps<BackendContext, BackendOptions> {
   debugMode?: boolean
 }
 
-function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
+export function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
   const { children, options, ...rest } = props
   const opts = {
     enableTouchEvents: true,
@@ -51,7 +53,9 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
   }
 
   const sensors = useSensors(
+    useSensor(MouseSensor),
     useSensor(PointerSensor),
+    useSensor(TouchSensor),
     useSensor(KeyboardSensor),
   )
 
@@ -65,7 +69,6 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
             strategy: MeasuringStrategy.Always,
           },
         }}
-        onDragCancel={(e) => console.log('handleDragCancel', e)}
       >
         {children}
       </DndContext>
@@ -75,5 +78,4 @@ function BesignerDndContext<T, U>(props: BesignerDndContextProps<T, U>) {
 BesignerDndContext.displayName = 'BesignerDndContext'
 BesignerDndContext.aglyn = true
 
-export { BesignerDndContext }
 export default BesignerDndContext
