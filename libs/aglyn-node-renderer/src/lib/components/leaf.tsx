@@ -50,7 +50,9 @@ export const Leaf = observer(
       >
         {children}
 
-        <ShadowDom.AglynText>{resolvedProps?.['children']}</ShadowDom.AglynText>
+        <ShadowDom.AglynText>
+          {resolvedProps?.['children'] as any}
+        </ShadowDom.AglynText>
       </Component>
     )
   }),
