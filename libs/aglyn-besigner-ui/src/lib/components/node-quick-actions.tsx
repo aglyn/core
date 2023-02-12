@@ -174,6 +174,35 @@ export const NodeQuickActions = observer(
               children={'add'}
               icon={{ path: ICON_VARIANT_SHOW_MORE_VERTICAL.path }}
               componentsProps={{
+                popper: {
+                  disablePortal: false,
+                  modifiers: [
+                    {
+                      name: 'flip',
+                      enabled: true,
+                      options: {
+                        altBoundary: true,
+                        rootBoundary: 'document',
+                        padding: 100,
+                      },
+                    },
+                    {
+                      name: 'preventOverflow',
+                      enabled: true,
+                      options: {
+                        altAxis: true,
+                        altBoundary: true,
+                        tether: true,
+                        rootBoundary: 'document',
+                        padding: 100,
+                      },
+                    },
+                    {
+                      name: 'arrow',
+                      enabled: true,
+                    },
+                  ],
+                },
                 tooltip: {
                   sx: {
                     padding: 0,
