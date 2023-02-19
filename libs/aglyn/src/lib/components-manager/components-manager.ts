@@ -214,7 +214,7 @@ export class ComponentManager {
     const setSchema = (schema: ComponentSchema<any> | PresetSchema<any>) => {
       const category = schema.category || ComponentCategory.UNCATEGORIZED
       ;(schemas[category] ??= []).push(schema)
-      ;(schemas[ComponentCategory.ALL] ??= []).push(schema)
+      // ;(schemas[ComponentCategory.ALL] ??= []).push(schema)
     }
     // Object.values(this.schemas).forEach(setSchema)
     Object.values(this.presets).forEach(setSchema)

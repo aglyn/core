@@ -31,13 +31,13 @@ import {
   Grid,
   IconButton,
   InputBase,
-  Paper,
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react-lite'
 import { forwardRef, useCallback, useState } from 'react'
 import CloseableDrawerComponent, {
   type CloseableDrawerProps,
 } from './closeable-drawer.component'
+import EmptyResults from './empty-results'
 import NodeCard from './node-card'
 
 export interface ComponentsDrawerProps extends CloseableDrawerProps {}
@@ -109,76 +109,85 @@ export const ComponentsDrawer = observer(
             <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
           </>
         }
+        childrenAfterToolbar={
+          <Collapse orientation="vertical" in={searching}>
+            <Box
+              component="form"
+              sx={{
+                p: '2px 4px',
+                display: 'flex',
+                alignItems: 'center',
+                width: 1,
+                borderTop: 1,
+                borderColor: 'divider',
+              }}
+            >
+              <IconButton
+                type="button"
+                color="inherit"
+                sx={{ p: '10px' }}
+                aria-label="search"
+                disabled
+              >
+                <MdiIcon path={ICON_VARIANT_SEARCH.path} />
+              </IconButton>
+              {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
+              <InputBase
+                sx={{ ml: 1, flex: 1 }}
+                placeholder="Search Elements"
+                inputProps={{ 'aria-label': 'search elements' }}
+                value={filter}
+                onChange={handleFilterChange}
+              />
+              {Boolean(filter) && (
+                <>
+                  <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+                  <IconButton
+                    type="button"
+                    color="inherit"
+                    sx={{ p: '10px' }}
+                    aria-label="search"
+                    onClick={() => setFilter('')}
+                  >
+                    <MdiIcon path={ICON_VARIANT_CLEAR.path} />
+                  </IconButton>
+                </>
+              )}
+            </Box>
+          </Collapse>
+        }
         {...rest}
       >
-        <Collapse orientation="vertical" in={searching}>
-          <Paper
-            component="form"
-            square
-            sx={{
-              p: '2px 4px',
-              display: 'flex',
-              alignItems: 'center',
-              width: 1,
+        {!items?.length ? (
+          <EmptyResults sx={{ minHeight: '40vh', height: 1 }} />
+        ) : (
+          <AccordionListComponent
+            items={items}
+            defaultExpanded={items.map((i) => i.$id)}
+            getItemId={(item) => item?.$id}
+            onRenderSummary={({ item }) => (
+              <Observer>{() => <>{item?.label}</>}</Observer>
+            )}
+            AccordionDetailsProps={{
+              sx: { overflowX: 'hidden' },
             }}
-          >
-            <IconButton
-              type="button"
-              color="inherit"
-              sx={{ p: '10px' }}
-              aria-label="search"
-              disabled
-            >
-              <MdiIcon path={ICON_VARIANT_SEARCH.path} />
-            </IconButton>
-            <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-            <InputBase
-              sx={{ ml: 1, flex: 1 }}
-              placeholder="Search Elements"
-              inputProps={{ 'aria-label': 'search elements' }}
-              value={filter}
-              onChange={handleFilterChange}
-            />
-            <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-            <IconButton
-              type="button"
-              color="inherit"
-              sx={{ p: '10px' }}
-              aria-label="search"
-              disabled={!filter}
-              onClick={() => setFilter('')}
-            >
-              <MdiIcon path={ICON_VARIANT_CLEAR.path} />
-            </IconButton>
-          </Paper>
-        </Collapse>
-
-        <AccordionListComponent
-          items={items}
-          defaultExpanded={items.map((i) => i.$id)}
-          getItemId={(item) => item?.$id}
-          onRenderSummary={({ item }) => (
-            <Observer>{() => <>{item?.label}</>}</Observer>
-          )}
-          AccordionDetailsProps={{
-            sx: { overflowX: 'hidden' },
-          }}
-          onRenderDetail={({ item }) => (
-            <Observer>
-              {() => (
-                <Box>
-                  <Grid spacing={3} container sx={{ overflowX: 'hidden' }}>
-                    {item?.items?.map((node, index) => (
-                      <Grid key={node?.$id ?? index} xs={4} item>
-                        <NodeCard node={node as any} />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-              )}
-            </Observer>
-          )}
-        />
+            onRenderDetail={({ item }) => (
+              <Observer>
+                {() => (
+                  <Box>
+                    <Grid spacing={3} container sx={{ overflowX: 'hidden' }}>
+                      {item?.items?.map((node, index) => (
+                        <Grid key={node?.$id ?? index} xs={4} item>
+                          <NodeCard node={node as any} />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                )}
+              </Observer>
+            )}
+          />
+        )}
       </CloseableDrawerComponent>
     )
   }),

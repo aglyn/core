@@ -56,22 +56,24 @@ export interface NavigationDrawerProps extends Partial<DrawerProps> {
   ContentProps?: BoxProps
   AppBarLeftProps?: StackProps
   AppBarRightProps?: StackProps
+  childrenAfterToolbar?: JSX.Node
 }
 
 export const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
   function RefRenderFn(props, forwardRef) {
     const {
+      sx,
       children,
       className,
       contentRef,
       appBarLeft,
       appBarRight,
-      sx,
       AppBarProps,
       ToolbarProps,
       ContentProps,
       AppBarLeftProps,
       AppBarRightProps,
+      childrenAfterToolbar,
       ...rest
     } = props
 
@@ -160,6 +162,7 @@ export const NavigationDrawerComponent = forwardRef<any, NavigationDrawerProps>(
                   </Stack>
                 </Stack>
               </Toolbar>
+              {childrenAfterToolbar}
             </AppBar>
           )}
         </ElevateOnScroll>
