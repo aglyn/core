@@ -32,7 +32,7 @@ import {
   InputBase,
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react-lite'
-import { forwardRef, useCallback, useState } from 'react'
+import { forwardRef, SyntheticEvent, useCallback, useState } from 'react'
 import AccordionListComponent from './accordion-list.component'
 import CloseableDrawerComponent, {
   type CloseableDrawerProps,
@@ -41,12 +41,15 @@ import EmptyResults from './empty-results'
 import NodeCard from './node-card'
 
 export interface ComponentPickerProps extends CloseableDrawerProps {
-  onSelect?: (item?: Aglyn.NodeSchema<any>) => void
+  onItemSelect?: (
+    e: SyntheticEvent,
+    item?: { option: Aglyn.NodeSchema<any> },
+  ) => void
 }
 
 export const ComponentPicker = observer(
   forwardRef<any, ComponentPickerProps>((props, forwardRef) => {
-    const { open, ...rest } = props
+    const { open, onClose, onItemSelect, ...rest } = props
     const allItems = Aglyn.components.schemasBySortedCategories
 
     const [searching, setSearching] = useState(false)
@@ -95,6 +98,8 @@ export const ComponentPicker = observer(
       <CloseableDrawerComponent
         ref={forwardRef}
         action={'Close'}
+        onActionClick={onClose}
+        onClose={onClose}
         drawerTitle={'Add new element'}
         open={open}
         extraActions={
@@ -178,13 +183,20 @@ export const ComponentPicker = observer(
                 {() => (
                   <Box>
                     <Grid spacing={3} container sx={{ overflowX: 'hidden' }}>
-                      {item?.items?.map((node, index) => (
-                        <Grid key={node?.$id ?? index} xs={4} sm={3} item>
-                          <NodeCard
-                            sx={{ cursor: 'pointer' }}
-                            node={node as any}
-                          />
-                        </Grid>
+                      {item?.items?.map((node: any, index) => (
+                        <Observer key={node?.$id ?? index}>
+                          {() => (
+                            <Grid xs={4} sm={3} item>
+                              <NodeCard
+                                sx={{ cursor: 'pointer' }}
+                                node={node as any}
+                                onClick={(e) =>
+                                  onItemSelect(e, { option: node })
+                                }
+                              />
+                            </Grid>
+                          )}
+                        </Observer>
                       ))}
                     </Grid>
                   </Box>

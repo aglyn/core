@@ -59,7 +59,7 @@ export interface CloseableDrawerProps extends Partial<NavigationDrawerProps> {
   action?: JSX.Node
   extraActions?: JSX.Node
   onActionClick?: {
-    bivarianceHack(event: SyntheticEvent, reason: 'actionButtonClick'): void
+    bivarianceHack(event: SyntheticEvent, reason: string): void
   }['bivarianceHack']
 }
 
@@ -90,7 +90,7 @@ export const CloseableDrawerComponent = forwardRef<any, CloseableDrawerProps>(
     )
     const handleActionClick = useCallback(
       (e) => {
-        onActionClick.call(null, e, 'actionButtonClick')
+        onActionClick?.call(null, e, 'actionButtonClick')
       },
       [onActionClick],
     )
