@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ declare global {
     type OverrideComponentsProps<T extends OverrideComponentProp = any> = [
       T,
     ] extends [{ component: infer C }]
-      ? ComponentProps<C>
+      ? C extends keyof IntrinsicElements | ElementConstructor<any>
+        ? ComponentProps<C>
+        : never
       : never
 
     type OverrideComponentPropPlusOverrideProps<

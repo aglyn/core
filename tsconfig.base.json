@@ -89,8 +89,6 @@
       "@aglyn/shared-data-fbenums/*": ["libs/shared/data/fbenums/src/lib/*"],
       "@aglyn/shared-data-forms": ["libs/shared/data/forms/src/index.ts"],
       "@aglyn/shared-data-forms/*": ["libs/shared/data/forms/src/lib/*"],
-      "@aglyn/shared-data-jsx": ["libs/shared/data/jsx/src/index.ts"],
-      "@aglyn/shared-data-jsx/*": ["libs/shared/data/jsx/src/lib/*"],
       "@aglyn/shared-data-mdi": ["libs/shared/data/mdi/src/index.ts"],
       "@aglyn/shared-data-mdi/*": ["libs/shared/data/mdi/src/lib/*"],
       "@aglyn/shared-data-operators": ["libs/shared/data/operators/src/index.ts"],
@@ -139,12 +137,9 @@
       "@aglyn/shared-util-vendor/*": ["libs/shared/util/vendor/src/lib/*"],
       "@aglyn/tenant-feature-instance": ["libs/tenant/feature/instance/src/index.ts"],
       "@aglyn/tenant-feature-instance/*": ["libs/tenant/feature/instance/src/lib/*"]
-    }
+    },
+    "typeRoots": ["types", "node_modules/@types"],
+    "types": ["node", "@jsx"]
   },
-  "exclude": ["node_modules", "tmp", "**/generated"],
-  "references": [
-    {
-      "path": "libs/shared/data/types/src"
-    }
-  ]
+  "exclude": ["node_modules", "tmp", "**/generated"]
 }

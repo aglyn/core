@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-export * from './lib/main.d'
-export * from './lib/mui.d'
-export * from './lib/overridable.d'
-export * from './lib/react.d'
-export * from './lib/jsx.d'
+export * from './main.d'
+export * from './mui.d'
+export * from './overridable.d'
+export * from './react.d'
+export * from './styles.d'
