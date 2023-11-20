@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,72 +16,73 @@
  */
 
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { alpha, mergeSxProps } from '@aglyn/shared-ui-theme'
+import { alpha } from '@aglyn/shared-ui-theme'
 import {
-  Box,
   CircularProgress,
   LinearProgress,
   Modal,
   type ModalProps as MuiModalProps,
   Stack,
+  styled,
 } from '@mui/material'
-import { forwardRef } from 'react'
+import { forwardRef, Fragment } from 'react'
 import { LoadingContext } from '../contexts/loading.context'
 import LoadingTextComponent from './loading-text.component'
+
+
+const LoadingOverlayModal = styled(Modal)(({ theme }) => ({
+  zIndex: theme.zIndex.max,
+  color: theme.palette.text.primary,
+
+  ['& .MuiBackdrop-root']: {
+    backdropFilter: 'blur(5px)',
+    backgroundColor: alpha(theme.palette.background.paper, 0.48),
+  },
+  ['& .wrapper']: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    flexDirection: 'column',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ['& .progress-bar-top']: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: alpha(theme.palette.primary.main, 0.86),
+    width: '100%',
+  },
+  ['& .status-text']: {
+    fontWeight: theme.typography.fontWeightBold,
+  },
+}))
 
 export interface LoadingOverlayComponentProps
   extends Partial<MuiModalProps<any, any>> {}
 
-const LoadingOverlayComponent = forwardRef<any, LoadingOverlayComponentProps>(
-  (props, ref) => {
-    const { open, children, sx, ...rest } = props
+export const LoadingOverlayComponent = forwardRef<
+  any,
+  LoadingOverlayComponentProps
+>((props, ref) => {
+  const { open, children, ...rest } = props
 
-    return (
-      <>
-        {children}
-        <LoadingContext.Consumer>
-          {({ loading }) => (
-            <Modal
-              ref={ref}
-              open={Boolean(open || loading)}
-              sx={mergeSxProps(
-                {
-                  zIndex: 'max',
-                  color: 'text.primary',
+  return (
+    <LoadingContext.Consumer>
+      {({ loading }) => {
+        const isOpen = Boolean(open || loading)
 
-                  '& .MuiBackdrop-root': {
-                    backdropFilter: 'blur(5px)',
-                    backgroundColor: (theme) =>
-                      alpha(theme.palette.background.paper, 0.48),
-                  },
-                },
-                sx,
-              )}
-              {...rest}
-            >
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  left: 0,
-                  flexDirection: 'column',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+        return (
+          <Fragment>
+            {!isOpen && children}
+            <Modal ref={ref} open={isOpen} closeAfterTransition {...rest}>
+              <div className="wrapper">
                 <LinearProgress
                   color="secondary"
-                  sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    backgroundColor: (theme) =>
-                      alpha(theme.palette.primary.main, 0.86),
-                    width: '100%',
-                  }}
+                  className="progress-bar-top"
                 />
                 <Stack
                   direction="column"
@@ -92,21 +93,19 @@ const LoadingOverlayComponent = forwardRef<any, LoadingOverlayComponentProps>(
                   <CircularProgress color="secondary" />
                   <LoadingTextComponent
                     variant="overline"
-                    sx={{ fontWeight: 'fontWeightBold' }}
+                    className="status-text"
                   >
-                    {'Loading'}
+                    Loading
                   </LoadingTextComponent>
                 </Stack>
-              </Box>
+              </div>
             </Modal>
-          )}
-        </LoadingContext.Consumer>
-      </>
-    )
-  },
-)
-
+          </Fragment>
+        )
+      }}
+    </LoadingContext.Consumer>
+  )
+})
 LoadingOverlayComponent.displayName = 'LoadingOverlayComponent'
 
-export { LoadingOverlayComponent }
 export default LoadingOverlayComponent

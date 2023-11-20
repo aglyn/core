@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 
 import { _isArr } from '@aglyn/shared-util-guards'
 
+
 /**
  * Safe array, will always return an array
  */
-export function arraySafe<T>(val: T[] | T, or?: any[], wrapValid = false): T[] {
+export function arraySafe<T>(val: T[] | T, or?: any, wrapValid = false): T[] {
   if (_isArr(val)) return val
   if (wrapValid && val) return [val]
   if (_isArr(or)) return or

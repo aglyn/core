@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,55 +32,74 @@ import {
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
-import { forwardRef, useCallback, useState } from 'react'
+import {
+  forwardRef,
+  SyntheticEvent,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import { Else, If, Then, When } from 'react-if'
 import type { CodeMirrorProps } from './components/code-mirror-editor'
 
-const Editor = dynamic(
-  () => import('./components/monaco-editor').then((mod) => mod.default),
-  { ssr: false },
-)
+const Editor = dynamic(() => import('./components/monaco-editor'), {
+  ssr: false,
+})
+
+type OnClose = {
+  bivarianceHack(
+    event: any,
+    reason: 'backdropClick' | 'escapeKeyDown' | 'saveClick' | 'cancelClick',
+  ): void
+}['bivarianceHack']
+type OnSave = {
+  bivarianceHack(event: SyntheticEvent<any, any>, value: iJSON): void
+}['bivarianceHack']
 
 export interface BesignerJsonEditorProps
-  extends Omit<DialogProps, 'defaultValue'> {
+  extends Omit<DialogProps, 'defaultValue'>,
+    HTMLElement {
   defaultValue?: CodeMirrorProps['defaultValue']
-  onSave?: {
-    bivarianceHack(event: object, value: iJSON): void
-  }['bivarianceHack']
-  onClose?: {
-    bivarianceHack(
-      event: Record<string, never>,
-      reason: 'backdropClick' | 'escapeKeyDown' | 'saveClick' | 'cancelClick',
-    ): void
-  }['bivarianceHack']
+  onSave?: OnSave
+  onClose?: OnClose
 }
 
 const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
   (props, ref) => {
     const { onClose, onSave, defaultValue, open, ...rest } = props
-    const [data, setData] = useState(defaultValue)
+    const [data, setData] = useState(
+      JSON.stringify(defaultValue || {}, null, 2),
+    )
     const [warnOpen, setWarnOpen] = useState(true)
     const closeWarn = useCallback(() => setWarnOpen(false), [])
 
-    // console.log('default value', data)
-    const value = JSON.stringify(defaultValue, null, 2)
+    const value = useMemo(() => {
+      let str: string = ''
+      let parsed: iJSON = {}
+      try {
+        str = JSON.stringify(data, null, 2)
+      } catch (e) {
+        console.warn('Error occurred in JsonEditor during stringify', e)
+      }
+      try {
+        parsed = JSON.parse(data)
+      } catch (e) {
+        console.warn('Error occurred in JsonEditor during parse', e)
+      }
+      return { str, parsed }
+    }, [data])
 
     const handleChange = useCallback((value: any) => {
-      try {
-        const json = JSON.parse(value)
-        setData(json)
-      } catch (e) {
-        console.warn(e)
-      }
+      setData(value)
     }, [])
-    const handleClose: BesignerJsonEditorProps['onClose'] = useCallback(
+    const handleClose = useCallback<OnClose>(
       (event, reason) => {
         onClose && onClose(event, reason)
       },
       [onClose],
     )
-    const handleSave = useCallback(
-      (event: any) => {
+    const handleSave: EventHandler = useCallback<OnSave>(
+      (event) => {
         onSave && onSave(event, data)
         handleClose(event, 'saveClick')
       },

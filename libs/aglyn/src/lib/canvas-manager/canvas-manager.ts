@@ -52,19 +52,20 @@ export const NODE_ID_LENGTH = 10
 export const NODE_ROOT_LABEL = 'Document'
 
 export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
-  // public store: CanvasManager = null
-  public $id: NodeId = null
-  public name: string = null
-  public type: NodeType | string = null
-  public pluginId?: PluginId = null
-  public componentId?: ComponentId = null
-  public parentId?: NodeId = null
-  public nodes?: NodeId[] = null
-  public props?: P = null
-  public sx?: JSX.SxProps = null
-  public className?: string = null
+  // public store: CanvasManager
+  public $id: NodeId
+  public name?: string
+  public type: NodeType | string
+  public pluginId?: PluginId
+  public componentId?: ComponentId
+  public parentId?: NodeId
+  public nodes?: NodeId[]
+  public props: P
+  public sx?: JSX.SxProps
+  public className?: string
 
-  get parent(): NodeSchema<any> | null {
+  get parent(): NodeSchema<any> | undefined {
+    if (!this.parentId) return
     return this.store.getNode(this.parentId)
   }
   get index(): number | null {
@@ -72,9 +73,9 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
   }
   get children(): NodeSchema<any>[] {
     const res: NodeSchema[] = []
-    for (const $id of this.nodes) {
+    for (const $id of (this.nodes ||= [])) {
       const node = this.store.getNode($id)
-      res.push(node)
+      if (node) res.push(node)
     }
     return res
   }
@@ -85,6 +86,7 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     return this.store.getNodeBreadcrumbPath(this)
   }
   get componentSchema(): ComponentSchema | undefined {
+    if (!this.componentId) return
     return this.store.aglyn.components.getSchema(this.componentId)
   }
   get hasNodes(): boolean {
@@ -102,7 +104,10 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     return this.toJSON()
   }
 
-  constructor(schema: NodeSchema<P>, public store: CanvasManager) {
+  constructor(
+    schema: NodeSchema<P>,
+    public store: CanvasManager,
+  ) {
     makeAutoObservable(this, {
       store: false,
     })
@@ -119,7 +124,7 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     this.sx = Array.isArray(schema.sx) ? [...schema.sx] : { ...schema.sx }
 
     // this.store = store
-    console.log('canvase node', this)
+    console.log('canvas node', this)
   }
 
   public delete() {
@@ -194,10 +199,10 @@ class HistoryManager<K extends string, T> {
 }
 
 export class CanvasManager {
-  private _initial = null
-  private _history: HistoryManager<NodeId, NodeSchema<any>> = null
+  private _initial: NodesMap | undefined
+  private _history: HistoryManager<NodeId, NodeSchema<any>>
 
-  constructor(public aglyn?: Aglyn) {
+  constructor(public aglyn: Aglyn) {
     makeObservable(this, {
       nodes: computed,
       undo: action,
@@ -236,13 +241,17 @@ export class CanvasManager {
     return this.nodes.get(NODE_ROOT_ID)
   }
   public get nestedNodes(): NodeSchemaNested<any> {
-    return this.makeNested(this.rootNode)
+    const root = this.rootNode
+    console.log('root', this.rootNode, this.nodes)
+    if (!root) throw new Error('Missing root node')
+    return this.makeNested(root)
   }
 
   public hasNode = computedFn(($id: NodeId): boolean => {
     return this.nodes.has($id)
   })
   public getNode = computedFn(($id: NodeId): NodeSchema<any> | undefined => {
+    if (!$id) return
     return this.nodes.get($id)
   })
   public nodesAreEqual = computedFn(
@@ -252,16 +261,17 @@ export class CanvasManager {
     },
   )
   public getNodeParent = computedFn(
-    (node: NodeSchema<any>): NodeSchema<any> => {
+    (node: NodeSchema<any>): NodeSchema<any> | undefined => {
       if (!node) throw new Error('Invalid node')
+      if (!node.parentId) return
       return this.getNode(node.parentId)
     },
   )
   public getNodeIndex = computedFn((node: NodeSchema<any>): number => {
-    if (!node) throw new Error('Invalid node')
+    if (!node || !node.$id) throw new Error('Invalid node')
     const parent = this.getNodeParent(node)
     if (!parent) throw new Error('Invalid parent node')
-    return parent.nodes?.indexOf(node.$id)
+    return parent.nodes?.indexOf(node.$id) ?? -1
   })
   public isRootNodeId = computedFn(
     (id: NodeId): id is string & typeof NODE_ROOT_ID => {
@@ -275,7 +285,8 @@ export class CanvasManager {
     (nodeOrId: NodeId | NodeSchema<any>): NodeBreadcrumbPath => {
       const hierarchy = [NODE_ROOT_ID]
 
-      let currentId = typeof nodeOrId !== 'string' ? nodeOrId?.$id : nodeOrId
+      let currentId: string | undefined =
+        typeof nodeOrId !== 'string' ? nodeOrId?.$id : nodeOrId
       while (currentId && !this.isRootNodeId(currentId)) {
         hierarchy.splice(1, 0, currentId)
         currentId = this.getNode(currentId)?.parentId
@@ -285,18 +296,23 @@ export class CanvasManager {
     },
   )
   public getNodeLabelShort = computedFn((node: NodeSchema<any>): any => {
+    if (!node) throw new Error('Invalid node')
     if (this.isRootNode(node)) return NODE_ROOT_LABEL
-    const componentLabel = this.aglyn.components.getLabel(node?.componentId)
+    const componentLabel =
+      node.componentId && this.aglyn.components.getLabel(node.componentId)
     return node?.name || componentLabel || node?.$id
   })
+
   public makeNested = computedFn((node: NodeSchema<any>) => {
-    if (!node) return null
     const newNode = toJS(node) as unknown as NodeSchemaNested<any>
 
-    const childNodes = []
+    const childNodes: NodeSchemaNested<any>[] = []
     for (const childId of (newNode.nodes ||= []) as unknown as NodeId[]) {
       const child = this.getNode(childId)
-      if (child) childNodes.push(this.makeNested(child))
+      if (child) {
+        const nested = this.makeNested(child)
+        childNodes.push(nested)
+      }
     }
     newNode.nodes = childNodes
 
@@ -311,14 +327,14 @@ export class CanvasManager {
 
   public redo(): this {
     const state = this._history.redo()
-    const json = Object.fromEntries(state.entries())
+    const json = Object.fromEntries(state!.entries())
     console.log('redo', json)
     this.setNodes(json)
     return this
   }
   public undo(): this {
     const state = this._history.undo()
-    const json = Object.fromEntries(state.entries())
+    const json = Object.fromEntries(state!.entries())
     console.log('undo', json)
     this.setNodes(json)
     return this
@@ -349,13 +365,14 @@ export class CanvasManager {
     return this
   }
   public updateInitialNodes(nodes?: NodesMap) {
-    this._initial = toJS(nodes || this.nodes)
+    this._initial = toJS(nodes || this.nodes) as NodesMap
     return this
   }
   public setNode(node: NodeSchema<any>, create = false) {
-    if (!node || (!create && !node.$id)) throw new Error('Invalid node')
+    if (!node) throw new Error('Invalid node')
+    if (!create && !node.$id) throw new Error('Invalid node id')
     const _node = create ? this.createNode(node) : node
-    this.nodes.set(_node.$id, _node)
+    this.nodes.set(_node.$id!, _node)
     return this.nodes.get(_node.$id)
   }
   public setNodes(schemas: NodesMap, merge = false): this {
@@ -363,8 +380,8 @@ export class CanvasManager {
     const cloned = toJS(schemas)
     const nodes = {}
     for (const nodeId in cloned) {
-      if (!cloned[nodeId]) continue
-      nodes[nodeId] = this.createNode(cloned[nodeId])
+      const node = cloned[nodeId]
+      if (node) nodes[nodeId] = this.createNode(node)
     }
     if (merge) {
       this.nodes.merge(nodes)
@@ -374,17 +391,18 @@ export class CanvasManager {
     return this
   }
   public deleteNode(node: NodeSchema<any>): this {
-    if (!node) throw new Error('Invalid node')
+    if (!node || !node.$id || !node.parentId) throw new Error('Invalid node')
     if (this.isRootNode(node)) throw new Error('Cannot delete root node')
     this.saveHistory()
     const parent = this.getNode(node.parentId)
-    const index = parent.nodes.indexOf(node.$id)
-    for (const childId of toJS(node.nodes)) {
+    if (!parent) throw new Error('Invalid parent node')
+    const index = parent.nodes?.indexOf(node.$id) ?? -1
+    for (const childId of toJS(node.nodes || [])) {
       const child = this.getNode(childId)
-      this.deleteNode(child)
+      if (child) this.deleteNode(child)
     }
 
-    if (index > -1) parent.nodes.splice(index, 1)
+    if (index > -1) parent.nodes?.splice(index, 1)
     this.nodes.delete(node.$id)
     return this
   }
@@ -399,16 +417,19 @@ export class CanvasManager {
 
     this.saveHistory()
     const oldParent = this.getNodeParent(node)
-    const oldIndex = oldParent?.nodes?.indexOf(node?.$id)
-    if (oldIndex > -1) oldParent.nodes.splice(oldIndex, 1)
+    const oldIndex = oldParent?.nodes?.indexOf(node?.$id) ?? -1
+    if (oldIndex > -1) oldParent?.nodes?.splice(oldIndex, 1)
     if (oldParent?.$id !== newParent.$id) node.parentId = newParent?.$id
 
-    if (isNaN(index)) newParent.nodes.push(node?.$id)
-    else newParent.nodes.splice(index, 0, node?.$id)
+    if (isNaN(index)) (newParent.nodes ||= []).push(node?.$id)
+    else (newParent.nodes ||= []).splice(index, 0, node?.$id)
     return node
   }
   public reorderNode(node: NodeSchema<any>, index = NaN): typeof node {
-    return this.reparentNode(node, this.getNodeParent(node), index)
+    if (!node) throw new Error('Invalid node')
+    const parent = this.getNodeParent(node)
+    if (!parent) throw new Error('Invalid parent node')
+    return this.reparentNode(node, parent, index)
   }
   public duplicateNode(node: NodeSchema<any>): NodeSchema<any> {
     if (!node) throw new Error('Invalid node')
@@ -420,7 +441,7 @@ export class CanvasManager {
       node: NodeSchema<any>,
       parentId: NodeId,
     ): NodeSchema<any> => {
-      if (!node) return
+      if (!node) throw new Error('Invalid node')
 
       const json = toJS(node)
       const newNode = this.setNode(
@@ -430,13 +451,15 @@ export class CanvasManager {
           parentId,
           nodes: [],
         }),
-      )
-      for (const childId of arraySafe(json?.nodes)) {
-        const childNode = duplicateNodeAndChildren(
-          this.getNode(childId),
-          newNode.$id,
-        )
-        if (childNode) newNode.nodes.push(childNode?.$id)
+      )!
+      if (!json) return newNode
+
+      for (const childId of arraySafe(json.nodes)) {
+        const child = childId && this.getNode(childId)
+        if (child) {
+          const copy = duplicateNodeAndChildren(child, newNode.$id!)
+          if (copy) newNode.nodes!.push(copy.$id!)
+        }
       }
 
       return newNode
@@ -444,9 +467,10 @@ export class CanvasManager {
 
     this.saveHistory()
     const nodeIndex = this.getNodeIndex(node)
-    const index = nodeIndex === -1 ? parent.nodes.length - 1 : nodeIndex + 1
-    const newNode = duplicateNodeAndChildren(node, node?.parentId)
-    parent.nodes.splice(index, 0, newNode.$id)
+    const index =
+      nodeIndex === -1 ? (parent.nodes?.length ?? 1) - 1 : nodeIndex + 1
+    const newNode = duplicateNodeAndChildren(node, node.parentId!)
+    ;(parent.nodes ||= []).splice(index, 0, newNode.$id)
 
     return newNode
   }
@@ -456,13 +480,13 @@ export class CanvasManager {
     const $id = this.createNodeId()
     const cloned = toJS(node)
     const nodes = Array.isArray(cloned?.nodes) ? [...cloned.nodes] : []
-    const res = { ...cloned, $id, nodes: [] }
+    const res: NodeSchemaNested<any> = { ...cloned, $id, nodes: [] }
     for (const child of nodes) {
       const childDuplicate = this.createDuplicateNode({
         ...child,
         parentId: $id,
       })
-      res.nodes.push(childDuplicate)
+      res.nodes!.push(childDuplicate)
     }
     return res
   }
@@ -480,10 +504,10 @@ export class CanvasManager {
     const parsed = this.processNodesToDenormalized(duplicate)
     this.setNodes(parsed, true)
 
-    if (isNaN(index)) parent.nodes.push(duplicate.$id)
-    else parent.nodes.splice(index, 0, duplicate.$id)
+    if (isNaN(index)) (parent.nodes ||= []).push(duplicate.$id)
+    else (parent.nodes ||= []).splice(index, 0, duplicate.$id)
 
-    return this.getNode(duplicate.$id)
+    return this.getNode(duplicate.$id)!
   }
   public updateNodeProps(
     node: NodeSchema<any>,
@@ -499,9 +523,10 @@ export class CanvasManager {
     rootId: NodeId = NODE_ROOT_ID,
   ): NodeSchemaNested<any> {
     const rootNode = nodes[rootId]
+    if (!rootNode) throw new Error('Invalid root node')
     const response = { ...(rootNode as unknown as NodeSchemaNested<any>) }
-    const children = []
-    for (const id of rootNode.nodes) {
+    const children: NodeSchemaNested<any>[] = []
+    for (const id of (rootNode.nodes ||= [])) {
       const child = { ...nodes[id] }
       const nestedChild = this.nestDenormalizedNodes(nodes, child.$id)
       children.push(nestedChild)
@@ -578,7 +603,7 @@ export class CanvasManager {
           NODE_ROOT_ID,
           response,
         )
-      } else if (item?.parentId === NODE_ROOT_ID || !item?.parentId) {
+      } else if (item?.parentId === NODE_ROOT_ID || (item && item.parentId)) {
         response = this.denormalizeNodes(
           [{ $id: NODE_ROOT_ID, componentId: 'div', nodes: [item] }],
           NODE_ROOT_ID,

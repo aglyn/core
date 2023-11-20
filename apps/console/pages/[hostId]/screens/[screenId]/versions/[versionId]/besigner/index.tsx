@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import {
   withBesignerContext,
   type WorkspaceEditorComponentProps,
 } from '@aglyn/besigner-ui'
-import { BesignerJsonEditor } from '@aglyn/besigner-json-editor'
 // import '@aglyn/foundation-feature-singleton'
 import {
   HAS_BROWSER,
@@ -65,6 +64,10 @@ const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
   () => import('@aglyn/besigner-ui').then((mod) => mod.ViewportCanvasComponent),
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
+const BesignerJsonEditor = dynamic<WorkspaceEditorComponentProps>(
+  () => import('@aglyn/besigner-json-editor'),
+  { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
+)
 
 function setLocalNodes(value: Aglyn.ProcessableNodes) {
   const parsed = Aglyn.canvas.processNodesToDenormalized(value)
@@ -97,6 +100,23 @@ function BesignerPage(props) {
   console.log('result', result)
   const hasError = Boolean(error) || status === 'error'
   const notFound = status === 'success' && !data
+
+  useEffect(() => {
+    if (status === 'loading') {
+      return queueLoading()
+    }
+  }, [status])
+
+  if (nodes && !Aglyn.canvas.didSetInitial) {
+    console.log('decoded update', nodes)
+    console.log('decoded update previous nodes', sss)
+    const updated = setLocalNodes(nodes)
+    Aglyn.canvas.updateInitialNodes(updated)
+    console.log(
+      'Aglyn.screen.nestedNodes as any',
+      Aglyn.canvas.nestedNodes as any,
+    )
+  }
 
   const handleSave = useCallback(async () => {
     if (!saveAvailable) {
@@ -132,14 +152,19 @@ function BesignerPage(props) {
     setJsonOpen(false)
   }, [])
 
-  useEffect(() => {
-    if (nodes && !Aglyn.canvas.didSetInitial) {
-      console.log('decoded update', nodes)
-      console.log('decoded update previous nodes', sss)
-      const updated = setLocalNodes(nodes)
-      Aglyn.canvas.updateInitialNodes(updated)
-    }
-  }, [nodes, sss])
+  // useEffect(() => {
+  //   if (nodes && !Aglyn.canvas.didSetInitial) {
+  //     console.log('decoded update', nodes)
+  //     console.log('decoded update previous nodes', sss)
+  //     const updated = setLocalNodes(nodes)
+  //     Aglyn.canvas.updateInitialNodes(updated)
+  //   }
+  //
+  //   console.log(
+  //     'Aglyn.screen.nestedNodes as any',
+  //     Aglyn.canvas.nestedNodes as any,
+  //   )
+  // }, [nodes, sss])
 
   useEffect(() => {
     if (HAS_BROWSER()) {
@@ -167,11 +192,6 @@ function BesignerPage(props) {
       })
     }
   }, [enqueueSnackbar, hasError, error, notFound])
-
-  console.log(
-    'Aglyn.screen.nestedNodes as any',
-    Aglyn.canvas.nestedNodes as any,
-  )
 
   return (
     <>
@@ -326,12 +346,14 @@ function BesignerPage(props) {
           setScreenDialog(false)
         }}
       />
-      <BesignerJsonEditor
-        open={Boolean(Aglyn.canvas.rootNode && jsonOpen)}
-        onClose={closeJsonEditor}
-        onSave={handleJsonSave}
-        defaultValue={Aglyn.canvas.nestedNodes as any}
-      />
+      {Boolean(Aglyn.canvas.rootNode && jsonOpen) && (
+        <BesignerJsonEditor
+          open={Boolean(Aglyn.canvas.rootNode && jsonOpen)}
+          onClose={closeJsonEditor}
+          onSave={handleJsonSave}
+          defaultValue={Aglyn.canvas.nestedNodes as any}
+        />
+      )}
     </>
   )
 }

@@ -5,7 +5,7 @@
     "outDir": "../../../../dist/out-tsc",
     "declaration": true,
     "typeRoots": ["../../../../types", "../../../../node_modules/@types"],
-    "types": ["node", "@jsx"]
+    "types": ["node", "@jsx", "@jsx"]
   },
   "exclude": ["**/*.spec.ts", "**/*.test.ts"],
   "include": ["**/*.ts"]

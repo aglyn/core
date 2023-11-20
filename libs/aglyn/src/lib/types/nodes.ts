@@ -160,7 +160,7 @@ export interface AbstractNodeSchema<P = JSX.AnyProps> extends CanvasNode {
   /**
    * The unique identifier for a node
    */
-  $id?: AbstractId
+  $id: AbstractId
   title?: string
   displayName?: string
   description?: string
@@ -227,9 +227,11 @@ export type NodeId = string
 type PresetI = AglynDocument &
   Omit<AbstractNodeSchema<any>, 'type' | 'data'> &
   Omit<CanvasPreset, 'type' | 'data'>
+
 interface PresetII extends PresetI {
   type: NodeType.PRESET | string
 }
+
 export interface PresetSchema<P = JSX.AnyProps> extends PresetII {
   $id: PresetId
   pluginId?: PluginId
@@ -242,6 +244,7 @@ export interface PresetSchema<P = JSX.AnyProps> extends PresetII {
 
 // @TODO ⚠️ Refactor for better adoption of hast
 type NodeI<P> = AglynDocument & Omit<AbstractNodeSchema<P>, 'type'>
+
 export interface NodeSchema<P = JSX.AnyProps> extends NodeI<P> {
   type: NodeType | string
   /**
