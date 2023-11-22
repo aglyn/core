@@ -30,12 +30,14 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material'
+import { toJS } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import {
   forwardRef,
   SyntheticEvent,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -57,8 +59,7 @@ type OnSave = {
 }['bivarianceHack']
 
 export interface BesignerJsonEditorProps
-  extends Omit<DialogProps, 'defaultValue'>,
-    HTMLElement {
+  extends Omit<DialogProps, 'defaultValue'> {
   defaultValue?: CodeMirrorProps['defaultValue']
   onSave?: OnSave
   onClose?: OnClose
@@ -72,6 +73,11 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
     )
     const [warnOpen, setWarnOpen] = useState(true)
     const closeWarn = useCallback(() => setWarnOpen(false), [])
+
+    useEffect(() => {
+      const parsed = JSON.stringify(defaultValue || {}, null, 2)
+      if (parsed !== data) setData(parsed)
+    }, [defaultValue, data])
 
     const value = useMemo(() => {
       let str: string = ''
@@ -98,12 +104,18 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
       },
       [onClose],
     )
-    const handleSave: EventHandler = useCallback<OnSave>(
-      (event) => {
+    const handleSave = useCallback(
+      (event: any) => {
         onSave && onSave(event, data)
         handleClose(event, 'saveClick')
       },
       [onSave, handleClose, data],
+    )
+
+    console.log(
+      'BesignerJsonEditor',
+      Aglyn.canvas.toJSON(),
+      JSON.stringify({ ...toJS(Aglyn.canvas.nestedNodes) }, null, 2),
     )
 
     return (
@@ -157,7 +169,12 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
                 </Box>
               </Then>
               <Else>
-                <Editor height="50vh" value={value} onChange={handleChange} />
+                <Editor
+                  height="50vh"
+                  defaultValue={defaultValue}
+                  value={JSON.stringify(value.parsed, null, 2)}
+                  onChange={handleChange}
+                />
               </Else>
             </If>
           </When>

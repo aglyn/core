@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import type { PartialKeys } from '@aglyn/shared-data-types'
 import _isObj from '@aglyn/shared-util-guards/_is-obj'
 import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'

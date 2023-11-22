@@ -139,7 +139,7 @@
       "@aglyn/tenant-feature-instance/*": ["libs/tenant/feature/instance/src/lib/*"]
     },
     "typeRoots": ["types", "node_modules/@types"],
-    "types": ["node", "@jsx"]
+    "types": ["@tshelpers", "node"]
   },
   "exclude": ["node_modules", "tmp", "**/generated"]
 }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import {
   type ExtensionUnloadPayload,
 } from '@aglyn/core-data-foundation'
 import { isAglynExtension, isAglynModule } from '@aglyn/core-util-app'
-import type { MutableShallow } from '@aglyn/shared-data-types'
 import { _isCtor } from '@aglyn/shared-util-guards'
 import { AglynExtension } from '../models/aglyn-extension.model'
 import { AglynModuleModel } from '../models/aglyn-module.model'

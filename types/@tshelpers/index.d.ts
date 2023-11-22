@@ -15,22 +15,9 @@
  * limitations under the License.
  */
 
-import { getComponent } from '@aglyn/core-data-app'
-import type {
-  AglynExoticComponent,
-  BundleId,
-  CommandUId,
-} from '@aglyn/core-data-foundation'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
-
-export function useAglynComponent<P, T>(
-  componentId: CommandUId,
-  pluginId?: BundleId,
-): OrUndef<AglynExoticComponent<P, T>> {
-  const app = useAglynAppContext()
-  return getComponent(app, { componentId, pluginId }) as AglynExoticComponent<
-    P,
-    T
-  >
-}
-export default useAglynComponent
+export * from './arithmetic.d'
+export * from './basic.d'
+export * from './fallback.d'
+export * from './iterable.d'
+export * from './strings.d'
+export * from './tuples.d'

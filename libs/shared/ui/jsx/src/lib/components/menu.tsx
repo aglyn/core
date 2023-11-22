@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { Conditional } from '@aglyn/shared-data-types'
 import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-mdi-jsx'
 import { mergeSxProps } from '@aglyn/shared-ui-theme'
 import {
@@ -135,8 +134,8 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
     horizontalOrigin === 'right'
       ? { right: 14 }
       : horizontalOrigin === 'center'
-      ? { right: 'auto', left: 'auto' }
-      : { left: 14 }
+        ? { right: 'auto', left: 'auto' }
+        : { left: 14 }
 
   return (
     <Box

@@ -4,7 +4,7 @@
     "outDir": "../../../../dist/out-tsc",
     "declaration": true,
     "typeRoots": ["../../../../types", "../../../../node_modules/@types"],
-    "types": ["node", "@jsx"]
+    "types": ["@tshelpers", "node", "@jsx"]
   },
   "include": ["**/*.ts"],
   "exclude": ["jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]

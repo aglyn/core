@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,8 @@
  * limitations under the License.
  */
 
-
-type BuildTuple<L extends number, T extends any[] = []> =
-  T extends {length: L} ? T : BuildTuple<L, [...T, any]>
-
-type Length<T extends any[]> =
-  T extends {length: infer L} ? L : never
-
-export type Add<A extends number, B extends number> =
-  Length<[...BuildTuple<A>, ...BuildTuple<B>]>
-
-export type Subtract<A extends number, B extends number, > =
-  BuildTuple<A> extends [...infer U, ...BuildTuple<B>] ? Length<U> : never
+declare global {
+  export interface LengthLike {
+    readonly length: number
+  }
+}

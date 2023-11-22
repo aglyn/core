@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 import { getCanvasNormalizedNodesStore } from '@aglyn/core-data-app'
 import type { NodeId } from '@aglyn/core-data-foundation'
 import { getComponentElementHierarchy } from '@aglyn/core-util-app'
-import type { Conditional } from '@aglyn/shared-data-types'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
 import useBesignerAppContext from './use-besigner-app-context'
 

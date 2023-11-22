@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import {
   AglynDependents,
   type IAglynDependencyManager,
 } from '@aglyn/core-data-foundation'
-import { ImmutableSlightlyDeep } from '@aglyn/shared-data-types'
 
 const originalMixinSymbol = Symbol('originalMixinSymbol')
 const appliedMixinSymbol = Symbol('appliedMixinSymbol')
@@ -32,9 +31,11 @@ const cachedApplicationSymbol = Symbol('cachedApplicationSymbol')
 interface MixableClass<Instance, Args = any> {
   new (...args: Args[]): Instance
 }
+
 interface MixinFn<Super, New, Ctor extends MixableClass<Super>> {
   (Mixin: Ctor): MixableClass<Super & New, ConstructorParameters<Ctor>>
 }
+
 interface AppliedMixinClassMembers<
   Super,
   New,
@@ -42,11 +43,13 @@ interface AppliedMixinClassMembers<
 > {
   [originalMixinSymbol]?: MixinFn<Super, New, Ctor>
 }
+
 interface AppliedMixinClassCtor<Super, New, Ctor extends MixableClass<Super>> {
-  new (...args: ConstructorParameters<Ctor>): Super &
-    New &
-    AppliedMixinClassMembers<Super, New, Ctor>
+  new (
+    ...args: ConstructorParameters<Ctor>
+  ): Super & New & AppliedMixinClassMembers<Super, New, Ctor>
 }
+
 interface AppliedMixinClass<Super, New, Ctor extends MixableClass<Super>>
   extends AppliedMixinClassMembers<Super, New, Ctor>,
     AppliedMixinClassCtor<Super, New, Ctor> {

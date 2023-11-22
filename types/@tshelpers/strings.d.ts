@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,9 @@
  * limitations under the License.
  */
 
-/** Tuple with exactly two nodes */
-export interface Tuple<T1, T2 = T1> extends Array<T1 | T2> {
-  0: T1
-  1: T2
-  length: 2 // using the numeric literal type '2'
-}
-
-/** Tuple with a guaranteed minimum of one (1) item */
-export interface TupleMin1<T> extends Array<T> {
-  0: T
-}
-
-/** Tuple with a guaranteed minimum of two (2) items */
-export interface TupleMin2<T1, T2 = T1> extends TupleMin1<T1 | T2> {
-  1: T2
+declare global {
+  export interface StringLike {
+    toString?(): string
+    [Symbol.toStringTag]?: string
+  }
 }

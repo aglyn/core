@@ -16,11 +16,20 @@
  */
 'use client'
 
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import type {
+  PanelGroupProps} from 'react-resizable-panels';
+import {
+  Panel,
+  PanelGroup,
+  PanelResizeHandle,
+} from 'react-resizable-panels'
 
-export default function ResizableLayout(props) {
+export type ResizableLayoutProps = Partial<PanelGroupProps>
+
+export default function ResizableLayout(props: ResizableLayoutProps) {
+  const { children, ...rest } = props
   return (
-    <PanelGroup direction="horizontal">
+    <PanelGroup direction="horizontal" {...rest}>
       <Panel style={{ minHeight: 100 }}>left</Panel>
       <PanelResizeHandle style={{ background: 'red', width: 10 }} />
       <Panel>

@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import type { ReplaceKey } from '@aglyn/shared-data-types'
 import MuiGrid, {
   type Grid2Props as MuiGridProps,
 } from '@mui/material/Unstable_Grid2'

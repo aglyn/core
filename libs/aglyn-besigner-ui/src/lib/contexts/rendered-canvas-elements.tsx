@@ -16,7 +16,6 @@
  */
 
 import type { NodeId } from '@aglyn/core-data-foundation'
-import type { Dictionary } from '@aglyn/shared-data-types'
 import {
   createContext,
   type RefObject,

@@ -5,7 +5,7 @@
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["vite/client", "@jsx"]
+    "types": ["@tshelpers", "vite/client", "@jsx"]
   },
   "files": [],
   "include": [],

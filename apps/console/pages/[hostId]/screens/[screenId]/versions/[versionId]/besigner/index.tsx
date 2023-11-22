@@ -18,6 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import '@aglyn/aglyn-plugin-mui'
 import * as Besigner from '@aglyn/besigner'
+import type { BesignerJsonEditorProps } from '@aglyn/besigner-json-editor'
 import {
   PropertiesDialogComponent,
   useAddElementDrawerCallback,
@@ -64,8 +65,9 @@ const ViewportCanvasComponent = dynamic<WorkspaceEditorComponentProps>(
   () => import('@aglyn/besigner-ui').then((mod) => mod.ViewportCanvasComponent),
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
-const BesignerJsonEditor = dynamic<WorkspaceEditorComponentProps>(
-  () => import('@aglyn/besigner-json-editor'),
+const BesignerJsonEditor = dynamic<BesignerJsonEditorProps>(
+  () =>
+    import('@aglyn/besigner-json-editor').then((mod) => mod.BesignerJsonEditor),
   { ssr: false, loading: () => LOADING_OVERLAY_ELEMENT },
 )
 
@@ -364,37 +366,17 @@ BesignerPage.layouts = [{ Component: AuthenticatedLayout }]
 export default withBesignerContext(observer(BesignerPage))
 
 // export const getServerSideProps = async (ctx) => {
-//   // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'sample tenant', hosts: []})
-//   console.log('Page:Besigner getStaticProps START')
-//   const tenantId = '-atN0g5dZgoDp4rfMaO_'
-//   const tenant = await getAdminTenant(tenantId)
-//     .then((snapshot) => {
-//       if (snapshot.exists()) {
-//         console.log('getAdminTenant exists', tenantId, snapshot.val())
-//         console.log(snapshot.val())
-//         return snapshot.val()
-//       }
-//       else {
-//         console.log('getAdminTenant No data available', tenantId)
-//         return null
-//       }
-//     }).catch((error) => {
-//       console.error(`getAdminTenant error`, tenantId, error)
-//       return null
-//     })
-//   console.log('Page:Besigner getStaticProps AWAIT DONE', tenant)
-//
-//
-//   if (!tenant && ctx) {
-//     console.log('Page:Besigner WRITE START')
-//     // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake tenant'})
-//     // tenant = await getServerSideProps(null).then((data) => data.props.tenant)
-//     console.log('Page:Besigner WRITE DONE', tenant)
-//   }
-//
-//   return {
-//     props: {
-//       tenant,
-//     },
-//   }
-// }
+//   // await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'sample
+// tenant', hosts: []}) console.log('Page:Besigner getStaticProps START') const
+// tenantId = '-atN0g5dZgoDp4rfMaO_' const tenant = await
+// getAdminTenant(tenantId) .then((snapshot) => { if (snapshot.exists()) {
+// console.log('getAdminTenant exists', tenantId, snapshot.val())
+// console.log(snapshot.val()) return snapshot.val() } else {
+// console.log('getAdminTenant No data available', tenantId) return null }
+// }).catch((error) => { console.error(`getAdminTenant error`, tenantId, error)
+// return null }) console.log('Page:Besigner getStaticProps AWAIT DONE',
+// tenant)   if (!tenant && ctx) { console.log('Page:Besigner WRITE START') //
+// await setAdminTenant({$id: '-atN0g5dZgoDp4rfMaO_', displayName: 'test fake
+// tenant'}) // tenant = await getServerSideProps(null).then((data) =>
+// data.props.tenant) console.log('Page:Besigner WRITE DONE', tenant) }  return
+// { props: { tenant, }, } }

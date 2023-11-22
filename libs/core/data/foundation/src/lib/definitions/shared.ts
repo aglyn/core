@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
  * limitations under the License.
  */
 
-import type {
-  Dictionary,
-  Serializable,
-  StringLike,
-} from '@aglyn/shared-data-types'
+import type { Serializable } from '@aglyn/shared-data-types'
 import type { LogLevelString } from '@aglyn/shared-util-logger'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type { AglynEmitter } from '../constants/emitter'

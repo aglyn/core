@@ -5,7 +5,7 @@
     "rootDir": ".",
     "module": "commonjs",
     "target": "es5",
-    "types": ["node", "@jsx"],
+    "types": ["@tshelpers", "node", "@jsx"],
     "importHelpers": false,
     "resolveJsonModule": true
   },

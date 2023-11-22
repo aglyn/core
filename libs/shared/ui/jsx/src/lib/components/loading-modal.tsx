@@ -21,11 +21,12 @@ import {
   CircularProgress,
   LinearProgress,
   Modal,
-  type ModalProps as MuiModalProps,
+  type ModalProps,
   Stack,
   styled,
 } from '@mui/material'
 import { forwardRef, Fragment } from 'react'
+import { AglynLogoFull } from '../const/svg-icons'
 import { LoadingContext } from '../contexts/loading.context'
 import LoadingTextComponent from './loading-text.component'
 
@@ -44,6 +45,8 @@ const LoadingOverlayModal = styled(Modal)(({ theme }) => ({
     right: 0,
     bottom: 0,
     left: 0,
+    height: '100%',
+    width: '100%',
     flexDirection: 'column',
     display: 'flex',
     alignItems: 'center',
@@ -61,13 +64,9 @@ const LoadingOverlayModal = styled(Modal)(({ theme }) => ({
   },
 }))
 
-export interface LoadingOverlayComponentProps
-  extends Partial<MuiModalProps<any, any>> {}
+export interface LoadingModalProps extends Partial<ModalProps> {}
 
-export const LoadingOverlayComponent = forwardRef<
-  any,
-  LoadingOverlayComponentProps
->((props, ref) => {
+export const LoadingModal = forwardRef<any, LoadingModalProps>((props, ref) => {
   const { open, children, ...rest } = props
 
   return (
@@ -77,8 +76,13 @@ export const LoadingOverlayComponent = forwardRef<
 
         return (
           <Fragment>
-            {!isOpen && children}
-            <Modal ref={ref} open={isOpen} closeAfterTransition {...rest}>
+            {children}
+            <LoadingOverlayModal
+              ref={ref}
+              open={isOpen}
+              closeAfterTransition
+              {...rest}
+            >
               <div className="wrapper">
                 <LinearProgress
                   color="secondary"
@@ -89,23 +93,35 @@ export const LoadingOverlayComponent = forwardRef<
                   justifyContent="center"
                   alignItems="center"
                   spacing={2}
+                  flexGrow={1}
                 >
-                  <CircularProgress color="secondary" />
-                  <LoadingTextComponent
-                    variant="overline"
-                    className="status-text"
-                  >
-                    Loading
-                  </LoadingTextComponent>
+                  <div>
+                    <CircularProgress color="secondary" />
+                    <LoadingTextComponent
+                      variant="overline"
+                      className="status-text"
+                      sx={{ ml: -0.5 }}
+                    >
+                      Loading
+                    </LoadingTextComponent>
+                  </div>
                 </Stack>
+                <AglynLogoFull
+                  sx={{
+                    fontSize: 100,
+                    m: '0 auto',
+                    position: 'absolute',
+                    bottom: (theme) => theme.spacing(2),
+                  }}
+                />
               </div>
-            </Modal>
+            </LoadingOverlayModal>
           </Fragment>
         )
       }}
     </LoadingContext.Consumer>
   )
 })
-LoadingOverlayComponent.displayName = 'LoadingOverlayComponent'
+LoadingModal.displayName = 'LoadingModal'
 
-export default LoadingOverlayComponent
+export default LoadingModal

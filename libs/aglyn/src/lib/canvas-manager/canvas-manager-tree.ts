@@ -15,22 +15,35 @@
  * limitations under the License.
  */
 
-import { getComponent } from '@aglyn/core-data-app'
-import type {
-  AglynExoticComponent,
-  BundleId,
-  CommandUId,
-} from '@aglyn/core-data-foundation'
-import { useAglynAppContext } from '../contexts/aglyn-app-context'
+import {
+  _NotCustomized,
+  IAnyModelType,
+  IArrayType,
+  IModelType,
+  Instance,
+  ISimpleType,
+  types,
+} from 'mobx-state-tree'
 
-export function useAglynComponent<P, T>(
-  componentId: CommandUId,
-  pluginId?: BundleId,
-): OrUndef<AglynExoticComponent<P, T>> {
-  const app = useAglynAppContext()
-  return getComponent(app, { componentId, pluginId }) as AglynExoticComponent<
-    P,
-    T
-  >
-}
-export default useAglynComponent
+const IdType = types.identifier
+export type INode = Instance<typeof Node>
+
+export interface Node
+  extends IModelType<
+    {
+      $id: ISimpleType<string>
+      name: ISimpleType<string>
+      nodes: IArrayType<IAnyModelType>
+    },
+    {},
+    _NotCustomized,
+    _NotCustomized
+  > {}
+
+export const Node = types.model('AglynNode', {
+  $id: IdType,
+  name: types.string,
+  nodes: types.array(types.late((): IAnyModelType => Node)),
+})
+
+Node.create({})

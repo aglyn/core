@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2023 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,7 @@ import {
   useLoading,
 } from '../contexts/loading.context'
 import { NextRouterEvent } from '../hooks/router-events'
-import {
-  LoadingOverlayComponent,
-  type LoadingOverlayComponentProps,
-} from './loading-overlay.component'
+import { LoadingModal, type LoadingModalProps } from './loading-modal'
 
 function RouterLoading({ children }) {
   const router = useRouter()
@@ -60,7 +57,7 @@ RouterLoading.displayName = 'RouterLoading'
 RouterLoading.aglyn = true
 
 export interface LoadingLayoutComponentProps
-  extends Partial<LoadingOverlayComponentProps> {}
+  extends Partial<LoadingModalProps> {}
 
 const LoadingLayoutComponent = forwardRef<any, LoadingLayoutComponentProps>(
   (props, ref) => {
@@ -68,9 +65,9 @@ const LoadingLayoutComponent = forwardRef<any, LoadingLayoutComponentProps>(
 
     return (
       <LoadingProviderComponent>
-        <LoadingOverlayComponent ref={ref} {...rest}>
+        <LoadingModal ref={ref} {...rest}>
           <RouterLoading>{children}</RouterLoading>
-        </LoadingOverlayComponent>
+        </LoadingModal>
       </LoadingProviderComponent>
     )
   },
