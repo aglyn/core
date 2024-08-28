@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import { alpha } from '@aglyn/shared-ui-theme'
 import {
   CircularProgress,
   LinearProgress,
@@ -25,11 +24,12 @@ import {
   Stack,
   styled,
 } from '@mui/material'
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { alpha } from '@mui/material/styles'
 import { forwardRef, Fragment } from 'react'
 import { AglynLogoFull } from '../const/svg-icons'
 import { LoadingContext } from '../contexts/loading.context'
 import LoadingTextComponent from './loading-text.component'
-
 
 const LoadingOverlayModal = styled(Modal)(({ theme }) => ({
   zIndex: theme.zIndex.max,

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { type AccordionRenderProps } from '@aglyn/besigner-ui'
 import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/core-data-foundation'
@@ -94,7 +95,7 @@ CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 
 function Screens(props) {
   const params = useParams<{ hostId: string }>()
-  const hostId = params.hostId as string
+  const hostId = params?.hostId as string
   const { queueLoading, loading } = useLoading()
   const { confirm } = useConfirmationContext()
   const [quickDrawerOpen, setQuickDrawerOpen] = useState<boolean>(false)

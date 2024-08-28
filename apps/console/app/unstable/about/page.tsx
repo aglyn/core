@@ -46,7 +46,7 @@ export default function About() {
         </Typography>
         <Box sx={{ maxWidth: 'sm' }}>
           <Button variant="contained" component={NextLink} href="/unstable">
-            Go to the home page
+            Go to the home pagemmm
           </Button>
         </Box>
         {/*<ProTip />*/}

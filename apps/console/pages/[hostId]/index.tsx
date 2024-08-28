@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { ICON_VARIANT_HOME } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
@@ -29,7 +30,7 @@ import { CONTENT_MAX_WIDTH } from '../../constants/shared'
 
 const Index: NextPageWithLayout = (props) => {
   const params = useParams<{ hostId: string }>()
-  const hostId = params.hostId
+  const hostId = params?.hostId
   useNextPageTitle({ screen: 'My Dashboard' })
 
   return (

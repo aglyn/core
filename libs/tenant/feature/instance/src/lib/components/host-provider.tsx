@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
+
 import { useParams } from 'next/navigation'
 import { createContext, useContext } from 'react'
 import useHost from '../hooks/use-host'

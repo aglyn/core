@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { _isArr } from '@aglyn/shared-util-guards'
 import { useParams, usePathname, useRouter } from 'next/navigation'

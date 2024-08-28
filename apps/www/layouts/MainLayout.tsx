@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { APP_WWW, BUILD_ID, PACKAGE_VERSION } from '@aglyn/shared-data-enums'
 import {

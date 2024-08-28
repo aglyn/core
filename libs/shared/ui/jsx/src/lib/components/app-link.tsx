@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
 import { _isObj } from '@aglyn/shared-util-guards'

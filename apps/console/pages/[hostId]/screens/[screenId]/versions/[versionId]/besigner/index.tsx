@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
 import '@aglyn/aglyn-plugin-mui'
@@ -83,7 +84,9 @@ function BesignerPage(props) {
     screenId: string,
     versionId: string
   }>()
-  const {hostId, screenId, versionId} = params
+  const hostId = params?.hostId as string
+  const screenId = params?.screenId as string
+  const versionId = params?.versionId as string
   const {enqueueSnackbar} = useSnackbar()
   const {queueLoading} = useLoading()
   const saveAvailable = !Aglyn.canvas.isInitialSame

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import {
   ICON_VARIANT_BESIGNER,
@@ -45,7 +46,9 @@ function ScreenDetails(props) {
     screenId: string
     versionId: string
   }>()
-  const { hostId, screenId, versionId } = params
+  const hostId = params?.hostId as string
+  const screenId = params?.screenId as string
+  const versionId = params?.versionId as string
   const { queueLoading } = useLoading()
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const {

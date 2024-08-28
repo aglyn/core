@@ -14,35 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use client'
 
-import { createTheme } from '@mui/material/styles'
-import { Roboto } from 'next/font/google'
-
-const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-})
-
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-  },
-  typography: {
-    fontFamily: roboto.style.fontFamily,
-  },
-  components: {
-    MuiAlert: {
-      styleOverrides: {
-        root: ({ ownerState }) => ({
-          ...(ownerState.severity === 'info' && {
-            backgroundColor: '#60a5fa',
-          }),
-        }),
-      },
-    },
-  },
-})
-
-export default theme
+export default function Loading(props) {
+  // You can add any UI inside Loading, including a Skeleton.
+  console.log('loading props', props)
+  return <div>loading...</div>
+}

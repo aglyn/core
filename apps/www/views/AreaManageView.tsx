@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import { useLoading } from '@aglyn/shared-ui-jsx'
 import { mdiFilterVariant, MdiIcon, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'

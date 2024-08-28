@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
 import {
   ICON_VARIANT_HOME,
@@ -82,7 +83,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
     activeTab,
   } = props
   const params = useParams<{ hostId: string }>()
-  const hostId = params.hostId
+  const hostId = params?.hostId
 
   const breadcrumbs = useMemo(() => {
     return [
