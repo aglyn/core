@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ function Index(props) {
               spacing={2}
               items={[
                 {
-                  xs: 12,
+                  size: { xs: 12 },
                   children: (
                     <>
                       <Typography
@@ -65,8 +65,10 @@ function Index(props) {
                   ),
                 },
                 {
-                  xs: 12,
-                  md: 5,
+                  size: {
+                    xs: 12,
+                    md: 5,
+                  },
                   children: (
                     <Image
                       src={img1}
@@ -79,8 +81,10 @@ function Index(props) {
                   ),
                 },
                 {
-                  xs: 12,
-                  md: 7,
+                  size: {
+                    xs: 12,
+                    md: 7,
+                  },
                   children: (
                     <>
                       <Typography
@@ -118,8 +122,10 @@ function Index(props) {
               spacing={2}
               items={[
                 {
-                  xs: 12,
-                  md: 4,
+                  size: {
+                    xs: 12,
+                    md: 4,
+                  },
                   children: (
                     <Image
                       src={img2}
@@ -131,8 +137,10 @@ function Index(props) {
                   ),
                 },
                 {
-                  xs: 12,
-                  md: 7,
+                  size: {
+                    xs: 12,
+                    md: 7,
+                  },
                   children: (
                     <>
                       <Typography
@@ -165,8 +173,10 @@ function Index(props) {
               spacing={2}
               items={[
                 {
-                  xs: 12,
-                  md: 4,
+                  size: {
+                    xs: 12,
+                    md: 4,
+                  },
                   children: (
                     <Image
                       src={img3}
@@ -178,8 +188,10 @@ function Index(props) {
                   ),
                 },
                 {
-                  xs: 12,
-                  md: 7,
+                  size: {
+                    xs: 12,
+                    md: 7,
+                  },
                   children: (
                     <>
                       <Typography
@@ -212,8 +224,10 @@ function Index(props) {
               spacing={2}
               items={[
                 {
-                  xs: 12,
-                  md: 4,
+                  size: {
+                    xs: 12,
+                    md: 4,
+                  },
                   children: (
                     <Image
                       src={img4}
@@ -225,8 +239,10 @@ function Index(props) {
                   ),
                 },
                 {
-                  xs: 12,
-                  md: 7,
+                  size: {
+                    xs: 12,
+                    md: 7,
+                  },
                   children: (
                     <>
                       <Typography

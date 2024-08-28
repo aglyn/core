@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,8 +137,10 @@ export const ComponentsGridListComponent = forwardRef<
         ),
       }}
       GridItemProps={{
-        xs: 6,
-        sm: Math.floor(12 / columns),
+        size: {
+          xs: 6,
+          sm: Math.floor(12 / columns),
+        },
       }}
       renderItemContent={renderItemContent}
       items={items}

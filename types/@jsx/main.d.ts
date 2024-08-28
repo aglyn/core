@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import type {
 } from 'prop-types'
 import type {
   Component as ReactComponent,
-  JSXElementConstructor,
   ReactElement,
   ReactNode,
 } from 'react'
@@ -84,16 +83,16 @@ declare global {
       | ((props: P) => Element | null)
       | (new (props: P) => Component<P, any>)
 
-    interface Element<
-      P = any,
-      T extends string | JSXElementConstructor<any> =
-        | string
-        | JSXElementConstructor<any>,
-    > {
-      type: T
-      props: P
-      key: Key | null
-    }
+    // interface Element<
+    //   P = any,
+    //   T extends string | JSXElementConstructor<any> =
+    //     | string
+    //     | JSXElementConstructor<any>,
+    // > {
+    //   type: T
+    //   props: P
+    //   key: Key | null
+    // }
 
     interface ComponentClass<P = EmptyObj, S = any> {
       new (props: P, context?: any): Component<P, S>
@@ -130,16 +129,17 @@ declare global {
       displayName?: string | undefined
     }
 
-    // TODO: similar to how Fragment is actually a symbol, the values returned from createContext,
-    // forwardRef and memo are actually objects that are treated specially by the renderer; see:
+    // TODO: similar to how Fragment is actually a symbol, the values returned
+    // from createContext, forwardRef and memo are actually objects that are
+    // treated specially by the renderer; see:
     // https://github.com/facebook/react/blob/v16.6.0/packages/react/src/ReactContext.js#L35-L48
     // https://github.com/facebook/react/blob/v16.6.0/packages/react/src/forwardRef.js#L42-L45
     // https://github.com/facebook/react/blob/v16.6.0/packages/react/src/memo.js#L27-L31
-    // However, we have no way of telling the JSX parser that it's a JSX element type or its props other than
-    // by pretending to be a normal component.
-    //
-    // We don't just use ComponentType or FunctionComponent types because you are not supposed to attach statics to this
-    // object, but rather to the original function.
+    // However, we have no way of telling the JSX parser that it's a JSX
+    // element type or its props other than by pretending to be a normal
+    // component.  We don't just use ComponentType or FunctionComponent types
+    // because you are not supposed to attach statics to this object, but
+    // rather to the original function.
     interface ExoticComponent<P = EmptyObj> {
       /**
        * **NOTE**: Exotic components are not callable.
@@ -152,8 +152,8 @@ declare global {
       displayName?: string | undefined
     }
 
-    // will show `ForwardRef(${Component.displayName || Component.name})` in devtools by default,
-    // but can be given its own specific name
+    // will show `ForwardRef(${Component.displayName || Component.name})` in
+    // devtools by default, but can be given its own specific name
     interface ForwardRefExoticComponent<P> extends NamedExoticComponent<P> {
       defaultProps?: Partial<P> | undefined
       propTypes?: WeakValidationMap<P> | undefined
@@ -162,12 +162,15 @@ declare global {
     type RefCallback<T> = {
       bivarianceHack(instance: T | null): void
     }['bivarianceHack']
+
     interface RefObject<T> {
       readonly current: T | null
     }
+
     interface MutableRefObject<T> {
       current: T
     }
+
     type Ref<T> = RefCallback<T> | RefObject<T> | null
     /**
      * Gets the instance type for a React element. The instance will be
@@ -217,8 +220,8 @@ declare global {
     >
       ? Method
       : ComponentPropsWithRef<T> extends RefAttributes<infer Method>
-      ? Method
-      : never
+        ? Method
+        : never
 
     interface RefAttributes<T> extends Attributes {
       ref?: Ref<T> | undefined
@@ -226,8 +229,8 @@ declare global {
 
     /** Ensures that the props do not include ref at all */
     type PropsWithoutRef<P> =
-      // Pick would not be sufficient for this. We'd like to avoid unnecessary mapping and need a
-      // distributive conditional to support unions. see:
+      // Pick would not be sufficient for this. We'd like to avoid unnecessary
+      // mapping and need a distributive conditional to support unions. see:
       // https://www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
       // https://github.com/Microsoft/TypeScript/issues/28339
       P extends any
@@ -244,7 +247,8 @@ declare global {
 
     /** Ensures that the props do not include string ref, which cannot be forwarded */
     type PropsWithRef<P> =
-      // Just "P extends { ref?: infer R }" looks sufficient, but R will infer as {} if P is {}.
+      // Just "P extends { ref?: infer R }" looks sufficient, but R will infer as
+      // {} if P is {}.
       'ref' extends keyof P
         ? P extends { ref?: infer R | undefined }
           ? string extends R
@@ -287,8 +291,8 @@ declare global {
     > = T extends ElementConstructor<infer P>
       ? P
       : T extends keyof IntrinsicElements
-      ? IntrinsicElements[T]
-      : AnyObj
+        ? IntrinsicElements[T]
+        : AnyObj
 
     type PropsWithChildren<P = unknown> = P & {
       children?: ReactNode | undefined
@@ -297,12 +301,15 @@ declare global {
     interface Attributes {
       key?: KeyPropType
     }
+
     interface ElementAttributesProperty {
       props: EmptyObj
     }
+
     interface ElementChildrenAttribute {
       children: EmptyObj
     }
+
     interface ResolveProps<P = unknown, U extends P = P> {
       <U extends P>(props: P): U
       <U extends P>(props: P): PromiseLike<U>
@@ -317,8 +324,8 @@ declare global {
       [K in keyof T]?: null extends T[K]
         ? PropValidator<T[K] | null | undefined>
         : undefined extends T[K]
-        ? PropValidator<T[K] | null | undefined>
-        : PropValidator<T[K]>
+          ? PropValidator<T[K] | null | undefined>
+          : PropValidator<T[K]>
     }
   }
 }

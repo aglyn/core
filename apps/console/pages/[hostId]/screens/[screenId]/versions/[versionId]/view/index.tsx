@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,9 +176,11 @@ function ScreenDetails(props) {
             spacing={3}
             items={[
               {
-                xs: 12,
-                md: 6,
-                lg: 4,
+                size: {
+                  xs: 12,
+                  md: 6,
+                  lg: 4,
+                },
                 children: (
                   <CardDisplay
                     header={'Basic Details'}
@@ -220,9 +222,11 @@ function ScreenDetails(props) {
                 ),
               },
               {
-                xs: 12,
-                md: 6,
-                lg: 8,
+                size: {
+                  xs: 12,
+                  md: 6,
+                  lg: 8,
+                },
                 children: (
                   <CardDisplay
                     header={'Raw JSON'}

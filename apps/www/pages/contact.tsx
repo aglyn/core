@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,8 +149,10 @@ function Contact(props) {
               spacing={2}
               items={[
                 {
-                  xs: 12,
-                  md: 8,
+                  size: {
+                    xs: 12,
+                    md: 8,
+                  },
                   children: (
                     <>
                       <Typography
@@ -179,8 +181,10 @@ function Contact(props) {
                   ),
                 },
                 {
-                  xs: 12,
-                  md: 9,
+                  size: {
+                    xs: 12,
+                    md: 9,
+                  },
                   children: (
                     <Container maxWidth="sm">
                       <FormRenderer

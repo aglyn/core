@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,7 +264,7 @@ const IconSelectComponent = forwardRef<any, IconSelectProps>((props, ref) => {
           <GridListWrapper>
             <GridList
               GridContainerProps={{ spacing: 1 }}
-              GridItemProps={{ xs: 2 }}
+              GridItemProps={{ size: { xs: 2 } }}
               ListWrapperProps={{ className: classKeys.gridList }}
               items={icons}
               renderItemContent={renderItemContent}

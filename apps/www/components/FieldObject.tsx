@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,18 @@
  * limitations under the License.
  */
 
-import {DoD} from '@aglyn/shared-data-types'
-import {MdiIcon, mdiPlus} from '@aglyn/shared-ui-mdi-jsx'
-import {useCallback} from 'react'
-import {Components, FieldPreset} from '../lib/input-fields'
-import FormFields, {Props as FormFieldsProps} from './FormFields'
-
+import { DoD } from '@aglyn/shared-data-types'
+import { MdiIcon, mdiPlus } from '@aglyn/shared-ui-mdi-jsx'
+import { useCallback } from 'react'
+import { Components, FieldPreset } from '../lib/input-fields'
+import FormFields, { Props as FormFieldsProps } from './FormFields'
 
 function FieldObjectProperty(props: ObjectPropertyProps) {
-  const {value, ...rest} = props
+  const { value, ...rest } = props
   const [key, property] = value
   const fields = [
     {
-      GridItemProps: {xs: 2},
+      GridItemProps: { size: { xs: 2 } },
       component: Components.Elements.byKey.TextField,
       name: 'key',
       label: 'Key',
@@ -35,11 +34,11 @@ function FieldObjectProperty(props: ObjectPropertyProps) {
       color: 'primary',
       fullWidth: true,
       size: 'small',
-      InputLabelProps: {shrink: true},
+      InputLabelProps: { shrink: true },
       value: String(key),
     },
     {
-      GridItemProps: {xs: 3},
+      GridItemProps: { size: { xs: 3 } },
       component: Components.Elements.byKey.SelectField,
       name: 'kind',
       label: 'Kind',
@@ -49,33 +48,34 @@ function FieldObjectProperty(props: ObjectPropertyProps) {
       fullWidth: true,
       size: 'small',
       value: property.type,
-      items: DoD.FT.Tag.all.map((sym: any) => ({
-        value: sym,
-        children: DoD.lbl[sym],
-      } as any)),
+      items: DoD.FT.Tag.all.map(
+        (sym: any) =>
+          ({
+            value: sym,
+            children: DoD.lbl[sym],
+          }) as any,
+      ),
     },
   ]
-  return (
-    <FormFields items={fields as any} {...rest} />
-  )
+  return <FormFields items={fields as any} {...rest} />
 }
 FieldObjectProperty.displayName = 'FieldObjectProperty'
 FieldObjectProperty.aglyn = true
 
 interface ObjectPropertyProps extends Omit<FormFieldsProps, 'items'> {
-  value: [key: string | number, property: {type: symbol}]
+  value: [key: string | number, property: { type: symbol }]
 }
 
 // const emptyObjectProperty = (key: string | number) => {
 //   return ({
-//     GridItemProps: { xs: 12 },
+//     GridItemProps: { size: {xs: 12} },
 //     component: FieldObjectProperty,
 //     value: [key, PropertyModel.create()],
 //   })
 // }
 
 function FieldObject(props: Props) {
-  const {value, onChange, ...rest} = props
+  const { value, onChange, ...rest } = props
 
   const handleAddProperty = useCallback((e) => {
     // setFields(prev => [...prev, emptyObjectProperty(prev.length)])
@@ -83,7 +83,7 @@ function FieldObject(props: Props) {
 
   const nameField = FieldPreset.Named.byKey.name
   const addButtonField = {
-    GridItemProps: {xs: 12},
+    GridItemProps: { size: { xs: 12 } },
     component: Components.Elements.byKey.Button,
     variant: 'outlined',
     startIcon: <MdiIcon path={mdiPlus.path} />,
@@ -96,11 +96,13 @@ function FieldObject(props: Props) {
 
   return (
     <FormFields
-      items={[
-        nameField,
-        Object.keys(value?.get('items')).map(k => value.get(k)),
-        addButtonField,
-      ].filter(v => Boolean(v)) as any}
+      items={
+        [
+          nameField,
+          Object.keys(value?.get('items')).map((k) => value.get(k)),
+          addButtonField,
+        ].filter((v) => Boolean(v)) as any
+      }
       {...rest}
     />
   )

@@ -19,10 +19,15 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
+import type { Metadata } from 'next'
 import NextLink from 'next/link'
 import * as React from 'react'
 // import Copyright from '@/components/Copyright'
 // import ProTip from '@/components/ProTip'
+
+export const metadata: Metadata = {
+  title: 'About',
+}
 
 export default function About() {
   return (

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,11 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(
               justifyContent="space-between"
               items={[
                 {
-                  xs: 12,
-                  sm: 6,
-                  md: 3,
+                  size: {
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  },
                   children: (
                     <>
                       <NextImage
@@ -79,9 +81,11 @@ const SiteFooterView = forwardRef<HTMLDivElement, SiteFooterViewProps>(
                   ),
                 },
                 ...footerNavigation.map(({ items, ...item }, key) => ({
-                  xs: 12 as any,
-                  sm: 6 as any,
-                  md: 3 as any,
+                  size: {
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  },
                   children: (
                     <>
                       <Typography variant="overline">

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-import {GridButtons} from '@aglyn/shared-ui-jsx'
-import {mdiBug, MdiIcon} from '@aglyn/shared-ui-mdi-jsx'
+import { GridButtons } from '@aglyn/shared-ui-jsx'
+import { mdiBug, MdiIcon } from '@aglyn/shared-ui-mdi-jsx'
 import styled from '@emotion/styled'
-
 
 const StyledPage = styled.div`
   .page {
@@ -26,7 +25,6 @@ const StyledPage = styled.div`
 `
 
 export function Index() {
-
   /*
    * Replace the elements below with your own.
    *
@@ -41,7 +39,7 @@ export function Index() {
         items={[
           {
             GridItemProps: {
-              xs: 6,
+              size: { xs: 6 },
             },
             children: 'Hello Button 1',
             variant: 'contained',
@@ -50,7 +48,7 @@ export function Index() {
           },
           {
             GridItemProps: {
-              xs: 3,
+              size: { xs: 3 },
             },
             children: 'Hello Button 1',
             variant: 'contained',
@@ -59,7 +57,7 @@ export function Index() {
           },
           {
             GridItemProps: {
-              xs: 3,
+              size: { xs: 3 },
             },
             children: 'Hello Button 1',
             variant: 'contained',
