@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2024 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { createResponsiveCssVarTheme } from '@aglyn/shared-ui-theme/util/create-responsive-theme'
+import { createResponsiveCssVarTheme } from '../util/create-responsive-theme';
 import { getDisplayName } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { CssBaseline } from '@mui/material'
-import { Experimental_CssVarsProvider as MuiCssVarsProvider } from '@mui/material/styles'
+import { CssVarsProvider as MuiCssVarsProvider } from '@mui/material/styles'
 import { forwardRef, useMemo } from 'react'
 
 export interface ThemeCssVarProviderProps
