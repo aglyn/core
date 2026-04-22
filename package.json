@@ -96,7 +96,7 @@
     "effector-react": "^22.0.6",
     "effector-storage": "^5.0.0",
     "eventemitter2": "^6.4.5",
-    "firebase": "^9.9.3",
+    "firebase": "^10.9.0",
     "firebase-admin": "^11.0.1",
     "flat": "^5.0.2",
     "framer-motion": "^6.3.16",
