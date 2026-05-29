@@ -25,9 +25,19 @@ import type {
   ReactElement,
   ReactNode,
 } from 'react'
+import type { JSX as ReactJSX } from 'react/jsx-runtime'
 
 declare global {
   namespace JSX {
+    // React 19 removed these from the global JSX namespace; restore them here so
+    // type annotations like JSX.Element and JSX.IntrinsicElements continue to work.
+    interface Element extends ReactElement<any, any> {}
+    interface ElementClass extends ReactJSX.ElementClass {}
+    interface IntrinsicAttributes extends ReactJSX.IntrinsicAttributes {}
+    interface IntrinsicClassAttributes<T> extends ReactJSX.IntrinsicClassAttributes<T> {}
+    interface IntrinsicElements extends ReactJSX.IntrinsicElements {}
+    type LibraryManagedAttributes<C, P> = ReactJSX.LibraryManagedAttributes<C, P>
+
     /** The index key when symbol is not supported */
     type Key = string | number
     /** The attribute key prop components */
@@ -58,8 +68,9 @@ declare global {
 
     type Text = string | number
     type Child = Element | Text
-    type Fragment = Iterable<Node>
-    type Node = Child | Fragment | Portal | boolean | null | undefined
+    type Fragment = Iterable<ReactNode>
+    /** Alias for React.ReactNode — the full set of renderable content in React 19. */
+    type Node = ReactNode
     type NodeList = Node[] | ArrayLike<Node>
     type NodeIterableList = NodeList | Iterable<Node>
     type Children = Node
@@ -71,7 +82,7 @@ declare global {
       IntrinsicElementMap<P>[keyof IntrinsicElements]
 
     type ElementFunctionComponent<P = any> = {
-      (props: P): JSX.Element | null
+      (props: P): ReactNode
     }
     type ElementClassComponent<P = any> = ComponentClass<P, any>
     type ComponentType<P> =
@@ -80,7 +91,7 @@ declare global {
     type ElementType<P = any> = IntrinsicElement<P> | ComponentType<P>
 
     type ElementConstructor<P> =
-      | ((props: P) => Element | null)
+      | ((props: P) => ReactNode)
       | (new (props: P) => Component<P, any>)
 
     // interface Element<
@@ -117,12 +128,11 @@ declare global {
     }
 
     interface Portal extends Element {
-      key: Key | null
       children: Children
     }
 
     interface FunctionComponent<P = EmptyObj, S = any> {
-      (props: PropsWithChildren<P>, context?: any): Element<any, any> | null
+      (props: PropsWithChildren<P>, context?: any): ReactNode
       propTypes?: WeakValidationMap<P> | undefined
       contextTypes?: PropValidationMap<any> | undefined
       defaultProps?: Partial<P> | undefined
@@ -144,7 +154,7 @@ declare global {
       /**
        * **NOTE**: Exotic components are not callable.
        */
-      (props: P): Element | null
+      (props: P): ReactNode
       readonly $$typeof: symbol
     }
 

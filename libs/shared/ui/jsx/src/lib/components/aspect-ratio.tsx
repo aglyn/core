@@ -238,6 +238,5 @@ export const AspectRatio = forwardRef<any, AspectRatioProps>((inProps, ref) => {
   )
 })
 AspectRatio.displayName = 'AspectRatio'
-AspectRatio.defaultProps = {}
 
 export default AspectRatio
