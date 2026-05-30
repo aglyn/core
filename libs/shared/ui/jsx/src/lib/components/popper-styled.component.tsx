@@ -16,7 +16,7 @@
  */
 
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
-import { _isEqualitySameType } from '@aglyn/shared-util-guards'
+import { _isEqualitySameType } from '@aglyn/shared-util-tools'
 import MuiPopper, {
   type PopperProps as MuiPopperProps,
 } from '@mui/material/Popper'

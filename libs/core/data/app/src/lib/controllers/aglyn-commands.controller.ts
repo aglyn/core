@@ -34,7 +34,7 @@ import {
   type CommandsUnregisterListenerPayload,
 } from '@aglyn/core-data-foundation'
 import { EmitterFn } from '@aglyn/shared-util-emitter'
-import { _isFnT } from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-tools'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
 const TAG = 'AglynCommands'

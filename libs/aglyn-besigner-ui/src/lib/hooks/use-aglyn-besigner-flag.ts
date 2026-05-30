@@ -22,7 +22,7 @@ import {
   setBesignerFlag,
 } from '@aglyn/besigner-data-app'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
-import { _isFnT } from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-tools'
 import { useCallback } from 'react'
 import useBesignerAppContext from './use-besigner-app-context'
 

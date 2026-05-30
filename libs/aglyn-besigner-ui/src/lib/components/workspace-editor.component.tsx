@@ -18,8 +18,13 @@
 import * as Besigner from '@aglyn/besigner'
 import { LOADING_OVERLAY_ELEMENT, useMergeRefs } from '@aglyn/shared-ui-jsx'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
-import { _isFnT } from '@aglyn/shared-util-guards'
-import { DragEndEvent, DragMoveEvent, DragStartEvent, useDndMonitor, } from '@dnd-kit/core'
+import { _isFnT } from '@aglyn/shared-util-tools'
+import {
+  DragEndEvent,
+  DragMoveEvent,
+  DragStartEvent,
+  useDndMonitor,
+} from '@dnd-kit/core'
 import { Stack } from '@mui/material'
 import clsx from 'clsx'
 import dynamic from 'next/dynamic'
@@ -30,7 +35,6 @@ import useAglynBesignerPanelValue from '../hooks/use-aglyn-besigner-panel-value'
 import AppBarBreadcrumbsComponent from './app-bar-breadcrumbs.component'
 import type { AsidePanelComponentProps } from './aside-panel.component'
 import ViewportZoomControls from './viewport-zoom-controls'
-
 
 const classKeys = generateComponentClassKeys('AglynViewport', [
   'panelLeftOpen',

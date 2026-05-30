@@ -38,7 +38,7 @@ import {
   type ExtensionUnloadPayload,
 } from '@aglyn/core-data-foundation'
 import { isAglynExtension, isAglynModule } from '@aglyn/core-util-app'
-import { _isCtor } from '@aglyn/shared-util-guards'
+import { _isCtor } from '@aglyn/shared-util-tools'
 import { AglynExtension } from '../models/aglyn-extension.model'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 

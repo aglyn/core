@@ -32,7 +32,7 @@ import {
   CANVAS_ROOT_ELEMENT_ID,
   DEFAULT_ROOT_ELEMENT,
 } from '@aglyn/core-data-foundation'
-import { _hasOwnProperty } from '@aglyn/shared-util-guards'
+import { _hasOwnProperty } from '@aglyn/shared-util-tools'
 import {
   arrayMoveAtIndex,
   arrayPushAtIndex,

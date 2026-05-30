@@ -18,7 +18,7 @@
 import { getCanvasNormalizedNodesStore } from '@aglyn/core-data-app'
 import type { AglynNodesById } from '@aglyn/core-data-foundation'
 import { useSubscribable } from '@aglyn/shared-ui-jsx'
-import { _isFnT } from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-tools'
 import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 export function useAglynCanvasElementsDenormalized(): AglynNodesById

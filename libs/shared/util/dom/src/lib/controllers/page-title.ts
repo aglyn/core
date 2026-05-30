@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isStrEmpty, _isUndOrNull } from '@aglyn/shared-util-guards'
+import { _isStrEmpty, _isUndOrNull } from '@aglyn/shared-util-tools'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
 import { makeAutoObservable } from 'mobx'
 import { BehaviorSubject } from 'rxjs'

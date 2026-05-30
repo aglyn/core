@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2025 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import _isObj from '@aglyn/shared-util-guards/_is-obj'
-import _isStrT from '@aglyn/shared-util-guards/_is-str-t'
+import { _isObj, _isStrT } from '@aglyn/shared-util-tools'
 import arraySafe from '@aglyn/shared-util-tools/array/array-safe'
 import cloneDeep from 'lodash-es/cloneDeep'
 import isEqual from 'lodash-es/isEqual'

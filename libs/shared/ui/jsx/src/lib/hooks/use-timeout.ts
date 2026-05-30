@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2021 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-import {_isFnT} from '@aglyn/shared-util-guards'
-import {useEffect, useRef} from 'react'
+import { _isFnT } from '@aglyn/shared-util-tools'
+import { useEffect, useRef } from 'react'
 
-
-export function useTimeout(callback: TimerHandler, delay: number, ...args: any[]): void {
+export function useTimeout(
+  callback: TimerHandler,
+  delay: number,
+  ...args: any[]
+): void {
   const savedCallback = useRef(null)
 
   useEffect(() => {

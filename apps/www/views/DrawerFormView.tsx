@@ -18,7 +18,7 @@
 import { NavigationDrawerComponent } from '@aglyn/shared-ui-jsx'
 import { mdiClose, MdiIcon } from '@aglyn/shared-ui-jsx'
 import { alpha, createStyles, withStyles } from '@aglyn/shared-ui-theme'
-import { _isStrT } from '@aglyn/shared-util-guards'
+import { _isStrT } from '@aglyn/shared-util-tools'
 import { objectRemap } from '@aglyn/shared-util-tools'
 import { Box, Button } from '@mui/material'
 import Container from '@mui/material/Container'

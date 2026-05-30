@@ -36,7 +36,7 @@ import {
   type ContextsGetStorePayload,
   type ContextsSetStorePayload,
 } from '@aglyn/core-data-foundation'
-import { _hasOwnProperty, _isObj } from '@aglyn/shared-util-guards'
+import { _hasOwnProperty, _isObj } from '@aglyn/shared-util-tools'
 import { getProperty } from '@aglyn/shared-util-tools'
 import { createDomain as createEffectorDomain } from 'effector'
 import { AglynModuleModel } from '../models/aglyn-module.model'

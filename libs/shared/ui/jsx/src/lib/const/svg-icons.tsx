@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2023 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
  */
 
 import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
-import { _isEqualitySameType } from '@aglyn/shared-util-guards'
+import { _isEqualitySameType } from '@aglyn/shared-util-tools'
 import { styled, SvgIcon, SvgIconProps } from '@mui/material'
 import { forwardRef } from 'react'
+
 
 export const aglynLogoClassKeys = generateComponentClassKeys('AglynLogo', [
   'compass',
@@ -331,16 +332,28 @@ const AglynSvgLogoRoot = styled(SvgIcon, { name: 'AglynSvgLogo' })({
   height: 'unset',
 })
 
-export const AglynSvgLogo = forwardRef<SVGSVGElement, SvgIconProps>(function AglynSvgLogo(
-  { 'aria-label': ariaLabel = 'aglyn', viewBox = AGLYN_SVG_LOGO.viewBox, children, ...props },
-  ref
-) {
-  return (
-    <AglynSvgLogoRoot aria-label={ariaLabel} viewBox={viewBox} ref={ref} {...props}>
-      {children ?? <path d={AGLYN_SVG_LOGO.path} />}
-    </AglynSvgLogoRoot>
-  )
-})
+export const AglynSvgLogo = forwardRef<SVGSVGElement, SvgIconProps>(
+  function AglynSvgLogo(
+    {
+      'aria-label': ariaLabel = 'aglyn',
+      viewBox = AGLYN_SVG_LOGO.viewBox,
+      children,
+      ...props
+    },
+    ref,
+  ) {
+    return (
+      <AglynSvgLogoRoot
+        aria-label={ariaLabel}
+        viewBox={viewBox}
+        ref={ref}
+        {...props}
+      >
+        {children ?? <path d={AGLYN_SVG_LOGO.path} />}
+      </AglynSvgLogoRoot>
+    )
+  },
+)
 AglynSvgLogo.displayName = 'AglynSvgLogo'
 AglynSvgLogo.aglyn = true
 
@@ -349,16 +362,28 @@ const BesignerSvgLogoRoot = styled(SvgIcon, { name: 'BesignerSvgLogo' })({
   // height: 'unset',
 })
 
-export const BesignerSvgLogo = forwardRef<SVGSVGElement, SvgIconProps>(function BesignerSvgLogo(
-  { 'aria-label': ariaLabel = 'besigner', viewBox = BESIGNER_SVG_LOGO.viewBox, children, ...props },
-  ref
-) {
-  return (
-    <BesignerSvgLogoRoot aria-label={ariaLabel} viewBox={viewBox} ref={ref} {...props}>
-      {children ?? <path d={BESIGNER_SVG_LOGO.path} />}
-    </BesignerSvgLogoRoot>
-  )
-})
+export const BesignerSvgLogo = forwardRef<SVGSVGElement, SvgIconProps>(
+  function BesignerSvgLogo(
+    {
+      'aria-label': ariaLabel = 'besigner',
+      viewBox = BESIGNER_SVG_LOGO.viewBox,
+      children,
+      ...props
+    },
+    ref,
+  ) {
+    return (
+      <BesignerSvgLogoRoot
+        aria-label={ariaLabel}
+        viewBox={viewBox}
+        ref={ref}
+        {...props}
+      >
+        {children ?? <path d={BESIGNER_SVG_LOGO.path} />}
+      </BesignerSvgLogoRoot>
+    )
+  },
+)
 BesignerSvgLogo.displayName = 'BesignerSvgLogo'
 BesignerSvgLogo.aglyn = true
 

@@ -16,7 +16,7 @@
  */
 
 import { ScrollReaction } from '@aglyn/shared-ui-jsx'
-import { _isArrEmpty } from '@aglyn/shared-util-guards'
+import { _isArrEmpty } from '@aglyn/shared-util-tools'
 import {
   AppBar,
   type AppBarProps,

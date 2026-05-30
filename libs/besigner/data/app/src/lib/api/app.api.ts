@@ -25,7 +25,7 @@ import {
   type AppUUN,
   DEFAULT_APP_UUN,
 } from '@aglyn/core-data-foundation'
-import { _isObj, _isStrEmpty } from '@aglyn/shared-util-guards'
+import { _isObj, _isStrEmpty } from '@aglyn/shared-util-tools'
 import BesignerAppController from '../controllers/besigner-app.controller'
 import type {
   BesignerAppOptions,

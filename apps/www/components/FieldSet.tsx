@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  */
 
 import { createStyles, makeStyles, type Theme } from '@aglyn/shared-ui-theme'
-import { _isArr } from '@aglyn/shared-util-guards'
+import { _isArr } from '@aglyn/shared-util-tools'
 import { MenuItem, TextField } from '@mui/material'
 import Checkbox from '@mui/material/Checkbox'
 import ListItem from '@mui/material/ListItem'
@@ -37,11 +37,15 @@ const useStyles = makeStyles<Theme, Props>((theme: Theme) =>
       },
     },
     list: {},
-  })
+  }),
 )
 
 const buildOption = (option: Fields.Option, key?: any) => (
-  <MenuItem key={item.key ?? item.id ?? key} value={option.value} children={option.label} />
+  <MenuItem
+    key={item.key ?? item.id ?? key}
+    value={option.value}
+    children={option.label}
+  />
 )
 
 function checkboxListRow(props: ListChildComponentProps) {
@@ -65,7 +69,10 @@ function checkboxListRow(props: ListChildComponentProps) {
   )
 }
 
-const getFieldOptions = (field: Fields.FieldT, fields: Fields.FieldGroup): Fields.Option[] => {
+const getFieldOptions = (
+  field: Fields.FieldT,
+  fields: Fields.FieldGroup,
+): Fields.Option[] => {
   let items = _isArr(field.options) ? field.options : field.options(fields)
   let error = null
   if (!_isArr(items)) {
@@ -86,7 +93,9 @@ const getFieldOptions = (field: Fields.FieldT, fields: Fields.FieldGroup): Field
 export type Props = {
   fields: Fields.FieldGroup
   loading?: boolean
-  onUpdate: (fieldId: string) => ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  onUpdate: (
+    fieldId: string,
+  ) => ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
 }
 
 export default function FieldSet(props: Props) {
@@ -156,5 +165,7 @@ export default function FieldSet(props: Props) {
     }
   }
 
-  return <div className={classes.root}>{Object.values(fields).map(buildField)}</div>
+  return (
+    <div className={classes.root}>{Object.values(fields).map(buildField)}</div>
+  )
 }

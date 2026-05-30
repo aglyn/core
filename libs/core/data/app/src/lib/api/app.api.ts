@@ -29,7 +29,7 @@ import {
   AglynEventStateFlag,
   DEFAULT_APP_UUN,
 } from '@aglyn/core-data-foundation'
-import { _isObj, _isStrEmpty } from '@aglyn/shared-util-guards'
+import { _isObj, _isStrEmpty } from '@aglyn/shared-util-tools'
 import { AglynAppController } from '../controllers/aglyn-app.controller'
 
 export function getAllApps(): IAglynAppController[] {

@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import type { NodeId } from '@aglyn/core-data-foundation'
-import { _isFnT } from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-tools'
 import { useMemo } from 'react'
 
 function defaultPropsResolver(node: Aglyn.NodeSchema) {

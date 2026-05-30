@@ -49,7 +49,7 @@ const Snackbar = forwardRef<any, SnackbarProps>((props, ref) => {
     ...rest
   } = props
 
-  const timerAutoHide = useRef<NodeJS.Timeout>()
+  const timerAutoHide = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const handleClose = useEventCallback((...args) => {
     if (onClose) {

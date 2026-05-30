@@ -27,7 +27,7 @@ import {
   type IAglynExtension,
   MODULE_TYPE,
 } from '@aglyn/core-data-foundation'
-import { _isFnT, _isObj } from '@aglyn/shared-util-guards'
+import { _isFnT, _isObj } from '@aglyn/shared-util-tools'
 
 export function kindOf(object: unknown) {
   if (_isFnT(object) || _isObj(object)) {

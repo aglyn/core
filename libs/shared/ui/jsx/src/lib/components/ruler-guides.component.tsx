@@ -16,7 +16,7 @@
  */
 
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
-import { _isArr, _isEqualitySameType } from '@aglyn/shared-util-guards'
+import { _isArr, _isEqualitySameType } from '@aglyn/shared-util-tools'
 import Box, { BoxProps } from '@mui/material/Box'
 import { teal } from '@mui/material/colors'
 

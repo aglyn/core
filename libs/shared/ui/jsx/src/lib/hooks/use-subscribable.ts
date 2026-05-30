@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-tools'
 import isEqual from 'lodash-es/isEqual'
 import { type DependencyList, useCallback, useEffect, useState } from 'react'
 import type {

@@ -47,7 +47,7 @@ import {
 } from '@aglyn/core-data-foundation'
 import { isAglynComponentElement } from '@aglyn/core-util-app'
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { _isArr } from '@aglyn/shared-util-guards'
+import { _isArr } from '@aglyn/shared-util-tools'
 import { AglynModuleModel } from '../models/aglyn-module.model'
 
 const TAG = 'AglynComponents'

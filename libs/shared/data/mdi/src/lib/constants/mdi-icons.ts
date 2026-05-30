@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _hasOwnProperty, _isArr, _isObj } from '@aglyn/shared-util-guards'
+import { _hasOwnProperty, _isArr, _isObj } from '@aglyn/shared-util-tools'
 import type { Icon, IconId } from 'libs/shared/data/mdi/src/lib/types'
 
 export const MdiIcons = new Map<IconId, Icon>()

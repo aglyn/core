@@ -16,7 +16,7 @@
  */
 
 import { styled } from '@aglyn/shared-ui-theme'
-import { _isLength } from '@aglyn/shared-util-guards'
+import { _isLength } from '@aglyn/shared-util-tools'
 import {
   Breadcrumbs as MuiBreadcrumbs,
   type BreadcrumbsProps as MuiBreadcrumbsProps,

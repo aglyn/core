@@ -29,16 +29,17 @@ import {
   AglynConsoleLogoFull,
   AppLink,
   type AppLinkProps,
+  MdiIcon,
+  type MdiIconProps,
   Menu,
   type MenuItemProps,
   type MenuProps,
   ScrollReaction,
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
-import { MdiIcon, type MdiIconProps } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { getThemeModeDisplayName, mergeSxProps } from '@aglyn/shared-ui-theme'
-import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
+import { _isArr, _isArrEmpty } from '@aglyn/shared-util-tools'
 import { useUserPhoto } from '@aglyn/tenant-feature-instance'
 import {
   AppBar,
@@ -398,10 +399,10 @@ export function MainLayout(props: MainLayoutProps) {
                       mode === 'dark'
                         ? 'system'
                         : mode === 'light'
-                        ? 'dark'
-                        : mode === 'system' || mode === undefined
-                        ? 'light'
-                        : 'system',
+                          ? 'dark'
+                          : mode === 'system' || mode === undefined
+                            ? 'light'
+                            : 'system',
                     )
                   },
                   // component: 'button',
@@ -411,8 +412,8 @@ export function MainLayout(props: MainLayoutProps) {
                       mode === 'dark'
                         ? ICON_VARIANT_THEME_DARK.path
                         : mode === 'light'
-                        ? ICON_VARIANT_THEME_LIGHT.path
-                        : ICON_VARIANT_THEME_SYSTEM.path,
+                          ? ICON_VARIANT_THEME_LIGHT.path
+                          : ICON_VARIANT_THEME_SYSTEM.path,
                   },
                   'aria-label': 'switch theme mode',
                 },

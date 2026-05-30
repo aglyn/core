@@ -23,7 +23,7 @@ import {
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
-import { _isFnT } from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-tools'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Tooltip from '@mui/material/Tooltip'

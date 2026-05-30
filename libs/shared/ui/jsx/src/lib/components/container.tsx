@@ -16,7 +16,7 @@
  */
 
 import { styled } from '@aglyn/shared-ui-theme'
-import { _isEqualitySameType } from '@aglyn/shared-util-guards'
+import { _isEqualitySameType } from '@aglyn/shared-util-tools'
 import {
   Container as MuiContainer,
   type ContainerProps as MuiContainerProps,

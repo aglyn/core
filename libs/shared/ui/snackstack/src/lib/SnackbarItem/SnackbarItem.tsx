@@ -134,7 +134,7 @@ export interface SnackbarItemProps
 
 const SnackbarItem = forwardRef<any, SnackbarItemProps>((props, ref) => {
   const { classes: propClasses, ...rest } = props
-  const timeout = useRef<ReturnType<typeof setTimeout>>()
+  const timeout = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [collapsed, setCollapsed] = useState(true)
 
   useEffect(

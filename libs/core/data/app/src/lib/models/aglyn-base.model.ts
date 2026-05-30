@@ -29,7 +29,7 @@ import {
   AglynEventStateFlag,
   type AglynLogger,
 } from '@aglyn/core-data-foundation'
-import { _isArr } from '@aglyn/shared-util-guards'
+import { _isArr } from '@aglyn/shared-util-tools'
 import { ITimestamp, Timestamp } from '@aglyn/shared-util-timestamp'
 import { getStaticField } from '@aglyn/shared-util-tools'
 

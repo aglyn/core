@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { _isArr } from '@aglyn/shared-util-guards'
+import { _isArr } from '@aglyn/shared-util-tools'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { useCallback, useMemo } from 'react'
 

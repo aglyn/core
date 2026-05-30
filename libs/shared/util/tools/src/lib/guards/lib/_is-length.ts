@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @nx/enforce-module-boundaries
-import type { ComparisonOperator } from '@aglyn/shared-data-operators'
+import { compare, type ComparisonOperator } from '../../operator'
 import { _isNum } from './_is-num'
-import compare from './utils/compare'
+
 
 /**
  * Checks if the parameter has length greater than 0 or second parameter

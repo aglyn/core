@@ -17,7 +17,7 @@
 
 import * as Besigner from '@aglyn/besigner'
 import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
-import _isEqualitySameType from '@aglyn/shared-util-guards/_is-equality-same-type'
+import { _isEqualitySameType } from '@aglyn/shared-util-tools'
 import { type ClientRect } from '@dnd-kit/core'
 import { Portal, styled } from '@mui/material'
 import clsx from 'clsx'

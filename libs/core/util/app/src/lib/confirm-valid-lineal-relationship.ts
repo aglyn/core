@@ -16,7 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
-import { _isArr, _isArrEmpty } from '@aglyn/shared-util-guards'
+import { _isArr, _isArrEmpty } from '@aglyn/shared-util-tools'
 
 export enum InvalidLinealRelationFlag {
   DISALLOW = 0x01,

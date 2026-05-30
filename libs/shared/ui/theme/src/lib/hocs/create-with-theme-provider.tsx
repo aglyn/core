@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isArr, _isNull } from '@aglyn/shared-util-guards'
+import { _isArr, _isNull } from '@aglyn/shared-util-tools'
 import { getDisplayName, noop } from '@aglyn/shared-util-tools'
 import { hoistNonReactStatics } from '@aglyn/shared-util-vendor'
 import { CssBaseline, useMediaQuery } from '@mui/material'

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isFnT } from '@aglyn/shared-util-guards'
+import { _isFnT } from '@aglyn/shared-util-tools'
 import { useScrollTrigger } from '@mui/material'
 // eslint-disable-next-line no-restricted-imports
 import type { UseScrollTriggerOptions } from '@mui/material/useScrollTrigger/useScrollTrigger'

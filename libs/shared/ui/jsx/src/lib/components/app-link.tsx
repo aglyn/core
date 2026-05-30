@@ -17,7 +17,7 @@
 'use client'
 
 import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
-import { _isObj } from '@aglyn/shared-util-guards'
+import { _isObj } from '@aglyn/shared-util-tools'
 import { truthy } from '@aglyn/shared-util-tools'
 import type {
   ButtonBaseProps as MuiButtonBaseProps,

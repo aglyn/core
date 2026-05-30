@@ -16,7 +16,7 @@
  */
 
 import type { ModificationHistoryState } from '@aglyn/core-data-foundation'
-import { _isArrEmpty } from '@aglyn/shared-util-guards'
+import { _isArrEmpty } from '@aglyn/shared-util-tools'
 import { cloneDeep } from '@aglyn/shared-util-tools'
 
 export function handleStateModificationHistoryUndo<S>(

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { _isUndT } from '@aglyn/shared-util-guards'
+import { _isUndT } from '@aglyn/shared-util-tools'
 import cloneDeep from '../copy'
 
 export type RemapOptions = {
