@@ -24,7 +24,7 @@ export type UseContinueUrlDecodedRoutePusher = (
   url?: string,
   as?: string,
   options?: { shallow?: boolean; locale?: string | false; scroll?: boolean },
-) => Promise<boolean>
+) => void
 
 export type UseContinueUrlDecodedResponse = [
   decoded: string,
