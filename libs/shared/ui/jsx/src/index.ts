@@ -85,7 +85,7 @@ export * from './lib/utils/make-link-elements'
 export * from './lib/utils/make-meta-elements'
 export * from './lib/utils/vendor'
 
-export * from './types'
+export * from './lib/types'
 
 export * from './lib/hooks/mdi-icon/use-mdi-icon'
 export * from './lib/hooks/mdi-icon/use-mdi-icons'

@@ -19,5 +19,5 @@
       "outputs": ["{options.outputFile}"]
     }
   },
-  "tags": ["scope:lib", "scope:shared", "scope:util"]
+  "tags": ["scope:lib", "scope:shared", "scope:util", "scope:data"]
 }
