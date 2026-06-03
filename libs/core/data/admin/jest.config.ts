@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-module.exports = {
+export default {
   displayName: 'core-data-admin',
   preset: '../../../../jest.preset.js',
   globals: {},

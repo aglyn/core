@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-module.exports = {
+export default {
   displayName: 'plugins-ui-mui',
   preset: '../../../../jest.preset.js',
   transform: {

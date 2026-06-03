@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-module.exports = {
+export default {
   displayName: 'shared-data-types',
   preset: '../../../../jest.preset.js',
   globals: {},

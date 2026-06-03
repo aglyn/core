@@ -1,10 +1,10 @@
 /* eslint-disable */
-const { readFileSync } = require('fs')
+import { readFileSync } from 'fs'
 
 // Reading the SWC compilation config and remove the "exclude"
 // for the test files to be compiled by SWC
 const { exclude: _, ...swcJestConfig } = JSON.parse(
-  readFileSync(`${__dirname}/.swcrc`, 'utf-8'),
+  readFileSync(`${import.meta.dirname}/.swcrc`, 'utf-8'),
 )
 
 // disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves.
@@ -13,7 +13,7 @@ if (swcJestConfig.swcrc === undefined) {
   swcJestConfig.swcrc = false
 }
 
-module.exports = {
+export default {
   displayName: 'aglyn-besigner',
   preset: '../../jest.preset.js',
   transform: {

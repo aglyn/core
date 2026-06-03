@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-module.exports = {
+export default {
   displayName: 'aglyn-besigner-ui',
   preset: '../../jest.preset.js',
   transform: {

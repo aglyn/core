@@ -34,7 +34,7 @@
  * limitations under the License.
  */
 
-module.exports = {
+export default {
   displayName: 'shared-ui-jsx-forms',
   preset: '../../../../jest.preset.js',
   transform: {

@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable */
-module.exports = {
+export default {
   displayName: 'core-feature-renderer',
   preset: '../../../../jest.preset.js',
   transform: {
