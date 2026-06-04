@@ -22,7 +22,7 @@ import {
   DEFAULT_APP_UUN,
   type IAglynAppController,
 } from '@aglyn/core-data-foundation'
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 export type IAglynAppContext = IAglynAppController | undefined
 
@@ -46,11 +46,7 @@ export interface AglynAppContextComponentProps {
 export function AglynAppProvider(props: AglynAppContextComponentProps) {
   const { appName = DEFAULT_APP_UUN, children, canvasElements } = props
 
-  const [state, setState] = useState<IAglynAppContext>()
-
-  useMemo(() => {
-    setState(getApp(appName))
-  }, [appName])
+  const state = useMemo<IAglynAppContext>(() => getApp(appName), [appName])
 
   return (
     <AglynAppContext.Provider value={state}>
