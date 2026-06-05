@@ -109,6 +109,7 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
   ) {
     makeAutoObservable(this, {
       store: false,
+      toJSON: false,
     })
 
     this.$id = schema.$id
@@ -130,22 +131,20 @@ export class AglynNode<P = JSX.AnyProps> implements NodeSchema<P> {
     this.store.deleteNode(this)
   }
 
-  public toJSON = computedFn((): NodeSchemaJSON<P> => {
-    if (this.$id === NODE_ROOT_ID) console.log('toJSON', this.nodes)
-    const node = toJS(this)
+  public toJSON = (): NodeSchemaJSON<P> => {
     return {
-      $id: node.$id,
-      name: node.name,
-      type: node.type,
-      parentId: node.parentId,
-      pluginId: node.pluginId,
-      componentId: node.componentId,
-      className: node.className,
-      nodes: node.nodes,
-      props: node.props,
-      sx: node.sx,
+      $id: this.$id,
+      name: this.name,
+      type: this.type,
+      parentId: this.parentId,
+      pluginId: this.pluginId,
+      componentId: this.componentId,
+      className: this.className,
+      nodes: this.nodes ? [...this.nodes] : [],
+      props: toJS(this.props),
+      sx: toJS(this.sx),
     } as NodeSchemaJSON<P>
-  })
+  }
 }
 
 class HistoryManager<K extends string, T> {
@@ -355,9 +354,11 @@ export class CanvasManager {
   })
 
   public toJSON() {
-    return {
-      nodes: toJS(this.nodes),
-    }
+    const nodes: NodesMap = {}
+    this.nodes.forEach((node, id) => {
+      nodes[id] = node.toJSON()
+    })
+    return { nodes }
   }
 
   public redo(): this {

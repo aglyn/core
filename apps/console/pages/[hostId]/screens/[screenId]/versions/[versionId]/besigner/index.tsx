@@ -129,7 +129,7 @@ function BesignerPage(props) {
     }
     const dequeueLoading = queueLoading()
 
-    const nodes = Aglyn.canvas.nodesToJSON()
+    const nodes = Aglyn.canvas.toJSON().nodes
     await updateScreen({nodes: nodes}, {merge: true})
       .then((...args) => {
         console.log('updaye screen then promise', args)
