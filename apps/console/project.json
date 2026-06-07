@@ -12,7 +12,9 @@
         "outputPath": "dist/apps/console"
       },
       "configurations": {
-        "production": {},
+        "production": {
+          "webpack": true
+        },
         "development": {
           "outputPath": "apps/console"
         }
