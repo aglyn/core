@@ -22,7 +22,12 @@
           "@aglyn/shared-util-tools",
           "@aglyn/shared-util-vendor"
         ],
-        "rollupConfig": ["@nx/react/plugins/bundle-rollup"],
+        "rollupConfig": [
+          "@nx/react/plugins/bundle-rollup",
+          "tools/rollup-external-packages.js",
+          "tools/rollup-suppress-use-client.js",
+          "tools/rollup-skip-typecheck.js"
+        ],
         "compiler": "swc",
         "skipTypeCheck": true,
         "assets": [

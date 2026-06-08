@@ -26,7 +26,9 @@
         ],
         "rollupConfig": [
           "@nx/react/plugins/bundle-rollup",
-          "tools/rollup-suppress-use-client.js"
+          "tools/rollup-external-packages.js",
+          "tools/rollup-suppress-use-client.js",
+          "tools/rollup-skip-typecheck.js"
         ],
         "compiler": "swc",
         "assets": [
