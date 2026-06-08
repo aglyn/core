@@ -17,7 +17,7 @@
 
 import { type FirebaseOptions } from 'firebase/app'
 
-export const RECAPTCHA_API_KEY = process.env.NEXT_PUBLIC_RECPATCHA_PUBLIC_KEY
+export const RECAPTCHA_API_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_PUBLIC_KEY
 export const FIREBASE_API_KEY = process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY
 export const FIREBASE_AUTH_DOMAIN = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
 export const FIREBASE_DATABASE_URL =
