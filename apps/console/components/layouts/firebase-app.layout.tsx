@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2024 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,9 @@ function GetInnerLayout({ children }) {
   if (!connectedFirestore) {
     try {
       initializeFirestore(app, {
-        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager(),
+        }),
       })
       if (FIREBASE_FIRESTORE_EMULATOR_ENABLED) {
         connectFirestoreEmulator(getFirestore(app), 'localhost', 8082)
@@ -166,6 +168,11 @@ function GetInnerLayout({ children }) {
   let appCheck
   try {
     console.log('RECAPTCHA_API_KEY sitekey', RECAPTCHA_API_KEY)
+    console.log('process.env', process.env)
+    console.log(
+      'process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY',
+      process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY,
+    )
     appCheck = initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(RECAPTCHA_API_KEY),
       isTokenAutoRefreshEnabled: true,

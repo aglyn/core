@@ -88,7 +88,8 @@ function generateExportDefaultFile(
   const dataStr = JSON.stringify(data, null, 2)
   const exportName = convertIdToModuleName(data.id)
   const contents = [
-    `export const ${exportName} = ${dataStr}`,
+    `import type { Icon } from '../../../src/lib/types'`,
+    `export const ${exportName}: Icon = ${dataStr}`,
     `export default ${exportName}`,
   ].join('\r\n')
   writeFile(dir, filename, contents)
