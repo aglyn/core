@@ -141,7 +141,7 @@ export const ComponentPicker = observer(
         onClose={handleClose}
         open={open}
         maxWidth="sm"
-        PaperProps={{ sx: { width: '100%' } }}
+        slotProps={{ paper: { sx: { width: '100%' } } }}
         TransitionComponent={Transition}
         {...rest}
       >

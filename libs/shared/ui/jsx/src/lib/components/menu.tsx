@@ -128,8 +128,10 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
     'aria-expanded': open ? 'true' : 'false',
   })
 
-  const { PaperProps, ...menuProps } = MenuProps || ({} as any)
-  const { sx: paperSx, ...paperProps } = PaperProps || ({} as any)
+  // MUI v9: PaperProps → slotProps.paper. Accept both for backward compat.
+  const { PaperProps: legacyPaperProps, slotProps: menuSlotProps, ...menuProps } = MenuProps || ({} as any)
+  const resolvedPaperProps = legacyPaperProps ?? menuSlotProps?.paper ?? {}
+  const { sx: paperSx, ...paperProps } = resolvedPaperProps
   const arrowPlacement =
     horizontalOrigin === 'right'
       ? { right: 14 }
@@ -173,8 +175,8 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                 horizontal: horizontalOrigin || 'left',
               }
         }
-        PaperProps={
-          context
+        slotProps={{
+          paper: context
             ? undefined
             : {
                 elevation: 0,
@@ -201,8 +203,8 @@ export const Menu = forwardRef<any, MenuProps>((props, ref) => {
                   paperSx,
                 ),
                 ...paperProps,
-              }
-        }
+              },
+        }}
         // getContentAnchorEl={null}
         open={open}
         onClose={handleClose}
