@@ -38,7 +38,7 @@ import {
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
-import { getThemeModeDisplayName, mergeSxProps, useThemeMode } from '@aglyn/shared-ui-theme'
+import { getThemeModeDisplayName, mergeSxProps } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-tools'
 import { useUserPhoto } from '@aglyn/tenant-feature-instance'
 import {
@@ -55,6 +55,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
+import { useColorScheme } from '@mui/material/styles'
 import { Fragment, useMemo } from 'react'
 import { buildRoute, Route } from '../../constants/route-links'
 import { TOP_BAR_HEIGHT } from '../../constants/shared'
@@ -331,11 +332,8 @@ export function MainLayout(props: MainLayoutProps) {
     ...rest
   } = props
   const userPhotoUrl = useUserPhoto({ gravatar: { size: '64' } })
-  const [[, activeMode], toggleThemeMode, cookieMode] = useThemeMode()
-  // cookieMode is the user's explicit choice (null/'system' = follow device)
-  // activeMode is the resolved effective mode ('light' | 'dark')
-  const displayMode = cookieMode ?? 'system'
-  const themeModeDisplayName = getThemeModeDisplayName(displayMode)
+  const { mode, setMode } = useColorScheme()
+  const themeModeDisplayName = getThemeModeDisplayName(mode)
   const layoutTitle = useMemo(() => {
     return title ? [...(_isArr(title) ? title : [title]), 'Secure'] : 'Secure'
   }, [title])
@@ -402,13 +400,12 @@ export function MainLayout(props: MainLayoutProps) {
               },
               items: [
                 {
-                  onClick: (event) => {
-                    // cycle: system/null → light → dark → system
-                    toggleThemeMode(
-                      event,
-                      cookieMode === 'dark'
+                  onClick: () => {
+                    // cycle: system/undefined → light → dark → system
+                    setMode(
+                      mode === 'dark'
                         ? 'system'
-                        : cookieMode === 'light'
+                        : mode === 'light'
                           ? 'dark'
                           : 'light',
                     )
@@ -417,9 +414,9 @@ export function MainLayout(props: MainLayoutProps) {
                   children: `Theme mode: ${themeModeDisplayName}`,
                   icon: {
                     path:
-                      displayMode === 'dark'
+                      mode === 'dark'
                         ? ICON_VARIANT_THEME_DARK.path
-                        : displayMode === 'light'
+                        : mode === 'light'
                           ? ICON_VARIANT_THEME_LIGHT.path
                           : ICON_VARIANT_THEME_SYSTEM.path,
                   },
