@@ -219,6 +219,15 @@ const AGLYN_CONFIG = {
   eslint: {
     ignoreDuringBuilds: IS_PRODUCTION,
   },
+  /**
+   * Disable the static/dynamic page dev indicator.
+   * In Next.js 16 the handleStaticIndicator function accesses
+   * window.next.router.components before the Pages Router is initialized,
+   * causing a race-condition TypeError on every page load in dev.
+   * Setting this to false compiles out the entire indicator code path.
+   */
+  devIndicators: false,
+
   experimental: {
     workerThreads: true,
 
