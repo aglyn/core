@@ -177,6 +177,7 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
             {...rest}
           />
@@ -188,6 +189,7 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
             {...rest}
           />
@@ -199,6 +201,7 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
             {...rest}
           />
@@ -210,6 +213,7 @@ const AppLink = forwardRef(
             ref={ref}
             className={elemClassName}
             component={NextLink}
+            nativeButton={false}
             hrefTo={href || ''}
             {...rest}
           />

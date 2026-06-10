@@ -78,7 +78,7 @@ const buildNav = (type?: 'icon' | 'text') => (item, i) => {
         }
         {...(!rest.href
           ? {}
-          : { component: AppLink, componentVariant: 'button' })}
+          : { component: AppLink, componentVariant: 'button', nativeButton: false })}
         {...rest}
         sx={mergeSxProps(
           {
