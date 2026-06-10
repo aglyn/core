@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { alpha, styled } from '@aglyn/shared-ui-theme'
+import { styled } from '@aglyn/shared-ui-theme'
 import generateComponentClassKeys from '@aglyn/shared-ui-theme/util/generate-component-class-keys'
 import {
   List as MuiList,
@@ -78,49 +78,28 @@ const List = styled(MuiList)<ListProps>(({ theme }) => ({
         [`& .${classKey.dragHandle}`]: {
           visibility: 'visible',
         },
-        backgroundColor: alpha(
-          theme.palette.secondary.dark,
-          theme.palette.action.hoverOpacity + 0.2,
-        ),
+        backgroundColor: `rgba(${(theme as any).vars.palette.secondary.darkChannel} / calc(${(theme as any).vars.palette.action.hoverOpacity} + 0.2))`,
         [`&:has(> .${listItemButtonClasses.focusVisible})`]: {
-          backgroundColor: alpha(
-            theme.palette.secondary.dark,
-            theme.palette.action.focusOpacity + 0.3,
-          ),
+          backgroundColor: `rgba(${(theme as any).vars.palette.secondary.darkChannel} / calc(${(theme as any).vars.palette.action.focusOpacity} + 0.3))`,
         },
       },
       [`&:has(> .${listItemButtonClasses.focusVisible})`]: {
-        backgroundColor: alpha(
-          theme.palette.secondary.dark,
-          theme.palette.action.focusOpacity + 0.2,
-        ),
+        backgroundColor: `rgba(${(theme as any).vars.palette.secondary.darkChannel} / calc(${(theme as any).vars.palette.action.focusOpacity} + 0.2))`,
       },
     },
     [`&.${listItemClasses.selected}, &.${classKey.itemSelected}`]: {
       [`> .${classKey.treeListItem}`]: {
-        backgroundColor: alpha(
-          theme.palette.tertiary.main,
-          theme.palette.action.selectedOpacity,
-        ),
+        backgroundColor: `rgba(${(theme as any).vars.palette.tertiary.mainChannel} / ${(theme as any).vars.palette.action.selectedOpacity})`,
 
         [`&:hover, &.${classKey.itemHovered}`]: {
-          backgroundColor: alpha(
-            theme.palette.tertiary.main,
-            theme.palette.action.selectedOpacity + 0.2,
-          ),
+          backgroundColor: `rgba(${(theme as any).vars.palette.tertiary.mainChannel} / calc(${(theme as any).vars.palette.action.selectedOpacity} + 0.2))`,
 
           [`&:has(> .${listItemButtonClasses.focusVisible})`]: {
-            backgroundColor: alpha(
-              theme.palette.tertiary.main,
-              theme.palette.action.selectedOpacity + 0.2,
-            ),
+            backgroundColor: `rgba(${(theme as any).vars.palette.tertiary.mainChannel} / calc(${(theme as any).vars.palette.action.selectedOpacity} + 0.2))`,
           },
         },
         [`&:has(> .${listItemButtonClasses.focusVisible})`]: {
-          backgroundColor: alpha(
-            theme.palette.tertiary.main,
-            theme.palette.action.activatedOpacity,
-          ),
+          backgroundColor: `rgba(${(theme as any).vars.palette.tertiary.mainChannel} / ${(theme as any).vars.palette.action.activatedOpacity})`,
         },
       },
     },

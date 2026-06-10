@@ -31,7 +31,7 @@ import {
   ICON_VARIANT_MODIFY_ADD,
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
-import { alpha, mergeSxProps, styled } from '@aglyn/shared-ui-theme'
+import { mergeSxProps, styled } from '@aglyn/shared-ui-theme'
 import {
   getDisplayName,
   numberFromHexadecimal,
@@ -212,11 +212,8 @@ const ElementInfo = function ElementInfo({
                       display: "inline"
                     }, mergeSxProps(
                       (theme) => ({
-                        bgcolor: alpha(theme.palette.secondary.light, 0.18),
-                        border: `1px solid ${alpha(
-                          theme.palette.secondary.light,
-                          0.72,
-                        )}`,
+                        bgcolor: `rgba(${(theme as any).vars.palette.secondary.lightChannel} / 0.18)`,
+                        border: `1px solid rgba(${(theme as any).vars.palette.secondary.lightChannel} / 0.72)`,
                         borderRadius: '0.3em',
                         px: 0.5,
                         py: 0.15,

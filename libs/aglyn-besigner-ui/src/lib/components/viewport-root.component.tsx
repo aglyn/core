@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { alpha, styled } from '@aglyn/shared-ui-theme'
+import { styled } from '@aglyn/shared-ui-theme'
 import type { ComponentProps } from 'react'
 import { forwardRef } from 'react'
 
@@ -36,8 +36,11 @@ const AglynViewport = styled('main', {
   //   rot: '-90deg',
   // }
 
-  const divider = alpha(theme.palette.divider, 0.0312)
-  const dot = alpha(theme.palette.divider, 0.0486)
+  // theme.vars is available from MuiCssVarsProvider; use channel variables so the
+  // colours update when the mode switches without calling alpha() on a CSS-variable string.
+  const t = theme as any
+  const divider = `rgba(${t.vars.palette.dividerChannel} / 0.0312)`
+  const dot = `rgba(${t.vars.palette.dividerChannel} / 0.0486)`
   const minor = theme.spacing(1)
   const major = theme.spacing(12)
 

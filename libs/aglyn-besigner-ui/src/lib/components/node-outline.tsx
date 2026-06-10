@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
-import { alpha, generateComponentClassKeys } from '@aglyn/shared-ui-theme'
+import { generateComponentClassKeys } from '@aglyn/shared-ui-theme'
 import { getElementClientRectBounding } from '@aglyn/shared-util-dom'
 import { styled } from '@mui/material'
 import clsx from 'clsx'
@@ -66,19 +66,19 @@ const NodeOutlineRoot = styled('div', {
   },
   [`&.${classKeys.hoveringSelf}`]: {
     outlineColor: theme.palette.secondary.main,
-    backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+    backgroundColor: `rgba(${(theme as any).vars.palette.secondary.mainChannel} / 0.12)`,
   },
   [`&.${classKeys.draggingSelf}`]: {
     outlineColor: 'transparent',
-    backgroundColor: alpha(theme.palette.secondary.light, 0.12),
+    backgroundColor: `rgba(${(theme as any).vars.palette.secondary.lightChannel} / 0.12)`,
   },
   [`&.${classKeys.draggingOver}`]: {
     outlineColor: theme.palette.tertiary.main,
-    backgroundColor: alpha(theme.palette.tertiary.dark, 0.12),
+    backgroundColor: `rgba(${(theme as any).vars.palette.tertiary.darkChannel} / 0.12)`,
   },
   [`&.${classKeys.draggingOver}.${classKeys.draggingSelf}`]: {
     outlineColor: theme.palette.grey['500'],
-    backgroundColor: alpha(theme.palette.grey['500'], 0.64),
+    backgroundColor: 'rgba(158 158 158 / 0.64)',
   },
 }))
 

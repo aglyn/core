@@ -30,7 +30,6 @@ import {
 } from '@aglyn/shared-data-enums'
 import MdiIcon from '@aglyn/shared-ui-jsx/components/mdi-icon/mdi-icon'
 import {
-  alpha,
   Divider,
   ListItemIcon,
   ListItemText,
@@ -145,7 +144,7 @@ export const NodeContextMenu = observer(
             mb={1}
             sx={{
               backgroundColor: (theme) =>
-                alpha(theme.palette.primary.dark, 0.12),
+                `rgba(${(theme as any).vars.palette.primary.darkChannel} / 0.12)`,
             }}
           >
             {node?.labelShort}
