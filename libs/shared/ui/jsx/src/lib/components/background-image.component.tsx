@@ -33,6 +33,10 @@ export type BackgroundImageComponentProps = MuiBoxProps<any, OverrideProps>
 export const BackgroundImageComponent = styled('div', {
   name: 'BackgroundImage',
   shouldForwardProp(propName) {
+    // Exclude both this component's custom props and MUI system props (sx,
+    // ownerState, theme, as) so they are not forwarded to the DOM element.
+    // A custom shouldForwardProp replaces the MUI default filter entirely,
+    // so system props must be excluded explicitly to avoid React DOM warnings.
     return !_isEqualitySameType(
       propName,
       null,
@@ -41,6 +45,8 @@ export const BackgroundImageComponent = styled('div', {
       'bgPosition',
       'bgSize',
       'bgRepeat',
+      'sx',
+      'ownerState',
     )
   },
 })<BackgroundImageComponentProps>(
