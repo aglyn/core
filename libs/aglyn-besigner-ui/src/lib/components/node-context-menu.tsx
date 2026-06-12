@@ -136,13 +136,15 @@ export const NodeContextMenu = observer(
             variant="caption"
             color="text.secondary"
             align="center"
-            textOverflow="ellipsis"
             component="div"
             bgcolor="primary.dark"
             px={1}
             py={0.15}
             mb={1}
             sx={{
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
               backgroundColor: (theme) =>
                 `rgba(${(theme as any).vars.palette.primary.darkChannel} / 0.12)`,
             }}

@@ -113,17 +113,25 @@ function Hosts() {
                       ),
                       slotProps: {
                         title: {
-                          textOverflow: 'ellipsis',
                           // variant: 'h6',
                           noWrap: true,
-                          fontSize: ({ typography }) =>
-                            typography.subtitle1.fontSize,
-                          fontWeight: ({ typography }) =>
-                            typography.h6.fontWeight,
+                          sx: {
+                            // Function callbacks and textOverflow must live
+                            // inside sx — passing them as direct Typography
+                            // props causes React DOM attribute warnings in v9.
+                            textOverflow: 'ellipsis',
+                            overflow: 'hidden',
+                            fontSize: ({ typography }) =>
+                              typography.subtitle1.fontSize,
+                            fontWeight: ({ typography }) =>
+                              typography.h6.fontWeight,
+                          },
                         },
                         subheader: {
-                          fontSize: ({ typography }) =>
-                            typography.caption.fontSize,
+                          sx: {
+                            fontSize: ({ typography }) =>
+                              typography.caption.fontSize,
+                          },
                         },
                       },
                     }}
