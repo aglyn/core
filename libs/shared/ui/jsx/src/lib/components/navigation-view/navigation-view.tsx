@@ -167,15 +167,10 @@ export const NavigationView = forwardRef<any, NavigationViewProps>(
                 direction="row"
                 className={classKeys.appBarLeft}
                 {...AppBarLeftProps}
-                sx={[
-                  {
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                  },
-                  ...(Array.isArray(AppBarLeftProps?.sx)
-                    ? AppBarLeftProps.sx
-                    : [AppBarLeftProps?.sx]),
-                ]}
+                sx={mergeSxProps(
+                  { alignItems: 'center', justifyContent: 'flex-start' },
+                  AppBarLeftProps?.sx,
+                )}
               >
                 {appBarLeft}
               </Stack>
@@ -183,15 +178,10 @@ export const NavigationView = forwardRef<any, NavigationViewProps>(
                 direction="row"
                 className={classKeys.appBarRight}
                 {...AppBarRightProps}
-                sx={[
-                  {
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                  },
-                  ...(Array.isArray(AppBarRightProps?.sx)
-                    ? AppBarRightProps.sx
-                    : [AppBarRightProps?.sx]),
-                ]}
+                sx={mergeSxProps(
+                  { alignItems: 'center', justifyContent: 'flex-start' },
+                  AppBarRightProps?.sx,
+                )}
               >
                 {appBarRight}
               </Stack>
@@ -205,7 +195,7 @@ export const NavigationView = forwardRef<any, NavigationViewProps>(
           direction="column"
           className={classKeys.content}
           {...ContentProps}
-          sx={[
+          sx={mergeSxProps(
             {
               overflow: 'auto',
               flexGrow: 1,
@@ -214,10 +204,8 @@ export const NavigationView = forwardRef<any, NavigationViewProps>(
               bgcolor: 'background.default',
               zIndex: 1,
             },
-            ...(Array.isArray(ContentProps?.sx)
-              ? ContentProps.sx
-              : [ContentProps?.sx]),
-          ]}
+            ContentProps?.sx,
+          )}
         >
           {children}
         </Stack>
