@@ -10,6 +10,25 @@ index 590c657..7691712 100644
      className: clsx(classes.grid, className)
    }, props), children);
  };
+diff --git a/node_modules/@data-driven-forms/mui-component-mapper/esm/text-field/text-field.js b/node_modules/@data-driven-forms/mui-component-mapper/esm/text-field/text-field.js
+index d9c3070..9ba877c 100644
+--- a/node_modules/@data-driven-forms/mui-component-mapper/esm/text-field/text-field.js
++++ b/node_modules/@data-driven-forms/mui-component-mapper/esm/text-field/text-field.js
+@@ -40,9 +40,11 @@ var TextField = function TextField(props) {
+     label: label,
+     placeholder: placeholder,
+     required: isRequired,
+-    inputProps: _objectSpread({
+-      readOnly: isReadOnly
+-    }, inputProps)
++    slotProps: {
++      input: _objectSpread({
++        readOnly: isReadOnly
++      }, inputProps)
++    }
+   }, rest)));
+ };
+ 
 diff --git a/node_modules/@data-driven-forms/mui-component-mapper/form-field-grid/form-field-grid.js b/node_modules/@data-driven-forms/mui-component-mapper/form-field-grid/form-field-grid.js
 index 13f0e9c..bf72322 100644
 --- a/node_modules/@data-driven-forms/mui-component-mapper/form-field-grid/form-field-grid.js
@@ -22,3 +41,22 @@ index 13f0e9c..bf72322 100644
      className: (0, _clsx["default"])(classes.grid, className)
    }, props), children);
  };
+diff --git a/node_modules/@data-driven-forms/mui-component-mapper/text-field/text-field.js b/node_modules/@data-driven-forms/mui-component-mapper/text-field/text-field.js
+index ed923e5..a2ba46e 100644
+--- a/node_modules/@data-driven-forms/mui-component-mapper/text-field/text-field.js
++++ b/node_modules/@data-driven-forms/mui-component-mapper/text-field/text-field.js
+@@ -58,9 +58,11 @@ var TextField = function TextField(props) {
+     label: label,
+     placeholder: placeholder,
+     required: isRequired,
+-    inputProps: _objectSpread({
+-      readOnly: isReadOnly
+-    }, inputProps)
++    slotProps: {
++      input: _objectSpread({
++        readOnly: isReadOnly
++      }, inputProps)
++    }
+   }, rest)));
+ };
+ 
