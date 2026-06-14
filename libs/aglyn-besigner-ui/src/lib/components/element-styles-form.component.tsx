@@ -120,8 +120,7 @@ const stylesSchema = (presetColors) => ({
       description: 'The text color of the element',
       presetColors,
       FormFieldGridProps: {
-        xs: 12,
-        sm: 6,
+        size: { xs: 12, sm: 6 },
       },
     },
     {
@@ -131,8 +130,7 @@ const stylesSchema = (presetColors) => ({
       description: 'The background color of the element',
       presetColors,
       FormFieldGridProps: {
-        xs: 12,
-        sm: 6,
+        size: { xs: 12, sm: 6 },
       },
     },
     {
