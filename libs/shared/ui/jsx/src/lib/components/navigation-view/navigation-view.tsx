@@ -145,7 +145,6 @@ export const NavigationView = forwardRef<any, NavigationViewProps>(
             overflow: 'hidden',
           },
           sx,
-          rest.sx,
         )}
       >
         <NavigationAppBar
