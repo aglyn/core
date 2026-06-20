@@ -36,7 +36,7 @@ async function handler(request: NextApiRequest, response: NextApiResponse) {
   let error = null
   // Start listing users from the beginning, 1000 at a time.
   try {
-    data = await getHost(host as string)
+    data = await getHost({ host: host as string })
     if (data?.error) error = data?.error
   } catch (err) {
     // eslint-disable-next-line no-console
