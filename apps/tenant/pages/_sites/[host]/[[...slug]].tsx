@@ -21,7 +21,7 @@ import '@aglyn/aglyn-plugin-mui'
 import { doc } from 'firebase/firestore'
 import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
-import { useMemo } from 'react'
+import { useEffect } from 'react'
 import { useFirestore, useFirestoreDocData } from 'reactfire'
 import getHost from '../../../utils/get-host'
 import getScreen from '../../../utils/get-screen'
@@ -147,7 +147,6 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 
     const nodes = versionRes.version.nodes
     const denormalized = Aglyn.canvas.processNodesToDenormalized(nodes)
-    Aglyn.canvas.setNodes(denormalized)
 
     const props = {
       data: JSON.parse(
@@ -182,8 +181,8 @@ export default function CatchAllPage(props: Props) {
 
   console.log('!!!!!CatchAllPage', props)
 
-  const rendered = useMemo(() => {
-    return Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: nodes })
+  useEffect(() => {
+    Aglyn.emitter.emit(Aglyn.AglynEvent.NODE_SET_ITEMS, { nodes: nodes })
   }, [nodes])
 
   return (
