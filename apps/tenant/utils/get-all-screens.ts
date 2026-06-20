@@ -25,8 +25,9 @@ export async function getAllScreens(
   const data = { screens: [] as any, nextPageToken: '', error: null }
   const firestore = firebaseAdmin.app().firestore()
 
-  // List batch of users, 1000 at a time.
   await firestore
+    .collection('hosts')
+    .doc(host)
     .collection('screens')
     .where('status', '==', Aglyn.HostScreenStatus.PUBLISHED)
     .limit(5)
