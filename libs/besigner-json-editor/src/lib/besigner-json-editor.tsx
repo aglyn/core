@@ -29,7 +29,6 @@ import {
   DialogTitle,
   IconButton,
 } from '@mui/material'
-import { toJS } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import dynamic from 'next/dynamic'
 import {
@@ -104,12 +103,6 @@ const BesignerJsonEditorRaw = forwardRef<any, BesignerJsonEditorProps>(
         handleClose(event, 'saveClick')
       },
       [onSave, handleClose, parsedValue],
-    )
-
-    console.log(
-      'BesignerJsonEditor',
-      Aglyn.canvas.toJSON(),
-      JSON.stringify({ ...toJS(Aglyn.canvas.nestedNodes) }, null, 2),
     )
 
     return (
