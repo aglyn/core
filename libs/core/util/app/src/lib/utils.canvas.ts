@@ -84,7 +84,7 @@ export const handleCanvasAddElement = (
 ): AglynNodesById => {
   const { index, element } = payload
   let parentId: NodeId = null
-  if (_hasOwnProperty(payload.parentId, state)) {
+  if (_hasOwnProperty(state, payload.parentId)) {
     parentId = payload.parentId
   } else {
     console.error('Element must have a valid parent, falling back to root')
@@ -140,7 +140,7 @@ export const handleCanvasMoveElement = (
   }
 
   let parentId: NodeId = null
-  if (_hasOwnProperty(payload.parentId, state)) parentId = payload.parentId
+  if (_hasOwnProperty(state, payload.parentId)) parentId = payload.parentId
   else {
     console.error('Element must have a valid parent, falling back to root')
     parentId = CANVAS_ROOT_ELEMENT_ID
