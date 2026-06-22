@@ -42,10 +42,10 @@ export const presets: Aglyn.PresetSchema[] = [
   {
     type: 'preset',
     $id: GeneratePresetId(ID),
-    displayName: 'Toolbar (Complete)',
+    displayName: 'App Bar',
     pluginId: PLUGIN_ID,
-    description: 'A toolbar preset with the app bar and toolbar content nodes',
-    category: ComponentCategory.DATA_DISPLAY,
+    description: 'An app bar preset with the app bar and toolbar content nodes',
+    category: ComponentCategory.SURFACE,
     icon: schema.icon,
     data: {
       $id: null,
