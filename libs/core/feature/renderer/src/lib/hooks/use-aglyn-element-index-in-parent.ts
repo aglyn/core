@@ -48,4 +48,4 @@ export function useAglynElementIndexInParent(
     [index, isFirst, isLast, parentId, elements],
   )
 }
-export default useAglynElementData
+export default useAglynElementIndexInParent
