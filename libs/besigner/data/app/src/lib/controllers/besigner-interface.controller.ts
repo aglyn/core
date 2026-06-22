@@ -232,7 +232,7 @@ export class BesignerInterfaceController
     const prev = this.__store__?.canvas?.getValue()
     const prevItem = prev?.[item]
     const nowItem = value(prevItem, prev)
-    const now = { ...prev, [item]: value(prev?.[item], prev) }
+    const now = { ...prev, [item]: nowItem }
     !this.isDeepEqual(prevItem, nowItem) && this.__store__?.canvas?.next(now)
     return this
   }
