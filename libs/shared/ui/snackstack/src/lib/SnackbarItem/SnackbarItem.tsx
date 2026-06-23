@@ -154,7 +154,7 @@ const SnackbarItem = forwardRef<any, SnackbarItemProps>((props, ref) => {
 
   const handleEntered: TransitionHandlerProps['onEntered'] = () => {
     if (rest.snack.requestClose) {
-      handleClose(null, REASONS.INSTRCUTED)
+      handleClose(null, REASONS.INSTRUCTED)
     }
   }
 
