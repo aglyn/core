@@ -114,7 +114,7 @@ export function setPanel(panel: PanelSchema): PanelSchema {
 }
 
 export function deletePanel($id: PanelId): boolean {
-  if ($id) return
+  if (!$id) return false
   return runInAction(() => {
     return state.panels.delete($id)
   })
