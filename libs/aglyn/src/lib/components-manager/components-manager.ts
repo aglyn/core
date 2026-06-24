@@ -110,7 +110,7 @@ export class ComponentManager {
     return this.schemas[id]
   })
   public getPreset = computedFn((id: PresetId) => {
-    return this.schemas[id]
+    return this.presets[id]
   })
   public getLabel = computedFn((id: ComponentId) => {
     const schema = this.schemas[id]
