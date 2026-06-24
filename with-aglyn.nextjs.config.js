@@ -492,8 +492,8 @@ function withAglyn(nextConfig = {}) {
           )
         }
 
-        if (typeof merged.webpack === 'function') {
-          return merged.webpack(config, options)
+        if (typeof userConfig.webpack === 'function') {
+          return userConfig.webpack(config, options)
         }
 
         return config
