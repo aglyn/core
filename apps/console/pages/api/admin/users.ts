@@ -40,7 +40,7 @@ const getAllUsers = async (nextPageToken?: string) => {
   await firebaseAdmin
     .app()
     .auth()
-    .listUsers(5, nextPageToken)
+    .listUsers(1000, nextPageToken)
     .then((listUsersResult) => {
       listUsersResult.users.forEach((userRecord) => {
         data.users.push(userRecord.toJSON())
