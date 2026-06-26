@@ -42,7 +42,7 @@ const useStyles = makeStyles<Theme, Props>((theme: Theme) =>
 
 const buildOption = (option: Fields.Option, key?: any) => (
   <MenuItem
-    key={item.key ?? item.id ?? key}
+    key={key}
     value={option.value}
     children={option.label}
   />
