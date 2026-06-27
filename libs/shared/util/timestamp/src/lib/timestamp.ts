@@ -44,12 +44,12 @@ export enum TimeExchange {
   SEC_TO_WK = 6.048e5,
   SEC_TO_MO = 2.628e6,
   SEC_TO_YR = 3.154e7,
-  MIN_TO_SEC = 6e-1,
-  HR_TO_SEC = 3.6e-3,
-  DY_TO_SEC = 8.64e-4,
-  WK_TO_SEC = 6.048e-5,
-  MO_TO_SEC = 2.628e-6,
-  YR_TO_SEC = 3.154e-7,
+  MIN_TO_SEC = 1.6667e-2,
+  HR_TO_SEC = 2.7778e-4,
+  DY_TO_SEC = 1.1574e-5,
+  WK_TO_SEC = 1.6534e-6,
+  MO_TO_SEC = 3.8052e-7,
+  YR_TO_SEC = 3.1710e-8,
 }
 
 export interface ITimestamp extends FirestoreTimestamp {}
