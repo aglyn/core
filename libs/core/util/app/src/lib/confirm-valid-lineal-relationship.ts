@@ -22,11 +22,11 @@ export enum InvalidLinealRelationFlag {
   DISALLOW = 0x01,
   LIMIT_TO = 0x02,
 
-  ITEM = 0x03,
-  PARENT = 0x04,
+  ITEM = 0x04,
+  PARENT = 0x08,
 
-  COMPONENT = 0x05,
-  BUNDLE = 0x06,
+  COMPONENT = 0x10,
+  BUNDLE = 0x20,
 
   DISALLOW_COMPONENT = DISALLOW | COMPONENT,
   DISALLOW_BUNDLE = DISALLOW | BUNDLE,
