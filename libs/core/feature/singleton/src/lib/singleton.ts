@@ -32,7 +32,6 @@ declare global {
 let Aglyn = globalThis.Aglyn
 if (!Aglyn) {
   Aglyn = globalThis.Aglyn = initializeApp({})
-  console.log('set global Aglyn', Aglyn, globalThis)
 }
 
 export { Aglyn }
