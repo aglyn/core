@@ -90,7 +90,7 @@ export const ComponentsGridListComponent = forwardRef<
           component={ButtonBase}
           onClick={(e) => handleOnActionClick(e, item)}
           label={item?.label}
-          icon={item?.icon}
+          icon={item?.icon as any}
           item={{ id: item?.$id, ...item } as any}
         />
       )

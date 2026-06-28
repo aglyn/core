@@ -360,7 +360,7 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
           label: 'Styles',
         },
         panel: {
-          Component: withLastSelectedNode(ElementStylesForm),
+          Component: withLastSelectedNode(ElementStylesForm as any),
         },
       },
     ],

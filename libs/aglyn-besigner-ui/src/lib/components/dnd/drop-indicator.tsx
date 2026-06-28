@@ -92,31 +92,31 @@ export const DropIndicator = forwardRef<HTMLDivElement, DropIndicatorProps>(
         left: rect.left - handleHalf,
         top: rect.top - handleHalf,
         height: rect.height + handleW,
-        width: null,
+        width: undefined,
       },
       [Besigner.DropRegion.TOP]: {
         left: rect.left - handleHalf,
         top: rect.top - handleHalf,
         width: rect.width + handleW,
-        height: null,
+        height: undefined,
       },
       [Besigner.DropRegion.RIGHT]: {
         left: rect.left + rect.width - handleHalf,
         top: rect.top - handleHalf,
         height: rect.height + handleW,
-        width: null,
+        width: undefined,
       },
       [Besigner.DropRegion.BOTTOM]: {
         left: rect.left - handleHalf,
         top: rect.top + rect.height - handleHalf,
         width: rect.width + handleW,
-        height: null,
+        height: undefined,
       },
       [Besigner.DropRegion.CHILDREN]: {
         left: rect.left + handleHalf,
         top: rect.top + rect.height / 2 - handleHalf,
         width: rect.width - handleW,
-        height: null,
+        height: undefined,
       },
     }
 

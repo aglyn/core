@@ -20,7 +20,7 @@ import * as Besigner from '@aglyn/besigner'
 import { useDraggable } from '@dnd-kit/core'
 
 export type NodeDragItem = {
-  node?: Aglyn.AbstractNodeSchema
+  node?: Aglyn.NodeSchema<any>
 }
 
 export function useLeafDrag(
