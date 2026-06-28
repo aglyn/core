@@ -87,7 +87,7 @@ const WorkspaceEditorComponent = forwardRef<any, WorkspaceEditorComponentProps>(
       className,
     )
 
-    const pannerRef = useRef<any>()
+    const pannerRef = useRef<any>(null)
 
     const handleZoomReset = useCallback((e: ChangeEvent<unknown>) => {
       if (_isFnT(pannerRef.current?.reset)) {
