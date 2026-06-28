@@ -135,13 +135,13 @@ export const NodeContextMenu = observer(
           <Typography
             variant="caption"
             color="text.secondary"
-            align="center"
             component="div"
             bgcolor="primary.dark"
             px={1}
             py={0.15}
             mb={1}
             sx={{
+              textAlign: 'center',
               textOverflow: 'ellipsis',
               overflow: 'hidden',
               whiteSpace: 'nowrap',
