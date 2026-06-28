@@ -16,7 +16,12 @@
  */
 
 import { DoD } from '@aglyn/shared-data-types'
-import { MdiIcon, mdiPlus } from '@aglyn/shared-ui-jsx'
+import {
+  mdiPlus,
+} from '@aglyn/shared-data-mdi'
+import {
+  MdiIcon,
+} from '@aglyn/shared-ui-jsx'
 import { useCallback } from 'react'
 import { Components, FieldPreset } from '../lib/input-fields'
 import FormFields, { Props as FormFieldsProps } from './FormFields'

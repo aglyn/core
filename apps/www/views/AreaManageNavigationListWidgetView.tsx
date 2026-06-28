@@ -16,8 +16,16 @@
  */
 
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
-import { AppLink } from '@aglyn/shared-ui-jsx'
-import { mdiChevronDown, mdiChevronUp, MdiIcon } from '@aglyn/shared-ui-jsx'
+import {
+  AppLink,
+} from '@aglyn/shared-ui-jsx'
+import {
+  mdiChevronDown,
+  mdiChevronUp,
+} from '@aglyn/shared-data-mdi'
+import {
+  MdiIcon,
+} from '@aglyn/shared-ui-jsx'
 import {
   Collapse,
   IconButton,

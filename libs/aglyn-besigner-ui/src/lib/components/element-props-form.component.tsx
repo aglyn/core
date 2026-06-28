@@ -24,7 +24,12 @@ import {
   simpleComponentMapper,
   useFormApi,
 } from '@aglyn/shared-ui-jsx-forms'
-import { mdiContentSave, MdiIcon } from '@aglyn/shared-ui-jsx'
+import {
+  mdiContentSave,
+} from '@aglyn/shared-data-mdi'
+import {
+  MdiIcon,
+} from '@aglyn/shared-ui-jsx'
 import { NoSsr } from '@mui/material'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'

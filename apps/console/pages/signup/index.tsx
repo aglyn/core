@@ -24,10 +24,18 @@ import {
   FIELD_SCHEMA_PASSWORD,
   FIELD_SCHEMA_PASSWORD_CONFIRM,
 } from '@aglyn/shared-data-forms'
-import { AppLink, useLoading } from '@aglyn/shared-ui-jsx'
+import {
+  AppLink,
+  useLoading,
+} from '@aglyn/shared-ui-jsx'
 import type { FormSchema } from '@aglyn/shared-ui-jsx-forms'
 import { FormRenderer, simpleComponentMapper } from '@aglyn/shared-ui-jsx-forms'
-import { mdiGoogle, MdiIcon } from '@aglyn/shared-ui-jsx'
+import {
+  mdiGoogle,
+} from '@aglyn/shared-data-mdi'
+import {
+  MdiIcon,
+} from '@aglyn/shared-ui-jsx'
 import { useNextPageTitle } from '@aglyn/shared-ui-next'
 import { Button, Divider, Stack, Typography } from '@mui/material'
 import { logEvent } from 'firebase/analytics'

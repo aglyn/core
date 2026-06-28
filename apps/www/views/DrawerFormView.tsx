@@ -15,8 +15,15 @@
  * limitations under the License.
  */
 
-import { NavigationDrawerComponent } from '@aglyn/shared-ui-jsx'
-import { mdiClose, MdiIcon } from '@aglyn/shared-ui-jsx'
+import {
+  NavigationDrawerComponent,
+} from '@aglyn/shared-ui-jsx'
+import {
+  mdiClose,
+} from '@aglyn/shared-data-mdi'
+import {
+  MdiIcon,
+} from '@aglyn/shared-ui-jsx'
 import { alpha, createStyles, withStyles } from '@aglyn/shared-ui-theme'
 import { _isStrT } from '@aglyn/shared-util-tools'
 import { objectRemap } from '@aglyn/shared-util-tools'
