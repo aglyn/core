@@ -19,10 +19,10 @@ import * as Aglyn from '@aglyn/aglyn'
 import { decode, encode } from '@msgpack/msgpack'
 import * as firebaseAdmin from 'firebase-admin'
 
-function compress(value) {
+function compress(value: any) {
   return Buffer.from(encode(value))
 }
-function decompress(value) {
+function decompress(value: any) {
   return decode(value)
 }
 
