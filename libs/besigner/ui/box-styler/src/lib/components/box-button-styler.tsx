@@ -23,7 +23,7 @@ import { type ComponentProps, forwardRef, useCallback, useState } from 'react'
 import type { Measurements } from '../types'
 import Legend, { LegendItem } from './legend'
 
-export { Measurements }
+export type { Measurements }
 
 const GAP = 2
 const BTN_SIZE = 20
