@@ -25,7 +25,7 @@ import MarginStyler from './components/margin-styler'
 import PaddingStyler from './components/padding-styler'
 import type { Measurements } from './types'
 
-export { Measurements }
+export type { Measurements }
 
 const BTN_SIZE = 20
 const HEIGHT = 200
