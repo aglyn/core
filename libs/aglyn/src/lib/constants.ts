@@ -17,7 +17,8 @@
 
 import { customAlphabet, urlAlphabet } from 'nanoid'
 
-const pkg = require('../../package.json')
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pkg = require('../../package.json') as { version: string; name: string }
 
 export const version = pkg.version
 export const namespace = pkg.name
