@@ -28,7 +28,7 @@ export interface TreeProps {
   renderLeaf?: (leaf: LeafType) => JSX.Node
 }
 
-const defaultRenderLeaf = (leaf) => <LeafComponent key={leaf.id} data={leaf} />
+const defaultRenderLeaf = (leaf: LeafType) => <LeafComponent key={leaf.id} data={leaf} />
 
 export const TreeComponent = forwardRef<any, TreeProps>((props, ref) => {
   const { leafs = [], renderLeaf = defaultRenderLeaf } = props
