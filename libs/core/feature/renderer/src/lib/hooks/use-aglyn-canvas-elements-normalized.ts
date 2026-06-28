@@ -22,6 +22,6 @@ import { useAglynAppContext } from '../contexts/aglyn-app-context'
 
 export function useAglynCanvasElementsNormalized(): AglynNodesList {
   const app = useAglynAppContext()
-  return useSubscribable(getCanvasNormalizedNodesStore(app))
+  return useSubscribable(getCanvasNormalizedNodesStore(app)) as AglynNodesList
 }
 export default useAglynCanvasElementsNormalized
