@@ -69,18 +69,6 @@ const c5 = createAglynComponent(
     $id: 'sample-element-4',
     displayName: 'Sample Element 4',
     title: 'Sample Element 4',
-    presets: [
-      {
-        $id: 'sample-element-4',
-        label: 'Sample Element 4',
-        data: {
-          componentId: 'sample-element-4',
-          props: {
-            children: 'Sample Element 4',
-          },
-        },
-      },
-    ],
   },
   'div',
 )
