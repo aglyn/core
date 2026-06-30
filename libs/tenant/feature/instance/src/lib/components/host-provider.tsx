@@ -17,7 +17,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { createContext, useContext } from 'react'
+import { createContext, type ReactNode, useContext } from 'react'
 import useHost from '../hooks/use-host'
 
 export const HostContext = createContext<ReturnType<typeof useHost>>(null)
@@ -26,7 +26,7 @@ export const useHostContext = () => {
   return useContext(HostContext)
 }
 
-export function HostProvider({ children }) {
+export function HostProvider({ children }: { children: ReactNode }) {
   const params = useParams<{ hostId: string }>()
   const hostId = params?.hostId
   const $doc = useHost({ hostId: hostId ?? '__no_host__' }, { suspense: true })

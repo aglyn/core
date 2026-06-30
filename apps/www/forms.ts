@@ -277,7 +277,7 @@ export namespace DdfForms {
   }
 }
 
-export const validateRegex = (value: string, regex) =>
+export const validateRegex = (value: string, regex: string | RegExp) =>
   new RegExp(regex).test(value)
 export const fieldHasError = (field: Fields.FieldT) =>
   Boolean(field.status & Fields.FieldStatus.ERROR)
