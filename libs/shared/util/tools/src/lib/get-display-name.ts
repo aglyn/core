@@ -27,14 +27,14 @@ export const getPureFunctionName = (fn: any) => {
 /**
  *
  */
-export const getFunctionComponentName = (Component: any, fallback = 'fn') => (
+export const getFunctionComponentName = (Component: { displayName?: string; name?: string }, fallback = 'fn') => (
   Component.displayName
   || Component.name
   || getPureFunctionName(Component)
   || fallback
 )
 
-export const getWrappedComponentName = (outerType: any, innerType: any, wrapperName: any) => {
+export const getWrappedComponentName = (outerType: { displayName?: string }, innerType: { displayName?: string; name?: string }, wrapperName: string) => {
   const functionName = getFunctionComponentName(innerType)
   return (
     outerType.displayName
