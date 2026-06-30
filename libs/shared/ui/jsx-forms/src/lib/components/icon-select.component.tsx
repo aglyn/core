@@ -168,7 +168,7 @@ const IconSelectComponent = forwardRef<any, IconSelectProps>((props, ref) => {
     function RenderItemContent(item: Icon, key: number) {
       return (
         <Tooltip
-          key={item.key ?? item.id ?? key}
+          key={item.id ?? key}
           title={item.name}
           disableInteractive
           enterDelay={375}
