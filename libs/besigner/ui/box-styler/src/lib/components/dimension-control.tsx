@@ -50,41 +50,41 @@ export const DimensionControl = observer((props: DimensionControlProps) => {
   const [parsed, setParsed] = useState(buildLocalValue(dimension))
   useEffect(() => setParsed(buildLocalValue(dimension)), [dimension])
   const [menuOpen, setMenuOpen] = useState(false)
-  const [iconRef, setIconRef] = useState<any>()
-  const [btnRef, setBtnRef] = useState<any>()
+  const [iconRef, setIconRef] = useState<HTMLButtonElement | null>(null)
+  const [btnRef, setBtnRef] = useState<HTMLButtonElement | null>(null)
   const toggleMenu = () => setMenuOpen((prev) => !prev)
   const handleChange = useCallback(
-    (type: 'quantity' | 'unit') => (newValue: any) => {
-      const res: any = {
+    (type: 'quantity' | 'unit') => (newValue: string) => {
+      const res: { raw?: string; value?: number; unit?: CssUnit } = {
         raw: undefined,
-        quantity: undefined,
+        value: undefined,
         unit: undefined,
       }
       switch (true) {
         case type === 'unit' && isGlobalUnit(newValue):
           res.raw = `${newValue}`
-          res.quantity = undefined
-          res.unit = newValue
+          res.value = undefined
+          res.unit = newValue as CssUnit
           break
         case type === 'unit' && !newValue:
           res.raw = undefined
-          res.quantity = undefined
+          res.value = undefined
           res.unit = undefined
           break
         case type === 'unit':
           res.raw = buildCssMeasurement({
             value: parsed.value,
-            unit: newValue,
+            unit: newValue as CssUnit,
           })
-          res.quantity = parsed.value
-          res.unit = newValue
+          res.value = parsed.value
+          res.unit = newValue as CssUnit
           break
         default:
           res.raw = buildCssMeasurement({
-            value: newValue,
+            value: Number(newValue),
             unit: parsed.unit,
           })
-          res.quantity = newValue
+          res.value = Number(newValue)
           res.unit = parsed.unit
           break
       }
