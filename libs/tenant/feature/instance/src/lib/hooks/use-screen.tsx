@@ -25,7 +25,7 @@ import {
 import { ReactFireOptions, useFirestore } from 'reactfire'
 import useDoc from './helpers/use-doc'
 
-export const useScreenRef = ({ hostId, screenId }) => {
+export const useScreenRef = ({ hostId, screenId }: { hostId: Aglyn.HostUid; screenId: Aglyn.ScreenUid }) => {
   const firestore = useFirestore()
   const ref = doc(firestore, 'hosts', hostId, 'screens', screenId)
   return ref.withConverter({
