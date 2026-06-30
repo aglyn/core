@@ -52,13 +52,13 @@ const Snackbar = forwardRef<any, SnackbarProps>((props, ref) => {
 
   const timerAutoHide = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  const handleClose = useEventCallback((...args) => {
+  const handleClose = useEventCallback((...args: any[]) => {
     if (onClose) {
       onClose(...args)
     }
   })
 
-  const setAutoHideTimer = useEventCallback((autoHideDurationParam) => {
+  const setAutoHideTimer = useEventCallback((autoHideDurationParam: number) => {
     if (!onClose || autoHideDurationParam == null) {
       return
     }

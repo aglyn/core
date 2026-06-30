@@ -26,7 +26,7 @@ export default function useEventCallback(fn: (...args: any[]) => any) {
     ref.current = fn
   })
   return useCallback(
-    (...args) => (0, ref.current)(...args),
+    (...args: any[]) => (0, ref.current)(...args),
     [],
   )
 }
