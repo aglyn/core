@@ -65,7 +65,7 @@ const Draggable = observer(
         ? {
             outlineColor: 'grey',
             outlineStyle: 'double',
-            outlineOffset: -1 as any,
+            outlineOffset: '-1px',
             opacity: 0.5,
             cursor: 'move',
           }
