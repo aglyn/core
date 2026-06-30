@@ -386,7 +386,7 @@ export const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(
     const value = tab || defaultTab
 
     const handleTabChange = useCallback(
-      (e, val) => {
+      (e: SyntheticEvent, val: string) => {
         setPanel((panel) => ({ ...panel, tab: numberFromHexadecimal(val) }))
       },
       [setPanel],
