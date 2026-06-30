@@ -247,7 +247,7 @@ export const ComponentPicker = observer(
                   {() => (
                     <Box>
                       <Grid spacing={3} container sx={{ overflowX: 'hidden' }}>
-                        {item?.items?.map((node: any, index) => (
+                        {item?.items?.map((node: typeof allItems[number]['items'][number], index: number) => (
                           <Observer key={node?.$id ?? index}>
                             {() => (
                               <Grid
