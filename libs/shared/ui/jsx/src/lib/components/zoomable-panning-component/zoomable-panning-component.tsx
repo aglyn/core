@@ -266,7 +266,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
 
     // if using noStateUpdate we still need to set the new values in the state
     if (noStateUpdate) {
-      this.setState(({x: this.prevPanPosition.x, y: this.prevPanPosition.y}))
+      this.setState({x: this.prevPanPosition.x, y: this.prevPanPosition.y})
     }
 
     this.triggerOnPanEnd(e)
@@ -460,7 +460,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
     else {
       const {noStateUpdate} = this.props
       if (noStateUpdate) {
-        this.setState(({x: this.prevPanPosition.x, y: this.prevPanPosition.y}))
+        this.setState({x: this.prevPanPosition.x, y: this.prevPanPosition.y})
       }
 
       this.touchInProgress = false
@@ -638,10 +638,10 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
       const {x: transformX, y: transformY} = this.getTransformMatrix(x + dx, y + dy, scale, angle)
       const {boundX, boundY} = this.getBoundCoordinates({x: transformX, y: transformY}, {angle, scale, offsetX: x + dx, offsetY: y + dy})
 
-      this.setState(({
+      this.setState({
         x: x + dx - (transformX - boundX),
         y: y + dy - (transformY - boundY),
-      }))
+      })
     }
   }
 
