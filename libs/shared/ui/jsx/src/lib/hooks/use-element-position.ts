@@ -72,9 +72,9 @@ function getPosition(el: any) {
     if (offsetParent && offsetParent !== el && offsetParent.nodeType === 1) {
       parentOffset = getOffset(offsetParent as HTMLElement)
       parentOffset.top +=
-        parseInt(getStyle(offsetParent, 'borderTopWidth')) || 0
+        parseInt(getStyle(offsetParent as Element, 'borderTopWidth')) || 0
       parentOffset.left +=
-        parseInt(getStyle(offsetParent, 'borderLeftWidth')) || 0
+        parseInt(getStyle(offsetParent as Element, 'borderLeftWidth')) || 0
     }
   }
 
