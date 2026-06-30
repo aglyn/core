@@ -22,7 +22,7 @@ export async function getAllScreens(
   host: Aglyn.HostUid,
   nextPageToken?: string,
 ) {
-  const data = { screens: [] as any, nextPageToken: '', error: null }
+  const data: { screens: Record<string, unknown>[]; nextPageToken: string; error: Error | null } = { screens: [], nextPageToken: '', error: null }
   const firestore = firebaseAdmin.app().firestore()
 
   await firestore
