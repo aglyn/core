@@ -302,8 +302,7 @@ const SnackbarItem = forwardRef<any, SnackbarItemProps>((props, ref) => {
             handleEntered,
           ])}
         >
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore */}
+          {/* @ts-expect-error — SnackbarContent children typing is overly strict */}
           {content || (
             <SnackbarContent
               {...ariaAttributes}

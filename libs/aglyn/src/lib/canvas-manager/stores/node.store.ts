@@ -34,7 +34,7 @@ interface INodeModel<P = any> {
 }
 
 // Define a branch-level model with a reference to child nodes
-// @ts-ignore
+// @ts-expect-error — MST generic model type inference limitation
 const NodeModel = types.model<INodeModel>('NodeModel', {
   $id: types.identifier,
   // children: types.maybe(
@@ -67,6 +67,6 @@ const CanvasModel = types.model('NodeStoreModel', {
 })
 
 // Define the root-level model with a reference to child nodes
-// @ts-ignore
+// @ts-expect-error — MST union type inference limitation
 export const TreeNodeModel = types.union(LeafModel, NodeModel)
 

@@ -96,7 +96,7 @@ export function shadowDomRootFactory<P = any>(options: FactoryOptions<P>) {
           {(root || ssr) && (
             <ShadowDomContext.Provider value={root}>
               {ssr ? (
-                // @ts-ignore
+                // @ts-expect-error — declarative shadowroot attr is not in React types
                 (<template shadowroot="open">
                   {options.render?.({ root, ssr, children })}
                 </template>)
