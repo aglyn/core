@@ -66,9 +66,9 @@ export interface ZoomablePanningComponentProps extends PropsWithRef<HTMLAttribut
   boundaryRatioHorizontal: number,
   enableBoundingBox?: boolean,
 
-  onPanStart?: (any) => void,
-  onPan?: (any) => void,
-  onPanEnd?: (any) => void,
+  onPanStart?: (event: MouseEvent<any> | TouchEvent<any>) => void,
+  onPan?: (event: MouseEvent<any> | TouchEvent<any>) => void,
+  onPanEnd?: (event: MouseEvent<any> | TouchEvent<any>) => void,
   onStateChange?: (data: OnStateChangeData) => void,
 }
 
@@ -117,8 +117,8 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
     y: 0,
   }
 
-  frameAnimation = null
-  intermediateFrameAnimation = null
+  frameAnimation: number = 0
+  intermediateFrameAnimation: number = 0
 
   transformMatrixString = `matrix(1, 0, 0, 1, 0, 0)`
   intermediateTransformMatrixString = `matrix(1, 0, 0, 1, 0, 0)`
@@ -298,7 +298,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
       return
     }
 
-    const keys = {
+    const keys: Record<string, { x: number; y: number; z: number }> = {
       '38': {x: 0, y: -1, z: 0}, // up
       '40': {x: 0, y: 1, z: 0}, // down
       '37': {x: -1, y: 0, z: 0}, // left
@@ -310,7 +310,7 @@ export class ZoomablePanningComponent extends Component<ZoomablePanningComponent
       ...keyMapping,
     }
 
-    const mappedCoords = keys[e.keyCode]
+    const mappedCoords = keys[String(e.keyCode)]
     if (mappedCoords) {
       const {x, y, z} = mappedCoords
       e.preventDefault()

@@ -13,6 +13,11 @@ declare module 'mout/object/deepFillIn' {
   export = deepFillIn
 }
 
+declare module 'warning' {
+  function warning(condition: boolean, format: string, ...args: unknown[]): void
+  export = warning
+}
+
 declare module 'nanoid-dictionary' {
   export const lowercase: string
   export const uppercase: string
