@@ -127,9 +127,9 @@ export class AglynCanvasController
       ),
     }
 
-    this.#setup()
+    this.setupInternal()
   }
-  #setup() {}
+  private setupInternal() {}
 
   public toJSON() {
     return {
