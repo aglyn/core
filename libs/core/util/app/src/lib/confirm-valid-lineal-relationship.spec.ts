@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as Aglyn from '@aglyn/aglyn'
+import * as Aglyn from '@aglyn/core-data-foundation'
 import confirmValidLinealRelationship from './confirm-valid-lineal-relationship'
 
 describe('confirm-valid-lineal-relationship', () => {

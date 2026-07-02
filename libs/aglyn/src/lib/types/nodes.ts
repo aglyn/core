@@ -28,16 +28,13 @@ import type { SvgIconProps } from '@mui/material/SvgIcon'
 export type MdiIconProps<D extends React.ElementType = 'svg', P = object> = SvgIconProps<D, P> & {
   path?: string
 }
+import type { ComponentsLinealOrder } from '@aglyn/core-data-foundation'
 import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 import type React from 'react'
 import type { ComponentClass, ComponentProps } from 'react'
 import type { NODE_ROOT_ID } from '../canvas-manager'
 
-import type {
-  FEATURE_FLAG,
-  FieldComponentType,
-  LinealDirectiveFlag,
-} from '../constants'
+import type { FEATURE_FLAG, FieldComponentType } from '../constants'
 import type { PluginId } from '../plugin-manager'
 import type { ElementContentMap, Node, Props, Taxonomic } from './ast'
 import type { AglynDocument } from './shared'
@@ -350,13 +347,7 @@ export type ComponentFactory<
 > = ComponentClass<P> | JSX.ElementConstructor<P> | keyof JSX.IntrinsicElements
 // | keyof JSX.IntrinsicElements[keyof JSX.IntrinsicElements]
 
-export type ComponentsLinealOrder = [
-  directiveType: LinealDirectiveFlag,
-  directiveDefinition:
-    | Array<ComponentId>
-    | { plugins?: Array<PluginId>; components: Array<ComponentId> }
-    | { plugins: Array<PluginId>; components?: Array<ComponentId> },
-]
+export type { ComponentsLinealOrder }
 
 // @TODO ⚠️ Refactor for better adoption of hast
 export interface AttributeSchema extends Dictionary<any> {

@@ -20,14 +20,12 @@ import {
   type AglynComponentPropsFormSchema,
   FieldComponentType,
   type IAglynComponentsController,
+  LinealDirectiveFlag,
 } from '../definitions/components.types'
 
 // export { FieldComponentType }
 
-export enum ComponentsLinealDirectiveFlag {
-  LIMIT_TO = 'limitedTo',
-  DISALLOW = 'forbid',
-}
+export { LinealDirectiveFlag as ComponentsLinealDirectiveFlag }
 
 export enum ComponentCategory {
   INPUT = 'Input',

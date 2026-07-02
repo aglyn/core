@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { LinealDirectiveFlag } from '@aglyn/core-data-foundation'
 import { customAlphabet, urlAlphabet } from 'nanoid'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -61,10 +62,7 @@ export enum FieldComponentType {
   WIZARD = 'wizard',
 }
 
-export enum LinealDirectiveFlag {
-  LIMIT_TO = 'limitedTo',
-  DISALLOW = 'forbid',
-}
+export { LinealDirectiveFlag }
 
 export enum ViewportWidth { //BesignerDeviceFlag
   SCALE = 0x1,

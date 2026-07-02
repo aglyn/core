@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import * as Aglyn from '@aglyn/aglyn'
 import type {
   ConditionDefinition,
   DataType,
@@ -47,7 +46,13 @@ import type {
   IAglynModuleModel,
 } from './module.types'
 
+export enum LinealDirectiveFlag {
+  LIMIT_TO = 'limitedTo',
+  DISALLOW = 'forbid',
+}
+
 export type BundleId = string
+export type PluginId = string
 export type ComponentId = string
 export type PresetId = string
 export type NodeId = string
@@ -71,11 +76,11 @@ export type InstanceSchemas = Map<
 export type InstanceNodePresets = Map<PresetId, AglynNodePresetSchema>
 
 export type ComponentsLinealOrder = [
-  directiveType: Aglyn.LinealDirectiveFlag,
+  directiveType: LinealDirectiveFlag,
   directiveDefinition:
     | Array<ComponentId>
-    | { bundles?: Array<BundleId>; components: Array<ComponentId> }
-    | { bundles: Array<BundleId>; components?: Array<ComponentId> },
+    | { plugins?: Array<PluginId>; components: Array<ComponentId> }
+    | { plugins: Array<PluginId>; components?: Array<ComponentId> },
 ]
 
 export type AglynComponentPropsFormSchema<P = any> =
@@ -186,11 +191,11 @@ export interface AglynComponentSchema<P = any> {
   /**
    * Define a limitation for nodes allowed as direct descendents
    */
-  restrictChildren?: Aglyn.ComponentsLinealOrder
+  restrictChildren?: ComponentsLinealOrder
   /**
    * Define a limitation for nodes allowed to be direct ancestors
    */
-  restrictParent?: Aglyn.ComponentsLinealOrder
+  restrictParent?: ComponentsLinealOrder
 
   /**
    * Filter props
