@@ -70,7 +70,7 @@ class SnackbarProvider extends Component<SnackbarProviderProps, State> {
     super(props)
     this.state = {
       snacks: [],
-      queue: [], // eslint-disable-line react/no-unused-state
+      queue: [],
       contextValue: {
         enqueueSnackbar: this.enqueueSnackbar.bind(this),
         closeSnackbar: this.closeSnackbar.bind(this),
@@ -325,7 +325,7 @@ class SnackbarProvider extends Component<SnackbarProviderProps, State> {
           ? {...item, open: false}
           : {...item, requestClose: true}
       }),
-      queue: queue.filter(item => item.snackbarId !== snackbarId), // eslint-disable-line react/no-unused-state
+      queue: queue.filter(item => item.snackbarId !== snackbarId),
     }))
   }
 
