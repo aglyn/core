@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { type MutableRefObject, useLayoutEffect, useState } from 'react'
+import { type MutableRefObject, useCallback, useLayoutEffect, useState } from 'react'
 
 function getStyle(el: Element, styleName: string) {
   return (getComputedStyle(el) as unknown as Record<string, string>)[
@@ -93,11 +93,11 @@ export function useElementPosition(ref: MutableRefObject<any>) {
     left: left,
   })
 
-  function handleChangePosition() {
+  const handleChangePosition = useCallback(() => {
     if (ref && ref.current) {
       setElementPosition(getPosition(ref.current))
     }
-  }
+  }, [ref])
 
   useLayoutEffect(() => {
     handleChangePosition()
@@ -106,7 +106,7 @@ export function useElementPosition(ref: MutableRefObject<any>) {
     return () => {
       window.removeEventListener('resize', handleChangePosition)
     }
-  }, [])
+  }, [handleChangePosition])
 
   return ElementPosition
 }
