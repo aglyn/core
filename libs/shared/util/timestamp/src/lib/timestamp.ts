@@ -25,6 +25,9 @@ import { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
  * `MILLI_TO_SEC` - 1e3 equals 1,000 i.e., 1,000 milliseconds in a second
  * `SEC_TO_MILLI` - 1e-3 equals 0.001 i.e., 1/1,000 of a second is a millisecond
  */
+// Multiple members intentionally share the same value: base-1000 metric
+// prefix conversions (nano/micro/milli/sec) recur at the same magnitude.
+/* eslint-disable @typescript-eslint/no-duplicate-enum-values */
 export enum TimeExchange {
   NANO_TO_MICRO = 1e3,
   NANO_TO_MILLI = 1e6,
@@ -51,6 +54,7 @@ export enum TimeExchange {
   MO_TO_SEC = 3.8052e-7,
   YR_TO_SEC = 3.1710e-8,
 }
+/* eslint-enable @typescript-eslint/no-duplicate-enum-values */
 
 export interface ITimestamp extends FirestoreTimestamp {}
 
