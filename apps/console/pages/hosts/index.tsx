@@ -26,7 +26,7 @@ import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { Typography } from '@mui/material'
 import { collection, query, where } from 'firebase/firestore'
 import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire'
-import CardDisplay from '../../components/card-display'
+import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
@@ -95,7 +95,7 @@ function Hosts() {
           <GridItems
             spacing={3}
             items={[
-              ...(data || [])?.map((host) => ({
+              ...(data || []).map((host) => ({
                 size: {
                   xs: 12,
                   md: 4,

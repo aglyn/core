@@ -23,7 +23,7 @@ import {
 import { Button, FormControl, Grid } from '@mui/material'
 import { forwardRef } from 'react'
 import { Case, Default, Switch } from 'react-if'
-import CardDisplay, { type CardDisplayProps } from './card-display'
+import { CardDisplay, type CardDisplayProps } from '@aglyn/shared-ui-jsx'
 
 export const FormCardWrapper = forwardRef<any, CardDisplayProps>(
   (props, ref) => {

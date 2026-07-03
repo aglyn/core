@@ -155,7 +155,7 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
       LoadingOverlayViewProps,
       children,
       sx,
-      components,
+      slots,
       ...rest
     } = props
     return (
@@ -185,10 +185,10 @@ const DataTableComponent = forwardRef<HTMLElement, DataTableProps>(
           rows={rows}
           columns={columns}
           loading={loading}
-          components={{
-            NoRowsOverlay: noRowsOverlay(noRowsLabel),
-            LoadingOverlay: AppLoaderOverlayView(LoadingOverlayViewProps),
-            ...components,
+          slots={{
+            noRowsOverlay: noRowsOverlay(noRowsLabel),
+            loadingOverlay: AppLoaderOverlayView(LoadingOverlayViewProps),
+            ...slots,
           }}
           {...rest}
         />

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ErrorBoundaryComponent } from '@aglyn/shared-ui-jsx'
+import { ErrorBoundaryComponent } from './error-boundary.component'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
 import {
   Card as MuiCard,
