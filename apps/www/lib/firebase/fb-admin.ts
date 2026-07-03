@@ -39,5 +39,9 @@ export let fbAdminApp: fbAdmin.app.App
   }
 })()
 
+export const verifyIdToken = (idToken: string) => {
+  return fbAdmin.auth().verifyIdToken(idToken)
+}
+
 export {fbAdmin}
 export default fbAdmin
