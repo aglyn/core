@@ -24,7 +24,7 @@ import {
   ref,
   set,
 } from 'firebase/database'
-import firebaseApp from './firebase-app'
+import { firebaseApp } from '@aglyn/shared-util-fbclient'
 
 export function setTenant(tenant: Aglyn.AglynTenant): Promise<void> {
   const { $id, ...rest } = tenant

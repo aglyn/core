@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export * from './lib/client/firebase-app'
+export { appCheck, firebaseApp } from '@aglyn/shared-util-fbclient'
 export * from './lib/client/tenant.utils'
 
 export * from './lib/server/firebase-admin'
