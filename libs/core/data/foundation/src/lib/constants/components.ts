@@ -33,6 +33,9 @@ export enum ComponentCategory {
   NAVIGATION = 'Navigation',
   LAYOUT = 'Layout',
   DATA_DISPLAY = 'Data Display',
+  TEXT = 'Text',
+  UNCATEGORIZED = 'Uncategorized',
+  ALL = 'All',
 }
 
 export const _INTERNAL_COMPONENTS_: Map<AppUUN, IAglynComponentsController> =
