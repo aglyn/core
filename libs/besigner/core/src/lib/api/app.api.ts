@@ -25,10 +25,6 @@ import {
   type IBesignerAppController,
 } from '../definitions/besigner-app.types'
 
-export function getAllBesignerApps(): IBesignerAppController[] {
-  return [..._INTERNAL_BESIGNER_APPS_.values()]
-}
-
 export function doesBesignerAppExist(appName?: AppUUN): boolean {
   return _INTERNAL_BESIGNER_APPS_.has(appName || DEFAULT_APP_UUN)
 }

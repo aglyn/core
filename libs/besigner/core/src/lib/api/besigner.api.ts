@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject } from 'rxjs'
 import { _INTERNAL_BESIGNERS_ } from '../constants/_internal'
 import type {
   BesignerClosePanelPayload,
-  BesignerGetStorePayload,
   BesignerOpenPanelPayload,
   BesignerSetCanvasHoveredPayload,
   BesignerSetCanvasItemPayload,
@@ -31,13 +29,9 @@ import type {
   BesignerSetFlagsPayload,
   BesignerSetPanelPayload,
   BesignerSetPanelsPayload,
-  BesignerTogglePanelPayload,
 } from '../constants/emitter'
 import type { IBesignerAppController } from '../definitions/besigner-app.types'
-import type {
-  BesignerContext,
-  IBesignerInterfaceController,
-} from '../definitions/besigner-interface.types'
+import type { IBesignerInterfaceController } from '../definitions/besigner-interface.types'
 import { _validateBesignerAppArg } from './app.api'
 
 export function _getBesignerController(
@@ -45,16 +39,6 @@ export function _getBesignerController(
 ): IBesignerInterfaceController {
   _validateBesignerAppArg(app as IBesignerAppController)
   return _INTERNAL_BESIGNERS_.get(app.getName())
-}
-
-export function getBesignerStore<K extends keyof BesignerContext>(
-  app: IBesignerAppController,
-  payload: BesignerGetStorePayload<K>,
-): BehaviorSubject<BesignerContext[K]> {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.getStore(payload)
 }
 
 export function setBesignerFlag(
@@ -95,16 +79,6 @@ export function setBesignerPanels(
     app as IBesignerAppController,
   )
   return besignerController.setPanels(payload)
-}
-
-export function toggleBesignerPanel(
-  app: IBesignerAppController,
-  payload: BesignerTogglePanelPayload,
-) {
-  const besignerController = _getBesignerController(
-    app as IBesignerAppController,
-  )
-  return besignerController.togglePanel(payload)
 }
 
 export function openBesignerPanel(

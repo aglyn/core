@@ -20,6 +20,5 @@ import { DndManager } from './dnd-manager'
 export * from './canvas-manager'
 export * from './dnd-manager'
 export * from './focus-manager'
-export * from './panel-manager'
 
 export const dnd = new DndManager()
