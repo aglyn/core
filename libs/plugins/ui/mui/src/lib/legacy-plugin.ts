@@ -42,7 +42,7 @@ export function registerLegacyMuiPlugin(): void {
     description: 'Material UI elements',
     title: 'Material UI',
     dependencies: {},
-    load(...args: unknown[]): void {
+    load(): void {
       Aglyn.components.registerComponent(AppBar.default, AppBar.schema)
       Aglyn.components.registerComponent(Toolbar.default, Toolbar.schema)
       Aglyn.components.registerComponent(Typography.default, Typography.schema)
@@ -66,7 +66,7 @@ export function registerLegacyMuiPlugin(): void {
       Aglyn.components.registerPreset(ListItemText.presets)
       Aglyn.components.registerPreset(Stack.presets)
     },
-    destroy(...args: unknown[]): void {
+    destroy(): void {
       Aglyn.components.unregisterPreset(AppBar.presets.map((i) => i.$id))
       Aglyn.components.unregisterPreset(Toolbar.presets.map((i) => i.$id))
       Aglyn.components.unregisterPreset(Typography.presets.map((i) => i.$id))
