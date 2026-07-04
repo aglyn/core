@@ -1,7 +1,7 @@
 {
-  "name": "besigner-ui-color-picker",
+  "name": "shared-ui-color-picker",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/besigner/ui/color-picker/src",
+  "sourceRoot": "libs/shared/ui/color-picker/src",
   "projectType": "library",
   "tags": ["scope:lib", "scope:shared", "scope:ui"],
   "targets": {
@@ -11,10 +11,10 @@
         "{options.outputPath}"
       ],
       "options": {
-        "outputPath": "dist/libs/besigner/ui/color-picker",
-        "tsConfig": "libs/besigner/ui/color-picker/tsconfig.lib.json",
-        "project": "libs/besigner/ui/color-picker/package.json",
-        "entryFile": "libs/besigner/ui/color-picker/src/index.ts",
+        "outputPath": "dist/libs/shared/ui/color-picker",
+        "tsConfig": "libs/shared/ui/color-picker/tsconfig.lib.json",
+        "project": "libs/shared/ui/color-picker/package.json",
+        "entryFile": "libs/shared/ui/color-picker/src/index.ts",
         "external": [
           "@emotion/react/jsx-runtime",
           "@aglyn/shared-util-tools"
@@ -28,7 +28,7 @@
         "compiler": "swc",
         "assets": [
           {
-            "glob": "libs/besigner/ui/color-picker/README.md",
+            "glob": "libs/shared/ui/color-picker/README.md",
             "input": ".",
             "output": "."
           }
@@ -46,10 +46,10 @@
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": [
-        "{workspaceRoot}/coverage/libs/besigner/ui/color-picker"
+        "{workspaceRoot}/coverage/libs/shared/ui/color-picker"
       ],
       "options": {
-        "jestConfig": "libs/besigner/ui/color-picker/jest.config.ts"
+        "jestConfig": "libs/shared/ui/color-picker/jest.config.ts"
       }
     }
   }

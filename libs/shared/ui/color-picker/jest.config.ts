@@ -17,7 +17,7 @@
 
 /* eslint-disable */
 module.exports = {
-  displayName: 'besigner-ui-color-picker',
+  displayName: 'shared-ui-color-picker',
   preset: '../../../../jest.preset.js',
   transform: {
     '^.+\\.[tj]sx?$': [
@@ -26,5 +26,5 @@ module.exports = {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../../../coverage/libs/besigner/ui/color-picker',
+  coverageDirectory: '../../../../coverage/libs/shared/ui/color-picker',
 }
