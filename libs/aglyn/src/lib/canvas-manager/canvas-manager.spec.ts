@@ -221,4 +221,47 @@ describe('Aglyn: Screen Manager', () => {
       expect(denormalized['child1'].nodes).toEqual(['child1-1', 'child1-2'])
     })
   })
+
+  describe('applyNodes history', () => {
+    it('makes a raw-json replacement undoable and redoable', () => {
+      const canvas = new CanvasManager(undefined as any)
+      canvas.setNodes(nodes)
+      expect(canvas.canUndo).toBe(false)
+
+      const edited = JSON.parse(JSON.stringify(canvas.nestedNodes))
+      edited.nodes[0].props = { title: 'edited via raw json' }
+      canvas.applyNodes(edited)
+
+      expect(canvas.canUndo).toBe(true)
+      expect(canvas.nodes.get('child1').props).toEqual({
+        title: 'edited via raw json',
+      })
+
+      canvas.undo()
+      expect(canvas.nodes.get('child1').props).toEqual({})
+      expect(canvas.canRedo).toBe(true)
+
+      canvas.redo()
+      expect(canvas.nodes.get('child1').props).toEqual({
+        title: 'edited via raw json',
+      })
+    })
+
+    it('clears the redo stack when a new raw-json edit is applied', () => {
+      const canvas = new CanvasManager(undefined as any)
+      canvas.setNodes(nodes)
+
+      const first = JSON.parse(JSON.stringify(canvas.nestedNodes))
+      first.nodes[0].props = { title: 'first' }
+      canvas.applyNodes(first)
+      canvas.undo()
+      expect(canvas.canRedo).toBe(true)
+
+      const second = JSON.parse(JSON.stringify(canvas.nestedNodes))
+      second.nodes[1].props = { title: 'second' }
+      canvas.applyNodes(second)
+      expect(canvas.canRedo).toBe(false)
+      expect(canvas.canUndo).toBe(true)
+    })
+  })
 })

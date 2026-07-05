@@ -251,6 +251,7 @@ export class CanvasManager {
       updateInitialNodes: action,
       setNode: action,
       setNodes: action,
+      applyNodes: action,
       deleteNode: action,
       reparentNode: action,
       reorderNode: action,
@@ -437,6 +438,13 @@ export class CanvasManager {
       this.nodes.replace(nodes)
     }
     return this
+  }
+  public applyNodes(value: ProcessableNodes): this {
+    // Wholesale user edit (e.g. the raw-json editor): snapshot first so the
+    // replacement is undoable, unlike setNodes which also serves the
+    // history-restore and initial-load paths.
+    this.saveHistory()
+    return this.setNodes(this.processNodesToDenormalized(value))
   }
   public deleteNode(node: NodeSchema<any>): this {
     const validateNode = (node: NodeSchema<any>) => {

@@ -162,7 +162,7 @@ function BesignerPage(props) {
   const openJsonEditor = useCallback(() => setJsonOpen(true), [])
   const closeJsonEditor = useCallback(() => setJsonOpen(false), [])
   const handleJsonSave = useCallback((e, value) => {
-    setLocalNodes(value)
+    Aglyn.canvas.applyNodes(value)
     setJsonOpen(false)
   }, [])
 
