@@ -24,6 +24,7 @@ import {
 import {
   ICON_VARIANT_APP_SETTINGS,
   ICON_VARIANT_MODIFY_SAVE,
+  ICON_VARIANT_NEW_TAB,
   ICON_VARIANT_SYMBOL_CONFIRMED,
 } from '@aglyn/shared-data-enums'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
@@ -36,13 +37,14 @@ import SecondaryAppBarComponent, {
 export interface BesignerAppBarProps extends SecondaryAppBarProps {
   detailsUrl: string
   onSave: ButtonProps['onClick']
+  onPreview?: ButtonProps['onClick']
   onPropertiesEdit?: ButtonProps['onClick']
   saveAvailable?: boolean
 }
 
 export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
   (props, ref) => {
-    const { onPropertiesEdit, onSave, saveAvailable } = props
+    const { onPreview, onPropertiesEdit, onSave, saveAvailable } = props
 
     return (
       <SecondaryAppBarComponent
@@ -84,6 +86,14 @@ export const BesignerAppBarComponent = forwardRef<any, BesignerAppBarProps>(
             })}
             flexItem
           />
+          <Button
+            onClick={onPreview}
+            size="small"
+            color="secondary"
+            endIcon={<MdiIcon path={ICON_VARIANT_NEW_TAB.path} />}
+          >
+            {'Preview'}
+          </Button>
           <Button
             onClick={onSave}
             size="small"

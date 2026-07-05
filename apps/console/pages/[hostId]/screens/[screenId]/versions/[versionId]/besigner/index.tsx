@@ -51,6 +51,10 @@ import BesignerAppBarComponent from '../../../../../../../components/besigner-ap
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
 import '../../../../../../../constants/app-setup'
+import {
+  previewWindowName,
+  writePreviewState,
+} from '../../../../../../../constants/preview-state'
 import { buildRoute, Route } from '../../../../../../../constants/route-links'
 
 registerLegacyMuiPlugin()
@@ -161,6 +165,12 @@ function BesignerPage(props) {
   const [jsonOpen, setJsonOpen] = useState(false)
   const openJsonEditor = useCallback(() => setJsonOpen(true), [])
   const closeJsonEditor = useCallback(() => setJsonOpen(false), [])
+  const handlePreview = useCallback(() => {
+    const ids = { hostId, screenId, versionId }
+    writePreviewState(ids, Aglyn.canvas.toJSON().nodes)
+    window.open(buildRoute(Route.SCREEN_PREVIEW, ids), previewWindowName(ids))
+  }, [hostId, screenId, versionId])
+
   const handleJsonSave = useCallback((e, value) => {
     Aglyn.canvas.applyNodes(value)
     setJsonOpen(false)
@@ -318,6 +328,7 @@ function BesignerPage(props) {
             <BesignerAppBarComponent
               detailsUrl={detailUrl}
               onSave={handleSave}
+              onPreview={handlePreview}
               onPropertiesEdit={() => setScreenDialog(true)}
               saveAvailable={saveAvailable}
             />

@@ -234,7 +234,7 @@ class HistoryManager<K extends string, T> {
 }
 
 export class CanvasManager {
-  private _initial: NodesMap | undefined
+  private _initial: NodesMap | undefined = undefined
   private _history: HistoryManager<NodeId, NodeSchema<any>>
 
   constructor(public aglyn: Aglyn) {
