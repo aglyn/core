@@ -16,25 +16,31 @@
  */
 'use client'
 
-import { CANVAS_ROOT_ELEMENT_ID } from '@aglyn/aglyn'
-import { createResourceUid } from '@aglyn/aglyn'
+import {
+  CANVAS_ROOT_ELEMENT_ID,
+  createResourceUid,
+  LAYOUT_SLOT_COMPONENT_ID,
+} from '@aglyn/aglyn'
+import { BUNDLE_ID as MUI_BUNDLE_ID } from '@aglyn/plugins-ui-mui'
 import {
   ICON_VARIANT_CLOSE,
   ICON_VARIANT_MODIFY_DELETE,
-  ICON_VARIANT_PAGES,
-  ICON_VARIANT_SHOW_DETAIL,
+  ICON_VARIANT_MODIFY_EDIT,
 } from '@aglyn/shared-data-enums'
+import { mdiPageLayoutBody } from '@aglyn/shared-data-mdi'
 import {
   AppLink,
   AppLinkNakedLinkProps,
+  CardDisplay,
   Container,
+  DataTableComponent,
+  MdiIcon,
   NavigationDrawerComponent,
   SrOnly,
   useConfirmationContext,
   useLoading,
 } from '@aglyn/shared-ui-jsx'
 import { FormRenderer, simpleComponentMapper } from '@aglyn/shared-ui-jsx-forms'
-import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
@@ -53,8 +59,6 @@ import { forwardRef, useCallback, useEffect, useState } from 'react'
 import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 import AuthErrorAlertComponent from '../../../../components/auth-error-alert.component'
 import AuthFormTemplateComponent from '../../../../components/auth-form-template.component'
-import { CardDisplay } from '@aglyn/shared-ui-jsx'
-import { DataTableComponent } from '@aglyn/shared-ui-jsx'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
@@ -71,7 +75,7 @@ const CellItemLinkComponent = forwardRef<any, AppLinkNakedLinkProps>(
 )
 CellItemLinkComponent.displayName = 'CellItemLinkComponent'
 
-function Screens(props) {
+function Layouts(props) {
   const params = useParams<{ hostId: string }>()
   const hostId = params?.hostId as string
   const { queueLoading, loading } = useLoading()
@@ -85,13 +89,13 @@ function Screens(props) {
   }, [])
   const [pageSize, setPageSize] = useState<number>(5)
   const firestore = useFirestore()
-  const screensCollection = collection(firestore, 'hosts', hostId, 'screens')
-  const screensQuery = query(screensCollection, limit(pageSize))
-  const { status, data } = useFirestoreCollectionData<any>(screensQuery, {
+  const layoutsCollection = collection(firestore, 'hosts', hostId, 'layouts')
+  const layoutsQuery = query(layoutsCollection, limit(pageSize))
+  const { status, data } = useFirestoreCollectionData<any>(layoutsQuery, {
     idField: '$id',
   })
-  const screens = data || []
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar()
+  const layouts = data || []
+  const { enqueueSnackbar } = useSnackbar()
 
   const [error, setError] = useState(null)
 
@@ -111,27 +115,40 @@ function Screens(props) {
       const dequeueLoading = queueLoading()
       const newId = createResourceUid()
       const newVersionId = createResourceUid()
+      const slotNodeId = createResourceUid()
       const timestamp = Timestamp.now()
       const newValues = {
         ...values,
         versionId: newVersionId,
+        versions: [newVersionId],
         createdAt: timestamp,
         updatedAt: timestamp,
       }
+      // Seed with a single LayoutSlot so bound screens have a graft point
+      // from the first save.
       const newVersionValue = {
-        screenId: newId,
+        layoutId: newId,
         createdAt: timestamp,
         updatedAt: timestamp,
-        nodes: { [CANVAS_ROOT_ELEMENT_ID]: { nodes: [] } },
+        nodes: {
+          [CANVAS_ROOT_ELEMENT_ID]: { nodes: [slotNodeId] },
+          [slotNodeId]: {
+            $id: slotNodeId,
+            componentId: LAYOUT_SLOT_COMPONENT_ID,
+            pluginId: MUI_BUNDLE_ID,
+            parentId: CANVAS_ROOT_ELEMENT_ID,
+            props: {},
+          },
+        },
       }
       await Promise.all([
-        setDoc(doc(firestore, 'hosts', hostId, 'screens', newId), newValues),
+        setDoc(doc(firestore, 'hosts', hostId, 'layouts', newId), newValues),
         setDoc(
           doc(
             firestore,
             'hosts',
             hostId,
-            'screens',
+            'layouts',
             newId,
             'versions',
             newVersionId,
@@ -163,13 +180,13 @@ function Screens(props) {
     ],
   )
 
-  const handleDeleteScreen = useCallback(
-    (id: string, versionId: string) => async () => {
+  const handleDeleteLayout = useCallback(
+    (id: string) => async () => {
       let dequeueLoading
       await confirm({
         title: 'Are you sure?',
         description:
-          "You are about to delete a screen from the application, please confirm the desired option. Press 'Delete' to confirm and delete the item. Press 'Cancel' to void the operation and close this dialog.",
+          "You are about to delete a layout. Screens bound to it will render without shared chrome until they are rebound. Press 'Delete' to confirm or 'Cancel' to keep the layout.",
         confirmationText: 'Delete',
         confirmationButtonProps: { color: 'error' },
       })
@@ -177,7 +194,7 @@ function Screens(props) {
           dequeueLoading = queueLoading()
         })
         .then(() =>
-          updateDoc(doc(firestore, 'hosts', hostId, 'screens', id), {
+          updateDoc(doc(firestore, 'hosts', hostId, 'layouts', id), {
             deletedAt: Timestamp.now(),
           }),
         )
@@ -186,7 +203,7 @@ function Screens(props) {
           dequeueLoading && dequeueLoading()
         })
     },
-    [confirm, firestore, queueLoading],
+    [confirm, firestore, hostId, queueLoading],
   )
 
   const columns: GridColDef[] = [
@@ -195,18 +212,18 @@ function Screens(props) {
       type: 'actions',
       width: 100,
       getActions: ({ id, row }) => {
-        const screenId = id as string
+        const layoutId = id as string
         const versionId = row.versionId as string
         return [
           <GridActionsCellItem
-            key="action-detail"
-            icon={<MdiIcon path={ICON_VARIANT_SHOW_DETAIL.path} />}
-            label="detail"
+            key="action-edit"
+            icon={<MdiIcon path={ICON_VARIANT_MODIFY_EDIT.path} />}
+            label="edit"
             LinkComponent={CellItemLinkComponent}
             {...({
-              href: buildRoute(Route.SCREEN_DETAILS, {
+              href: buildRoute(Route.LAYOUT_BESIGNER, {
                 hostId,
-                screenId,
+                layoutId,
                 versionId,
               }),
             } as any)}
@@ -215,7 +232,7 @@ function Screens(props) {
             key="action-delete"
             icon={<MdiIcon path={ICON_VARIANT_MODIFY_DELETE.path} color="error" />}
             label="Delete"
-            onClick={handleDeleteScreen(screenId, versionId)}
+            onClick={handleDeleteLayout(layoutId)}
           />,
         ]
       },
@@ -254,11 +271,9 @@ function Screens(props) {
     },
   ]
 
-  // console.log('Screens props', props, data, status, screens)
-
   return (
     <>
-      <NextPageTitle screen={'Screens'} />
+      <NextPageTitle screen={'Layouts'} />
       <DashboardLayout
         navTabItems={[
           {
@@ -282,24 +297,24 @@ function Screens(props) {
             href: buildRoute(Route.HOST_SETUP, { hostId }),
           },
         ]}
-        activeTab={buildRoute(Route.SCREEN_LIST, { hostId })}
+        activeTab={buildRoute(Route.LAYOUT_LIST, { hostId })}
         breadcrumbItems={[
           {
             children: hostId,
             href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
           },
           {
-            children: 'Screens',
-            href: buildRoute(Route.SCREEN_LIST, { hostId }),
+            children: 'Layouts',
+            href: buildRoute(Route.LAYOUT_LIST, { hostId }),
           },
         ]}
         header={{
-          children: 'Screens',
-          icon: { path: ICON_VARIANT_PAGES.path },
+          children: 'Layouts',
+          icon: { path: mdiPageLayoutBody.path },
         }}
         headerRight={
           <Button size="small" variant="contained" onClick={handleFormOpen}>
-            {'Create New Screen'}
+            {'Create New Layout'}
           </Button>
         }
         aside={
@@ -321,7 +336,7 @@ function Screens(props) {
                   <SrOnly>close drawer</SrOnly>
                 </IconButton>
                 <Typography variant="h6" component="div">
-                  {'Create new screen'}
+                  {'Create new layout'}
                 </Typography>
               </>
             }
@@ -354,20 +369,12 @@ function Screens(props) {
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <CardDisplay>
-            {/*<AccordionListComponent*/}
-            {/*  unique*/}
-            {/*  items={screens}*/}
-            {/*  AccordionSummaryProps={{ dense: true }}*/}
-            {/*  DetailsContentComponent={DetailsContentComponent as any}*/}
-            {/*  SummaryContentComponent={SummaryContentComponent as any}*/}
-            {/*  getItemId={(item) => item.$id}*/}
-            {/*/>*/}
             <DataTableComponent
               rowHeight={TABLE_ROW_HEIGHT}
               getRowId={(row) => row.$id}
               columns={columns}
-              noRowsLabel="No screens"
-              rows={screens}
+              noRowsLabel="No layouts"
+              rows={layouts}
               loading={status === 'loading'}
               initialState={{ pagination: { paginationModel: { pageSize } } }}
               onPaginationModelChange={(model) => setPageSize(model.pageSize)}
@@ -413,17 +420,17 @@ const formSchema = {
     },
   ],
 }
-Screens.displayName = 'Page:Screens'
-Screens.layouts = [
+Layouts.displayName = 'Page:Layouts'
+Layouts.layouts = [
   {
     Component: AuthenticatedLayout,
   },
   {
     Component: MainLayout,
     props: {
-      title: 'Screens',
+      title: 'Layouts',
     },
   },
 ]
 
-export default Screens
+export default Layouts

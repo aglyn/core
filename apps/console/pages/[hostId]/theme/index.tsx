@@ -77,6 +77,11 @@ const HostTheme: NextPageWithLayout = () => {
             href: buildRoute(Route.SCREEN_LIST, { hostId }),
           },
           {
+            id: 'nav-tab-layouts',
+            label: 'Layouts',
+            href: buildRoute(Route.LAYOUT_LIST, { hostId }),
+          },
+          {
             id: 'nav-tab-theme',
             label: 'Theme',
             href: buildRoute(Route.HOST_THEME, { hostId }),
