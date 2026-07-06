@@ -248,6 +248,7 @@ export class CanvasManager {
       saveHistory: action,
       clearHistory: action,
       clearNodes: action,
+      reset: action,
       updateInitialNodes: action,
       setNode: action,
       setNodes: action,
@@ -411,6 +412,18 @@ export class CanvasManager {
   }
   public clearNodes() {
     this.nodes.clear()
+    return this
+  }
+  /**
+   * Returns the canvas to its pristine state (no nodes, no history, no
+   * recorded initial snapshot). The canvas is an app-level singleton shared
+   * by every editing session — call this when a session ends so the next
+   * document doesn't inherit stale content.
+   */
+  public reset() {
+    this.clearNodes()
+    this.clearHistory()
+    this._initial = undefined
     return this
   }
   public updateInitialNodes(nodes?: NodesMap) {
