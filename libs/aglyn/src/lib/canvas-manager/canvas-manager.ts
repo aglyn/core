@@ -430,7 +430,13 @@ export class CanvasManager {
     const nodes: Record<NodeId, NodeSchema<any>> = {}
     for (const nodeId in cloned) {
       const node = cloned[nodeId]
-      if (node) nodes[nodeId] = this.createNode(node)
+      if (!node) continue
+      // Persisted maps key nodes by id. Early seeds omitted $id (which used
+      // to mint a random one), and the root must always keep the canonical
+      // id — the map key is authoritative.
+      const $id =
+        nodeId === NODE_ROOT_ID ? NODE_ROOT_ID : (node.$id ?? nodeId)
+      nodes[nodeId] = this.createNode({ ...node, $id })
     }
     if (merge) {
       this.nodes.merge(nodes)
