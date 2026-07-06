@@ -120,16 +120,15 @@ const NodeOverlay = observer(
       if (shadowHost) ro.observe(shadowHost)
       window.addEventListener('resize', update, { passive: true })
 
-      // In device preview mode the artboard has a fixed width so the canvas
-      // scroll container can scroll — scroll shifts getBoundingClientRect()
-      // values without triggering a resize, so we need a scroll listener too.
-      const scrollContainer = document.getElementById('aglyn:viewport-canvas')
-      scrollContainer?.addEventListener('scroll', update, { passive: true })
+      // Scrolling any ancestor (the canvas container, panels, or the page
+      // body) shifts getBoundingClientRect() values without triggering a
+      // resize — capture-phase listener catches them all.
+      window.addEventListener('scroll', update, { passive: true, capture: true })
 
       return () => {
         ro.disconnect()
         window.removeEventListener('resize', update)
-        scrollContainer?.removeEventListener('scroll', update)
+        window.removeEventListener('scroll', update, { capture: true })
       }
       // node?.index changes when the node is reordered among siblings (e.g.
       // "shift up"/"shift down"). Reordering moves the same DOM element to a
@@ -151,6 +150,12 @@ const NodeOverlay = observer(
         modifiers={outerModifiers}
         open={isOpen}
         keepMounted
+        // The anchor rect is viewport-relative; fixed positioning matches it
+        // and, unlike the default absolute strategy, cannot extend the
+        // document — an overlay past the fold otherwise grows the page,
+        // which grows the scroll range, which moves the overlay again
+        // (infinite scroll feedback).
+        popperOptions={{ strategy: 'fixed' }}
         // disablePortal
         // transition
         {...rest}
@@ -163,6 +168,7 @@ const NodeOverlay = observer(
             anchorEl={virtualElement}
             placement={variant === 'hovered' ? 'top-start' : undefined}
             modifiers={innerModifiers}
+            popperOptions={{ strategy: 'fixed' }}
             // keepMounted
             // disablePortal
             // transition
