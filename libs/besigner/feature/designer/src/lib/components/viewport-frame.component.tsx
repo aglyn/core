@@ -195,7 +195,9 @@ const Overlays = forwardRef<any, Partial<BoxProps>>((props, ref) => {
       data-aglyn="viewport:popover"
       sx={{
         // position: 'relative',
-        zIndex: 'tooltip',
+        // Above the canvas content, below the designer chrome (app bars and
+        // breadcrumbs sit at zIndex.appBar) within the workspace context.
+        zIndex: 10,
       }}
       {...rest}
     >

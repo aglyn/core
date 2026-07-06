@@ -156,11 +156,10 @@ const NodeOverlay = observer(
         // which grows the scroll range, which moves the overlay again
         // (infinite scroll feedback).
         popperOptions={{ strategy: 'fixed' }}
-        // Overlays belong to the canvas layer: keep them under the designer
-        // chrome (app bars, breadcrumbs at zIndex.appBar) so outlines never
-        // paint over the editor UI.
-        sx={{ zIndex: (theme) => theme.zIndex.appBar - 100 }}
-        // disablePortal
+        // Overlays belong to the canvas layer: rendering in place (no body
+        // portal) keeps them inside the viewport's stacking context, so the
+        // designer chrome (app bars, breadcrumbs) always paints above them.
+        disablePortal
         // transition
         {...rest}
       >
@@ -173,11 +172,10 @@ const NodeOverlay = observer(
             placement={variant === 'hovered' ? 'top-start' : undefined}
             modifiers={innerModifiers}
             popperOptions={{ strategy: 'fixed' }}
+            disablePortal
             // keepMounted
-            // disablePortal
             // transition
             sx={{
-              zIndex: (theme) => theme.zIndex.appBar - 100,
               ['&[data-popper-placement^=top] #aglyn\\:element-overlay-label']:
                 {
                   borderTopLeftRadius: 3,
