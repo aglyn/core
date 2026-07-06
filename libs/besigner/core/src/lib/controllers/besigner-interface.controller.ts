@@ -71,6 +71,7 @@ export class BesignerInterfaceController
         logLevel: 'info',
         interactMode: InteractionModeFlag.SELECT,
         devicePreview: BesignerDeviceFlag.RESPONSIVE,
+        canvasScheme: 'light',
       },
       panels: {
         panelLeft: {
