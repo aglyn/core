@@ -15,15 +15,13 @@
  * limitations under the License.
  */
 
+import {
+  resolveRolePermissions,
+  type TenantPermissionSet,
+} from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
-export interface TenantPermissionSet {
-  createHosts: boolean
-  editBilling: boolean
-  publishToCommunity: boolean
-  installPlugins: boolean
-  manageMembers: boolean
-}
+export type { TenantPermissionSet }
 
 export interface ResolvedTenantPermissions {
   /** True when the uid has no manager-membership record anywhere. */
@@ -33,13 +31,7 @@ export interface ResolvedTenantPermissions {
   permissions: TenantPermissionSet
 }
 
-const ALL_TRUE: TenantPermissionSet = {
-  createHosts: true,
-  editBilling: true,
-  publishToCommunity: true,
-  installPlugins: true,
-  manageMembers: true,
-}
+const ALL_TRUE: TenantPermissionSet = resolveRolePermissions('admin')
 
 /**
  * Tenant permission resolver (AGL-108): a uid with a manager-membership
@@ -70,19 +62,13 @@ export async function resolveTenantPermissions(
       return { isOwner: true, ownerUid: uid, permissions: ALL_TRUE }
     }
     const data = membership.data()
-    const permissions = (data['permissions'] ?? {}) as Partial<
-      TenantPermissionSet
-    >
+    // Role defaults + per-user overrides (AGL-120). Members created before
+    // roles have no `role` and resolve as viewer + their stored flags —
+    // identical effective permissions to the pre-role behavior.
     return {
       isOwner: false,
       ownerUid: membership.ref.parent.parent?.id ?? uid,
-      permissions: {
-        createHosts: Boolean(permissions.createHosts),
-        editBilling: Boolean(permissions.editBilling),
-        publishToCommunity: Boolean(permissions.publishToCommunity),
-        installPlugins: Boolean(permissions.installPlugins),
-        manageMembers: Boolean(permissions.manageMembers),
-      },
+      permissions: resolveRolePermissions(data['role'], data['permissions']),
     }
   } catch (error) {
     console.error('tenant-permissions resolve failed (failing open)', error)

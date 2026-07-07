@@ -25,10 +25,16 @@ import {
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
+  resolveRolePermissions,
+  TENANT_ROLE_LABELS,
+  type TenantRoleId,
+} from '@aglyn/aglyn'
+import {
   Button,
   Checkbox,
   Chip,
   FormControlLabel,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -52,11 +58,14 @@ import useTenantPermissions from '../../../hooks/use-tenant-permissions'
 
 const PERMISSIONS: Array<{ key: string; label: string }> = [
   { key: 'createHosts', label: 'Create hosts' },
+  { key: 'editHosts', label: 'Edit hosts' },
   { key: 'editBilling', label: 'Edit billing' },
   { key: 'publishToCommunity', label: 'Publish to community' },
   { key: 'installPlugins', label: 'Install plugins' },
   { key: 'manageMembers', label: 'Manage members' },
 ]
+
+const ROLE_IDS: TenantRoleId[] = ['admin', 'editor', 'viewer']
 
 /**
  * Tenant team manager (AGL-108): the account owner adds manager seats by
@@ -74,6 +83,7 @@ const ManageTeam: NextPageWithLayout = () => {
   const canManage = isOwner || permissions.manageMembers
   const [members, setMembers] = useState<any[]>([])
   const [email, setEmail] = useState('')
+  const [newRole, setNewRole] = useState<TenantRoleId>('editor')
   const [busy, setBusy] = useState(false)
   const seatQuota = checkTenantSeatQuota(tenant, 'managers', members.length + 1)
 
@@ -115,10 +125,7 @@ const ManageTeam: NextPageWithLayout = () => {
     const value = email.trim().toLowerCase()
     if (!value) return
     setBusy(true)
-    const payload = await request('POST', {
-      email: value,
-      permissions: { createHosts: true },
-    })
+    const payload = await request('POST', { email: value, role: newRole })
     setBusy(false)
     if (!payload) return
     enqueueSnackbar(
@@ -129,13 +136,38 @@ const ManageTeam: NextPageWithLayout = () => {
     )
     setEmail('')
     void refresh()
-  }, [email, request, enqueueSnackbar, refresh])
+  }, [email, newRole, request, enqueueSnackbar, refresh])
+
+  const handleRoleChange = useCallback(
+    (member: any) => async (event: { target: { value: string } }) => {
+      const role = event.target.value
+      // A role change resets overrides — the new role's defaults apply.
+      setMembers((prev) =>
+        prev.map((item) =>
+          item.$id === member.$id
+            ? { ...item, role, permissions: {} }
+            : item,
+        ),
+      )
+      const payload = await request('PATCH', {
+        memberId: member.$id,
+        role,
+        permissions: {},
+      })
+      if (!payload) void refresh()
+    },
+    [request, refresh],
+  )
 
   const handleTogglePermission = useCallback(
     (member: any, key: string) => async () => {
+      const effective = resolveRolePermissions(
+        member.role,
+        member.permissions,
+      ) as any
       const permissions = {
         ...(member.permissions ?? {}),
-        [key]: !member.permissions?.[key],
+        [key]: !effective[key],
       }
       // Optimistic flip; refresh reconciles with the server state.
       setMembers((prev) =>
@@ -211,6 +243,22 @@ const ManageTeam: NextPageWithLayout = () => {
                   onChange={(event) => setEmail(event.target.value)}
                   sx={{ flexGrow: 1, maxWidth: 360 }}
                 />
+                <TextField
+                  select
+                  size="small"
+                  label="Role"
+                  value={newRole}
+                  onChange={(event) =>
+                    setNewRole(event.target.value as TenantRoleId)
+                  }
+                  sx={{ minWidth: 110 }}
+                >
+                  {ROLE_IDS.map((role) => (
+                    <MenuItem key={role} value={role}>
+                      {TENANT_ROLE_LABELS[role]}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <Button
                   size="small"
                   variant="contained"
@@ -274,30 +322,58 @@ const ManageTeam: NextPageWithLayout = () => {
                         </Stack>
                       </TableCell>
                       <TableCell>
-                        <Stack
-                          direction="row"
-                          sx={{ flexWrap: 'wrap', columnGap: 1 }}
-                        >
-                          {PERMISSIONS.map(({ key, label }) => (
-                            <FormControlLabel
-                              key={key}
-                              control={
-                                <Checkbox
-                                  size="small"
-                                  checked={Boolean(member.permissions?.[key])}
-                                  onChange={handleTogglePermission(
-                                    member,
-                                    key,
-                                  )}
+                        <Stack spacing={0.5}>
+                          <TextField
+                            select
+                            size="small"
+                            variant="standard"
+                            value={
+                              (member.role as string) in TENANT_ROLE_LABELS
+                                ? member.role
+                                : 'viewer'
+                            }
+                            onChange={handleRoleChange(member)}
+                            disabled={!canManage}
+                            sx={{ maxWidth: 120 }}
+                          >
+                            {ROLE_IDS.map((role) => (
+                              <MenuItem key={role} value={role}>
+                                {TENANT_ROLE_LABELS[role]}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                          <Stack
+                            direction="row"
+                            sx={{ flexWrap: 'wrap', columnGap: 1 }}
+                          >
+                            {PERMISSIONS.map(({ key, label }) => {
+                              const effective = resolveRolePermissions(
+                                member.role,
+                                member.permissions,
+                              ) as any
+                              return (
+                                <FormControlLabel
+                                  key={key}
+                                  control={
+                                    <Checkbox
+                                      size="small"
+                                      checked={Boolean(effective[key])}
+                                      disabled={!canManage}
+                                      onChange={handleTogglePermission(
+                                        member,
+                                        key,
+                                      )}
+                                    />
+                                  }
+                                  label={
+                                    <Typography variant="caption">
+                                      {label}
+                                    </Typography>
+                                  }
                                 />
-                              }
-                              label={
-                                <Typography variant="caption">
-                                  {label}
-                                </Typography>
-                              }
-                            />
-                          ))}
+                              )
+                            })}
+                          </Stack>
                         </Stack>
                       </TableCell>
                       <TableCell align="right">
@@ -314,9 +390,10 @@ const ManageTeam: NextPageWithLayout = () => {
                 </TableBody>
               </Table>
               <Typography variant="caption" color="text.secondary">
-                {'Permissions are recorded per member and enforced across ' +
-                  'the console as each surface adopts them; host-level ' +
-                  'access is managed per host on its dashboard.'}
+                {'Roles set the default permissions; ticking a box applies ' +
+                  'a per-member override on top (changing the role resets ' +
+                  'overrides). Host-level access is managed per host on ' +
+                  'its dashboard.'}
               </Typography>
             </Stack>
           </CardDisplay>
