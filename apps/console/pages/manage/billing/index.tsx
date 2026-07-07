@@ -34,6 +34,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
+import settingsNavTabItems from '../../../constants/settings-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import useCurrentTenant from '../../../hooks/use-current-tenant'
 
@@ -95,28 +96,7 @@ const Billing: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Billing'} />
       <DashboardLayout
-        navTabItems={[
-          {
-            id: 'nav-tab-settings-user',
-            label: 'User',
-            href: buildRoute(Route.MANAGE_USER_SETTINGS),
-          },
-          {
-            id: 'nav-tab-settings-account',
-            label: 'Account',
-            href: buildRoute(Route.MANAGE_ACCOUNT_SETTINGS),
-          },
-          {
-            id: 'nav-tab-settings-billing',
-            label: 'Billing',
-            href: buildRoute(Route.MANAGE_BILLING),
-          },
-          {
-            id: 'nav-tab-settings-community',
-            label: 'Community',
-            href: buildRoute(Route.MANAGE_COMMUNITY_PROFILE),
-          },
-        ]}
+        navTabItems={settingsNavTabItems()}
         activeTab={buildRoute(Route.MANAGE_BILLING)}
         breadcrumbItems={[
           { children: 'Billing', href: buildRoute(Route.MANAGE_BILLING) },

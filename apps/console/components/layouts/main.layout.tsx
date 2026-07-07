@@ -166,7 +166,11 @@ const TopAppBar = (props: TopAppBarProps) => {
           color="surface"
           variant="elevation"
           elevation={enableAppBarElevation && activeWithoutHysteresis ? 4 : 0}
-          position={!enableAppBarElevation ? 'relative' : 'sticky'}
+          // Always scrolls away (user request 2026-07-07): the secondary
+          // nav-tabs bar is the sticky one; pages that passed
+          // enableAppBarElevation used to pin this bar too, so which bar
+          // stuck varied page to page.
+          position="relative"
           sx={{
             height: `${TOP_BAR_HEIGHT - 1}px`,
             borderBottomWidth: `1px`,
