@@ -19,7 +19,6 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
   Box,
   Button,
@@ -31,26 +30,12 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import {
-  collection,
-  deleteDoc,
-  doc,
-  increment,
-  limit,
-  query,
-  setDoc,
-} from 'firebase/firestore'
-import {
-  deleteObject,
-  getDownloadURL,
-  ref as storageRef,
-  uploadBytesResumable,
-} from 'firebase/storage'
+import { collection, limit, query } from 'firebase/firestore'
 import { type ChangeEvent, useCallback, useRef, useState } from 'react'
 import {
   useFirestore,
   useFirestoreCollectionData,
-  useStorage,
+  useUser,
 } from 'reactfire'
 import { checkTenantQuota } from '../../constants/entitlements'
 import useCurrentTenant from '../../hooks/use-current-tenant'
@@ -64,23 +49,39 @@ export interface MediaLibraryComponentProps {
 const formatBytes = (bytes: number) =>
   bytes >= 1024 * 1024
     ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-    : `${Math.max(1, Math.round(bytes / 1024))} KB`
+    : `${bytes === 0 ? 0 : Math.max(1, Math.round(bytes / 1024))} KB`
+
+/** File → base64 (payload for the upload API). */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(reader.error)
+    reader.onload = () => {
+      const result = String(reader.result ?? '')
+      resolve(result.slice(result.indexOf(',') + 1))
+    }
+    reader.readAsDataURL(file)
+  })
+}
 
 /**
- * Per-host media library (AGL-72/73): uploads to Firebase Storage at
+ * Per-host media library (AGL-72/73): files live in Firebase Storage at
  * `hosts/{hostId}/media/{mediaId}` with a Firestore metadata mirror and a
  * bytes counter doc (`counters/media`) that feeds the storage quota meter.
+ * Uploads/deletes go through `/api/media/upload` (AGL-85) — Storage rules
+ * deny client writes, so auth, admin membership, and quota are enforced
+ * server-side; the quota check here is just a friendlier early error.
  * Doubles as the browse grid inside MediaPickerDialog via `onSelect`.
  */
 export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const { hostId, onSelect } = props
   const firestore = useFirestore()
-  const storage = useStorage()
+  const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const { tenant } = useCurrentTenant()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [progress, setProgress] = useState<number | null>(null)
+  const [busy, setBusy] = useState(false)
 
   const { data: mediaDocs } = useFirestoreCollectionData<any>(
     query(collection(firestore, 'hosts', hostId, 'media'), limit(500)),
@@ -117,38 +118,29 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         )
       }
 
-      const mediaId = Aglyn.createResourceUid()
-      const objectRef = storageRef(storage, `hosts/${hostId}/media/${mediaId}`)
-      setProgress(0)
+      setBusy(true)
       try {
-        await new Promise<void>((resolve, reject) => {
-          const task = uploadBytesResumable(objectRef, file, {
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch('/api/media/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+          body: JSON.stringify({
+            hostId,
+            fileName: file.name,
             contentType: file.type,
+            data: await fileToBase64(file),
+          }),
+        })
+        const payload = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          return void enqueueSnackbar(payload?.error ?? 'Upload failed', {
+            variant: 'error',
+            allowDuplicate: true,
           })
-          task.on(
-            'state_changed',
-            (snapshot) =>
-              setProgress(
-                (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
-              ),
-            reject,
-            () => resolve(),
-          )
-        })
-        const url = await getDownloadURL(objectRef)
-        const timestamp = Timestamp.now()
-        await setDoc(doc(firestore, 'hosts', hostId, 'media', mediaId), {
-          fileName: file.name,
-          contentType: file.type,
-          sizeBytes: file.size,
-          url,
-          createdAt: timestamp,
-        })
-        await setDoc(
-          doc(firestore, 'hosts', hostId, 'counters', 'media'),
-          { bytes: increment(file.size), count: increment(1) },
-          { merge: true },
-        )
+        }
         enqueueSnackbar(`Uploaded "${file.name}"`, {
           variant: 'success',
           persist: false,
@@ -160,10 +152,10 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           allowDuplicate: true,
         })
       } finally {
-        setProgress(null)
+        setBusy(false)
       }
     },
-    [storage, firestore, hostId, tenant, usedBytes, enqueueSnackbar],
+    [user, hostId, tenant, usedBytes, enqueueSnackbar],
   )
 
   const handleCopyUrl = useCallback(
@@ -192,20 +184,16 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         .catch(() => false)
       if (!confirmed) return
       try {
-        await deleteObject(
-          storageRef(storage, `hosts/${hostId}/media/${media.$id}`),
-        ).catch(() => {
-          // Object may already be gone; still remove the metadata.
-        })
-        await deleteDoc(doc(firestore, 'hosts', hostId, 'media', media.$id))
-        await setDoc(
-          doc(firestore, 'hosts', hostId, 'counters', 'media'),
-          {
-            bytes: increment(-(media.sizeBytes ?? 0)),
-            count: increment(-1),
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch('/api/media/upload', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
           },
-          { merge: true },
-        )
+          body: JSON.stringify({ hostId, mediaId: media.$id }),
+        })
+        if (!response.ok) throw new Error(`Delete failed (${response.status})`)
         enqueueSnackbar('File deleted', { variant: 'success', persist: false })
       } catch (error) {
         console.error(error)
@@ -215,7 +203,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         })
       }
     },
-    [confirm, storage, firestore, hostId, enqueueSnackbar],
+    [confirm, user, hostId, enqueueSnackbar],
   )
 
   return (
@@ -224,7 +212,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         <Button
           variant="contained"
           color="secondary"
-          disabled={progress !== null}
+          disabled={busy}
           onClick={() => inputRef.current?.click()}
         >
           {'Upload image'}
@@ -241,9 +229,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           sx={{ display: 'none' }}
         />
       </Stack>
-      {progress !== null ? (
-        <LinearProgress variant="determinate" value={progress} />
-      ) : null}
+      {busy ? <LinearProgress /> : null}
       {items.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           {'No media yet — upload an image to use it on your site.'}
