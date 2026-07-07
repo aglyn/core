@@ -21,6 +21,7 @@ import { useUser } from 'reactfire'
 
 export interface TenantPermissions {
   createHosts: boolean
+  editHosts: boolean
   editBilling: boolean
   publishToCommunity: boolean
   installPlugins: boolean
@@ -29,6 +30,7 @@ export interface TenantPermissions {
 
 const ALL_TRUE: TenantPermissions = {
   createHosts: true,
+  editHosts: true,
   editBilling: true,
   publishToCommunity: true,
   installPlugins: true,

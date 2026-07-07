@@ -15,27 +15,29 @@
  * limitations under the License.
  */
 
-import { checkSeatQuota, createResourceUid } from '@aglyn/aglyn'
+import {
+  checkSeatQuota,
+  createResourceUid,
+  TENANT_PERMISSION_KEYS,
+  TENANT_ROLE_PERMISSIONS,
+} from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-/** Granular manager permissions (AGL-108); enforced across the console as
- * surfaces adopt `useTenantPermissions`. */
-const PERMISSION_KEYS = [
-  'createHosts',
-  'editBilling',
-  'publishToCommunity',
-  'installPlugins',
-  'manageMembers',
-] as const
+/** Role + per-key overrides (AGL-120): only boolean overrides persist. */
+function sanitizeRole(input: unknown): string {
+  const role = String(input ?? '')
+  return role in TENANT_ROLE_PERMISSIONS ? role : 'viewer'
+}
 
 function sanitizePermissions(input: unknown) {
   const permissions: Record<string, boolean> = {}
-  for (const key of PERMISSION_KEYS) {
-    permissions[key] = Boolean((input as any)?.[key])
+  for (const key of TENANT_PERMISSION_KEYS) {
+    const value = (input as any)?.[key]
+    if (typeof value === 'boolean') permissions[key] = value
   }
   return permissions
 }
@@ -122,6 +124,7 @@ export default async function handler(
         email,
         status: authUser ? 'active' : 'invited',
         ...(authUser ? { uid: authUser.uid } : {}),
+        role: sanitizeRole(req.body?.role),
         permissions: sanitizePermissions(req.body?.permissions),
         createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
       })
@@ -139,7 +142,12 @@ export default async function handler(
         return res.status(404).json({ error: 'Member not found' })
       }
       await membersRef.doc(memberId).update({
-        permissions: sanitizePermissions(req.body?.permissions),
+        ...(req.body?.role != null
+          ? { role: sanitizeRole(req.body.role) }
+          : {}),
+        ...(req.body?.permissions != null
+          ? { permissions: sanitizePermissions(req.body.permissions) }
+          : {}),
       })
       return res.status(200).json({ ok: true })
     }
