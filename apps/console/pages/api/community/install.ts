@@ -18,6 +18,7 @@
 import { createResourceUid } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
 
 /**
  * Installs (or updates) a community listing into a host (AGL-44/46).
@@ -48,6 +49,13 @@ export default async function handler(
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    // Manager permission gate (AGL-108).
+    const membership = await resolveTenantPermissions(decoded.uid)
+    if (!membership.permissions.installPlugins) {
+      return res.status(403).json({
+        error: 'Your team role does not allow installing from the community',
+      })
+    }
     const firestore = firebaseAdmin.app().firestore()
 
     const hostRef = firestore.collection('hosts').doc(hostId)

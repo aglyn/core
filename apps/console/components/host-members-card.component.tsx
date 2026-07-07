@@ -42,6 +42,7 @@ import {
 import { checkTenantSeatQuota } from '../constants/entitlements'
 import useCurrentTenant from '../hooks/use-current-tenant'
 import useHostActivityLogger from '../hooks/use-host-activity-logger'
+import useTenantPermissions from '../hooks/use-tenant-permissions'
 
 const ROLE_OPTIONS = [
   { value: 'viewer', label: 'Viewer' },
@@ -68,6 +69,8 @@ export function HostMembersCard(props: HostMembersCardProps) {
   const { confirm } = useConfirmationContext()
   const { tenant } = useCurrentTenant()
   const logActivity = useHostActivityLogger(hostId)
+  const { permissions } = useTenantPermissions()
+  const canManage = permissions.manageMembers
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('editor')
   const [busy, setBusy] = useState(false)
@@ -206,7 +209,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
             size="small"
             variant="contained"
             color="secondary"
-            disabled={busy || !email.trim()}
+            disabled={busy || !email.trim() || !canManage}
             onClick={handleAdd}
           >
             {'Add'}
@@ -268,7 +271,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
                     variant="standard"
                     value={member.role ?? 'editor'}
                     onChange={handleRoleChange(member)}
-                    disabled={busy}
+                    disabled={busy || !canManage}
                   >
                     {ROLE_OPTIONS.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
@@ -281,7 +284,7 @@ export function HostMembersCard(props: HostMembersCardProps) {
                   <Button
                     size="small"
                     color="error"
-                    disabled={busy}
+                    disabled={busy || !canManage}
                     onClick={handleRemove(member)}
                   >
                     {'Remove'}

@@ -48,6 +48,7 @@ import settingsNavTabItems from '../../../constants/settings-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import useCurrentTenant from '../../../hooks/use-current-tenant'
+import useTenantPermissions from '../../../hooks/use-tenant-permissions'
 
 const PERMISSIONS: Array<{ key: string; label: string }> = [
   { key: 'createHosts', label: 'Create hosts' },
@@ -69,6 +70,8 @@ const ManageTeam: NextPageWithLayout = () => {
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const { tenant } = useCurrentTenant()
+  const { permissions, isOwner } = useTenantPermissions()
+  const canManage = isOwner || permissions.manageMembers
   const [members, setMembers] = useState<any[]>([])
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
@@ -212,7 +215,7 @@ const ManageTeam: NextPageWithLayout = () => {
                   size="small"
                   variant="contained"
                   color="secondary"
-                  disabled={busy || !email.trim()}
+                  disabled={busy || !email.trim() || !canManage}
                   onClick={handleAdd}
                 >
                   {'Add team member'}

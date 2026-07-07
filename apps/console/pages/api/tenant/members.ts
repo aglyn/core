@@ -18,6 +18,7 @@
 import { checkSeatQuota, createResourceUid } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -59,6 +60,14 @@ export default async function handler(
   try {
     const app = firebaseAdmin.app()
     const decoded = await app.auth().verifyIdToken(idToken)
+    // Manager permission gate (AGL-108); memberships are owner-scoped so
+    // this only bites a manager probing another account's roster.
+    const membership = await resolveTenantPermissions(decoded.uid)
+    if (!membership.isOwner && !membership.permissions.manageMembers) {
+      return res
+        .status(403)
+        .json({ error: 'Your team role does not allow managing the team' })
+    }
     const firestore = app.firestore()
     // Tenants are keyed by the owner's uid; only the owner manages seats.
     const tenantRef = firestore.collection('tenants').doc(decoded.uid)

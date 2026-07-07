@@ -23,6 +23,7 @@ import {
 } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
 
 /**
  * Publishes a host reusable component to the community (AGL-44). Runs
@@ -68,6 +69,13 @@ export default async function handler(
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    // Manager permission gate (AGL-108).
+    const membership = await resolveTenantPermissions(decoded.uid)
+    if (!membership.permissions.publishToCommunity) {
+      return res.status(403).json({
+        error: 'Your team role does not allow publishing to the community',
+      })
+    }
     const firestore = firebaseAdmin.app().firestore()
 
     const hostSnapshot = await firestore.collection('hosts').doc(hostId).get()
