@@ -17,8 +17,9 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
+import { mdiFileDocumentMultipleOutline } from '@aglyn/shared-data-mdi'
 import {
+  CardDisplay,
   Container,
   useConfirmationContext,
 } from '@aglyn/shared-ui-jsx'
@@ -249,7 +250,7 @@ const HostContent: NextPageWithLayout = () => {
         ]}
         header={{
           children: 'Content',
-          icon: { path: ICON_VARIANT_APP_SETTINGS.path },
+          icon: { path: mdiFileDocumentMultipleOutline.path },
         }}
         headerRight={
           <Button
@@ -262,6 +263,12 @@ const HostContent: NextPageWithLayout = () => {
         }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <CardDisplay
+            header={'Collections & Entries'}
+            contentGutterX
+            contentGutterY
+            contentBordered="all"
+          >
           {collections.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
               {'Create a collection (e.g. "Blog") to publish entries at ' +
@@ -375,6 +382,7 @@ const HostContent: NextPageWithLayout = () => {
               )}
             </Stack>
           )}
+          </CardDisplay>
         </Container>
       </DashboardLayout>
       <Dialog

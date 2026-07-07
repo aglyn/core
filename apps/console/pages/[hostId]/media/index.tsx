@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
-import { Container } from '@aglyn/shared-ui-jsx'
+import { mdiImageMultipleOutline } from '@aglyn/shared-data-mdi'
+import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -48,11 +48,18 @@ const HostMedia: NextPageWithLayout = () => {
         ]}
         header={{
           children: 'Media',
-          icon: { path: ICON_VARIANT_APP_SETTINGS.path },
+          icon: { path: mdiImageMultipleOutline.path },
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <MediaLibraryComponent hostId={hostId} />
+          <CardDisplay
+            header={'Library'}
+            contentGutterX
+            contentGutterY
+            contentBordered="all"
+          >
+            <MediaLibraryComponent hostId={hostId} />
+          </CardDisplay>
         </Container>
       </DashboardLayout>
     </>
