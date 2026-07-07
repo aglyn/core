@@ -32,6 +32,7 @@ import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { InputAdornment, Tab } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
 import { doc } from 'firebase/firestore'
+import { useSearchParams } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { useAnalytics, useFirestore } from 'reactfire'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
@@ -42,6 +43,7 @@ import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import CustomDomainCard from '../../../components/custom-domain-card.component'
 import NotFoundScreenCard from '../../../components/not-found-screen-card.component'
+import ThemeEditor from '../../../components/theme-editor/theme-editor.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../constants/route-links'
 import hostNavTabItems from '../../../constants/host-nav-tabs'
@@ -232,17 +234,48 @@ const useHostRef = (id: Aglyn.HostUid) => {
   return doc(firestore, 'hosts', id)
 }
 
+/** Theme tab id (AGL-114); `/setup?tab=theme` deep links land here. */
+const THEME_TAB_ID = 'theme'
+
 const HostSetup: NextPageWithLayout = (props) => {
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
 
-  const [tab, setTab] = useState(basicSchema.id)
+  const searchParams = useSearchParams()
+  const requestedTab = searchParams?.get('tab')
+  const [tab, setTab] = useState(
+    requestedTab === THEME_TAB_ID || requestedTab === seoSchema.id
+      ? requestedTab
+      : basicSchema.id,
+  )
   const analytics = useAnalytics()
   const hostId = useHostId()
   const {
-    doc: { data },
+    doc: { data, status },
     setDoc,
   } = useHost({ hostId })
+  const [themeSaving, setThemeSaving] = useState(false)
+
+  const handleThemeSave = useCallback(
+    async (theme: Aglyn.AglynHostTheme) => {
+      setThemeSaving(true)
+      const dequeueLoading = queueLoading()
+      // mergeFields replaces the theme atomically, so cleared colors do not
+      // linger from a deep merge with the previous document.
+      await setDoc({ theme }, { mergeFields: ['theme'] })
+        .then(() => {
+          enqueueSnackbar('Theme saved!', { variant: 'success' })
+        })
+        .catch((e) => {
+          enqueueSnackbar(`Error: ${JSON.stringify(e)}`, { variant: 'error' })
+        })
+        .finally(() => {
+          dequeueLoading()
+          setThemeSaving(false)
+        })
+    },
+    [enqueueSnackbar, queueLoading, setDoc],
+  )
 
   const handleBasicSave = useCallback(
     async (fields: any) => {
@@ -279,7 +312,7 @@ const HostSetup: NextPageWithLayout = (props) => {
       setTab(value)
       const form = forms.find(({ schema }) => schema.id === value)
       logEvent(analytics, 'screen_view', {
-        firebase_screen: form.schema.title as string,
+        firebase_screen: (form?.schema.title as string) ?? 'Theme',
         firebase_screen_class: HostSetup.displayName,
       })
     },
@@ -337,6 +370,7 @@ const HostSetup: NextPageWithLayout = (props) => {
                             label={schema.title}
                           />
                         ))}
+                        <Tab value={THEME_TAB_ID} label={'Theme'} />
                       </TabList>
                     </CardDisplay>
                   ),
@@ -365,6 +399,15 @@ const HostSetup: NextPageWithLayout = (props) => {
                           <CardDisplay></CardDisplay>
                         </TabPanel>
                       ))}
+                      <TabPanel value={THEME_TAB_ID} sx={{ padding: 'unset' }}>
+                        {status === 'success' ? (
+                          <ThemeEditor
+                            theme={data?.theme}
+                            saving={themeSaving}
+                            onSave={handleThemeSave}
+                          />
+                        ) : null}
+                      </TabPanel>
                     </>
                   ),
                 },
