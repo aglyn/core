@@ -16,8 +16,12 @@
  */
 'use client'
 
-import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
-import { Container, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { mdiInboxArrowDown } from '@aglyn/shared-data-mdi'
+import {
+  CardDisplay,
+  Container,
+  useConfirmationContext,
+} from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -118,10 +122,16 @@ const HostInbox: NextPageWithLayout = () => {
         ]}
         header={{
           children: 'Inbox',
-          icon: { path: ICON_VARIANT_APP_SETTINGS.path },
+          icon: { path: mdiInboxArrowDown.path },
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          <CardDisplay
+            header={'Form Submissions'}
+            contentGutterX
+            contentGutterY
+            contentBordered="all"
+          >
           {submissions.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
               {'No form submissions yet. Add a Contact Form element to a ' +
@@ -197,6 +207,7 @@ const HostInbox: NextPageWithLayout = () => {
               </TableBody>
             </Table>
           )}
+          </CardDisplay>
           <Stack sx={{ mt: 3 }}>
             <HostOrdersCard hostId={hostId} />
           </Stack>
