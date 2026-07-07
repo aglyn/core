@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as Besigner from '@aglyn/besigner'
 import { BesignerDeviceFlag } from '@aglyn/besigner'
 import { LOADING_OVERLAY_ELEMENT } from '@aglyn/shared-ui-jsx'
 import { generateComponentClassKeys, styled } from '@aglyn/shared-ui-theme'
@@ -102,7 +103,23 @@ export const ViewportCanvasComponent = forwardRef<
   })
 
   return (
-    <ViewportCanvas ref={ref} id="aglyn:viewport-canvas" {...rest}>
+    <ViewportCanvas
+      ref={ref}
+      id="aglyn:viewport-canvas"
+      onMouseDown={(event) => {
+        // Clicking empty canvas — the panning surface or the artboard's own
+        // background (node clicks stop propagation in DraggableDroppable) —
+        // deselects all (AGL-12).
+        const target = event.target as HTMLElement
+        if (
+          target === event.currentTarget ||
+          target.id === 'aglyn:viewport-artboard'
+        ) {
+          Besigner.focus.clearSelection()
+        }
+      }}
+      {...rest}
+    >
       <ViewportArtboard id="aglyn:viewport-artboard" className={artboardClass}>
         <ViewportFrameComponent />
       </ViewportArtboard>
