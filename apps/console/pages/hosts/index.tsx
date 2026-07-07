@@ -34,6 +34,7 @@ import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
+import useTenantPermissions from '../../hooks/use-tenant-permissions'
 
 function HostInfoItem({ label, value }) {
   return (
@@ -77,6 +78,7 @@ function Hosts() {
   const hostsQuery = query(ref, where(`admins.${user.uid}`, '==', true))
   const { data } = useFirestoreCollectionData(hostsQuery, { idField: '$id' })
   const [creating, setCreating] = useState(false)
+  const { permissions } = useTenantPermissions()
 
   return (
     <>
@@ -94,13 +96,15 @@ function Hosts() {
           icon: { path: ICON_VARIANT_HOST_GROUP.path },
         }}
         headerRight={
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => setCreating(true)}
-          >
-            {'Create host'}
-          </Button>
+          permissions.createHosts ? (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => setCreating(true)}
+            >
+              {'Create host'}
+            </Button>
+          ) : undefined
         }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>

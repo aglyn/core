@@ -18,6 +18,7 @@
 import { checkQuota, createResourceUid } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
 
 const SUBDOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]{2,29}$/
 // Platform/system names a tenant must not squat.
@@ -72,6 +73,13 @@ export default async function handler(
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    // Manager permission gate (AGL-108).
+    const membership = await resolveTenantPermissions(decoded.uid)
+    if (!membership.permissions.createHosts) {
+      return res
+        .status(403)
+        .json({ error: 'Your team role does not allow creating hosts' })
+    }
     const firestore = firebaseAdmin.app().firestore()
 
     const taken = await firestore

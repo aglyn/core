@@ -34,6 +34,7 @@ import {
   useFirestoreCollectionData,
   useUser,
 } from 'reactfire'
+import useTenantPermissions from '../../hooks/use-tenant-permissions'
 
 export interface CommunityBrowseProps {
   hostId: string
@@ -52,6 +53,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
+  const { permissions } = useTenantPermissions()
   const { queueLoading } = useLoading()
   const [handles, setHandles] = useState<Record<string, string>>({})
 
@@ -346,7 +348,15 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     color="secondary"
                     disabled={Boolean(upToDate)}
                     onClick={
-                      mustBuy ? handleBuy(listing) : handleInstall(listing)
+                      permissions.installPlugins
+                        ? mustBuy
+                          ? handleBuy(listing)
+                          : handleInstall(listing)
+                        : () =>
+                            enqueueSnackbar(
+                              'Your team role does not allow installing from the community',
+                              { variant: 'warning', persist: false },
+                            )
                     }
                   >
                     {upToDate

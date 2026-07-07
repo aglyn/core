@@ -37,12 +37,14 @@ import { buildRoute, Route } from '../../../constants/route-links'
 import settingsNavTabItems from '../../../constants/settings-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import useCurrentTenant from '../../../hooks/use-current-tenant'
+import useTenantPermissions from '../../../hooks/use-tenant-permissions'
 
 
 const Billing: NextPageWithLayout = () => {
   const { data: user } = useUser()
   const firestore = useFirestore()
   const { tenant } = useCurrentTenant()
+  const { permissions } = useTenantPermissions()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
 
@@ -163,7 +165,14 @@ const Billing: NextPageWithLayout = () => {
                 children: (
                   <BillingPlanCardsComponent
                     plan={tenant?.plan as TenantPlan | undefined}
-                    onSelect={(tier) => void handleUpgrade(tier)()}
+                    onSelect={(tier) =>
+                      permissions.editBilling
+                        ? void handleUpgrade(tier)()
+                        : void enqueueSnackbar(
+                            'Your team role does not allow billing changes',
+                            { variant: 'warning', persist: false },
+                          )
+                    }
                   />
                 ),
               },
