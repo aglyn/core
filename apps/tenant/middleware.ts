@@ -55,6 +55,10 @@ export const config = {
     // '/(\\?\\!_next|_static|api)/:path*',
     // '/_sites/:path*',
     '/((?!api|_next|_static|fonts|examples|[\\w-]+\\.\\w+).*)',
+    // Per-host SEO files, rewritten to the api routes with the resolved
+    // tenant host (SEO Toolkit).
+    '/sitemap.xml',
+    '/robots.txt',
   ],
 }
 
@@ -183,6 +187,18 @@ export const middleware: NextMiddleware = (req, event) => {
       req.cookies.get('__Secure-next-auth.session-token'),
     )
     return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  // Per-host SEO files resolve through api routes (SEO Toolkit).
+  if (req.nextUrl.pathname === '/sitemap.xml') {
+    return NextResponse.rewrite(
+      new URL(`/api/sitemap?host=${tenantHost}`, req.url),
+    )
+  }
+  if (req.nextUrl.pathname === '/robots.txt') {
+    return NextResponse.rewrite(
+      new URL(`/api/robots?host=${tenantHost}`, req.url),
+    )
   }
 
   // rewrite to the current hostname under the pages/_sites folder
