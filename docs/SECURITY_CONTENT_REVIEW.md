@@ -19,11 +19,11 @@ markup, requests, or storage. Verdicts below; fixes shipped in the same PR.
 
 ## Known residual items
 
-1. **Storage rules** are still any-authed write: Firebase Storage rules
-   cannot read the host `admins` map, so per-host authorization there needs
-   either per-host custom claims or moving uploads behind an authenticated
-   API route (recommended follow-up before GA; metadata mirror writes are
-   already admin-scoped by the Firestore fix).
+1. ~~**Storage rules** are still any-authed write~~ — RESOLVED (AGL-85):
+   uploads/deletes moved behind `/api/media/upload` (ID token + host-admin
+   + server-side quota, Admin SDK writes); `cloud/firebase-storage.rules`
+   now denies all client writes (public read for site assets). Deploy with
+   `firebase deploy --only storage`.
 2. **Render-time HTML sanitization on the tenant** (defense-in-depth for
    the `html` prop) — sanitizer currently runs at commit time only.
 3. Screen-link resolved hrefs come from the host routing map (slug-derived,
