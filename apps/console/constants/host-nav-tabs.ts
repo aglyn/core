@@ -39,11 +39,7 @@ export function hostNavTabItems(hostId: string) {
       label: 'Layouts',
       href: buildRoute(Route.LAYOUT_LIST, { hostId }),
     },
-    {
-      id: 'nav-tab-theme',
-      label: 'Theme',
-      href: buildRoute(Route.HOST_THEME, { hostId }),
-    },
+    // Theme lives under Setup → Theme (AGL-114); the /theme route redirects.
     {
       id: 'nav-tab-media',
       label: 'Media',
