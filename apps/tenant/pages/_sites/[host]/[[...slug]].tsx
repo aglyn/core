@@ -279,7 +279,7 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       <Head>
         <title>{fullTitle}</title>
         {description ? (
-          <meta key="description" name="description" content={description} />
+          <meta key="desc" name="description" content={description} />
         ) : null}
         <meta key="og:title" property="og:title" content={fullTitle} />
         {description ? (

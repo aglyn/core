@@ -35,7 +35,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const host = String(req.query['host'] ?? '')
+  const host = String(
+    req.headers['x-aglyn-tenant-host'] ?? req.query['host'] ?? '',
+  )
   if (!host) return res.status(400).send('Missing host')
 
   const hostRes = await getHost({ host })

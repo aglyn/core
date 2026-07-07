@@ -189,16 +189,21 @@ export const middleware: NextMiddleware = (req, event) => {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
-  // Per-host SEO files resolve through api routes (SEO Toolkit).
-  if (req.nextUrl.pathname === '/sitemap.xml') {
-    return NextResponse.rewrite(
-      new URL(`/api/sitemap?host=${tenantHost}`, req.url),
-    )
-  }
-  if (req.nextUrl.pathname === '/robots.txt') {
-    return NextResponse.rewrite(
-      new URL(`/api/robots?host=${tenantHost}`, req.url),
-    )
+  // Per-host SEO files resolve through api routes (SEO Toolkit). Clone the
+  // request URL so the host query survives the rewrite.
+  if (
+    req.nextUrl.pathname === '/sitemap.xml' ||
+    req.nextUrl.pathname === '/robots.txt'
+  ) {
+    const seoUrl = req.nextUrl.clone()
+    seoUrl.pathname =
+      req.nextUrl.pathname === '/sitemap.xml' ? '/api/sitemap' : '/api/robots'
+    seoUrl.searchParams.set('host', tenantHost)
+    // The query can be dropped across dev rewrites, so the resolved tenant
+    // host also travels as a request header the api routes prefer.
+    const seoHeaders = new Headers(req.headers)
+    seoHeaders.set('x-aglyn-tenant-host', tenantHost)
+    return NextResponse.rewrite(seoUrl, { request: { headers: seoHeaders } })
   }
 
   // rewrite to the current hostname under the pages/_sites folder
