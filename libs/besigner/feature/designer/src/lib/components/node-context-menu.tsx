@@ -42,7 +42,9 @@ import { observer } from 'mobx-react-lite'
 import { ChangeEvent, forwardRef, useCallback, useState } from 'react'
 import useAddElementDrawerCallback from '../hooks/use-add-element-drawer-callback'
 import useBesignerAppContext from '../hooks/use-besigner-app-context'
-import useDeleteElementCallback from '../hooks/use-delete-element-callback'
+import useDeleteElementCallback, {
+  useDeleteElementsCallback,
+} from '../hooks/use-delete-element-callback'
 
 export interface NodeContextMenuProps extends PaperProps {
   node: Aglyn.NodeSchema<any>
@@ -55,6 +57,9 @@ export const NodeContextMenu = observer(
     const { node, onAction, ...rest } = props
 
     const isRootNode = Aglyn.canvas.isRootNode(node)
+    // Multi-selection (AGL-11): ambiguous single-target actions hide or
+    // disable; Duplicate/Delete apply to the whole selection.
+    const multi = Besigner.focus.hasMultipleSelected()
     const app = useBesignerAppContext()
     const handleAddElementClick = useAddElementDrawerCallback()
     const elementRef = Besigner.refs.get(node?.$id)
@@ -68,9 +73,14 @@ export const NodeContextMenu = observer(
       (e: ChangeEvent<unknown>) => {
         if (isRootNode) return
         onAction?.()
-        Aglyn.canvas.duplicateNode(node)
+        const targets = multi ? Besigner.focus.getSelected() : [node]
+        for (const target of targets) {
+          if (target && !Aglyn.canvas.isRootNode(target)) {
+            Aglyn.canvas.duplicateNode(target)
+          }
+        }
       },
-      [node, isRootNode, onAction],
+      [node, isRootNode, multi, onAction],
     )
 
     const handleModifyClick = useCallback(
@@ -127,11 +137,20 @@ export const NodeContextMenu = observer(
     )
 
     const deleteElementCallback = useDeleteElementCallback()
+    const deleteElementsCallback = useDeleteElementsCallback()
     const handleDeleteClick = useCallback(() => {
       closeMore()
       onAction?.()
-      deleteElementCallback(node)
-    }, [node, closeMore, onAction, deleteElementCallback])
+      if (multi) void deleteElementsCallback(Besigner.focus.getSelected())
+      else void deleteElementCallback(node)
+    }, [
+      node,
+      multi,
+      closeMore,
+      onAction,
+      deleteElementCallback,
+      deleteElementsCallback,
+    ])
 
     return (
       <Paper ref={ref} sx={{ width: 240, overflow: 'hidden' }} {...rest}>
@@ -154,18 +173,20 @@ export const NodeContextMenu = observer(
           >
             {node?.labelShort}
           </Typography>
-          <MenuItem
-            onClick={() => {
-              onAction?.()
-              handleAddElementClick(node)
-            }}
-          >
-            <ListItemText inset>Add element</ListItemText>
-          </MenuItem>
-          <Divider />
+          {multi ? null : (
+            <MenuItem
+              onClick={() => {
+                onAction?.()
+                handleAddElementClick(node)
+              }}
+            >
+              <ListItemText inset>Add element</ListItemText>
+            </MenuItem>
+          )}
+          {multi ? null : <Divider />}
           <MenuItem
             onClick={handleParentOnClick}
-            disabled={isRootNode}
+            disabled={isRootNode || multi}
             onMouseEnter={handleParentOnMouseEnter}
             onPointerEnter={handleParentOnMouseEnter}
             onMouseLeave={handleParentOnMouseLeave}
@@ -175,7 +196,7 @@ export const NodeContextMenu = observer(
           </MenuItem>
           <MenuItem
             onClick={handleMoveUp}
-            disabled={isRootNode || !(node?.index > 0)}
+            disabled={isRootNode || multi || !(node?.index > 0)}
           >
             <ListItemIcon>
               <MdiIcon
@@ -188,7 +209,9 @@ export const NodeContextMenu = observer(
           <MenuItem
             onClick={handleMoveDown}
             disabled={
-              isRootNode || !(node?.index < node?.parent?.nodes?.length - 1)
+              isRootNode ||
+              multi ||
+              !(node?.index < node?.parent?.nodes?.length - 1)
             }
           >
             <ListItemIcon>
@@ -207,7 +230,9 @@ export const NodeContextMenu = observer(
                 path={ICON_VARIANT_MODIFY_DUPLICATE.path}
               />
             </ListItemIcon>
-            <ListItemText>Duplicate</ListItemText>
+            <ListItemText>
+              {multi ? 'Duplicate selection' : 'Duplicate'}
+            </ListItemText>
           </MenuItem>
           <MenuItem disabled={isRootNode} onClick={handleDeleteClick}>
             <ListItemIcon>
@@ -216,7 +241,7 @@ export const NodeContextMenu = observer(
                 path={ICON_VARIANT_MODIFY_DELETE.path}
               />
             </ListItemIcon>
-            <ListItemText>Delete</ListItemText>
+            <ListItemText>{multi ? 'Delete selection' : 'Delete'}</ListItemText>
           </MenuItem>
         </MenuList>
       </Paper>

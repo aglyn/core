@@ -142,7 +142,17 @@ export const DraggableDroppable = observer(
       function handleMouseDown(e: Event) {
         e.preventDefault()
         e.stopPropagation()
-        Besigner.focus.handleNodeSelection(node)
+        // Canvas multi-selection modifiers (AGL-12), mirroring the
+        // hierarchy panel: Shift ranges, Cmd/Ctrl toggles.
+        const pointer = e as globalThis.MouseEvent
+        if (pointer.shiftKey) {
+          Besigner.focus.rangeSelectNode(node)
+        } else {
+          Besigner.focus.handleNodeSelection(
+            node,
+            pointer.metaKey || pointer.ctrlKey,
+          )
+        }
       }
       function handleDoubleClick(e: Event) {
         // Inline text editing for components that declare textEditable;

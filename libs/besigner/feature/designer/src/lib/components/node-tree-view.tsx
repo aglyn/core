@@ -418,7 +418,13 @@ export const NodeTreeView = observer(
       e.preventDefault()
       const node = Aglyn.canvas.getNode($id)
       if (!node) return
-      Besigner.focus.handleNodeSelection(node)
+      // Multi-selection modifiers (AGL-8): Shift ranges from the anchor,
+      // Cmd/Ctrl toggles membership, plain click single-selects.
+      if (e.shiftKey) {
+        Besigner.focus.rangeSelectNode(node)
+      } else {
+        Besigner.focus.handleNodeSelection(node, e.metaKey || e.ctrlKey)
+      }
     }, [])
 
     const handleTreeItemHover = useCallback((e, $id: Aglyn.NodeId) => {
