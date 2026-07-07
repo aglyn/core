@@ -342,7 +342,7 @@ function ScreenDetails() {
     at: string
   } | null>(null)
   const openScheduler = useCallback(
-    (action: 'publish' | 'unpublish') => () => {
+    (action: 'publish' | 'unpublish', presetVersionId?: string) => () => {
       if (!hasEntitlement('scheduled-publishing', tenant)) {
         return enqueueSnackbar(
           'Scheduled publishing requires a Business plan — see Billing',
@@ -354,7 +354,8 @@ function ScreenDetails() {
       const pad = (value: number) => String(value).padStart(2, '0')
       setScheduler({
         action,
-        versionId: screen?.versionId ?? versions[0]?.$id ?? '',
+        versionId:
+          presetVersionId ?? screen?.versionId ?? versions[0]?.$id ?? '',
         at:
           `${initial.getFullYear()}-${pad(initial.getMonth() + 1)}-` +
           `${pad(initial.getDate())}T${pad(initial.getHours())}:${pad(initial.getMinutes())}`,
@@ -784,7 +785,7 @@ function ScreenDetails() {
                 ),
               },
               {
-                size: { xs: 12, lg: 8 },
+                size: { xs: 12 },
                 children: (
                   <CardDisplay
                     header={'Versions'}
@@ -847,6 +848,27 @@ function ScreenDetails() {
                                 >
                                   {'Publish now'}
                                 </Button>
+                                <Tooltip
+                                  title={
+                                    isLive
+                                      ? 'This version is already live'
+                                      : 'Make this version live at a date/time'
+                                  }
+                                >
+                                  <span>
+                                    <Button
+                                      size="small"
+                                      color="secondary"
+                                      disabled={isLive}
+                                      onClick={openScheduler(
+                                        'publish',
+                                        version.$id,
+                                      )}
+                                    >
+                                      {'Schedule'}
+                                    </Button>
+                                  </span>
+                                </Tooltip>
                                 <AppLink
                                   size="small"
                                   componentVariant="button"
@@ -879,7 +901,7 @@ function ScreenDetails() {
                 ),
               },
               {
-                size: { xs: 12, lg: 4 },
+                size: { xs: 12 },
                 children: (
                   <CardDisplay
                     header={'Raw JSON'}
@@ -887,7 +909,13 @@ function ScreenDetails() {
                     contentGutterY
                     contentBordered="all"
                   >
-                    <pre style={{ overflowX: 'auto', margin: 0 }}>
+                    <pre
+                      style={{
+                        margin: 0,
+                        maxHeight: 360,
+                        overflow: 'auto',
+                      }}
+                    >
                       {JSON.stringify(screen, null, 2)}
                     </pre>
                   </CardDisplay>
