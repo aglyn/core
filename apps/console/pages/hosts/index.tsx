@@ -23,10 +23,12 @@ import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { AppLink } from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
-import { Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { collection, query, where } from 'firebase/firestore'
+import { useState } from 'react'
 import { useFirestore, useFirestoreCollectionData, useUser } from 'reactfire'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
+import CreateHostDialog from '../../components/create-host-dialog.component'
 import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
@@ -74,6 +76,7 @@ function Hosts() {
   const ref = collection(firestore, 'hosts')
   const hostsQuery = query(ref, where(`admins.${user.uid}`, '==', true))
   const { data } = useFirestoreCollectionData(hostsQuery, { idField: '$id' })
+  const [creating, setCreating] = useState(false)
 
   return (
     <>
@@ -90,6 +93,15 @@ function Hosts() {
           children: 'All Hosts',
           icon: { path: ICON_VARIANT_HOST_GROUP.path },
         }}
+        headerRight={
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => setCreating(true)}
+          >
+            {'Create host'}
+          </Button>
+        }
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <GridItems
@@ -178,6 +190,7 @@ function Hosts() {
             ]}
           />
         </Container>
+        <CreateHostDialog open={creating} onClose={() => setCreating(false)} />
       </DashboardLayout>
     </>
   )

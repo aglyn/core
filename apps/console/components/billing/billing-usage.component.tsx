@@ -24,7 +24,7 @@ import {
 import { Link, LinearProgress, Stack, Typography } from '@mui/material'
 import { collection, doc, getCountFromServer, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { useFirestore } from 'reactfire'
+import { useFirestore, useUser } from 'reactfire'
 
 export interface BillingUsageProps {
   tenant: Partial<AglynTenant> | null | undefined
@@ -92,11 +92,16 @@ function HostUsageMeters(props: {
 }) {
   const { host, showName, tenant } = props
   const firestore = useFirestore()
+  const { data: user } = useUser()
   const [counts, setCounts] = useState<{
     screens: number | null
     layouts: number | null
     storageMb: number | null
   }>({ screens: null, layouts: null, storageMb: null })
+  const [usage, setUsage] = useState<{
+    siteSizeMb: number | null
+    bandwidthGb: number | null
+  }>({ siteSizeMb: null, bandwidthGb: null })
   const entitlements = resolveTenantEntitlements(tenant)
 
   // Aggregation counts instead of full collection reads — one billed read
@@ -128,6 +133,39 @@ function HostUsageMeters(props: {
     }
   }, [firestore, host.$id])
 
+  // Site size (published version payloads) and month bandwidth are summed
+  // server-side — version node payloads aren't client-readable at a
+  // reasonable cost (AGL-41 follow-up).
+  useEffect(() => {
+    let active = true
+    void (async () => {
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        if (!idToken) return
+        const response = await fetch(
+          `/api/billing/host-usage?hostId=${encodeURIComponent(host.$id)}`,
+          { headers: { Authorization: `Bearer ${idToken}` } },
+        )
+        if (!response.ok) return
+        const payload = await response.json()
+        if (!active) return
+        setUsage({
+          siteSizeMb:
+            Math.round((payload.siteSizeBytes / (1024 * 1024)) * 10) / 10,
+          bandwidthGb:
+            Math.round(
+              (payload.bandwidthBytes / (1024 * 1024 * 1024)) * 100,
+            ) / 100,
+        })
+      } catch {
+        // Meters keep their "not yet metered" state on failure.
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [user, host.$id])
+
   const members = Object.keys(host.admins ?? {}).length
 
   return (
@@ -158,6 +196,18 @@ function HostUsageMeters(props: {
         limit={entitlements.storagePerHostMb}
         unit="MB"
       />
+      <UsageMeter
+        label="Total site size"
+        used={usage.siteSizeMb}
+        limit={entitlements.totalSiteSizeMb}
+        unit="MB"
+      />
+      <UsageMeter
+        label="Bandwidth (this month)"
+        used={usage.bandwidthGb}
+        limit={entitlements.bandwidthGb}
+        unit="GB"
+      />
     </>
   )
 }
@@ -185,18 +235,6 @@ export function BillingUsageComponent(props: BillingUsageProps) {
           tenant={tenant}
         />
       ))}
-      <UsageMeter
-        label="Total site size"
-        used={null}
-        limit={entitlements.totalSiteSizeMb}
-        unit="MB"
-      />
-      <UsageMeter
-        label="Bandwidth"
-        used={null}
-        limit={entitlements.bandwidthGb}
-        unit="GB"
-      />
     </>
   )
 }

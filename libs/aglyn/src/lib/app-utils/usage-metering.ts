@@ -36,6 +36,13 @@ export const METERED_UNIT_RATES_USD = {
   perFormSubmission: 0.0005,
 }
 
+/**
+ * Average transfer per page view (HTML + JS + a few images) used to turn
+ * the analytics view counter into a bandwidth estimate — same assumption
+ * the `perPageView` rate is built on.
+ */
+export const ESTIMATED_PAGE_TRANSFER_BYTES = 600 * 1024
+
 /** One month of usage for a single host (from the per-host counters). */
 export interface HostUsageSnapshot {
   storageBytes: number
