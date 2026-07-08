@@ -62,6 +62,10 @@ interface Props {
   membershipPage?: string
   /** Rendered as the custom not-found screen (noindex, AGL-87). */
   notFoundFallback?: boolean
+  /** Maintenance mode (AGL-131): 503 screen or the built-in notice. */
+  maintenanceFallback?: boolean
+  /** Composed 401 screen nodes for members-only denials (AGL-131). */
+  unauthorizedNodes?: Record<string, any> | null
 }
 
 export const getStaticPaths: GetStaticPaths<StaticPathsCtx> = async (ctx) => {
@@ -113,6 +117,51 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
 
     const hostId = hostRes.host.$id
     const pathsByScreenId = hostRes.host.screens || {}
+
+    // Maintenance mode (AGL-131): every path renders the assigned 503
+    // screen (noindex) or a built-in notice; short revalidate so flipping
+    // the toggle recovers quickly.
+    if ((hostRes.host as any)?.maintenance) {
+      const unavailableId = (hostRes.host as any)?.errorScreens?.unavailable
+      if (unavailableId) {
+        const unavailable = await getScreen({
+          hostId,
+          screenId: unavailableId,
+        })
+        if (unavailable.screen) {
+          const unavailableNodes = await composeScreenNodes({
+            hostId,
+            screenId: unavailableId,
+            screen: unavailable.screen,
+          })
+          if (unavailableNodes) {
+            return {
+              props: JSON.parse(
+                JSON.stringify({
+                  data: {
+                    host: hostRes.host,
+                    screen: { data: unavailable.screen },
+                  },
+                  nodes: unavailableNodes,
+                  maintenanceFallback: true,
+                }),
+              ),
+              revalidate: 30,
+            }
+          }
+        }
+      }
+      return {
+        props: JSON.parse(
+          JSON.stringify({
+            data: { host: hostRes.host },
+            nodes: null,
+            maintenanceFallback: true,
+          }),
+        ),
+        revalidate: 30,
+      }
+    }
 
     // Membership routes (AGL-109): fixed sign-in/up surfaces per site.
     if (path === 'signin' || path === 'signup') {
@@ -212,7 +261,9 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       // Custom not-found screen (AGL-87): render the designated screen's
       // content with noindex — SSG can't emit a real 404 status for
       // dynamic content, so noindex keeps soft-404s out of search.
-      const notFoundScreenId = (hostRes.host as any)?.notFoundScreenId
+      const notFoundScreenId =
+        (hostRes.host as any)?.errorScreens?.notFound ??
+        (hostRes.host as any)?.notFoundScreenId
       if (notFoundScreenId) {
         const fallbackScreen = await getScreen({
           hostId,
@@ -302,6 +353,23 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       (screenRes.screen as any)?.visibility ===
       Aglyn.HostScreenVisibility.AUTHENTICATED
     ) {
+      // Assigned 401 screen (AGL-131): pre-composed so a signed-out
+      // visitor sees the designed page instead of the built-in prompt.
+      const unauthorizedId = (hostRes.host as any)?.errorScreens?.unauthorized
+      let unauthorizedNodes: Record<string, any> | null = null
+      if (unauthorizedId) {
+        const unauthorized = await getScreen({
+          hostId,
+          screenId: unauthorizedId,
+        })
+        if (unauthorized.screen) {
+          unauthorizedNodes = await composeScreenNodes({
+            hostId,
+            screenId: unauthorizedId,
+            screen: unauthorized.screen,
+          })
+        }
+      }
       return {
         props: JSON.parse(
           JSON.stringify({
@@ -311,6 +379,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
             },
             nodes: null,
             memberScreen: true,
+            unauthorizedNodes,
           }),
         ),
         revalidate: 60,
@@ -566,6 +635,39 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
     )
   }
 
+  // Maintenance mode without an assigned 503 screen (AGL-131).
+  if (props.maintenanceFallback && !nodes) {
+    return (
+      <div style={{ maxWidth: 420, margin: '15vh auto', padding: 24 }}>
+        <Head>
+          <title>{'Temporarily unavailable'}</title>
+          <meta key="robots" name="robots" content="noindex" />
+        </Head>
+        <h1 style={{ fontSize: 22 }}>{'Back soon'}</h1>
+        <p style={{ opacity: 0.8 }}>
+          {'This site is undergoing maintenance. Please check back shortly.'}
+        </p>
+      </div>
+    )
+  }
+
+  // Members-only denial with an assigned 401 screen (AGL-131): render the
+  // designed page instead of the built-in prompt. Client-only transition
+  // (the server renders the checking state), so the mid-render canvas fill
+  // mirrors the first-fill pattern above.
+  if (props.memberScreen && memberDenied && props.unauthorizedNodes) {
+    Aglyn.canvas.setNodes(props.unauthorizedNodes)
+    return (
+      <>
+        <Head>
+          <title>{'Members only'}</title>
+          <meta key="robots" name="robots" content="noindex" />
+        </Head>
+        <AglynNodeRenderer node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)} />
+      </>
+    )
+  }
+
   // Members-only screens (AGL-109): prompt for sign-in until the session
   // cookie verifies and the nodes arrive.
   if (props.memberScreen && !memberNodes) {
@@ -784,7 +886,7 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
         {canonical ? (
           <link key="canonical" rel="canonical" href={canonical} />
         ) : null}
-        {props.notFoundFallback || unlisted ? (
+        {props.notFoundFallback || props.maintenanceFallback || unlisted ? (
           <meta key="robots" name="robots" content="noindex" />
         ) : null}
       </Head>
