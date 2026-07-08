@@ -40,6 +40,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Drawer,
   Grid,
   LinearProgress,
   Link,
@@ -230,10 +231,6 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const [typeFilter, setTypeFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   const [sizeFilter, setSizeFilter] = useState('')
-  const folderNames = useMemo(
-    () => folderList.map((folder) => folder.name),
-    [folderList],
-  )
   const tags = useMemo(
     () =>
       [...new Set(items.flatMap((item: any) => item.tags ?? []))].sort(),
@@ -537,56 +534,26 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
     ],
   )
 
-  // Metadata editor (folder, tags, alt text, description) — metadata lives
-  // on the Firestore mirror doc, so host admins edit it client-side.
+  // Detail panel (AGL-173): drawer with preview, file facts, and all
+  // metadata fields — folder is a picker over AGL-171 docs, tags are
+  // normalized by the shared helper.
   const [editor, setEditor] = useState<{
     id: string
-    fileName: string
-    folder: string
+    media: any
+    folderId: string
     tags: string
     alt: string
     description: string
   } | null>(null)
   const handleEditorSave = useCallback(async () => {
     if (!editor) return
-    const tagList = [
-      ...new Set(
-        editor.tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-      ),
-    ]
-    // Resolve the typed folder name to a folder doc (AGL-171): reuse a
-    // root folder case-insensitively or create one; empty name = root.
-    const folderName = Aglyn.normalizeFolderName(editor.folder)
-    let folderId: string | null = null
-    if (folderName) {
-      const existing = folderList.find(
-        (folder) =>
-          (folder.parentId ?? null) === null &&
-          folder.name.trim().toLowerCase() === folderName.toLowerCase(),
-      )
-      if (existing) {
-        folderId = existing.$id
-      } else {
-        const ref = doc(collection(firestore, 'hosts', hostId, 'mediaFolders'))
-        const batch = writeBatch(firestore)
-        batch.set(ref, {
-          name: folderName,
-          parentId: null,
-          createdAt: serverTimestamp(),
-        })
-        await batch.commit()
-        folderId = ref.id
-      }
-    }
+    const folderId = editor.folderId || null
     await updateDoc(doc(firestore, 'hosts', hostId, 'media', editor.id), {
       folderId,
       // Legacy string kept in sync until every reader is on folderId.
-      folder: folderName ?? '',
-      tags: tagList,
-      alt: editor.alt.trim(),
+      folder: folderId ? (folderNameById[folderId] ?? '') : '',
+      tags: Aglyn.normalizeMediaTags(editor.tags),
+      alt: editor.alt.trim().slice(0, Aglyn.MEDIA_ALT_MAX_LENGTH),
       description: editor.description.trim(),
     })
       .then(() => {
@@ -597,14 +564,87 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         logActivity('Updated media details', {
           type: 'media',
           id: editor.id,
-          name: editor.fileName,
+          name: editor.media?.fileName ?? editor.id,
         })
         setEditor(null)
       })
       .catch(() =>
         enqueueSnackbar('An error has occurred', { variant: 'error' }),
       )
-  }, [editor, folderList, firestore, hostId, enqueueSnackbar, logActivity])
+  }, [editor, folderNameById, firestore, hostId, enqueueSnackbar, logActivity])
+
+  // Bulk tag/delete (AGL-173) on the current selection.
+  const [bulkTag, setBulkTag] = useState<{
+    mode: 'add' | 'remove'
+    value: string
+  } | null>(null)
+  const handleBulkTag = useCallback(async () => {
+    if (!bulkTag) return
+    const [tag] = Aglyn.normalizeMediaTags(bulkTag.value)
+    if (!tag) return void setBulkTag(null)
+    const batch = writeBatch(firestore)
+    for (const item of items as any[]) {
+      if (!selected.has(item.$id)) continue
+      const tags: string[] = item.tags ?? []
+      const next =
+        bulkTag.mode === 'add'
+          ? Aglyn.normalizeMediaTags([...tags, tag])
+          : tags.filter((existing) => existing !== tag)
+      batch.update(doc(firestore, 'hosts', hostId, 'media', item.$id), {
+        tags: next,
+      })
+    }
+    await batch.commit()
+    setBulkTag(null)
+    enqueueSnackbar(
+      `${bulkTag.mode === 'add' ? 'Tagged' : 'Untagged'} ${selected.size} file${selected.size === 1 ? '' : 's'}`,
+      { variant: 'success', persist: false },
+    )
+  }, [bulkTag, items, selected, firestore, hostId, enqueueSnackbar])
+  const handleBulkDelete = useCallback(async () => {
+    const count = selected.size
+    if (!count) return
+    const confirmed = await confirm({
+      title: `Delete ${count} file${count === 1 ? '' : 's'}?`,
+      description:
+        'The files are removed from storage. Elements using their URLs ' +
+        'will stop rendering them.',
+      confirmationText: 'Delete',
+      confirmationButtonProps: { color: 'error' },
+    })
+      .then(() => true)
+      .catch(() => false)
+    if (!confirmed) return
+    setBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      for (const mediaId of selected) {
+        const response = await fetch('/api/media/upload', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+          },
+          body: JSON.stringify({ hostId, mediaId }),
+        })
+        if (!response.ok) throw new Error(`Delete failed (${response.status})`)
+      }
+      setSelected(new Set())
+      enqueueSnackbar(`Deleted ${count} file${count === 1 ? '' : 's'}`, {
+        variant: 'success',
+        persist: false,
+      })
+      logActivity('Deleted media (bulk)', { type: 'media', name: `${count}` })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('An error has occurred', {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    } finally {
+      setBusy(false)
+    }
+  }, [selected, confirm, user, hostId, enqueueSnackbar, logActivity])
 
   const handleUpload = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -945,6 +985,21 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           >
             {'Move to folder…'}
           </Button>
+          <Button
+            size="small"
+            onClick={() => setBulkTag({ mode: 'add', value: '' })}
+          >
+            {'Add tag…'}
+          </Button>
+          <Button
+            size="small"
+            onClick={() => setBulkTag({ mode: 'remove', value: '' })}
+          >
+            {'Remove tag…'}
+          </Button>
+          <Button size="small" color="error" onClick={handleBulkDelete}>
+            {'Delete…'}
+          </Button>
           <Button size="small" onClick={() => setSelected(new Set())}>
             {'Clear'}
           </Button>
@@ -1081,8 +1136,8 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
                         onClick={() =>
                           setEditor({
                             id: media.$id as string,
-                            fileName: media.fileName ?? (media.$id as string),
-                            folder: (media as any).folder ?? '',
+                            media,
+                            folderId: (media as any).folderId ?? '',
                             tags: ((media as any).tags ?? []).join(', '),
                             alt: (media as any).alt ?? '',
                             description: (media as any).description ?? '',
@@ -1107,32 +1162,80 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           ))}
         </Grid>
       )}
-      <Dialog
+      <Drawer
+        anchor="right"
         open={Boolean(editor)}
         onClose={() => setEditor(null)}
-        maxWidth="xs"
-        fullWidth
       >
-        <DialogTitle>{editor?.fileName}</DialogTitle>
-        <DialogContent
-          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-        >
+        <Stack spacing={2} sx={{ width: 340, p: 2 }}>
+          <Typography variant="h6" noWrap>
+            {editor?.media?.fileName ?? editor?.id}
+          </Typography>
+          {editor?.media?.url ? (
+            String(editor.media.contentType ?? '').startsWith('video/') ? (
+              <Box
+                component="video"
+                src={editor.media.url}
+                controls
+                muted
+                sx={{ width: '100%', borderRadius: 1 }}
+              />
+            ) : String(editor.media.contentType ?? '').startsWith(
+                'image/',
+              ) ? (
+              <Box
+                component="img"
+                src={editor.media.url}
+                alt={editor.alt}
+                sx={{
+                  width: '100%',
+                  maxHeight: 200,
+                  objectFit: 'contain',
+                  borderRadius: 1,
+                  bgcolor: 'action.hover',
+                }}
+              />
+            ) : null
+          ) : null}
+          <Typography variant="caption" color="text.secondary" component="div">
+            {[
+              formatBytes(editor?.media?.sizeBytes ?? 0),
+              editor?.media?.width && editor?.media?.height
+                ? `${editor.media.width} × ${editor.media.height}px`
+                : null,
+              editor?.media?.contentType,
+              editor?.media?.createdAt?.seconds
+                ? new Date(
+                    editor.media.createdAt.seconds * 1000,
+                  ).toLocaleDateString()
+                : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </Typography>
+          {editor?.media?.url ? (
+            <Button size="small" onClick={handleCopyUrl(editor.media)}>
+              {'Copy URL'}
+            </Button>
+          ) : null}
           <TextField
+            select
             size="small"
             label="Folder"
-            value={editor?.folder ?? ''}
+            value={editor?.folderId ?? ''}
             onChange={(event) =>
               setEditor((prev) =>
-                prev ? { ...prev, folder: event.target.value } : prev,
+                prev ? { ...prev, folderId: event.target.value } : prev,
               )
             }
-            sx={{ mt: 1 }}
-            helperText={
-              folderNames.length
-                ? `Existing: ${folderNames.join(', ')}`
-                : undefined
-            }
-          />
+          >
+            <MenuItem value="">{'No folder'}</MenuItem>
+            {folderList.map((folder) => (
+              <MenuItem key={folder.$id} value={folder.$id}>
+                {folder.name}
+              </MenuItem>
+            ))}
+          </TextField>
           <TextField
             size="small"
             label="Tags"
@@ -1166,15 +1269,53 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
             multiline
             minRows={2}
           />
+          <Stack direction="row" spacing={1} sx={{ justifyContent: 'flex-end' }}>
+            <Button onClick={() => setEditor(null)}>{'Cancel'}</Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleEditorSave}
+            >
+              {'Save'}
+            </Button>
+          </Stack>
+        </Stack>
+      </Drawer>
+      <Dialog
+        open={Boolean(bulkTag)}
+        onClose={() => setBulkTag(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {bulkTag?.mode === 'remove'
+            ? `Remove a tag from ${selected.size} files`
+            : `Add a tag to ${selected.size} files`}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            size="small"
+            label="Tag"
+            value={bulkTag?.value ?? ''}
+            onChange={(event) =>
+              setBulkTag((prev) =>
+                prev ? { ...prev, value: event.target.value } : prev,
+              )
+            }
+            sx={{ mt: 1 }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditor(null)}>{'Cancel'}</Button>
+          <Button onClick={() => setBulkTag(null)}>{'Cancel'}</Button>
           <Button
             variant="contained"
             color="secondary"
-            onClick={handleEditorSave}
+            disabled={!bulkTag?.value.trim()}
+            onClick={handleBulkTag}
           >
-            {'Save'}
+            {'Apply'}
           </Button>
         </DialogActions>
       </Dialog>

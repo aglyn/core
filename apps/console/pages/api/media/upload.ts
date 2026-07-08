@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { checkEntitlement, checkQuota, createResourceUid } from '@aglyn/aglyn'
+import {
+  checkEntitlement,
+  checkQuota,
+  createResourceUid,
+  readImageDimensions,
+} from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { randomUUID } from 'crypto'
 import type { NextApiRequest, NextApiResponse } from 'next'
@@ -168,12 +173,19 @@ export default async function handler(
       `${encodeURIComponent(`hosts/${hostId}/media/${mediaId}`)}` +
       `?alt=media&token=${token}`
 
+    // Auto-captured metadata (AGL-173): image dimensions from the file
+    // header (best-effort, never a gate) and the uploader's uid.
+    const dimensions = isImage
+      ? readImageDimensions(new Uint8Array(buffer))
+      : null
     await hostRef.collection('media').doc(mediaId).set({
       fileName,
       contentType,
       sizeBytes: buffer.length,
       url,
       folderId,
+      ...(dimensions ?? {}),
+      uploadedBy: decoded.uid,
       createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
     })
     await hostRef

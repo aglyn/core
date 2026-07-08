@@ -328,6 +328,10 @@ export interface AglynHostMedia {
   tags?: string[]
   alt?: string
   description?: string
+  /** Auto-captured at upload (AGL-173); best-effort for images only. */
+  width?: number
+  height?: number
+  uploadedBy?: string
   createdAt?: ITimestamp
   deletedAt?: ITimestamp
 }
