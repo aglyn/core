@@ -149,6 +149,12 @@ const Booking = forwardRef<HTMLDivElement, BookingProps>((props, ref) => {
         setStatus('error')
         return
       }
+      if (payload?.checkoutUrl) {
+        // Paid service (AGL-170): finish payment on Stripe; the webhook
+        // confirms the held slot.
+        window.location.assign(payload.checkoutUrl)
+        return
+      }
       if (Array.isArray(payload?.alerts)) setAlerts(payload.alerts)
       setStatus('booked')
     } catch {

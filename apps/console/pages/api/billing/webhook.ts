@@ -158,6 +158,62 @@ export default async function handler(
           })
       }
     }
+    // Paid bookings (AGL-170): payment confirms the pendingPayment hold.
+    if (
+      type === 'checkout.session.completed' &&
+      object?.metadata?.type === 'booking-payment' &&
+      object?.payment_status === 'paid'
+    ) {
+      const { hostId, bookingId } = object.metadata ?? {}
+      if (hostId && bookingId) {
+        const bookingRef = firebaseAdmin
+          .app()
+          .firestore()
+          .collection('hosts')
+          .doc(String(hostId))
+          .collection('bookings')
+          .doc(String(bookingId))
+        await bookingRef.set(
+          {
+            status: 'confirmed',
+            paidAmountCents: Number(object?.amount_total ?? 0),
+            expiresAtMs: firebaseAdmin.firestore.FieldValue.delete(),
+            confirmedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true },
+        )
+        // Confirmation email now that payment cleared (env-gated).
+        const resendKey = process.env.RESEND_API_KEY
+        const emailFrom = process.env.USAGE_EMAIL_FROM
+        if (resendKey && emailFrom) {
+          const booking = (await bookingRef.get()).data() ?? {}
+          if (booking['email']) {
+            const when = new Date(
+              Number(booking['startsAtMs']),
+            ).toLocaleString('en-US', {
+              dateStyle: 'full',
+              timeStyle: 'short',
+            })
+            await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${resendKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                from: emailFrom,
+                to: [booking['email']],
+                subject: `Booking confirmed: ${booking['serviceName'] ?? ''}`,
+                text:
+                  `Hi ${booking['name'] ?? ''},\n\nPayment received — ` +
+                  `"${booking['serviceName'] ?? 'your booking'}" is ` +
+                  `confirmed for ${when}.\n\nReference: ${bookingId}`,
+              }),
+            }).catch(() => undefined)
+          }
+        }
+      }
+    }
     // Commerce Starter orders (AGL-90): recorded under the selling host.
     if (
       type === 'checkout.session.completed' &&

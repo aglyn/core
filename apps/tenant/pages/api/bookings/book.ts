@@ -118,6 +118,18 @@ export default async function handler(
     const endsAtMs = startsAtMs + durationMs
     const bookingsRef = hostRef.collection('bookings')
 
+    // Paid services (AGL-170): the slot is HELD pending payment — the
+    // booking lands as `pendingPayment` with a 15-minute expiry (expired
+    // holds release the slot in the collision filters), and the visitor
+    // goes to Stripe Checkout; the webhook confirms + emails on payment.
+    const priceUsd = Number(service.priceUsd ?? 0)
+    const paid = priceUsd > 0
+    if (paid && !process.env.STRIPE_SECRET_KEY) {
+      return res.status(501).json({
+        error: 'Paid bookings are not configured (STRIPE_SECRET_KEY).',
+      })
+    }
+
     // Transaction: re-read overlapping bookings and validate the slot so
     // two simultaneous requests cannot double-book.
     const bookingId = await firestore.runTransaction(async (transaction) => {
@@ -128,7 +140,15 @@ export default async function handler(
           .limit(500),
       )
       const booked: BookedInterval[] = overlapping.docs
-        .filter((doc) => doc.get('status') !== 'canceled')
+        .filter(
+        (doc) =>
+          doc.get('status') !== 'canceled' &&
+          // Expired payment holds release the slot (AGL-170).
+          !(
+            doc.get('status') === 'pendingPayment' &&
+            Number(doc.get('expiresAtMs') ?? 0) < Date.now()
+          ),
+      )
         .map((doc) => ({
           startsAtMs: Number(doc.get('startsAtMs') ?? 0),
           endsAtMs: Number(doc.get('endsAtMs') ?? 0),
@@ -144,11 +164,71 @@ export default async function handler(
         email,
         startsAtMs,
         endsAtMs,
-        status: 'confirmed',
+        status: paid ? 'pendingPayment' : 'confirmed',
+        ...(paid && { expiresAtMs: Date.now() + 15 * 60_000 }),
         createdAt: FieldValue.serverTimestamp(),
       })
       return bookingRef.id
     })
+
+    if (paid) {
+      const origin = req.headers.origin ?? `https://${req.headers.host}`
+      const params = new URLSearchParams({
+        mode: 'payment',
+        'line_items[0][quantity]': '1',
+        'line_items[0][price_data][currency]': 'usd',
+        'line_items[0][price_data][unit_amount]': String(
+          Math.round(priceUsd * 100),
+        ),
+        'line_items[0][price_data][product_data][name]': String(
+          service.name ?? 'Booking',
+        ).slice(0, 120),
+        success_url: `${origin}/?booking=paid`,
+        cancel_url: `${origin}/?booking=canceled`,
+        customer_email: email,
+        'metadata[type]': 'booking-payment',
+        'metadata[hostId]': hostId,
+        'metadata[bookingId]': bookingId,
+        expires_at: String(Math.floor(Date.now() / 1000) + 30 * 60),
+      })
+      const stripeResponse = await fetch(
+        'https://api.stripe.com/v1/checkout/sessions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: params.toString(),
+        },
+      )
+      const session = (await stripeResponse.json()) as {
+        url?: string
+        error?: any
+      }
+      if (!stripeResponse.ok || !session.url) {
+        console.error('Stripe booking checkout error', session.error)
+        // Release the hold so the slot isn't stuck for 15 minutes.
+        await bookingsRef
+          .doc(bookingId)
+          .set({ status: 'canceled' }, { merge: true })
+          .catch(() => undefined)
+        return res.status(502).json({ error: 'Payment setup failed' })
+      }
+      // Lead lands now; the confirmation email + workflow event fire from
+      // the payment webhook.
+      await hostRef
+        .collection('leads')
+        .add({
+          email,
+          source: 'booking',
+          createdAt: FieldValue.serverTimestamp(),
+        })
+        .catch(() => undefined)
+      return res
+        .status(200)
+        .json({ bookingId, startsAtMs, endsAtMs, checkoutUrl: session.url })
+    }
 
     // Bookings double as leads for the site owner (mirrors sign-ups).
     await hostRef
