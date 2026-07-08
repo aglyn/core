@@ -21,6 +21,8 @@ import {
   type FormRendererProps,
   FormSpy,
   type FormTemplateRenderProps,
+  FIELD_MAP_CHECKBOX,
+  FIELD_MAP_ICON_PICKER,
   simpleComponentMapper,
   useFormApi,
 } from '@aglyn/shared-ui-jsx-forms'
@@ -134,6 +136,15 @@ export interface ElementPropsFormProps extends FormRendererProps {
   node?: Aglyn.NodeSchema<any>
 }
 
+// Attribute editors available to canvas component schemas: the simple set
+// plus pickers components actually declare (icon picker AGL-146, checkbox
+// AGL-162).
+const elementPropsComponentMapper = {
+  ...simpleComponentMapper,
+  [Aglyn.FieldComponentType.ICON_PICKER]: FIELD_MAP_ICON_PICKER,
+  [Aglyn.FieldComponentType.CHECKBOX]: FIELD_MAP_CHECKBOX,
+}
+
 const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
   (props, ref) => {
     const { node, ...rest } = props
@@ -237,7 +248,7 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
       <>
         <NoSsr>
           <FormRenderer
-            componentMapper={simpleComponentMapper}
+            componentMapper={elementPropsComponentMapper}
             onCancel={handleFormCancel}
             onSubmit={handleElementSave}
             initialValues={nodeProps}
