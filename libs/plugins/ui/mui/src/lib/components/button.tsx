@@ -19,7 +19,8 @@ import * as Aglyn from '@aglyn/aglyn'
 import {
   mdiGestureTapButton,
 } from '@aglyn/shared-data-mdi'
-import { AppLink } from '@aglyn/shared-ui-jsx'
+import { getMdiIconFromId } from '@aglyn/shared-data-mdi'
+import { AppLink, MdiIcon } from '@aglyn/shared-ui-jsx'
 import Button, { type ButtonProps } from '@mui/material/Button'
 import { forwardRef } from 'react'
 import { BUNDLE_ID } from '../constants/bundle-common'
@@ -40,6 +41,17 @@ export interface LinkableButtonProps extends ButtonProps {
   screenId?: string
   /** External URL, used only when no `screenId` is set. */
   href?: string
+  /** mdi icon id rendered before the label (AGL-146). */
+  startIconId?: string
+  /** mdi icon id rendered after the label (AGL-146). */
+  endIconId?: string
+}
+
+/** mdi id → icon element; unknown/empty ids render nothing. */
+function iconFromId(iconId?: string) {
+  if (!iconId) return undefined
+  const icon = getMdiIconFromId(iconId)
+  return icon?.path ? <MdiIcon path={icon.path} fontSize="small" /> : undefined
 }
 
 // Only navigable protocols — mirrors ScreenLink's hardening.
@@ -52,7 +64,12 @@ const SAFE_HREF = /^(https?:\/\/|mailto:|tel:|\/|#)/i
  * doesn't resolve.
  */
 const LinkableButton = forwardRef<any, LinkableButtonProps>((props, ref) => {
-  const { screenId, href: externalHref, ...rest } = props
+  const { screenId, href: externalHref, startIconId, endIconId, ...rest } =
+    props
+  const iconProps = {
+    startIcon: iconFromId(startIconId),
+    endIcon: iconFromId(endIconId),
+  }
   const { href: resolvedHref, suppressNavigation } =
     Aglyn.useScreenLink(screenId)
   const safeExternalHref =
@@ -62,9 +79,17 @@ const LinkableButton = forwardRef<any, LinkableButtonProps>((props, ref) => {
   const href = screenId ? resolvedHref : safeExternalHref
 
   if (!href || suppressNavigation) {
-    return <Button ref={ref} {...rest} />
+    return <Button ref={ref} {...iconProps} {...rest} />
   }
-  return <AppLink ref={ref} componentVariant="button" href={href} {...rest} />
+  return (
+    <AppLink
+      ref={ref}
+      componentVariant="button"
+      href={href}
+      {...iconProps}
+      {...rest}
+    />
+  )
 })
 LinkableButton.displayName = 'LinkableButton'
 
@@ -111,6 +136,18 @@ export const schema: Aglyn.ComponentSchema<LinkableButtonProps> = {
       description: 'External URL used only when no screen is selected.',
       component: Aglyn.FieldComponentType.TEXT_FIELD,
       label: 'External URL',
+    },
+    {
+      name: 'startIconId',
+      description: 'Icon shown before the label.',
+      component: Aglyn.FieldComponentType.ICON_PICKER,
+      label: 'Start icon',
+    },
+    {
+      name: 'endIconId',
+      description: 'Icon shown after the label.',
+      component: Aglyn.FieldComponentType.ICON_PICKER,
+      label: 'End icon',
     },
   ],
 }
