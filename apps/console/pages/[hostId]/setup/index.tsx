@@ -42,7 +42,7 @@ import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import CustomDomainCard from '../../../components/custom-domain-card.component'
 import FaviconCard from '../../../components/favicon-card.component'
-import NotFoundScreenCard from '../../../components/not-found-screen-card.component'
+import ErrorScreensCard from '../../../components/error-screens-card.component'
 import ThemeEditor from '../../../components/theme-editor/theme-editor.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { buildRoute, Route } from '../../../constants/route-links'
@@ -457,7 +457,7 @@ const HostSetup: NextPageWithLayout = (props) => {
 
                           {schema.id === 'hostDetails' ? (
                             <div style={{ marginTop: 24 }}>
-                              <NotFoundScreenCard hostId={hostId} />
+                              <ErrorScreensCard hostId={hostId} />
                             </div>
                           ) : null}
                           {schema.id === 'hostSeo' ? (

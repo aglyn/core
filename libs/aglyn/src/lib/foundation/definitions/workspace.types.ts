@@ -218,6 +218,13 @@ export interface AglynHost extends AglynDocument {
   screens?: Record<ScreenUid, ScreenSlug>
   /** Screen rendered (noindex) for unmatched paths (AGL-87). */
   notFoundScreenId?: ScreenUid
+  /**
+   * Designable error screens by status (AGL-131). `notFound` supersedes
+   * `notFoundScreenId` (kept in sync for back-compat).
+   */
+  errorScreens?: HostErrorScreens
+  /** Maintenance mode (AGL-131): every path renders the 503 screen. */
+  maintenance?: boolean
   /** Directory of shared layouts by display name (mirrors `screens`). */
   layouts?: Record<LayoutUid, string>
   theme?: AglynHostTheme
@@ -228,6 +235,14 @@ export interface AglynHost extends AglynDocument {
   // CONCEPT: Enterprise - Siloed projects
   projectId?: ProjectUid
   projectNumber?: ProjectNumber
+}
+
+/** Error-screen bindings by HTTP-ish status (AGL-131). */
+export interface HostErrorScreens {
+  notFound?: ScreenUid
+  unauthorized?: ScreenUid
+  forbidden?: ScreenUid
+  unavailable?: ScreenUid
 }
 
 export type RoleUid = string
