@@ -20,13 +20,17 @@ import {
   applyDatasetQuery,
   checkDatasetQuota,
   coerceDocumentValues,
+  datasetRecordsToCsv,
   createResourceUid,
   datasetValueToInput,
   deriveModelFromFields,
   effectiveDatasetModel,
   formatDatasetValue,
+  mapImportColumns,
   parseDatasetFields,
   parseDatasetFilter,
+  parseImportRows,
+  serializeDatasetValue,
   parseDatasetSort,
   sortDatasetRecords,
   validateDocument,
@@ -513,6 +517,143 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
     [selected, datasets, firestore, hostId, enqueueSnackbar],
   )
 
+  // CSV/JSON round-tripping (AGL-182) over the loaded window.
+  const download = useCallback((name: string, mime: string, text: string) => {
+    const url = URL.createObjectURL(new Blob([text], { type: mime }))
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = name
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }, [])
+  const handleExport = useCallback(
+    (format: 'csv' | 'json') => () => {
+      if (!selected) return
+      const rows = records.map((record: any) => record.values ?? {})
+      const base = String(selected.displayName ?? 'collection')
+        .replace(/[^A-Za-z0-9_-]+/g, '-')
+        .toLowerCase()
+      if (format === 'csv') {
+        download(
+          `${base}.csv`,
+          'text/csv',
+          datasetRecordsToCsv(model, rows),
+        )
+      } else {
+        download(
+          `${base}.json`,
+          'application/json',
+          JSON.stringify(
+            rows.map((row) =>
+              Object.fromEntries(
+                model.order.map((fieldId) => [
+                  fieldId,
+                  model.fields[fieldId]
+                    ? serializeDatasetValue(model.fields[fieldId], row[fieldId])
+                    : '',
+                ]),
+              ),
+            ),
+            null,
+            2,
+          ),
+        )
+      }
+    },
+    [selected, records, model, download],
+  )
+
+  const [importer, setImporter] = useState<{ text: string } | null>(null)
+  const importPreview = useMemo(() => {
+    if (!importer) return null
+    const rows = parseImportRows(importer.text)
+    if (!rows || !rows.length) return null
+    const { mapping, unmatched } = mapImportColumns(
+      model,
+      Object.keys(rows[0]),
+    )
+    const prepared = rows.map((raw) => {
+      const input: Record<string, string> = {}
+      for (const [column, fieldId] of Object.entries(mapping)) {
+        input[fieldId] = raw[column] ?? ''
+      }
+      const values = coerceDocumentValues(model, input)
+      const errors = validateDocument(model, values)
+      return { values, errors, valid: !Object.keys(errors).length }
+    })
+    return {
+      prepared,
+      unmatched,
+      valid: prepared.filter((row) => row.valid).length,
+    }
+  }, [importer, model])
+  const handleImport = useCallback(async () => {
+    if (!selected || !importPreview) return
+    const validRows = importPreview.prepared.filter((row) => row.valid)
+    const quota = checkTenantQuota(
+      tenant,
+      'recordsPerDataset',
+      records.length + validRows.length - 1,
+    )
+    const room = quota.allowed
+      ? validRows.length
+      : Math.max(0, Number(quota.limit ?? 0) - records.length)
+    const toWrite = validRows.slice(0, room)
+    if (!toWrite.length) {
+      return void enqueueSnackbar(
+        `Record limit reached (${quota.limit}) — see Billing to upgrade`,
+        { variant: 'warning', persist: false },
+      )
+    }
+    // Chunked under Firestore's 500-writes/batch limit.
+    for (let start = 0; start < toWrite.length; start += 400) {
+      const batch = writeBatch(firestore)
+      toWrite.slice(start, start + 400).forEach((row, index) => {
+        batch.set(
+          doc(
+            firestore,
+            'hosts',
+            hostId,
+            'datasets',
+            selected.$id,
+            'records',
+            createResourceUid(),
+          ),
+          {
+            values: row.values,
+            order: records.length + start + index,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+          },
+        )
+      })
+      await batch.commit()
+    }
+    setImporter(null)
+    const skippedInvalid = importPreview.prepared.length - validRows.length
+    const skippedQuota = validRows.length - toWrite.length
+    enqueueSnackbar(
+      `Imported ${toWrite.length} row${toWrite.length === 1 ? '' : 's'}` +
+        (skippedInvalid ? `, ${skippedInvalid} invalid skipped` : '') +
+        (skippedQuota ? `, ${skippedQuota} over the record limit` : ''),
+      { variant: skippedInvalid || skippedQuota ? 'warning' : 'success' },
+    )
+    logActivity('Imported records', {
+      type: 'content',
+      id: selected.$id,
+      name: selected.displayName,
+    })
+  }, [
+    selected,
+    importPreview,
+    tenant,
+    records.length,
+    firestore,
+    hostId,
+    enqueueSnackbar,
+    logActivity,
+  ])
+
   return (
     <CardDisplay
       header={'Data'}
@@ -552,6 +693,19 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
             <Button size="small" onClick={() => setSchemaOpen(true)}>
               {'Schema'}
             </Button>
+            <Button size="small" onClick={() => setImporter({ text: '' })}>
+              {'Import'}
+            </Button>
+            {records.length ? (
+              <>
+                <Button size="small" onClick={handleExport('csv')}>
+                  {'CSV'}
+                </Button>
+                <Button size="small" onClick={handleExport('json')}>
+                  {'JSON'}
+                </Button>
+              </>
+            ) : null}
             <Button size="small" color="error" onClick={handleDeleteDataset}>
               {'Delete'}
             </Button>
@@ -834,6 +988,59 @@ export function HostDatasetsCard(props: HostDatasetsCardProps) {
             onClick={handleSaveRecord}
           >
             {editor?.id ? 'Save' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={Boolean(importer)}
+        onClose={() => setImporter(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{'Import records'}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        >
+          <TextField
+            multiline
+            minRows={6}
+            size="small"
+            label="CSV (with header row) or JSON array"
+            value={importer?.text ?? ''}
+            onChange={(event) =>
+              setImporter((prev) =>
+                prev ? { ...prev, text: event.target.value } : prev,
+              )
+            }
+            sx={{ mt: 1 }}
+            helperText="Columns match by field id or display name"
+          />
+          {importPreview ? (
+            <Typography variant="body2" color="text.secondary">
+              {`${importPreview.prepared.length} rows parsed · ` +
+                `${importPreview.valid} valid` +
+                (importPreview.prepared.length - importPreview.valid
+                  ? ` · ${importPreview.prepared.length - importPreview.valid} invalid (skipped)`
+                  : '') +
+                (importPreview.unmatched.length
+                  ? ` · unmatched columns: ${importPreview.unmatched.join(', ')}`
+                  : '')}
+            </Typography>
+          ) : importer?.text.trim() ? (
+            <Typography variant="body2" color="warning.main">
+              {'Nothing parseable yet — CSV needs a header row.'}
+            </Typography>
+          ) : null}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setImporter(null)}>{'Cancel'}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!importPreview?.valid}
+            onClick={handleImport}
+          >
+            {'Import valid rows'}
           </Button>
         </DialogActions>
       </Dialog>

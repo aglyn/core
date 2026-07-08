@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { checkEntitlement } from '@aglyn/aglyn'
+import {
+  checkEntitlement,
+  effectiveDatasetModel,
+  validateDocument,
+} from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import {
@@ -188,6 +192,13 @@ export default async function handler(
       }
     }
 
+    // Non-conforming rows are imported AND reported (AGL-182) — data is
+    // never silently dropped; the report tells the owner what to fix.
+    const dataReport: Array<{
+      datasetId: string
+      recordId: string
+      errors: Record<string, string>
+    }> = []
     const importDatasets = async () => {
       const items: any[] = Array.isArray(bundle.datasets)
         ? bundle.datasets
@@ -196,9 +207,20 @@ export default async function handler(
         if (!item?.$id) continue
         const docRef = hostRef.collection('datasets').doc(String(item.$id))
         await write(docRef, cleanDoc(item))
+        // v1 exports (no model) validate through the derived text model,
+        // same as the live migration — everything passes, by design.
+        const model = effectiveDatasetModel(item)
         const records: any[] = Array.isArray(item.records) ? item.records : []
         for (const record of records.slice(0, 1000)) {
           if (!record?.$id) continue
+          const errors = validateDocument(model, record.values ?? {})
+          if (Object.keys(errors).length) {
+            dataReport.push({
+              datasetId: String(item.$id),
+              recordId: String(record.$id),
+              errors,
+            })
+          }
           await write(
             docRef.collection('records').doc(String(record.$id)),
             cleanDoc(record),
@@ -231,7 +253,12 @@ export default async function handler(
       })
       .catch(() => undefined)
 
-    return res.status(200).json({ written })
+    return res.status(200).json({
+      written,
+      // Truncated so pathological bundles can't balloon the response.
+      dataReport: dataReport.slice(0, 100),
+      dataReportTotal: dataReport.length,
+    })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ error: 'Import failed' })
