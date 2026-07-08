@@ -78,7 +78,15 @@ export default async function handler(
       .limit(500)
       .get()
     const booked: BookedInterval[] = bookedSnapshot.docs
-      .filter((doc) => doc.get('status') !== 'canceled')
+      .filter(
+        (doc) =>
+          doc.get('status') !== 'canceled' &&
+          // Expired payment holds release the slot (AGL-170).
+          !(
+            doc.get('status') === 'pendingPayment' &&
+            Number(doc.get('expiresAtMs') ?? 0) < Date.now()
+          ),
+      )
       .map((doc) => ({
         startsAtMs: Number(doc.get('startsAtMs') ?? 0),
         endsAtMs: Number(doc.get('endsAtMs') ?? 0),
