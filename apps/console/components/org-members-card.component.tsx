@@ -16,13 +16,22 @@
  */
 'use client'
 
-import { canManageOrg, type AglynOrgMember, type OrgRole } from '@aglyn/aglyn'
+import {
+  canManageOrg,
+  type AglynOrgMember,
+  type HostAccessRole,
+  type OrgRole,
+} from '@aglyn/aglyn'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Button,
   Checkbox,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControlLabel,
   MenuItem,
   Stack,
@@ -34,11 +43,26 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
-import { useUser } from '@aglyn/tenant-feature-instance'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { useAdminHosts } from '../hooks/use-admin-hosts'
 import { useOrgWorkspace } from '../hooks/use-org-workspace'
 
 const ASSIGNABLE_ROLES: OrgRole[] = ['admin', 'editor', 'viewer']
+const HOST_ROLE_OPTIONS: Array<HostAccessRole | 'none'> = [
+  'none',
+  'viewer',
+  'editor',
+  'admin',
+]
+
+interface AccessDraft {
+  uid: string
+  label: string
+  role: OrgRole
+  allHosts: boolean
+  hostAccess: Record<string, HostAccessRole>
+}
 
 /**
  * Organization membership manager (AGL-234): the permanent org-role model
@@ -49,6 +73,7 @@ const ASSIGNABLE_ROLES: OrgRole[] = ['admin', 'editor', 'viewer']
  */
 export function OrgMembersCard() {
   const { data: user } = useUser()
+  const firestore = useFirestore()
   const { currentOrg } = useOrgWorkspace()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -58,8 +83,16 @@ export function OrgMembersCard() {
   const [role, setRole] = useState<OrgRole>('editor')
   const [allHosts, setAllHosts] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [accessDraft, setAccessDraft] = useState<AccessDraft | null>(null)
   const orgId = currentOrg?.$id
   const canManage = canManageOrg(currentOrg?.role)
+  // An org admin sees every org host via the memberRoles projection, so
+  // this doubles as the org host directory for the access editor.
+  const { hosts } = useAdminHosts(firestore, user?.uid)
+  const orgHosts = useMemo(
+    () => hosts.filter((host) => host['orgId'] === orgId),
+    [hosts, orgId],
+  )
 
   const request = useCallback(
     async (path: string, method: string, body?: Record<string, unknown>) => {
@@ -233,11 +266,31 @@ export function OrgMembersCard() {
                   )}
                 </TableCell>
                 <TableCell>
-                  {member.role === 'owner' || member.role === 'admin'
-                    ? 'All sites'
-                    : member.allHosts
-                      ? 'All sites'
-                      : `${Object.keys(member.hostAccess ?? {}).length} site(s)`}
+                  {member.role === 'owner' || member.role === 'admin' ? (
+                    'All sites'
+                  ) : canManage ? (
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        setAccessDraft({
+                          uid: member.$id,
+                          label:
+                            member.displayName || member.email || member.$id,
+                          role: (member.role ?? 'viewer') as OrgRole,
+                          allHosts: member.allHosts === true,
+                          hostAccess: { ...(member.hostAccess ?? {}) },
+                        })
+                      }
+                    >
+                      {member.allHosts
+                        ? 'All sites'
+                        : `${Object.keys(member.hostAccess ?? {}).length} site(s)`}
+                    </Button>
+                  ) : member.allHosts ? (
+                    'All sites'
+                  ) : (
+                    `${Object.keys(member.hostAccess ?? {}).length} site(s)`
+                  )}
                 </TableCell>
                 <TableCell align="right">
                   {canManage && member.role !== 'owner' ? (
@@ -297,6 +350,98 @@ export function OrgMembersCard() {
           </Stack>
         ) : null}
       </Stack>
+      <Dialog
+        open={Boolean(accessDraft)}
+        onClose={() => setAccessDraft(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{`Site access — ${accessDraft?.label ?? ''}`}</DialogTitle>
+        <DialogContent
+          sx={{ display: 'flex', flexDirection: 'column', gap: 1, pt: 1 }}
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={accessDraft?.allHosts ?? false}
+                onChange={(event) =>
+                  setAccessDraft((draft) =>
+                    draft ? { ...draft, allHosts: event.target.checked } : draft,
+                  )
+                }
+              />
+            }
+            label={`All sites (as ${accessDraft?.role ?? 'member'})`}
+          />
+          {accessDraft?.allHosts
+            ? null
+            : orgHosts.map((host) => (
+                <Stack
+                  key={host.$id}
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: 'center' }}
+                >
+                  <Typography variant="body2" sx={{ flexGrow: 1 }} noWrap>
+                    {host['displayName'] ?? host.$id}
+                  </Typography>
+                  <TextField
+                    size="small"
+                    select
+                    value={accessDraft?.hostAccess[host.$id] ?? 'none'}
+                    onChange={(event) =>
+                      setAccessDraft((draft) => {
+                        if (!draft) return draft
+                        const hostAccess = { ...draft.hostAccess }
+                        if (event.target.value === 'none') {
+                          delete hostAccess[host.$id]
+                        } else {
+                          hostAccess[host.$id] = event.target
+                            .value as HostAccessRole
+                        }
+                        return { ...draft, hostAccess }
+                      })
+                    }
+                    sx={{ width: 110 }}
+                  >
+                    {HOST_ROLE_OPTIONS.map((value) => (
+                      <MenuItem key={value} value={value}>
+                        {value}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Stack>
+              ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAccessDraft(null)}>{'Cancel'}</Button>
+          <Button
+            variant="contained"
+            disabled={busy}
+            onClick={() => {
+              if (!accessDraft) return
+              setBusy(true)
+              void request('/api/orgs/members', 'POST', {
+                orgId,
+                action: 'upsert',
+                uid: accessDraft.uid,
+                role: accessDraft.role,
+                allHosts: accessDraft.allHosts,
+                hostAccess: accessDraft.hostAccess,
+              })
+                .then(async (ok) => {
+                  if (ok) {
+                    setAccessDraft(null)
+                    await refresh()
+                  }
+                })
+                .finally(() => setBusy(false))
+            }}
+          >
+            {busy ? 'Saving…' : 'Save access'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </CardDisplay>
   )
 }
