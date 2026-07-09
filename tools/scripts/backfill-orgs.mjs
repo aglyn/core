@@ -92,6 +92,22 @@ async function ownerProfile(uid) {
   }
 }
 
+// Phantom-owner guard: legacy hosts can carry a tenantId that was never an
+// auth uid (pre-billing push ids). Orgs must be owned by real accounts —
+// otherwise nobody can manage them (first prod backfill, 2026-07-09).
+const userExistsCache = new Map()
+async function isRealUser(uid) {
+  if (!userExistsCache.has(uid)) {
+    try {
+      await auth.getUser(uid)
+      userExistsCache.set(uid, true)
+    } catch {
+      userExistsCache.set(uid, false)
+    }
+  }
+  return userExistsCache.get(uid)
+}
+
 // ---------------------------------------------------------------------
 // Pass 1: plan orgs from tenants + hosts.
 // ---------------------------------------------------------------------
@@ -150,6 +166,10 @@ async function planOrg(ownerUid, tenantData) {
 }
 
 for (const doc of tenantDocs) {
+  if (!(await isRealUser(doc.id))) {
+    console.warn(`! tenants/${doc.id} is not an auth user — no org planned`)
+    continue
+  }
   const org = await planOrg(doc.id, doc.data())
   if (org.alreadyExists) continue
   // Tenant managers (AGL-127) become org admins.
@@ -166,7 +186,34 @@ for (const doc of tenantDocs) {
 
 for (const doc of hostDocs) {
   const host = doc.data()
-  const ownerUid = host.tenantId || Object.keys(host.admins ?? {})[0]
+  // Already org-wired (created through the new API): never re-parent —
+  // a host must not be claimed by two orgs (first prod backfill).
+  if (host.orgId) {
+    const wired = [...orgs.values()].find((plan) => plan.orgId === host.orgId)
+    if (wired && !wired.hosts.some((entry) => entry.hostId === doc.id)) {
+      wired.hosts.push({ hostId: doc.id, subdomain: host.subdomain ?? null })
+    }
+    continue
+  }
+  let ownerUid = host.tenantId || Object.keys(host.admins ?? {})[0]
+  if (ownerUid && !(await isRealUser(ownerUid))) {
+    let realFallback = null
+    for (const uid of Object.keys(host.admins ?? {})) {
+      if (await isRealUser(uid)) {
+        realFallback = uid
+        break
+      }
+    }
+    if (!realFallback) {
+      console.warn(`! host ${doc.id}: no real owner candidate — skipped`)
+      continue
+    }
+    console.warn(
+      `! host ${doc.id}: tenantId ${ownerUid} is not an auth user — ` +
+        `owner falls back to admin ${realFallback}`,
+    )
+    ownerUid = realFallback
+  }
   if (!ownerUid) {
     console.warn(`! host ${doc.id} has no tenantId and no admins — skipped`)
     continue
