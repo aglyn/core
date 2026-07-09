@@ -53,7 +53,6 @@
   --ifm-navbar-background-color: #404c5c;
   --ifm-navbar-link-color: rgba(255, 255, 255, 0.9);
   --ifm-navbar-link-hover-color: #00b0ff;
-  --ifm-footer-background-color: #404c5c;
 
   /* Semantic colors from console.theme.ts, wired into admonitions. */
   --ifm-color-info: #1e88e5;
@@ -69,8 +68,11 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 176, 255, 0.12);
 }
 
-/* Dark scheme — console dark surfaces. */
-[data-theme='dark'] {
+/* Dark scheme — console dark surfaces. Must be `html[data-theme='dark']`, not
+   bare `[data-theme='dark']`: Infima defines its own dark defaults on
+   `html[data-theme='dark']`, which out-specifies the bare attribute selector
+   and would silently win otherwise. */
+html[data-theme='dark'] {
   --ifm-color-primary: #00b0ff;
   --ifm-color-primary-dark: #00a1e6;
   --ifm-color-primary-darker: #0098d9;
@@ -83,9 +85,18 @@
   --ifm-background-surface-color: #2a3440; /* background.paper (dark) */
 
   --ifm-navbar-background-color: #2c3540; /* primary.main (dark) */
-  --ifm-footer-background-color: #202934; /* surface.main (dark) */
 
   --docusaurus-highlighted-code-line-bg: rgba(0, 176, 255, 0.2);
+}
+
+/* The `style: 'dark'` footer defines its own background variable on
+   `.footer--dark`, which beats any :root-level override — scope ours to the
+   same class so the console footer colors actually apply. */
+.footer--dark {
+  --ifm-footer-background-color: #404c5c;
+}
+html[data-theme='dark'] .footer--dark {
+  --ifm-footer-background-color: #202934; /* surface.main (dark) */
 }
 
 /* Material app-bar: subtle elevation under the fixed navbar. */
