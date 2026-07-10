@@ -24,10 +24,12 @@ import OrgActivityCard from '../../../components/org-activity-card.component'
 import OrgMembersCard from '../../../components/org-members-card.component'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import orgNavTabItems from '../../../constants/org-nav-tabs'
+import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
+import useTenantPermissions from '../../../hooks/use-tenant-permissions'
+import OrgRolesCard from '../../../components/org-roles-card.component'
 
 /**
  * Organization team page (AGL-234/238): the org roster with roles,
@@ -37,12 +39,14 @@ import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
  * site's own Users card, which grants org membership scoped to that site.
  */
 const ManageTeam: NextPageWithLayout = () => {
+  const orgNavTabs = useOrgNavTabItems()
   const { currentOrg } = useOrgWorkspace()
+  const { can, loaded: permissionsLoaded } = useTenantPermissions()
   return (
     <>
       <NextPageTitle screen={'Team'} />
       <DashboardLayout
-        navTabItems={orgNavTabItems()}
+        navTabItems={orgNavTabs}
         activeTab={buildRoute(Route.MANAGE_TEAM)}
         breadcrumbItems={[
           {
@@ -63,7 +67,13 @@ const ManageTeam: NextPageWithLayout = () => {
                 size: { xs: 12 },
                 children: <OrgMembersCard />,
               },
-              ...(currentOrg?.$id
+              {
+                size: { xs: 12 },
+                children: <OrgRolesCard />,
+              },
+              // Activity is permission-gated (AGL-243, org.auditLog).
+              ...(currentOrg?.$id &&
+              (!permissionsLoaded || can('org.auditLog'))
                 ? [
                     {
                       size: { xs: 12 },

@@ -38,10 +38,11 @@ import { useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import orgNavTabItems from '../../../constants/org-nav-tabs'
+import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
+import useTenantPermissions from '../../../hooks/use-tenant-permissions'
 
 const WORKSPACE_DOMAIN =
   process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
@@ -52,6 +53,7 @@ const WORKSPACE_DOMAIN =
  * workspace info. Slug changes and deletion stay deliberate future flows.
  */
 const OrgSettings: NextPageWithLayout = () => {
+  const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgWorkspace()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
@@ -61,6 +63,7 @@ const OrgSettings: NextPageWithLayout = () => {
   const [busy, setBusy] = useState(false)
   const canManage = canManageOrg(currentOrg?.role)
   const isOwner = currentOrg?.role === 'owner'
+  const { can, loaded: permissionsLoaded } = useTenantPermissions()
 
   useEffect(() => {
     setName(currentOrg?.orgName ?? '')
@@ -198,7 +201,7 @@ const OrgSettings: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Settings – Organization'} />
       <DashboardLayout
-        navTabItems={orgNavTabItems()}
+        navTabItems={orgNavTabs}
         activeTab={buildRoute(Route.ORG_SETTINGS)}
         breadcrumbItems={[
           { children: 'Settings', href: buildRoute(Route.ORG_SETTINGS) },
@@ -213,6 +216,12 @@ const OrgSettings: NextPageWithLayout = () => {
             <Alert severity="info">
               {'Create your first site to start an organization, or accept ' +
                 'a pending invite from your dashboard.'}
+            </Alert>
+          ) : permissionsLoaded && !can('org.settings') ? (
+            // Permission guard (AGL-243): org.settings gates the page.
+            <Alert severity="warning">
+              {'You do not have permission to manage settings for this ' +
+                'organization — ask an organization admin for access.'}
             </Alert>
           ) : (
             <CardDisplay header={'General'} contentGutterX contentGutterY>

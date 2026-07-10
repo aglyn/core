@@ -15,12 +15,19 @@ Control what each teammate can do with **roles** — named permission sets — p
 
 ## Create a custom role
 
-1. In the site's role settings, choose **New role**.
-2. Give it a name and select the **permissions** it grants.
-3. Save, then assign it when you [invite teammates](invite-teammates.md).
+1. On the organization **Team** page, find the **Custom roles** card and choose
+   **New role**.
+2. Give it a name and set each **permission** to granted, denied, or inherit (inherit
+   falls back to the member's org role default).
+3. Save, then assign it to members from the roster's **Custom role** column.
+
+The permission catalog covers organization settings, the activity log, billing (view
+and manage separately), member management, site creation and deletion, data,
+marketing, community publishing, and plugin installs.
 
 Permissions are enforced everywhere — across the console's APIs and every surface — so a
-role reliably limits what a member can see and do.
+role reliably limits what a member can see and do. Members without billing or settings
+permissions don't see those tabs at all.
 
 ## Per-member overrides
 

@@ -72,6 +72,13 @@ export interface AglynOrganization extends AglynDocument {
 export interface AglynOrgMember extends AglynDocument {
   $id: UserUid
   role?: OrgRole
+  /**
+   * Custom role reference (AGL-243): id of an `orgs/{orgId}/roles` doc
+   * whose permission map overrides the org role's defaults.
+   */
+  roleId?: string
+  /** Per-member permission overrides (AGL-243); win over every layer. */
+  permissions?: Record<string, boolean>
   /** Org-wide host access shortcut; otherwise `hostAccess` decides. */
   allHosts?: boolean
   hostAccess?: Record<HostUid, HostAccessRole>

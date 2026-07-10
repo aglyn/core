@@ -36,7 +36,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
-import orgNavTabItems from '../../../constants/org-nav-tabs'
+import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
 function formatWhen(ms: number | null): string {
@@ -48,6 +48,7 @@ function formatWhen(ms: number | null): string {
  * both server-gated to paid plans via the /api/support routes.
  */
 const ManageSupport: NextPageWithLayout = () => {
+  const orgNavTabs = useOrgNavTabItems()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
 
@@ -156,7 +157,7 @@ const ManageSupport: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Support'} />
       <DashboardLayout
-        navTabItems={orgNavTabItems()}
+        navTabItems={orgNavTabs}
         activeTab={buildRoute(Route.MANAGE_SUPPORT)}
         breadcrumbItems={[
           { children: 'Support', href: buildRoute(Route.MANAGE_SUPPORT) },

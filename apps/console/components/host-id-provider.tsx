@@ -68,7 +68,23 @@ export function HostIdProvider({ children }) {
           return
         }
         const hostOrgId = snapshot.get('orgId') as string | undefined
-        if (!hostOrgId || hostOrgId === currentOrg.$id) return
+        if (!hostOrgId || hostOrgId === currentOrg.$id) {
+          // Host-scoped access guard (AGL-242): membership in the org is
+          // not access to every host — restricted members carry
+          // `hostAccess` and the host doc's memberRoles projection (and
+          // the rules) exclude them elsewhere. A permission-denied read
+          // here means "not your site": bounce instead of rendering an
+          // empty shell. Staff claims pass the rules, so staff keep
+          // access.
+          void getDoc(doc(firestore, 'hosts', hostId)).catch(
+            (error: { code?: string }) => {
+              if (active && error?.code === 'permission-denied') {
+                void router.replace('/hosts')
+              }
+            },
+          )
+          return
+        }
         const membership = orgs.find((org) => org.$id === hostOrgId)
         if (!membership) {
           // Not this user's org — rules already deny the data; keep the

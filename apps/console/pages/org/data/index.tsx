@@ -25,7 +25,7 @@ import HostDatasetsCard from '../../../components/host-datasets-card.component'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
-import orgNavTabItems from '../../../constants/org-nav-tabs'
+import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
@@ -36,12 +36,13 @@ import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
  * Data page shows the same collections in host context.
  */
 const OrgData: NextPageWithLayout = () => {
+  const orgNavTabs = useOrgNavTabItems()
   const { currentOrg, loading } = useOrgWorkspace()
   return (
     <>
       <NextPageTitle screen={'Data – Organization'} />
       <DashboardLayout
-        navTabItems={orgNavTabItems()}
+        navTabItems={orgNavTabs}
         activeTab={buildRoute(Route.ORG_DATA)}
         breadcrumbItems={[
           { children: 'Data', href: buildRoute(Route.ORG_DATA) },

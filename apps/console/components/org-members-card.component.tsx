@@ -79,6 +79,8 @@ export function OrgMembersCard() {
   const { confirm } = useConfirmationContext()
   const [members, setMembers] = useState<AglynOrgMember[]>([])
   const [invites, setInvites] = useState<any[]>([])
+  // Custom roles (AGL-243): named permission sets assignable per member.
+  const [roles, setRoles] = useState<Array<{ $id: string; name?: string }>>([])
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<OrgRole>('editor')
   const [allHosts, setAllHosts] = useState(true)
@@ -120,14 +122,16 @@ export function OrgMembersCard() {
 
   const refresh = useCallback(async () => {
     if (!orgId || !user) return
-    const [membersPayload, invitesPayload] = await Promise.all([
+    const [membersPayload, invitesPayload, rolesPayload] = await Promise.all([
       request(`/api/orgs/members?orgId=${orgId}`, 'GET'),
       canManage
         ? request(`/api/orgs/invites?orgId=${orgId}`, 'GET')
         : Promise.resolve({ invites: [] }),
+      request(`/api/orgs/roles?orgId=${orgId}`, 'GET'),
     ])
     if (membersPayload?.members) setMembers(membersPayload.members)
     if (invitesPayload?.invites) setInvites(invitesPayload.invites)
+    if (rolesPayload?.roles) setRoles(rolesPayload.roles)
   }, [orgId, user, canManage, request])
 
   useEffect(() => {
@@ -227,6 +231,7 @@ export function OrgMembersCard() {
             <TableRow>
               <TableCell>{'Member'}</TableCell>
               <TableCell>{'Role'}</TableCell>
+              <TableCell>{'Custom role'}</TableCell>
               <TableCell>{'Access'}</TableCell>
               <TableCell align="right" />
             </TableRow>
@@ -263,6 +268,46 @@ export function OrgMembersCard() {
                     </TextField>
                   ) : (
                     <Chip label={member.role ?? 'viewer'} size="small" />
+                  )}
+                </TableCell>
+                <TableCell>
+                  {canManage && member.role !== 'owner' ? (
+                    <TextField
+                      size="small"
+                      select
+                      value={(member as any).roleId ?? ''}
+                      onChange={(event) =>
+                        void request('/api/orgs/members', 'POST', {
+                          orgId,
+                          action: 'upsert',
+                          uid: member.$id,
+                          role: member.role ?? 'viewer',
+                          allHosts: member.allHosts === true,
+                          hostAccess: member.hostAccess ?? {},
+                          roleId: event.target.value || null,
+                        }).then((ok) => ok && refresh())
+                      }
+                      sx={{ width: 150 }}
+                    >
+                      <MenuItem value="">{'—'}</MenuItem>
+                      {roles.map((customRole) => (
+                        <MenuItem key={customRole.$id} value={customRole.$id}>
+                          {customRole.name ?? customRole.$id}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  ) : (member as any).roleId ? (
+                    <Chip
+                      size="small"
+                      label={
+                        roles.find(
+                          (customRole) =>
+                            customRole.$id === (member as any).roleId,
+                        )?.name ?? 'custom'
+                      }
+                    />
+                  ) : (
+                    '—'
                   )}
                 </TableCell>
                 <TableCell>

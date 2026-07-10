@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-import { canManageOrg, type HostAccessRole, isOrgRole } from '@aglyn/aglyn'
+import { type HostAccessRole, isOrgRole } from '@aglyn/aglyn'
 import {
   firebaseAdmin,
   listOrgMembers,
   logOrgActivity,
+  memberHasOrgPermission,
   removeOrgMember,
   resolveOrgMembership,
   upsertOrgMember,
@@ -82,10 +83,14 @@ export default async function handler(
       return res.status(200).json({ members })
     }
 
-    if (!isStaff && !canManageOrg(actor?.member.role)) {
+    // Permission-gated (AGL-243): members.manage covers custom roles too.
+    if (
+      !isStaff &&
+      !(await memberHasOrgPermission(orgId, actor?.member, 'members.manage'))
+    ) {
       return res
         .status(403)
-        .json({ error: 'Managing members requires the admin role' })
+        .json({ error: 'Managing members requires the members.manage permission' })
     }
     const firestore = firebaseAdmin.app().firestore()
     const orgSnapshot = await firestore.collection('orgs').doc(orgId).get()
@@ -140,6 +145,14 @@ export default async function handler(
         role,
         allHosts: req.body?.allHosts === true,
         hostAccess: sanitizeHostAccess(req.body?.hostAccess),
+        // Custom role assignment (AGL-243): string sets, null clears,
+        // absent leaves unchanged.
+        roleId:
+          typeof req.body?.roleId === 'string' && req.body.roleId
+            ? String(req.body.roleId)
+            : req.body?.roleId === null
+              ? null
+              : undefined,
         email,
         displayName,
         invitedBy: decoded.uid,

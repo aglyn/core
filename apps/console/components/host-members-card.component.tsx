@@ -21,6 +21,7 @@ import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Button,
   Chip,
+  Link,
   MenuItem,
   Stack,
   Table,
@@ -35,6 +36,7 @@ import { collection, doc, limit, query } from 'firebase/firestore'
 import { useCallback, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { checkTenantSeatQuota } from '../constants/entitlements'
+import { buildRoute, Route } from '../constants/route-links'
 import useCurrentTenant from '../hooks/use-current-tenant'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 import useFirestoreDoc from '../hooks/use-firestore-doc'
@@ -182,6 +184,13 @@ export function HostMembersCard(props: HostMembersCardProps) {
       contentBordered="all"
     >
       <Stack spacing={1.5}>
+        <Typography variant="caption" color="text.secondary">
+          {'Site users are organization members scoped to this site — the '}
+          <Link href={buildRoute(Route.MANAGE_TEAM)} color="secondary">
+            {'organization Team page'}
+          </Link>
+          {' manages everyone in one place.'}
+        </Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
           <TextField
             size="small"

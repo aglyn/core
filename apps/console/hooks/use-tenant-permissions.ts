@@ -16,7 +16,13 @@
  */
 'use client'
 
-import type { OrgRole } from '@aglyn/aglyn'
+import {
+  resolveOrgPermissions,
+  type AglynOrgCustomRole,
+  type AglynOrgMember,
+  type OrgPermission,
+  type OrgRole,
+} from '@aglyn/aglyn'
 import { doc, getDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
@@ -40,41 +46,37 @@ const ALL_TRUE: TenantPermissions = {
   manageMembers: true,
 }
 
-const EDITOR: TenantPermissions = {
-  createHosts: false,
-  editHosts: true,
-  editBilling: false,
-  publishToCommunity: true,
-  installPlugins: true,
-  manageMembers: false,
-}
+const ALL_GRANTED = resolveOrgPermissions({ role: 'owner' })
 
-const VIEWER: TenantPermissions = {
-  createHosts: false,
-  editHosts: false,
-  editBilling: false,
-  publishToCommunity: false,
-  installPlugins: false,
-  manageMembers: false,
-}
-
-const ROLE_PERMISSIONS: Record<OrgRole, TenantPermissions> = {
-  owner: ALL_TRUE,
-  admin: ALL_TRUE,
-  editor: EDITOR,
-  viewer: VIEWER,
+/** Legacy boolean map derived from the granular permission set. */
+function toLegacyPermissions(
+  granted: Record<OrgPermission, boolean>,
+  role: OrgRole | undefined,
+): TenantPermissions {
+  return {
+    createHosts: granted['hosts.create'],
+    editHosts: role !== 'viewer',
+    editBilling: granted['billing.manage'],
+    publishToCommunity: granted['community.publish'],
+    installPlugins: granted['plugins.install'],
+    manageMembers: granted['members.manage'],
+  }
 }
 
 /**
- * Signed-in user's permissions in the current org workspace (AGL-238,
- * replacing the manager-seat flags from AGL-108): the org role decides.
- * Accounts without an org yet act as owners (the org is created on first
- * need). Defaults to full access while loading and on failure — the
- * server APIs are the actual enforcement point, this hook only
- * hides/disables surfaces.
+ * Signed-in user's permissions in the current org workspace: the org role
+ * decides the defaults; a custom role (`orgs/{orgId}/roles`, AGL-243) and
+ * per-member overrides refine them. Accounts without an org yet act as
+ * owners (the org is created on first need). Defaults to full access
+ * while loading and on failure — the server APIs are the enforcement
+ * point, this hook only hides/disables surfaces.
  */
 export function useTenantPermissions(): {
   permissions: TenantPermissions
+  /** Granular permission check (AGL-243). */
+  can: (permission: OrgPermission) => boolean
+  /** The full resolved permission map. */
+  granted: Record<OrgPermission, boolean>
   isOwner: boolean
   /** Org the permissions were resolved in (undefined pre-first-org). */
   orgId: string | undefined
@@ -86,13 +88,13 @@ export function useTenantPermissions(): {
   const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
   const orgId = currentOrg?.$id
   const [state, setState] = useState<{
-    permissions: TenantPermissions
+    granted: Record<OrgPermission, boolean>
     isOwner: boolean
     orgId: string | undefined
     role: OrgRole | undefined
     loaded: boolean
   }>({
-    permissions: ALL_TRUE,
+    granted: ALL_GRANTED,
     isOwner: true,
     orgId: undefined,
     role: undefined,
@@ -105,7 +107,7 @@ export function useTenantPermissions(): {
     if (!orgId) {
       // No org yet — fresh account, full access (owner of its future org).
       setState({
-        permissions: ALL_TRUE,
+        granted: ALL_GRANTED,
         isOwner: true,
         orgId: undefined,
         role: undefined,
@@ -114,28 +116,56 @@ export function useTenantPermissions(): {
       return
     }
     let active = true
-    void getDoc(doc(firestore, 'orgs', orgId, 'members', uid))
-      .then((snapshot) => {
+    void (async () => {
+      try {
+        const snapshot = await getDoc(
+          doc(firestore, 'orgs', orgId, 'members', uid),
+        )
+        const member = (snapshot.data() ?? {}) as Partial<AglynOrgMember>
+        const role = (member.role ?? 'viewer') as OrgRole
+        // Custom role layer (AGL-243): one extra read, only when assigned.
+        let customRole: AglynOrgCustomRole | null = null
+        if (member.roleId) {
+          try {
+            const roleSnapshot = await getDoc(
+              doc(firestore, 'orgs', orgId, 'roles', member.roleId),
+            )
+            if (roleSnapshot.exists()) {
+              customRole = roleSnapshot.data() as AglynOrgCustomRole
+            }
+          } catch {
+            // Dangling roleId — fall back to the role defaults.
+          }
+        }
         if (!active) return
-        const role = (snapshot.get('role') ?? 'viewer') as OrgRole
         setState({
-          permissions: ROLE_PERMISSIONS[role] ?? VIEWER,
+          granted: resolveOrgPermissions(member, customRole),
           isOwner: role === 'owner' || role === 'admin',
           orgId,
           role,
           loaded: true,
         })
-      })
-      .catch(() => {
+      } catch {
         // Fail open — surfaces stay visible; APIs still enforce.
         if (active) setState((prev) => ({ ...prev, orgId, loaded: true }))
-      })
+      }
+    })()
     return () => {
       active = false
     }
   }, [user, firestore, orgId, orgsLoading])
 
-  return state
+  return {
+    permissions: state.loaded
+      ? toLegacyPermissions(state.granted, state.role)
+      : ALL_TRUE,
+    can: (permission) => state.granted[permission],
+    granted: state.granted,
+    isOwner: state.isOwner,
+    orgId: state.orgId,
+    role: state.role,
+    loaded: state.loaded,
+  }
 }
 
 export default useTenantPermissions

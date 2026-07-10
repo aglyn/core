@@ -74,6 +74,13 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Custom roles (AGL-243): named permission sets members resolve
+      // their own access from — member-readable, API-written only.
+      match /roles/{roleId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+
       // Org-shared data (AGL-237): datasets (records included), contacts
       // and segments are shared across every host in the org. Any member
       // reads; editors and up write; viewers stay read-only. Suspension

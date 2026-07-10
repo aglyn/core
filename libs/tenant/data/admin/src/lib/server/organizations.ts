@@ -23,13 +23,16 @@
  */
 
 import {
-  type AglynOrganization,
-  type AglynOrgMember,
   createResourceUid,
   generateOrgSlug,
+  hasOrgPermission,
   isValidOrgSlug,
-  type OrgRole,
   projectHostMemberRoles,
+  type AglynOrganization,
+  type AglynOrgCustomRole,
+  type AglynOrgMember,
+  type OrgPermission,
+  type OrgRole,
 } from '@aglyn/aglyn'
 import { FieldValue } from 'firebase-admin/firestore'
 import firebaseAdmin from './firebase-admin'
@@ -302,6 +305,32 @@ export async function orgDataCollectionForHost(
     : firestore().collection('hosts').doc(hostId).collection(name)
 }
 
+/**
+ * Server-side permission check (AGL-243): the member's org-role defaults
+ * refined by their custom role doc (one read, only when assigned). API
+ * routes call this before privileged mutations.
+ */
+export async function memberHasOrgPermission(
+  orgId: string,
+  member: Partial<AglynOrgMember> | null | undefined,
+  permission: OrgPermission,
+): Promise<boolean> {
+  if (!member) return false
+  let customRole: AglynOrgCustomRole | null = null
+  if (member.roleId) {
+    const snapshot = await firestore()
+      .collection('orgs')
+      .doc(orgId)
+      .collection('roles')
+      .doc(member.roleId)
+      .get()
+    customRole = snapshot.exists
+      ? (snapshot.data() as AglynOrgCustomRole)
+      : null
+  }
+  return hasOrgPermission(member, permission, customRole)
+}
+
 export async function listOrgMembers(
   orgId: string,
 ): Promise<AglynOrgMember[]> {
@@ -392,6 +421,8 @@ export interface UpsertOrgMemberOptions {
   role: OrgRole
   allHosts?: boolean
   hostAccess?: Record<string, 'admin' | 'editor' | 'viewer'>
+  /** Custom role reference (AGL-243); null clears it. */
+  roleId?: string | null
   email?: string | null
   displayName?: string | null
   invitedBy?: string | null
@@ -405,8 +436,17 @@ export interface UpsertOrgMemberOptions {
 export async function upsertOrgMember(
   options: UpsertOrgMemberOptions,
 ): Promise<void> {
-  const { orgId, uid, role, allHosts, hostAccess, email, displayName, invitedBy } =
-    options
+  const {
+    orgId,
+    uid,
+    role,
+    allHosts,
+    hostAccess,
+    roleId,
+    email,
+    displayName,
+    invitedBy,
+  } = options
   const db = firestore()
   await db.runTransaction(async (tx) => {
     const orgSnapshot = await tx.get(db.collection('orgs').doc(orgId))
@@ -424,6 +464,7 @@ export async function upsertOrgMember(
         role,
         allHosts: allHosts ?? false,
         hostAccess: hostAccess ?? {},
+        ...(roleId !== undefined ? { roleId } : {}),
         ...(email !== undefined ? { email } : {}),
         ...(displayName !== undefined ? { displayName } : {}),
         ...(invitedBy ? { invitedBy } : {}),

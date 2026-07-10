@@ -26,7 +26,7 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { Chip, Stack, Typography } from '@mui/material'
+import { Alert, Chip, Stack, Typography } from '@mui/material'
 import { useCallback } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import BillingPlanCardsComponent, {
@@ -38,7 +38,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
-import orgNavTabItems from '../../../constants/org-nav-tabs'
+import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useAdminHosts } from '../../../hooks/use-admin-hosts'
 import useCurrentTenant from '../../../hooks/use-current-tenant'
@@ -46,10 +46,12 @@ import useTenantPermissions from '../../../hooks/use-tenant-permissions'
 
 
 const BillingContent: NextPageWithLayout = () => {
+  const orgNavTabs = useOrgNavTabItems()
   const { data: user } = useUser()
   const firestore = useFirestore()
   const { tenant, orgId } = useCurrentTenant()
-  const { permissions } = useTenantPermissions()
+  const { permissions, can, loaded: permissionsLoaded } =
+    useTenantPermissions()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
 
@@ -98,7 +100,7 @@ const BillingContent: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Billing'} />
       <DashboardLayout
-        navTabItems={orgNavTabItems()}
+        navTabItems={orgNavTabs}
         activeTab={buildRoute(Route.MANAGE_BILLING)}
         breadcrumbItems={[
           { children: 'Billing', href: buildRoute(Route.MANAGE_BILLING) },
@@ -109,6 +111,13 @@ const BillingContent: NextPageWithLayout = () => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          {/* Permission guard (AGL-243): billing.view gates the page. */}
+          {permissionsLoaded && !can('billing.view') ? (
+            <Alert severity="warning">
+              {'You do not have permission to view billing for this ' +
+                'organization — ask an organization admin for access.'}
+            </Alert>
+          ) : (
           <GridItems
             spacing={3}
             items={[
@@ -178,6 +187,7 @@ const BillingContent: NextPageWithLayout = () => {
               },
             ]}
           />
+          )}
         </Container>
       </DashboardLayout>
     </>
