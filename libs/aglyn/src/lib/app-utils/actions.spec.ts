@@ -50,6 +50,21 @@ describe('validateHostAction', () => {
     ).toMatch(/Custom event/)
   })
 
+  it('validates frequency caps (AGL-274)', () => {
+    expect(
+      validateHostAction({
+        ...base,
+        trigger: { ...base.trigger, cooldownMinutes: 0 },
+      }),
+    ).toMatch(/Cooldown/)
+    expect(
+      validateHostAction({
+        ...base,
+        trigger: { ...base.trigger, cooldownMinutes: 30 },
+      }),
+    ).toBeNull()
+  })
+
   it('validates per-step required fields', () => {
     expect(
       validateHostAction({

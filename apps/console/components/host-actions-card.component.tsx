@@ -33,12 +33,10 @@ import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   IconButton,
   MenuItem,
   Stack,
@@ -307,8 +305,15 @@ export function HostActionsCard(props: { hostId: string }) {
         ...(draft.trigger.pathPattern?.trim()
           ? { pathPattern: draft.trigger.pathPattern.trim() }
           : {}),
+        // Frequency caps (AGL-274).
         ...(draft.trigger.oncePerVisitor === true
           ? { oncePerVisitor: true }
+          : {}),
+        ...(draft.trigger.oncePerSession === true
+          ? { oncePerSession: true }
+          : {}),
+        ...(Number(draft.trigger.cooldownMinutes) >= 1
+          ? { cooldownMinutes: Number(draft.trigger.cooldownMinutes) }
           : {}),
       },
       steps: draft.steps,
@@ -327,6 +332,17 @@ export function HostActionsCard(props: { hostId: string }) {
         doc(firestore, 'hosts', hostId, 'actions', id),
         {
           ...candidate,
+          // Frequency caps overwrite explicitly (AGL-274): a merge-set
+          // keeps omitted keys, so switching one off must write it out.
+          trigger: {
+            ...candidate.trigger,
+            oncePerVisitor: draft.trigger.oncePerVisitor === true,
+            oncePerSession: draft.trigger.oncePerSession === true,
+            cooldownMinutes:
+              Number(draft.trigger.cooldownMinutes) >= 1
+                ? Number(draft.trigger.cooldownMinutes)
+                : null,
+          },
           updatedAt: Timestamp.now(),
           ...(draft.id ? {} : { createdAt: Timestamp.now() }),
         },
@@ -425,6 +441,14 @@ export function HostActionsCard(props: { hostId: string }) {
                     threshold: action.trigger?.threshold,
                     pathPattern: action.trigger?.pathPattern ?? '',
                     oncePerVisitor: action.trigger?.oncePerVisitor === true,
+                    oncePerSession: action.trigger?.oncePerSession === true,
+                    ...(Number(action.trigger?.cooldownMinutes) >= 1
+                      ? {
+                          cooldownMinutes: Number(
+                            action.trigger?.cooldownMinutes,
+                          ),
+                        }
+                      : {}),
                   },
                   steps: action.steps ?? [],
                   enabled: action.enabled !== false,
@@ -603,24 +627,64 @@ export function HostActionsCard(props: { hostId: string }) {
                 size="small"
                 sx={{ flex: 1 }}
               />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={draft?.trigger.oncePerVisitor === true}
-                    onChange={(event) =>
-                      patch((previous) => ({
-                        ...previous,
-                        trigger: {
-                          ...previous.trigger,
-                          oncePerVisitor: event.target.checked,
-                        },
-                      }))
-                    }
-                  />
+              {/* Frequency caps (AGL-274). */}
+              <TextField
+                select
+                label="Frequency"
+                size="small"
+                sx={{ minWidth: 170 }}
+                value={
+                  draft?.trigger.oncePerVisitor
+                    ? 'visitor'
+                    : draft?.trigger.oncePerSession
+                      ? 'session'
+                      : Number(draft?.trigger.cooldownMinutes) >= 1
+                        ? 'cooldown'
+                        : ''
                 }
-                label="Once per visitor"
-              />
+                onChange={(event) => {
+                  const mode = event.target.value
+                  patch((previous) => ({
+                    ...previous,
+                    trigger: {
+                      ...previous.trigger,
+                      oncePerVisitor: mode === 'visitor',
+                      oncePerSession: mode === 'session',
+                      cooldownMinutes:
+                        mode === 'cooldown'
+                          ? Number(previous.trigger.cooldownMinutes) >= 1
+                            ? Number(previous.trigger.cooldownMinutes)
+                            : 60
+                          : undefined,
+                    },
+                  }))
+                }}
+              >
+                <MenuItem value="">{'Every matching pageview'}</MenuItem>
+                <MenuItem value="session">{'Once per session'}</MenuItem>
+                <MenuItem value="visitor">{'Once per visitor'}</MenuItem>
+                <MenuItem value="cooldown">{'With a cooldown'}</MenuItem>
+              </TextField>
+              {Number(draft?.trigger.cooldownMinutes) >= 1 &&
+              !draft?.trigger.oncePerVisitor &&
+              !draft?.trigger.oncePerSession ? (
+                <TextField
+                  type="number"
+                  label="Cooldown (minutes)"
+                  size="small"
+                  sx={{ width: 150 }}
+                  value={draft?.trigger.cooldownMinutes ?? 60}
+                  onChange={(event) =>
+                    patch((previous) => ({
+                      ...previous,
+                      trigger: {
+                        ...previous.trigger,
+                        cooldownMinutes: Number(event.target.value),
+                      },
+                    }))
+                  }
+                />
+              ) : null}
             </Stack>
           ) : null}
           <Typography variant="overline" color="text.secondary">

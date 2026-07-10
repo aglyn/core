@@ -886,6 +886,30 @@ function AutomationsEngine(props: {
         } catch {
           // Storage unavailable — degrade to once per pageview.
         }
+      } else if (automation.oncePerSession) {
+        // Once per session (AGL-274): survives navigation, not the tab.
+        const key = `aglyn:auto:${automation.id}`
+        try {
+          if (sessionStorage.getItem(key)) return
+          sessionStorage.setItem(key, '1')
+        } catch {
+          // Storage unavailable — degrade to once per pageview.
+        }
+      } else if (automation.cooldownMinutes) {
+        // Cooldown (AGL-274): a timestamp gates re-fires for the visitor.
+        const key = `aglyn:auto:${automation.id}:at`
+        try {
+          const last = Number(localStorage.getItem(key) ?? 0)
+          if (
+            last &&
+            Date.now() - last < automation.cooldownMinutes * 60_000
+          ) {
+            return
+          }
+          localStorage.setItem(key, String(Date.now()))
+        } catch {
+          // Storage unavailable — degrade to once per pageview.
+        }
       }
       runClientSteps(automation)
       if (automation.hasServerSteps) {

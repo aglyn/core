@@ -31,6 +31,10 @@ export interface ClientAutomation {
   threshold?: number
   /** Fire at most once per visitor (AGL-266). */
   oncePerVisitor?: boolean
+  /** Fire at most once per browser session (AGL-274). */
+  oncePerSession?: boolean
+  /** Minimum minutes between fires for the same visitor (AGL-274). */
+  cooldownMinutes?: number
   steps: Aglyn.HostActionStep[]
   hasServerSteps: boolean
 }
@@ -84,6 +88,12 @@ export async function getClientAutomations(options: {
           : {}),
         ...(action.trigger?.oncePerVisitor === true
           ? { oncePerVisitor: true }
+          : {}),
+        ...(action.trigger?.oncePerSession === true
+          ? { oncePerSession: true }
+          : {}),
+        ...(Number(action.trigger?.cooldownMinutes) >= 1
+          ? { cooldownMinutes: Number(action.trigger?.cooldownMinutes) }
           : {}),
         steps: clientSteps,
         hasServerSteps,

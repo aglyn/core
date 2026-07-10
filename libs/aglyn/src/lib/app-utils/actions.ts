@@ -66,6 +66,17 @@ export interface HostActionTrigger {
    * of once per pageview. Site events only.
    */
   oncePerVisitor?: boolean
+  /**
+   * Fire at most once per browser session (AGL-274,
+   * sessionStorage-keyed). Site events only.
+   */
+  oncePerSession?: boolean
+  /**
+   * Minimum minutes between fires for the same visitor (AGL-274,
+   * localStorage timestamp). Site events only; ignored when
+   * `oncePerVisitor` is set.
+   */
+  cooldownMinutes?: number
 }
 
 export type HostActionStep =
@@ -195,6 +206,13 @@ export function validateHostAction(action: HostAction): string | null {
     return event === 'scrollDepth'
       ? 'Set the scroll percentage (1–100)'
       : 'Set the seconds on page'
+  }
+  // Frequency caps (AGL-274).
+  if (
+    action.trigger?.cooldownMinutes != null &&
+    !(Number(action.trigger.cooldownMinutes) >= 1)
+  ) {
+    return 'Cooldown must be at least 1 minute'
   }
   const steps = action.steps ?? []
   if (!steps.length) return 'Add at least one step'
