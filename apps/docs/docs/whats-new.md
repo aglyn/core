@@ -18,10 +18,10 @@ Each links into its section for the how-to.
 - **[Screens & layouts](screens-and-layouts/overview.md)** — hierarchical routing with
   cascading slug rewrites, shared **layouts** with slots, reusable components, and **named
   versions with scheduled publishing**.
-- **[Theme builder](theme-builder/overview.md)** — host theme editor with live preview and
+- **[Theme builder](theme-builder/overview.md)** — site theme editor with live preview and
   light/dark schemes, supplied to the canvas so previews match the live site.
 - **[Templates, blocks & content](site-templates/overview.md)** — starter template gallery,
-  save-host-as-template, a section & block library, and a blog with collections and RSS.
+  save-site-as-template, a section & block library, and a blog with collections and RSS.
 
 ## Data
 
@@ -70,7 +70,7 @@ Each links into its section for the how-to.
 - **[Plugins & marketplace](plugins/overview.md)** — a plugin registry with install/upgrade,
   a sandboxed runtime, per-plugin config, a network bridge, and marketplace monetization.
 - **[Workflows, actions & webhooks](workflows-and-actions/overview.md)** — event-to-action
-  automation, workflows on host events, and outbound/inbound webhooks.
+  automation, workflows on site events, and outbound/inbound webhooks.
 - **[AI assist](ai-assist/overview.md)** — copy assist for any text prop and AI Generate
   Section.
 
