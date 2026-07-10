@@ -1,0 +1,69 @@
+/**
+ * @license
+ * Copyright 2026 Aglyn LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { createContext } from 'react'
+
+/**
+ * Host-app-provided interactions for the Attributes panel (AGL-258): the
+ * console supplies the host's element-scoped automations and section
+ * experiments plus creators; the designer stays storage-agnostic and
+ * hides the section when no context is provided. Element selectors use
+ * the renderer's stable `[data-aglyn="leaf:<nodeId>"]` attribute.
+ */
+export interface InteractionAutomation {
+  id: string
+  name?: string
+  event: string
+  selector?: string
+  enabled?: boolean
+}
+
+export interface SectionExperimentRef {
+  id: string
+  name?: string
+  nodeId?: string
+  status?: string
+}
+
+export type InteractionTriggerEvent =
+  | 'elementClick'
+  | 'elementVisible'
+  | 'scrollToElement'
+
+export interface InteractionsContextValue {
+  /** The host's site-event automations (for per-element listing). */
+  automations?: InteractionAutomation[]
+  /** Screen/section experiments (badges + duplication guard). */
+  sectionExperiments?: SectionExperimentRef[]
+  /**
+   * Creates a disabled automation bound to the node's element selector;
+   * the editor finishes its steps on the Workflows page.
+   */
+  onCreateInteraction?: (options: {
+    nodeId: string
+    event: InteractionTriggerEvent
+  }) => void
+  /** Creates a draft section experiment targeting the node. */
+  onCreateSectionExperiment?: (options: { nodeId: string }) => void
+}
+
+export const InteractionsContext = createContext<InteractionsContextValue>({})
+
+/** The selector the renderer/automations engine can target for a node. */
+export function nodeElementSelector(nodeId: string): string {
+  return `[data-aglyn="leaf:${nodeId}"]`
+}

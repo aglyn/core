@@ -36,19 +36,28 @@ export async function composeScreenNodes(options: {
   screen: Aglyn.AglynScreen
   /** Entry-template tokens (AGL-105) substituted before denormalize. */
   tokens?: Record<string, string>
+  /**
+   * Compose a specific version instead of the published one (AGL-253):
+   * experiment variants point at versions; schedules don't apply.
+   */
+  versionId?: string
 }): Promise<Record<string, any> | null> {
   const { hostId, screenId, screen } = options
 
-  const effectiveVersionId = await applyDuePublishSchedule({
-    hostId,
-    collectionName: 'screens',
-    docId: screenId,
-    parent: screen,
-  })
+  const effectiveVersionId = options.versionId
+    ? null
+    : await applyDuePublishSchedule({
+        hostId,
+        collectionName: 'screens',
+        docId: screenId,
+        parent: screen,
+      })
   const versionRes = await getScreenVersion({
     hostId,
     screenId,
-    versionId: (effectiveVersionId ?? screen.versionId) as string,
+    versionId: (options.versionId ??
+      effectiveVersionId ??
+      screen.versionId) as string,
   })
   if (versionRes.error || !versionRes.version) return null
 

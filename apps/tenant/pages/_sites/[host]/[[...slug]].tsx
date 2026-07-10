@@ -35,6 +35,9 @@ import getVariables from '../../../utils/get-variables'
 import getClientAutomations, {
   type ClientAutomation,
 } from '../../../utils/get-client-automations'
+import getScreenExperiments, {
+  type ScreenExperiment,
+} from '../../../utils/get-screen-experiments'
 import getOverlays from '../../../utils/get-overlays'
 import getHost from '../../../utils/get-host'
 import getPublishedLayoutVersion from '../../../utils/get-layout-version'
@@ -88,6 +91,12 @@ interface Props {
     endAtMs?: number
     contentHash: string
   } | null
+  /**
+   * Screen/section A/B experiments for this screen (AGL-253): the client
+   * runner assigns a variant per visitor, swaps the composed tree, and
+   * beacons exposures/conversions.
+   */
+  experiments?: import('../../../utils/get-screen-experiments').ScreenExperiment[]
   /**
    * Site-event automations for this page (AGL-256): the client engine
    * arms triggers, runs client steps, and dispatches server steps.
@@ -557,6 +566,18 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
             .webhooks,
         })
       : []
+    // Screen/section experiments (AGL-253): Business-gated; composing a
+    // tree per divergent variant is bounded (≤4) and ISR-cached.
+    const experiments: ScreenExperiment[] = Aglyn.resolveTenantEntitlements(
+      tenantRes.tenant,
+    ).features.abTesting
+      ? await getScreenExperiments({
+          hostId,
+          screenId,
+          screen: screenRes.screen,
+        })
+      : []
+
     // Overlay payloads showOverlay steps reference (AGL-257).
     const automationOverlays: Record<string, any> = {}
     for (const automation of clientAutomations) {
@@ -592,6 +613,7 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       announcementBar,
       popup,
       clientAutomations: JSON.parse(JSON.stringify(clientAutomations)),
+      experiments: JSON.parse(JSON.stringify(experiments)),
       automationOverlays: Object.keys(automationOverlays).length
         ? JSON.parse(JSON.stringify(automationOverlays))
         : null,
@@ -629,6 +651,109 @@ function sendOverlayBeacon(hostId: string | undefined, overlay: string) {
  * localStorage (no cookies): editing the text re-shows the bar for
  * everyone who hid the old one.
  */
+/**
+ * Experiments runner (AGL-253): deterministic per-visitor assignment for
+ * the screen's experiments. The first active experiment wins (one per
+ * screen); its variant tree — composed server-side per variant version —
+ * swaps in via canvas.setNodes on hydration. Exposures beacon on
+ * assignment; the conversion listener matches the experiment's goal and
+ * beacons once per pageview.
+ */
+function ExperimentsRunner(props: {
+  hostId?: string
+  experiments: ScreenExperiment[]
+}) {
+  const { hostId, experiments } = props
+
+  useEffect(() => {
+    if (!hostId || !experiments.length) return undefined
+    const experiment = experiments[0]
+    let visitorId = ''
+    try {
+      visitorId = localStorage.getItem('aglyn:visitor') ?? ''
+      if (!visitorId) {
+        visitorId = `v-${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`
+        localStorage.setItem('aglyn:visitor', visitorId)
+      }
+    } catch {
+      return undefined // No storage (privacy mode) — serve the default.
+    }
+    const variant = Aglyn.assignExperimentVariant(
+      { status: experiment.status, variants: experiment.variants,
+        ...(experiment.winnerVariantId
+          ? { winnerVariantId: experiment.winnerVariantId }
+          : {}) },
+      experiment.id,
+      visitorId,
+    )
+    if (!variant) return undefined
+    const payload = experiment.payloads[variant.id]
+    if (payload) Aglyn.canvas.setNodes(payload as any)
+
+    const beacon = (kind: 'exposure' | 'conversion') => {
+      void fetch('/api/experiments/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          hostId,
+          experimentId: experiment.id,
+          variantId: variant.id,
+          kind,
+        }),
+        keepalive: true,
+      }).catch(() => undefined)
+    }
+    // Finished experiments serve the winner without counting stats.
+    if (experiment.status !== 'running') return undefined
+    beacon('exposure')
+
+    // Goal listener — client-observable goals only; server-side goals
+    // (bookings etc.) count through their own pipelines in a follow-up.
+    const cleanups: Array<() => void> = []
+    let converted = false
+    const convert = () => {
+      if (converted) return
+      converted = true
+      beacon('conversion')
+    }
+    const goal = experiment.goal?.event ?? 'formSubmission'
+    if (goal === 'formSubmission') {
+      const onSubmit = () => convert()
+      document.addEventListener('submit', onSubmit, true)
+      cleanups.push(() => document.removeEventListener('submit', onSubmit, true))
+    } else if (goal === 'elementClick') {
+      const selector = experiment.goal?.filter?.trim() || 'a, button'
+      const onClick = (event: MouseEvent) => {
+        const target = event.target as Element | null
+        if (target?.closest?.(selector)) convert()
+      }
+      document.addEventListener('click', onClick, true)
+      cleanups.push(() => document.removeEventListener('click', onClick, true))
+    } else if (goal === 'scrollDepth') {
+      const onScroll = () => {
+        const doc = document.documentElement
+        const max = doc.scrollHeight - window.innerHeight
+        if (max <= 0 || (window.scrollY / max) * 100 >= 50) {
+          convert()
+          window.removeEventListener('scroll', onScroll)
+        }
+      }
+      window.addEventListener('scroll', onScroll, { passive: true })
+      cleanups.push(() => window.removeEventListener('scroll', onScroll))
+    } else if (goal === 'timeOnPage') {
+      const timer = setTimeout(convert, 30_000)
+      cleanups.push(() => clearTimeout(timer))
+    }
+    return () => {
+      for (const cleanup of cleanups) cleanup()
+    }
+    // Experiments are static per pageview (ISR props).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hostId, experiments.length && experiments[0]?.id])
+
+  return null
+}
+
 /**
  * Site-event automations engine (AGL-256/257): arms the page's triggers
  * (scroll depth, element visibility/clicks, exit intent, dwell time),
@@ -1832,6 +1957,13 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       ) : null}
       {props.popup ? (
         <PopupOverlay popup={props.popup} hostId={props.data?.host?.$id} />
+      ) : null}
+      {/* Screen/section experiments (AGL-253). */}
+      {props.experiments?.length ? (
+        <ExperimentsRunner
+          hostId={props.data?.host?.$id}
+          experiments={props.experiments}
+        />
       ) : null}
       {/* Site-event automations (AGL-256/257). */}
       {props.clientAutomations?.length ? (

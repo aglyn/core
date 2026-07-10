@@ -42,6 +42,14 @@ Business plans can A/B test screens, sections, and emails from the **Experiments
 on the Marketing page: weighted variants, deterministic visitor assignment, a conversion
 goal, and per-variant exposure/conversion rates with a pick-the-winner flow.
 
+- **Screens & sections** — variants pin a screen *version*; visitors are split
+  deterministically and the winning version serves to everyone once you pick it.
+  Start a section test straight from the Besigner's Interactions panel.
+- **Emails** — variants override the campaign's subject and/or body. Attach a running
+  email experiment in the campaign composer; each recipient deterministically receives
+  one variant (re-sends reach the same variant), sends count as exposures, and once a
+  winner is picked every later send uses the winning copy.
+
 ## Compliance
 
 - Every send includes an **unsubscribe** link.

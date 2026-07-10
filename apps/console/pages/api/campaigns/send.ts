@@ -19,6 +19,8 @@ import {
   checkQuota,
   contactMatchesSegment,
   createResourceUid,
+  assignExperimentVariant,
+  type HostExperiment,
 } from '@aglyn/aglyn'
 import {
   orgDataCollectionForHost, firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
@@ -184,22 +186,21 @@ export default async function handler(
     const monthKey = new Date().toISOString().slice(0, 7)
     const counterRef = hostRef.collection('counters').doc('emailSends')
     {
+      // Plan-less orgs resolve as free (AGL-247) — the cap always runs.
       const tenant = (await getOrgForHost(hostId))?.org
-      if (tenant?.['plan']) {
-        const counterSnapshot = await counterRef.get()
-        const used = Number(counterSnapshot.get(monthKey) ?? 0)
-        const quota = checkQuota(
-          tenant as any,
-          'emailSendsPerMonth',
-          used + sendable.length - 1,
-        )
-        if (!quota.allowed) {
-          return res.status(403).json({
-            error:
-              `Monthly email limit reached (${quota.limit}) — upgrade in ` +
-              'Billing or shrink the audience',
-          })
-        }
+      const counterSnapshot = await counterRef.get()
+      const used = Number(counterSnapshot.get(monthKey) ?? 0)
+      const quota = checkQuota(
+        tenant as any,
+        'emailSendsPerMonth',
+        used + sendable.length - 1,
+      )
+      if (!quota.allowed) {
+        return res.status(403).json({
+          error:
+            `Monthly email limit reached (${quota.limit}) — upgrade in ` +
+            'Billing or shrink the audience',
+        })
       }
     }
 
@@ -209,12 +210,44 @@ export default async function handler(
       : `https://${subdomain}.aglyn.app`
 
     const campaignId = String(req.body?.campaignId ?? '') || createResourceUid()
+
+    // Email A/B (AGL-255): each recipient deterministically lands in a
+    // variant whose subject/body overrides apply; sends count as that
+    // variant's exposures. A finished experiment sends the winner copy.
+    const experimentId = String(req.body?.experimentId ?? '')
+    let experiment: (HostExperiment & { $id: string }) | null = null
+    if (experimentId) {
+      const experimentSnapshot = await hostRef
+        .collection('experiments')
+        .doc(experimentId)
+        .get()
+      const data = experimentSnapshot.data() as HostExperiment | undefined
+      if (
+        !experimentSnapshot.exists ||
+        !data ||
+        data.target !== 'email' ||
+        (data.status !== 'running' && !data.winnerVariantId)
+      ) {
+        return res
+          .status(400)
+          .json({ error: 'Pick a running email experiment' })
+      }
+      experiment = { $id: experimentSnapshot.id, ...data }
+    }
+    const variantSends: Record<string, number> = {}
     let sent = 0
     for (const email of sendable) {
       const signature = unsubscribeSignature(hostId, email, unsubscribeSecret)
       const unsubscribeUrl =
         `${siteBase}/api/email/unsubscribe?hostId=${encodeURIComponent(hostId)}` +
         `&email=${encodeURIComponent(email)}&sig=${signature}`
+      // Variant assignment keys on the recipient address (AGL-255) so a
+      // re-send reaches the same variant.
+      const variant = experiment
+        ? assignExperimentVariant(experiment, experiment.$id, email)
+        : null
+      const recipientSubject = variant?.subject?.trim() || subject
+      const recipientBody = variant?.body?.trim() || body
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -224,12 +257,35 @@ export default async function handler(
         body: JSON.stringify({
           from: emailFrom,
           to: [email],
-          subject,
-          text: `${body}\n\n—\nUnsubscribe: ${unsubscribeUrl}`,
+          subject: recipientSubject,
+          text: `${recipientBody}\n\n—\nUnsubscribe: ${unsubscribeUrl}`,
           headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>` },
         }),
       }).catch(() => null)
-      if (response?.ok) sent += 1
+      if (response?.ok) {
+        sent += 1
+        if (variant) {
+          variantSends[variant.id] = (variantSends[variant.id] ?? 0) + 1
+        }
+      }
+    }
+    // Sends are the email variant's exposures (AGL-255).
+    if (experiment && experiment.status === 'running') {
+      for (const [variantId, count] of Object.entries(variantSends)) {
+        await hostRef
+          .collection('experiments')
+          .doc(experiment.$id)
+          .collection('stats')
+          .doc(variantId)
+          .set(
+            {
+              exposures: firebaseAdmin.firestore.FieldValue.increment(count),
+              updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true },
+          )
+          .catch(() => undefined)
+      }
     }
 
     await hostRef.collection('campaigns').doc(campaignId).set(
@@ -237,7 +293,12 @@ export default async function handler(
         subject,
         body,
         audience,
-        stats: { recipients: sendable.length, sent },
+        ...(experiment ? { experimentId: experiment.$id } : {}),
+        stats: {
+          recipients: sendable.length,
+          sent,
+          ...(Object.keys(variantSends).length ? { variantSends } : {}),
+        },
         status: 'sent',
         sentAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
         sentBy: decoded.uid,

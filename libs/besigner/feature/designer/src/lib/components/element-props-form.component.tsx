@@ -45,6 +45,11 @@ import * as Besigner from '@aglyn/besigner'
 import { forwardRef, memo, type SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AiAssistContext } from '../contexts/ai-assist-context'
 import { BindingPickerContext } from '../contexts/binding-picker-context'
+import {
+  InteractionsContext,
+  nodeElementSelector,
+  type InteractionTriggerEvent,
+} from '../contexts/interactions-context'
 import { MediaPickerContext } from '../contexts/media-picker-context'
 import { ComponentPromotionContext } from '../contexts/component-promotion-context'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
@@ -268,6 +273,15 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     // asset from the host's media library; the commit spreads current props
     // (updateNodeProps REPLACES the props object).
     const { onPickMedia } = useContext(MediaPickerContext)
+    // Interactions (AGL-258): element-scoped automations + section A/B.
+    const interactions = useContext(InteractionsContext)
+    const nodeSelector = node?.$id ? nodeElementSelector(node.$id) : ''
+    const nodeAutomations = (interactions.automations ?? []).filter(
+      (automation) => automation.selector === nodeSelector,
+    )
+    const nodeExperiment = (interactions.sectionExperiments ?? []).find(
+      (experiment) => experiment.nodeId === node?.$id,
+    )
     const hasSrcAttribute = (rawAttributes ?? []).some(
       (field: any) => field?.name === 'src',
     )
@@ -446,6 +460,84 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                     >
                       Browse media
                     </Button>
+                  </FormControl>
+                ) : null}
+                {interactions.onCreateInteraction && node?.$id ? (
+                  <FormControl margin="none" fullWidth>
+                    {/* Interactions (AGL-258): automations bound to this
+                        element's stable data-aglyn selector. */}
+                    <Typography
+                      variant="overline"
+                      color="text.secondary"
+                      sx={{ mt: 2 }}
+                    >
+                      {'Interactions'}
+                    </Typography>
+                    {nodeAutomations.map((automation) => (
+                      <Stack
+                        key={automation.id}
+                        direction="row"
+                        spacing={1}
+                        sx={{ alignItems: 'center', mb: 0.5 }}
+                      >
+                        <Typography variant="body2" noWrap sx={{ flex: 1 }}>
+                          {automation.name ?? automation.id}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {automation.event}
+                          {automation.enabled === false ? ' · off' : ''}
+                        </Typography>
+                      </Stack>
+                    ))}
+                    <TextField
+                      select
+                      size="small"
+                      label="Add interaction"
+                      value=""
+                      onChange={(event) => {
+                        const trigger = event.target
+                          .value as InteractionTriggerEvent
+                        if (trigger && node?.$id) {
+                          interactions.onCreateInteraction?.({
+                            nodeId: node.$id,
+                            event: trigger,
+                          })
+                        }
+                      }}
+                    >
+                      <MuiMenuItem value="elementClick">
+                        {'When clicked…'}
+                      </MuiMenuItem>
+                      <MuiMenuItem value="elementVisible">
+                        {'When scrolled into view…'}
+                      </MuiMenuItem>
+                    </TextField>
+                    {interactions.onCreateSectionExperiment ? (
+                      nodeExperiment ? (
+                        <Typography
+                          variant="caption"
+                          color="secondary"
+                          sx={{ mt: 1 }}
+                        >
+                          {`A/B test: ${nodeExperiment.name ?? nodeExperiment.id}` +
+                            ` (${nodeExperiment.status ?? 'draft'})`}
+                        </Typography>
+                      ) : (
+                        <Button
+                          color="secondary"
+                          size="small"
+                          sx={{ mt: 1, alignSelf: 'flex-start' }}
+                          onClick={() =>
+                            node?.$id &&
+                            interactions.onCreateSectionExperiment?.({
+                              nodeId: node.$id,
+                            })
+                          }
+                        >
+                          {'A/B test this section'}
+                        </Button>
+                      )
+                    ) : null}
                   </FormControl>
                 ) : null}
                 {(node?.props as any)?.repeatDataset ? (

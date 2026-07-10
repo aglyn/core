@@ -86,10 +86,29 @@ export function HostCampaignsCard(props: { hostId: string }) {
   const lists = [...(listDocs ?? [])].sort((a, b) =>
     String(a.name ?? '').localeCompare(String(b.name ?? '')),
   )
+  // Email A/B experiments (AGL-255): running (or winner-decided) email
+  // experiments the composer can attach.
+  const { data: experimentDocs } = useFirestoreCollection<any>(
+    () =>
+      query(collection(firestore, 'hosts', hostId, 'experiments'), limit(50)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const emailExperiments = [...(experimentDocs ?? [])]
+    .filter(
+      (experiment: any) =>
+        !experiment.deletedAt &&
+        experiment.target === 'email' &&
+        (experiment.status === 'running' || experiment.winnerVariantId),
+    )
+    .sort((a: any, b: any) =>
+      String(a.name ?? '').localeCompare(String(b.name ?? '')),
+    )
 
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
   const [audience, setAudience] = useState<string>('leads')
+  const [experimentId, setExperimentId] = useState('')
   const [busy, setBusy] = useState(false)
 
   const handleSend = useCallback(async () => {
@@ -135,6 +154,7 @@ export function HostCampaignsCard(props: { hostId: string }) {
           ...(audience.startsWith('list:')
             ? { listId: audience.slice('list:'.length) }
             : {}),
+          ...(experimentId ? { experimentId } : {}),
         }),
       })
       const payload = await response.json().catch(() => ({}))
@@ -165,7 +185,7 @@ export function HostCampaignsCard(props: { hostId: string }) {
     } finally {
       setBusy(false)
     }
-  }, [subject, body, audience, busy, user, hostId, confirm, enqueueSnackbar])
+  }, [subject, body, audience, experimentId, busy, user, hostId, confirm, enqueueSnackbar])
 
   return (
     <CardDisplay header={'Email campaigns'} contentGutterX contentGutterY>
@@ -204,6 +224,26 @@ export function HostCampaignsCard(props: { hostId: string }) {
               </MenuItem>
             ))}
           </TextField>
+          {emailExperiments.length ? (
+            // Email A/B (AGL-255): variant subject/body overrides apply
+            // per recipient; a decided experiment sends the winner copy.
+            <TextField
+              select
+              label="A/B test"
+              value={experimentId}
+              onChange={(event) => setExperimentId(event.target.value)}
+              size="small"
+              sx={{ minWidth: 150 }}
+            >
+              <MenuItem value="">{'None'}</MenuItem>
+              {emailExperiments.map((experiment: any) => (
+                <MenuItem key={experiment.$id} value={experiment.$id}>
+                  {experiment.name ?? experiment.$id}
+                  {experiment.winnerVariantId ? ' (winner decided)' : ''}
+                </MenuItem>
+              ))}
+            </TextField>
+          ) : null}
         </Stack>
         <TextField
           label="Message"

@@ -117,6 +117,30 @@ export function HostExperimentsCard(props: HostExperimentsCardProps) {
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const [editor, setEditor] = useState<ExperimentDraft | null>(null)
+  // Versions of the screen under test (AGL-253): variants pin one each.
+  const { data: versionDocs } = useFirestoreCollection<any>(
+    () =>
+      query(
+        collection(
+          firestore,
+          'hosts',
+          hostId,
+          'screens',
+          editor?.screenId ?? '-none-',
+          'versions',
+        ),
+        limit(50),
+      ),
+    [firestore, hostId, editor?.screenId],
+    { idField: '$id' },
+  )
+  const versionOptions = [...(versionDocs ?? [])]
+    .filter((version: any) => !version.deletedAt)
+    .map((version: any) => ({
+      id: version.$id as string,
+      name: (version.name ?? version.displayName ?? version.$id) as string,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
   const [results, setResults] = useState<{
     experiment: ExperimentDraft
     stats: Record<string, { exposures?: number; conversions?: number }>
@@ -418,26 +442,74 @@ export function HostExperimentsCard(props: HostExperimentsCardProps) {
           </TextField>
           <Typography variant="subtitle2">{'Variants'}</Typography>
           {(editor?.variants ?? []).map((variant, index) => (
-            <Stack key={variant.id} direction="row" spacing={1}>
-              <TextField
-                size="small"
-                label={`Variant ${variant.id.toUpperCase()}`}
-                value={variant.name ?? ''}
-                onChange={(event) =>
-                  patchVariant(index, { name: event.target.value })
-                }
-                sx={{ flex: 1 }}
-              />
-              <TextField
-                size="small"
-                type="number"
-                label="Weight"
-                value={variant.weight ?? 1}
-                onChange={(event) =>
-                  patchVariant(index, { weight: Number(event.target.value) })
-                }
-                sx={{ width: 100 }}
-              />
+            <Stack key={variant.id} spacing={1}>
+              <Stack direction="row" spacing={1}>
+                <TextField
+                  size="small"
+                  label={`Variant ${variant.id.toUpperCase()}`}
+                  value={variant.name ?? ''}
+                  onChange={(event) =>
+                    patchVariant(index, { name: event.target.value })
+                  }
+                  sx={{ flex: 1 }}
+                />
+                <TextField
+                  size="small"
+                  type="number"
+                  label="Weight"
+                  value={variant.weight ?? 1}
+                  onChange={(event) =>
+                    patchVariant(index, { weight: Number(event.target.value) })
+                  }
+                  sx={{ width: 100 }}
+                />
+                {editor?.target !== 'email' ? (
+                  // Screen/section variants pin a screen version
+                  // (AGL-253); empty = the published version.
+                  <TextField
+                    select
+                    size="small"
+                    label="Version"
+                    value={variant.versionId ?? ''}
+                    onChange={(event) =>
+                      patchVariant(index, { versionId: event.target.value })
+                    }
+                    sx={{ minWidth: 160 }}
+                  >
+                    <MenuItem value="">{'Published (control)'}</MenuItem>
+                    {versionOptions.map((option) => (
+                      <MenuItem key={option.id} value={option.id}>
+                        {option.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                ) : null}
+              </Stack>
+              {editor?.target === 'email' ? (
+                // Email variants override the campaign copy (AGL-255).
+                <Stack direction="row" spacing={1}>
+                  <TextField
+                    size="small"
+                    label="Subject override"
+                    value={variant.subject ?? ''}
+                    onChange={(event) =>
+                      patchVariant(index, { subject: event.target.value })
+                    }
+                    sx={{ width: 220 }}
+                  />
+                  <TextField
+                    size="small"
+                    label="Body override"
+                    value={variant.body ?? ''}
+                    onChange={(event) =>
+                      patchVariant(index, { body: event.target.value })
+                    }
+                    multiline
+                    maxRows={3}
+                    sx={{ flex: 1 }}
+                  />
+                </Stack>
+              ) : null}
             </Stack>
           ))}
         </DialogContent>

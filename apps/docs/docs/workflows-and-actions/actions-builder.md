@@ -52,6 +52,15 @@ Steps run in order and mix **in-page effects** with **server-side work**:
 Every reference (workflow, dataset, webhook, overlay, list, campaign) is picked from a
 list and stored by id — renaming things never breaks an automation.
 
+## Interactions from the Besigner
+
+Select any element in the Besigner and use the **Interactions** section of the
+attributes panel to attach a "when clicked" or "when scrolled into view" trigger to that
+exact element — no CSS selectors to write. The interaction is created disabled with a
+placeholder step; finish and enable it on the Workflows page. The same panel shows the
+element's existing interactions and offers **"A/B test this section"**, which creates a
+draft section experiment for the element.
+
 ## When to use which
 
 | Use the actions builder | Use a workflow |
