@@ -88,7 +88,7 @@ export function OrgMembersCard() {
   const canManage = canManageOrg(currentOrg?.role)
   // An org admin sees every org host via the memberRoles projection, so
   // this doubles as the org host directory for the access editor.
-  const { hosts } = useAdminHosts(firestore, user?.uid)
+  const { hosts } = useAdminHosts(firestore, user?.uid, orgId)
   const orgHosts = useMemo(
     () => hosts.filter((host) => host['orgId'] === orgId),
     [hosts, orgId],

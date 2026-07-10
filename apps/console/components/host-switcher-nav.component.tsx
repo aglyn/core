@@ -36,6 +36,7 @@ import { useRouter } from 'next/router'
 import { type MouseEvent, useCallback, useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import { useAdminHosts } from '../hooks/use-admin-hosts'
+import { useOrgWorkspace } from '../hooks/use-org-workspace'
 
 function HostsPlainLink() {
   return (
@@ -73,7 +74,14 @@ function HostSwitcherMenu(props: { uid: string }) {
   const hostId = params?.hostId
   const router = useRouter()
   const firestore = useFirestore()
-  const { hosts } = useAdminHosts(firestore, uid)
+  const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
+  // Workspace-scoped (AGL-236): the switcher lists the selected org's
+  // sites only; undefined holds the query while the workspace resolves.
+  const { hosts } = useAdminHosts(
+    firestore,
+    uid,
+    orgsLoading ? undefined : (currentOrg?.$id ?? null),
+  )
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
   const handleOpen = useCallback((event: MouseEvent<HTMLElement>) => {

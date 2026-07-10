@@ -36,6 +36,7 @@ import orgNavTabItems from '../../constants/org-nav-tabs'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
 import { useAdminHosts } from '../../hooks/use-admin-hosts'
+import { useOrgWorkspace } from '../../hooks/use-org-workspace'
 import useTenantPermissions from '../../hooks/use-tenant-permissions'
 
 function HostInfoItem({ label, value }) {
@@ -76,7 +77,14 @@ function HostInfoItem({ label, value }) {
 function HostsContent() {
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { hosts: data } = useAdminHosts(firestore, user?.uid)
+  const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
+  // Workspace-scoped (AGL-236): the list shows the selected org's sites
+  // only — a member of several orgs switches workspaces to see the rest.
+  const { hosts: data } = useAdminHosts(
+    firestore,
+    user?.uid,
+    orgsLoading ? undefined : (currentOrg?.$id ?? null),
+  )
   const [creating, setCreating] = useState(false)
   const { permissions } = useTenantPermissions()
 

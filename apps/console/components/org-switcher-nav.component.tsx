@@ -39,6 +39,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import { useOrgWorkspace } from '../hooks/use-org-workspace'
@@ -54,6 +55,7 @@ const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 export function OrgSwitcherNav() {
   const { data: user } = useUser()
   const { orgs, currentOrg, selectOrg, workspaceSlug } = useOrgWorkspace()
+  const router = useRouter()
   const { enqueueSnackbar } = useSnackbar()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const [creating, setCreating] = useState(false)
@@ -84,6 +86,8 @@ export function OrgSwitcherNav() {
       }
       enqueueSnackbar(`Created "${name.trim()}"`, { variant: 'success' })
       selectOrg(payload.orgId)
+      // Land in the new workspace, not on the previous org's pages.
+      void router.push(buildRoute(Route.HOST_LIST))
       setCreating(false)
       setName('')
       setSlug('')
@@ -142,6 +146,11 @@ export function OrgSwitcherNav() {
             onClick={() => {
               selectOrg(org.$id)
               setAnchor(null)
+              // Switching workspaces re-scopes everything — leave any
+              // host/org page from the previous org (Slack semantics).
+              if (org.$id !== currentOrg.$id) {
+                void router.push(buildRoute(Route.HOST_LIST))
+              }
             }}
           >
             <ListItemText

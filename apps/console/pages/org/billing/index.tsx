@@ -48,12 +48,13 @@ import useTenantPermissions from '../../../hooks/use-tenant-permissions'
 const BillingContent: NextPageWithLayout = () => {
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { tenant } = useCurrentTenant()
+  const { tenant, orgId } = useCurrentTenant()
   const { permissions } = useTenantPermissions()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
 
-  const { hosts } = useAdminHosts(firestore, user?.uid)
+  // Workspace-scoped (AGL-236): meters cover the selected org's sites.
+  const { hosts } = useAdminHosts(firestore, user?.uid, orgId)
   const plan = (tenant?.plan ?? 'free') as TenantPlan
 
   const handleUpgrade = useCallback(
