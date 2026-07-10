@@ -662,6 +662,16 @@ function sendOverlayBeacon(
   } catch {
     // Beacons are best-effort.
   }
+  // GA mirror (wave v8): sites with Analytics configured see overlay
+  // engagement in their own property; no-op without gtag.
+  try {
+    ;(window as any).gtag?.('event', 'aglyn_overlay', {
+      overlay_action: overlay,
+      ...(overlayId ? { overlay_id: overlayId } : {}),
+    })
+  } catch {
+    // GA is best-effort too.
+  }
 }
 
 /**
@@ -722,6 +732,17 @@ function ExperimentsRunner(props: {
         }),
         keepalive: true,
       }).catch(() => undefined)
+      // GA mirror (wave v8): exposure/conversion events land in the
+      // site's own Analytics property when configured.
+      try {
+        ;(window as any).gtag?.('event', 'aglyn_experiment', {
+          experiment_id: experiment.id,
+          variant_id: variant.id,
+          experiment_action: kind,
+        })
+      } catch {
+        // GA is best-effort.
+      }
     }
     // Finished experiments serve the winner without counting stats.
     if (experiment.status !== 'running') return undefined
