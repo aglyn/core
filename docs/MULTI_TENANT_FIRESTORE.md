@@ -50,7 +50,13 @@ Constraints:
   needs per-org usage attribution.
 - No downtime migration from the v1 layout.
 
-## 2. Current state (v1)
+## 2. Current state (v1) — RETIRED 2026-07-09 (AGL-238)
+
+> Kept for history: the layout below no longer exists. The webhook, every
+> entitlement/suspension read, the rules, and the staff console are
+> org-keyed; `tenants/*`, `hosts.admins` and `hosts.tenantId` were deleted
+> by `tools/scripts/retire-legacy-tenants.mjs` after a host→org parity
+> check.
 
 ```
 tenants/{ownerUid}                 plan, entitlements, suspension, Stripe ids
@@ -135,7 +141,7 @@ graph TD
   HIDX["hostIndex/#lcub;hostId#rcub;"] --> O
   RIDX["users/#lcub;uid#rcub;/orgs/#lcub;orgId#rcub; (reverse index)"] --> O
   subgraph HOST ["hosts/#lcub;hostId#rcub; (top-level)"]
-    H["host doc: orgId · memberRoles projection · legacy admins"]
+    H["host doc: orgId · memberRoles projection"]
     HC["screens · layouts · contacts · media · datasets …"]
   end
   O -- "hosts directory" --> H
@@ -220,12 +226,12 @@ As implemented, host-content authorization reads only the host doc's
 ```mermaid
 flowchart TD
   R["Request on hosts/#lcub;hostId#rcub;/…"] --> G["Rules read the host doc (1 get)"]
-  G --> P{"memberRoles[uid] or legacy admins[uid]"}
+  G --> P{"memberRoles[uid]"}
   P -- "absent" --> DENY["denied"]
   P -- "viewer" --> READ["read only"]
   P -- "editor" --> RW["read + write content (no host delete)"]
   P -- "admin" --> ALL["read + write + delete"]
-  RW --> S{"owning tenant suspended?"}
+  RW --> S{"owning org suspended?"}
   ALL --> S
   S -- "yes" --> RO["reads ok, writes blocked"]
   S -- "no" --> OK["allowed"]
@@ -306,9 +312,12 @@ Phase 4 — **Shared resources**: media/datasets/plugin installs move to org
 scope (copy + re-point), billing objects re-keyed to orgId (Stripe metadata
 update, webhook handles both keys during transition).
 
-Phase 5 — **Cutover & cleanup**: stop dual-writes, freeze `tenants`/top-level
-`hosts` read paths behind staff-only fallback, delete after a full billing
-cycle of parity checks. Remove v1 rules.
+Phase 5 — **Cutover & cleanup** (DONE 2026-07-09): dual-writes stopped, every
+read path org-keyed (published-site suspension/plan gates, console API
+quota/permission gates, staff console, usage email), the manager-seat and
+custom-role system replaced by org roles, v1 rules removed (tenants block +
+legacy `admins` fallback), and `retire-legacy-tenants.mjs` deletes the dead
+data after a parity check.
 
 ## 11. Resource scoping (DECIDED 2026-07-09, drives AGL-237)
 

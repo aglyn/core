@@ -37,7 +37,7 @@ graph TD
   RIDX["users/#lcub;uid#rcub;/orgs/#lcub;orgId#rcub;<br/>(reverse index: 'my organizations')"] --> O
 
   subgraph HOST ["hosts/#lcub;hostId#rcub; (top-level, globally unique id)"]
-    H["host doc<br/>orgId · memberRoles projection<br/>(+ legacy admins map)"]
+    H["host doc<br/>orgId · memberRoles projection"]
     HC["screens · layouts · contacts<br/>media · datasets · redirects …"]
   end
 
@@ -63,7 +63,7 @@ the host doc itself, which carries a **`memberRoles` projection** — a map of
 ```mermaid
 flowchart TD
   R["Request on hosts/#lcub;hostId#rcub;/…"] --> G["Rules read the host doc (1 get)"]
-  G --> P{"memberRoles[uid]<br/>(or legacy admins[uid])"}
+  G --> P{"memberRoles[uid]"}
   P -- "absent" --> DENY["⛔ denied"]
   P -- "viewer" --> READ["👁 read only"]
   P -- "editor" --> RW["✏️ read + write content<br/>(cannot delete the host)"]
@@ -137,17 +137,16 @@ belongs to one.
 
 ## Billing & cost attribution
 
-Plans and entitlements are migrating from uid-keyed `tenants` docs to org docs. During
-the transition both are written; the console already **reads from the org doc first**:
+Plans and entitlements live on the **org doc** — the uid-keyed `tenants`
+collection retired with the AGL-238 cutover. The Stripe webhook writes org docs
+only, and every entitlement, quota, and suspension check resolves host → org:
 
 ```mermaid
 flowchart TD
   CO["Checkout API<br/>(orgId in Stripe metadata)"] --> ST["Stripe subscription"]
   ST -- "webhook" --> WH["/api/billing/webhook"]
-  WH --> T["tenants/#lcub;uid#rcub;<br/>(legacy, until cutover)"]
-  WH --> OG["orgs/#lcub;orgId#rcub;<br/>plan · subscription mirror"]
+  WH --> OG["orgs/#lcub;orgId#rcub;<br/>plan · subscription"]
   OG --> ENT["useCurrentTenant →<br/>entitlements & quotas"]
-  T -. "fallback only" .-> ENT
   CRON["Monthly usage cron"] --> UR["orgs/#lcub;orgId#rcub;/usage/#lcub;month#rcub;<br/>storage · views · cost × 1.30"]
   UR --> METER["Stripe metered billing<br/>(pass-through pricing)"]
 ```

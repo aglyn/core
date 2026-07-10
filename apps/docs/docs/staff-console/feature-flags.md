@@ -12,7 +12,7 @@ changes requires the **super** staff role.
 :::
 
 Release flags control whether a feature is **launched** — a separate axis from
-[plan entitlements](../billing-and-plans/overview.md), which control whether a tenant's
+[plan entitlements](../billing-and-plans/overview.md), which control whether an organization's
 *plan includes* a feature. A customer sees a feature only when it's released **and**
 their plan allows it.
 
@@ -27,7 +27,7 @@ flowchart TD
   B --> C{enabled?}
   C -- "yes" --> ON["✅ Visible to everyone"]
   C -- "no" --> D{"rolloutPercent #gt; 0?"}
-  D -- "yes" --> E{"hash(flag + tenant) mod 100<br/>#lt; rolloutPercent?"}
+  D -- "yes" --> E{"hash(flag + org) mod 100<br/>#lt; rolloutPercent?"}
   E -- "yes" --> ON
   D -- "no" --> F{Staff claim?}
   E -- "no" --> F
@@ -35,7 +35,7 @@ flowchart TD
   F -- "no" --> OFF["🙈 Hidden: tab removed,<br/>deep links show 'coming soon'"]
 ```
 
-The rollout hash is seeded with the **flag key and the tenant**, so a workspace keeps a
+The rollout hash is seeded with the **flag key and the organization**, so a workspace keeps a
 stable verdict across sessions and different flags don't share buckets.
 
 ## How gating behaves
@@ -46,7 +46,7 @@ stable verdict across sessions and different flags don't share buckets.
   its nav tab and a warning banner on the page, so an unreleased surface is never mistaken
   for a launched one.
 - **Percentage rollout**: a flag that's off can be rolled out gradually. The verdict is
-  deterministic per workspace (hashed from the tenant), so a workspace keeps the feature
+  deterministic per workspace (hashed from the org), so a workspace keeps the feature
   once its bucket is inside the rollout percentage — no flapping between sessions.
 
 ## Managing flags
