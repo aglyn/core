@@ -184,7 +184,7 @@ const AdminFlags: NextPageWithLayout = () => {
         ]}
         header={{
           children: 'Feature Flags',
-          icon: { path: ICON_VARIANT_SYMBOL_FLAG },
+          icon: { path: ICON_VARIANT_SYMBOL_FLAG.path },
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>

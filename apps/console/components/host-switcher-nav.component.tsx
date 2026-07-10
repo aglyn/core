@@ -46,7 +46,7 @@ function HostsPlainLink() {
       {...({ componentVariant: 'button', nativeButton: false } as any)}
       href={buildRoute(Route.HOST_LIST)}
     >
-      {'Hosts'}
+      {'Sites'}
     </Button>
   )
 }
@@ -97,7 +97,7 @@ function HostSwitcherMenu(props: { uid: string }) {
   }, [router])
 
   const current = (hosts ?? []).find((host: any) => host.$id === hostId)
-  const label = current?.displayName ?? current?.$id ?? 'Hosts'
+  const label = current?.displayName ?? current?.$id ?? 'Sites'
 
   return (
     <>
@@ -109,7 +109,7 @@ function HostSwitcherMenu(props: { uid: string }) {
         aria-haspopup="menu"
         aria-expanded={anchorEl ? 'true' : undefined}
         onClick={handleOpen}
-        endIcon={<MdiIcon path={ICON_VARIANT_MENU_DOWN} />}
+        endIcon={<MdiIcon path={ICON_VARIANT_MENU_DOWN.path} />}
         sx={{
           maxWidth: 260,
           '& .MuiButton-endIcon': { marginLeft: 0 },
@@ -180,7 +180,7 @@ function HostSwitcherMenu(props: { uid: string }) {
         <Divider />
         <MenuItem onClick={handleViewAll}>
           <ListItemText
-            primary="View all hosts"
+            primary="View all sites"
             slotProps={{ primary: { color: 'secondary' } }}
           />
         </MenuItem>

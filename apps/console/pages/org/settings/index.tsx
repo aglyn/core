@@ -140,13 +140,13 @@ const OrgSettings: NextPageWithLayout = () => {
         ]}
         header={{
           children: 'Organization Settings',
-          icon: { path: ICON_VARIANT_APP_SETTINGS },
+          icon: { path: ICON_VARIANT_APP_SETTINGS.path },
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           {!loading && !currentOrg ? (
             <Alert severity="info">
-              {'Create your first host to start an organization, or accept ' +
+              {'Create your first site to start an organization, or accept ' +
                 'a pending invite from your dashboard.'}
             </Alert>
           ) : (

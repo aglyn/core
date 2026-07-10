@@ -50,13 +50,13 @@ const OrgMedia: NextPageWithLayout = () => {
         ]}
         header={{
           children: 'Organization Media',
-          icon: { path: ICON_VARIANT_HOST_GROUP },
+          icon: { path: ICON_VARIANT_HOST_GROUP.path },
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           {!loading && !currentOrg ? (
             <Alert severity="info">
-              {'Create your first host to start an organization, or accept ' +
+              {'Create your first site to start an organization, or accept ' +
                 'a pending invite from your dashboard.'}
             </Alert>
           ) : (

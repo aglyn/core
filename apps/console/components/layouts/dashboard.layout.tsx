@@ -137,7 +137,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
       return [
         {
           ...item,
-          icon: { path: ICON_VARIANT_SYMBOL_FLAG },
+          icon: { path: ICON_VARIANT_SYMBOL_FLAG.path },
           title: `${definition.label} is hidden from customers by release flag ${definition.key}`,
         },
       ]

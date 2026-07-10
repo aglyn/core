@@ -108,12 +108,12 @@ export function OrgSwitcherNav() {
           onClick={(event) => setAnchor(event.currentTarget)}
           startIcon={
             <MdiIcon
-              path={ICON_VARIANT_SYMBOL_SECURE}
+              path={ICON_VARIANT_SYMBOL_SECURE.path}
               fontSize={'small'}
             />
           }
           endIcon={
-            <MdiIcon path={ICON_VARIANT_MENU_DOWN} fontSize="small" />
+            <MdiIcon path={ICON_VARIANT_MENU_DOWN.path} fontSize="small" />
           }
           sx={{
             maxWidth: 240,
@@ -183,7 +183,7 @@ export function OrgSwitcherNav() {
           sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}
         >
           <Typography variant="body2" color="text.secondary">
-            {'Organizations own hosts and share media, data, plugins and ' +
+            {'Organizations own sites and share media, data, plugins and ' +
               'billing across them. You become the owner.'}
           </Typography>
           <TextField
