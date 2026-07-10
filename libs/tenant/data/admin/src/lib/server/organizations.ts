@@ -405,6 +405,57 @@ export async function upsertOrgMember(
 }
 
 /**
+ * Transfers org ownership (AGL-232): the target must already be on the
+ * roster; the previous owner steps down to admin. One transaction across
+ * the org doc, both member docs and both reverse-index entries, then the
+ * host projections re-sync.
+ */
+export async function transferOrgOwnership(
+  orgId: string,
+  fromUid: string,
+  toUid: string,
+): Promise<void> {
+  if (fromUid === toUid) throw new Error('Target already owns this org')
+  const db = firestore()
+  await db.runTransaction(async (tx) => {
+    const orgRef = db.collection('orgs').doc(orgId)
+    const orgSnapshot = await tx.get(orgRef)
+    if (!orgSnapshot.exists) throw new Error(`Unknown org: ${orgId}`)
+    const org = orgSnapshot.data() as AglynOrganization
+    if (org.ownerUid !== fromUid) {
+      throw new Error('Only the current owner can transfer ownership')
+    }
+    const targetRef = orgRef.collection('members').doc(toUid)
+    const target = await tx.get(targetRef)
+    if (!target.exists) {
+      throw new Error('The new owner must already be an org member')
+    }
+    tx.set(
+      orgRef,
+      { ownerUid: toUid, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true },
+    )
+    tx.set(targetRef, { role: 'owner', allHosts: true }, { merge: true })
+    tx.set(
+      orgRef.collection('members').doc(fromUid),
+      { role: 'admin' },
+      { merge: true },
+    )
+    tx.set(
+      db.collection('users').doc(toUid).collection('orgs').doc(orgId),
+      { role: 'owner' },
+      { merge: true },
+    )
+    tx.set(
+      db.collection('users').doc(fromUid).collection('orgs').doc(orgId),
+      { role: 'admin' },
+      { merge: true },
+    )
+  })
+  await syncHostMemberRoles(orgId)
+}
+
+/**
  * Grants (or updates) per-host access for a uid without disturbing an
  * existing membership's org role or allHosts flag (AGL-238: the host user
  * manager rides org membership). Creates a viewer membership scoped to

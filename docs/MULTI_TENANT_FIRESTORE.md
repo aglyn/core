@@ -332,12 +332,25 @@ data after a parity check.
   install at org scope (`orgs/{orgId}/pluginInstalls`); host-only plugins
   stay host-scoped. Both levels coexist.
 
-## 12. Open questions
+## 12. Open questions (ALL SETTLED 2026-07-09, closes AGL-232)
 
 - ~~Org-level GDPR erasure~~ — v1 shipped: `erase-tenant.mjs` is org-aware
   (solely-owned orgs deleted with slug/hostIndex; shared memberships
-  removed; owned-with-members skipped). Ownership transfer still undesigned.
+  removed; owned-with-members skipped).
+- ~~Ownership transfer~~ — **shipped**: owner-only `transfer-ownership`
+  action on `/api/orgs/settings` (`transferOrgOwnership`: one transaction
+  across the org doc, both member docs and reverse-index entries; the old
+  owner steps down to admin) with a picker card on the org Settings page.
 - ~~Contacts scoping~~ — decided: org-based (see §11).
-- Slug squatting / trademark policy for subdomains.
-- Whether `hostIndex` should also carry the public-domain → host mapping the
-  tenant app uses today (probably yes, consolidating two lookups).
+- ~~Slug squatting / trademark policy~~ — **decided (policy, not code)**:
+  prevention stays code-side (the reserved-word list in
+  `isValidOrgSlug`/`isBlockedSubdomain` blocks product/brand terms);
+  disputes are handled manually by staff — rename the offending org via
+  the slug-change API (its tombstone keeps their links working) and
+  reserve the contested slug. No automated arbitration; revisit if volume
+  ever warrants a takedown queue.
+- ~~`hostIndex` carrying the public-domain → host mapping~~ — **decided:
+  no (for now)**. Custom-domain resolution already works through the host
+  doc and consolidating would migrate a working lookup for marginal gain;
+  `hostIndex` stays a single-purpose host→org mirror. Revisit only if
+  domain-lookup cost shows up in the usage rollups.

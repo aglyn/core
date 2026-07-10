@@ -25,7 +25,14 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  Button,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -104,6 +111,68 @@ const OrgSettings: NextPageWithLayout = () => {
         variant: 'error',
       })
       setSlug(currentOrg.slug ?? '')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Ownership transfer (AGL-232): owner-only; the roster comes from the
+  // members API so the picker only offers actual members.
+  const [members, setMembers] = useState<any[]>([])
+  const [transferTarget, setTransferTarget] = useState('')
+  useEffect(() => {
+    if (!isOwner || !currentOrg?.$id) return
+    let active = true
+    void (async () => {
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        if (!idToken) return
+        const response = await fetch(
+          `/api/orgs/members?orgId=${encodeURIComponent(currentOrg.$id)}`,
+          { headers: { Authorization: `Bearer ${idToken}` } },
+        )
+        if (!response.ok) return
+        const payload = await response.json()
+        if (active) setMembers(payload.members ?? [])
+      } catch {
+        // The card simply stays empty; transfer is still possible later.
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [isOwner, currentOrg?.$id, user])
+
+  const handleTransfer = async () => {
+    if (!currentOrg || !transferTarget || busy) return
+    const target = members.find((member) => member.$id === transferTarget)
+    const accepted = await confirm({
+      title: 'Transfer ownership?',
+      description:
+        `${target?.email ?? transferTarget} becomes the organization ` +
+        'owner (billing, workspace URL, and ownership transfers). You ' +
+        'step down to admin. This cannot be undone by you afterwards.',
+      confirmationText: 'Transfer ownership',
+      confirmationButtonProps: { color: 'error' },
+    })
+      .then(() => true)
+      .catch(() => false)
+    if (!accepted) return
+    setBusy(true)
+    try {
+      await settingsRequest({
+        action: 'transfer-ownership',
+        targetUid: transferTarget,
+      })
+      enqueueSnackbar('Ownership transferred — you are now an admin', {
+        variant: 'success',
+      })
+      setTransferTarget('')
+    } catch (error: any) {
+      console.error(error)
+      enqueueSnackbar(error?.message ?? 'Transfer failed', {
+        variant: 'error',
+      })
     } finally {
       setBusy(false)
     }
@@ -216,6 +285,60 @@ const OrgSettings: NextPageWithLayout = () => {
               </Stack>
             </CardDisplay>
           )}
+          {currentOrg && isOwner ? (
+            <CardDisplay
+              header={'Transfer ownership'}
+              contentGutterX
+              contentGutterY
+              sx={{ mt: 3 }}
+            >
+              <Stack spacing={2} sx={{ maxWidth: 480 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {'Hand the organization to another member. They gain ' +
+                    'billing, workspace-URL and transfer powers; you step ' +
+                    'down to admin.'}
+                </Typography>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: 'flex-start' }}
+                >
+                  <TextField
+                    select
+                    label="New owner"
+                    value={transferTarget}
+                    disabled={busy}
+                    onChange={(event) =>
+                      setTransferTarget(event.target.value)
+                    }
+                    sx={{ flexGrow: 1 }}
+                    helperText={
+                      members.length <= 1
+                        ? 'Invite a member from the Team page first.'
+                        : ''
+                    }
+                  >
+                    {members
+                      .filter((member) => member.$id !== (user as any)?.uid)
+                      .map((member) => (
+                        <MenuItem key={member.$id} value={member.$id}>
+                          {member.email ?? member.displayName ?? member.$id}
+                        </MenuItem>
+                      ))}
+                  </TextField>
+                  <Button
+                    color="error"
+                    variant="outlined"
+                    disabled={busy || !transferTarget}
+                    onClick={() => void handleTransfer()}
+                    sx={{ mt: 1 }}
+                  >
+                    {'Transfer'}
+                  </Button>
+                </Stack>
+              </Stack>
+            </CardDisplay>
+          ) : null}
         </Container>
       </DashboardLayout>
     </>

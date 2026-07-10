@@ -22,6 +22,7 @@ import {
   listOrgMembers,
   OrgSlugTakenError,
   resolveOrgMembership,
+  transferOrgOwnership,
 } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -121,6 +122,39 @@ export default async function handler(
             .json({ error: 'That workspace URL is taken' })
         }
         throw error
+      }
+    }
+
+    // Ownership transfer (AGL-232): owner-only; the target must already
+    // be a member. The previous owner steps down to admin.
+    if (req.body?.action === 'transfer-ownership') {
+      const isOwner = membership?.member.role === 'owner'
+      if (decoded['staff'] !== true && !isOwner) {
+        return res
+          .status(403)
+          .json({ error: 'Transferring ownership requires the owner' })
+      }
+      const targetUid = String(req.body?.targetUid ?? '')
+      if (!targetUid) {
+        return res.status(400).json({ error: 'Missing targetUid' })
+      }
+      const orgSnapshot = await firebaseAdmin
+        .app()
+        .firestore()
+        .collection('orgs')
+        .doc(orgId)
+        .get()
+      try {
+        await transferOrgOwnership(
+          orgId,
+          String(orgSnapshot.get('ownerUid') ?? decoded.uid),
+          targetUid,
+        )
+        return res.status(200).json({ ok: true, ownerUid: targetUid })
+      } catch (error: any) {
+        return res
+          .status(409)
+          .json({ error: error?.message ?? 'Transfer failed' })
       }
     }
 
