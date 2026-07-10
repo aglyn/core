@@ -77,6 +77,9 @@ async function activeSubscription(
  * - `switch`   → updates the subscription item to the target plan's
  *   price with prorations (an existing subscription never goes through
  *   Checkout again). 501 without Stripe env.
+ * - `portal`   → a Stripe Billing Portal session URL (AGL-275) for
+ *   payment-method management; works even without an active
+ *   subscription so past-due orgs can fix their card.
  */
 export default async function handler(
   req: NextApiRequest,
@@ -96,7 +99,10 @@ export default async function handler(
   if (!idToken) return res.status(401).json({ error: 'Unauthenticated' })
   const orgId = String(req.body?.orgId ?? '')
   const action = String(req.body?.action ?? '')
-  if (!orgId || !['cancel', 'resume', 'preview', 'switch'].includes(action)) {
+  if (
+    !orgId ||
+    !['cancel', 'resume', 'preview', 'switch', 'portal'].includes(action)
+  ) {
     return res.status(400).json({ error: 'Bad request' })
   }
 
@@ -120,6 +126,23 @@ export default async function handler(
     if (!customerId) {
       return res.status(409).json({ error: 'No billing account yet' })
     }
+
+    if (action === 'portal') {
+      // Billing portal (AGL-275): no subscription requirement — orgs fix
+      // failing cards here even after a subscription dies.
+      const origin = req.headers.origin ?? `https://${req.headers.host}`
+      const session = await stripeRequest(
+        secretKey,
+        'POST',
+        'billing_portal/sessions',
+        new URLSearchParams({
+          customer: String(customerId),
+          return_url: `${origin}/org/billing`,
+        }),
+      )
+      return res.status(200).json({ url: session.url })
+    }
+
     const subscription = await activeSubscription(secretKey, String(customerId))
     if (!subscription) {
       return res.status(409).json({ error: 'No active subscription' })

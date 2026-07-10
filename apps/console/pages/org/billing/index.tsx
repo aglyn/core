@@ -113,6 +113,17 @@ const BillingContent: NextPageWithLayout = () => {
     [user, orgId, enqueueSnackbar],
   )
 
+  // Stripe Billing Portal (AGL-275): payment methods, receipts, tax ids.
+  const handleOpenPortal = useCallback(async () => {
+    const dequeue = queueLoading()
+    try {
+      const payload = await subscriptionRequest({ action: 'portal' })
+      if (payload?.url) window.location.assign(payload.url)
+    } finally {
+      dequeue()
+    }
+  }, [subscriptionRequest, queueLoading])
+
   // Cancel/resume (AGL-269).
   const handleCancelToggle = useCallback(async () => {
     const dequeue = queueLoading()
@@ -334,6 +345,20 @@ const BillingContent: NextPageWithLayout = () => {
                           {cancelAtPeriodEnd
                             ? 'Resume subscription'
                             : 'Cancel subscription'}
+                        </Link>
+                      </Typography>
+                    ) : null}
+                    {can('billing.manage') ? (
+                      // Stripe Billing Portal (AGL-275): payment methods
+                      // and receipts, even when the subscription lapsed.
+                      <Typography variant="body2" sx={{ mt: 0.5 }}>
+                        <Link
+                          component="button"
+                          color="secondary"
+                          underline="hover"
+                          onClick={() => void handleOpenPortal()}
+                        >
+                          {'Manage payment methods'}
                         </Link>
                       </Typography>
                     ) : null}

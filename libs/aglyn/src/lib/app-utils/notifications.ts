@@ -27,11 +27,13 @@ import type { ITimestamp } from '@aglyn/shared-util-timestamp'
 export type AglynNotificationType =
   | 'billing.invoice'
   | 'billing.paymentFailed'
+  | 'billing.usage'
   | 'team.invite'
   | 'team.roleChanged'
   | 'team.hostAccessGranted'
   | 'content.formSubmission'
   | 'content.booking'
+  | 'content.order'
   | 'system.announcement'
 
 export interface AglynNotification {
@@ -52,11 +54,13 @@ export const NOTIFICATION_TYPE_LABELS: Record<AglynNotificationType, string> =
   {
     'billing.invoice': 'Invoice available',
     'billing.paymentFailed': 'Payment failed',
+    'billing.usage': 'Usage threshold',
     'team.invite': 'Team invite',
     'team.roleChanged': 'Role changed',
     'team.hostAccessGranted': 'Site access granted',
     'content.formSubmission': 'Form submission',
     'content.booking': 'New booking',
+    'content.order': 'New order',
     'system.announcement': 'Announcement',
   }
 

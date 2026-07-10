@@ -159,6 +159,30 @@ export function QuotaWarningsBanner(props: QuotaWarningsBannerProps) {
     )
   }
 
+  // Dunning (AGL-275): past_due is the grace window — entitlements keep
+  // working, but the card needs fixing before the subscription dies.
+  // Deliberately not dismissible; it clears when Stripe retries succeed.
+  if ((tenant?.subscription as any)?.status === 'past_due') {
+    return (
+      <Alert
+        severity="warning"
+        sx={{ borderRadius: 0 }}
+        action={
+          <Button
+            color="inherit"
+            size="small"
+            href={buildRoute(Route.MANAGE_BILLING)}
+          >
+            {'Fix payment'}
+          </Button>
+        }
+      >
+        {'Your last payment failed. Update your payment method to keep ' +
+          'your plan — access continues during the retry window.'}
+      </Alert>
+    )
+  }
+
   if (!plan || dismissed) return null
   const breached = quotas.filter(
     (quota) =>
