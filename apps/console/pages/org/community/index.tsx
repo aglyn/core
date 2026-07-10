@@ -17,6 +17,7 @@
 
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { CardDisplay, Container, GridItems } from '@aglyn/shared-ui-jsx'
+import OrgPluginInstallsCard from '../../../components/org-plugin-installs-card.component'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
@@ -42,6 +43,7 @@ import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
 import useOrgNavTabItems from '../../../hooks/use-org-nav-tabs'
+import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import useFirestoreCollection from '../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../hooks/use-firestore-doc'
@@ -55,6 +57,7 @@ const HANDLE_PATTERN = /^[a-z0-9][a-z0-9-]{2,29}$/
  */
 const CommunitySettings: NextPageWithLayout = () => {
   const orgNavTabs = useOrgNavTabItems()
+  const { currentOrg } = useOrgWorkspace()
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
@@ -275,6 +278,17 @@ const CommunitySettings: NextPageWithLayout = () => {
           <GridItems
             spacing={3}
             items={[
+              // Org-tier plugin inventory (AGL-263).
+              ...(currentOrg?.$id
+                ? [
+                    {
+                      size: { xs: 12 },
+                      children: (
+                        <OrgPluginInstallsCard orgId={currentOrg.$id} />
+                      ),
+                    },
+                  ]
+                : []),
               {
                 size: { xs: 12, md: 6 },
                 children: (

@@ -26,8 +26,18 @@ import {
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { Alert, Chip, Stack, Typography } from '@mui/material'
-import { useCallback } from 'react'
+import {
+  Alert,
+  Chip,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
+import { useCallback, useEffect, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import BillingPlanCardsComponent, {
   PLAN_LABELS,
@@ -96,6 +106,39 @@ const BillingContent: NextPageWithLayout = () => {
     [user, queueLoading, enqueueSnackbar],
   )
 
+  // Invoice history (AGL-248), billing.view-gated server-side.
+  const [invoices, setInvoices] = useState<Array<{
+    id: string
+    number: string | null
+    status: string | null
+    amountDueCents: number
+    currency: string
+    periodEnd: string | null
+    hostedInvoiceUrl: string | null
+  }> | null>(null)
+  useEffect(() => {
+    if (!orgId || !user || (permissionsLoaded && !can('billing.view'))) return
+    let active = true
+    void (async () => {
+      try {
+        const idToken = await (user as any)?.getIdToken?.()
+        const response = await fetch(
+          `/api/billing/invoices?orgId=${encodeURIComponent(orgId)}`,
+          { headers: idToken ? { Authorization: `Bearer ${idToken}` } : {} },
+        )
+        if (!response.ok) return
+        const payload = await response.json()
+        if (active) setInvoices(payload.invoices ?? [])
+      } catch {
+        // The card keeps its loading state on failure.
+      }
+    })()
+    return () => {
+      active = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, user, permissionsLoaded])
+
   return (
     <>
       <NextPageTitle screen={'Billing'} />
@@ -140,9 +183,37 @@ const BillingContent: NextPageWithLayout = () => {
                     <Typography variant="body2" color="text.secondary">
                       {tenant?.plan
                         ? 'Usage and limits for your plan are shown beside.'
-                        : 'No plan assigned yet — limits are not enforced ' +
-                          'on this account.'}
+                        : 'No plan assigned yet — this organization resolves ' +
+                          'to the Free limits.'}
                     </Typography>
+                    {/* Renewal + addons (AGL-248). */}
+                    {(tenant?.subscription as any)?.currentPeriodEnd ? (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block', mt: 1 }}
+                      >
+                        {`Renews ${new Date(
+                          (tenant?.subscription as any).currentPeriodEnd
+                            ?.toDate?.()
+                            ?.getTime?.() ??
+                            (tenant?.subscription as any).currentPeriodEnd,
+                        ).toLocaleDateString()}`}
+                      </Typography>
+                    ) : null}
+                    {tenant?.seatAddons &&
+                    Object.values(tenant.seatAddons).some(Boolean) ? (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block' }}
+                      >
+                        {`Add-ons: ${Object.entries(tenant.seatAddons)
+                          .filter(([, count]) => Number(count) > 0)
+                          .map(([kind, count]) => `${count} ${kind}`)
+                          .join(', ')}`}
+                      </Typography>
+                    ) : null}
                   </CardDisplay>
                 ),
               },
@@ -166,6 +237,67 @@ const BillingContent: NextPageWithLayout = () => {
                     contentGutterY
                   >
                     <BillingMeteredEstimateComponent hosts={hosts ?? []} />
+                  </CardDisplay>
+                ),
+              },
+              {
+                size: { xs: 12, md: 8 },
+                children: (
+                  <CardDisplay
+                    header={'Billing history'}
+                    contentGutterX
+                    contentGutterY
+                  >
+                    {invoices === null ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {'Invoices appear here once billing is configured.'}
+                      </Typography>
+                    ) : invoices.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {'No invoices yet.'}
+                      </Typography>
+                    ) : (
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>{'Invoice'}</TableCell>
+                            <TableCell>{'Status'}</TableCell>
+                            <TableCell>{'Amount'}</TableCell>
+                            <TableCell>{'Period end'}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {invoices.map((invoice) => (
+                            <TableRow key={invoice.id}>
+                              <TableCell>
+                                {invoice.hostedInvoiceUrl ? (
+                                  <a
+                                    href={invoice.hostedInvoiceUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {invoice.number ?? invoice.id}
+                                  </a>
+                                ) : (
+                                  (invoice.number ?? invoice.id)
+                                )}
+                              </TableCell>
+                              <TableCell>{invoice.status ?? '—'}</TableCell>
+                              <TableCell>
+                                {`$${(invoice.amountDueCents / 100).toFixed(2)} ${invoice.currency.toUpperCase()}`}
+                              </TableCell>
+                              <TableCell>
+                                {invoice.periodEnd
+                                  ? new Date(
+                                      invoice.periodEnd,
+                                    ).toLocaleDateString()
+                                  : '—'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
                   </CardDisplay>
                 ),
               },
