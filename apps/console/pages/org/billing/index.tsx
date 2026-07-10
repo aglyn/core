@@ -23,13 +23,17 @@ import {
   Container,
   GridItems,
   useLoading,
+  useConfirmationContext,
 } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Alert,
   Chip,
+  FormControlLabel,
+  Link,
   Stack,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -64,15 +68,114 @@ const BillingContent: NextPageWithLayout = () => {
     useTenantPermissions()
   const { enqueueSnackbar } = useSnackbar()
   const { queueLoading } = useLoading()
+  const { confirm } = useConfirmationContext()
+  // Annual billing (AGL-269): checkout maps to the *_YEARLY price ids.
+  const [interval, setInterval] = useState<'month' | 'year'>('month')
 
   // Workspace-scoped (AGL-236): meters cover the selected org's sites.
   const { hosts } = useAdminHosts(firestore, user?.uid, orgId)
   const plan = (tenant?.plan ?? 'free') as TenantPlan
+  const subscriptionStatus = tenant?.subscription?.status
+  const subscriptionActive = ['active', 'trialing', 'past_due'].includes(
+    String(subscriptionStatus ?? ''),
+  )
+  const cancelAtPeriodEnd =
+    (tenant?.subscription as any)?.cancelAtPeriodEnd === true
+
+  const subscriptionRequest = useCallback(
+    async (body: Record<string, unknown>) => {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/billing/subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({ orgId, ...body }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (response.status === 501) {
+        enqueueSnackbar('Billing is not configured yet — Stripe keys are pending.', {
+          variant: 'info',
+          persist: false,
+        })
+        return null
+      }
+      if (!response.ok) {
+        enqueueSnackbar(payload?.error ?? 'Billing request failed', {
+          variant: 'warning',
+          persist: false,
+        })
+        return null
+      }
+      return payload
+    },
+    [user, orgId, enqueueSnackbar],
+  )
+
+  // Cancel/resume (AGL-269).
+  const handleCancelToggle = useCallback(async () => {
+    const dequeue = queueLoading()
+    try {
+      const payload = await subscriptionRequest({
+        action: cancelAtPeriodEnd ? 'resume' : 'cancel',
+      })
+      if (payload) {
+        enqueueSnackbar(
+          payload.cancelAtPeriodEnd
+            ? `Subscription cancels ${
+                payload.currentPeriodEnd
+                  ? new Date(payload.currentPeriodEnd).toLocaleDateString()
+                  : 'at period end'
+              }`
+            : 'Subscription resumed',
+          { variant: 'success', persist: false },
+        )
+      }
+    } finally {
+      dequeue()
+    }
+  }, [cancelAtPeriodEnd, subscriptionRequest, queueLoading, enqueueSnackbar])
 
   const handleUpgrade = useCallback(
     (targetPlan: TenantPlan) => async () => {
       const dequeue = queueLoading()
       try {
+        // Plan switches on a live subscription go through the proration
+        // preview + subscription update, never a second Checkout (AGL-269).
+        if (subscriptionActive && tenant?.plan && targetPlan !== 'free') {
+          dequeue()
+          const preview = await subscriptionRequest({
+            action: 'preview',
+            plan: targetPlan,
+          })
+          if (!preview) return
+          const accepted = await confirm({
+            title: `Switch to ${targetPlan}?`,
+            description:
+              `Prorated charge today: $${(preview.amountDueCents / 100).toFixed(2)} ` +
+              `${String(preview.currency).toUpperCase()}; renews ${
+                preview.periodEnd
+                  ? new Date(preview.periodEnd).toLocaleDateString()
+                  : 'at period end'
+              }.`,
+            confirmationText: 'Switch plan',
+          })
+            .then(() => true)
+            .catch(() => false)
+          if (!accepted) return
+          const switched = await subscriptionRequest({
+            action: 'switch',
+            plan: targetPlan,
+          })
+          if (switched) {
+            enqueueSnackbar(`Plan switched to ${targetPlan}`, {
+              variant: 'success',
+              persist: false,
+            })
+          }
+          return
+        }
         const idToken = await (user as any)?.getIdToken?.()
         const response = await fetch('/api/billing/checkout', {
           method: 'POST',
@@ -80,7 +183,7 @@ const BillingContent: NextPageWithLayout = () => {
             'Content-Type': 'application/json',
             ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
           },
-          body: JSON.stringify({ plan: targetPlan }),
+          body: JSON.stringify({ plan: targetPlan, interval, orgId }),
         })
         const payload = await response.json()
         if (response.status === 501) {
@@ -103,7 +206,17 @@ const BillingContent: NextPageWithLayout = () => {
         dequeue()
       }
     },
-    [user, queueLoading, enqueueSnackbar],
+    [
+      user,
+      orgId,
+      interval,
+      subscriptionActive,
+      tenant?.plan,
+      subscriptionRequest,
+      confirm,
+      queueLoading,
+      enqueueSnackbar,
+    ],
   )
 
   // Invoice history (AGL-248), billing.view-gated server-side.
@@ -186,6 +299,14 @@ const BillingContent: NextPageWithLayout = () => {
                         : 'No plan assigned yet — this organization resolves ' +
                           'to the Free limits.'}
                     </Typography>
+                    {cancelAtPeriodEnd ? (
+                      <Chip
+                        label="cancels at period end"
+                        size="small"
+                        color="warning"
+                        sx={{ mt: 1 }}
+                      />
+                    ) : null}
                     {/* Renewal + addons (AGL-248). */}
                     {(tenant?.subscription as any)?.currentPeriodEnd ? (
                       <Typography
@@ -199,6 +320,21 @@ const BillingContent: NextPageWithLayout = () => {
                             ?.getTime?.() ??
                             (tenant?.subscription as any).currentPeriodEnd,
                         ).toLocaleDateString()}`}
+                      </Typography>
+                    ) : null}
+                    {subscriptionActive && can('billing.manage') ? (
+                      // Cancel/downgrade flow (AGL-269).
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        <Link
+                          component="button"
+                          color={cancelAtPeriodEnd ? 'secondary' : 'error'}
+                          underline="hover"
+                          onClick={() => void handleCancelToggle()}
+                        >
+                          {cancelAtPeriodEnd
+                            ? 'Resume subscription'
+                            : 'Cancel subscription'}
+                        </Link>
                       </Typography>
                     ) : null}
                     {tenant?.seatAddons &&
@@ -299,6 +435,27 @@ const BillingContent: NextPageWithLayout = () => {
                       </Table>
                     )}
                   </CardDisplay>
+                ),
+              },
+              {
+                size: { xs: 12 },
+                children: (
+                  // Annual billing toggle (AGL-269): two months free.
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={interval === 'year'}
+                        onChange={(event) =>
+                          setInterval(event.target.checked ? 'year' : 'month')
+                        }
+                      />
+                    }
+                    label={
+                      interval === 'year'
+                        ? 'Annual billing — 2 months free'
+                        : 'Monthly billing (switch for 2 months free)'
+                    }
+                  />
                 ),
               },
               {

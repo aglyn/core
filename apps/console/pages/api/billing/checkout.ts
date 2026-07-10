@@ -24,6 +24,13 @@ const PRICE_ENV: Record<string, string | undefined> = {
   business: process.env.STRIPE_PRICE_BUSINESS,
 }
 
+/** Annual prices (AGL-269); absent envs make the toggle degrade to 501. */
+const YEARLY_PRICE_ENV: Record<string, string | undefined> = {
+  starter: process.env.STRIPE_PRICE_STARTER_YEARLY,
+  pro: process.env.STRIPE_PRICE_PRO_YEARLY,
+  business: process.env.STRIPE_PRICE_BUSINESS_YEARLY,
+}
+
 /**
  * Creates a Stripe Checkout session for a plan upgrade. Uses Stripe's REST
  * API directly (no SDK dependency); degrades to 501 when Stripe isn't
@@ -40,7 +47,10 @@ export default async function handler(
   }
   const secretKey = process.env.STRIPE_SECRET_KEY
   const plan = String(req.body?.plan ?? '')
-  const priceId = PRICE_ENV[plan]
+  // Billing interval (AGL-269): 'year' maps to the *_YEARLY price ids.
+  const interval = req.body?.interval === 'year' ? 'year' : 'month'
+  const priceId =
+    interval === 'year' ? YEARLY_PRICE_ENV[plan] : PRICE_ENV[plan]
   if (!secretKey || !priceId) {
     return res.status(501).json({
       error:
