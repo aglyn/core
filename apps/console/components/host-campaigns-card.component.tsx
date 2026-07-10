@@ -277,7 +277,16 @@ export function HostCampaignsCard(props: { hostId: string }) {
                 <Typography variant="caption" color="text.secondary">
                   {`${campaign.stats?.sent ?? 0}/${
                     campaign.stats?.recipients ?? 0
-                  } sent · ${campaign.audience}`}
+                  } sent` +
+                    // Opens/clicks arrive via the Resend webhook (AGL-268).
+                    (campaign.stats?.opens
+                      ? ` · ${campaign.stats.opens} opens`
+                      : '') +
+                    (campaign.stats?.clicks
+                      ? ` · ${campaign.stats.clicks} clicks`
+                      : '') +
+                    ` · ${campaign.audience}` +
+                    (campaign.experimentId ? ' · A/B' : '')}
                 </Typography>
               </Stack>
             ))}

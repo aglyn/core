@@ -260,6 +260,15 @@ export default async function handler(
           subject: recipientSubject,
           text: `${recipientBody}\n\n—\nUnsubscribe: ${unsubscribeUrl}`,
           headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>` },
+          // Event attribution (AGL-268): the opens/clicks webhook maps
+          // deliveries back to the campaign (and experiment) via tags.
+          tags: [
+            { name: 'hostId', value: hostId },
+            { name: 'campaignId', value: campaignId },
+            ...(experiment
+              ? [{ name: 'experimentId', value: experiment.$id }]
+              : []),
+          ],
         }),
       }).catch(() => null)
       if (response?.ok) {
