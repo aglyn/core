@@ -23,6 +23,7 @@ import AnnouncementBarCard from '../../../components/announcement-bar-card.compo
 import HostCampaignsCard from '../../../components/host-campaigns-card.component'
 import HostExperimentsCard from '../../../components/host-experiments-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
+import HostMarketingSummaryCard from '../../../components/host-marketing-summary-card.component'
 import HostOverlaysCard from '../../../components/host-overlays-card.component'
 import OrgListsCard from '../../../components/org-lists-card.component'
 import { useHostId } from '../../../components/host-id-provider'
@@ -67,6 +68,11 @@ const HostMarketing: NextPageWithLayout = () => {
           <GridItems
             spacing={3}
             items={[
+              // Channel rollup (wave v8).
+              {
+                size: { xs: 12 },
+                children: <HostMarketingSummaryCard hostId={hostId} />,
+              },
               {
                 size: { xs: 12 },
                 children: <HostOverlaysCard hostId={hostId} />,
