@@ -28,11 +28,14 @@ const PAGES = [
   '/signin',
   '/signup',
   '/hosts',
-  '/org/members',
+  '/org', // redirects to /org/team — must never fall into [hostId]
+  '/org/team',
   '/org/media',
+  '/org/billing',
+  '/org/community',
+  '/org/support',
   '/org/settings',
-  '/manage/team',
-  '/manage/billing',
+  '/manage/team', // legacy redirect
   '/admin/flags',
   '/admin/overview',
   '/somehost/media',

@@ -32,6 +32,7 @@ import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 import OrgInvitesBanner from '../../components/org-invites-banner.component'
 import DashboardLayout from '../../components/layouts/dashboard.layout'
 import MainLayout from '../../components/layouts/main.layout'
+import orgNavTabItems from '../../constants/org-nav-tabs'
 import { buildRoute, Route } from '../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../constants/shared'
 import { useAdminHosts } from '../../hooks/use-admin-hosts'
@@ -83,7 +84,8 @@ function HostsContent() {
     <>
       <NextPageTitle screen={'Settings'} />
       <DashboardLayout
-        navTabItems={[]}
+        navTabItems={orgNavTabItems()}
+        activeTab={buildRoute(Route.HOST_LIST)}
         breadcrumbItems={[
           {
             children: 'Hosts',

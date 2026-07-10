@@ -38,7 +38,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
-import settingsNavTabItems from '../../../constants/settings-nav-tabs'
+import orgNavTabItems from '../../../constants/org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import { useAdminHosts } from '../../../hooks/use-admin-hosts'
 import useCurrentTenant from '../../../hooks/use-current-tenant'
@@ -97,7 +97,7 @@ const BillingContent: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Billing'} />
       <DashboardLayout
-        navTabItems={settingsNavTabItems()}
+        navTabItems={orgNavTabItems()}
         activeTab={buildRoute(Route.MANAGE_BILLING)}
         breadcrumbItems={[
           { children: 'Billing', href: buildRoute(Route.MANAGE_BILLING) },

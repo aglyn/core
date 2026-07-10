@@ -23,10 +23,9 @@ export enum Route {
   ADMIN_AUDIT = '/admin/audit',
   ADMIN_USERS = '/admin/users',
   ADMIN_FLAGS = '/admin/flags',
-  ORG_MEMBERS = '/org/members',
   ORG_MEDIA = '/org/media',
   ORG_SETTINGS = '/org/settings',
-  MANAGE_BILLING = '/manage/billing',
+  MANAGE_BILLING = '/org/billing',
   MANAGE_USER_SETTINGS = '/manage/user',
   AUTH_SIGN_IN = '/signin',
   AUTH_SIGN_OUT = '/signout',
@@ -37,9 +36,9 @@ export enum Route {
   HOST_COMMUNITY_LISTING = '/[hostId]/community/[listingId]',
   HOST_COMMUNITY_PUBLISHER = '/[hostId]/community/publisher/[profileId]',
   HOST_CONTENT = '/[hostId]/content',
-  MANAGE_COMMUNITY_PROFILE = '/manage/community',
-  MANAGE_TEAM = '/manage/team',
-  MANAGE_SUPPORT = '/manage/support',
+  MANAGE_COMMUNITY_PROFILE = '/org/community',
+  MANAGE_TEAM = '/org/team',
+  MANAGE_SUPPORT = '/org/support',
   HOST_DASHBOARD = '/[hostId]',
   HOST_INBOX = '/[hostId]/inbox',
   HOST_CONTACTS = '/[hostId]/contacts',
@@ -76,7 +75,6 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.ADMIN_AUDIT]: undefined
   [Route.ADMIN_USERS]: undefined
   [Route.ADMIN_FLAGS]: undefined
-  [Route.ORG_MEMBERS]: undefined
   [Route.ORG_MEDIA]: undefined
   [Route.ORG_SETTINGS]: undefined
   [Route.HOST_COMMUNITY]: { hostId: string }

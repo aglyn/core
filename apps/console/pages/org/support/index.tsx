@@ -36,7 +36,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
-import settingsNavTabItems from '../../../constants/settings-nav-tabs'
+import orgNavTabItems from '../../../constants/org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 
 function formatWhen(ms: number | null): string {
@@ -156,7 +156,7 @@ const ManageSupport: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Support'} />
       <DashboardLayout
-        navTabItems={settingsNavTabItems()}
+        navTabItems={orgNavTabItems()}
         activeTab={buildRoute(Route.MANAGE_SUPPORT)}
         breadcrumbItems={[
           { children: 'Support', href: buildRoute(Route.MANAGE_SUPPORT) },

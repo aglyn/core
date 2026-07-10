@@ -134,7 +134,7 @@ const OrgSettings: NextPageWithLayout = () => {
         breadcrumbItems={[
           {
             children: currentOrg?.orgName ?? 'Organization',
-            href: buildRoute(Route.ORG_MEMBERS),
+            href: buildRoute(Route.MANAGE_TEAM),
           },
           { children: 'Settings', href: buildRoute(Route.ORG_SETTINGS) },
         ]}

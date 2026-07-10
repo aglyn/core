@@ -41,7 +41,7 @@ import AuthenticatedLayout from '../../../components/layouts/authenticated.layou
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
-import settingsNavTabItems from '../../../constants/settings-nav-tabs'
+import orgNavTabItems from '../../../constants/org-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import useFirestoreCollection from '../../../hooks/use-firestore-collection'
 import useFirestoreDoc from '../../../hooks/use-firestore-doc'
@@ -258,7 +258,7 @@ const CommunitySettings: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Community profile'} />
       <DashboardLayout
-        navTabItems={settingsNavTabItems()}
+        navTabItems={orgNavTabItems()}
         breadcrumbItems={[
           {
             children: 'Community profile',

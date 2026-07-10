@@ -24,14 +24,34 @@ import { buildRoute, Route } from './route-links'
 export function orgNavTabItems() {
   return [
     {
-      id: 'nav-tab-org-members',
-      label: 'Members',
-      href: buildRoute(Route.ORG_MEMBERS),
+      id: 'nav-tab-org-sites',
+      label: 'Sites',
+      href: buildRoute(Route.HOST_LIST),
+    },
+    {
+      id: 'nav-tab-org-team',
+      label: 'Team',
+      href: buildRoute(Route.MANAGE_TEAM),
     },
     {
       id: 'nav-tab-org-media',
       label: 'Media',
       href: buildRoute(Route.ORG_MEDIA),
+    },
+    {
+      id: 'nav-tab-org-billing',
+      label: 'Billing',
+      href: buildRoute(Route.MANAGE_BILLING),
+    },
+    {
+      id: 'nav-tab-org-community',
+      label: 'Community',
+      href: buildRoute(Route.MANAGE_COMMUNITY_PROFILE),
+    },
+    {
+      id: 'nav-tab-org-support',
+      label: 'Support',
+      href: buildRoute(Route.MANAGE_SUPPORT),
     },
     {
       id: 'nav-tab-org-settings',

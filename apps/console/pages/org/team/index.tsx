@@ -57,7 +57,7 @@ import OrgMembersCard from '../../../components/org-members-card.component'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import { checkTenantSeatQuota } from '../../../constants/entitlements'
-import settingsNavTabItems from '../../../constants/settings-nav-tabs'
+import orgNavTabItems from '../../../constants/org-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
 import useCurrentTenant from '../../../hooks/use-current-tenant'
@@ -256,7 +256,7 @@ const ManageTeam: NextPageWithLayout = () => {
     <>
       <NextPageTitle screen={'Team'} />
       <DashboardLayout
-        navTabItems={settingsNavTabItems()}
+        navTabItems={orgNavTabItems()}
         activeTab={buildRoute(Route.MANAGE_TEAM)}
         breadcrumbItems={[
           {

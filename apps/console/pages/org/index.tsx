@@ -15,26 +15,17 @@
  * limitations under the License.
  */
 
-import { buildRoute, Route } from './route-links'
+import type { GetServerSideProps } from 'next'
+import { buildRoute, Route } from '../../constants/route-links'
 
 /**
- * The Manage section's tab strip, previously copy-pasted per page — which
- * drifted (user/account pages were missing Billing). One source of truth,
- * mirroring `hostNavTabItems`.
+ * /org has no content of its own — without this page the path would fall
+ * through to the [hostId] catch-all as a phantom host (AGL-236).
  */
-export function settingsNavTabItems() {
-  return [
-    {
-      id: 'nav-tab-settings-user',
-      label: 'User',
-      href: buildRoute(Route.MANAGE_USER_SETTINGS),
-    },
-    {
-      id: 'nav-tab-settings-account',
-      label: 'Account',
-      href: buildRoute(Route.MANAGE_ACCOUNT_SETTINGS),
-    },
-  ]
-}
+export const getServerSideProps: GetServerSideProps = async () => ({
+  redirect: { destination: buildRoute(Route.MANAGE_TEAM), permanent: false },
+})
 
-export default settingsNavTabItems
+const OrgIndex = () => null
+OrgIndex.displayName = 'Page:OrgIndex'
+export default OrgIndex
