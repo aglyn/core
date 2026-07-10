@@ -25,6 +25,12 @@ Team members act **in the owner's organization**, not their own — so their cha
 site, and permissions are enforced across the console's APIs and surfaces. Seat limits are
 enforced per tier; if you're at your limit, add a **seat add-on** before inviting more.
 
+## Activity log
+
+The organization's **Team** page shows a **Recent Activity** feed — renames, workspace URL
+changes, ownership transfers, members added/removed or re-roled, and invites sent, revoked,
+or accepted — each with who did it and when. Visible to any member of the organization.
+
 ## Tips
 
 - Start people on a least-privilege [role](custom-roles.md) and widen it with per-member

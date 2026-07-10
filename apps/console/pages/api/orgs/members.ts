@@ -19,6 +19,7 @@ import { canManageOrg, type HostAccessRole, isOrgRole } from '@aglyn/aglyn'
 import {
   firebaseAdmin,
   listOrgMembers,
+  logOrgActivity,
   removeOrgMember,
   resolveOrgMembership,
   upsertOrgMember,
@@ -125,6 +126,14 @@ export default async function handler(
           .status(400)
           .json({ error: "The owner's membership can't be changed here" })
       }
+      const existedAlready = (
+        await firestore
+          .collection('orgs')
+          .doc(orgId)
+          .collection('members')
+          .doc(targetUid)
+          .get()
+      ).exists
       await upsertOrgMember({
         orgId,
         uid: targetUid,
@@ -135,6 +144,15 @@ export default async function handler(
         displayName,
         invitedBy: decoded.uid,
       })
+      const targetName = displayName ?? email ?? targetUid
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        existedAlready
+          ? `Changed ${targetName}'s role to ${role}`
+          : `Added ${targetName} as ${role}`,
+        { type: 'member', id: targetUid, name: targetName },
+      )
       return res.status(200).json({ ok: true, uid: targetUid })
     }
 
@@ -146,7 +164,23 @@ export default async function handler(
           .status(400)
           .json({ error: 'The organization owner cannot be removed' })
       }
+      const targetSnapshot = await firestore
+        .collection('orgs')
+        .doc(orgId)
+        .collection('members')
+        .doc(targetUid)
+        .get()
+      const targetName =
+        targetSnapshot.get('displayName') ??
+        targetSnapshot.get('email') ??
+        targetUid
       await removeOrgMember(orgId, targetUid)
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Removed ${targetName} from the organization`,
+        { type: 'member', id: targetUid, name: targetName },
+      )
       return res.status(200).json({ ok: true })
     }
 

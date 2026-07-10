@@ -349,6 +349,43 @@ export async function syncHostMemberRoles(
   await batch.commit()
 }
 
+/** What an org activity entry points at; `id` lets detail views filter. */
+export interface OrgActivityTarget {
+  type: 'org' | 'member' | 'invite'
+  id?: string
+  name?: string
+}
+
+/**
+ * Org-level counterpart to the host activity log (AGL-118): fire-and-
+ * forget append to `orgs/{orgId}/activity` from the org API routes. Never
+ * throws — an audit miss must not break the mutation that triggered it.
+ * Admin-SDK-only, like the rest of this file; the rules deny client writes.
+ */
+export async function logOrgActivity(
+  orgId: string,
+  actor: { uid: string; email?: string | null },
+  action: string,
+  target: OrgActivityTarget,
+): Promise<void> {
+  await firestore()
+    .collection('orgs')
+    .doc(orgId)
+    .collection('activity')
+    .add({
+      actorId: actor.uid,
+      actorEmail: actor.email ?? null,
+      action,
+      target: {
+        type: target.type,
+        ...(target.id ? { id: target.id } : {}),
+        ...(target.name ? { name: target.name } : {}),
+      },
+      createdAt: FieldValue.serverTimestamp(),
+    })
+    .catch(() => undefined)
+}
+
 export interface UpsertOrgMemberOptions {
   orgId: string
   uid: string

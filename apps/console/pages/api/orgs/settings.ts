@@ -20,6 +20,7 @@ import {
   changeOrgSlug,
   firebaseAdmin,
   listOrgMembers,
+  logOrgActivity,
   OrgSlugTakenError,
   resolveOrgMembership,
   transferOrgOwnership,
@@ -90,6 +91,12 @@ export default async function handler(
         )
       }
       await batch.commit()
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Renamed organization to "${name}"`,
+        { type: 'org', id: orgId },
+      )
       return res.status(200).json({ ok: true, name })
     }
 
@@ -114,6 +121,12 @@ export default async function handler(
       }
       try {
         const { previousSlug } = await changeOrgSlug(orgId, slug)
+        void logOrgActivity(
+          orgId,
+          { uid: decoded.uid, email: decoded.email },
+          `Changed workspace URL to "${slug}"`,
+          { type: 'org', id: orgId },
+        )
         return res.status(200).json({ ok: true, slug, previousSlug })
       } catch (error) {
         if (error instanceof OrgSlugTakenError) {
@@ -149,6 +162,24 @@ export default async function handler(
           orgId,
           String(orgSnapshot.get('ownerUid') ?? decoded.uid),
           targetUid,
+        )
+        const targetSnapshot = await firebaseAdmin
+          .app()
+          .firestore()
+          .collection('orgs')
+          .doc(orgId)
+          .collection('members')
+          .doc(targetUid)
+          .get()
+        const targetName =
+          targetSnapshot.get('displayName') ??
+          targetSnapshot.get('email') ??
+          targetUid
+        void logOrgActivity(
+          orgId,
+          { uid: decoded.uid, email: decoded.email },
+          `Transferred ownership to ${targetName}`,
+          { type: 'member', id: targetUid, name: targetName },
         )
         return res.status(200).json({ ok: true, ownerUid: targetUid })
       } catch (error: any) {

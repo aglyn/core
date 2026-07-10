@@ -17,15 +17,17 @@
 'use client'
 
 import { mdiAccountMultipleOutline } from '@aglyn/shared-data-mdi'
-import { Container } from '@aglyn/shared-ui-jsx'
+import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
+import OrgActivityCard from '../../../components/org-activity-card.component'
 import OrgMembersCard from '../../../components/org-members-card.component'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import orgNavTabItems from '../../../constants/org-nav-tabs'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
+import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
 
 /**
  * Organization team page (AGL-234/238): the org roster with roles,
@@ -35,6 +37,7 @@ import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
  * site's own Users card, which grants org membership scoped to that site.
  */
 const ManageTeam: NextPageWithLayout = () => {
+  const { currentOrg } = useOrgWorkspace()
   return (
     <>
       <NextPageTitle screen={'Team'} />
@@ -53,7 +56,23 @@ const ManageTeam: NextPageWithLayout = () => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <OrgMembersCard />
+          <GridItems
+            spacing={3}
+            items={[
+              {
+                size: { xs: 12 },
+                children: <OrgMembersCard />,
+              },
+              ...(currentOrg?.$id
+                ? [
+                    {
+                      size: { xs: 12 },
+                      children: <OrgActivityCard orgId={currentOrg.$id} />,
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </Container>
       </DashboardLayout>
     </>

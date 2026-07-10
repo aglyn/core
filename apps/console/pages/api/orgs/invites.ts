@@ -23,6 +23,7 @@ import {
 } from '@aglyn/aglyn'
 import {
   firebaseAdmin,
+  logOrgActivity,
   resolveOrgMembership,
   upsertOrgMember,
 } from '@aglyn/tenant-data-admin'
@@ -155,6 +156,12 @@ export default async function handler(
         createdAt: FieldValue.serverTimestamp(),
         acceptedAt: null,
       })
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Invited ${email} as ${role}`,
+        { type: 'invite', id: inviteId, name: email },
+      )
       // Best-effort notification via Resend (same provider as AGL-137's
       // usage emails); the invite works without it — the console banner
       // surfaces it after sign-in either way.
@@ -193,7 +200,15 @@ export default async function handler(
       }
       const inviteId = String(req.body?.inviteId ?? '')
       if (!inviteId) return res.status(400).json({ error: 'Missing inviteId' })
+      const revokedSnapshot = await invitesRef.doc(inviteId).get()
+      const revokedEmail = revokedSnapshot.get('email') ?? inviteId
       await invitesRef.doc(inviteId).delete()
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Revoked invite for ${revokedEmail}`,
+        { type: 'invite', id: inviteId, name: revokedEmail },
+      )
       return res.status(200).json({ ok: true })
     }
 
@@ -230,6 +245,12 @@ export default async function handler(
           acceptedBy: decoded.uid,
         },
         { merge: true },
+      )
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Joined the organization as ${invite['role']}`,
+        { type: 'member', id: decoded.uid, name: email },
       )
       return res.status(200).json({ ok: true })
     }
