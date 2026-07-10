@@ -15,13 +15,42 @@ workflow. It maps one **event** to one **action**.
 
 ## Create an action
 
-1. Open the **actions builder** from **Data**.
+1. Open the **actions builder** from **Workflows**.
 2. Choose the **event** (the trigger).
-3. Choose the **action** to run in response.
+3. Choose the **steps** to run in response.
 4. Save.
 
 That's it — no multi-step logic to manage. Reach for a [workflow](build-a-workflow.md) when
 you need several steps, branching, or composition.
+
+## Triggers
+
+Beyond server events (form submissions, page views, sign-ins, leads, bookings), actions
+can fire on **visitor behavior in the page**:
+
+- **Scroll depth** — the visitor scrolls past a percentage.
+- **Scroll to / element visible** — a CSS-selected element enters the viewport.
+- **Element click** — a CSS-selected element is clicked.
+- **Exit intent** — the pointer leaves toward the top of the window.
+- **Time on page** — a dwell-time threshold passes.
+- **Page visit** — the page loads.
+
+Page triggers can be limited to certain paths (`/pricing`, `/blog/*`). Each fires at most
+once per page view.
+
+## Steps
+
+Steps run in order and mix **in-page effects** with **server-side work**:
+
+- **In the page**: show a popup or bar from your Marketing overlays, make the navigation
+  sticky, add/remove a CSS class, show custom HTML, run custom JS (Business), redirect,
+  track an analytics event, show a site alert.
+- **On the server**: run a workflow, write to or update a dataset, send a webhook
+  (Business), send an email, notify site admins, enroll the contact in a list, assign a
+  campaign, fire a custom event to chain more actions.
+
+Every reference (workflow, dataset, webhook, overlay, list, campaign) is picked from a
+list and stored by id — renaming things never breaks an automation.
 
 ## When to use which
 

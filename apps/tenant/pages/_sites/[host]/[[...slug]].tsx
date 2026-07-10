@@ -21,7 +21,7 @@ import { registerLegacyMuiPlugin } from '@aglyn/plugins-ui-mui'
 import { observer } from 'mobx-react-lite'
 import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
-import { type CSSProperties, useEffect, useMemo, useState } from 'react'
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import Head from 'next/head'
 import applyDuePublishSchedule from '../../../utils/apply-publish-schedule'
 import composeScreenNodes from '../../../utils/compose-screen-nodes'
@@ -32,6 +32,9 @@ import getCollectionContent, {
 import getComponents from '../../../utils/get-components'
 import getTenant from '../../../utils/get-tenant'
 import getVariables from '../../../utils/get-variables'
+import getClientAutomations, {
+  type ClientAutomation,
+} from '../../../utils/get-client-automations'
 import getOverlays from '../../../utils/get-overlays'
 import getHost from '../../../utils/get-host'
 import getPublishedLayoutVersion from '../../../utils/get-layout-version'
@@ -85,6 +88,16 @@ interface Props {
     endAtMs?: number
     contentHash: string
   } | null
+  /**
+   * Site-event automations for this page (AGL-256): the client engine
+   * arms triggers, runs client steps, and dispatches server steps.
+   */
+  clientAutomations?: import('../../../utils/get-client-automations').ClientAutomation[]
+  /** Overlay payloads referenced by showOverlay steps, by overlay id. */
+  automationOverlays?: Record<
+    string,
+    { kind: 'bar' | 'popup'; bar?: any; popup?: any }
+  > | null
   /** Collection list/entry payload when the path is content, not a screen. */
   content?: CollectionContent
   /** Password-protected screen: nodes withheld until unlock (AGL-87). */
@@ -532,6 +545,37 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       }
     }
 
+    // Site-event automations (AGL-256): actions-gated; runJs steps are
+    // business-gated (webhooks flag marks the tier).
+    const actionsEntitled = Aglyn.resolveTenantEntitlements(tenantRes.tenant)
+      .features.actions
+    const clientAutomations: ClientAutomation[] = actionsEntitled
+      ? await getClientAutomations({
+          hostId,
+          path: overlayPath,
+          allowJs: Aglyn.resolveTenantEntitlements(tenantRes.tenant).features
+            .webhooks,
+        })
+      : []
+    // Overlay payloads showOverlay steps reference (AGL-257).
+    const automationOverlays: Record<string, any> = {}
+    for (const automation of clientAutomations) {
+      for (const step of automation.steps) {
+        if (step.type === 'showOverlay' && step.overlayId) {
+          const overlay = overlayDocs.find(
+            (candidate) => candidate.$id === step.overlayId,
+          )
+          if (overlay) {
+            automationOverlays[step.overlayId] = {
+              kind: overlay.kind,
+              ...(overlay.bar ? { bar: overlay.bar } : {}),
+              ...(overlay.popup ? { popup: overlay.popup } : {}),
+            }
+          }
+        }
+      }
+    }
+
     const props = {
       data: JSON.parse(
         JSON.stringify({
@@ -547,6 +591,10 @@ export const getStaticProps: GetStaticProps<Props> = async (context) => {
       showBranding,
       announcementBar,
       popup,
+      clientAutomations: JSON.parse(JSON.stringify(clientAutomations)),
+      automationOverlays: Object.keys(automationOverlays).length
+        ? JSON.parse(JSON.stringify(automationOverlays))
+        : null,
     }
 
     return {
@@ -581,6 +629,187 @@ function sendOverlayBeacon(hostId: string | undefined, overlay: string) {
  * localStorage (no cookies): editing the text re-shows the bar for
  * everyone who hid the old one.
  */
+/**
+ * Site-event automations engine (AGL-256/257): arms the page's triggers
+ * (scroll depth, element visibility/clicks, exit intent, dwell time),
+ * runs each fired action's CLIENT steps in the browser, and dispatches
+ * actions with server steps to /api/events/dispatch. Every trigger fires
+ * at most once per pageview.
+ */
+function AutomationsEngine(props: {
+  hostId?: string
+  automations: ClientAutomation[]
+  onShowOverlay: (overlayId: string) => void
+}) {
+  const { hostId, automations, onShowOverlay } = props
+  const showOverlayRef = useRef(onShowOverlay)
+  showOverlayRef.current = onShowOverlay
+
+  useEffect(() => {
+    if (!hostId || !automations.length) return undefined
+    const fired = new Set<string>()
+    const cleanups: Array<() => void> = []
+
+    const showToast = (
+      message: string,
+      severity: 'info' | 'success' | 'warning' | 'error',
+    ) => {
+      const toast = document.createElement('div')
+      toast.textContent = message
+      toast.setAttribute('role', 'status')
+      Object.assign(toast.style, {
+        position: 'fixed',
+        bottom: '16px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: '2147483000',
+        padding: '10px 16px',
+        borderRadius: '8px',
+        fontSize: '14px',
+        fontFamily: 'system-ui, sans-serif',
+        color: '#fff',
+        backgroundColor:
+          severity === 'error'
+            ? '#c62828'
+            : severity === 'warning'
+              ? '#e65100'
+              : severity === 'success'
+                ? '#2e7d32'
+                : 'rgba(0, 0, 0, 0.85)',
+        maxWidth: '90vw',
+      })
+      document.body.appendChild(toast)
+      setTimeout(() => toast.remove(), 6000)
+    }
+
+    const runClientSteps = (automation: ClientAutomation) => {
+      for (const step of automation.steps) {
+        try {
+          if (step.type === 'addClass' || step.type === 'removeClass') {
+            document
+              .querySelectorAll(step.selector)
+              .forEach((element) =>
+                step.type === 'addClass'
+                  ? element.classList.add(step.className)
+                  : element.classList.remove(step.className),
+              )
+          } else if (step.type === 'stickyNav') {
+            const target = document.querySelector(
+              step.selector?.trim() || 'header, nav',
+            )
+            if (target instanceof HTMLElement) {
+              target.style.position = 'sticky'
+              target.style.top = '0'
+              target.style.zIndex = '1100'
+            }
+          } else if (step.type === 'showHtml') {
+            const container = document.createElement('div')
+            container.innerHTML = step.html
+            document.body.appendChild(container)
+          } else if (step.type === 'runJs') {
+            // Business-gated server-side (dropped from props otherwise);
+            // the site owner's own code running on their own page.
+            // eslint-disable-next-line no-new-func
+            new Function(step.code)()
+          } else if (step.type === 'redirect') {
+            window.location.assign(step.url)
+          } else if (step.type === 'trackGaEvent') {
+            ;(window as any).gtag?.('event', step.eventName, step.params ?? {})
+          } else if (step.type === 'siteAlert') {
+            showToast(
+              String(step.message ?? '').slice(0, 300),
+              step.severity ?? 'info',
+            )
+          } else if (step.type === 'showOverlay') {
+            if (step.overlayId) showOverlayRef.current(step.overlayId)
+          }
+        } catch (error) {
+          console.error('automation step failed', error)
+        }
+      }
+    }
+
+    const fire = (automation: ClientAutomation) => {
+      if (fired.has(automation.id)) return
+      fired.add(automation.id)
+      runClientSteps(automation)
+      if (automation.hasServerSteps) {
+        void fetch('/api/events/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            hostId,
+            actionId: automation.id,
+            event: automation.event,
+            payload: { path: window.location.pathname },
+          }),
+          keepalive: true,
+        }).catch(() => undefined)
+      }
+    }
+
+    for (const automation of automations) {
+      const { event, selector, threshold } = automation
+      if (event === 'pageVisit') {
+        fire(automation)
+      } else if (event === 'timeOnPage') {
+        const timer = setTimeout(
+          () => fire(automation),
+          Math.max(1, threshold ?? 5) * 1000,
+        )
+        cleanups.push(() => clearTimeout(timer))
+      } else if (event === 'scrollDepth') {
+        const onScroll = () => {
+          const doc = document.documentElement
+          const max = doc.scrollHeight - window.innerHeight
+          const percent = max > 0 ? (window.scrollY / max) * 100 : 100
+          if (percent >= Math.min(100, Math.max(1, threshold ?? 50))) {
+            fire(automation)
+            window.removeEventListener('scroll', onScroll)
+          }
+        }
+        window.addEventListener('scroll', onScroll, { passive: true })
+        cleanups.push(() => window.removeEventListener('scroll', onScroll))
+      } else if (event === 'elementVisible' || event === 'scrollToElement') {
+        if (!selector) continue
+        const targets = document.querySelectorAll(selector)
+        if (!targets.length) continue
+        const observer = new IntersectionObserver((entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            fire(automation)
+            observer.disconnect()
+          }
+        })
+        targets.forEach((target) => observer.observe(target))
+        cleanups.push(() => observer.disconnect())
+      } else if (event === 'elementClick') {
+        if (!selector) continue
+        const onClick = (mouseEvent: MouseEvent) => {
+          const target = mouseEvent.target as Element | null
+          if (target?.closest?.(selector)) fire(automation)
+        }
+        document.addEventListener('click', onClick, true)
+        cleanups.push(() =>
+          document.removeEventListener('click', onClick, true),
+        )
+      } else if (event === 'exitIntent') {
+        const onLeave = (mouseEvent: MouseEvent) => {
+          if (mouseEvent.clientY <= 0) fire(automation)
+        }
+        document.addEventListener('mouseleave', onLeave)
+        cleanups.push(() => document.removeEventListener('mouseleave', onLeave))
+      }
+    }
+    return () => {
+      for (const cleanup of cleanups) cleanup()
+    }
+    // Automations are static per pageview (ISR props).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hostId, JSON.stringify(automations.map((automation) => automation.id))])
+
+  return null
+}
+
 function AnnouncementBar(props: {
   bar: NonNullable<Props['announcementBar']>
   hostId?: string
@@ -922,6 +1151,13 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
     any
   > | null>(null)
   const [unlockError, setUnlockError] = useState(false)
+  // Automation-triggered overlay (AGL-257 showOverlay step).
+  const [automationOverlay, setAutomationOverlay] = useState<{
+    id: string
+    kind: 'bar' | 'popup'
+    bar?: any
+    popup?: any
+  } | null>(null)
   // Members-only content (AGL-109): fetched with the session cookie.
   const [memberNodes, setMemberNodes] = useState<Record<string, any> | null>(
     null,
@@ -1596,6 +1832,44 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       ) : null}
       {props.popup ? (
         <PopupOverlay popup={props.popup} hostId={props.data?.host?.$id} />
+      ) : null}
+      {/* Site-event automations (AGL-256/257). */}
+      {props.clientAutomations?.length ? (
+        <AutomationsEngine
+          hostId={props.data?.host?.$id}
+          automations={props.clientAutomations}
+          onShowOverlay={(overlayId) => {
+            const overlay = props.automationOverlays?.[overlayId]
+            if (overlay) setAutomationOverlay({ id: overlayId, ...overlay })
+          }}
+        />
+      ) : null}
+      {automationOverlay?.kind === 'bar' && automationOverlay.bar?.text ? (
+        <AnnouncementBar
+          bar={{
+            ...automationOverlay.bar,
+            text: String(automationOverlay.bar.text),
+            dismissible: automationOverlay.bar.dismissible !== false,
+            contentHash: `automation-${automationOverlay.id}`,
+          }}
+          hostId={props.data?.host?.$id}
+        />
+      ) : null}
+      {automationOverlay?.kind === 'popup' && automationOverlay.popup?.body ? (
+        <PopupOverlay
+          popup={{
+            ...automationOverlay.popup,
+            body: String(automationOverlay.popup.body),
+            trigger: 'delay',
+            triggerValue: 0,
+            frequencyDays: Math.max(
+              1,
+              Number(automationOverlay.popup.frequencyDays ?? 1),
+            ),
+            contentHash: `automation-${automationOverlay.id}`,
+          }}
+          hostId={props.data?.host?.$id}
+        />
       ) : null}
       <AglynNodeRenderer node={Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)} />
       {props.showBranding ? (

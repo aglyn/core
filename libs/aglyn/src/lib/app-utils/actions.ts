@@ -25,6 +25,44 @@ import { HOST_EVENT_TYPES } from './workflows'
  * here; the executor lives server-side where the I/O is (tenant utils).
  */
 
+/**
+ * Client-side site events (AGL-256) the tenant page runtime emits:
+ * element interactions, scroll behavior, dwell time, and exit intent.
+ * Trigger config (selector/threshold/path) rides the action's trigger.
+ */
+export const SITE_EVENT_TYPES = [
+  'scrollDepth',
+  'scrollToElement',
+  'elementClick',
+  'elementVisible',
+  'exitIntent',
+  'timeOnPage',
+  'pageVisit',
+] as const
+
+export type SiteEventType = (typeof SITE_EVENT_TYPES)[number]
+
+export function isSiteEventType(event: string): event is SiteEventType {
+  return SITE_EVENT_TYPES.includes(event as SiteEventType)
+}
+
+export interface HostActionTrigger {
+  /**
+   * Event the action enrolls on: a HOST_EVENT_TYPE (server-emitted), a
+   * SITE_EVENT_TYPE (client-emitted, AGL-256), or a custom name fired by
+   * another action's `customEvent` step.
+   */
+  event: string
+  /** Optional expression over the payload; runs only when truthy. */
+  filter?: string
+  /** CSS selector for element-scoped site events (click/visible/scroll-to). */
+  selector?: string
+  /** Percent 0-100 (scrollDepth) or seconds (timeOnPage). */
+  threshold?: number
+  /** Path pattern the site event listens on (overlay glob rules); empty = all. */
+  pathPattern?: string
+}
+
 export type HostActionStep =
   // Entity references carry a doc id (AGL-261, rename-safe) with the name
   // kept as a display hint; pre-AGL-261 docs have only the name and the
@@ -38,17 +76,51 @@ export type HostActionStep =
   | { type: 'customEvent'; eventName: string }
   | { type: 'datasetAppend'; datasetId?: string; datasetName?: string }
   | { type: 'webhookPost'; webhookId?: string; webhookName?: string }
+  // Client-side UI steps (AGL-257): run in the visitor's page by the
+  // tenant automations engine; the server executor skips them.
+  | { type: 'showOverlay'; overlayId?: string; overlayName?: string }
+  | { type: 'stickyNav'; selector?: string }
+  | { type: 'addClass'; selector: string; className: string }
+  | { type: 'removeClass'; selector: string; className: string }
+  | { type: 'showHtml'; html: string }
+  | { type: 'runJs'; code: string }
+  | { type: 'redirect'; url: string }
+  | {
+      type: 'trackGaEvent'
+      eventName: string
+      params?: Record<string, string>
+    }
+  // Server-side steps (AGL-257).
+  | { type: 'sendEmail'; subject: string; body: string; toField?: string }
+  | { type: 'notifyAdmins'; title: string; body?: string }
+  | { type: 'enrollList'; listId?: string; listName?: string }
+  | { type: 'updateDataset'; datasetId?: string; datasetName?: string }
+  | { type: 'assignCampaign'; campaignId?: string; campaignName?: string }
+
+/** Steps the tenant page runtime executes client-side (AGL-257). */
+export const CLIENT_ACTION_STEP_TYPES: ReadonlySet<HostActionStepType> =
+  new Set([
+    'showOverlay',
+    'stickyNav',
+    'addClass',
+    'removeClass',
+    'showHtml',
+    'runJs',
+    'redirect',
+    'trackGaEvent',
+    'siteAlert',
+  ] as const)
+
+export function isClientActionStep(step: HostActionStep): boolean {
+  return CLIENT_ACTION_STEP_TYPES.has(step.type)
+}
 
 export type HostActionStepType = HostActionStep['type']
 
 /** `hosts/{hostId}/actions/{id}` doc. */
 export interface HostAction {
   name: string
-  /**
-   * Event the action enrolls on: one of HOST_EVENT_TYPES or a custom
-   * event name fired by another action's `customEvent` step.
-   */
-  trigger: { event: string; filter?: string }
+  trigger: HostActionTrigger
   steps: HostActionStep[]
   /** Disabled actions never run; new actions default enabled. */
   enabled?: boolean
@@ -66,6 +138,19 @@ export const HOST_ACTION_STEP_LABELS: Record<HostActionStepType, string> = {
   customEvent: 'Fire a custom event',
   datasetAppend: 'Write to a dataset',
   webhookPost: 'Send a webhook (Business)',
+  showOverlay: 'Show a popup or bar',
+  stickyNav: 'Make navigation sticky',
+  addClass: 'Add a CSS class',
+  removeClass: 'Remove a CSS class',
+  showHtml: 'Show custom HTML',
+  runJs: 'Run custom JS (Business)',
+  redirect: 'Redirect the visitor',
+  trackGaEvent: 'Track an analytics event',
+  sendEmail: 'Send an email',
+  notifyAdmins: 'Notify site admins',
+  enrollList: 'Enroll in a list',
+  updateDataset: 'Update a dataset record',
+  assignCampaign: 'Assign to a campaign',
 }
 
 /** True for a custom (non-built-in) event name an action may fire. */
@@ -84,8 +169,27 @@ export function validateHostAction(action: HostAction): string | null {
   if (!action.name?.trim()) return 'Name the action'
   const event = action.trigger?.event?.trim() ?? ''
   if (!event) return 'Pick a trigger event'
-  if (!HOST_EVENT_TYPES.includes(event as any) && !isCustomEventName(event)) {
+  if (
+    !HOST_EVENT_TYPES.includes(event as any) &&
+    !isSiteEventType(event) &&
+    !isCustomEventName(event)
+  ) {
     return 'Custom event names are 2–40 letters, digits, dashes'
+  }
+  // Site-event trigger config (AGL-256).
+  if (
+    ['scrollToElement', 'elementClick', 'elementVisible'].includes(event) &&
+    !action.trigger?.selector?.trim()
+  ) {
+    return 'This trigger needs a CSS selector'
+  }
+  if (
+    ['scrollDepth', 'timeOnPage'].includes(event) &&
+    !(Number(action.trigger?.threshold) > 0)
+  ) {
+    return event === 'scrollDepth'
+      ? 'Set the scroll percentage (1–100)'
+      : 'Set the seconds on page'
   }
   const steps = action.steps ?? []
   if (!steps.length) return 'Add at least one step'
@@ -122,6 +226,58 @@ export function validateHostAction(action: HostAction): string | null {
       !step.webhookName?.trim()
     ) {
       return `${label}: pick a webhook`
+    }
+    // Client + server steps (AGL-257).
+    if (step.type === 'addClass' || step.type === 'removeClass') {
+      if (!step.selector?.trim()) return `${label}: enter a CSS selector`
+      if (!step.className?.trim()) return `${label}: enter the class name`
+    }
+    if (step.type === 'showHtml' && !step.html?.trim()) {
+      return `${label}: enter the HTML`
+    }
+    if (step.type === 'runJs' && !step.code?.trim()) {
+      return `${label}: enter the JavaScript`
+    }
+    if (step.type === 'redirect' && !step.url?.trim()) {
+      return `${label}: enter the destination URL`
+    }
+    if (step.type === 'trackGaEvent' && !step.eventName?.trim()) {
+      return `${label}: name the analytics event`
+    }
+    if (step.type === 'sendEmail') {
+      if (!step.subject?.trim()) return `${label}: enter the subject`
+      if (!step.body?.trim()) return `${label}: enter the email body`
+    }
+    if (step.type === 'notifyAdmins' && !step.title?.trim()) {
+      return `${label}: enter the notification title`
+    }
+    if (
+      step.type === 'showOverlay' &&
+      !step.overlayId?.trim() &&
+      !step.overlayName?.trim()
+    ) {
+      return `${label}: pick an overlay`
+    }
+    if (
+      step.type === 'enrollList' &&
+      !step.listId?.trim() &&
+      !step.listName?.trim()
+    ) {
+      return `${label}: pick a list`
+    }
+    if (
+      step.type === 'updateDataset' &&
+      !step.datasetId?.trim() &&
+      !step.datasetName?.trim()
+    ) {
+      return `${label}: pick a dataset`
+    }
+    if (
+      step.type === 'assignCampaign' &&
+      !step.campaignId?.trim() &&
+      !step.campaignName?.trim()
+    ) {
+      return `${label}: pick a campaign`
     }
   }
   return null
