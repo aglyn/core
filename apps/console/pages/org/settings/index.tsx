@@ -146,7 +146,7 @@ const OrgSettings: NextPageWithLayout = () => {
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           {!loading && !currentOrg ? (
             <Alert severity="info">
-              {'Create your first site to start an organization, or accept ' +
+              {'Create your first host to start an organization, or accept ' +
                 'a pending invite from your dashboard.'}
             </Alert>
           ) : (

@@ -24,8 +24,8 @@ import { buildRoute, Route } from './route-links'
 export function orgNavTabItems() {
   return [
     {
-      id: 'nav-tab-org-sites',
-      label: 'Sites',
+      id: 'nav-tab-org-hosts',
+      label: 'Hosts',
       href: buildRoute(Route.HOST_LIST),
     },
     {

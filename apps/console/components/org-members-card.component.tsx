@@ -66,7 +66,7 @@ interface AccessDraft {
 
 /**
  * Organization membership manager (AGL-234): the permanent org-role model
- * (owner/admin/editor/viewer + all-sites toggle) over /api/orgs/members
+ * (owner/admin/editor/viewer + all-hosts toggle) over /api/orgs/members
  * and /api/orgs/invites. People without an Aglyn account get a pending
  * invite they accept on first sign-in; per-site access editing lands with
  * the workspace host picker.
@@ -178,7 +178,7 @@ export function OrgMembersCard() {
       <Stack spacing={2}>
         <Typography variant="body2" color="text.secondary">
           {'Owners and admins manage the whole organization; editors and ' +
-            'viewers can be limited to specific sites.'}
+            'viewers can be limited to specific hosts.'}
         </Typography>
         {canManage ? (
           <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
@@ -210,7 +210,7 @@ export function OrgMembersCard() {
                   onChange={(event) => setAllHosts(event.target.checked)}
                 />
               }
-              label="All sites"
+              label="All hosts"
             />
             <Button
               variant="contained"
@@ -267,7 +267,7 @@ export function OrgMembersCard() {
                 </TableCell>
                 <TableCell>
                   {member.role === 'owner' || member.role === 'admin' ? (
-                    'All sites'
+                    'All hosts'
                   ) : canManage ? (
                     <Button
                       size="small"
@@ -283,13 +283,13 @@ export function OrgMembersCard() {
                       }
                     >
                       {member.allHosts
-                        ? 'All sites'
-                        : `${Object.keys(member.hostAccess ?? {}).length} site(s)`}
+                        ? 'All hosts'
+                        : `${Object.keys(member.hostAccess ?? {}).length} host(s)`}
                     </Button>
                   ) : member.allHosts ? (
-                    'All sites'
+                    'All hosts'
                   ) : (
-                    `${Object.keys(member.hostAccess ?? {}).length} site(s)`
+                    `${Object.keys(member.hostAccess ?? {}).length} host(s)`
                   )}
                 </TableCell>
                 <TableCell align="right">
@@ -300,7 +300,7 @@ export function OrgMembersCard() {
                       onClick={() =>
                         void confirm({
                           title: 'Remove member?',
-                          description: `${member.email ?? member.$id} loses access to every site in this organization.`,
+                          description: `${member.email ?? member.$id} loses access to every host in this organization.`,
                         }).then(async (accepted) => {
                           if (!accepted) return
                           const ok = await request('/api/orgs/members', 'POST', {
@@ -371,7 +371,7 @@ export function OrgMembersCard() {
                 }
               />
             }
-            label={`All sites (as ${accessDraft?.role ?? 'member'})`}
+            label={`All hosts (as ${accessDraft?.role ?? 'member'})`}
           />
           {accessDraft?.allHosts
             ? null

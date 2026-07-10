@@ -34,7 +34,7 @@ import useFirestoreCollection from '../../hooks/use-firestore-collection'
 /**
  * Organization media library (AGL-237): assets shared with every host in
  * the org — distinct from the host library above it, which stays private
- * to this site. Uploads/deletes go through /api/orgs/media so the
+ * to this host. Uploads/deletes go through /api/orgs/media so the
  * Storage object and its doc never drift.
  */
 export function OrgMediaCard(props: { orgId: string | null }) {
@@ -106,15 +106,15 @@ export function OrgMediaCard(props: { orgId: string | null }) {
 
   return (
     <CardDisplay
-      header={'Organization media (shared with all sites)'}
+      header={'Organization media (shared with all hosts)'}
       contentGutterX
       contentGutterY
     >
       <Stack spacing={2}>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
-            {'Assets here can be used by any site in your organization; the ' +
-              'library above stays private to this site.'}
+            {'Assets here can be used by any host in your organization; the ' +
+              'library above stays private to this host.'}
           </Typography>
           <input
             ref={fileInput}
@@ -184,7 +184,7 @@ export function OrgMediaCard(props: { orgId: string | null }) {
                     onClick={() =>
                       void confirm({
                         title: 'Delete org media?',
-                        description: `${item.fileName} disappears from every site using it.`,
+                        description: `${item.fileName} disappears from every host using it.`,
                       }).then(async (accepted) => {
                         if (accepted) await request({ action: 'delete', mediaId: item.$id })
                       })
