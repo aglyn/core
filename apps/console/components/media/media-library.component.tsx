@@ -553,12 +553,32 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
           { variant: 'warning', persist: false },
         )
       }
-      await updateDoc(
-        doc(firestore, scopeCollection, scopeId, 'mediaFolders', folder.$id),
-        { name },
-      )
+      // API-routed: renaming a folder renames a REAL Storage prefix, so
+      // the server relocates every asset underneath (urls follow).
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/media/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          ...scopeBody,
+          action: 'rename',
+          folderId: folder.$id,
+          name,
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Rename failed', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
+      }
+      refresh()
     },
-    [firestore, scopeId, folderList, enqueueSnackbar],
+    [firestore, scopeId, folderList, enqueueSnackbar, user, refresh],
   )
   const handleFolderDelete = useCallback(
     async (folder: Aglyn.AglynHostMediaFolder) => {
@@ -574,25 +594,28 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         .catch(() => false)
       if (!confirmed) return
       const parentId = folder.parentId ?? null
-      const batch = writeBatch(firestore)
-      // Documented AGL-171 policy: re-parent children and assets.
-      for (const child of folderList) {
-        if ((child.parentId ?? null) === folder.$id) {
-          batch.update(
-            doc(firestore, scopeCollection, scopeId, 'mediaFolders', child.$id),
-            { parentId },
-          )
-        }
+      // API-routed (AGL-171 policy preserved): the server re-parents
+      // children and assets AND moves their Storage objects up a level.
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/media/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          ...scopeBody,
+          action: 'delete',
+          folderId: folder.$id,
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Delete failed', {
+          variant: 'error',
+          allowDuplicate: true,
+        })
       }
-      for (const item of items as any[]) {
-        if (item.folderId === folder.$id) {
-          batch.update(doc(firestore, scopeCollection, scopeId, 'media', item.$id), {
-            folderId: parentId,
-          })
-        }
-      }
-      batch.delete(doc(firestore, scopeCollection, scopeId, 'mediaFolders', folder.$id))
-      await batch.commit()
       if (currentFolder === folder.$id) setCurrentFolder(parentId ?? 'all')
       refresh()
       logActivity('Deleted media folder', { type: 'media', name: folder.name })
@@ -616,14 +639,28 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
   const moveMedia = useCallback(
     async (mediaIds: string[], folderId: string | null) => {
       if (!mediaIds.length) return
-      const batch = writeBatch(firestore)
-      for (const mediaId of mediaIds) {
-        batch.update(doc(firestore, scopeCollection, scopeId, 'media', mediaId), {
+      // API-routed: moving between folders moves the REAL objects too.
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/media/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          ...scopeBody,
+          action: 'move-assets',
+          mediaIds,
           folderId,
-          folder: folderId ? (folderNameById[folderId] ?? '') : '',
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Move failed', {
+          variant: 'error',
+          allowDuplicate: true,
         })
       }
-      await batch.commit()
       setSelected(new Set())
       refresh()
       enqueueSnackbar(
@@ -631,7 +668,7 @@ export function MediaLibraryComponent(props: MediaLibraryComponentProps) {
         { variant: 'success', persist: false },
       )
     },
-    [firestore, scopeId, folderNameById, enqueueSnackbar, refresh],
+    [user, scopeId, enqueueSnackbar, refresh],
   )
 
   const sensors = useSensors(
