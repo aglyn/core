@@ -21,18 +21,14 @@ import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import useOrgWorkspace from './use-org-workspace'
-import useTenantPermissions from './use-tenant-permissions'
 
 const RETRY_DELAY_MS = 400
 const MAX_RETRIES = 5
 
 /**
- * The tenant the signed-in user ACTS IN. Owners resolve their own doc
- * (`tenants/{uid}`); team members (AGL-127) resolve the OWNER's tenant via
- * their membership record, so plan/entitlements come from the account they
- * belong to — a member is a user of a single tenant, not a tenant of their
- * own. Rules grant members read on the owner doc via the members
- * subcollection.
+ * The org workspace's billing doc — the entitlement source the signed-in
+ * user acts under (AGL-238). The name is historic: the returned shape is
+ * the org doc, which mirrors the legacy tenant billing fields.
  *
  * Subscribes with a raw `onSnapshot` (with its own retry) rather than
  * reactfire's `useFirestoreDocData` — that hook's cached Observable is a
@@ -49,9 +45,8 @@ export function useCurrentTenant(): {
 } {
   const { data: user } = useUser()
   const firestore = useFirestore()
-  const { ownerUid } = useTenantPermissions()
   const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
-  const tenantId = ownerUid ?? user?.uid
+  const tenantId = user?.uid
   // AGL-238 cutover: the org doc is the ONLY entitlement source (plan
   // mirrored by backfill + webhook). Accounts without an org yet (fresh
   // signups pre first host) resolve undefined, which the entitlement

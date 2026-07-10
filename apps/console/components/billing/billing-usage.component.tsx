@@ -283,35 +283,31 @@ function HostUsageMeters(props: {
 export function BillingUsageComponent(props: BillingUsageProps) {
   const { tenant, hosts } = props
   const entitlements = resolveTenantEntitlements(tenant)
-  const { data: user } = useUser()
-  // Team seats (AGL-119): the members subcollection is server-readable
-  // only, so the count comes from the team API; owner occupies one seat.
+  // Team seats (AGL-119, org roster since AGL-238): every org member
+  // occupies a seat; the roster is member-readable so the count is a
+  // client aggregate query.
+  const firestore = useFirestore()
+  const orgId = (tenant as any)?.$id as string | undefined
   const [teamSeats, setTeamSeats] = useState<number | null>(null)
   useEffect(() => {
+    if (!orgId) return
     let active = true
-    void (async () => {
-      try {
-        const idToken = await (user as any)?.getIdToken?.()
-        if (!idToken) return
-        const response = await fetch('/api/tenant/members', {
-          headers: { Authorization: `Bearer ${idToken}` },
-        })
-        if (!response.ok) return
-        const payload = await response.json()
-        if (active) setTeamSeats((payload.members?.length ?? 0) + 1)
-      } catch {
+    void getCountFromServer(collection(firestore, 'orgs', orgId, 'members'))
+      .then((snapshot) => {
+        if (active) setTeamSeats(snapshot.data().count)
+      })
+      .catch(() => {
         // Meter keeps its "not yet metered" state on failure.
-      }
-    })()
+      })
     return () => {
       active = false
     }
-  }, [user])
+  }, [firestore, orgId])
   const teamSeatLimit = checkSeatQuota(tenant, 'managers', 0).limit
   return (
     <>
       <UsageMeter
-        label="Hosts"
+        label="Sites"
         used={hosts.length}
         limit={entitlements.hostLimit}
       />

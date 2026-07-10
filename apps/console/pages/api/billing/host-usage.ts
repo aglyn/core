@@ -63,8 +63,8 @@ export default async function handler(
     if (!hostSnapshot.exists) {
       return res.status(404).json({ error: 'Unknown site' })
     }
-    const admins = hostSnapshot.get('admins') ?? {}
-    if (!admins[decoded.uid]) {
+    const memberRole = (hostSnapshot.get('memberRoles') ?? {})[decoded.uid]
+    if (!memberRole) {
       return res.status(403).json({ error: 'Not a site admin' })
     }
 

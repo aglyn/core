@@ -30,7 +30,6 @@ import {
   resolveOrgMembership,
 } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
 
 /**
  * Creates a host (user request 2026-07-07 — the hosts page had no create
@@ -73,13 +72,6 @@ export default async function handler(
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    // Manager permission gate (AGL-108).
-    const membership = await resolveTenantPermissions(decoded.uid)
-    if (!membership.permissions.createHosts) {
-      return res
-        .status(403)
-        .json({ error: 'Your team role does not allow creating sites' })
-    }
     // Org resolution (AGL-233): hosts belong to an organization. The org
     // comes from the request (workspace context) or the user's first org,
     // auto-creating a personal org for brand-new accounts. Creating hosts
@@ -124,15 +116,16 @@ export default async function handler(
         .json({ error: 'That subdomain is taken', suggestions })
     }
 
-    const tenantSnapshot = await firestore
-      .collection('tenants')
-      .doc(decoded.uid)
+    // Site quota rides the org doc (AGL-238), counted per org.
+    const orgSnapshot = await firestore
+      .collection('orgs')
+      .doc(orgMembership.orgId)
       .get()
-    const tenant = tenantSnapshot.data()
+    const tenant = orgSnapshot.data()
     if (tenant?.['plan']) {
       const owned = await firestore
         .collection('hosts')
-        .where(`admins.${decoded.uid}`, '==', true)
+        .where('orgId', '==', orgMembership.orgId)
         .count()
         .get()
       const quota = checkQuota(
@@ -157,10 +150,6 @@ export default async function handler(
         displayName,
         subdomain,
         orgId: orgMembership.orgId,
-        // Legacy billing-v1 fields kept until AGL-237 re-keys billing:
-        // tenantId feeds plan resolution, admins feeds pre-org queries.
-        tenantId: decoded.uid,
-        admins: { [decoded.uid]: true },
         screens: {},
         createdAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),

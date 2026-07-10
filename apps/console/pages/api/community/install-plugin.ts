@@ -18,7 +18,7 @@
 import {
   resolveOrgIdForHost, firebaseAdmin } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { resolveTenantPermissions } from '../../../utils/server/tenant-permissions'
+import { resolveOrgPermissions } from '../../../utils/server/org-permissions'
 
 /**
  * Installs (or upgrades) a community plugin into a host (AGL-45), pinning a
@@ -53,10 +53,10 @@ export default async function handler(
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    const membership = await resolveTenantPermissions(decoded.uid)
+    const membership = await resolveOrgPermissions(decoded.uid, { hostId })
     if (!membership.permissions.installPlugins) {
       return res.status(403).json({
-        error: 'Your team role does not allow installing from the community',
+        error: 'Your organization role does not allow installing from the community',
       })
     }
     const firestore = firebaseAdmin.app().firestore()
@@ -66,9 +66,8 @@ export default async function handler(
     if (!hostSnapshot.exists) {
       return res.status(404).json({ error: 'Unknown site' })
     }
-    const admins = hostSnapshot.get('admins') ?? {}
     const memberRole = (hostSnapshot.get('memberRoles') ?? {})[decoded.uid]
-    if (!admins[decoded.uid] && !['admin', 'editor'].includes(memberRole)) {
+    if (!['admin', 'editor'].includes(memberRole)) {
       return res.status(403).json({ error: 'Not a site admin' })
     }
 

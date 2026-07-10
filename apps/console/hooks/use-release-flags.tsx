@@ -72,17 +72,17 @@ export interface ReleaseFlagsProviderProps {
 /**
  * Release-flag delivery (AGL-229): activates the Remote Config template
  * once per session and resolves every registered flag for the current
- * subject. The rollout subject is the tenant the user acts in (owner uid,
- * AGL-127) so a whole workspace gets a feature together, falling back to
- * the uid pre-resolution. Until activation lands, registry defaults gate —
- * a flag that's default-off never flashes on.
+ * subject. The rollout subject is the org workspace the user acts in
+ * (AGL-238) so a whole organization gets a feature together, falling back
+ * to the uid pre-resolution. Until activation lands, registry defaults
+ * gate — a flag that's default-off never flashes on.
  */
 export function ReleaseFlagsProvider(props: ReleaseFlagsProviderProps) {
   const { children } = props
   const remoteConfig = useRemoteConfig()
   const { data: user } = useUser()
-  const { ownerUid } = useTenantPermissions()
-  const subjectId = ownerUid ?? user?.uid ?? null
+  const { orgId } = useTenantPermissions()
+  const subjectId = orgId ?? user?.uid ?? null
 
   const [activated, setActivated] = useState(false)
   const [isStaff, setIsStaff] = useState(false)

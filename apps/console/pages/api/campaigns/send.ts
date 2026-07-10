@@ -21,7 +21,7 @@ import {
   createResourceUid,
 } from '@aglyn/aglyn'
 import {
-  orgDataCollectionForHost, firebaseAdmin } from '@aglyn/tenant-data-admin'
+  orgDataCollectionForHost, firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { createHash, createHmac } from 'crypto'
 import type { NextApiRequest, NextApiResponse } from 'next'
 
@@ -100,8 +100,8 @@ export default async function handler(
     if (!hostSnapshot.exists) {
       return res.status(404).json({ error: 'Unknown site' })
     }
-    const admins = hostSnapshot.get('admins') ?? {}
-    if (!admins[decoded.uid]) {
+    const memberRole = (hostSnapshot.get('memberRoles') ?? {})[decoded.uid]
+    if (memberRole !== 'admin' && memberRole !== 'editor') {
       return res.status(403).json({ error: 'Not a site admin' })
     }
 
@@ -168,16 +168,11 @@ export default async function handler(
         .json({ error: 'Every recipient has unsubscribed' })
     }
 
-    // Monthly cap by the owning tenant's plan (dark-launch rule).
-    const tenantId = hostSnapshot.get('tenantId') as string | undefined
+    // Monthly cap by the owning org's plan (dark-launch rule, AGL-238).
     const monthKey = new Date().toISOString().slice(0, 7)
     const counterRef = hostRef.collection('counters').doc('emailSends')
-    if (tenantId) {
-      const tenantSnapshot = await firestore
-        .collection('tenants')
-        .doc(tenantId)
-        .get()
-      const tenant = tenantSnapshot.exists ? tenantSnapshot.data() : undefined
+    {
+      const tenant = (await getOrgForHost(hostId))?.org
       if (tenant?.['plan']) {
         const counterSnapshot = await counterRef.get()
         const used = Number(counterSnapshot.get(monthKey) ?? 0)
