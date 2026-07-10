@@ -50,6 +50,12 @@ goal, and per-variant exposure/conversion rates with a pick-the-winner flow.
   one variant (re-sends reach the same variant), sends count as exposures, and once a
   winner is picked every later send uses the winning copy.
 
+## Opens & clicks
+
+With the Resend webhook configured, campaign history shows **opens and clicks** per
+campaign, and clicks on A/B sends count as that variant's **conversions** — so the
+experiment results table fills in by itself.
+
 ## Compliance
 
 - Every send includes an **unsubscribe** link.

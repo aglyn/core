@@ -36,7 +36,11 @@ can fire on **visitor behavior in the page**:
 - **Page visit** — the page loads.
 
 Page triggers can be limited to certain paths (`/pricing`, `/blog/*`). Each fires at most
-once per page view.
+once per page view — or check **"Once per visitor"** to never re-fire for the same
+browser.
+
+Each automation row offers a **Runs** log (its recent executions) and, for page
+triggers, a **Test** button that exercises the server-side steps immediately.
 
 ## Steps
 

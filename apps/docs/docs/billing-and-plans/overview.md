@@ -51,6 +51,13 @@ Every site has a plan. **Free**, **Pro**, and **Business** unlock progressively 
 Billing runs through **Stripe**. Paid features (commerce, bookings, campaigns) share the
 same Stripe integration.
 
+- **Annual billing** — a toggle on the plan cards; annual plans include two months free.
+- **Plan switches** on an active subscription show a **prorated preview** of today's
+  charge before you confirm, and apply in place (no second checkout).
+- **Cancel any time** — the subscription runs to the end of the paid period; a warning
+  chip shows the end date and you can resume before it hits.
+- **Invoice history** with **opens into Stripe-hosted invoices** from the billing page.
+
 ## Related
 
 - [Teams, roles & membership](../teams-and-roles/overview.md)

@@ -29,6 +29,12 @@ Permissions are enforced everywhere — across the console's APIs and every surf
 role reliably limits what a member can see and do. Members without billing or settings
 permissions don't see those tabs at all.
 
+## Effective permissions
+
+Not sure what someone can actually do? Every member row has a **Permissions** viewer
+that resolves their org role defaults, custom role, and per-member overrides into the
+final yes/no grant list.
+
 ## Per-member overrides
 
 Need one person to have slightly more (or less) than their role? Apply a **per-member
