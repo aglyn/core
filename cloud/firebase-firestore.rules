@@ -93,8 +93,15 @@ service cloud.firestore {
         allow write: if isStaff() || canWriteOrgData();
       }
 
-      // Org media library and plugin installs follow with the remaining
-      // AGL-237 moves.
+      // Org media library (AGL-237): shareable with any host in the org.
+      // Docs are API-written only — every doc pairs with a Storage object
+      // under orgs/{orgId}/media/, and the API keeps them consistent.
+      match /media/{mediaId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+
+      // Org-tier plugin installs follow with the remaining AGL-237 move.
     }
 
     // Workspace-subdomain resolution ({slug}.aglyn.com): public read so

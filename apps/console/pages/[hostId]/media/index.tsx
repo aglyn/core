@@ -17,6 +17,7 @@
 
 import { mdiImageMultipleOutline } from '@aglyn/shared-data-mdi'
 import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
+import { Box } from '@mui/material'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -24,6 +25,7 @@ import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import MediaLibraryComponent from '../../../components/media/media-library.component'
+import OrgMediaCard from '../../../components/media/org-media-card.component'
 import { buildRoute, Route } from '../../../constants/route-links'
 import hostNavTabItems from '../../../constants/host-nav-tabs'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
@@ -60,6 +62,10 @@ const HostMedia: NextPageWithLayout = () => {
           >
             <MediaLibraryComponent hostId={hostId} />
           </CardDisplay>
+          {/* Shared org library (AGL-237) below the host-private one. */}
+          <Box sx={{ mt: 3 }}>
+            <OrgMediaCard hostId={hostId} />
+          </Box>
         </Container>
       </DashboardLayout>
     </>
