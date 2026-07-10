@@ -52,19 +52,14 @@ export function useCurrentTenant(): {
   const { ownerUid } = useTenantPermissions()
   const { currentOrg, loading: orgsLoading } = useOrgWorkspace()
   const tenantId = ownerUid ?? user?.uid
-  // Billing re-key (AGL-237): the org doc mirrors plan/entitlements
-  // (backfill + webhook), so it is preferred as the source once the user
-  // has an org; uid-keyed tenants remain the fallback until AGL-238
-  // retires them. The returned tenantId stays uid-keyed for the legacy
-  // billing APIs either way.
+  // AGL-238 cutover: the org doc is the ONLY entitlement source (plan
+  // mirrored by backfill + webhook). Accounts without an org yet (fresh
+  // signups pre first host) resolve undefined, which the entitlement
+  // helpers treat as the pre-billing fail-open, same as before. The
+  // returned tenantId stays uid-keyed for the legacy billing APIs.
   const orgId = currentOrg?.$id
-  const sourcePath = orgsLoading
-    ? null
-    : orgId
-      ? (['orgs', orgId] as const)
-      : tenantId
-        ? (['tenants', tenantId] as const)
-        : null
+  const sourcePath =
+    orgsLoading || !orgId ? null : (['orgs', orgId] as const)
   const [tenant, setTenant] = useState<Partial<AglynTenant> | undefined>(
     undefined,
   )
