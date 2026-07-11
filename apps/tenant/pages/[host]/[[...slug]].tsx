@@ -28,21 +28,21 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import Head from 'next/head'
 import applyDuePublishSchedule from '@aglyn/tenant-runtime/apply-publish-schedule'
 import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
-import { resolveRedirect } from '../../../utils/resolve-redirect'
+import { resolveRedirect } from '../../utils/resolve-redirect'
 import getCollectionContent, {
   type CollectionContent,
-} from '../../../utils/get-collection-content'
+} from '../../utils/get-collection-content'
 import getComponents from '@aglyn/tenant-runtime/get-components'
-import getTenant from '../../../utils/get-tenant'
+import getTenant from '../../utils/get-tenant'
 import getVariables from '@aglyn/tenant-runtime/get-variables'
 import getClientAutomations, {
   type ClientAutomation,
-} from '../../../utils/get-client-automations'
+} from '../../utils/get-client-automations'
 import getScreenExperiments, {
   type ScreenExperiment,
-} from '../../../utils/get-screen-experiments'
-import getOverlays from '../../../utils/get-overlays'
-import getHost from '../../../utils/get-host'
+} from '../../utils/get-screen-experiments'
+import getOverlays from '../../utils/get-overlays'
+import getHost from '../../utils/get-host'
 import getPublishedLayoutVersion from '@aglyn/tenant-runtime/get-layout-version'
 import getScreen from '@aglyn/tenant-runtime/get-screen'
 import getScreenVersion from '@aglyn/tenant-runtime/get-screen-version'
@@ -106,12 +106,12 @@ interface Props {
    * runner assigns a variant per visitor, swaps the composed tree, and
    * beacons exposures/conversions.
    */
-  experiments?: import('../../../utils/get-screen-experiments').ScreenExperiment[]
+  experiments?: import('../../utils/get-screen-experiments').ScreenExperiment[]
   /**
    * Site-event automations for this page (AGL-256): the client engine
    * arms triggers, runs client steps, and dispatches server steps.
    */
-  clientAutomations?: import('../../../utils/get-client-automations').ClientAutomation[]
+  clientAutomations?: import('../../utils/get-client-automations').ClientAutomation[]
   /** Overlay payloads referenced by showOverlay steps, by overlay id. */
   automationOverlays?: Record<
     string,

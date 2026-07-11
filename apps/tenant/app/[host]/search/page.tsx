@@ -17,7 +17,7 @@
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import searchContent from '../../../../utils/search-content'
+import searchContent from '../../../utils/search-content'
 import { getHostCached } from '../host-data'
 
 // Reads ?q= per request, so it can never be statically cached.

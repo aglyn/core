@@ -16,7 +16,7 @@
  */
 
 import { cache } from 'react'
-import getHost from '../../../utils/get-host'
+import getHost from '../../utils/get-host'
 
 /**
  * Request-deduped host lookup. The `[host]` layout resolves the host for
