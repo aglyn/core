@@ -181,6 +181,11 @@ export default function BookingsConsolePage({
   shared tooling — the where-used dialog and its fetch util, plus the
   variable/function cards — which the app's workflows surface and besigner
   ƒx button import from `@aglyn/plugins-logic`. Always-on (not release-flagged).
+- **Marketing** (`libs/plugins/marketing`) — console-only (AGL-395): the
+  at-a-glance rollup, overlay/announcement/popup managers, and A/B testing.
+  The first relocated plugin to consume the media browser — the popup image
+  picker calls `useMediaPicker()` (the shell mounts the provider around plugin
+  pages), so the app media dialog never leaves the console app.
 - **Workflows** (`libs/plugins/workflows`) — console-only (AGL-395): the
   workflow builder, actions builder, and webhooks tabs, plus the shared
   `HostActivityCard` (exported for the app dashboard + screen-view). Each tab
