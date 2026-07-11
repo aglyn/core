@@ -11,8 +11,14 @@ STRIPE_SECRET_KEY=sk_live_... node tools/scripts/setup-stripe.mjs \
   --webhook-url https://<console-domain>/api/billing/webhook
 ```
 
-Idempotent — prices are keyed by `lookup_key` (`aglyn_starter`, `aglyn_pro`,
-`aglyn_business`, plus `_extra_host` variants), so re-running reuses them.
+Idempotent — prices are keyed by `lookup_key` (`aglyn_{plan}_v2` monthly,
+`aglyn_{plan}_v2_yearly` annual, plus `_extra_host` variants; plans:
+starter/pro/business/advanced), so re-running reuses them.
+
+**Grandfathering (AGL-307):** the original `aglyn_{plan}` prices are left
+untouched — existing subscriptions keep billing at their old price until
+the tenant changes plans, at which point checkout uses the v2 prices. Do
+not archive the old prices while any subscription references them.
 The script prints the env block to paste into the console app's environment
 (Vercel project settings):
 
