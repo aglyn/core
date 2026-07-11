@@ -385,6 +385,15 @@ const TeamMemberDetail: NextPageWithLayout = () => {
               </CardDisplay>
             )}
             {currentOrg?.$id ? (
+              // Changes made TO this member (role/access edits), AGL-389.
+              <OrgActivityCard
+                orgId={currentOrg.$id}
+                targetId={uid}
+                header={'Changes to this member'}
+                max={30}
+              />
+            ) : null}
+            {currentOrg?.$id ? (
               <OrgActivityCard
                 orgId={currentOrg.$id}
                 actorId={uid}
