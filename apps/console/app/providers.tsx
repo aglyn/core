@@ -20,6 +20,7 @@ import {
   ConfirmationProviderComponent,
   LoadingLayoutComponent,
 } from '@aglyn/shared-ui-jsx'
+import { NextPageTitleProvider } from '@aglyn/shared-ui-next'
 import { SnackbarProvider } from '@aglyn/shared-ui-snackstack'
 import {
   consoleThemeDark,
@@ -41,7 +42,7 @@ import '../constants/register-console-plugins'
  * then firebase init, loading gate, confirmation dialogs, snackbars, and the
  * host-id context. Wraps every app route under the root layout.
  */
-const Providers = withThemeCssVarProvider(
+const ThemeStack = withThemeCssVarProvider(
   ({ children }: { children?: ReactNode }) => (
     <FirebaseAppLayout>
       <LoadingLayoutComponent>
@@ -57,4 +58,10 @@ const Providers = withThemeCssVarProvider(
   { theme: { light: consoleThemeLight, dark: consoleThemeDark } },
 )
 
-export default Providers
+export default function Providers({ children }: { children?: ReactNode }) {
+  return (
+    <NextPageTitleProvider>
+      <ThemeStack>{children}</ThemeStack>
+    </NextPageTitleProvider>
+  )
+}

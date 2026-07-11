@@ -39,6 +39,11 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
+// The console is a fully client-rendered authoring app (firebase/reactfire/
+// mobx behind an auth gate); nothing is statically prerenderable, so opt the
+// whole App Router tree out of static generation (AGL-401).
+export const dynamic = 'force-dynamic'
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
