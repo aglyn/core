@@ -129,6 +129,16 @@ export function HostAnalyticsCard(props: {
     (sum, count) => sum + count,
     0,
   )
+  // Top insights (AGL-386): per-day average, week-over-week trend, and
+  // the leading device — computed from the same day-counter docs.
+  const dayCount = (days ?? []).length || 1
+  const avgPerDay = Math.round(total / dayCount)
+  const last7 = (days ?? []).slice(-7).reduce((sum, d) => sum + d.total, 0)
+  const prev7 = (days ?? []).slice(-14, -7).reduce((sum, d) => sum + d.total, 0)
+  const wowPct = prev7 ? Math.round(((last7 - prev7) / prev7) * 100) : null
+  const topDevice = Object.entries(deviceTotals).sort(
+    ([, a], [, b]) => b - a,
+  )[0]?.[0]
 
   return (
     <CardDisplay
@@ -176,7 +186,51 @@ export function HostAnalyticsCard(props: {
         </Typography>
       ) : (
         <Stack spacing={2}>
-          <Typography variant="h4">{total.toLocaleString()}</Typography>
+          <Stack direction="row" spacing={3} sx={{ flexWrap: 'wrap' }}>
+            <Stack>
+              <Typography variant="h4">{total.toLocaleString()}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {'Pageviews'}
+              </Typography>
+            </Stack>
+            <Stack>
+              <Typography variant="h4">
+                {avgPerDay.toLocaleString()}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {'Avg / day'}
+              </Typography>
+            </Stack>
+            {wowPct !== null ? (
+              <Stack>
+                <Typography
+                  variant="h4"
+                  color={
+                    wowPct > 0
+                      ? 'success.main'
+                      : wowPct < 0
+                        ? 'error.main'
+                        : 'text.primary'
+                  }
+                >
+                  {`${wowPct > 0 ? '+' : ''}${wowPct}%`}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {'Week over week'}
+                </Typography>
+              </Stack>
+            ) : null}
+            {topDevice ? (
+              <Stack>
+                <Typography variant="h4" sx={{ textTransform: 'capitalize' }}>
+                  {topDevice}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {'Top device'}
+                </Typography>
+              </Stack>
+            ) : null}
+          </Stack>
           <Stack
             direction="row"
             spacing={0.5}
