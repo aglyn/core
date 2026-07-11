@@ -78,25 +78,25 @@ import {
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
-import ScreenAnalyticsCard from '../../../../../../../components/analytics/screen-analytics-card.component'
-import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
-import DashboardLayout from '../../../../../../../components/layouts/dashboard.layout'
-import MainLayout from '../../../../../../../components/layouts/main.layout'
-import HostDisplayNameComponent from '../../../../../../../components/host-display-name.component'
-import { hasEntitlement } from '../../../../../../../constants/entitlements'
-import hostNavTabItems from '../../../../../../../constants/host-nav-tabs'
-import { buildRoute, Route } from '../../../../../../../constants/route-links'
-import { buildScreenLiveUrl } from '../../../../../../../constants/tenant-links'
+import ScreenAnalyticsCard from '../../../../../../../../components/analytics/screen-analytics-card.component'
+import AuthenticatedLayout from '../../../../../../../../components/layouts/authenticated.layout'
+import DashboardLayout from '../../../../../../../../components/layouts/dashboard.layout'
+import MainLayout from '../../../../../../../../components/layouts/main.layout'
+import HostDisplayNameComponent from '../../../../../../../../components/host-display-name.component'
+import { hasEntitlement } from '../../../../../../../../constants/entitlements'
+import hostNavTabItems from '../../../../../../../../constants/host-nav-tabs'
+import { buildRoute, Route } from '../../../../../../../../constants/route-links'
+import { buildScreenLiveUrl } from '../../../../../../../../constants/tenant-links'
 import {
   publishScreenRoute,
   unpublishScreenRoute,
-} from '../../../../../../../constants/screen-publishing'
+} from '../../../../../../../../constants/screen-publishing'
 import { HostActivityCard } from '@aglyn/plugins-workflows'
-import { CONTENT_MAX_WIDTH } from '../../../../../../../constants/shared'
-import useCurrentTenant from '../../../../../../../hooks/use-current-tenant'
-import useFirestoreCollection from '../../../../../../../hooks/use-firestore-collection'
-import useFirestoreDoc from '../../../../../../../hooks/use-firestore-doc'
-import useHostActivityLogger from '../../../../../../../hooks/use-host-activity-logger'
+import { CONTENT_MAX_WIDTH } from '../../../../../../../../constants/shared'
+import useCurrentTenant from '../../../../../../../../hooks/use-current-tenant'
+import useFirestoreCollection from '../../../../../../../../hooks/use-firestore-collection'
+import useFirestoreDoc from '../../../../../../../../hooks/use-firestore-doc'
+import useHostActivityLogger from '../../../../../../../../hooks/use-host-activity-logger'
 
 const whiteSpace = '--'
 
@@ -1213,10 +1213,5 @@ function ScreenDetails() {
   )
 }
 ScreenDetails.displayName = 'Page:ScreenDetails'
-ScreenDetails.layouts = [
-  {
-    Component: AuthenticatedLayout,
-  },
-]
 
 export default ScreenDetails

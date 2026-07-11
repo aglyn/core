@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+'use client'
+
 import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer, useAglynSiteTheme } from '@aglyn/aglyn-node-renderer'
 import { registerCommercePlugin } from '@aglyn/plugins-commerce'
@@ -33,11 +35,11 @@ import Head from 'next/head'
 import { observer } from 'mobx-react-lite'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import '../../../../../../../constants/app-setup'
+import '../../../../../../../../constants/app-setup'
 import {
   previewStateKey,
   readPreviewState,
-} from '../../../../../../../constants/preview-state'
+} from '../../../../../../../../constants/preview-state'
 
 registerMuiPlugin()
 registerCommercePlugin()

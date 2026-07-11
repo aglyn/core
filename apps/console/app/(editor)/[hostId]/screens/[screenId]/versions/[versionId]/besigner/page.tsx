@@ -73,28 +73,28 @@ import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import AiAssistProvider from '../../../../../../../components/ai-assist-provider.component'
-import BesignerFunctionsButton from '../../../../../../../components/besigner-functions-button.component'
-import BindingPickerProvider from '../../../../../../../components/binding-picker-provider.component'
-import InteractionsProvider from '../../../../../../../components/interactions-provider.component'
-import usePluginDrawerRegistration from '../../../../../../../hooks/use-plugin-drawer-registration'
-import BesignerMediaPickerProvider from '../../../../../../../components/besigner-media-picker-provider.component'
-import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
-import BesignerDocumentSwitcherComponent from '../../../../../../../components/besigner-document-switcher.component'
-import BesignerVersionsComponent from '../../../../../../../components/besigner-versions.component'
-import EntityPickerProvider from '../../../../../../../components/entity-picker-provider.component'
-import ReusableComponentsProvider from '../../../../../../../components/reusable-components-provider.component'
-import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
-import MainLayout from '../../../../../../../components/layouts/main.layout'
-import '../../../../../../../constants/app-setup'
+import AiAssistProvider from '../../../../../../../../components/ai-assist-provider.component'
+import BesignerFunctionsButton from '../../../../../../../../components/besigner-functions-button.component'
+import BindingPickerProvider from '../../../../../../../../components/binding-picker-provider.component'
+import InteractionsProvider from '../../../../../../../../components/interactions-provider.component'
+import usePluginDrawerRegistration from '../../../../../../../../hooks/use-plugin-drawer-registration'
+import BesignerMediaPickerProvider from '../../../../../../../../components/besigner-media-picker-provider.component'
+import BesignerAppBarComponent from '../../../../../../../../components/besigner-app-bar.component'
+import BesignerDocumentSwitcherComponent from '../../../../../../../../components/besigner-document-switcher.component'
+import BesignerVersionsComponent from '../../../../../../../../components/besigner-versions.component'
+import EntityPickerProvider from '../../../../../../../../components/entity-picker-provider.component'
+import ReusableComponentsProvider from '../../../../../../../../components/reusable-components-provider.component'
+import AuthenticatedLayout from '../../../../../../../../components/layouts/authenticated.layout'
+import MainLayout from '../../../../../../../../components/layouts/main.layout'
+import '../../../../../../../../constants/app-setup'
 import {
   previewWindowName,
   writePreviewState,
-} from '../../../../../../../constants/preview-state'
-import { buildRoute, Route } from '../../../../../../../constants/route-links'
-import { syncScreenRouteEntries } from '../../../../../../../constants/screen-publishing'
-import { buildScreenLiveUrl } from '../../../../../../../constants/tenant-links'
-import useFirestoreCollection from '../../../../../../../hooks/use-firestore-collection'
+} from '../../../../../../../../constants/preview-state'
+import { buildRoute, Route } from '../../../../../../../../constants/route-links'
+import { syncScreenRouteEntries } from '../../../../../../../../constants/screen-publishing'
+import { buildScreenLiveUrl } from '../../../../../../../../constants/tenant-links'
+import useFirestoreCollection from '../../../../../../../../hooks/use-firestore-collection'
 
 registerMuiPlugin()
 registerCommercePlugin()
@@ -999,7 +999,6 @@ function BesignerPage(props) {
 }
 
 BesignerPage.displayName = 'Page:Besigner'
-BesignerPage.layouts = [{Component: AuthenticatedLayout}]
 
 export default withBesignerContext(observer(BesignerPage))
 

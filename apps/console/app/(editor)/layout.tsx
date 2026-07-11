@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use client'
 
-import type { GetServerSidePropsContext } from 'next/types'
-import { buildRoute, Route } from '../../../constants/route-links'
+import type { ReactNode } from 'react'
+import AuthenticatedLayout from '../../components/layouts/authenticated.layout'
 
-export default () => null
-
-export const getServerSideProps = (context: GetServerSidePropsContext) => {
-  const { query } = context
-  const hostId = query.hostId as string
-  return {
-    redirect: {
-      permanent: true,
-      destination: buildRoute(Route.SCREEN_LIST, { hostId }),
-    },
-  }
+/**
+ * Full-screen host editor shell (App Router route group, AGL-401): the
+ * besigner, screen preview/view, and theme editor used `[AuthenticatedLayout]`
+ * only (no MainLayout app bar) so the canvas fills the viewport.
+ */
+export default function EditorLayout({ children }: { children: ReactNode }) {
+  return <AuthenticatedLayout>{children}</AuthenticatedLayout>
 }

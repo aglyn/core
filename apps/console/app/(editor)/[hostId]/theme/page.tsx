@@ -19,9 +19,9 @@
 import { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { useHostId } from '../../../components/host-id-provider'
-import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
-import { buildRoute, Route } from '../../../constants/route-links'
+import { useHostId } from '../../../../components/host-id-provider'
+import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
+import { buildRoute, Route } from '../../../../constants/route-links'
 
 /**
  * The theme editor moved under Setup → Theme (AGL-114); this route only
@@ -40,10 +40,5 @@ const HostTheme: NextPageWithLayout = () => {
   return null
 }
 HostTheme.displayName = 'Page:HostTheme'
-HostTheme.layouts = [
-  {
-    Component: AuthenticatedLayout,
-  },
-]
 
 export default HostTheme
