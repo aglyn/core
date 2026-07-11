@@ -29,7 +29,7 @@ import type { HostWorkflow } from './workflows'
  */
 export interface ReferenceIssue {
   /** What holds the broken reference. */
-  source: 'action' | 'workflow' | 'variable'
+  source: 'action' | 'workflow' | 'variable' | 'screen'
   sourceId: string
   /** Display name of the holder. */
   sourceName: string
@@ -39,10 +39,19 @@ export interface ReferenceIssue {
   missing: string
 }
 
+/** A screen's composed nodes, for canvas-reference auditing (AGL-345). */
+export interface ScreenAuditEntry {
+  $id: string
+  name?: string
+  nodes: Record<string, { props?: Record<string, unknown> } | undefined>
+}
+
 export interface ReferenceAuditInput {
   actions?: Array<HostAction & { $id: string }>
   workflows?: Array<HostWorkflow & { $id: string }>
   variables?: Array<HostVariable & { $id: string }>
+  /** Screen node maps to scan for entity/screen-link references. */
+  screens?: ScreenAuditEntry[]
   /** Known-good targets: doc ids AND display names both resolve. */
   known: {
     workflows?: Set<string>
@@ -52,6 +61,11 @@ export interface ReferenceAuditInput {
     campaigns?: Set<string>
     overlays?: Set<string>
     webhooks?: Set<string>
+    /** New reference kinds (AGL-345). */
+    screens?: Set<string>
+    products?: Set<string>
+    collections?: Set<string>
+    categories?: Set<string>
   }
 }
 
@@ -112,6 +126,12 @@ export function auditHostReferences(
         if (!resolves(known.webhooks, step.webhookId, step.webhookName)) {
           push('webhook', step.webhookId || step.webhookName || '')
         }
+      } else if (step.type === 'redirect') {
+        // Screen-id redirects (AGL-339) go stale when the screen is
+        // deleted/unpublished.
+        if (!resolves(known.screens, (step as any).screenId)) {
+          push('screen', (step as any).screenId || '')
+        }
       }
     }
   }
@@ -139,6 +159,38 @@ export function auditHostReferences(
         refType: 'workflow',
         missing: variable.workflowId || variable.workflowName || '',
       })
+    }
+  }
+
+  // Canvas node references (AGL-345): screen links, commerce entities,
+  // and repeat datasets persisted in component props.
+  const NODE_PROP_TARGETS: Array<{
+    prop: string
+    refType: string
+    known: Set<string> | undefined
+  }> = [
+    { prop: 'screenId', refType: 'screen', known: known.screens },
+    { prop: 'productId', refType: 'product', known: known.products },
+    { prop: 'collectionId', refType: 'collection', known: known.collections },
+    { prop: 'categoryId', refType: 'category', known: known.categories },
+    { prop: 'repeatDataset', refType: 'dataset', known: known.datasets },
+  ]
+  for (const screen of input.screens ?? []) {
+    for (const node of Object.values(screen.nodes ?? {})) {
+      const props = node?.props ?? {}
+      for (const target of NODE_PROP_TARGETS) {
+        const value = props[target.prop]
+        if (typeof value !== 'string' || !value.trim()) continue
+        if (!resolves(target.known, value)) {
+          issues.push({
+            source: 'screen',
+            sourceId: screen.$id,
+            sourceName: screen.name ?? screen.$id,
+            refType: target.refType,
+            missing: value,
+          })
+        }
+      }
     }
   }
 

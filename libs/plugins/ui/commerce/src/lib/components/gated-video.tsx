@@ -166,7 +166,7 @@ export const schema: Aglyn.ComponentSchema<GatedVideoProps> = {
       label: 'Product id',
       description:
         'Members entitled to this product can watch its gated videos.',
-      component: Aglyn.FieldComponentType.TEXT_FIELD,
+      component: Aglyn.FieldComponentType.PRODUCT_SELECT,
     },
     {
       name: 'videoIndex',

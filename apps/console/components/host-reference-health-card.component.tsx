@@ -58,6 +58,11 @@ export function HostReferenceHealthCard(props: HostReferenceHealthCardProps) {
   const campaignDocs = useHostCollection('campaigns')
   const overlayDocs = useHostCollection('overlays')
   const webhookDocs = useHostCollection('webhooks')
+  // New reference kinds (AGL-345): screen links, commerce entities.
+  const screenDocs = useHostCollection('screens')
+  const productDocs = useHostCollection('products')
+  const collectionDocs = useHostCollection('collections')
+  const categoryDocs = useHostCollection('productCategories')
   const { data: datasetDocs } = useFirestoreCollection<any>(
     () =>
       query(
@@ -101,6 +106,10 @@ export function HostReferenceHealthCard(props: HostReferenceHealthCardProps) {
         campaigns: knownSet(campaignDocs),
         overlays: knownSet(overlayDocs),
         webhooks: knownSet(webhookDocs),
+        screens: knownSet(screenDocs, 'displayName'),
+        products: knownSet(productDocs),
+        collections: knownSet(collectionDocs),
+        categories: knownSet(categoryDocs),
       },
     })
   }, [
@@ -113,6 +122,10 @@ export function HostReferenceHealthCard(props: HostReferenceHealthCardProps) {
     campaignDocs,
     overlayDocs,
     webhookDocs,
+    screenDocs,
+    productDocs,
+    collectionDocs,
+    categoryDocs,
   ])
 
   return (

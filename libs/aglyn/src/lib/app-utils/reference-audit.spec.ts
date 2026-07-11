@@ -105,6 +105,51 @@ describe('auditHostReferences', () => {
     expect(issues[0]).toMatchObject({ source: 'variable', refType: 'workflow' })
   })
 
+  it('flags dangling screen-node entity references (AGL-345)', () => {
+    const issues = auditHostReferences({
+      known: {
+        screens: new Set(['home']),
+        products: new Set(['p1']),
+        collections: new Set(['c1']),
+        datasets: new Set(['d1', 'Team']),
+      },
+      screens: [
+        {
+          $id: 's1',
+          name: 'Shop',
+          nodes: {
+            a: { props: { screenId: 'gone-screen' } },
+            b: { props: { productId: 'p1' } }, // resolves — no issue
+            c: { props: { collectionId: 'gone-collection' } },
+            d: { props: { repeatDataset: 'Team' } }, // by name — resolves
+          },
+        },
+      ],
+    })
+    expect(issues).toHaveLength(2)
+    expect(issues.map((issue) => issue.refType).sort()).toEqual([
+      'collection',
+      'screen',
+    ])
+    expect(issues[0]).toMatchObject({ source: 'screen', sourceName: 'Shop' })
+  })
+
+  it('flags redirect steps pointing at deleted screens', () => {
+    const issues = auditHostReferences({
+      known: { screens: new Set(['home']) },
+      actions: [
+        {
+          $id: 'a1',
+          name: 'Go',
+          trigger: { event: 'elementClick' },
+          steps: [{ type: 'redirect', screenId: 'gone' } as any],
+        },
+      ],
+    })
+    expect(issues).toHaveLength(1)
+    expect(issues[0]).toMatchObject({ refType: 'screen', missing: 'gone' })
+  })
+
   it('stays quiet when a target kind is not loaded and for empty refs', () => {
     expect(
       auditHostReferences({

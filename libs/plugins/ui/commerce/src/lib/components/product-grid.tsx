@@ -35,12 +35,16 @@ export const ID: Aglyn.ComponentId = 'product-grid'
 export interface ProductGridProps {
   /** Filter source; 'all' lists the whole active catalog. */
   source?: 'all' | 'collection' | 'category' | 'tag'
-  /** Collection slug when source = collection; blank follows the
-   * /collections/{slug} URL (collection template screens, AGL-298). */
+  /** Collection id when source = collection (rename-safe, AGL-343). */
+  collectionId?: string
+  /** Legacy collection slug; used only when no collectionId is set.
+   * Blank follows the /collections/{slug} URL (AGL-298). */
   collectionSlug?: string
   /** Faceted controls above the grid: tags, availability, sort. */
   showFilters?: boolean
-  /** Category slug when source = category. */
+  /** Category id when source = category (rename-safe, AGL-343). */
+  categoryId?: string
+  /** Legacy category slug; used only when no categoryId is set. */
   categorySlug?: string
   /** Tag when source = tag. */
   tag?: string
@@ -93,7 +97,9 @@ const ProductGrid = forwardRef<HTMLDivElement, ProductGridProps>(
   (props, ref) => {
     const {
       source,
+      collectionId,
       collectionSlug: collectionSlugProp,
+      categoryId,
       categorySlug,
       tag,
       sort: sortProp,
@@ -117,11 +123,14 @@ const ProductGrid = forwardRef<HTMLDivElement, ProductGridProps>(
       if (!hostId) return
       let active = true
       const params = new URLSearchParams({ hostId })
-      if (source === 'collection' && collectionSlug) {
-        params.set('collection', collectionSlug)
+      // Ids first (rename-safe, AGL-343); slugs remain as the legacy path.
+      if (source === 'collection') {
+        if (collectionId) params.set('collectionId', collectionId)
+        else if (collectionSlug) params.set('collection', collectionSlug)
       }
-      if (source === 'category' && categorySlug) {
-        params.set('category', categorySlug)
+      if (source === 'category') {
+        if (categoryId) params.set('categoryId', categoryId)
+        else if (categorySlug) params.set('category', categorySlug)
       }
       if (source === 'tag' && tag) params.set('tag', tag)
       if (sort) params.set('sort', sort)
@@ -137,7 +146,17 @@ const ProductGrid = forwardRef<HTMLDivElement, ProductGridProps>(
       return () => {
         active = false
       }
-    }, [hostId, source, collectionSlug, categorySlug, tag, sort, maxItems])
+    }, [
+      hostId,
+      source,
+      collectionId,
+      collectionSlug,
+      categoryId,
+      categorySlug,
+      tag,
+      sort,
+      maxItems,
+    ])
 
     const desktopColumns = Math.min(6, Math.max(1, columns ?? 3))
     const gridSx = {
@@ -323,15 +342,31 @@ export const schema: Aglyn.ComponentSchema<ProductGridProps> = {
       ],
     },
     {
+      name: 'collectionId',
+      label: 'Collection',
+      description:
+        'Pick the collection — stored by id, so renaming it never breaks ' +
+        'this grid. Leave empty on collection template screens to follow ' +
+        'the /collections/{slug} URL.',
+      component: Aglyn.FieldComponentType.COLLECTION_SELECT,
+    },
+    {
       name: 'collectionSlug',
-      label: 'Collection slug',
-      description: 'From the Categories & collections card.',
+      label: 'Collection slug (legacy)',
+      description: 'Used only when no collection is picked above.',
       component: Aglyn.FieldComponentType.TEXT_FIELD,
     },
     {
+      name: 'categoryId',
+      label: 'Category',
+      description:
+        'Pick the category — stored by id, rename-safe.',
+      component: Aglyn.FieldComponentType.CATEGORY_SELECT,
+    },
+    {
       name: 'categorySlug',
-      label: 'Category slug',
-      description: 'From the Categories & collections card.',
+      label: 'Category slug (legacy)',
+      description: 'Used only when no category is picked above.',
       component: Aglyn.FieldComponentType.TEXT_FIELD,
     },
     {

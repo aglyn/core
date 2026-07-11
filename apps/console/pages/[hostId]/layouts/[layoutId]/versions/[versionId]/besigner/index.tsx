@@ -60,6 +60,7 @@ import BesignerMediaPickerProvider from '../../../../../../../components/besigne
 import BesignerAppBarComponent from '../../../../../../../components/besigner-app-bar.component'
 import BesignerDocumentSwitcherComponent from '../../../../../../../components/besigner-document-switcher.component'
 import BesignerVersionsComponent from '../../../../../../../components/besigner-versions.component'
+import EntityPickerProvider from '../../../../../../../components/entity-picker-provider.component'
 import ReusableComponentsProvider from '../../../../../../../components/reusable-components-provider.component'
 import AuthenticatedLayout from '../../../../../../../components/layouts/authenticated.layout'
 import MainLayout from '../../../../../../../components/layouts/main.layout'
@@ -252,6 +253,7 @@ function LayoutBesignerPage(props) {
   return (
     <HostThemeDocumentContext.Provider value={hostTheme}>
     <Aglyn.ScreenLinkContext.Provider value={screenLinks}>
+    <EntityPickerProvider hostId={hostId}>
     <ReusableComponentsProvider hostId={hostId}>
     <AiAssistProvider>
     <BindingPickerProvider hostId={hostId}>
@@ -406,6 +408,7 @@ function LayoutBesignerPage(props) {
     </BindingPickerProvider>
     </AiAssistProvider>
     </ReusableComponentsProvider>
+    </EntityPickerProvider>
     </Aglyn.ScreenLinkContext.Provider>
     </HostThemeDocumentContext.Provider>
   )

@@ -104,10 +104,10 @@ export const schema: Aglyn.ComponentSchema = {
       name: 'repeatDataset',
       label: 'Repeat over dataset',
       description:
-        'Dataset name (Dashboard → Data). The children act as an item ' +
-        'template rendered once per record on the published site; use ' +
-        '{{item.field}} inside them for record values.',
-      component: Aglyn.FieldComponentType.TEXT_FIELD,
+        'The children act as an item template rendered once per record ' +
+        'on the published site; use {{item.field}} inside them for record ' +
+        'values. Stored by dataset id — renames never break the repeat.',
+      component: Aglyn.FieldComponentType.DATASET_SELECT,
     },
     {
       name: 'repeatLimit',

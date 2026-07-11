@@ -151,7 +151,7 @@ export const schema: Aglyn.ComponentSchema<GateProps> = {
       description:
         'Members who bought or subscribe to this product get in; blank ' +
         'accepts any live subscription.',
-      component: Aglyn.FieldComponentType.TEXT_FIELD,
+      component: Aglyn.FieldComponentType.PRODUCT_SELECT,
     },
     {
       name: 'teaserText',

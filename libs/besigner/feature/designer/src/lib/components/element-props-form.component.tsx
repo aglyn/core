@@ -167,31 +167,59 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     const rawAttributes = schema?.attributes
     // Screen-select fields can't carry static options (the host's screens
     // are only known at edit time), so resolve them here from the routing
-    // map + labels the console provides via ScreenLinkContext.
+    // map + labels the console provides via ScreenLinkContext. Entity
+    // pickers (AGL-343/344) resolve the same way from EntityPickerContext.
     const { screens, labels } = useContext(Aglyn.ScreenLinkContext)
-    const attributes = useMemo(
-      () =>
-        (rawAttributes ?? []).map((field) =>
-          field.component === Aglyn.FieldComponentType.SCREEN_SELECT
-            ? {
-                ...field,
-                component: Aglyn.FieldComponentType.SELECT,
-                options: [
-                  { value: '', label: 'None (use external URL)' },
-                  ...Object.entries(screens ?? {})
-                    .sort(([, a], [, b]) => a.localeCompare(b))
-                    .map(([screenId, path]) => ({
-                      value: screenId,
-                      label: `${labels?.[screenId] ?? screenId} (${
-                        path === '/' ? '/' : `/${path}`
-                      })`,
-                    })),
-                ],
-              }
-            : field,
-        ),
-      [rawAttributes, screens, labels],
-    )
+    const entityOptions = useContext(Aglyn.EntityPickerContext)
+    const attributes = useMemo(() => {
+      const entityListFor = (component: Aglyn.FieldComponentType) => {
+        switch (component) {
+          case Aglyn.FieldComponentType.PRODUCT_SELECT:
+            return entityOptions.products
+          case Aglyn.FieldComponentType.COLLECTION_SELECT:
+            return entityOptions.collections
+          case Aglyn.FieldComponentType.CATEGORY_SELECT:
+            return entityOptions.categories
+          case Aglyn.FieldComponentType.DATASET_SELECT:
+            return entityOptions.datasets
+          default:
+            return undefined
+        }
+      }
+      return (rawAttributes ?? []).map((field) => {
+        if (field.component === Aglyn.FieldComponentType.SCREEN_SELECT) {
+          return {
+            ...field,
+            component: Aglyn.FieldComponentType.SELECT,
+            options: [
+              { value: '', label: 'None (use external URL)' },
+              ...Object.entries(screens ?? {})
+                .sort(([, a], [, b]) => a.localeCompare(b))
+                .map(([screenId, path]) => ({
+                  value: screenId,
+                  label: `${labels?.[screenId] ?? screenId} (${
+                    path === '/' ? '/' : `/${path}`
+                  })`,
+                })),
+            ],
+          }
+        }
+        const entities = entityListFor(field.component as any)
+        if (entities !== undefined) {
+          return {
+            ...field,
+            component: Aglyn.FieldComponentType.SELECT,
+            options: [
+              { value: '', label: 'None' },
+              ...[...entities]
+                .sort((a, b) => a.label.localeCompare(b.label))
+                .map((entity) => ({ value: entity.id, label: entity.label })),
+            ],
+          }
+        }
+        return field
+      })
+    }, [rawAttributes, screens, labels, entityOptions])
 
     // Reusable-component flows (AGL-35): actions appear only when the host
     // app provides callbacks; locked nodes (layout chrome) never promote.

@@ -163,7 +163,7 @@ export const schema: Aglyn.ComponentSchema<RelatedProductsProps> = {
       name: 'productId',
       label: 'Product id',
       description: 'Blank follows the product page URL.',
-      component: Aglyn.FieldComponentType.TEXT_FIELD,
+      component: Aglyn.FieldComponentType.PRODUCT_SELECT,
     },
     {
       name: 'heading',

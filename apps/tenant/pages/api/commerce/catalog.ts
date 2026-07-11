@@ -46,6 +46,10 @@ export default async function handler(
   if (!hostId) return res.status(400).json({ error: 'Missing hostId' })
   const collectionSlug = String(req.query.collection ?? '')
   const categorySlug = String(req.query.category ?? '')
+  // Id-based filters are preferred (rename-safe, AGL-343); slugs remain
+  // for legacy screens and template-URL resolution.
+  const collectionIdParam = String(req.query.collectionId ?? '')
+  const categoryIdParam = String(req.query.categoryId ?? '')
   const tag = String(req.query.tag ?? '')
   const ids = String(req.query.ids ?? '')
     .split(',')
@@ -58,26 +62,32 @@ export default async function handler(
   try {
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
-    const [productsSnapshot, collectionsSnapshot, categoriesSnapshot] =
+    const [productsSnapshot, collectionsSnapshot, categoriesSnapshot, collectionByIdSnapshot] =
       await Promise.all([
         hostRef.collection('products').limit(500).get(),
-        collectionSlug
+        !collectionIdParam && collectionSlug
           ? hostRef
               .collection('collections')
               .where('slug', '==', collectionSlug)
               .limit(1)
               .get()
           : null,
-        categorySlug
+        !categoryIdParam && categorySlug
           ? hostRef
               .collection('productCategories')
               .where('slug', '==', categorySlug)
               .limit(1)
               .get()
           : null,
+        collectionIdParam
+          ? hostRef.collection('collections').doc(collectionIdParam).get()
+          : null,
       ])
-    const collection = collectionsSnapshot?.docs[0]
-    const categoryId = categoriesSnapshot?.docs[0]?.id
+    const collection =
+      collectionByIdSnapshot?.exists
+        ? collectionByIdSnapshot
+        : collectionsSnapshot?.docs[0]
+    const categoryId = categoryIdParam || categoriesSnapshot?.docs[0]?.id
 
     let products = productsSnapshot.docs
       .map((docSnapshot) => ({
