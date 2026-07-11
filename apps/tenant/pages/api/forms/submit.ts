@@ -24,7 +24,7 @@ import { extractEmailFromFields } from '@aglyn/aglyn'
 import { upsertHostContact } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { emitHostEvent } from '../../../utils/emit-host-event'
+import { emitHostEvent } from '@aglyn/tenant-runtime'
 
 const MAX_FIELDS = 20
 const MAX_PAYLOAD_CHARS = 10000

@@ -18,7 +18,7 @@
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { emitHostEvent } from '../../../utils/emit-host-event'
+import { emitHostEvent } from '@aglyn/tenant-runtime'
 
 /** Firestore map keys can't be parsed as field paths on read anyway, but
  * keep them tame: strip characters that complicate querying/exporting. */

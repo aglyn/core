@@ -17,7 +17,7 @@
 
 import { firebaseAdmin, upsertHostContact } from '@aglyn/tenant-data-admin'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { emitHostEvent } from '../../../utils/emit-host-event'
+import { emitHostEvent } from '@aglyn/tenant-runtime'
 import {
   hashMemberPassword,
   mintMemberSession,

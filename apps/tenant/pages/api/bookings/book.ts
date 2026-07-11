@@ -29,7 +29,7 @@ import {
 } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { emitHostEvent } from '../../../utils/emit-host-event'
+import { emitHostEvent } from '@aglyn/tenant-runtime'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 

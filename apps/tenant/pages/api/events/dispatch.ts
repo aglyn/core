@@ -17,7 +17,7 @@
 
 import { isSiteEventType } from '@aglyn/aglyn'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { runSingleAction } from '../../../utils/run-event-actions'
+import { runSingleAction } from '@aglyn/tenant-runtime'
 
 /**
  * Site-event dispatch (AGL-256): the page runtime evaluates client-side

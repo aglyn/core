@@ -47,6 +47,8 @@
       "@aglyn/besigner/*": ["libs/besigner/core/src/lib/*"],
       "@aglyn/tenant-data-admin": ["libs/tenant/data/admin/src/index.ts"],
       "@aglyn/tenant-data-admin/*": ["libs/tenant/data/admin/src/lib/*"],
+      "@aglyn/tenant-runtime": ["libs/tenant/runtime/src/index.ts"],
+      "@aglyn/tenant-runtime/*": ["libs/tenant/runtime/src/lib/*"],
       "@aglyn/plugins-email": ["libs/plugins/email/src/index.ts"],
       "@aglyn/plugins-email/*": ["libs/plugins/email/src/lib/*"],
       "@aglyn/plugins-bookings": ["libs/plugins/bookings/src/index.ts"],
