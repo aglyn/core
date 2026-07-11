@@ -562,6 +562,20 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             <MenuItem value="backorder">{'Keep selling (backorder)'}</MenuItem>
           </TextField>
           <TextField
+            label="Kind"
+            value={current.giftCard ? 'gift' : 'standard'}
+            onChange={(event) =>
+              update({ giftCard: event.target.value === 'gift' })
+            }
+            size="small"
+            select
+            sx={{ minWidth: 130 }}
+            helperText="Gift cards issue a code"
+          >
+            <MenuItem value="standard">{'Standard'}</MenuItem>
+            <MenuItem value="gift">{'Gift card'}</MenuItem>
+          </TextField>
+          <TextField
             label="Tax"
             value={current.taxExempt ? 'exempt' : 'taxable'}
             onChange={(event) =>

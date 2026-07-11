@@ -79,6 +79,7 @@ function CartLines(props: {
   const [coupon, setCoupon] = useState('')
   const [email, setEmail] = useState('')
   const [optIn, setOptIn] = useState(false)
+  const [giftCard, setGiftCard] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
@@ -95,6 +96,7 @@ function CartLines(props: {
           ...(email.trim() ? { email: email.trim() } : {}),
           ...(optIn ? { marketingOptIn: true } : {}),
           ...(coupon.trim() ? { couponCode: coupon.trim() } : {}),
+          ...(giftCard.trim() ? { giftCardCode: giftCard.trim() } : {}),
         }),
       })
       const payload = await response.json().catch(() => ({}))
@@ -111,7 +113,7 @@ function CartLines(props: {
     } catch {
       setStatus('error')
     }
-  }, [hostId, coupon, email, optIn, status])
+  }, [hostId, coupon, email, optIn, giftCard, status])
 
   if (!cart || cart.lines.length === 0) {
     return (
@@ -222,12 +224,21 @@ function CartLines(props: {
         }
       />
       {showCoupon ? (
-        <TextField
-          label="Coupon code"
-          value={coupon}
-          onChange={(event) => setCoupon(event.target.value)}
-          size="small"
-        />
+        <>
+          <TextField
+            label="Coupon code"
+            value={coupon}
+            onChange={(event) => setCoupon(event.target.value)}
+            size="small"
+          />
+          <TextField
+            label="Gift card"
+            value={giftCard}
+            onChange={(event) => setGiftCard(event.target.value)}
+            size="small"
+            placeholder="GC-…"
+          />
+        </>
       ) : null}
       {status === 'error' ? (
         <Alert severity="error">

@@ -739,6 +739,67 @@ export default async function handler(
             )
             .catch(() => undefined)
         }
+        // Gift card balance decrement (AGL-322).
+        if (object.metadata?.giftCardCode) {
+          await hostRef
+            .collection('giftCards')
+            .doc(String(object.metadata.giftCardCode))
+            .set(
+              {
+                balanceCents: firebaseAdmin.firestore.FieldValue.increment(
+                  -Number(object.metadata?.giftCardCents ?? 0),
+                ),
+                lastUsedAtMs: Date.now(),
+              },
+              { merge: true },
+            )
+            .catch(() => undefined)
+        }
+        // Gift card issuance (AGL-322): each purchased gift-card line
+        // mints a code for its unit price and emails it to the buyer.
+        for (const line of lineItems) {
+          const lineProduct = productsById.get(line.productId)
+          if (!lineProduct?.giftCard) continue
+          for (let unit = 0; unit < line.quantity; unit += 1) {
+            const code = `GC-${createHmac('sha256', String(object.id))
+              .update(`${line.productId}:${unit}:${Date.now()}`)
+              .digest('hex')
+              .slice(0, 12)
+              .toUpperCase()}`
+            await hostRef
+              .collection('giftCards')
+              .doc(code)
+              .set({
+                initialCents: line.unitAmountCents,
+                balanceCents: line.unitAmountCents,
+                recipientEmail: object?.customer_details?.email ?? null,
+                orderId: String(object.id),
+                createdAtMs: Date.now(),
+              })
+              .catch(() => undefined)
+            const giftResendKey = process.env.RESEND_API_KEY
+            const giftEmailFrom = process.env.USAGE_EMAIL_FROM
+            const giftTo = object?.customer_details?.email
+            if (giftResendKey && giftEmailFrom && giftTo) {
+              await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${giftResendKey}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  from: giftEmailFrom,
+                  to: [giftTo],
+                  subject: 'Your gift card',
+                  text:
+                    `Gift card code: ${code}\n` +
+                    `Value: $${(line.unitAmountCents / 100).toFixed(2)}\n\n` +
+                    'Enter it at checkout to apply the balance.',
+                }),
+              }).catch(() => undefined)
+            }
+          }
+        }
         // Discounts engine redemptions (AGL-305).
         if (object.metadata?.discountId) {
           await hostRef

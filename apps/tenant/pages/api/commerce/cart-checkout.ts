@@ -43,6 +43,10 @@ export default async function handler(
   const hostId = String(body.hostId ?? '')
   const email = String(body.email ?? '').trim().toLowerCase().slice(0, 120)
   const marketingOptIn = Boolean(body.marketingOptIn)
+  const giftCardCode = String(body.giftCardCode ?? '')
+    .trim()
+    .toUpperCase()
+    .slice(0, 24)
   const couponCode = String(body.couponCode ?? '')
     .trim()
     .toUpperCase()
@@ -218,6 +222,40 @@ export default async function handler(
       }
     }
 
+    // Gift cards (AGL-322): balance applies as amount-off; the webhook
+    // decrements the balance on completion.
+    if (giftCardCode) {
+      const cardSnapshot = await hostRef
+        .collection('giftCards')
+        .doc(giftCardCode)
+        .get()
+      const balanceCents = Number(cardSnapshot.get('balanceCents') ?? 0)
+      if (!cardSnapshot.exists || balanceCents <= 0) {
+        return res.status(400).json({ error: 'Gift card is empty or invalid' })
+      }
+      const applyCents = Math.min(balanceCents, itemsCents)
+      const stripeCoupon = await fetch('https://api.stripe.com/v1/coupons', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          amount_off: String(applyCents),
+          currency: 'usd',
+          duration: 'once',
+        }).toString(),
+      }).then((response) => response.json())
+      if (stripeCoupon?.id) {
+        params.set('discounts[0][coupon]', stripeCoupon.id)
+        params.set('metadata[giftCardCode]', giftCardCode)
+        params.set('metadata[giftCardCents]', String(applyCents))
+        feeCents = Math.round(
+          (feeCents * Math.max(0, itemsCents - applyCents)) /
+            Math.max(1, itemsCents),
+        )
+      }
+    }
     if (feeCents > 0) {
       params.set(
         'payment_intent_data[application_fee_amount]',
