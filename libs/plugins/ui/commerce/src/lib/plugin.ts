@@ -27,6 +27,7 @@ import * as ProductDetail from './components/product-detail'
 import * as ReservationWidget from './components/reservation-widget'
 import * as ProductGrid from './components/product-grid'
 import * as ProductReviews from './components/product-reviews'
+import * as RelatedProducts from './components/related-products'
 import * as Wishlist from './components/wishlist'
 import { BUNDLE_ID } from './constants/bundle-common'
 
@@ -93,6 +94,11 @@ export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
     component: ProductReviews.default,
     schema: ProductReviews.schema,
     presets: ProductReviews.presets,
+  },
+  {
+    component: RelatedProducts.default,
+    schema: RelatedProducts.schema,
+    presets: RelatedProducts.presets,
   },
 ]
 

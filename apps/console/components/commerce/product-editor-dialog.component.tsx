@@ -88,6 +88,11 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
     [firestore, hostId],
     { idField: '$id' },
   )
+  const { data: allProductDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'products'), limit(300)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
   const { data: supplierDocs } = useFirestoreCollection<any>(
     () => query(collection(firestore, 'hosts', hostId, 'suppliers'), limit(50)),
     [firestore, hostId],
@@ -728,6 +733,33 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             </Button>
           </>
         ) : null}
+
+        <Autocomplete
+          multiple
+          options={(allProductDocs ?? []).filter(
+            (item: any) => !item.deletedAt && item.$id !== product?.$id,
+          )}
+          getOptionLabel={(item: any) => item.name ?? item.$id}
+          isOptionEqualToValue={(option: any, value: any) =>
+            option.$id === value.$id
+          }
+          value={(allProductDocs ?? []).filter((item: any) =>
+            (current.relatedProductIds ?? []).includes(item.$id),
+          )}
+          onChange={(_event, picked) =>
+            update({
+              relatedProductIds: picked.map((item: any) => item.$id),
+            })
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Related products (upsells)"
+              size="small"
+              helperText="Shown by the Related products block; blank falls back to frequently-bought-together"
+            />
+          )}
+        />
 
         <Divider textAlign="left">{'Search engine listing'}</Divider>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

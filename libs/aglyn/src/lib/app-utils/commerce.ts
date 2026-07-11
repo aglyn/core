@@ -117,6 +117,8 @@ export interface HostProduct {
   subscription?: { interval: 'month' | 'year'; trialDays?: number }
   /** Members-only videos (AGL-315), streamed via short-TTL links. */
   gatedVideos?: Array<{ url: string; title?: string }>
+  /** Manual related products for the upsell block (AGL-325). */
+  relatedProductIds?: string[]
   /** Tracked-total at/below this alerts host managers (AGL-281). */
   lowStockThreshold?: number
   createdAtMs?: number
