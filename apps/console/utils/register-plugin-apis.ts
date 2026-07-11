@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { registerBookingsConsoleApi } from '@aglyn/plugins-bookings/server'
+
 /**
  * Plugin API routes for the console (authoring) app (AGL-396). The console
  * counterpart to the tenant registration module: each feature plugin
@@ -25,7 +27,7 @@
  * route's original `/api/...` URL.
  */
 export function registerConsolePluginApis(): void {
-  // Populated as each feature's console API migrates into its plugin.
+  registerBookingsConsoleApi()
 }
 
 // Run on import so the registry is ready before the dispatcher resolves.
