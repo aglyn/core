@@ -25,6 +25,7 @@ import LocationsCard from '../../../components/commerce/locations-card.component
 import HostOrdersCard from '../../../components/commerce/host-orders-card.component'
 import PaymentsSettingsCard from '../../../components/commerce/payments-settings-card.component'
 import ShippingSettingsCard from '../../../components/commerce/shipping-settings-card.component'
+import StoreSettingsCard from '../../../components/commerce/store-settings-card.component'
 import SuppliersCard from '../../../components/commerce/suppliers-card.component'
 import TaxSettingsCard from '../../../components/commerce/tax-settings-card.component'
 import ProductsHubCard from '../../../components/commerce/products-hub-card.component'
@@ -83,6 +84,10 @@ const HostProducts: NextPageWithLayout = () => {
               {
                 size: { xs: 12, md: 6 },
                 children: <PaymentsSettingsCard hostId={hostId} />,
+              },
+              {
+                size: { xs: 12, md: 6 },
+                children: <StoreSettingsCard hostId={hostId} />,
               },
               {
                 size: { xs: 12, md: 6 },
