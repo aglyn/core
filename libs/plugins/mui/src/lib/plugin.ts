@@ -29,7 +29,6 @@ import * as Product from './components/product'
 import * as Blocks from './components/blocks'
 import * as FormComponents from './components/form'
 import * as Image from './components/image'
-import * as Booking from './components/booking'
 import * as Icon from './components/icon'
 import * as LanguageSwitcher from './components/language-switcher'
 import * as Video from './components/video'
@@ -78,7 +77,7 @@ export function registerMuiPlugin(): void {
     { component: Image.default, schema: Image.schema, presets: Image.presets },
     { component: Video.default, schema: Video.schema, presets: Video.presets },
     { component: Icon.default, schema: Icon.schema, presets: Icon.presets },
-    { component: Booking.default, schema: Booking.schema, presets: Booking.presets },
+    // booking moved to @aglyn/plugins-bookings (AGL-395).
     // event-list moved to @aglyn/plugins-events-calendar (AGL-313).
     { component: LanguageSwitcher.default, schema: LanguageSwitcher.schema, presets: LanguageSwitcher.presets },
     { component: ReusableInstance.default, schema: ReusableInstance.schema, presets: ReusableInstance.presets },

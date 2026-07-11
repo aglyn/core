@@ -18,6 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
 import { registerCommercePlugin } from '@aglyn/plugins-commerce'
+import { registerBookingsPlugin } from '@aglyn/plugins-bookings'
 import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
 import { registerMuiPlugin } from '@aglyn/plugins-mui'
 import { observer } from 'mobx-react-lite'
@@ -49,6 +50,7 @@ import getScreenVersion from '../../../utils/get-screen-version'
 registerMuiPlugin()
 registerCommercePlugin()
 registerEventsCalendarPlugin()
+registerBookingsPlugin()
 
 interface StaticPathsCtx extends ParsedUrlQuery {}
 

@@ -19,6 +19,7 @@ import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer, useAglynSiteTheme } from '@aglyn/aglyn-node-renderer'
 import { registerCommercePlugin } from '@aglyn/plugins-commerce'
 import { registerEmailPlugin } from '@aglyn/plugins-email'
+import { registerBookingsPlugin } from '@aglyn/plugins-bookings'
 import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
 import { registerMuiPlugin } from '@aglyn/plugins-mui'
 import { NextPageTitle } from '@aglyn/shared-ui-next'
@@ -41,6 +42,7 @@ import {
 registerMuiPlugin()
 registerCommercePlugin()
 registerEventsCalendarPlugin()
+registerBookingsPlugin()
 registerEmailPlugin()
 
 const SUPPRESSED_SCREEN_LINKS = { suppressNavigation: true }

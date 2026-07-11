@@ -17,6 +17,8 @@
 'use client'
 
 import {
+  checkQuota,
+  type ConsolePluginPageProps,
   createResourceUid,
   type HostBookingService,
 } from '@aglyn/aglyn'
@@ -43,10 +45,10 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
-import { checkTenantQuota, hasEntitlement } from '../constants/entitlements'
-import useCurrentTenant from '../hooks/use-current-tenant'
-import useFirestoreCollection from '../hooks/use-firestore-collection'
+import {
+  useFirestore,
+  useFirestoreCollection,
+} from '@aglyn/tenant-feature-instance'
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -92,12 +94,11 @@ interface ServiceDraft {
  * the tenant /api/bookings endpoints; confirmations email through the
  * env-gated Resend path. Plan-gated (`bookings` flag + `servicesPerHost`).
  */
-export function HostBookings(props: { hostId: string }) {
-  const { hostId } = props
+export function BookingsConsolePage(props: ConsolePluginPageProps) {
+  const { hostId, entitled, tenant } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
-  const { tenant } = useCurrentTenant()
 
   const { data: serviceDocs } = useFirestoreCollection<any>(
     () =>
@@ -127,13 +128,13 @@ export function HostBookings(props: { hostId: string }) {
   const [draft, setDraft] = useState<ServiceDraft | null>(null)
 
   const handleAdd = useCallback(() => {
-    if (!hasEntitlement('bookings', tenant)) {
+    if (!entitled) {
       return void enqueueSnackbar(
         'Bookings require a Starter plan — see Billing to upgrade',
         { variant: 'warning', persist: false },
       )
     }
-    const quota = checkTenantQuota(tenant, 'servicesPerHost', services.length)
+    const quota = checkQuota(tenant, 'servicesPerHost', services.length)
     if (!quota.allowed) {
       return void enqueueSnackbar(
         `Service limit reached (${quota.limit}) — upgrade in Billing`,
@@ -151,7 +152,7 @@ export function HostBookings(props: { hostId: string }) {
         index >= 1 && index <= 5 ? '09:00-17:00' : '',
       ),
     })
-  }, [tenant, services.length, enqueueSnackbar])
+  }, [entitled, tenant, services.length, enqueueSnackbar])
 
   const handleSave = useCallback(async () => {
     if (!draft || !draft.name.trim()) return
@@ -461,6 +462,6 @@ export function HostBookings(props: { hostId: string }) {
     </Stack>
   )
 }
-HostBookings.displayName = 'HostBookings'
+BookingsConsolePage.displayName = 'BookingsConsolePage'
 
-export default HostBookings
+export default BookingsConsolePage
