@@ -15,20 +15,29 @@
  * limitations under the License.
  */
 
-import { checkEntitlement } from '@aglyn/aglyn'
+/**
+ * Server half of the events-calendar plugin (AGL-396): the reference API
+ * migration. Registers the public `events/list` handler with the plugin API
+ * registry; the app dispatcher serves it at the unchanged `/api/events/list`
+ * URL. This module imports firebase-admin, so it is NOT re-exported from the
+ * plugin's client barrel — apps import `@aglyn/plugins-events-calendar/server`
+ * only from their (server-only) API dispatcher.
+ */
+
+import {
+  checkEntitlement,
+  registerPluginApiRoute,
+  type PluginApiHandler,
+} from '@aglyn/aglyn'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
 
 /**
- * Public event listing (AGL-145): published events for the Event List
- * canvas element. Drafts never leave the server; the paid `eventCalendar`
- * add-on gates plan-holding tenants (dark-launch tenants pass, as
- * everywhere). Sorted by start; `mode=past` flips the window.
+ * Public event listing (AGL-145): published events for the Event List canvas
+ * element. Drafts never leave the server; the paid `eventCalendar` add-on
+ * gates plan-holding tenants (dark-launch tenants pass). Sorted by start;
+ * `mode=past` flips the window.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+const eventsListHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -46,7 +55,7 @@ export default async function handler(
     {
       // Plan/quota gates ride the owning org's doc (AGL-238).
       const tenant = (await getOrgForHost(hostId))?.org
-      if (!checkEntitlement(tenant as any, 'eventCalendar')) {
+      if (!checkEntitlement(tenant as never, 'eventCalendar')) {
         return res.status(200).json({ events: [] })
       }
     }
@@ -86,4 +95,9 @@ export default async function handler(
     console.error(error)
     return res.status(500).json({ error: 'Event listing failed' })
   }
+}
+
+/** Registers the events-calendar plugin's API routes with the dispatcher. */
+export function registerEventsCalendarApi(): void {
+  registerPluginApiRoute('events/list', eventsListHandler)
 }

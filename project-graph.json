@@ -5230,6 +5230,11 @@
           "source": "plugins-events-calendar",
           "target": "tenant-feature-instance",
           "type": "static"
+        },
+        {
+          "source": "plugins-events-calendar",
+          "target": "tenant-data-admin",
+          "type": "static"
         }
       ],
       "tenant-feature-instance": [
