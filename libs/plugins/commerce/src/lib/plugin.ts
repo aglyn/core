@@ -102,7 +102,32 @@ export const COMMERCE_BUNDLE: Aglyn.FeatureBundleEntry[] = [
   },
 ]
 
+/**
+ * Console half (AGL-395): registers the Products nav item in the
+ * ConsoleExtension registry so the commerce console surface is owned by the
+ * plugin, like events and email. The page body still lives in the console
+ * app (`/[hostId]/products`): its product editor depends on the app's media
+ * browser, which transitively pulls in the org/session context, so a full
+ * body relocation needs a plugin-consumable media-picker context first —
+ * tracked as follow-up. The nav item omits a `Component`, so the shell's
+ * nav renders the link and the existing named route serves the page.
+ */
+export function registerCommerceConsole(): void {
+  Aglyn.registerConsoleExtension({
+    pluginId: BUNDLE_ID,
+    displayName: 'Commerce',
+    navItems: [
+      {
+        label: 'Products',
+        href: '/products',
+        icon: { path: mdiStorefrontOutline.path },
+      },
+    ],
+  })
+}
+
 export function registerCommercePlugin(): void {
+  registerCommerceConsole()
   if (Aglyn.plugins.getDependency(BUNDLE_ID)) return
   Aglyn.plugins.addDependency(
     Aglyn.defineUiFeatureBundle(

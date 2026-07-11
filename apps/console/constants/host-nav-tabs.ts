@@ -95,11 +95,8 @@ export function hostNavTabItems(hostId: string) {
       label: 'Data',
       href: buildRoute(Route.HOST_DATA, { hostId }),
     },
-    {
-      id: 'nav-tab-products',
-      label: 'Products',
-      href: buildRoute(Route.HOST_PRODUCTS, { hostId }),
-    },
+    // Products now comes from the commerce plugin's ConsoleExtension
+    // (AGL-395); the page still lives at Route.HOST_PRODUCTS.
     {
       id: 'nav-tab-redirects',
       label: 'Redirects',
