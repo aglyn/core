@@ -1,0 +1,96 @@
+# Local authenticated e2e for the console
+
+Runs the console against the Firebase emulators with a seeded org/host and a
+real signed-in session — no staging instance needed. The specs cover the
+pages that historically rendered empty under the emulator; they are the
+regression canary for the authenticated read path.
+
+## Requirements
+
+- **firebase-tools ≥ 13** for the emulators (the recipe below uses `npx`, so
+  the globally installed CLI doesn't matter). **This is the big one**: the
+  long-standing "authenticated emulator sessions see empty pages / silent
+  permission denials" wall was firebase-tools 11's Firestore emulator
+  ignoring the `Authorization` header on the modern firebase-js-sdk v12
+  WebChannel handshake — every listen evaluated rules as unauthenticated
+  while REST and the Node SDK (gRPC) worked fine. v13 fixes it (v14+ needs
+  Java 21; v13 runs on Java 11+).
+- Google Chrome installed (the harness drives it via `playwright-core`; no
+  browser download).
+
+## Running it
+
+Three terminals (or background the first two):
+
+```bash
+# 1. Emulators (dedicated config: auth 9099, firestore 8082, UI disabled)
+cd cloud && npx -y firebase-tools@13 emulators:start \
+  --config firebase.e2e.json --project aglyn-main --only auth,firestore
+
+# 2. Seed + console dev server with the emulator flags
+npm run seed:e2e
+npm run serve:console:emulated     # port 4200
+
+# 3. The tests
+npm run e2e:console                # E2E_BASE_URL overrides the target
+```
+
+The harness signs in once through the real `/signin` UI (a synthetic
+localStorage session races the app's `connectAuthEmulator` call — don't),
+pre-warms each route so dev-server compiles don't eat the navigation
+timeout, then asserts seeded content on every page. Failures drop full-page
+screenshots into `tmp/e2e-artifacts/`.
+
+## The three bugs this setup fixed (July 2026)
+
+Context for future spelunkers — the "auth-race wall" was actually three
+stacked issues:
+
+1. **Emulator dropped auth on modern WebChannel** (firebase-tools 11, above)
+   — the root cause of the AGL-217 "browser empty, Node works" mystery.
+2. **`useSessionCookie` signed restored sessions out**: the Auth emulator
+   doesn't support session cookies, so the cross-subdomain `__session` mint
+   always failed, and the hook's restore-validation branch read the missing
+   cookie as "signed out elsewhere" → `signOut()` + wiped persistence on
+   every fresh page load. Now skipped under `FIREBASE_AUTH_EMULATOR_ENABLED`.
+3. **Streaming transport hang + App Check 403s under the emulator** — fixed
+   by forcing long-polling / memory cache and skipping `initializeAppCheck`
+   when the emulator flags are set (`firebase-services.tsx`).
+
+Also historical: the old `seed-demo-host.mjs` predates the org data model
+and wrote docs missing queried fields (Firestore silently drops docs missing
+an `orderBy` field; the media root view hides foldered items; contacts/
+datasets read org-scoped paths via `hostIndex/{hostId}.orgId`).
+
+## Fixtures
+
+`tools/scripts/seed-e2e.mjs` (idempotent, **refuses to run without both
+emulator-host env vars** so it can never touch production):
+
+- Auth user `e2e@aglyn.test` / `E2e-Password-1` (uid `e2e-owner`, `staff`
+  claim; the password satisfies the sign-in form's client-side policy).
+- Org `e2e-owner` — business plan, active subscription (all entitlements
+  unlock), owner member, `users/{uid}/orgs` workspace mirror.
+- Host `demo` — `orgId`, `memberRoles`, `hostIndex` mirror.
+- Org-scoped: `datasets` (Team + records), `contacts`, `lists`.
+- Host-scoped: root-level media (with `createdAt`), bookings (with
+  `startsAtMs`), a service, a blog collection + entry, variables/functions/
+  workflows/actions, an overlay, a sent campaign, a lead.
+
+## Env knobs (all optional)
+
+| Var | Default | Meaning |
+| --- | --- | --- |
+| `E2E_BASE_URL` | `http://localhost:4200` | Console dev server |
+| `E2E_HOST` | `demo` | Host under test |
+| `E2E_EMAIL` / `E2E_PASSWORD` | seeded values | Test account |
+| `E2E_CHROME_PATH` | system Chrome | Browser binary |
+| `E2E_TIMEOUT_MS` | `45000` | Per-assertion timeout |
+| `E2E_ARTIFACTS_DIR` | `tmp/e2e-artifacts` | Failure screenshots |
+
+## Adding specs
+
+Add rows to the `specs` table in `tools/e2e/console.e2e.mjs` — a path plus
+the text the seeded fixtures make visible. Keep the invariant when extending
+the seeder: **every doc carries the fields the page's queries `orderBy` or
+`where` on**, or the page will look empty with zero errors.
