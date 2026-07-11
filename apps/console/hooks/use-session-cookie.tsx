@@ -16,6 +16,7 @@
  */
 'use client'
 
+import { FIREBASE_AUTH_EMULATOR_ENABLED } from '@aglyn/shared-data-enums'
 import { useAuth, useUser } from '@aglyn/tenant-feature-instance'
 import { signInWithCustomToken, signOut } from 'firebase/auth'
 import { useEffect, useRef } from 'react'
@@ -47,6 +48,14 @@ export function useSessionCookie(): void {
   const restoreAttempted = useRef(false)
 
   useEffect(() => {
+    // Emulator mode (dev/e2e): the Auth emulator does not support
+    // session cookies, so the mint below always fails — and the
+    // restore-validation branch would then read every fresh page load's
+    // missing cookie as "signed out elsewhere" and sign the restored
+    // user out (the long-standing "authenticated emulator sessions
+    // don't survive a reload" wall). Localhost is single-origin; there
+    // is no cross-subdomain session to sync.
+    if (FIREBASE_AUTH_EMULATOR_ENABLED) return
     // reactfire emits `undefined` until auth resolves; the first real
     // value (user or null) is the persisted state, not a transition.
     if (user === undefined) return
