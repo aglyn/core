@@ -200,6 +200,21 @@ entry **only** from the dispatcher's registration module (server code); the
 client barrel must never pull it in, or firebase-admin leaks into the browser
 bundle. Reference: `libs/plugins/events-calendar/src/lib/server.ts`.
 
+**Both Next apps carry a dispatcher.** The tenant (site-facing) app registers
+via `registerTenantPluginApis`; the console (authoring) app has its own
+`pages/api/[...pluginApi]` + `registerConsolePluginApis`, and plugins expose a
+separate `register*ConsoleApi()` for console-only handlers (staff/merchant
+ops, cron jobs) so each app registers only what it serves. A migrated route
+keeps its `/api/...` URL in whichever app owned it.
+
+**Body-parsing exceptions stay app-side.** The dispatcher is one route file,
+so its single `config` governs body parsing for every handler it serves.
+Routes that need a different policy — a webhook reading the **raw body** for
+signature verification (`bodyParser: false`), or an upload needing a raised
+`sizeLimit` — can't be expressed per-registered-route, so they remain named
+app routes. `email/events` (Svix), `community/publish-plugin` (8 MB bundle),
+and `community/preview-image` (3 MB image) are the current exceptions.
+
 ### Shared server runtime (`@aglyn/tenant-runtime`)
 
 Some handlers need tenant runtime that no single plugin owns — the host-event
