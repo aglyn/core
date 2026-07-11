@@ -17,8 +17,8 @@
 
 import { createHash, timingSafeEqual } from 'crypto'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import composeScreenNodes from '../../../utils/compose-screen-nodes'
-import getScreen from '../../../utils/get-screen'
+import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
+import getScreen from '@aglyn/tenant-runtime/get-screen'
 
 // Best-effort per-instance brute-force damper.
 const attemptsByIp = new Map<string, number[]>()

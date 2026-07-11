@@ -15,20 +15,17 @@
  * limitations under the License.
  */
 
-import type { NextApiRequest, NextApiResponse } from 'next'
-import composeScreenNodes from '../../../utils/compose-screen-nodes'
-import getScreen from '../../../utils/get-screen'
-import { readMemberSession } from '@aglyn/plugins-commerce/server'
+import type { PluginApiHandler } from '@aglyn/aglyn'
+import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
+import getScreen from '@aglyn/tenant-runtime/get-screen'
+import { readMemberSession } from './membership'
 
 /**
- * Members-only screen content (AGL-109): like the AGL-87 unlock API, the
- * node tree never ships in static HTML — it is returned here only when the
- * visitor's session cookie verifies for this host.
+ * Members-only screen content (AGL-109/309): like the AGL-87 unlock API,
+ * the node tree never ships in static HTML — it is returned here only when
+ * the visitor's session cookie verifies for this host.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const membershipContentHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }

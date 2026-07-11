@@ -26,15 +26,15 @@ import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import Head from 'next/head'
-import applyDuePublishSchedule from '../../../utils/apply-publish-schedule'
-import composeScreenNodes from '../../../utils/compose-screen-nodes'
+import applyDuePublishSchedule from '@aglyn/tenant-runtime/apply-publish-schedule'
+import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 import { resolveRedirect } from '../../../utils/resolve-redirect'
 import getCollectionContent, {
   type CollectionContent,
 } from '../../../utils/get-collection-content'
-import getComponents from '../../../utils/get-components'
+import getComponents from '@aglyn/tenant-runtime/get-components'
 import getTenant from '../../../utils/get-tenant'
-import getVariables from '../../../utils/get-variables'
+import getVariables from '@aglyn/tenant-runtime/get-variables'
 import getClientAutomations, {
   type ClientAutomation,
 } from '../../../utils/get-client-automations'
@@ -43,9 +43,9 @@ import getScreenExperiments, {
 } from '../../../utils/get-screen-experiments'
 import getOverlays from '../../../utils/get-overlays'
 import getHost from '../../../utils/get-host'
-import getPublishedLayoutVersion from '../../../utils/get-layout-version'
-import getScreen from '../../../utils/get-screen'
-import getScreenVersion from '../../../utils/get-screen-version'
+import getPublishedLayoutVersion from '@aglyn/tenant-runtime/get-layout-version'
+import getScreen from '@aglyn/tenant-runtime/get-screen'
+import getScreenVersion from '@aglyn/tenant-runtime/get-screen-version'
 
 registerMuiPlugin()
 registerCommercePlugin()

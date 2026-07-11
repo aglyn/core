@@ -17,7 +17,7 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import composeScreenNodes from './compose-screen-nodes'
+import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 
 /**
  * A screen/section experiment prepared for the page runtime (AGL-253):
