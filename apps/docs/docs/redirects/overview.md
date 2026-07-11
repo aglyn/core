@@ -27,6 +27,24 @@ rename screens or migrate a site.
 Each rule tracks **hit metrics** (sampled), so you can see which redirects are actually
 used and prune the ones that aren't.
 
+## Match modes (v2)
+
+Rules match one of three ways:
+
+- **Exact path** — the original mode; `/old-page` only.
+- **Path prefix** — `/blog` catches `/blog` and everything under it
+  (`/blog/post-1`), but not `/blogging`.
+- **Regular expression** — anchored to the whole path, with capture
+  groups substituted into the destination: pattern `/product/(\d+)` and
+  destination `/products/item-$1` sends `/product/42` to
+  `/products/item-42`. Invalid patterns are rejected at save and can
+  never take the site down.
+
+When several rules match, the lowest **priority** number fires first.
+Use the inline **tester** at the bottom of the redirects card to paste a
+path and see exactly which rule (if any) catches it — it runs the same
+matcher the live site uses.
+
 :::note More detailed how-tos coming
 Examples for common migration patterns are on the way.
 :::

@@ -10,6 +10,33 @@ description: The features Aglyn shipped most recently, grouped by area with link
 A huge wave of features shipped over the last few days. Here's the tour, grouped by area.
 Each links into its section for the how-to.
 
+## Designer & email wave (newest)
+
+- **[Responsive styling](besigner/responsive-styling.md)** — the artboard
+  preview mode now scopes style edits per breakpoint (XS–XL), the box
+  stylers are fully interactive with side/axis/all fan-out and units, and
+  every element takes custom classes plus a CSS builder (builder / raw
+  CSS / raw JSS) on its `sx`.
+- **[Designed emails](email-campaigns/designed-emails.md)** — build
+  campaign emails in the besigner with email-safe blocks and merge
+  tokens; campaigns pick templates by id and support test sends.
+- **Rename-safe references everywhere** — products, collections,
+  categories, datasets, and screens are picked from lists and stored by
+  id; the reference-health audit flags anything dangling.
+- **Console reorganization** — site users and analytics get their own
+  sections, the dashboard gains commerce and campaign glance widgets, and
+  the Products/Marketing/Workflows hubs are tabbed with `?tab=` deep
+  links. Notifications + profile live under a personal Manage area.
+- **[Redirects v2](redirects/overview.md)** — prefix and regex match
+  modes with capture substitution (`$1`), priority ordering, and an
+  inline tester.
+- **Org & team v2** — organization logo + contact details, a team member
+  detail page with role/title editing and per-member activity, personal
+  community profiles, and profile images for every user.
+- **Staff console v3** — impersonate a user or an org's owner (audited,
+  bannered), edit orgs and user identities directly, and paginated,
+  card-styled admin lists.
+
 ## Ecommerce platform
 
 The biggest wave yet turns every Aglyn site into a full store, competitive
