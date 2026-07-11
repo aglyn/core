@@ -16,7 +16,7 @@ page (next to Media in the organization tabs), or from any site's Data page; bot
 the same data. Dataset limits, storage, and add-ons are billed at the organization
 level.
 
-![The Data page in the Aglyn console, showing the empty state with an "Add dataset" button — datasets are created here, then repeated over with `{{item.field}}` bindings](/img/datasets/data-page.png)
+![The Data page in the Aglyn console: an organization-shared dataset with its records table, filter and sort inputs, and Import/CSV/JSON actions](/img/datasets/data-page.png)
 
 ```mermaid
 flowchart LR

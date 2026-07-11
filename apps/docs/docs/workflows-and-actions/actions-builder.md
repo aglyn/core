@@ -60,6 +60,8 @@ though, so the **Logic** page's **Reference health** card audits every automatio
 workflow, and computed-variable reference and lists any that point at something that no
 longer exists.
 
+![The Logic page in the Aglyn console: Variables and Functions cards with the Reference health audit reporting that every reference resolves](/img/workflows-and-actions/logic-page.png)
+
 ## Interactions from the Besigner
 
 Select any element in the Besigner and use the **Interactions** section of the

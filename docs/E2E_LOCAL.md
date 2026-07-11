@@ -92,6 +92,17 @@ emulator-host env vars** so it can never touch production):
 | `E2E_TIMEOUT_MS` | `45000` | Per-assertion timeout |
 | `E2E_ARTIFACTS_DIR` | `tmp/e2e-artifacts` | Failure screenshots |
 
+## Docs screenshots
+
+`tools/e2e/capture-docs-screenshots.mjs` reuses the same stack to capture
+the docs site's console screenshots (1440×900 PNGs straight into
+`apps/docs/static/img/…`), stripping the emulator banner and dev overlay.
+Re-run it after UI changes so the docs never drift:
+
+```bash
+E2E_BASE_URL=http://localhost:4200 node tools/e2e/capture-docs-screenshots.mjs
+```
+
 ## Adding specs
 
 Add rows to the `specs` table in `tools/e2e/console.e2e.mjs` — a path plus

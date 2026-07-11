@@ -10,6 +10,8 @@ The **media library** stores your images, video, and files, keeps them organized
 serves them quickly. Media plugs into components like **Image** and **Video** and into the
 theme's favicon.
 
+![The Media page in the Aglyn console: the site library with thumbnails, folders, search, type/date/size filters and tags, plus the organization-shared media section](/img/media/media-page.png)
+
 ```mermaid
 flowchart LR
   U[Upload] --> Org["Organize<br/>(folders, tags, metadata)"]

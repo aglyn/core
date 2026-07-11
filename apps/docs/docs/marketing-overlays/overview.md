@@ -10,6 +10,8 @@ description: Site-wide announcement bars and promotional popups with triggers, s
 promote offers and capture emails — without touching your page designs. Manage them from
 your site's **Marketing** page.
 
+![The Marketing page in the Aglyn console: the at-a-glance channel rollup, and the overlays table with status, scheduling window, page targeting, and per-overlay engagement counts](/img/marketing-overlays/marketing-page.png)
+
 ```mermaid
 flowchart LR
   Visit[Visitor arrives] --> Trig{Trigger met?<br/>load / scroll / exit}

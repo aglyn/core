@@ -9,6 +9,8 @@ description: Create a collection, publish rich entries, and template their pages
 Aglyn's blog is built on **collections** — a collection holds your entries, and an
 **entry-template screen** renders each one.
 
+![The Content page in the Aglyn console, showing a Blog collection with its published entries](/img/content/content-page.png)
+
 :::info Plan availability
 **Free** to start; content features scale with your tier.
 :::
