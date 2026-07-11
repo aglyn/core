@@ -31,14 +31,25 @@ import {
 } from '@mui/material'
 import { collection, doc, getDoc, limit, query, where } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
-import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import { buildRoute, Route } from '../../constants/route-links'
-import useCommunityActions from '../../hooks/use-community-actions'
-import useFirestoreCollection from '../../hooks/use-firestore-collection'
-import useTenantPermissions from '../../hooks/use-tenant-permissions'
+import type { TenantPermissions } from '@aglyn/aglyn'
+import {
+  useFirestore,
+  useFirestoreCollection,
+  useUser,
+} from '@aglyn/tenant-feature-instance'
+import useCommunityActions from '../hooks/use-community-actions'
+
+// Community console routes live in the app's route table; the patterns are
+// stable, so the plugin builds them directly (AGL-395).
+const listingHref = (hostId: string, listingId: string) =>
+  `/${hostId}/community/${listingId}`
+const publisherHref = (hostId: string, profileId: string) =>
+  `/${hostId}/community/publisher/${profileId}`
 
 export interface CommunityBrowseProps {
   hostId: string
+  /** Signed-in user's org permissions, supplied by the shell (AGL-395). */
+  permissions?: Partial<TenantPermissions>
 }
 
 /**
@@ -54,7 +65,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   const firestore = useFirestore()
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
-  const { permissions } = useTenantPermissions()
+  const { permissions } = props
   const { install: runInstall, buy: runBuy } = useCommunityActions(hostId)
   const [handles, setHandles] = useState<Record<string, string>>({})
 
@@ -252,10 +263,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     sx={{ alignItems: 'center' }}
                   >
                     <MuiLink
-                      href={buildRoute(Route.HOST_COMMUNITY_LISTING, {
-                        hostId,
-                        listingId: listing.$id,
-                      })}
+                      href={listingHref(hostId, listing.$id)}
                       color="inherit"
                       underline="hover"
                       variant="subtitle2"
@@ -281,10 +289,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                       <>
                         {' · by '}
                         <MuiLink
-                          href={buildRoute(Route.HOST_COMMUNITY_PUBLISHER, {
-                            hostId,
-                            profileId: listing.profileId,
-                          })}
+                          href={publisherHref(hostId, listing.profileId)}
                           color="secondary"
                           underline="hover"
                         >
@@ -317,7 +322,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     color="secondary"
                     disabled={Boolean(upToDate)}
                     onClick={
-                      permissions.installPlugins
+                      permissions?.installPlugins
                         ? mustBuy
                           ? handleBuy(listing)
                           : handleInstall(listing)

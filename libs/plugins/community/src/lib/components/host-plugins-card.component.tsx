@@ -37,9 +37,12 @@ import {
   where,
 } from 'firebase/firestore'
 import { useCallback, useMemo, useState } from 'react'
-import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
-import useFirestoreCollection from '../../hooks/use-firestore-collection'
-import useHostOrgId from '../../hooks/use-host-org-id'
+import {
+  useFirestore,
+  useFirestoreCollection,
+  useHostOrgId,
+  useUser,
+} from '@aglyn/tenant-feature-instance'
 
 export interface HostPluginsCardProps {
   hostId: string
