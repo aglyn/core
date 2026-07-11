@@ -72,6 +72,10 @@ export interface HostProduct {
   seo?: { title?: string; description?: string; imageUrl?: string }
   /** Supplier for dropship routing (AGL-289). */
   supplierId?: string
+  /** Out-of-stock behavior (AGL-281): deny (default) or allow backorder. */
+  oversellPolicy?: 'deny' | 'backorder'
+  /** Tracked-total at/below this alerts host managers (AGL-281). */
+  lowStockThreshold?: number
   createdAtMs?: number
   updatedAtMs?: number
   deletedAt?: number | null
@@ -201,6 +205,75 @@ export function productInventory(
     total = (total ?? 0) + Number(variant.inventory)
   }
   return total
+}
+
+/** Reasons an inventory adjustment doc may carry (AGL-281). */
+export type InventoryAdjustmentReason =
+  | 'sale'
+  | 'refund'
+  | 'restock'
+  | 'correction'
+  | 'damage'
+
+/** `hosts/{hostId}/inventoryAdjustments/{id}` doc. */
+export interface InventoryAdjustment {
+  productId: string
+  variantId: string
+  /** Positive = stock added, negative = removed. */
+  delta: number
+  reason: InventoryAdjustmentReason
+  /** Order id for sale/refund adjustments. */
+  orderId?: string
+  /** Location for multi-location stock (AGL-286); absent = default. */
+  locationId?: string
+  atMs: number
+}
+
+/**
+ * Whether `quantity` of a variant is purchasable (AGL-281): untracked
+ * stock always is; tracked stock honors the product's oversell policy.
+ */
+export function canPurchase(
+  product: Pick<HostProduct, 'variants' | 'oversellPolicy'>,
+  variantId: string | undefined,
+  quantity = 1,
+): boolean {
+  const variant = variantId
+    ? product.variants?.find((item) => item.id === variantId)
+    : product.variants?.[0]
+  if (!variant) return false
+  if (variant.inventory == null) return true
+  if (product.oversellPolicy === 'backorder') return true
+  return Number(variant.inventory) >= quantity
+}
+
+/**
+ * Applies a stock delta to one variant, flooring at zero (race-window
+ * sales can't drive the display negative), and returns the new variants
+ * array — callers persist it plus the `productInventory` denormalization.
+ */
+export function adjustVariantInventory(
+  product: Pick<HostProduct, 'variants'>,
+  variantId: string,
+  delta: number,
+): ProductVariant[] {
+  return (product.variants ?? []).map((variant) => {
+    if (variant.id !== variantId || variant.inventory == null) return variant
+    return {
+      ...variant,
+      inventory: Math.max(0, Number(variant.inventory) + delta),
+    }
+  })
+}
+
+/** True when tracked stock is at/below the product's alert threshold. */
+export function isLowStock(
+  product: Pick<HostProduct, 'variants' | 'lowStockThreshold'>,
+): boolean {
+  const threshold = product.lowStockThreshold
+  if (threshold == null || !(threshold >= 0)) return false
+  const total = productInventory(product)
+  return total != null && total <= threshold
 }
 
 function ruleMatches(product: HostProduct, rule: CollectionRule): boolean {

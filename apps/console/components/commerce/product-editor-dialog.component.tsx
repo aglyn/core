@@ -533,6 +533,39 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
           {'Blank stock = untracked; 0 shows sold out. The first variant’s ' +
             'price feeds legacy Product blocks.'}
         </Typography>
+        <Stack direction="row" spacing={2}>
+          <TextField
+            label="When out of stock"
+            value={current.oversellPolicy ?? 'deny'}
+            onChange={(event) =>
+              update({
+                oversellPolicy: event.target.value as 'deny' | 'backorder',
+              })
+            }
+            size="small"
+            select
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="deny">{'Stop selling (sold out)'}</MenuItem>
+            <MenuItem value="backorder">{'Keep selling (backorder)'}</MenuItem>
+          </TextField>
+          <TextField
+            label="Low-stock alert at"
+            value={current.lowStockThreshold ?? ''}
+            placeholder="Off"
+            onChange={(event) => {
+              const raw = event.target.value.trim()
+              update({
+                lowStockThreshold:
+                  raw === '' ? undefined : Math.max(0, Math.round(Number(raw))),
+              })
+            }}
+            size="small"
+            sx={{ width: 140 }}
+            inputProps={{ inputMode: 'numeric' }}
+            helperText="Notifies managers"
+          />
+        </Stack>
 
         <Divider textAlign="left">{'Search engine listing'}</Divider>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

@@ -69,9 +69,11 @@ export default async function handler(
     if (!(priceUsd > 0) || priceUsd > Aglyn.COMMERCE_MAX_PRICE_USD) {
       return res.status(400).json({ error: 'Product is not purchasable' })
     }
-    // Inventory (AGL-96): blank = untracked; 0 = sold out. Enforced here
-    // (the block's display is cosmetic) and decremented by the webhook.
-    if (product.inventory != null && Number(product.inventory) <= 0) {
+    // Inventory (AGL-281): variant-aware, honoring the product's oversell
+    // policy (backorder products keep selling at zero). Enforced here (the
+    // block's display is cosmetic) and decremented by the webhook.
+    const lifted = Aglyn.liftLegacyProduct(product)
+    if (!Aglyn.canPurchase(lifted, undefined, 1)) {
       return res.status(409).json({ error: 'Sold out' })
     }
 

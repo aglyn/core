@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as Aglyn from '@aglyn/aglyn'
 import {
   firebaseAdmin,
   getOrgForHost,
@@ -308,17 +309,65 @@ export default async function handler(
         })
         const productRef = hostRef.collection('products').doc(String(productId))
         const productSnapshot = await productRef.get()
-        // Inventory decrement (AGL-96): only tracked products; the
-        // checkout guard makes negative stock a race-window edge, and a
-        // floor here keeps the display sane if it happens.
-        if (productSnapshot.get('inventory') != null) {
-          const remaining = Math.max(
-            0,
-            Number(productSnapshot.get('inventory')) - 1,
+        // Inventory decrement (AGL-281): variant-aware with an adjustment
+        // log; the checkout guard makes negative stock a race-window edge,
+        // and the helper floors at zero. Legacy flat `inventory` stays
+        // denormalized for the Product block.
+        {
+          const lifted = Aglyn.liftLegacyProduct(
+            (productSnapshot.data() as any) ?? { name: 'Product' },
           )
-          await productRef
-            .set({ inventory: remaining }, { merge: true })
-            .catch(() => undefined)
+          const soldVariantId =
+            String(object.metadata?.variantId ?? '') ||
+            lifted.variants[0]?.id
+          if (
+            soldVariantId &&
+            lifted.variants.some(
+              (variant) =>
+                variant.id === soldVariantId && variant.inventory != null,
+            )
+          ) {
+            const variants = Aglyn.adjustVariantInventory(
+              lifted,
+              soldVariantId,
+              -1,
+            )
+            const updated = { ...lifted, variants }
+            await productRef
+              .set(
+                {
+                  variants,
+                  inventory: Aglyn.productInventory(updated),
+                },
+                { merge: true },
+              )
+              .catch(() => undefined)
+            await hostRef
+              .collection('inventoryAdjustments')
+              .add({
+                productId: String(productId),
+                variantId: soldVariantId,
+                delta: -1,
+                reason: 'sale',
+                orderId: String(object.id),
+                atMs: Date.now(),
+              } satisfies Aglyn.InventoryAdjustment)
+              .catch(() => undefined)
+            // Low-stock alert (AGL-281): fires on the crossing sale only,
+            // so managers get one nudge per threshold breach, not one per
+            // order after it.
+            if (
+              Aglyn.isLowStock(updated) &&
+              !Aglyn.isLowStock(lifted)
+            ) {
+              void notifyHostManagers(String(hostId), {
+                type: 'content.lowStock',
+                title: `Low stock — ${updated.name}`,
+                body: `${Aglyn.productInventory(updated) ?? 0} left across tracked variants`,
+                link: `/${hostId}/products`,
+              })
+            }
+          }
         }
         if (couponCode) {
           await hostRef

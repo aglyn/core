@@ -24,6 +24,10 @@ import {
   Box,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   MenuItem,
   Stack,
   Table,
@@ -35,6 +39,7 @@ import {
   Typography,
 } from '@mui/material'
 import {
+  addDoc,
   collection,
   doc,
   limit,
@@ -75,6 +80,12 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
   const [statusFilter, setStatusFilter] = useState('all')
   const [editing, setEditing] = useState<ProductRow | null>(null)
   const [creating, setCreating] = useState(false)
+  const [adjusting, setAdjusting] = useState<{
+    product: ProductRow
+    variantId: string
+    delta: string
+    reason: Aglyn.InventoryAdjustmentReason
+  } | null>(null)
 
   const { data: productDocs } = useFirestoreCollection<any>(
     () =>
@@ -161,6 +172,35 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
     },
     [confirm, firestore, hostId, enqueueSnackbar],
   )
+
+  const handleAdjustSave = useCallback(async () => {
+    if (!adjusting) return
+    const delta = Math.round(Number(adjusting.delta))
+    if (!delta) return
+    const variants = Aglyn.adjustVariantInventory(
+      adjusting.product,
+      adjusting.variantId,
+      delta,
+    )
+    await updateDoc(
+      doc(firestore, 'hosts', hostId, 'products', adjusting.product.$id),
+      {
+        variants,
+        inventory: Aglyn.productInventory({ variants }),
+        updatedAtMs: Date.now(),
+      },
+    )
+    // Adjustment history (AGL-281): the same log the sale webhook writes.
+    await addDoc(collection(firestore, 'hosts', hostId, 'inventoryAdjustments'), {
+      productId: adjusting.product.$id,
+      variantId: adjusting.variantId,
+      delta,
+      reason: adjusting.reason,
+      atMs: Date.now(),
+    } satisfies Aglyn.InventoryAdjustment)
+    setAdjusting(null)
+    enqueueSnackbar('Stock adjusted', { variant: 'success', persist: false })
+  }, [adjusting, firestore, hostId, enqueueSnackbar])
 
   const formatPrice = (product: ProductRow) => {
     const [min, max] = Aglyn.productPriceRange(product)
@@ -266,6 +306,24 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
                       <Button size="small" onClick={handleDuplicate(product)}>
                         {'Duplicate'}
                       </Button>
+                      {Aglyn.productInventory(product) != null ? (
+                        <Button
+                          size="small"
+                          onClick={() =>
+                            setAdjusting({
+                              product,
+                              variantId:
+                                product.variants.find(
+                                  (variant) => variant.inventory != null,
+                                )?.id ?? product.variants[0].id,
+                              delta: '',
+                              reason: 'restock',
+                            })
+                          }
+                        >
+                          {'Stock'}
+                        </Button>
+                      ) : null}
                       <Button
                         size="small"
                         onClick={handleStatus(
@@ -290,6 +348,85 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
           </Box>
         )}
       </Stack>
+      <Dialog
+        open={Boolean(adjusting)}
+        onClose={() => setAdjusting(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>{`Adjust stock — ${adjusting?.product.name ?? ''}`}</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Variant"
+            value={adjusting?.variantId ?? ''}
+            onChange={(event) =>
+              setAdjusting((prev) =>
+                prev ? { ...prev, variantId: event.target.value } : prev,
+              )
+            }
+            size="small"
+            select
+            sx={{ mt: 1 }}
+          >
+            {(adjusting?.product.variants ?? [])
+              .filter((variant) => variant.inventory != null)
+              .map((variant) => (
+                <MenuItem key={variant.id} value={variant.id}>
+                  {`${Object.values(variant.options ?? {}).join(' / ') || 'Default'} — ${variant.inventory} in stock`}
+                </MenuItem>
+              ))}
+          </TextField>
+          <TextField
+            label="Change"
+            placeholder="+10 or -3"
+            value={adjusting?.delta ?? ''}
+            onChange={(event) =>
+              setAdjusting((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      delta: event.target.value.replace(/[^0-9+-]/g, ''),
+                    }
+                  : prev,
+              )
+            }
+            size="small"
+          />
+          <TextField
+            label="Reason"
+            value={adjusting?.reason ?? 'restock'}
+            onChange={(event) =>
+              setAdjusting((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      reason: event.target
+                        .value as Aglyn.InventoryAdjustmentReason,
+                    }
+                  : prev,
+              )
+            }
+            size="small"
+            select
+          >
+            <MenuItem value="restock">{'Restock'}</MenuItem>
+            <MenuItem value="correction">{'Correction'}</MenuItem>
+            <MenuItem value="damage">{'Damaged'}</MenuItem>
+            <MenuItem value="refund">{'Refund return'}</MenuItem>
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAdjusting(null)}>{'Cancel'}</Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            disabled={!Math.round(Number(adjusting?.delta))}
+            onClick={handleAdjustSave}
+          >
+            {'Apply'}
+          </Button>
+        </DialogActions>
+      </Dialog>
       <ProductEditorDialog
         key={editing?.$id ?? (creating ? 'new' : 'closed')}
         hostId={hostId}

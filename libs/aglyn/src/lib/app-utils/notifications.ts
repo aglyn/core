@@ -34,6 +34,7 @@ export type AglynNotificationType =
   | 'content.formSubmission'
   | 'content.booking'
   | 'content.order'
+  | 'content.lowStock'
   | 'system.announcement'
 
 export interface AglynNotification {
@@ -61,6 +62,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<AglynNotificationType, string> =
     'content.formSubmission': 'Form submission',
     'content.booking': 'New booking',
     'content.order': 'New order',
+    'content.lowStock': 'Low stock',
     'system.announcement': 'Announcement',
   }
 

@@ -16,9 +16,12 @@
  */
 
 import {
+  adjustVariantInventory,
+  canPurchase,
   commerceSlug,
   expandVariantMatrix,
   findVariant,
+  isLowStock,
   liftLegacyProduct,
   matchesCollection,
   productInventory,
@@ -200,6 +203,51 @@ describe('validateProduct', () => {
         }),
       ),
     ).toMatch(/Compare-at/)
+  })
+})
+
+describe('inventory (AGL-281)', () => {
+  const tracked = product({
+    variants: [
+      { id: 'a', priceUsd: 10, inventory: 2 },
+      { id: 'b', priceUsd: 12, inventory: 0 },
+      { id: 'c', priceUsd: 14 },
+    ],
+  })
+
+  it('allows untracked, denies exhausted, backorder overrides', () => {
+    expect(canPurchase(tracked, 'a', 2)).toBe(true)
+    expect(canPurchase(tracked, 'a', 3)).toBe(false)
+    expect(canPurchase(tracked, 'b')).toBe(false)
+    expect(canPurchase(tracked, 'c')).toBe(true)
+    expect(canPurchase({ ...tracked, oversellPolicy: 'backorder' }, 'b')).toBe(
+      true,
+    )
+    expect(canPurchase(tracked, 'missing')).toBe(false)
+    // No variantId = default (first) variant.
+    expect(canPurchase(tracked, undefined)).toBe(true)
+  })
+
+  it('adjustVariantInventory floors at zero and skips untracked', () => {
+    const sold = adjustVariantInventory(tracked, 'a', -3)
+    expect(sold.find((v: any) => v.id === 'a').inventory).toBe(0)
+    const restocked = adjustVariantInventory(tracked, 'b', 5)
+    expect(restocked.find((v: any) => v.id === 'b').inventory).toBe(5)
+    const untouched = adjustVariantInventory(tracked, 'c', -1)
+    expect(untouched.find((v: any) => v.id === 'c').inventory).toBeUndefined()
+  })
+
+  it('isLowStock compares tracked totals to the threshold', () => {
+    expect(isLowStock({ ...tracked, lowStockThreshold: 2 })).toBe(true)
+    expect(isLowStock({ ...tracked, lowStockThreshold: 1 })).toBe(false)
+    expect(isLowStock(tracked)).toBe(false)
+    // Fully untracked products never alert.
+    expect(
+      isLowStock({
+        variants: [{ id: 'x', priceUsd: 1 }],
+        lowStockThreshold: 5,
+      }),
+    ).toBe(false)
   })
 })
 
