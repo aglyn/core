@@ -75,6 +75,7 @@ function CartLines(props: {
   const { hostId, cart, showCoupon, checkoutLabel, emptyText, onMutate } =
     props
   const [coupon, setCoupon] = useState('')
+  const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'sending' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
@@ -88,6 +89,7 @@ function CartLines(props: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           hostId,
+          ...(email.trim() ? { email: email.trim() } : {}),
           ...(coupon.trim() ? { couponCode: coupon.trim() } : {}),
         }),
       })
@@ -101,7 +103,7 @@ function CartLines(props: {
     } catch {
       setStatus('error')
     }
-  }, [hostId, coupon, status])
+  }, [hostId, coupon, email, status])
 
   if (!cart || cart.lines.length === 0) {
     return (
@@ -189,6 +191,14 @@ function CartLines(props: {
       <Typography variant="caption" color="text.secondary">
         {'Shipping and taxes are calculated at checkout.'}
       </Typography>
+      <TextField
+        label="Email"
+        type="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        size="small"
+        helperText="For your receipt and order updates"
+      />
       {showCoupon ? (
         <TextField
           label="Coupon code"

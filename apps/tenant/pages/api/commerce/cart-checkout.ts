@@ -41,6 +41,7 @@ export default async function handler(
   const body =
     typeof req.body === 'string' ? JSON.parse(req.body) : (req.body ?? {})
   const hostId = String(body.hostId ?? '')
+  const email = String(body.email ?? '').trim().toLowerCase().slice(0, 120)
   const couponCode = String(body.couponCode ?? '')
     .trim()
     .toUpperCase()
@@ -208,6 +209,7 @@ export default async function handler(
     const separator = backUrl.includes('?') ? '&' : '?'
     params.set('success_url', `${backUrl}${separator}order=success`)
     params.set('cancel_url', `${backUrl}${separator}order=canceled`)
+    if (email) params.set('customer_email', email)
     params.set('metadata[type]', 'commerce-cart')
     params.set('metadata[hostId]', hostId)
     params.set('metadata[cartId]', cartId)
@@ -224,11 +226,28 @@ export default async function handler(
         body: params.toString(),
       },
     )
-    const session = (await response.json()) as { url?: string; error?: any }
+    const session = (await response.json()) as {
+      url?: string
+      id?: string
+      error?: any
+    }
     if (!response.ok || !session.url) {
       console.error('Stripe cart checkout error', session.error)
       return res.status(502).json({ error: 'Checkout failed' })
     }
+    // Recoverable checkout (AGL-296): email captured before the redirect
+    // makes abandonment actionable (AGL-323 sends the recovery emails).
+    await hostRef
+      .collection('checkouts')
+      .doc(String(session.id))
+      .set({
+        cartId,
+        ...(email ? { email } : {}),
+        itemsCents,
+        status: 'open',
+        createdAtMs: Date.now(),
+      })
+      .catch(() => undefined)
     return res.status(200).json({ url: session.url })
   } catch (error: any) {
     if (error?.visible) {

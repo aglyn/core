@@ -376,6 +376,51 @@ export default async function handler(
           })
         })
         await cartRef.delete().catch(() => undefined)
+        // Recoverable checkout closes (AGL-296) so recovery emails stop.
+        await hostRef
+          .collection('checkouts')
+          .doc(String(object.id))
+          .set({ status: 'completed', completedAtMs: Date.now() }, { merge: true })
+          .catch(() => undefined)
+        // Branded receipt (AGL-296): env-gated like every outbound email.
+        const cartResendKey = process.env.RESEND_API_KEY
+        const cartEmailFrom = process.env.USAGE_EMAIL_FROM
+        const buyerEmailForReceipt = object?.customer_details?.email
+        if (cartResendKey && cartEmailFrom && buyerEmailForReceipt) {
+          const receiptSettings = await hostRef
+            .collection('settings')
+            .doc('store')
+            .get()
+            .catch(() => null)
+          const receiptFooter = String(
+            receiptSettings?.get('receiptFooter') ?? '',
+          )
+          const linesText = lineItems
+            .map(
+              (line) =>
+                `${line.quantity}× ${line.name}${
+                  line.variantLabel ? ` (${line.variantLabel})` : ''
+                } — $${((line.unitAmountCents * line.quantity) / 100).toFixed(2)}`,
+            )
+            .join('\n')
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${cartResendKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: cartEmailFrom,
+              to: [buyerEmailForReceipt],
+              subject: `Receipt for your order`,
+              text:
+                `Thanks for your purchase!\n\n${linesText}\n\n` +
+                `Total: $${(Number(object?.amount_total ?? 0) / 100).toFixed(2)}\n` +
+                `Order reference: ${object.id}` +
+                (receiptFooter ? `\n\n${receiptFooter}` : ''),
+            }),
+          }).catch(() => undefined)
+        }
         // Inventory per line (AGL-281 semantics).
         for (const line of cart.lines) {
           const product = productsById.get(line.productId)
