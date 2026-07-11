@@ -36,6 +36,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  Link as MuiLink,
   MenuItem,
   Stack,
   Table,
@@ -48,6 +49,7 @@ import {
 } from '@mui/material'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { buildRoute, Route } from '../constants/route-links'
 import { useAdminHosts } from '../hooks/use-admin-hosts'
 import { useOrgWorkspace } from '../hooks/use-org-workspace'
 
@@ -247,7 +249,25 @@ export function OrgMembersCard() {
             {members.map((member) => (
               <TableRow key={member.$id}>
                 <TableCell>
-                  {member.displayName || member.email || member.$id}
+                  {/* Member detail page (AGL-364). */}
+                  <MuiLink
+                    href={buildRoute(Route.MANAGE_TEAM_MEMBER, {
+                      uid: member.$id,
+                    })}
+                    color="inherit"
+                    underline="hover"
+                  >
+                    {member.displayName || member.email || member.$id}
+                  </MuiLink>
+                  {member.title ? (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      component="div"
+                    >
+                      {member.title}
+                    </Typography>
+                  ) : null}
                 </TableCell>
                 <TableCell>
                   {canManage && member.role !== 'owner' ? (

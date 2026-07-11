@@ -35,10 +35,15 @@ import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Tab } from '@mui/material'
+import { Avatar, Button, Stack, TextField } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
-import { signInWithEmailAndPassword, updatePassword } from 'firebase/auth'
+import {
+  signInWithEmailAndPassword,
+  updatePassword,
+  updateProfile,
+} from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAnalytics, useAuth, useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import CardDisplayFormTemplate from '../../../components/card-display-form-template'
@@ -100,6 +105,33 @@ const ManageUser: NextPageWithLayout = (props) => {
     },
     [enqueueSnackbar, queueLoading, userRef],
   )
+  // Profile image (AGL-365): mirrors to the auth photoURL (app bar,
+  // comments) and the users doc (team lists, activity).
+  const [photoUrl, setPhotoUrl] = useState('')
+  useEffect(() => {
+    setPhotoUrl(String((data as any)?.photoUrl ?? user?.photoURL ?? ''))
+  }, [(data as any)?.photoUrl, user?.photoURL])
+  const handlePhotoSave = useCallback(async () => {
+    const cleaned = photoUrl.trim()
+    if (cleaned && !/^https:\/\//i.test(cleaned)) {
+      return void enqueueSnackbar('Image URLs must be https://', {
+        variant: 'warning',
+        persist: false,
+      })
+    }
+    const dequeueLoading = queueLoading()
+    try {
+      await setDoc(userRef, { photoUrl: cleaned }, { merge: true })
+      await updateProfile(user, { photoURL: cleaned || null })
+      enqueueSnackbar('Profile image saved', { variant: 'success' })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('Saving the image failed', { variant: 'error' })
+    } finally {
+      dequeueLoading()
+    }
+  }, [photoUrl, userRef, user, queueLoading, enqueueSnackbar])
+
   const handleSecuritySave = useCallback(
     async (fields: any) => {
       const dequeueLoading = queueLoading()
@@ -163,6 +195,37 @@ const ManageUser: NextPageWithLayout = (props) => {
         }}
       >
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
+          {/* Profile image (AGL-365). */}
+          <CardDisplay
+            header={'Profile image'}
+            contentGutterX
+            contentGutterY
+            sx={{ mb: 3 }}
+          >
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{ alignItems: 'center', maxWidth: 560 }}
+            >
+              <Avatar src={photoUrl || undefined} sx={{ width: 56, height: 56 }}>
+                {(user?.displayName || user?.email || '?')
+                  .slice(0, 1)
+                  .toUpperCase()}
+              </Avatar>
+              <TextField
+                label="Image URL"
+                placeholder="https://…"
+                helperText="Upload to a site's Media page and paste the URL"
+                value={photoUrl}
+                onChange={(event) => setPhotoUrl(event.target.value)}
+                size="small"
+                fullWidth
+              />
+              <Button variant="outlined" onClick={() => void handlePhotoSave()}>
+                {'Save'}
+              </Button>
+            </Stack>
+          </CardDisplay>
           <TabContext value={tab}>
             <GridItems
               spacing={3}

@@ -425,6 +425,8 @@ export interface UpsertOrgMemberOptions {
   roleId?: string | null
   email?: string | null
   displayName?: string | null
+  /** Job title shown on the roster/member page (AGL-364). */
+  title?: string | null
   invitedBy?: string | null
 }
 
@@ -445,6 +447,7 @@ export async function upsertOrgMember(
     roleId,
     email,
     displayName,
+    title,
     invitedBy,
   } = options
   const db = firestore()
@@ -467,6 +470,7 @@ export async function upsertOrgMember(
         ...(roleId !== undefined ? { roleId } : {}),
         ...(email !== undefined ? { email } : {}),
         ...(displayName !== undefined ? { displayName } : {}),
+        ...(title !== undefined ? { title } : {}),
         ...(invitedBy ? { invitedBy } : {}),
         ...(existing.exists
           ? {}

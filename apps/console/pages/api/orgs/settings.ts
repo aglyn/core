@@ -100,6 +100,50 @@ export default async function handler(
       return res.status(200).json({ ok: true, name })
     }
 
+    // Org profile (AGL-363): logo + contact details, admin-writable.
+    // Logo URLs must be https; contact fields are plain strings, length
+    // capped — they surface on invoices, the community profile, and the
+    // admin console.
+    if (req.body?.action === 'update-profile') {
+      const clean = (value: unknown, max = 200) =>
+        String(value ?? '')
+          .trim()
+          .slice(0, max)
+      const logoUrl = clean(req.body?.logoUrl, 500)
+      if (logoUrl && !/^https:\/\//i.test(logoUrl)) {
+        return res.status(400).json({ error: 'Logo URLs must be https://' })
+      }
+      const contact = {
+        email: clean(req.body?.contactEmail),
+        phone: clean(req.body?.contactPhone, 40),
+        website: clean(req.body?.contactWebsite),
+        address: clean(req.body?.contactAddress, 400),
+      }
+      if (contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)) {
+        return res.status(400).json({ error: 'Enter a valid contact email' })
+      }
+      await firebaseAdmin
+        .app()
+        .firestore()
+        .collection('orgs')
+        .doc(orgId)
+        .set(
+          {
+            logoUrl: logoUrl || firebaseAdmin.firestore.FieldValue.delete(),
+            contact,
+            updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true },
+        )
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        'Updated organization profile',
+        { type: 'org', id: orgId },
+      )
+      return res.status(200).json({ ok: true })
+    }
+
     // Workspace URL change (AGL-236): owner-only — the slug is the org's
     // public identity. The old URL keeps resolving via a tombstone.
     if (req.body?.action === 'change-slug') {

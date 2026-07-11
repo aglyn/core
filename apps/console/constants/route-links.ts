@@ -29,6 +29,7 @@ export enum Route {
   MANAGE_BILLING = '/org/billing',
   MANAGE_USER_SETTINGS = '/manage/user',
   MANAGE_NOTIFICATIONS = '/manage/notifications',
+  MANAGE_MY_COMMUNITY = '/manage/community',
   AUTH_SIGN_IN = '/signin',
   AUTH_SIGN_OUT = '/signout',
   AUTH_SIGN_UP = '/signup',
@@ -40,6 +41,7 @@ export enum Route {
   HOST_CONTENT = '/[hostId]/content',
   MANAGE_COMMUNITY_PROFILE = '/org/community',
   MANAGE_TEAM = '/org/team',
+  MANAGE_TEAM_MEMBER = '/org/team/[uid]',
   MANAGE_SUPPORT = '/org/support',
   HOST_DASHBOARD = '/[hostId]',
   HOST_INBOX = '/[hostId]/inbox',
@@ -87,6 +89,7 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.ORG_MEDIA]: undefined
   [Route.ORG_DATA]: undefined
   [Route.MANAGE_NOTIFICATIONS]: undefined
+  [Route.MANAGE_MY_COMMUNITY]: undefined
   [Route.ORG_SETTINGS]: undefined
   [Route.HOST_COMMUNITY]: { hostId: string }
   [Route.HOST_COMMUNITY_LISTING]: { hostId: string; listingId: string }
@@ -94,6 +97,7 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.HOST_CONTENT]: { hostId: string }
   [Route.MANAGE_COMMUNITY_PROFILE]: undefined
   [Route.MANAGE_TEAM]: undefined
+  [Route.MANAGE_TEAM_MEMBER]: { uid: string }
   [Route.MANAGE_SUPPORT]: undefined
   [Route.HOST_INBOX]: { hostId: string }
   [Route.HOST_MEDIA]: { hostId: string }

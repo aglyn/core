@@ -16,7 +16,11 @@
  */
 'use client'
 
-import { type TenantPlan } from '@aglyn/aglyn'
+import {
+  PLAN_ENTITLEMENTS,
+  PLAN_PRICING,
+  type TenantPlan,
+} from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import {
   CardDisplay,
@@ -29,6 +33,7 @@ import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Alert,
+  Button,
   Chip,
   FormControlLabel,
   Link,
@@ -295,14 +300,45 @@ const BillingContent: NextPageWithLayout = () => {
                     <Stack
                       direction="row"
                       spacing={1}
-                      sx={{ alignItems: 'center', mb: 2 }}
+                      sx={{ alignItems: 'center', mb: 1 }}
                     >
                       <Typography variant="h5">{PLAN_LABELS[plan]}</Typography>
                       <Chip
                         label={tenant?.subscription?.status ?? 'no subscription'}
                         size="small"
+                        color={
+                          tenant?.subscription?.status === 'active'
+                            ? 'success'
+                            : tenant?.subscription?.status === 'past_due'
+                              ? 'warning'
+                              : 'default'
+                        }
                         variant="outlined"
                       />
+                    </Stack>
+                    {/* Plan price + headline entitlements (AGL-367). */}
+                    {PLAN_PRICING[plan]?.basePriceMonthlyUsd ? (
+                      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                        {`$${PLAN_PRICING[plan].basePriceMonthlyUsd}/mo · ` +
+                          `$${PLAN_PRICING[plan].basePriceAnnualMonthlyUsd}/mo billed yearly`}
+                      </Typography>
+                    ) : null}
+                    <Stack
+                      direction="row"
+                      spacing={0.5}
+                      sx={{ flexWrap: 'wrap', gap: 0.5, mb: 1 }}
+                    >
+                      {[
+                        `${PLAN_ENTITLEMENTS[plan]?.hostLimit ?? '—'} sites`,
+                        `${PLAN_ENTITLEMENTS[plan]?.emailSendsPerMonth ?? '—'} emails/mo`,
+                      ].map((label) => (
+                        <Chip
+                          key={label}
+                          size="small"
+                          variant="outlined"
+                          label={label}
+                        />
+                      ))}
                     </Stack>
                     <Typography variant="body2" color="text.secondary">
                       {tenant?.plan
@@ -333,34 +369,34 @@ const BillingContent: NextPageWithLayout = () => {
                         ).toLocaleDateString()}`}
                       </Typography>
                     ) : null}
-                    {subscriptionActive && can('billing.manage') ? (
-                      // Cancel/downgrade flow (AGL-269).
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        <Link
-                          component="button"
-                          color={cancelAtPeriodEnd ? 'secondary' : 'error'}
-                          underline="hover"
-                          onClick={() => void handleCancelToggle()}
-                        >
-                          {cancelAtPeriodEnd
-                            ? 'Resume subscription'
-                            : 'Cancel subscription'}
-                        </Link>
-                      </Typography>
-                    ) : null}
                     {can('billing.manage') ? (
-                      // Stripe Billing Portal (AGL-275): payment methods
-                      // and receipts, even when the subscription lapsed.
-                      <Typography variant="body2" sx={{ mt: 0.5 }}>
-                        <Link
-                          component="button"
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ mt: 1.5, flexWrap: 'wrap', gap: 1 }}
+                      >
+                        {/* Stripe Billing Portal (AGL-275). */}
+                        <Button
+                          size="small"
+                          variant="outlined"
                           color="secondary"
-                          underline="hover"
                           onClick={() => void handleOpenPortal()}
                         >
                           {'Manage payment methods'}
-                        </Link>
-                      </Typography>
+                        </Button>
+                        {subscriptionActive ? (
+                          // Cancel/downgrade flow (AGL-269).
+                          <Button
+                            size="small"
+                            color={cancelAtPeriodEnd ? 'secondary' : 'error'}
+                            onClick={() => void handleCancelToggle()}
+                          >
+                            {cancelAtPeriodEnd
+                              ? 'Resume subscription'
+                              : 'Cancel subscription'}
+                          </Button>
+                        ) : null}
+                      </Stack>
                     ) : null}
                     {tenant?.seatAddons &&
                     Object.values(tenant.seatAddons).some(Boolean) ? (

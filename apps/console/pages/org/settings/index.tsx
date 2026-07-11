@@ -27,6 +27,7 @@ import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Alert,
+  Avatar,
   Button,
   MenuItem,
   Stack,
@@ -35,6 +36,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
+import useCurrentTenant from '../../../hooks/use-current-tenant'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../components/layouts/main.layout'
@@ -181,6 +183,40 @@ const OrgSettings: NextPageWithLayout = () => {
     }
   }
 
+  // Org profile fields (AGL-363), prefilled from the org doc.
+  const { tenant } = useCurrentTenant()
+  const [profile, setProfile] = useState({
+    logoUrl: '',
+    contactEmail: '',
+    contactPhone: '',
+    contactWebsite: '',
+    contactAddress: '',
+  })
+  useEffect(() => {
+    setProfile({
+      logoUrl: String((tenant as any)?.logoUrl ?? ''),
+      contactEmail: String((tenant as any)?.contact?.email ?? ''),
+      contactPhone: String((tenant as any)?.contact?.phone ?? ''),
+      contactWebsite: String((tenant as any)?.contact?.website ?? ''),
+      contactAddress: String((tenant as any)?.contact?.address ?? ''),
+    })
+  }, [tenant])
+  const handleProfileSave = async () => {
+    if (!currentOrg || busy) return
+    setBusy(true)
+    try {
+      await settingsRequest({ action: 'update-profile', ...profile })
+      enqueueSnackbar('Organization profile saved', { variant: 'success' })
+    } catch (error: any) {
+      console.error(error)
+      enqueueSnackbar(error?.message ?? 'Saving the profile failed', {
+        variant: 'error',
+      })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const handleRename = async () => {
     if (!currentOrg || !name.trim() || busy) return
     setBusy(true)
@@ -290,6 +326,92 @@ const OrgSettings: NextPageWithLayout = () => {
               </Stack>
             </CardDisplay>
           )}
+          {currentOrg && canManage ? (
+            // Org profile (AGL-363): logo + contact details, used on
+            // invoices, the community profile, and the staff console.
+            <CardDisplay
+              header={'Organization profile'}
+              contentGutterX
+              contentGutterY
+              sx={{ mt: 3 }}
+            >
+              <Stack spacing={2} sx={{ maxWidth: 480 }}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                  <Avatar
+                    src={profile.logoUrl || undefined}
+                    variant="rounded"
+                    sx={{ width: 56, height: 56 }}
+                  >
+                    {(currentOrg.orgName ?? '?').slice(0, 1).toUpperCase()}
+                  </Avatar>
+                  <TextField
+                    label="Logo URL"
+                    placeholder="https://…"
+                    helperText="Upload to Media and paste the URL (https only)"
+                    value={profile.logoUrl}
+                    onChange={(event) =>
+                      setProfile((prev) => ({
+                        ...prev,
+                        logoUrl: event.target.value,
+                      }))
+                    }
+                    fullWidth
+                  />
+                </Stack>
+                <TextField
+                  label="Contact email"
+                  value={profile.contactEmail}
+                  onChange={(event) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      contactEmail: event.target.value,
+                    }))
+                  }
+                />
+                <TextField
+                  label="Phone"
+                  value={profile.contactPhone}
+                  onChange={(event) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      contactPhone: event.target.value,
+                    }))
+                  }
+                />
+                <TextField
+                  label="Website"
+                  value={profile.contactWebsite}
+                  onChange={(event) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      contactWebsite: event.target.value,
+                    }))
+                  }
+                />
+                <TextField
+                  label="Address"
+                  multiline
+                  minRows={2}
+                  value={profile.contactAddress}
+                  onChange={(event) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      contactAddress: event.target.value,
+                    }))
+                  }
+                />
+                <Stack direction="row">
+                  <Button
+                    variant="contained"
+                    disabled={busy}
+                    onClick={() => void handleProfileSave()}
+                  >
+                    {busy ? 'Saving…' : 'Save profile'}
+                  </Button>
+                </Stack>
+              </Stack>
+            </CardDisplay>
+          ) : null}
           {currentOrg && isOwner ? (
             <CardDisplay
               header={'Transfer ownership'}

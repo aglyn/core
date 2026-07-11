@@ -156,6 +156,13 @@ export default async function handler(
               : undefined,
         email,
         displayName,
+        // Job title (AGL-364): string sets, null clears, absent unchanged.
+        title:
+          typeof req.body?.title === 'string'
+            ? String(req.body.title).trim().slice(0, 80)
+            : req.body?.title === null
+              ? null
+              : undefined,
         invitedBy: decoded.uid,
       })
       const targetName = displayName ?? email ?? targetUid

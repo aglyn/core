@@ -35,6 +35,8 @@ export interface OrgActivityCardProps {
   orgId: string
   max?: number
   header?: string
+  /** Show only entries by this actor (member detail page, AGL-364). */
+  actorId?: string
 }
 
 /**
@@ -43,7 +45,7 @@ export interface OrgActivityCardProps {
  * invites API routes.
  */
 export function OrgActivityCard(props: OrgActivityCardProps) {
-  const { orgId, max = 20, header = 'Recent Activity' } = props
+  const { orgId, max = 20, header = 'Recent Activity', actorId } = props
   const firestore = useFirestore()
   const { data: entries } = useFirestoreCollection<any>(
     () => query(collection(firestore, 'orgs', orgId, 'activity'), limit(200)),
@@ -70,6 +72,7 @@ export function OrgActivityCard(props: OrgActivityCardProps) {
     return [...(entries ?? [])]
       .filter(
         (entry: any) =>
+          (!actorId || entry.actorId === actorId) &&
           (!typeFilter || entry.type === typeFilter) &&
           (!term ||
             [entry.action, entry.actorEmail]
@@ -82,7 +85,7 @@ export function OrgActivityCard(props: OrgActivityCardProps) {
         (a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
       )
       .slice(0, max)
-  }, [entries, max, filter, typeFilter])
+  }, [entries, max, filter, typeFilter, actorId])
 
   return (
     <CardDisplay

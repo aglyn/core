@@ -34,6 +34,11 @@ export function manageNavTabItems() {
       label: 'Profile',
       href: buildRoute(Route.MANAGE_USER_SETTINGS),
     },
+    {
+      id: 'nav-tab-manage-community',
+      label: 'Community profile',
+      href: buildRoute(Route.MANAGE_MY_COMMUNITY),
+    },
   ]
 }
 

@@ -25,6 +25,7 @@ import { AppLink, MdiIcon } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import {
+  Avatar,
   Button,
   Dialog,
   DialogActions,
@@ -42,6 +43,7 @@ import {
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
+import useCurrentTenant from '../hooks/use-current-tenant'
 import { useOrgWorkspace } from '../hooks/use-org-workspace'
 
 const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
@@ -55,6 +57,9 @@ const WORKSPACE_DOMAIN = process.env.NEXT_PUBLIC_WORKSPACE_DOMAIN ?? 'aglyn.io'
 export function OrgSwitcherNav() {
   const { data: user } = useUser()
   const { orgs, currentOrg, selectOrg, workspaceSlug } = useOrgWorkspace()
+  // Org logo (AGL-363) — replaces the generic building icon when set.
+  const { tenant } = useCurrentTenant()
+  const logoUrl = (tenant as any)?.logoUrl as string | undefined
   const router = useRouter()
   const { enqueueSnackbar } = useSnackbar()
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
@@ -119,7 +124,18 @@ export function OrgSwitcherNav() {
           color="primary"
           onClick={(event) => setAnchor(event.currentTarget)}
           startIcon={
-            <MdiIcon path={ICON_VARIANT_ORGANIZATION.path} fontSize={'small'} />
+            logoUrl ? (
+              <Avatar
+                src={logoUrl}
+                variant="rounded"
+                sx={{ width: 18, height: 18 }}
+              />
+            ) : (
+              <MdiIcon
+                path={ICON_VARIANT_ORGANIZATION.path}
+                fontSize={'small'}
+              />
+            )
           }
           endIcon={
             <MdiIcon path={ICON_VARIANT_MENU_DOWN.path} fontSize="small" />
