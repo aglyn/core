@@ -17,9 +17,9 @@
 
 import * as Aglyn from '@aglyn/aglyn'
 import { AglynNodeRenderer } from '@aglyn/aglyn-node-renderer'
-import { registerCommercePlugin } from '@aglyn/plugins-ui-commerce'
-import { registerEventsCalendarPlugin } from '@aglyn/plugins-ui-events-calendar'
-import { registerMuiPlugin } from '@aglyn/plugins-ui-mui'
+import { registerCommercePlugin } from '@aglyn/plugins-commerce'
+import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
+import { registerMuiPlugin } from '@aglyn/plugins-mui'
 import { observer } from 'mobx-react-lite'
 import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import type { ParsedUrlQuery } from 'querystring'

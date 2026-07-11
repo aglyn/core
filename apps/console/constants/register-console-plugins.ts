@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { registerEventsCalendarConsole } from '@aglyn/plugins-ui-events-calendar'
+import { registerEventsCalendarConsole } from '@aglyn/plugins-events-calendar'
 
 /**
  * Console plugin surfaces (AGL-394). Feature plugins declare their console

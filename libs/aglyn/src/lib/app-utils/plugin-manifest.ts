@@ -297,7 +297,7 @@ export function isPluginNetworkAllowed(
   }
 }
 
-/** Component id of the sandboxed plugin canvas element (plugins-ui-mui). */
+/** Component id of the sandboxed plugin canvas element (plugins-mui). */
 export const PLUGIN_COMPONENT_ID = 'communityPlugin'
 
 /** Resolved install data injected into a plugin node's props at compose. */

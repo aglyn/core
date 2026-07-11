@@ -16,23 +16,26 @@
  */
 
 /**
- * Feature-plugin pattern (AGL-277). Features ship as a PAIR of libs and
- * never merge into `plugins-ui-mui` (which stays pure component/theme
- * definitions):
+ * Feature-plugin pattern (AGL-277, AGL-395). Each feature ships as one lib
+ * under `libs/plugins/{feature}` (moved out of the old `.../ui/` nesting)
+ * that owns both halves and never merges into `plugins-mui` (which stays
+ * pure component/theme definitions):
  *
- *  - `libs/plugins/ui/{feature}`      → besigner/host components. Builds
- *    its bundle with `defineUiFeatureBundle` (which depends on the mui
- *    bundle so primitives/theming resolve first) and registers it with
+ *  - UI half → besigner/host components. Builds its bundle with
+ *    `defineUiFeatureBundle` (which depends on the mui bundle so
+ *    primitives/theming resolve first) and registers it with
  *    `Aglyn.plugins.addDependency`, exactly like the mui bundle itself.
- *  - `libs/plugins/console/{feature}` → console surface. Exports a
- *    `ConsoleExtension` registered with `registerConsoleExtension`; the
- *    console shell renders nav items, dashboard cards, and settings
- *    sections from the registry, gated by the extension's feature flag.
+ *    Registered per-editor via `register{Feature}Plugin()`.
+ *  - Console half → a `ConsoleExtension` registered with
+ *    `registerConsoleExtension` via a separate `register{Feature}Console()`
+ *    entry point (so app-load registration pulls no canvas code). The
+ *    console shell renders nav items + their pages, dashboard cards, and
+ *    settings sections from the registry, gated by the feature flag.
  *
  * This module is pure (no registry singletons) per app-utils layering;
  * the plugin libs close the loop by passing `Aglyn.components` in.
- * Reference implementation: events-calendar (AGL-313); commerce follows
- * the same shape (AGL-290).
+ * Reference implementation: events-calendar (AGL-313/394); commerce and
+ * email follow the same shape (AGL-290/346, relocated in AGL-395).
  */
 
 import { runInAction } from 'mobx'

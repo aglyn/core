@@ -208,7 +208,7 @@ export function hasBindings(text: string): boolean {
  * option lists) pass through untouched; unsafe values in hrefs remain
  * covered by the render-time SAFE_HREF/sanitizer checks.
  */
-/** Component id of the interactive function widget (plugins-ui-mui). */
+/** Component id of the interactive function widget (plugins-mui). */
 export const FUNCTION_WIDGET_COMPONENT_ID = 'functionWidget'
 
 /**

@@ -40,10 +40,10 @@ import {
   getGoogleFontsUrl,
   HostThemeDocumentContext,
 } from '@aglyn/shared-ui-theme'
-import { registerCommercePlugin } from '@aglyn/plugins-ui-commerce'
-import { registerEmailPlugin } from '@aglyn/plugins-ui-email'
-import { registerEventsCalendarPlugin } from '@aglyn/plugins-ui-events-calendar'
-import { registerMuiPlugin } from '@aglyn/plugins-ui-mui'
+import { registerCommercePlugin } from '@aglyn/plugins-commerce'
+import { registerEmailPlugin } from '@aglyn/plugins-email'
+import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
+import { registerMuiPlugin } from '@aglyn/plugins-mui'
 import { useHost, useLayout, useLayoutVersion } from '@aglyn/tenant-feature-instance'
 import { Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
