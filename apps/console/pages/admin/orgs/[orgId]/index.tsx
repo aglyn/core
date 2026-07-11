@@ -53,6 +53,7 @@ import AuthenticatedLayout from '../../../../components/layouts/authenticated.la
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import adminNavTabItems from '../../../../constants/admin-nav-tabs'
+import MediaUrlField from '../../../../components/media-url-field.component'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
@@ -455,16 +456,12 @@ const AdminOrgDetail: NextPageWithLayout = () => {
                               }))
                             }
                           />
-                          <TextField
-                            size="small"
+                          <MediaUrlField
                             label="Logo URL"
-                            placeholder="https://…"
+                            orgId={orgId}
                             value={orgEdit.logoUrl}
-                            onChange={(event) =>
-                              setOrgEdit((prev) => ({
-                                ...prev,
-                                logoUrl: event.target.value,
-                              }))
+                            onChange={(logoUrl) =>
+                              setOrgEdit((prev) => ({ ...prev, logoUrl }))
                             }
                           />
                           <TextField

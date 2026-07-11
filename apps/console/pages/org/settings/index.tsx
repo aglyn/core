@@ -36,6 +36,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
+import MediaUrlField from '../../../components/media-url-field.component'
 import useCurrentTenant from '../../../hooks/use-current-tenant'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../components/layouts/dashboard.layout'
@@ -355,18 +356,14 @@ const OrgSettings: NextPageWithLayout = () => {
                   >
                     {(currentOrg.orgName ?? '?').slice(0, 1).toUpperCase()}
                   </Avatar>
-                  <TextField
+                  <MediaUrlField
                     label="Logo URL"
-                    placeholder="https://…"
-                    helperText="Upload to Media and paste the URL (https only)"
+                    helperText="Browse the org media library or paste an https URL"
+                    orgId={currentOrg.$id}
                     value={profile.logoUrl}
-                    onChange={(event) =>
-                      setProfile((prev) => ({
-                        ...prev,
-                        logoUrl: event.target.value,
-                      }))
+                    onChange={(logoUrl) =>
+                      setProfile((prev) => ({ ...prev, logoUrl }))
                     }
-                    fullWidth
                   />
                 </Stack>
                 <TextField

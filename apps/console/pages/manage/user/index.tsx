@@ -35,7 +35,7 @@ import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Tab } from '@mui/material'
-import { Avatar, Button, Stack, TextField } from '@mui/material'
+import { Avatar, Box, Button, Stack, TextField } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
 import {
   signInWithEmailAndPassword,
@@ -53,6 +53,8 @@ import manageNavTabItems from '../../../constants/manage-nav-tabs'
 import MainLayout from '../../../components/layouts/main.layout'
 import { buildRoute, Route } from '../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
+import MediaUrlField from '../../../components/media-url-field.component'
+import { useOrgWorkspace } from '../../../hooks/use-org-workspace'
 import useFirestoreDoc from '../../../hooks/use-firestore-doc'
 
 const basicSchema: FormSchema = {
@@ -79,6 +81,7 @@ const ManageUser: NextPageWithLayout = (props) => {
   const [tab, setTab] = useState('basic')
   const { data: user } = useUser()
   const firestore = useFirestore()
+  const { currentOrg } = useOrgWorkspace()
   const userRef = doc(firestore, 'users', user.uid)
   const { data } = useFirestoreDoc(
     () => userRef,
@@ -212,15 +215,15 @@ const ManageUser: NextPageWithLayout = (props) => {
                   .slice(0, 1)
                   .toUpperCase()}
               </Avatar>
-              <TextField
-                label="Image URL"
-                placeholder="https://…"
-                helperText="Upload to a site's Media page and paste the URL"
-                value={photoUrl}
-                onChange={(event) => setPhotoUrl(event.target.value)}
-                size="small"
-                fullWidth
-              />
+              <Box sx={{ flex: 1 }}>
+                <MediaUrlField
+                  label="Image URL"
+                  helperText="Browse the org media library or paste an https URL"
+                  orgId={currentOrg?.$id ?? null}
+                  value={photoUrl}
+                  onChange={setPhotoUrl}
+                />
+              </Box>
               <Button variant="outlined" onClick={() => void handlePhotoSave()}>
                 {'Save'}
               </Button>
