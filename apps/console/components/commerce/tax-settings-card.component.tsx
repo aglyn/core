@@ -176,7 +176,7 @@ export function TaxSettingsCard(props: TaxSettingsCardProps) {
                   }
                   size="small"
                   sx={{ width: 80 }}
-                  inputProps={{ inputMode: 'decimal' }}
+                  slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                 />
                 <TextField
                   label="Label"

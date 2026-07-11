@@ -236,32 +236,31 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
         {totals ? (
           <>
             <Divider />
-            {[
-              ['Items', totals.itemsCents],
-              ['Shipping', totals.shippingCents],
-              ['Tax', totals.taxCents],
-              ['Discount', -totals.discountCents],
-              ['Total', totals.totalCents],
-            ]
-              .filter(([, cents]) => cents !== 0 || true)
-              .map(([label, cents]) => (
-                <Stack key={label as string} direction="row">
-                  <Typography
-                    variant="body2"
-                    sx={{ flex: 1 }}
-                    color={label === 'Total' ? 'text.primary' : 'text.secondary'}
-                  >
-                    {label}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    fontWeight={label === 'Total' ? 600 : 400}
-                  >
-                    {usd(Math.abs(cents as number)) &&
-                      `${(cents as number) < 0 ? '-' : ''}${usd(Math.abs(cents as number))}`}
-                  </Typography>
-                </Stack>
-              ))}
+            {(
+              [
+                ['Items', totals.itemsCents],
+                ['Shipping', totals.shippingCents],
+                ['Tax', totals.taxCents],
+                ['Discount', -totals.discountCents],
+                ['Total', totals.totalCents],
+              ] as Array<[string, number]>
+            ).map(([label, cents]) => (
+              <Stack key={label} direction="row">
+                <Typography
+                  variant="body2"
+                  sx={{ flex: 1 }}
+                  color={label === 'Total' ? 'text.primary' : 'text.secondary'}
+                >
+                  {label}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: label === 'Total' ? 600 : 400 }}
+                >
+                  {`${cents < 0 ? '-' : ''}${usd(Math.abs(cents))}`}
+                </Typography>
+              </Stack>
+            ))}
             {order.refundedCents ? (
               <Typography variant="caption" color="error">
                 {`Refunded ${usd(order.refundedCents)}`}

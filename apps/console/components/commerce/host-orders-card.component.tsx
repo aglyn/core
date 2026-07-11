@@ -350,7 +350,7 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
               )
             }
             size="small"
-            inputProps={{ inputMode: 'numeric' }}
+            slotProps={{ htmlInput: { inputMode: 'numeric' } }}
           />
           <TextField
             label="Buyer email (optional)"

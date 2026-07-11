@@ -231,7 +231,7 @@ export function ShippingSettingsCard(props: ShippingSettingsCardProps) {
                   }
                   size="small"
                   sx={{ width: 120 }}
-                  inputProps={{ inputMode: 'decimal' }}
+                  slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                 />
                 {rate.kind === 'free_over' ? (
                   <TextField
@@ -244,7 +244,7 @@ export function ShippingSettingsCard(props: ShippingSettingsCardProps) {
                     }
                     size="small"
                     sx={{ width: 160 }}
-                    inputProps={{ inputMode: 'decimal' }}
+                    slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                   />
                 ) : null}
               </Stack>
@@ -277,7 +277,7 @@ export function ShippingSettingsCard(props: ShippingSettingsCardProps) {
                       }}
                       size="small"
                       sx={{ width: 160 }}
-                      inputProps={{ inputMode: 'decimal' }}
+                      slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                     />
                     <TextField
                       label="Price ($)"
@@ -294,7 +294,7 @@ export function ShippingSettingsCard(props: ShippingSettingsCardProps) {
                       }}
                       size="small"
                       sx={{ width: 120 }}
-                      inputProps={{ inputMode: 'decimal' }}
+                      slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                     />
                     <Button
                       size="small"

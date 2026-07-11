@@ -297,20 +297,10 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
         <Autocomplete
           multiple
           freeSolo
-          options={[]}
+          options={[] as string[]}
           value={current.tags ?? []}
           onChange={(_event, tags) =>
             update({ tags: tags.map((tag) => String(tag).trim()).filter(Boolean) })
-          }
-          renderTags={(value, getTagProps) =>
-            value.map((tag, index) => (
-              <Chip
-                label={tag}
-                size="small"
-                {...getTagProps({ index })}
-                key={tag}
-              />
-            ))
           }
           renderInput={(params) => (
             <TextField
@@ -410,22 +400,12 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             <Autocomplete
               multiple
               freeSolo
-              options={[]}
+              options={[] as string[]}
               value={option.values}
               onChange={(_event, values) =>
                 handleOptionsChange(index, {
                   values: values.map((value) => String(value).trim()).filter(Boolean),
                 })
-              }
-              renderTags={(value, getTagProps) =>
-                value.map((item, itemIndex) => (
-                  <Chip
-                    label={item}
-                    size="small"
-                    {...getTagProps({ index: itemIndex })}
-                    key={item}
-                  />
-                ))
               }
               renderInput={(params) => (
                 <TextField
@@ -488,7 +468,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
                       }
                       size="small"
                       sx={{ width: 88 }}
-                      inputProps={{ inputMode: 'decimal' }}
+                      slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                     />
                   </TableCell>
                   <TableCell>
@@ -503,7 +483,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
                       }
                       size="small"
                       sx={{ width: 88 }}
-                      inputProps={{ inputMode: 'decimal' }}
+                      slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                     />
                   </TableCell>
                   <TableCell>
@@ -535,7 +515,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
                       }
                       size="small"
                       sx={{ width: 72 }}
-                      inputProps={{ inputMode: 'numeric' }}
+                      slotProps={{ htmlInput: { inputMode: 'numeric' } }}
                     />
                   </TableCell>
                   <TableCell>
@@ -546,7 +526,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
                       }
                       size="small"
                       sx={{ width: 88 }}
-                      inputProps={{ inputMode: 'numeric' }}
+                      slotProps={{ htmlInput: { inputMode: 'numeric' } }}
                     />
                   </TableCell>
                 </TableRow>
@@ -600,7 +580,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             }}
             size="small"
             sx={{ width: 140 }}
-            inputProps={{ inputMode: 'numeric' }}
+            slotProps={{ htmlInput: { inputMode: 'numeric' } }}
             helperText="Notifies managers"
           />
         </Stack>
