@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
+import type { PluginApiHandler } from '@aglyn/aglyn'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { emitHostEvent } from '@aglyn/tenant-runtime'
 import {
   mintMemberSession,
   setMemberCookie,
   verifyMemberPassword,
-} from '@aglyn/plugins-commerce/server'
+} from './membership'
 
 // Best-effort per-instance brute-force damper (mirrors AGL-87 unlock).
 const attemptsByIp = new Map<string, number[]>()
@@ -30,10 +30,7 @@ const WINDOW_MS = 60_000
 const MAX_ATTEMPTS = 10
 
 /** Site member sign-in (AGL-109); sets the session cookie on success. */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const membershipLoginHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -46,7 +43,7 @@ export default async function handler(
     return res.status(400).json({ error: 'Invalid request' })
   }
   const ip = String(
-    req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? 'unknown',
+    req.headers['x-forwarded-for'] ?? req.socket?.remoteAddress ?? 'unknown',
   ).split(',')[0]
   const now = Date.now()
   const attempts = (attemptsByIp.get(ip) ?? []).filter(

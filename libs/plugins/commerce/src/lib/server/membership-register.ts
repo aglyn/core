@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
+import type { PluginApiHandler } from '@aglyn/aglyn'
 import { firebaseAdmin, upsertHostContact } from '@aglyn/tenant-data-admin'
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { emitHostEvent } from '@aglyn/tenant-runtime'
 import {
   hashMemberPassword,
   mintMemberSession,
   setMemberCookie,
-} from '@aglyn/plugins-commerce/server'
+} from './membership'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -30,10 +30,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
  * Site member sign-up (AGL-109): creates the member record (scrypt hash),
  * doubles as a lead, and signs the visitor in via the session cookie.
  */
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+export const membershipRegisterHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }

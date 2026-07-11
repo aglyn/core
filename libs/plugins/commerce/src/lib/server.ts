@@ -40,7 +40,9 @@ import { reservationAvailabilityHandler } from './server/reservation-availabilit
 import { gateHandler } from './server/gate'
 import { memberFeedHandler } from './server/member-feed'
 import { membershipAccountHandler } from './server/membership-account'
+import { membershipLoginHandler } from './server/membership-login'
 import { membershipLogoutHandler } from './server/membership-logout'
+import { membershipRegisterHandler } from './server/membership-register'
 import { membershipWishlistHandler } from './server/membership-wishlist'
 import { reserveHandler } from './server/reserve'
 import { streamHandler } from './server/stream'
@@ -67,7 +69,9 @@ export function registerCommerceApi(): void {
   registerPluginApiRoute('commerce/subscription-portal', subscriptionPortalHandler)
   registerPluginApiRoute('commerce/reviews', reviewsHandler)
   registerPluginApiRoute('membership/account', membershipAccountHandler)
+  registerPluginApiRoute('membership/login', membershipLoginHandler)
   registerPluginApiRoute('membership/logout', membershipLogoutHandler)
+  registerPluginApiRoute('membership/register', membershipRegisterHandler)
   registerPluginApiRoute('membership/wishlist', membershipWishlistHandler)
 }
 
