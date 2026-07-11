@@ -50,8 +50,8 @@ export interface ProductVariant {
   weightGrams?: number
   /** null/undefined = untracked; 0 = sold out (matches AGL-96). */
   inventory?: number | null
-  /** Media id from the host media library shown when selected. */
-  imageMediaId?: string
+  /** Media-library image URL shown when this variant is selected. */
+  imageUrl?: string
 }
 
 /** `hosts/{hostId}/products/{id}` doc. */
@@ -62,14 +62,14 @@ export interface HostProduct {
   description?: string
   type: ProductType
   status: ProductStatus
-  /** Ordered media ids from the host media library. */
-  mediaIds?: string[]
+  /** Ordered media-library image URLs (first = primary). */
+  mediaUrls?: string[]
   categoryIds?: string[]
   tags?: string[]
   options?: ProductOption[]
   variants: ProductVariant[]
   /** Per-product overrides for PDP meta tags (AGL-299 consumes). */
-  seo?: { title?: string; description?: string; imageMediaId?: string }
+  seo?: { title?: string; description?: string; imageUrl?: string }
   /** Supplier for dropship routing (AGL-289). */
   supplierId?: string
   createdAtMs?: number
@@ -115,8 +115,8 @@ export interface HostCollection {
   rules?: CollectionRule[]
   /** Smart mode: true = every rule must match (default), false = any. */
   matchAll?: boolean
-  /** Media id for the collection card/landing hero. */
-  imageMediaId?: string
+  /** Media-library image URL for the collection card/landing hero. */
+  imageUrl?: string
   order?: number
 }
 

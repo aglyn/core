@@ -19,8 +19,9 @@
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import HostCouponsCard from '../../../components/commerce/host-coupons-card.component'
 import HostOrdersCard from '../../../components/commerce/host-orders-card.component'
-import HostProductsCard from '../../../components/commerce/host-products-card.component'
+import ProductsHubCard from '../../../components/commerce/products-hub-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -63,7 +64,11 @@ const HostProducts: NextPageWithLayout = () => {
             items={[
               {
                 size: { xs: 12 },
-                children: <HostProductsCard hostId={hostId} />,
+                children: <ProductsHubCard hostId={hostId} />,
+              },
+              {
+                size: { xs: 12, md: 6 },
+                children: <HostCouponsCard hostId={hostId} />,
               },
               {
                 size: { xs: 12 },
