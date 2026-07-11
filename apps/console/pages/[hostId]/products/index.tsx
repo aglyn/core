@@ -32,6 +32,7 @@ import SuppliersCard from '../../../components/commerce/suppliers-card.component
 import TaxSettingsCard from '../../../components/commerce/tax-settings-card.component'
 import ProductsHubCard from '../../../components/commerce/products-hub-card.component'
 import ReservationsCard from '../../../components/commerce/reservations-card.component'
+import ReviewsModerationCard from '../../../components/commerce/reviews-moderation-card.component'
 import HostDisplayNameComponent from '../../../components/host-display-name.component'
 import { useHostId } from '../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
@@ -119,6 +120,10 @@ const HostProducts: NextPageWithLayout = () => {
               {
                 size: { xs: 12 },
                 children: <ReservationsCard hostId={hostId} />,
+              },
+              {
+                size: { xs: 12, md: 6 },
+                children: <ReviewsModerationCard hostId={hostId} />,
               },
               {
                 size: { xs: 12 },
