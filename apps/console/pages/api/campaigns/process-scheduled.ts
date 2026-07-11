@@ -78,6 +78,7 @@ export default async function handler(
             : undefined,
           campaignId: campaignDoc.id,
           experimentId: String(data['experimentId'] ?? ''),
+          templateScreenId: String(data['templateScreenId'] ?? '') || undefined,
           senderUid: String(data['scheduledBy'] ?? 'scheduler'),
         })
         results.push(result)

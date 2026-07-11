@@ -16,6 +16,7 @@
  */
 'use client'
 
+import { CANVAS_ROOT_ELEMENT_ID, createResourceUid } from '@aglyn/aglyn'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -26,9 +27,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { collection, limit, query } from 'firebase/firestore'
+import { collection, doc, limit, query, setDoc, Timestamp } from 'firebase/firestore'
+import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { buildRoute, Route } from '../constants/route-links'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
 import useHostOrgId from '../hooks/use-host-org-id'
 
@@ -117,8 +120,131 @@ export function HostCampaignsCard(props: { hostId: string }) {
   const [sendAt, setSendAt] = useState('')
   const [busy, setBusy] = useState(false)
 
+  // Designed emails (AGL-347/349): besigner email documents are screens
+  // with kind 'email'; campaigns reference them by screen id.
+  const router = useRouter()
+  const { data: screenDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'screens'), limit(200)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const emailScreens = [...(screenDocs ?? [])]
+    .filter((screen: any) => !screen.deletedAt && screen.kind === 'email')
+    .sort((a: any, b: any) =>
+      String(a.displayName ?? '').localeCompare(String(b.displayName ?? '')),
+    )
+  const [templateScreenId, setTemplateScreenId] = useState('')
+  const selectedTemplate = emailScreens.find(
+    (screen: any) => screen.$id === templateScreenId,
+  )
+
+  const handleCreateTemplate = useCallback(async () => {
+    const screenId = createResourceUid()
+    const versionId = createResourceUid()
+    const timestamp = Timestamp.now()
+    const sectionId = createResourceUid()
+    const textId = createResourceUid()
+    try {
+      await Promise.all([
+        setDoc(doc(firestore, 'hosts', hostId, 'screens', screenId), {
+          displayName: 'Untitled email',
+          kind: 'email',
+          versionId,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        }),
+        setDoc(
+          doc(
+            firestore,
+            'hosts',
+            hostId,
+            'screens',
+            screenId,
+            'versions',
+            versionId,
+          ),
+          {
+            screenId,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+            nodes: {
+              [CANVAS_ROOT_ELEMENT_ID]: {
+                $id: CANVAS_ROOT_ELEMENT_ID,
+                componentId: 'div',
+                nodes: [sectionId],
+              },
+              [sectionId]: {
+                $id: sectionId,
+                componentId: 'emailSection',
+                pluginId: 'email',
+                parentId: CANVAS_ROOT_ELEMENT_ID,
+                nodes: [textId],
+              },
+              [textId]: {
+                $id: textId,
+                componentId: 'emailText',
+                pluginId: 'email',
+                parentId: sectionId,
+                props: {
+                  children: 'Hello {{contact.firstName}},',
+                  variant: 'body',
+                },
+              },
+            },
+          },
+        ),
+      ])
+      void router.push(
+        buildRoute(Route.SCREEN_BESIGNER, { hostId, screenId, versionId }),
+      )
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('Creating the email template failed', {
+        variant: 'error',
+      })
+    }
+  }, [firestore, hostId, router, enqueueSnackbar])
+
+  const handleTestSend = useCallback(async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/campaigns/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+        },
+        body: JSON.stringify({
+          hostId,
+          action: 'test',
+          subject: subject.trim() || 'Test send',
+          body: body.trim(),
+          templateScreenId: templateScreenId || undefined,
+        }),
+      })
+      const payload = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return void enqueueSnackbar(payload?.error ?? 'Test send failed', {
+          variant: 'warning',
+          allowDuplicate: true,
+        })
+      }
+      enqueueSnackbar('Test sent to your address', {
+        variant: 'success',
+        persist: false,
+      })
+    } catch (error) {
+      console.error(error)
+      enqueueSnackbar('An error has occurred', { variant: 'error' })
+    } finally {
+      setBusy(false)
+    }
+  }, [busy, user, hostId, subject, body, templateScreenId, enqueueSnackbar])
+
   const handleSend = useCallback(async () => {
-    if (!subject.trim() || !body.trim() || busy) return
+    if (!subject.trim() || (!templateScreenId && !body.trim()) || busy) return
     const sendAtMs = sendAt ? new Date(sendAt).getTime() : 0
     const scheduling = Boolean(sendAtMs)
     if (scheduling && sendAtMs <= Date.now()) {
@@ -173,6 +299,7 @@ export function HostCampaignsCard(props: { hostId: string }) {
             ? { listId: audience.slice('list:'.length) }
             : {}),
           ...(experimentId ? { experimentId } : {}),
+          ...(templateScreenId ? { templateScreenId } : {}),
         }),
       })
       const payload = await response.json().catch(() => ({}))
@@ -206,7 +333,7 @@ export function HostCampaignsCard(props: { hostId: string }) {
     } finally {
       setBusy(false)
     }
-  }, [subject, body, audience, experimentId, sendAt, busy, user, hostId, confirm, enqueueSnackbar])
+  }, [subject, body, audience, experimentId, templateScreenId, sendAt, busy, user, hostId, confirm, enqueueSnackbar])
 
   // Cancel a scheduled campaign before the processor picks it up.
   const handleCancelSchedule = useCallback(
@@ -298,23 +425,66 @@ export function HostCampaignsCard(props: { hostId: string }) {
             </TextField>
           ) : null}
         </Stack>
-        <TextField
-          label="Message"
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          size="small"
-          multiline
-          minRows={4}
-          helperText={
-            'Personalize with {{firstName|there}}, {{name}}, or {{email}} ' +
-            '— resolved per recipient at send time.'
-          }
-        />
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <TextField
+            select
+            label="Email design"
+            value={templateScreenId}
+            onChange={(event) => setTemplateScreenId(event.target.value)}
+            size="small"
+            sx={{ minWidth: 220 }}
+            helperText="Designed emails are built in the besigner"
+          >
+            <MenuItem value="">{'Plain text (message below)'}</MenuItem>
+            {emailScreens.map((screen: any) => (
+              <MenuItem key={screen.$id} value={screen.$id}>
+                {screen.displayName ?? screen.$id}
+              </MenuItem>
+            ))}
+          </TextField>
+          {selectedTemplate ? (
+            <Button
+              size="small"
+              onClick={() =>
+                void router.push(
+                  buildRoute(Route.SCREEN_BESIGNER, {
+                    hostId,
+                    screenId: selectedTemplate.$id,
+                    versionId: selectedTemplate.versionId,
+                  }),
+                )
+              }
+            >
+              {'Edit design'}
+            </Button>
+          ) : null}
+          <Button size="small" onClick={() => void handleCreateTemplate()}>
+            {'New email template'}
+          </Button>
+        </Stack>
+        {!templateScreenId ? (
+          <TextField
+            label="Message"
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            size="small"
+            multiline
+            minRows={4}
+            helperText={
+              'Personalize with {{firstName|there}}, {{name}}, or {{email}} ' +
+              '— resolved per recipient at send time.'
+            }
+          />
+        ) : null}
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Button
             variant="contained"
             color="secondary"
-            disabled={busy || !subject.trim() || !body.trim()}
+            disabled={
+              busy ||
+              !subject.trim() ||
+              (!templateScreenId && !body.trim())
+            }
             onClick={handleSend}
           >
             {busy
@@ -322,6 +492,13 @@ export function HostCampaignsCard(props: { hostId: string }) {
               : sendAt
                 ? 'Schedule campaign'
                 : 'Send campaign'}
+          </Button>
+          <Button
+            size="small"
+            disabled={busy || (!templateScreenId && !body.trim())}
+            onClick={() => void handleTestSend()}
+          >
+            {'Send test to me'}
           </Button>
           <TextField
             size="small"

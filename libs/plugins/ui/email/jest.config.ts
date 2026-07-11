@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * @license
  * Copyright 2022 Aglyn LLC
@@ -15,12 +16,18 @@
  * limitations under the License.
  */
 
-export * from './lib/constants/bundle-common'
-export * from './lib/plugin'
-export * from './lib/components/plugin-frame'
-export {
-  PLUGIN_DRAWER_CATEGORY,
-  type PluginInstallLike,
-  pluginInstallToPreset,
-} from './lib/components/plugin'
-export { sanitizeCustomHtml } from './lib/components/custom-html'
+export default {
+  displayName: 'plugins-ui-email',
+  preset: '../../../../jest.preset.js',
+  testEnvironment: 'jsdom',
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      '@swc/jest',
+      // swcrc: false keeps the build-oriented .swcrc (which excludes spec
+      // files) from being applied to the jest transform.
+      { swcrc: false, jsc: { transform: { react: { runtime: 'automatic' } } } },
+    ],
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  coverageDirectory: '../../../../coverage/libs/plugins/ui/email',
+}

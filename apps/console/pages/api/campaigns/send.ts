@@ -20,7 +20,10 @@ import {
   contactMatchesSegment,
   createResourceUid,
   assignExperimentVariant,
+  productPriceRange,
+  renderEmailHtml,
   resolveMergeTags,
+  type EmailRenderProduct,
   type HostExperiment,
 } from '@aglyn/aglyn'
 import {
@@ -67,8 +70,76 @@ export interface CampaignSendOptions {
   emails?: string[]
   campaignId?: string
   experimentId?: string
+  /**
+   * Designed email template (AGL-349): screen id of a besigner email
+   * document. When set, the render pipeline produces the HTML body and
+   * `body` becomes the plain-text fallback.
+   */
+  templateScreenId?: string
+  /** Test sends (AGL-349) skip the campaign record and stats. */
+  recordCampaign?: boolean
   /** Recorded as `sentBy`; the scheduler passes the scheduling user. */
   senderUid: string
+}
+
+/**
+ * Loads a designed email template's nodes + referenced products for the
+ * render pipeline. Throws 400 when the screen isn't an email document.
+ */
+async function loadEmailTemplate(hostId: string, screenId: string) {
+  const firestore = firebaseAdmin.app().firestore()
+  const screenRef = firestore
+    .collection('hosts')
+    .doc(hostId)
+    .collection('screens')
+    .doc(screenId)
+  const screenSnapshot = await screenRef.get()
+  if (!screenSnapshot.exists) {
+    throw new CampaignSendError('Unknown email template', 400)
+  }
+  const versionId = screenSnapshot.get('versionId')
+  const versionSnapshot = versionId
+    ? await screenRef.collection('versions').doc(String(versionId)).get()
+    : null
+  const nodes = (versionSnapshot?.get('nodes') ?? {}) as Record<string, any>
+  if (!Object.keys(nodes).length) {
+    throw new CampaignSendError('The email template is empty', 400)
+  }
+  // Resolve emailProduct references (by id — rename-safe, AGL-343).
+  const productIds = [
+    ...new Set(
+      Object.values(nodes)
+        .filter((node: any) => node?.componentId === 'emailProduct')
+        .map((node: any) => String(node?.props?.productId ?? ''))
+        .filter(Boolean),
+    ),
+  ].slice(0, 20)
+  const products: Record<string, EmailRenderProduct> = {}
+  await Promise.all(
+    productIds.map(async (productId) => {
+      const productSnapshot = await firestore
+        .collection('hosts')
+        .doc(hostId)
+        .collection('products')
+        .doc(productId)
+        .get()
+      if (!productSnapshot.exists) return
+      const data = productSnapshot.data() as any
+      const [minPrice] = productPriceRange(data)
+      products[productId] = {
+        name: String(data.name ?? productId),
+        priceLabel: minPrice ? `$${minPrice}` : undefined,
+        imageUrl: data.imageUrl ?? data.mediaUrls?.[0],
+        url: data.slug ? `/products/${data.slug}` : undefined,
+      }
+    }),
+  )
+  return {
+    nodes,
+    products,
+    subject: String(screenSnapshot.get('emailSubject') ?? ''),
+    preheader: String(screenSnapshot.get('emailPreheader') ?? ''),
+  }
 }
 
 /**
@@ -227,6 +298,12 @@ export async function performCampaignSend(
 
   const campaignId = options.campaignId || createResourceUid()
 
+  // Designed email template (AGL-349): loaded once; rendered per
+  // recipient with their merge values.
+  const template = options.templateScreenId
+    ? await loadEmailTemplate(hostId, options.templateScreenId)
+    : null
+
   // Email A/B (AGL-255): each recipient deterministically lands in a
   // variant whose subject/body overrides apply; sends count as that
   // variant's exposures. A finished experiment sends the winner copy.
@@ -264,13 +341,42 @@ export async function performCampaignSend(
     // variant copy can use tags too.
     const mergeRecipient = { email, name: names.get(email) }
     const recipientSubject = resolveMergeTags(
-      variant?.subject?.trim() || subject,
+      variant?.subject?.trim() || subject || template?.subject || '',
       mergeRecipient,
     )
     const recipientBody = resolveMergeTags(
       variant?.body?.trim() || body,
       mergeRecipient,
     )
+    // Designed emails render per recipient (AGL-349): merge tokens fill
+    // from the contact, product links become absolute on the site base.
+    let rendered: { html: string; text: string } | null = null
+    if (template) {
+      const name = names.get(email) ?? ''
+      rendered = renderEmailHtml({
+        nodes: template.nodes,
+        subject: recipientSubject,
+        preheader: template.preheader,
+        merge: {
+          'contact.email': email,
+          'contact.name': name,
+          'contact.firstName': name.split(/\s+/)[0] ?? '',
+          'site.url': siteBase,
+          unsubscribeUrl,
+        },
+        products: Object.fromEntries(
+          Object.entries(template.products).map(([id, product]) => [
+            id,
+            {
+              ...product,
+              url: product.url?.startsWith('/')
+                ? `${siteBase}${product.url}`
+                : product.url,
+            },
+          ]),
+        ),
+      })
+    }
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -281,7 +387,10 @@ export async function performCampaignSend(
         from: emailFrom,
         to: [email],
         subject: recipientSubject,
-        text: `${recipientBody}\n\n—\nUnsubscribe: ${unsubscribeUrl}`,
+        ...(rendered ? { html: rendered.html } : {}),
+        text: rendered
+          ? `${rendered.text}\n\n—\nUnsubscribe: ${unsubscribeUrl}`
+          : `${recipientBody}\n\n—\nUnsubscribe: ${unsubscribeUrl}`,
         headers: { 'List-Unsubscribe': `<${unsubscribeUrl}>` },
         // Event attribution (AGL-268): the opens/clicks webhook maps
         // deliveries back to the campaign (and experiment) via tags.
@@ -320,11 +429,17 @@ export async function performCampaignSend(
     }
   }
 
+  if (options.recordCampaign === false) {
+    return { campaignId, recipients: sendable.length, sent }
+  }
   await hostRef.collection('campaigns').doc(campaignId).set(
     {
       subject,
       body,
       audience,
+      ...(options.templateScreenId
+        ? { templateScreenId: options.templateScreenId }
+        : {}),
       ...(experiment ? { experimentId: experiment.$id } : {}),
       stats: {
         recipients: sendable.length,
@@ -367,8 +482,11 @@ export default async function handler(
     .trim()
     .slice(0, 20000)
   const audience = String(req.body?.audience ?? 'leads')
+  const templateScreenId = String(req.body?.templateScreenId ?? '')
   if (!hostId) return res.status(400).json({ error: 'Missing hostId' })
-  if (action !== 'cancel' && (!subject || !body)) {
+  // Designed emails carry their content in the template; plain sends
+  // still need subject + body.
+  if (action !== 'cancel' && !templateScreenId && (!subject || !body)) {
     return res.status(400).json({ error: 'Missing subject or body' })
   }
   if (!['leads', 'members', 'manual', 'segment', 'list'].includes(audience)) {
@@ -392,6 +510,28 @@ export default async function handler(
     const memberRole = (hostSnapshot.get('memberRoles') ?? {})[decoded.uid]
     if (memberRole !== 'admin' && memberRole !== 'editor') {
       return res.status(403).json({ error: 'Not a site admin' })
+    }
+
+    if (action === 'test') {
+      // Test send (AGL-349): delivers to the requesting user only, with
+      // no campaign record — proofing designed emails before a real send.
+      const testEmail = String(decoded.email ?? '')
+      if (!testEmail) {
+        return res
+          .status(400)
+          .json({ error: 'Your account has no email address for tests' })
+      }
+      const result = await performCampaignSend({
+        hostId,
+        subject,
+        body: body || 'Test send',
+        audience: 'manual',
+        emails: [testEmail],
+        templateScreenId: templateScreenId || undefined,
+        recordCampaign: false,
+        senderUid: decoded.uid,
+      })
+      return res.status(200).json({ ...result, test: true })
     }
 
     if (action === 'schedule') {
@@ -418,6 +558,7 @@ export default async function handler(
           ...(req.body?.experimentId
             ? { experimentId: String(req.body.experimentId) }
             : {}),
+          ...(templateScreenId ? { templateScreenId } : {}),
           status: 'scheduled',
           sendAtMs,
           scheduledAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
@@ -459,6 +600,7 @@ export default async function handler(
       emails: Array.isArray(req.body?.emails) ? req.body.emails : undefined,
       campaignId: String(req.body?.campaignId ?? ''),
       experimentId: String(req.body?.experimentId ?? ''),
+      templateScreenId: templateScreenId || undefined,
       senderUid: decoded.uid,
     })
     return res.status(200).json(result)
