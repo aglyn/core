@@ -181,6 +181,10 @@ export default function BookingsConsolePage({
   shared tooling — the where-used dialog and its fetch util, plus the
   variable/function cards — which the app's workflows surface and besigner
   ƒx button import from `@aglyn/plugins-logic`. Always-on (not release-flagged).
+- **Inbox** (`libs/plugins/inbox`) — console-only (AGL-395): form-submissions
+  reader, site members + leads, and the borrowed **Orders** and **Campaigns**
+  tabs. Depends on `@aglyn/plugins-commerce` + `@aglyn/plugins-email` — a
+  plugin can compose tabs from other plugins the same way the app did.
 - **Community** (`libs/plugins/community`) — console-only, multi-page
   (AGL-395): the plugin owns the hub page and its cards + `useCommunityActions`,
   but the listing/publisher **detail** pages stay as app file-routes (nested
