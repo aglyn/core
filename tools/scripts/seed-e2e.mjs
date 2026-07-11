@@ -285,6 +285,9 @@ await put(hostRef.collection('overlays').doc('seed-bar'), {
   enabled: true,
   bar: { text: 'Fresh sourdough every morning', dismissible: true },
   order: 0,
+  // Engagement counters (AGL-271) so the marketing hub's Engagement
+  // column and At-a-glance rollup show real numbers.
+  stats: { impressions: 120, clicks: 14, dismissals: 9 },
   createdAt: now,
 })
 await put(hostRef.collection('campaigns').doc('seed-campaign'), {
@@ -294,13 +297,54 @@ await put(hostRef.collection('campaigns').doc('seed-campaign'), {
   status: 'sent',
   sentAt: Timestamp.now(),
   sentBy: E2E_UID,
-  stats: { recipients: 2, sent: 2 },
+  stats: { recipients: 2, sent: 2, opens: 1, clicks: 1 },
+})
+// Scheduled send (AGL-272): renders the Scheduled chip + Cancel action.
+await put(hostRef.collection('campaigns').doc('seed-campaign-scheduled'), {
+  subject: 'Holiday preorder window',
+  body: 'Hi {{firstName|there}} — preorders open next week!',
+  audience: 'leads',
+  status: 'scheduled',
+  sendAtMs: Date.now() + 7 * dayMs,
+  scheduledAt: Timestamp.now(),
+  scheduledBy: E2E_UID,
+})
+// Draft A/B experiment (AGL-252/273): business plan unlocks the card.
+await put(hostRef.collection('experiments').doc('seed-experiment'), {
+  name: 'Hero copy test',
+  status: 'draft',
+  target: 'screen',
+  screenId: 'seed-screen',
+  variants: [
+    { id: 'a', name: 'A (control)', weight: 1 },
+    { id: 'b', name: 'B', weight: 1 },
+  ],
+  goal: { event: 'formSubmission' },
+  autoWinner: { minExposures: 200, confidence: 0.95 },
+  createdAt: now,
 })
 await put(hostRef.collection('leads').doc('seed-lead-1'), {
   email: 'wholesale@example.com',
   source: 'signup',
   createdAt: now,
 })
+// A notification (AGL-259/267 taxonomy) so the notifications page's
+// feed and category mute switches have content.
+await put(
+  firestore
+    .collection('users')
+    .doc(E2E_UID)
+    .collection('notifications')
+    .doc('seed-notification'),
+  {
+    type: 'billing.usage',
+    title: "You're above 80% of your monthly email sends quota",
+    body: '401 of 500 used — upgrade in Billing to raise the limit.',
+    link: '/org/billing',
+    orgId,
+    createdAt: now,
+  },
+)
 
 console.log(
   `Done — ${written} docs. user=${E2E_EMAIL} (uid ${E2E_UID}, staff) ` +

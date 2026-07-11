@@ -121,6 +121,55 @@ const specs = [
     path: `/${HOST_ID}/contacts`,
     expects: ['wholesale@example.com'],
   },
+  // ── July 2026 feature-wave surfaces ──────────────────────────────────
+  {
+    // Marketing hub: at-a-glance rollup (v8), overlay engagement stats
+    // (AGL-271), merge-tag composer + scheduled campaign chip (AGL-272),
+    // experiments card (AGL-252/273).
+    name: 'marketing',
+    path: `/${HOST_ID}/marketing`,
+    expects: [
+      'At a glance',
+      'Welcome bar',
+      '120 views',
+      'Personalize with',
+      'Holiday preorder window',
+      'Scheduled',
+      'Hero copy test',
+    ],
+  },
+  {
+    // Logic page: variables/functions plus the Reference health audit
+    // (wave v7) — the seed's references all resolve.
+    name: 'logic',
+    path: `/${HOST_ID}/logic`,
+    expects: [
+      'OrderTotal',
+      'Reference health',
+      'Every automation, workflow, and variable reference resolves.',
+    ],
+  },
+  {
+    // Workflows page: the automation + workflow rows with their Runs
+    // logs (AGL-266 / wave v6).
+    name: 'workflows',
+    path: `/${HOST_ID}/workflows`,
+    expects: ['DozenQuote', 'Form thank-you', 'Runs'],
+  },
+  {
+    // Org billing: business plan card + Stripe Billing Portal link
+    // (wave v5); active subscription shows the cancel flow (AGL-269).
+    name: 'billing',
+    path: '/org/billing',
+    expects: ['Manage payment methods', 'Cancel subscription'],
+  },
+  {
+    // Notifications: the seeded billing.usage entry (wave v5 taxonomy)
+    // + per-category mute switches (AGL-267).
+    name: 'notifications',
+    path: '/manage/notifications',
+    expects: ["You're above 80%", 'Forms & bookings'],
+  },
 ]
 
 const apiKey = resolveApiKey()

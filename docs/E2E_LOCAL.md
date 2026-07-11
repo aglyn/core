@@ -2,8 +2,12 @@
 
 Runs the console against the Firebase emulators with a seeded org/host and a
 real signed-in session — no staging instance needed. The specs cover the
-pages that historically rendered empty under the emulator; they are the
-regression canary for the authenticated read path.
+pages that historically rendered empty under the emulator (the regression
+canary for the authenticated read path) plus the July 2026 feature-wave
+surfaces: the Marketing hub (rollup, overlay engagement, merge tags,
+scheduled sends, experiments), the Logic page's Reference health audit,
+workflow/automation Runs logs, the billing page's Stripe portal + cancel
+flow, and the notifications feed with category mutes.
 
 ## Requirements
 
