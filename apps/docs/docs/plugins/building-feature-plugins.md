@@ -7,19 +7,29 @@ description: The console-extension + frontend-UI plugin pair pattern for shippin
 # Building feature plugins
 
 Aglyn features that add both **console surface** and **site components** ship
-as a *pair* of libraries (AGL-277) — never merged into the core `mui` plugin,
-which stays purely component and theme definitions for the Besigner and hosts.
+as a single library (AGL-277) — never merged into the core `mui` plugin, which
+stays purely component and theme definitions for the Besigner and hosts.
 
 ```
-libs/plugins/ui/{feature}       → Besigner/host components + the console page,
+libs/plugins/{feature}          → Besigner/host components + the console page,
                                   and both register* entry points
-                                  (depends on plugins-ui-mui)
+                                  (published as @aglyn/plugins-{feature},
+                                  depends on @aglyn/plugins-mui)
 ```
 
-The events-calendar plugin keeps its Besigner component, its console page, and
-both registration functions in the one `ui` lib — the console half is just a
-separate `register*Console()` export, so the shell can register nav+pages at
-app load without pulling in the Besigner canvas bundle.
+Plugins live directly under `libs/plugins/{feature}` (moved out of the old
+`.../ui/` nesting in AGL-395) and publish as `@aglyn/plugins-{feature}`. A
+plugin keeps its Besigner component, its console page, and both registration
+functions in the one lib — the console half is a separate `register*Console()`
+export, so the shell can register nav + pages at app load without pulling in
+the Besigner canvas bundle.
+
+**Sharing app hooks.** A relocated console page can't import console-app
+hooks. Genuinely reusable ones move into a shared lib the plugin can import —
+e.g. `useFirestoreCollection`, `useFirestoreDoc`, and `useHostOrgId` now live
+in `@aglyn/tenant-feature-instance` (the app keeps thin re-export shims).
+Watch the dependency cascade: a hook or component that transitively needs the
+org/session context or the media browser is not a cheap promotion.
 
 ## The UI half
 
@@ -132,11 +142,18 @@ export default function EventsConsolePage({ hostId, entitled }: ConsolePluginPag
 
 - Tag new plugin libs like the mui plugin: `["scope:lib", "scope:aglyn",
   "aglyn:addons"]` — module-boundary lint rules then apply unchanged.
-- UI plugin libs may import `plugins-ui-mui` for primitives; nothing may
-  import a feature plugin from `plugins-ui-mui` (that direction is the
+- Plugin libs may import `@aglyn/plugins-mui` for primitives; nothing may
+  import a feature plugin from `@aglyn/plugins-mui` (that direction is the
   anti-pattern this rule exists to stop).
 
 ## Reference implementations
 
-- **Events calendar** — the first extraction; see `libs/plugins/ui/events-calendar`.
-- **Commerce** — the storefront component set; see `libs/plugins/ui/commerce`.
+- **Events calendar** (`libs/plugins/events-calendar`) — the reference: its
+  whole console page lives in the plugin (AGL-313/394).
+- **Email** (`libs/plugins/email`) — full console relocation (AGL-395): the
+  campaigns composer, audience lists, and a dedicated email-screens list moved
+  into the plugin and surface as the **Emails** page; the Besigner offers only
+  email-safe blocks when editing an email document.
+- **Commerce** (`libs/plugins/commerce`) — nav registered through the registry
+  (AGL-395); the page body still lives in the app pending a plugin-consumable
+  media-picker context (the product editor's media browser needs it).
