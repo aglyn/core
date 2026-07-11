@@ -15,9 +15,17 @@
  * limitations under the License.
  */
 
+import { registerBookingsConsole } from '@aglyn/plugins-bookings'
 import { registerCommerceConsole } from '@aglyn/plugins-commerce'
+import { registerCommunityConsole } from '@aglyn/plugins-community'
+import { registerDataConsole } from '@aglyn/plugins-data'
 import { registerEmailConsole } from '@aglyn/plugins-email'
 import { registerEventsCalendarConsole } from '@aglyn/plugins-events-calendar'
+import { registerInboxConsole } from '@aglyn/plugins-inbox'
+import { registerLogicConsole } from '@aglyn/plugins-logic'
+import { registerMarketingConsole } from '@aglyn/plugins-marketing'
+import { registerRedirectsConsole } from '@aglyn/plugins-redirects'
+import { registerWorkflowsConsole } from '@aglyn/plugins-workflows'
 
 /**
  * Console plugin surfaces (AGL-394). Feature plugins declare their console
@@ -36,6 +44,14 @@ export function registerConsolePlugins(): void {
   registerEventsCalendarConsole()
   registerEmailConsole()
   registerCommerceConsole()
+  registerBookingsConsole()
+  registerRedirectsConsole()
+  registerDataConsole()
+  registerLogicConsole()
+  registerWorkflowsConsole()
+  registerMarketingConsole()
+  registerCommunityConsole()
+  registerInboxConsole()
 }
 
 // Run on import so the registry is ready by first render.

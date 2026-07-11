@@ -1601,6 +1601,474 @@
           "implicitDependencies": []
         }
       },
+      "plugins-community": {
+        "name": "plugins-community",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/community",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/community",
+                "tsConfig": "libs/plugins/community/tsconfig.lib.json",
+                "project": "libs/plugins/community/package.json",
+                "entryFile": "libs/plugins/community/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/community/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/community"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/community/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-community",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/community/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-community",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "plugins-marketing": {
+        "name": "plugins-marketing",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/marketing",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/marketing",
+                "tsConfig": "libs/plugins/marketing/tsconfig.lib.json",
+                "project": "libs/plugins/marketing/package.json",
+                "entryFile": "libs/plugins/marketing/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/marketing/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/marketing"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/marketing/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-marketing",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/marketing/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-marketing",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "plugins-redirects": {
+        "name": "plugins-redirects",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/redirects",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/redirects",
+                "tsConfig": "libs/plugins/redirects/tsconfig.lib.json",
+                "project": "libs/plugins/redirects/package.json",
+                "entryFile": "libs/plugins/redirects/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/redirects/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/redirects"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/redirects/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-redirects",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/redirects/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-redirects",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "plugins-workflows": {
+        "name": "plugins-workflows",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/workflows",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/workflows",
+                "tsConfig": "libs/plugins/workflows/tsconfig.lib.json",
+                "project": "libs/plugins/workflows/package.json",
+                "entryFile": "libs/plugins/workflows/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/workflows/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/workflows"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/workflows/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-workflows",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/workflows/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-workflows",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
       "shared-data-enums": {
         "name": "shared-data-enums",
         "type": "lib",
@@ -2126,6 +2594,123 @@
             "targetGroups": {},
             "js": {
               "packageName": "@aglyn/tenant-data-admin",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "plugins-bookings": {
+        "name": "plugins-bookings",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/bookings",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/bookings",
+                "tsConfig": "libs/plugins/bookings/tsconfig.lib.json",
+                "project": "libs/plugins/bookings/package.json",
+                "entryFile": "libs/plugins/bookings/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/bookings/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/bookings"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/bookings/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-bookings",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/bookings/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-bookings",
               "packageVersion": "0.0.1",
               "isInPackageManagerWorkspaces": false
             }
@@ -3059,6 +3644,240 @@
           "implicitDependencies": []
         }
       },
+      "plugins-inbox": {
+        "name": "plugins-inbox",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/inbox",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/inbox",
+                "tsConfig": "libs/plugins/inbox/tsconfig.lib.json",
+                "project": "libs/plugins/inbox/package.json",
+                "entryFile": "libs/plugins/inbox/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/inbox/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/inbox"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/inbox/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-inbox",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/inbox/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-inbox",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "plugins-logic": {
+        "name": "plugins-logic",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/logic",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/logic",
+                "tsConfig": "libs/plugins/logic/tsconfig.lib.json",
+                "project": "libs/plugins/logic/package.json",
+                "entryFile": "libs/plugins/logic/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/logic/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/logic"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/logic/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-logic",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/logic/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-logic",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
       "shared-ui-jsx": {
         "name": "shared-ui-jsx",
         "type": "lib",
@@ -3175,6 +3994,123 @@
             "targetGroups": {},
             "js": {
               "packageName": "@aglyn/shared-ui-jsx",
+              "packageVersion": "0.0.1",
+              "isInPackageManagerWorkspaces": false
+            }
+          },
+          "implicitDependencies": []
+        }
+      },
+      "plugins-data": {
+        "name": "plugins-data",
+        "type": "lib",
+        "data": {
+          "root": "libs/plugins/data",
+          "targets": {
+            "build": {
+              "dependsOn": [
+                "^build"
+              ],
+              "inputs": [
+                "production",
+                "^production"
+              ],
+              "cache": true,
+              "executor": "@nx/rollup:rollup",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "options": {
+                "outputPath": "dist/libs/plugins/data",
+                "tsConfig": "libs/plugins/data/tsconfig.lib.json",
+                "project": "libs/plugins/data/package.json",
+                "entryFile": "libs/plugins/data/src/index.ts",
+                "external": [
+                  "react/jsx-runtime"
+                ],
+                "rollupConfig": [
+                  "@nx/react/plugins/bundle-rollup",
+                  "tools/rollup-external-packages.js",
+                  "tools/rollup-suppress-use-client.js",
+                  "tools/rollup-skip-typecheck.js"
+                ],
+                "compiler": "swc",
+                "assets": [
+                  {
+                    "glob": "libs/plugins/data/README.md",
+                    "input": ".",
+                    "output": "."
+                  }
+                ],
+                "updateBuildableProjectDepsInPackageJson": true,
+                "skipTypeCheck": true
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                "{workspaceRoot}/eslint.config.mjs"
+              ],
+              "cache": true,
+              "executor": "@nx/eslint:lint",
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true
+            },
+            "test": {
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/jest.preset.js"
+              ],
+              "cache": true,
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{workspaceRoot}/coverage/libs/plugins/data"
+              ],
+              "options": {
+                "passWithNoTests": true,
+                "jestConfig": "libs/plugins/data/jest.config.ts"
+              },
+              "configurations": {
+                "ci": {
+                  "ci": true,
+                  "codeCoverage": true
+                }
+              },
+              "parallelism": true
+            },
+            "nx-release-publish": {
+              "executor": "@nx/js:release-publish",
+              "dependsOn": [
+                "^nx-release-publish"
+              ],
+              "options": {},
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "plugins-data",
+          "projectType": "library",
+          "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+          "sourceRoot": "libs/plugins/data/src",
+          "tags": [
+            "npm:public",
+            "scope:lib",
+            "scope:aglyn",
+            "aglyn:addons"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@aglyn/plugins-data",
               "packageVersion": "0.0.1",
               "isInPackageManagerWorkspaces": false
             }
@@ -4187,12 +5123,12 @@
         },
         {
           "source": "tenant-feature-instance",
-          "target": "aglyn",
+          "target": "shared-util-timestamp",
           "type": "static"
         },
         {
           "source": "tenant-feature-instance",
-          "target": "shared-util-timestamp",
+          "target": "aglyn",
           "type": "static"
         },
         {
@@ -4346,6 +5282,144 @@
       ],
       "shared-util-logger": [],
       "shared-util-vendor": [],
+      "plugins-community": [
+        {
+          "source": "plugins-community",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-community",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-community",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-community",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-community",
+          "target": "shared-data-mdi",
+          "type": "static"
+        }
+      ],
+      "plugins-marketing": [
+        {
+          "source": "plugins-marketing",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-marketing",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-marketing",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-marketing",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-marketing",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "plugins-marketing",
+          "target": "shared-data-mdi",
+          "type": "static"
+        },
+        {
+          "source": "plugins-marketing",
+          "target": "shared-ui-next",
+          "type": "static"
+        }
+      ],
+      "plugins-redirects": [
+        {
+          "source": "plugins-redirects",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-redirects",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-redirects",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-redirects",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "plugins-redirects",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-redirects",
+          "target": "shared-data-mdi",
+          "type": "static"
+        }
+      ],
+      "plugins-workflows": [
+        {
+          "source": "plugins-workflows",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-workflows",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-workflows",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-workflows",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "plugins-workflows",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-workflows",
+          "target": "plugins-logic",
+          "type": "static"
+        },
+        {
+          "source": "plugins-workflows",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "plugins-workflows",
+          "target": "shared-data-mdi",
+          "type": "static"
+        }
+      ],
       "shared-data-enums": [
         {
           "source": "shared-data-enums",
@@ -4391,6 +5465,38 @@
           "type": "static"
         }
       ],
+      "plugins-bookings": [
+        {
+          "source": "plugins-bookings",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-bookings",
+          "target": "shared-data-mdi",
+          "type": "static"
+        },
+        {
+          "source": "plugins-bookings",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-bookings",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-bookings",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "plugins-bookings",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        }
+      ],
       "plugins-commerce": [
         {
           "source": "plugins-commerce",
@@ -4400,6 +5506,31 @@
         {
           "source": "plugins-commerce",
           "target": "shared-data-mdi",
+          "type": "static"
+        },
+        {
+          "source": "plugins-commerce",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-commerce",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "plugins-commerce",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-commerce",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "plugins-commerce",
+          "target": "tenant-feature-instance",
           "type": "static"
         }
       ],
@@ -4505,6 +5636,21 @@
       "plugins-email": [
         {
           "source": "plugins-email",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-email",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-email",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-email",
           "target": "aglyn",
           "type": "static"
         },
@@ -4516,6 +5662,90 @@
         {
           "source": "plugins-email",
           "target": "plugins-mui",
+          "type": "static"
+        },
+        {
+          "source": "plugins-email",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "plugins-email",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        }
+      ],
+      "plugins-inbox": [
+        {
+          "source": "plugins-inbox",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-inbox",
+          "target": "plugins-email",
+          "type": "static"
+        },
+        {
+          "source": "plugins-inbox",
+          "target": "plugins-commerce",
+          "type": "static"
+        },
+        {
+          "source": "plugins-inbox",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-inbox",
+          "target": "shared-ui-next",
+          "type": "static"
+        },
+        {
+          "source": "plugins-inbox",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-inbox",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-inbox",
+          "target": "shared-data-mdi",
+          "type": "static"
+        }
+      ],
+      "plugins-logic": [
+        {
+          "source": "plugins-logic",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-logic",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-logic",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-logic",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "plugins-logic",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-logic",
+          "target": "shared-data-mdi",
           "type": "static"
         }
       ],
@@ -4538,6 +5768,38 @@
         {
           "source": "shared-ui-jsx",
           "target": "shared-util-vendor",
+          "type": "static"
+        }
+      ],
+      "plugins-data": [
+        {
+          "source": "plugins-data",
+          "target": "aglyn",
+          "type": "static"
+        },
+        {
+          "source": "plugins-data",
+          "target": "shared-ui-jsx",
+          "type": "static"
+        },
+        {
+          "source": "plugins-data",
+          "target": "shared-ui-snackstack",
+          "type": "static"
+        },
+        {
+          "source": "plugins-data",
+          "target": "tenant-feature-instance",
+          "type": "static"
+        },
+        {
+          "source": "plugins-data",
+          "target": "shared-util-timestamp",
+          "type": "static"
+        },
+        {
+          "source": "plugins-data",
+          "target": "shared-data-mdi",
           "type": "static"
         }
       ],
@@ -4630,6 +5892,11 @@
         },
         {
           "source": "console",
+          "target": "plugins-logic",
+          "type": "static"
+        },
+        {
+          "source": "console",
           "target": "shared-util-timestamp",
           "type": "static"
         },
@@ -4640,12 +5907,12 @@
         },
         {
           "source": "console",
-          "target": "shared-util-next",
+          "target": "shared-ui-next",
           "type": "static"
         },
         {
           "source": "console",
-          "target": "shared-ui-next",
+          "target": "shared-util-next",
           "type": "static"
         },
         {
@@ -4685,12 +5952,7 @@
         },
         {
           "source": "console",
-          "target": "plugins-events-calendar",
-          "type": "static"
-        },
-        {
-          "source": "console",
-          "target": "plugins-mui",
+          "target": "plugins-bookings",
           "type": "static"
         },
         {
@@ -4700,7 +5962,47 @@
         },
         {
           "source": "console",
+          "target": "plugins-community",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-data",
+          "type": "static"
+        },
+        {
+          "source": "console",
           "target": "plugins-email",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-events-calendar",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-inbox",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-marketing",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-redirects",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-workflows",
+          "type": "static"
+        },
+        {
+          "source": "console",
+          "target": "plugins-mui",
           "type": "static"
         },
         {
@@ -4750,6 +6052,11 @@
         {
           "source": "tenant",
           "target": "plugins-commerce",
+          "type": "static"
+        },
+        {
+          "source": "tenant",
+          "target": "plugins-bookings",
           "type": "static"
         },
         {

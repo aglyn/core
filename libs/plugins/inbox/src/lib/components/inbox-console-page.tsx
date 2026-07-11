@@ -16,14 +16,16 @@
  */
 'use client'
 
-import { mdiInboxArrowDown } from '@aglyn/shared-data-mdi'
-import {
-  CardDisplay,
-  Container,
-  useConfirmationContext,
-} from '@aglyn/shared-ui-jsx'
-import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import type { ConsolePluginPageProps } from '@aglyn/aglyn'
+import { CampaignsCard as HostCampaignsCard } from '@aglyn/plugins-email'
+import { HostOrdersCard } from '@aglyn/plugins-commerce'
+import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
+import { HubTabs } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
+import {
+  useFirestore,
+  useFirestoreCollection,
+} from '@aglyn/tenant-feature-instance'
 import {
   Button,
   Chip,
@@ -49,23 +51,15 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import { useCallback, useState } from 'react'
-import { useFirestore } from '@aglyn/tenant-feature-instance'
-import HostDisplayNameComponent from '../../../components/host-display-name.component'
-import HubTabs from '../../../components/hub-tabs.component'
-import { CampaignsCard as HostCampaignsCard } from '@aglyn/plugins-email'
-import { useHostId } from '../../../components/host-id-provider'
-import HostOrdersCard from '../../../components/commerce/host-orders-card.component'
-import AuthenticatedLayout from '../../../components/layouts/authenticated.layout'
-import DashboardLayout from '../../../components/layouts/dashboard.layout'
-import MainLayout from '../../../components/layouts/main.layout'
-import { buildRoute, Route } from '../../../constants/route-links'
-import hostNavTabItems from '../../../constants/host-nav-tabs'
-import { CONTENT_MAX_WIDTH } from '../../../constants/shared'
-import useFirestoreCollection from '../../../hooks/use-firestore-collection'
 
-/** Form submissions inbox (AGL-77). */
-const HostInbox: NextPageWithLayout = () => {
-  const hostId = useHostId()
+/**
+ * Inbox (AGL-77/104/109 → AGL-395): form submissions reader, site members +
+ * leads, orders, and campaigns — owned by the inbox plugin and rendered by
+ * the shell's generic plugin route. Depends on the commerce + email plugins
+ * for the borrowed Orders and Campaigns tabs.
+ */
+export function InboxConsolePage(props: ConsolePluginPageProps) {
+  const { hostId } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
@@ -168,26 +162,7 @@ const HostInbox: NextPageWithLayout = () => {
 
   return (
     <>
-      <NextPageTitle screen={'Inbox'} />
-      <DashboardLayout
-        navTabItems={hostNavTabItems(hostId)}
-        breadcrumbItems={[
-          {
-            children: <HostDisplayNameComponent hostId={hostId} />,
-            href: buildRoute(Route.HOST_DASHBOARD, { hostId }),
-          },
-          {
-            children: 'Inbox',
-            href: buildRoute(Route.HOST_INBOX, { hostId }),
-          },
-        ]}
-        header={{
-          children: 'Inbox',
-          icon: { path: mdiInboxArrowDown.path },
-        }}
-      >
-        <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
-          <HubTabs
+      <HubTabs
             tabs={[
               {
                 id: 'submissions',
@@ -378,8 +353,6 @@ const HostInbox: NextPageWithLayout = () => {
               },
             ]}
           />
-        </Container>
-      </DashboardLayout>
       <Dialog
         open={Boolean(reader)}
         onClose={() => setReader(null)}
@@ -436,17 +409,6 @@ const HostInbox: NextPageWithLayout = () => {
     </>
   )
 }
-HostInbox.displayName = 'Page:HostInbox'
-HostInbox.layouts = [
-  {
-    Component: AuthenticatedLayout,
-  },
-  {
-    Component: MainLayout,
-    props: {
-      title: 'Inbox',
-    },
-  },
-]
+InboxConsolePage.displayName = 'InboxConsolePage'
 
-export default HostInbox
+export default InboxConsolePage

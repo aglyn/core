@@ -63,11 +63,8 @@ export function hostNavTabItems(hostId: string) {
       label: 'Content',
       href: buildRoute(Route.HOST_CONTENT, { hostId }),
     },
-    {
-      id: 'nav-tab-inbox',
-      label: 'Inbox',
-      href: buildRoute(Route.HOST_INBOX, { hostId }),
-    },
+    // Inbox (nav + page) now comes from the inbox plugin's ConsoleExtension,
+    // served by the generic route (AGL-395).
     {
       id: 'nav-tab-contacts',
       label: 'Contacts',
@@ -85,43 +82,18 @@ export function hostNavTabItems(hostId: string) {
       label: 'Analytics',
       href: buildRoute(Route.HOST_ANALYTICS, { hostId }),
     },
-    {
-      id: 'nav-tab-bookings',
-      label: 'Bookings',
-      href: buildRoute(Route.HOST_BOOKINGS, { hostId }),
-    },
-    {
-      id: 'nav-tab-data',
-      label: 'Data',
-      href: buildRoute(Route.HOST_DATA, { hostId }),
-    },
-    // Products now comes from the commerce plugin's ConsoleExtension
-    // (AGL-395); the page still lives at Route.HOST_PRODUCTS.
-    {
-      id: 'nav-tab-redirects',
-      label: 'Redirects',
-      href: buildRoute(Route.HOST_REDIRECTS, { hostId }),
-    },
-    {
-      id: 'nav-tab-marketing',
-      label: 'Marketing',
-      href: buildRoute(Route.HOST_MARKETING, { hostId }),
-    },
-    {
-      id: 'nav-tab-logic',
-      label: 'Logic',
-      href: buildRoute(Route.HOST_LOGIC, { hostId }),
-    },
-    {
-      id: 'nav-tab-workflows',
-      label: 'Workflows',
-      href: buildRoute(Route.HOST_WORKFLOWS, { hostId }),
-    },
-    {
-      id: 'nav-tab-community',
-      label: 'Community',
-      href: buildRoute(Route.HOST_COMMUNITY, { hostId }),
-    },
+    // Bookings, Data (nav + page) now come from their plugins'
+    // ConsoleExtensions, served by the generic route (AGL-395).
+    // Products, Redirects (nav + page) now come from their plugins'
+    // ConsoleExtensions, served by the generic [hostId]/[pluginSlug] route
+    // (AGL-395).
+    // Marketing (nav + page) now comes from the marketing plugin's
+    // ConsoleExtension, served by the generic route (AGL-395).
+    // Logic, Workflows (nav + page) now come from their plugins'
+    // ConsoleExtensions, served by the generic route (AGL-395).
+    // Community (nav + hub page) now comes from the community plugin's
+    // ConsoleExtension, served by the generic route (AGL-395); the listing
+    // + publisher detail pages remain app routes.
     {
       id: 'nav-tab-setup',
       label: 'Setup',
@@ -139,8 +111,9 @@ export function hostNavTabItems(hostId: string) {
   }))
   if (!pluginTabs.length) return staticTabs
 
-  // Splice plugin tabs into the Events tab's former slot, after Bookings.
-  const anchor = staticTabs.findIndex((tab) => tab.id === 'nav-tab-bookings')
+  // Splice plugin tabs in where Bookings/Events/Products used to sit,
+  // right after Analytics.
+  const anchor = staticTabs.findIndex((tab) => tab.id === 'nav-tab-analytics')
   if (anchor === -1) return [...staticTabs, ...pluginTabs]
   return [
     ...staticTabs.slice(0, anchor + 1),
