@@ -333,7 +333,36 @@ export function ReservationsCard(props: ReservationsCardProps) {
                 </>
               ) : null}
               {reservation.status === 'checked_in' ? (
-                <Button size="small" onClick={handleStatus(reservation, 'checked_out')}>
+                <Button
+                  size="small"
+                  onClick={async () => {
+                    // Folio settlement (AGL-317): surface unpaid room
+                    // charges before the guest leaves.
+                    const folio = (reservation.folio ?? []) as Array<{
+                      amountCents: number
+                    }>
+                    const folioCents = folio.reduce(
+                      (sum, entry) => sum + (entry.amountCents ?? 0),
+                      0,
+                    )
+                    const balanceCents =
+                      (reservation.totalCents ?? 0) -
+                      (reservation.paidCents ?? 0)
+                    if (folioCents > 0 || balanceCents > 0) {
+                      const confirmed = await confirm({
+                        title: 'Check out with open balance?',
+                        description:
+                          `${folioCents > 0 ? `Room charges: ${usd(folioCents)} (already recorded as paid POS orders). ` : ''}` +
+                          `${balanceCents > 0 ? `Stay balance due: ${usd(balanceCents)} — collect at the register.` : ''}`,
+                        confirmationText: 'Check out',
+                      })
+                        .then(() => true)
+                        .catch(() => false)
+                      if (!confirmed) return
+                    }
+                    await handleStatus(reservation, 'checked_out')()
+                  }}
+                >
                   {'Check out'}
                 </Button>
               ) : null}

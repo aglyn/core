@@ -77,6 +77,7 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
   const [productFilter, setProductFilter] = useState('')
   const [dateFilter, setDateFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [channelFilter, setChannelFilter] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [draft, setDraft] = useState<{
     productId: string
@@ -91,14 +92,17 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
     const now = Date.now() / 1000
     return orders.filter((order: any) => {
       if (productFilter && order.productId !== productFilter) return false
-      const status = Aglyn.liftLegacyOrder(order).status
-      if (statusFilter && status !== statusFilter) return false
+      const lifted = Aglyn.liftLegacyOrder(order)
+      if (statusFilter && lifted.status !== statusFilter) return false
+      if (channelFilter && (lifted.channel ?? 'online') !== channelFilter) {
+        return false
+      }
       const created = order.createdAt?.seconds ?? 0
       if (dateFilter === '7d' && now - created > 7 * 86400) return false
       if (dateFilter === '30d' && now - created > 30 * 86400) return false
       return true
     })
-  }, [orders, productFilter, dateFilter, statusFilter])
+  }, [orders, productFilter, dateFilter, statusFilter, channelFilter])
   const handleExportCsv = useCallback(() => {
     const escape = (cell: string) =>
       /[",\n]/.test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell
@@ -222,6 +226,19 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
                   </MenuItem>
                 ),
               )}
+            </TextField>
+            <TextField
+              select
+              size="small"
+              label="Channel"
+              value={channelFilter}
+              onChange={(event) => setChannelFilter(event.target.value)}
+              sx={{ minWidth: 120 }}
+            >
+              <MenuItem value="">{'All channels'}</MenuItem>
+              <MenuItem value="online">{'Online'}</MenuItem>
+              <MenuItem value="pos">{'POS'}</MenuItem>
+              <MenuItem value="draft">{'Draft'}</MenuItem>
             </TextField>
             <Button size="small" onClick={handleExportCsv}>
               {'Export CSV'}
