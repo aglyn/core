@@ -17,27 +17,38 @@
 'use client'
 
 import type { ConsolePluginPageProps } from '@aglyn/aglyn'
-import { GridItems } from '@aglyn/shared-ui-jsx'
+import { HubTabs } from '@aglyn/shared-ui-next'
 import CampaignsCard from './campaigns-card'
 import EmailScreensCard from './email-screens-card'
 import ListsCard from './lists-card'
 
 /**
  * Emails page (AGL-395): the console surface owned by the email plugin,
- * rendered by the shell's generic plugin route. Gathers the marketing
- * "Email" section (campaigns composer + audience lists) that used to live
- * on the Marketing page, plus a dedicated list of designed email screens
- * (which no longer clutter the main Screens list).
+ * rendered by the shell's generic plugin route. Uses the host-setup
+ * vertical-tab pattern (shared `HubTabs`) — Campaigns composer/history,
+ * the designed-email list (which no longer clutters the main Screens
+ * list), and audience lists — the marketing "Email" section, relocated.
  */
 export function EmailsConsolePage(props: ConsolePluginPageProps) {
   const { hostId } = props
   return (
-    <GridItems
-      spacing={3}
-      items={[
-        { size: { xs: 12 }, children: <EmailScreensCard hostId={hostId} /> },
-        { size: { xs: 12 }, children: <CampaignsCard hostId={hostId} /> },
-        { size: { xs: 12 }, children: <ListsCard hostId={hostId} /> },
+    <HubTabs
+      tabs={[
+        {
+          id: 'campaigns',
+          label: 'Campaigns',
+          content: <CampaignsCard hostId={hostId} />,
+        },
+        {
+          id: 'designs',
+          label: 'Designs',
+          content: <EmailScreensCard hostId={hostId} />,
+        },
+        {
+          id: 'audiences',
+          label: 'Audiences',
+          content: <ListsCard hostId={hostId} />,
+        },
       ]}
     />
   )
