@@ -31,7 +31,7 @@ import {
   Timestamp,
   updateDoc,
 } from 'firebase/firestore'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { createEmailScreen } from '../utils/create-email-screen'
 
 const besignerHref = (hostId: string, screenId: string, versionId: string) =>

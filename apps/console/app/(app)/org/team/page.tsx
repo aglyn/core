@@ -18,7 +18,8 @@
 
 import { mdiAccountMultipleOutline } from '@aglyn/shared-data-mdi'
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
+import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import OrgActivityCard from '../../../../components/org-activity-card.component'
 import OrgMembersCard from '../../../../components/org-members-card.component'

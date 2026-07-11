@@ -41,7 +41,7 @@ import {
   useLoading,
 } from '@aglyn/shared-ui-jsx'
 import { FormRenderer, simpleComponentMapper } from '@aglyn/shared-ui-jsx-forms'
-import { NextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { Button, IconButton, Typography } from '@mui/material'

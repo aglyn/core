@@ -23,7 +23,8 @@ import {
 } from '@aglyn/aglyn'
 import { ICON_VARIANT_SYMBOL_SECURE } from '@aglyn/shared-data-enums'
 import { CardDisplay, Container, useConfirmationContext } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
+import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {

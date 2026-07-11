@@ -20,5 +20,5 @@
  * (e.g. the commerce console page) can share it; this shim keeps the app's
  * import sites working.
  */
-export { HubTabs, HubTabs as default } from '@aglyn/shared-ui-next'
-export type { HubTab, HubTabsProps } from '@aglyn/shared-ui-next'
+export { HubTabs, HubTabs as default } from '@aglyn/shared-ui-next/components/hub-tabs'
+export type { HubTab, HubTabsProps } from '@aglyn/shared-ui-next/components/hub-tabs'

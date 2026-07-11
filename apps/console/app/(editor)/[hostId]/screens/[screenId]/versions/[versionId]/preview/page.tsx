@@ -24,7 +24,7 @@ import { registerEmailPlugin } from '@aglyn/plugins-email'
 import { registerBookingsPlugin } from '@aglyn/plugins-bookings'
 import { registerEventsCalendarPlugin } from '@aglyn/plugins-events-calendar'
 import { registerMuiPlugin } from '@aglyn/plugins-mui'
-import { NextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import {
   getGoogleFontsUrl,
   ThemeProvider,

@@ -18,7 +18,8 @@
 
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import { Container } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
+import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Stack } from '@mui/material'
 import HostAnalyticsCard from '../../../../components/analytics/host-analytics-card.component'
 import CampaignGlanceCard from '../../../../components/dashboard/campaign-glance-card.component'

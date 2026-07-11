@@ -28,7 +28,7 @@ import {
 } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
 import { createEmailScreen } from '../utils/create-email-screen'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import {
   useFirestore,

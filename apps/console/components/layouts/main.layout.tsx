@@ -41,7 +41,7 @@ import {
   ScrollReaction,
   SrOnly,
 } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { getThemeModeDisplayName, mergeSxProps } from '@aglyn/shared-ui-theme'
 import { _isArr, _isArrEmpty } from '@aglyn/shared-util-tools'
 import { useUserPhoto } from '@aglyn/tenant-feature-instance'

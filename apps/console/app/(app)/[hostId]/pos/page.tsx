@@ -17,7 +17,8 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
-import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
+import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
   Alert,

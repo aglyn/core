@@ -24,7 +24,7 @@ import {
 import { Container, GridItems } from '@aglyn/shared-ui-jsx'
 import { AppLink } from '@aglyn/shared-ui-jsx'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { Button, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'

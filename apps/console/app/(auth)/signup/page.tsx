@@ -38,7 +38,7 @@ import {
 import {
   MdiIcon,
 } from '@aglyn/shared-ui-jsx'
-import { useNextPageTitle } from '@aglyn/shared-ui-next'
+import { useNextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { Button, Divider, Stack, Typography } from '@mui/material'
 import { logEvent } from 'firebase/analytics'
 import {

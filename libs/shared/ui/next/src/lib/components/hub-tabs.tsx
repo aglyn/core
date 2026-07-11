@@ -19,8 +19,7 @@
 import { CardDisplay, GridItems } from '@aglyn/shared-ui-jsx'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Tab, useMediaQuery, useTheme } from '@mui/material'
-import { useRouter } from 'next/router'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { type ReactNode, type SyntheticEvent, useCallback, useState } from 'react'
 
 export interface HubTab {
@@ -46,6 +45,7 @@ export interface HubTabsProps {
 export function HubTabs(props: HubTabsProps) {
   const { tabs, navHeader = 'Navigation' } = props
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const theme = useTheme()
   const stacked = useMediaQuery(theme.breakpoints.down('sm'))
@@ -59,13 +59,16 @@ export function HubTabs(props: HubTabsProps) {
   const handleChange = useCallback(
     (event: SyntheticEvent, value: string) => {
       setTab(value)
-      void router.replace(
-        { pathname: router.pathname, query: { ...router.query, tab: value } },
-        undefined,
-        { shallow: true },
-      )
+      // App Router has no shallow `router.replace({ query })`: rebuild the
+      // query string off the current params, set `tab`, and replace without
+      // scrolling so the hub view still deep-links and survives back/forward.
+      const nextParams = new URLSearchParams(searchParams?.toString())
+      nextParams.set('tab', value)
+      void router.replace(`${pathname}?${nextParams.toString()}`, {
+        scroll: false,
+      })
     },
-    [router],
+    [router, pathname, searchParams],
   )
 
   return (

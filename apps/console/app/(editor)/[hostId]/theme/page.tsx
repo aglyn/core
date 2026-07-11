@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { NextPageWithLayout } from '@aglyn/shared-ui-next'
+import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useHostId } from '../../../../components/host-id-provider'

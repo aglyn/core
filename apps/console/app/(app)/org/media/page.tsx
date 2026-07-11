@@ -18,7 +18,8 @@
 
 import { ICON_VARIANT_HOST_GROUP } from '@aglyn/shared-data-enums'
 import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
-import { NextPageTitle, NextPageWithLayout } from '@aglyn/shared-ui-next'
+import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
+import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { Alert } from '@mui/material'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'

@@ -17,8 +17,7 @@
 'use client'
 
 import { doc, getDoc } from 'firebase/firestore'
-import { useParams } from 'next/navigation'
-import { useRouter } from 'next/router'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { createContext, useContext, useEffect } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { useOrgWorkspace } from '../hooks/use-org-workspace'
@@ -36,6 +35,8 @@ export function HostIdProvider({ children }) {
   const params = useParams<{ hostId: string }>()
   const hostId = params?.hostId as string
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const firestore = useFirestore()
   const { data: user } = useUser()
   const {
@@ -94,9 +95,13 @@ export function HostIdProvider({ children }) {
         }
         if (workspaceSlug && membership.slug) {
           // Subdomains pin the workspace to the hostname — follow the
-          // site home instead (the session cookie signs it in).
+          // site home instead (the session cookie signs it in). The Pages
+          // Router `router.asPath` (path + query) is reconstructed here from
+          // `usePathname()` + `useSearchParams()`.
+          const query = searchParams?.toString()
+          const asPath = query ? `${pathname}?${query}` : pathname
           window.location.assign(
-            `https://${membership.slug}.${WORKSPACE_DOMAIN}${router.asPath}`,
+            `https://${membership.slug}.${WORKSPACE_DOMAIN}${asPath}`,
           )
           return
         }
@@ -111,6 +116,8 @@ export function HostIdProvider({ children }) {
     hostId,
     user,
     router,
+    pathname,
+    searchParams,
     orgs,
     currentOrg,
     selectOrg,

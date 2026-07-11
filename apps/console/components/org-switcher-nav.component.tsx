@@ -40,7 +40,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { buildRoute, Route } from '../constants/route-links'
 import useCurrentTenant from '../hooks/use-current-tenant'

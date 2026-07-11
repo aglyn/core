@@ -16,11 +16,9 @@
  */
 'use client'
 
-import {
-  ConfirmationProviderComponent,
-  LoadingLayoutComponent,
-} from '@aglyn/shared-ui-jsx'
-import { NextPageTitleProvider } from '@aglyn/shared-ui-next'
+import { ConfirmationProviderComponent } from '@aglyn/shared-ui-jsx'
+import { LoadingLayoutAppComponent } from '@aglyn/shared-ui-jsx/components/loading-layout-app.component'
+import { NextPageTitleProvider } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import { SnackbarProvider } from '@aglyn/shared-ui-snackstack'
 import {
   consoleThemeDark,
@@ -45,14 +43,14 @@ import '../constants/register-console-plugins'
 const ThemeStack = withThemeCssVarProvider(
   ({ children }: { children?: ReactNode }) => (
     <FirebaseAppLayout>
-      <LoadingLayoutComponent>
+      <LoadingLayoutAppComponent>
         <ConfirmationProviderComponent>
           <SnackbarProvider>
             <HostIdProvider>{children}</HostIdProvider>
           </SnackbarProvider>
           <OsfaTooltip />
         </ConfirmationProviderComponent>
-      </LoadingLayoutComponent>
+      </LoadingLayoutAppComponent>
     </FirebaseAppLayout>
   ),
   { theme: { light: consoleThemeLight, dark: consoleThemeDark } },
