@@ -318,6 +318,23 @@ are reference consumers.
 
 ## Project setup
 
+Scaffold a new first-party plugin instead of hand-copying one (AGL-425):
+
+```bash
+node tools/scripts/create-plugin.mjs my-plugin \
+  --label "My Plugin" --surfaces console,tenantApi
+```
+
+That generates the complete `libs/plugins/my-plugin` library (correctly
+tagged, with register entries per surface and a passing spec), registers it
+in `plugins.config.json` + the tsconfig aliases, re-runs the manifest
+codegen, and prints the two manual follow-ups (catalog entry + release
+flag). Community/marketplace authors start from
+`tools/plugin-loader/realm/template` instead — a standalone npm package
+that builds a host-ABI realm bundle.
+
+Conventions the scaffold already applies:
+
 - Tag new plugin libs with **exactly** `["aglyn:addons"]` — nothing else
   (AGL-409). This single tag is a plugin's whole module-boundary identity: as
   a dependency *target* no core scope's allowlist reaches it, so `nx lint`

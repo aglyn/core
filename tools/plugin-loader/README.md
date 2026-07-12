@@ -78,6 +78,10 @@ client- and server-side before a byte executes).
 - **`realm/demo/`** — a minimal realm plugin (console widget in the
   `hostActivity` slot). Build with
   `cd realm/demo && npx rollup -c ../rollup.config.mjs`.
+- **`realm/template/`** — the standalone starter for community authors
+  (AGL-425): npm package with the build config, entry-contract stubs,
+  `manifest.json`, and a README that doubles as the marketplace listing
+  documentation. Copy it out of the repo and go.
 
 The authoring contract: export `register(host)` for client surfaces and/or
 `registerApi()` for server handler bundles (the latter load only behind
