@@ -36,6 +36,7 @@ import * as ProductReviews from './components/product-reviews'
 import * as RelatedProducts from './components/related-products'
 import * as Wishlist from './components/wishlist'
 import { BUNDLE_ID } from './constants/bundle-common'
+import { COMMERCE_PERMISSIONS } from './model/plugin-permissions'
 
 /** Code-split: the Products console page only loads when opened. */
 const CommerceConsolePage = lazy(() => import('./components/commerce-console-page'))
@@ -122,6 +123,9 @@ export const COMMERCE_BUNDLE: PluginSdk.FeatureBundleEntry[] = [
  * nav renders the link and the existing named route serves the page.
  */
 export function registerCommerceConsole(): void {
+  // Plugin-declared permissions (AGL-435): tier defaults ride every
+  // resolved role set; custom roles override key-by-key.
+  PluginSdk.registerPluginPermissions(COMMERCE_PERMISSIONS)
   PluginSdk.registerConsoleExtension({
     pluginId: BUNDLE_ID,
     displayName: 'Commerce',

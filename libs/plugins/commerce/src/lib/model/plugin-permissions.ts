@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2022 Aglyn LLC
+ * Copyright 2026 Aglyn LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,19 @@
  * limitations under the License.
  */
 
-export { default } from './plugin-manager'
-export * from './plugin-manager'
-export * from './billing-webhook-hooks'
-export * from './custom-fields'
-export * from './enabled-plugins'
-export * from './install-presets'
-export * from './plugin-config'
-export * from './plugin-jobs'
-export * from './plugin-permissions'
-export * from './plugin-loader'
-export * from './realm-plugins'
-export * from './site-page-hooks'
-export * from './site-runtime'
-export * from './feature-plugins'
-export * from './plugin-bridge'
+import type { PluginPermission } from '@aglyn/aglyn'
+
+/**
+ * Commerce's plugin-declared permissions (AGL-435) — the reference
+ * adopter. Pure data: the client barrel and /server entry both register
+ * it, so console gating and API-side resolution agree.
+ */
+export const COMMERCE_PERMISSIONS: readonly PluginPermission[] = [
+  {
+    key: 'managePos',
+    pluginId: 'commerce',
+    label: 'Use the point of sale',
+    description: 'Open the POS page and record in-person sales.',
+    defaults: { admin: true, editor: true, viewer: false },
+  },
+]

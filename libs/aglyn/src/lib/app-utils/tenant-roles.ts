@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { pluginPermissionDefaults } from '../plugin-manager/plugin-permissions'
+
 /**
  * Tenant roles (AGL-120): named permission sets assigned to team members,
  * with per-user overrides an admin can apply on top. Shared between the
@@ -93,7 +95,13 @@ export function resolveRolePermissions(
   customRoles?: Record<string, TenantCustomRole | undefined> | null,
 ): TenantPermissionSet {
   const builtIn = TENANT_ROLE_PERMISSIONS[(role ?? '') as TenantRoleId]
-  let base = builtIn ?? TENANT_ROLE_PERMISSIONS.viewer
+  // Plugin-declared keys (AGL-435): tier defaults ride under the built-in
+  // set; custom-role overrides below win key-by-key like any other key.
+  const tier: TenantRoleId = builtIn ? ((role ?? 'viewer') as TenantRoleId) : 'viewer'
+  let base = {
+    ...pluginPermissionDefaults(tier),
+    ...(builtIn ?? TENANT_ROLE_PERMISSIONS.viewer),
+  }
   if (!builtIn) {
     const custom = customRoles?.[role ?? '']
     if (custom) {

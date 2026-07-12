@@ -17,6 +17,7 @@
 
 import { checkEntitlement,
   registerPluginConfigSchema,
+  registerPluginJob,
 } from '@aglyn/aglyn/server'
 import { type BookedInterval, BOOKING_MAX_DAYS_AHEAD, computeOpenSlots, type HostBookingService, isSlotOpen } from './model'
 import {
@@ -24,12 +25,42 @@ import {
   registerPluginApiRoute,
   type PluginApiHandler,
 } from '@aglyn/aglyn/server'
+import { BUNDLE_ID } from './constants/bundle-common'
 import { BOOKINGS_CONFIG_SCHEMA } from './plugin-config'
 import { bookingsBillingWebhookHandler } from './server/billing-webhook'
 
 // Settings schema (AGL-428): registered here too so server-only loads
 // (API dispatchers) get defaults-merged getPluginConfig reads.
 registerPluginConfigSchema(BOOKINGS_CONFIG_SCHEMA)
+
+// Scheduled cleanup (AGL-435): lapse day-old expired payment holds to
+// 'canceled' (the read paths already treat them as released — this keeps
+// the collection tidy and the read-time filter cheap). Bounded + failure
+// tolerant: a missing collection-group index just logs and retries on
+// the next beat.
+registerPluginJob({
+  pluginId: BUNDLE_ID,
+  name: 'expire-stale-holds',
+  intervalMinutes: 6 * 60,
+  description: 'Cancel pendingPayment bookings whose hold lapsed >24h ago.',
+  handler: async () => {
+    const cutoff = Date.now() - 24 * 60 * 60_000
+    const snapshot = await firebaseAdmin
+      .app()
+      .firestore()
+      .collectionGroup('bookings')
+      .where('status', '==', 'pendingPayment')
+      .where('expiresAtMs', '<', cutoff)
+      .limit(100)
+      .get()
+    for (const doc of snapshot.docs) {
+      await doc.ref.set({ status: 'canceled' }, { merge: true })
+    }
+    if (snapshot.size) {
+      console.info(`bookings: lapsed ${snapshot.size} stale payment holds`)
+    }
+  },
+})
 import {
   firebaseAdmin,
   getOrgForHost,

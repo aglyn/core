@@ -196,6 +196,17 @@ template + the catalog entry).
 - **Billing webhook hooks** — `registerBillingWebhookHandler` receives the
   platform Stripe events (commerce orders, booking payments, marketplace
   purchases live in their plugins).
+- **Permissions** (AGL-435) — `registerPluginPermissions([{key, label,
+  defaults: {admin, editor, viewer}}])` contributes role-resolved keys:
+  they ride every resolved permission set (`ConsolePluginPageProps.
+  permissions`, API-side resolution), and custom roles override them
+  key-by-key. Reference adopter: commerce's `managePos`.
+- **Scheduled jobs** (AGL-435) — `registerPluginJob({pluginId, name,
+  intervalMinutes, handler})` on the `/server` surface; the deployment's
+  scheduler POSTs `/api/plugins/run-jobs` (shared `PLUGIN_JOBS_SECRET`
+  header, 501 when unconfigured) and due jobs run with error isolation.
+  Keep handlers idempotent and bounded. Reference adopter: bookings'
+  `expire-stale-holds`.
 - **Custom field types** (AGL-434) — `registerCustomFieldType({name,
   pluginId, label, baseType, Input, validate})` adds a named field type to
   the dataset schema editor, riding an existing storage type (text/bool/
