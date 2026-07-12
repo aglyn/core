@@ -51,6 +51,110 @@ export interface CommunityListing {
   /** One-time price in whole USD; 0/absent = free (AGL-46). */
   priceUsd?: number
   deletedAt?: unknown
+  // Listing content (AGL-430, Strapi Market parity) — publisher-authored,
+  // rendered on the marketplace detail page. All optional; validated by
+  // validateListingContent on the API path and SANITIZED at render time
+  // (the doc is publisher-writable, so renderers never trust it).
+  logoUrl?: string
+  screenshots?: string[]
+  /** Markdown documentation shown on the listing page (no raw HTML). */
+  readme?: string
+  homepageUrl?: string
+  repositoryUrl?: string
+  /** SPDX-ish license label, e.g. "MIT". */
+  license?: string
+  categories?: string[]
+}
+
+/** Fixed category taxonomy for marketplace listings (AGL-430). */
+export const LISTING_CATEGORIES: readonly string[] = [
+  'analytics',
+  'automation',
+  'commerce',
+  'communication',
+  'content',
+  'design',
+  'forms',
+  'integrations',
+  'marketing',
+  'productivity',
+  'seo',
+  'security',
+] as const
+
+export const LISTING_README_MAX_CHARS = 20_000
+export const LISTING_MAX_SCREENSHOTS = 6
+
+const HTTPS_URL = /^https:\/\/[^\s]+$/
+
+/**
+ * Validates publisher-editable listing content (AGL-430). Returns the
+ * normalized subset to persist, or an error. Shared by publish and the
+ * update-listing action so both paths accept exactly the same shapes.
+ */
+export function validateListingContent(input: Record<string, unknown>): {
+  ok: boolean
+  error?: string
+  content?: Partial<CommunityListing>
+} {
+  const content: Partial<CommunityListing> = {}
+  for (const key of ['logoUrl', 'homepageUrl', 'repositoryUrl'] as const) {
+    const value = input[key]
+    if (value === undefined || value === '') continue
+    if (typeof value !== 'string' || !HTTPS_URL.test(value) || value.length > 500) {
+      return { ok: false, error: `${key} must be an https URL` }
+    }
+    content[key] = value
+  }
+  const screenshots = input['screenshots']
+  if (screenshots !== undefined) {
+    if (
+      !Array.isArray(screenshots) ||
+      screenshots.length > LISTING_MAX_SCREENSHOTS ||
+      screenshots.some(
+        (url) =>
+          typeof url !== 'string' || !HTTPS_URL.test(url) || url.length > 500,
+      )
+    ) {
+      return {
+        ok: false,
+        error: `screenshots must be up to ${LISTING_MAX_SCREENSHOTS} https URLs`,
+      }
+    }
+    content.screenshots = screenshots as string[]
+  }
+  const readme = input['readme']
+  if (readme !== undefined) {
+    if (typeof readme !== 'string' || readme.length > LISTING_README_MAX_CHARS) {
+      return {
+        ok: false,
+        error: `readme must be markdown up to ${LISTING_README_MAX_CHARS} chars`,
+      }
+    }
+    if (readme.trim()) content.readme = readme
+  }
+  const license = input['license']
+  if (license !== undefined && license !== '') {
+    if (typeof license !== 'string' || license.length > 40) {
+      return { ok: false, error: 'license must be a short label (max 40)' }
+    }
+    content.license = license
+  }
+  const categories = input['categories']
+  if (categories !== undefined) {
+    if (
+      !Array.isArray(categories) ||
+      categories.length > 3 ||
+      categories.some((entry) => !LISTING_CATEGORIES.includes(String(entry)))
+    ) {
+      return {
+        ok: false,
+        error: 'categories must be up to 3 entries from the fixed taxonomy',
+      }
+    }
+    content.categories = categories.map(String)
+  }
+  return { ok: true, content }
 }
 
 /** Platform revenue share on paid listings (AGL-46). */

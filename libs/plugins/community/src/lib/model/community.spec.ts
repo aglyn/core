@@ -107,3 +107,46 @@ describe('sanitizeCommunityDefinition', () => {
     })
   })
 })
+
+describe('validateListingContent (AGL-430)', () => {
+  const { validateListingContent, LISTING_CATEGORIES } =
+    require('./community') as typeof import('./community')
+
+  it('accepts a full, valid content payload', () => {
+    const verdict = validateListingContent({
+      logoUrl: 'https://cdn.example.com/logo.png',
+      screenshots: ['https://cdn.example.com/a.png'],
+      readme: '# Hi',
+      homepageUrl: 'https://example.com',
+      repositoryUrl: 'https://github.com/x/y',
+      license: 'MIT',
+      categories: [LISTING_CATEGORIES[0]],
+    })
+    expect(verdict.ok).toBe(true)
+    expect(verdict.content?.license).toBe('MIT')
+  })
+
+  it('rejects non-https URLs and oversized readme', () => {
+    expect(validateListingContent({ logoUrl: 'http://x.com/a.png' }).ok).toBe(
+      false,
+    )
+    expect(
+      validateListingContent({ readme: 'x'.repeat(20_001) }).ok,
+    ).toBe(false)
+  })
+
+  it('rejects off-taxonomy categories and too many screenshots', () => {
+    expect(validateListingContent({ categories: ['not-real'] }).ok).toBe(false)
+    expect(
+      validateListingContent({
+        screenshots: Array(7).fill('https://x.com/s.png'),
+      }).ok,
+    ).toBe(false)
+  })
+
+  it('treats absent fields as no-ops', () => {
+    const verdict = validateListingContent({})
+    expect(verdict.ok).toBe(true)
+    expect(verdict.content).toEqual({})
+  })
+})

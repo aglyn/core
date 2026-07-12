@@ -27,7 +27,10 @@ import {
 import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
 import { createHash } from 'crypto'
-import { COMMUNITY_MAX_PRICE_USD } from '../model/community'
+import {
+  COMMUNITY_MAX_PRICE_USD,
+  validateListingContent,
+} from '../model/community'
 
 // Base64 bundle bodies: a small JS plugin bundle, capped generously.
 const MAX_BUNDLE_BYTES = 5 * 1024 * 1024
@@ -45,9 +48,57 @@ const MAX_BUNDLE_BYTES = 5 * 1024 * 1024
  * permission, community profile, Pro plan; paid listings need completed
  * Stripe Connect onboarding.
  */
+const updateListingContent: PluginApiHandler = async (req, res) => {
+  const listingId = String(req.body?.listingId ?? '')
+  if (!listingId) return res.status(400).json({ error: 'Missing listingId' })
+  const authorization = String(req.headers.authorization ?? '')
+  const idToken = authorization.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : undefined
+  if (!idToken) return res.status(401).json({ error: 'Unauthenticated' })
+  const verdict = validateListingContent(req.body ?? {})
+  if (!verdict.ok) return res.status(400).json({ error: verdict.error })
+  try {
+    const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    const listingRef = firebaseAdmin
+      .app()
+      .firestore()
+      .collection('communityListings')
+      .doc(listingId)
+    const listing = (await listingRef.get()).data()
+    if (!listing || listing.deletedAt) {
+      return res.status(404).json({ error: 'Unknown listing' })
+    }
+    if (listing.profileId !== decoded.uid && decoded['staff'] !== true) {
+      return res.status(403).json({ error: 'Not your listing' })
+    }
+    const description = req.body?.description
+    await listingRef.set(
+      {
+        ...verdict.content,
+        ...(typeof description === 'string'
+          ? { description: description.slice(0, 500) }
+          : {}),
+        updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    )
+    return res.status(200).json({ ok: true })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Listing update failed' })
+  }
+}
+
 export const publishPluginHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+  // Content-only listing edits (AGL-430): publishers refresh the docs the
+  // detail page renders (readme/screenshots/links/…) without shipping a
+  // new bundle. Publisher-or-staff, validated exactly like publish.
+  if (req.body?.action === 'update-listing') {
+    return updateListingContent(req, res)
   }
   const body = req.body ?? {}
   const headers = req.headers as Partial<Record<string, string>>
@@ -57,6 +108,11 @@ export const publishPluginHandler: PluginApiHandler = async (req, res) => {
   const changelog = String(body?.changelog ?? '').slice(0, 1000)
   const priceUsd = Math.round(Number(body?.priceUsd ?? 0)) || 0
   const bundleBase64 = String(body?.bundle ?? '')
+  // Listing content (AGL-430): optional publisher docs for the detail page.
+  const contentVerdict = validateListingContent(body ?? {})
+  if (!contentVerdict.ok) {
+    return res.status(400).json({ error: contentVerdict.error })
+  }
   if (priceUsd < 0 || priceUsd > COMMUNITY_MAX_PRICE_USD) {
     return res
       .status(400)
@@ -184,6 +240,7 @@ export const publishPluginHandler: PluginApiHandler = async (req, res) => {
         ...(description.trim() && { description: description.trim() }),
         ...(category.trim() && { category: category.trim() }),
         priceUsd,
+        ...contentVerdict.content,
         latestVersion: manifest.version,
         deletedAt: null,
         ...(existing.empty && { createdAt: now }),

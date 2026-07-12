@@ -363,6 +363,46 @@ await put(
   },
 )
 
+// Marketplace demo plugin listing (AGL-430): a fully-populated listing so
+// the detail page, installs, and the review queue have real content to
+// exercise. The sha matches tools/plugin-loader/realm/demo's bundle when
+// that has been built; install tests re-seed the sha as needed.
+const demoListing = firestore.collection('communityListings').doc('realm-demo')
+await put(demoListing, {
+  type: 'plugin',
+  profileId: 'seed-publisher',
+  pluginId: 'realm-demo',
+  displayName: 'Realm demo',
+  description: 'A tiny example plugin that adds a console widget.',
+  categories: ['productivity'],
+  logoUrl: 'https://example.com/realm-demo-logo.png',
+  screenshots: ['https://example.com/realm-demo-shot-1.png'],
+  readme:
+    '# Realm demo\n\nAdds a friendly widget to the host activity slot.\n\n' +
+    '## Setup\n\n1. Install.\n2. Enable on Plugins & add-ons.\n',
+  homepageUrl: 'https://example.com/realm-demo',
+  repositoryUrl: 'https://example.com/realm-demo/repo',
+  license: 'MIT',
+  priceUsd: 0,
+  latestVersion: '1.0.0',
+  deletedAt: null,
+  createdAt: now,
+})
+await put(demoListing.collection('pluginVersions').doc('1.0.0'), {
+  version: '1.0.0',
+  sha256: 'seed-sha-placeholder',
+  objectPath: 'artifacts/realm-demo/1.0.0/seed-sha-placeholder.bundle',
+  manifest: {
+    id: 'realm-demo',
+    name: 'Realm demo',
+    version: '1.0.0',
+    entry: 'plugin.bundle.mjs',
+    hostAbi: 1,
+  },
+  changelog: 'First release.',
+  publishedAt: now,
+})
+
 console.log(
   `Done — ${written} docs. user=${E2E_EMAIL} (uid ${E2E_UID}, staff) ` +
     `org=${orgId} host=${hostId} project=${projectId}`,
