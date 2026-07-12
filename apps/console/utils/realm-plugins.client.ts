@@ -32,6 +32,54 @@ function ensureRealmPluginHost(): void {
 }
 
 /**
+ * DEV-ONLY realm loop (AGL-427, Strapi watch:link parity): load bundles
+ * straight from a local dev server WITHOUT sha/signature checks —
+ * `NEXT_PUBLIC_PLUGIN_DEV_BUNDLES="my-plugin=http://localhost:5173/plugin.bundle.mjs"`.
+ * The NODE_ENV guard makes this entire body dead code in production
+ * builds; localhost-only URLs are enforced on top. Pair with
+ * `npm run watch` in the plugin template and refresh to iterate.
+ */
+async function loadDevRealmBundles(): Promise<void> {
+  if (process.env.NODE_ENV === 'production') return
+  const configured = process.env.NEXT_PUBLIC_PLUGIN_DEV_BUNDLES ?? ''
+  if (!configured) return
+  Aglyn.setRealmPluginHost({ React, jsxRuntime, aglyn: Aglyn })
+  const host = (globalThis as Record<string, unknown>).__AGLYN_PLUGIN_HOST__
+  for (const entry of configured.split(',')) {
+    const [pluginId, url] = entry.split('=').map((part) => part.trim())
+    if (!pluginId || !url) continue
+    try {
+      const { hostname } = new URL(url)
+      if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        console.error(`dev realm bundle ${pluginId}: localhost URLs only`)
+        continue
+      }
+      const response = await fetch(url, { cache: 'no-store' })
+      if (!response.ok) throw new Error(`fetch ${response.status}`)
+      const blobUrl = URL.createObjectURL(
+        new Blob([await response.arrayBuffer()], { type: 'text/javascript' }),
+      )
+      try {
+        const mod = (await import(/* webpackIgnore: true */ blobUrl)) as {
+          register?: (host: unknown) => void
+          default?: { register?: (host: unknown) => void }
+        }
+        const register = mod.register ?? mod.default?.register
+        if (typeof register !== 'function') {
+          throw new Error('bundle exports no register(host)')
+        }
+        register(host)
+        console.info(`dev realm bundle loaded (UNVERIFIED): ${pluginId}`)
+      } finally {
+        URL.revokeObjectURL(blobUrl)
+      }
+    } catch (error) {
+      console.error(`dev realm bundle ${pluginId} failed:`, error)
+    }
+  }
+}
+
+/**
  * Fetches the org's trusted-realm installs (server-joined with the
  * staff-only trust grants) and loads them into the app realm. Never
  * throws: a missing artifacts origin, a failed fetch, or a bad bundle
@@ -41,6 +89,7 @@ export async function loadOrgRealmPlugins(
   orgId: string,
   idToken?: string,
 ): Promise<void> {
+  await loadDevRealmBundles()
   const artifactsBase = process.env.NEXT_PUBLIC_PLUGIN_ORIGIN ?? ''
   if (!artifactsBase) return
   try {

@@ -55,7 +55,9 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
     .map((install) => `${install.listingId}@${install.version}`)
     .join(',')
   useEffect(() => {
-    if (!realmKey) return
+    // Dev bundles (AGL-427) load even with no realm installs; the env is
+    // inlined and the whole dev path is dead code in production builds.
+    if (!realmKey && !process.env.NEXT_PUBLIC_PLUGIN_DEV_BUNDLES) return
     void loadSiteRealmPlugins(props.realmPlugins).then(() =>
       setRealmTick((tick) => tick + 1),
     )

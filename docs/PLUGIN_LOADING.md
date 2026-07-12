@@ -139,6 +139,7 @@ per-request org gate applies to them too.
 | `PLUGIN_TRUST_PRIVATE_KEY` | console server ONLY | Signing key (base64 PKCS8 DER) for the staff sign-plugin route |
 | `PLUGIN_REMOTE_SERVER` | server | `enabled` turns on remote server bundles (default off) |
 | `PLUGIN_REMOTE_SERVER_BUNDLES` | server | Comma-separated `listingId@version` allowlist |
+| `NEXT_PUBLIC_PLUGIN_DEV_BUNDLES` | client, **dev only** | `id=http://localhost:PORT/plugin.bundle.mjs,...` — loads UNVERIFIED bundles for the local authoring loop (AGL-427). The code path is compiled out of production builds and refuses non-localhost URLs; never set it anywhere shared. Pair with `npm run watch` in the realm template and refresh. |
 
 Generate the key pair with
 `node tools/scripts/generate-plugin-trust-key.mjs`. Rotating the key means
