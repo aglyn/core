@@ -80,7 +80,11 @@ export function createPluginLoader(manifest: PluginLoadManifest): PluginLoader {
   ) => {
     const wanted = surfaces.filter((surface) => entry.register[surface])
     if (!wanted.length) return
+    // Dev-mode load metrics (AGL-436): slow plugins show up in the
+    // console instead of hiding inside the gate's total.
+    const startedAt = Date.now()
     const mod = await loadOnce(entry)
+    const loadMs = Date.now() - startedAt
     for (const surface of wanted) {
       const key = `${entry.id}:${surface}`
       if (registered.has(key)) continue
@@ -100,6 +104,12 @@ export function createPluginLoader(manifest: PluginLoadManifest): PluginLoader {
       } finally {
         setRegisteringPluginId(undefined)
       }
+    }
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug(
+        `[plugin-loader] ${entry.id} [${wanted.join(',')}] ` +
+          `load ${loadMs}ms, total ${Date.now() - startedAt}ms`,
+      )
     }
   }
 

@@ -151,6 +151,23 @@ Generate the key pair with
 `node tools/scripts/generate-plugin-trust-key.mjs`. Rotating the key means
 re-signing every granted version, then swapping the public key everywhere.
 
+## Performance guardrails (AGL-436)
+
+- **Per-plugin budgets**: `node tools/scripts/check-plugin-budgets.mjs`
+  measures each plugin's OWN minified code (everything external) against
+  `tools/plugin-budgets.json` (baseline + 25% headroom) and fails on
+  regression; `--update` re-baselines after a deliberate change. Current
+  baseline: commerce ~179 KB, everything else 8–61 KB.
+- **Loader metrics**: dev builds log `[plugin-loader] <id> [surfaces]
+  load Xms, total Yms` per activation, so a slow plugin is visible
+  instead of hiding in the gate's total.
+- **Server cold start**: the dispatchers' `ensureAll` loads every
+  first-party `/server` entry once per process; the same dev metrics
+  time it. Registrations are cached — repeat requests pay nothing.
+- **Realm artifacts** are immutable content-addressed objects published
+  with `public, max-age=31536000, immutable`; front them with a CDN and
+  cache hits are free forever (a new version is a new URL).
+
 ## Publish → sign → load walkthrough
 
 1. Author builds with the realm rollup template; entry exports
