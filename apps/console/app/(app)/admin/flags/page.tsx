@@ -16,7 +16,11 @@
  */
 'use client'
 
-import type { ReleaseFlagKey, ReleaseFlagValue } from '@aglyn/aglyn'
+import {
+  pluginForReleaseFlag,
+  type ReleaseFlagKey,
+  type ReleaseFlagValue,
+} from '@aglyn/aglyn'
 import { ICON_VARIANT_SYMBOL_FLAG } from '@aglyn/shared-data-enums'
 import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
@@ -241,6 +245,17 @@ const AdminFlags: NextPageWithLayout = () => {
                             {row.key}
                           </Typography>
                           {statusChip(row)}
+                          {/* AGL-422: flags mapped to a first-party plugin
+                              gate its whole LOADER (console, sites, API),
+                              not just nav — surface that blast radius. */}
+                          {pluginForReleaseFlag(row.key) ? (
+                            <Chip
+                              label={`Gates plugin: ${pluginForReleaseFlag(row.key)?.label}`}
+                              size="small"
+                              variant="outlined"
+                              color="warning"
+                            />
+                          ) : null}
                           {row.published ? null : (
                             <Chip
                               label="Not in template (code default)"

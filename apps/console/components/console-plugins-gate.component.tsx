@@ -16,13 +16,36 @@
  */
 'use client'
 
-import { listConsoleProviders, resolveEnabledPlugins } from '@aglyn/aglyn'
+import {
+  filterPluginsByReleaseFlags,
+  listConsoleProviders,
+  resolveEnabledPlugins,
+} from '@aglyn/aglyn'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import type React from 'react'
 import { type ReactNode, useEffect, useState } from 'react'
 import { consolePluginLoader } from '../constants/console-plugin-loader'
 import useCurrentTenant from '../hooks/use-current-tenant'
+import { useReleaseFlags } from '../hooks/use-release-flags'
 import { loadOrgRealmPlugins } from '../utils/realm-plugins.client'
+
+/**
+ * The workspace's EFFECTIVE plugin set (AGL-416/422): the org switchboard
+ * minus release-flagged-off plugins (staff keep flagged plugins — the
+ * usual staff-preview bypass). Returned as a stable comma key; loading
+ * waits for Remote Config activation so a kill-switched plugin never
+ * flashes in on the registry defaults.
+ */
+function useEffectiveEnabledPlugins(): { flagsReady: boolean; enabledKey: string } {
+  const { tenant } = useCurrentTenant()
+  const { ready, isStaff, flags } = useReleaseFlags()
+  const enabledKey = filterPluginsByReleaseFlags(
+    resolveEnabledPlugins(tenant),
+    (flagKey) => flags[flagKey as keyof typeof flags]?.released ?? true,
+    { staffBypass: isStaff },
+  ).join(',')
+  return { flagsReady: ready, enabledKey }
+}
 
 /**
  * Dynamic console-plugin activation (AGL-417), replacing the static
@@ -40,10 +63,13 @@ export default function ConsolePluginsGate({
   const { tenant, orgId } = useCurrentTenant()
   const { data: user } = useUser()
   const [readyForOrg, setReadyForOrg] = useState<string | null>(null)
-  const enabledKey = resolveEnabledPlugins(tenant).join(',')
+  const { flagsReady, enabledKey } = useEffectiveEnabledPlugins()
 
   useEffect(() => {
-    if (!orgId) return undefined
+    // Wait for Remote Config activation (AGL-422) so a release-flagged-off
+    // plugin never loads on the registry defaults and then sticks (loaded
+    // chunks can't unload).
+    if (!orgId || !flagsReady) return undefined
     let active = true
     void (async () => {
       await consolePluginLoader.ensure(enabledKey.split(','), ['console'])
@@ -62,7 +88,7 @@ export default function ConsolePluginsGate({
     }
     // `user` identity churns with token refreshes; orgId names the session.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgId, enabledKey])
+  }, [orgId, flagsReady, enabledKey])
 
   if (orgId && readyForOrg !== orgId) return null
   // Plugin-registered app providers (AGL-419) wrap every console page —
@@ -103,12 +129,12 @@ export function withSitePlugins<P extends object>(
 }
 
 export function useSitePluginsReady(): boolean {
-  const { tenant, orgId } = useCurrentTenant()
+  const { orgId } = useCurrentTenant()
   const [ready, setReady] = useState(false)
-  const enabledKey = resolveEnabledPlugins(tenant).join(',')
+  const { flagsReady, enabledKey } = useEffectiveEnabledPlugins()
 
   useEffect(() => {
-    if (!orgId) return undefined
+    if (!orgId || !flagsReady) return undefined
     let active = true
     setReady(false)
     void consolePluginLoader.ensure(enabledKey.split(','), ['site']).then(() => {
@@ -117,7 +143,7 @@ export function useSitePluginsReady(): boolean {
     return () => {
       active = false
     }
-  }, [orgId, enabledKey])
+  }, [orgId, flagsReady, enabledKey])
 
   return ready
 }

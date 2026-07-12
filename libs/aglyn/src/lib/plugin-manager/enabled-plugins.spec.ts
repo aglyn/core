@@ -15,10 +15,13 @@
  * limitations under the License.
  */
 
+import { isReleaseFlagKey } from '../app-utils/release-flags'
 import {
   DEFAULT_ENABLED_PLUGINS,
   FIRST_PARTY_PLUGINS,
+  filterPluginsByReleaseFlags,
   isPluginEnabled,
+  pluginForReleaseFlag,
   resolveEnabledPlugins,
 } from './enabled-plugins'
 
@@ -55,5 +58,43 @@ describe('resolveEnabledPlugins (AGL-416)', () => {
     expect(isPluginEnabled({ enabledPlugins: ['data'] }, 'data')).toBe(true)
     expect(isPluginEnabled({ enabledPlugins: ['data'] }, 'email')).toBe(false)
     expect(isPluginEnabled(undefined, 'email')).toBe(true)
+  })
+})
+
+describe('filterPluginsByReleaseFlags (AGL-422)', () => {
+  it('every non-always-on first-party plugin carries a REAL release flag', () => {
+    for (const plugin of FIRST_PARTY_PLUGINS) {
+      if (plugin.alwaysOn) continue
+      expect(plugin.releaseFlag).toBeDefined()
+      expect(isReleaseFlagKey(String(plugin.releaseFlag))).toBe(true)
+      expect(pluginForReleaseFlag(String(plugin.releaseFlag))?.id).toBe(
+        plugin.id,
+      )
+    }
+  })
+
+  it('drops a flagged-off plugin and keeps the rest', () => {
+    const filtered = filterPluginsByReleaseFlags(
+      ['mui', 'bookings', 'commerce'],
+      (flagKey) => flagKey !== 'release_bookings',
+    )
+    expect(filtered).toEqual(['mui', 'commerce'])
+  })
+
+  it('keeps unknown marketplace ids and always-on plugins regardless', () => {
+    const filtered = filterPluginsByReleaseFlags(
+      ['mui', 'acme-widgets', 'email'],
+      () => false,
+    )
+    expect(filtered).toEqual(['mui', 'acme-widgets'])
+  })
+
+  it('staff bypass keeps everything', () => {
+    const filtered = filterPluginsByReleaseFlags(
+      ['bookings', 'email'],
+      () => false,
+      { staffBypass: true },
+    )
+    expect(filtered).toEqual(['bookings', 'email'])
   })
 })

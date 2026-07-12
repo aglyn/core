@@ -16,7 +16,11 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
-import { firebaseAdmin, getRealmPluginInstalls } from '@aglyn/tenant-data-admin'
+import {
+  filterEnabledPluginsByReleaseFlags,
+  firebaseAdmin,
+  getRealmPluginInstalls,
+} from '@aglyn/tenant-data-admin'
 import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 import getScreen from '@aglyn/tenant-runtime/get-screen'
 import getVariables from '@aglyn/tenant-runtime/get-variables'
@@ -430,6 +434,15 @@ export const loadPageData = cache(
       },
     )
 
+    // Plugin release gate (AGL-422): flagged-off plugins vanish from the
+    // published site too — the platform kill switch. Subject = the org, so
+    // rollout verdicts match the console's. Site visitors get no staff
+    // bypass; fail-open inside falls back to registry defaults.
+    const enabledPlugins = await filterEnabledPluginsByReleaseFlags(
+      Aglyn.resolveEnabledPlugins(tenantRes.tenant as never),
+      { subjectId: (tenantRes.tenant as { $id?: string })?.$id ?? hostId },
+    )
+
     const props = {
       data: JSON.parse(
         JSON.stringify({
@@ -442,9 +455,10 @@ export const loadPageData = cache(
         }),
       ),
       nodes: denormalized,
-      // Plugin switchboard (AGL-416/417): which site plugins the client
-      // loads before rendering the canvas.
-      enabledPlugins: Aglyn.resolveEnabledPlugins(tenantRes.tenant as never),
+      // Plugin switchboard (AGL-416/417/422): which site plugins the
+      // client loads before rendering the canvas — org-enabled minus
+      // release-flagged-off.
+      enabledPlugins,
       ...(realmPlugins.length ? { realmPlugins } : {}),
       showBranding,
       ...enriched,

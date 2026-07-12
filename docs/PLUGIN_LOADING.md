@@ -29,7 +29,20 @@ by the nx boundary rule (`scope:app` may not depend on `aglyn:addons`,
 `org.enabledPlugins: string[]` (AGL-416) is the switchboard; absent means
 `DEFAULT_ENABLED_PLUGINS` (all first-party), and always-on plugins (`mui`)
 are unioned in via `resolveEnabledPlugins(org)`. Managed on the org
-settings "Plugins" tab. Surfaces follow the switch:
+settings "Plugins" tab.
+
+On top of the org switchboard sits the **platform release gate**
+(AGL-422): every non-always-on first-party plugin maps to a release flag
+(`FirstPartyPlugin.releaseFlag` → the Remote Config registry), and
+`filterPluginsByReleaseFlags` subtracts flagged-off plugins from the
+effective set on every surface — console loader, published-site loader,
+and the API dispatchers (404, staff bearer tokens excepted). Staff keep
+the usual preview bypass; org-subject bucketing means rollout percentages
+give a whole workspace the same verdict everywhere. Server verdicts come
+from a 60s-cached admin-SDK template read that fails open to the registry
+defaults (`getServerReleaseFlagValues` in tenant-data-admin).
+
+Surfaces follow the switches:
 
 - **Console**: `ConsolePluginsGate` loads the enabled set's `console`
   surfaces after the org resolves, then renders the shell. Editor pages

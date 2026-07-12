@@ -170,6 +170,13 @@ console surfaces behind the providers gate, site/canvas surfaces behind the
 editor/tenant suspense gates, API handlers lazily on first dispatch with a
 per-request org gate (a disabled plugin's API 404s for that workspace).
 
+Each first-party plugin is additionally **release-flagged** (AGL-422,
+`FirstPartyPlugin.releaseFlag`): a flag staff turn off in the console
+Feature Flags page subtracts the plugin from every workspace's effective
+set — nav, editor, published sites, and API — with the usual staff preview
+bypass. Register a flag for any new plugin (registry + Remote Config
+template + the catalog entry).
+
 ## Extending beyond pages: slots, providers, runtimes, hooks (AGL-418/419)
 
 - **Widgets** — `ConsoleExtension.widgets` render into named shell slots

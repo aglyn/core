@@ -21,7 +21,10 @@ import {
   resolvePluginApiRoute,
   runLegacyHandler,
 } from '@aglyn/aglyn/server'
-import { getOrgForHost } from '@aglyn/tenant-data-admin'
+import {
+  filterEnabledPluginsByReleaseFlags,
+  getOrgForHost,
+} from '@aglyn/tenant-data-admin'
 import { ensureRemoteServerBundles } from '../../../utils/remote-server-bundles'
 import { serverPluginLoader as loader } from '../../../utils/server-plugin-loader'
 
@@ -64,8 +67,23 @@ async function dispatch(
       }
     }
     if (hostId) {
-      const org = (await getOrgForHost(hostId))?.org
-      if (org && !resolveEnabledPlugins(org).includes(pluginId)) {
+      const resolved = await getOrgForHost(hostId)
+      if (
+        resolved &&
+        !resolveEnabledPlugins(resolved.org).includes(pluginId)
+      ) {
+        return Response.json({ error: 'Not found' }, { status: 404 })
+      }
+      // Plugin release gate (AGL-422): a flagged-off plugin's API surface
+      // does not exist either — except for staff bearer tokens (preview).
+      const releaseFiltered = await filterEnabledPluginsByReleaseFlags(
+        [pluginId],
+        {
+          subjectId: resolved?.orgId ?? hostId,
+          authorization: request.headers.get('authorization'),
+        },
+      )
+      if (!releaseFiltered.length) {
         return Response.json({ error: 'Not found' }, { status: 404 })
       }
     }

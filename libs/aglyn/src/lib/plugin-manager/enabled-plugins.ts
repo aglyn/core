@@ -36,6 +36,13 @@ export interface FirstPartyPlugin {
   alwaysOn?: boolean
   /** One-line description for the org-settings toggle list. */
   description?: string
+  /**
+   * Release flag gating this plugin platform-wide (AGL-422). A flagged-off
+   * plugin is subtracted from every workspace's effective set — console
+   * loader, published sites, and API dispatch — unless the subject is
+   * staff. Always-on plugins carry no flag.
+   */
+  releaseFlag?: string
 }
 
 export const FIRST_PARTY_PLUGINS: readonly FirstPartyPlugin[] = [
@@ -45,18 +52,18 @@ export const FIRST_PARTY_PLUGINS: readonly FirstPartyPlugin[] = [
     alwaysOn: true,
     description: 'The base component and theme library every site builds on.',
   },
-  { id: 'bookings', label: 'Bookings', description: 'Services, open slots, and paid bookings.' },
-  { id: 'commerce', label: 'Commerce', description: 'Products, carts, checkout, orders, POS.' },
-  { id: 'community', label: 'Community', description: 'Marketplace listings, templates, and installs.' },
-  { id: 'contacts', label: 'Contacts', description: 'People, segments, and interactions.' },
-  { id: 'data', label: 'Data', description: 'Datasets, records, and CSV import/export.' },
-  { id: 'email', label: 'Email', description: 'Designed emails and campaign sending.' },
-  { id: 'events-calendar', label: 'Events Calendar', description: 'Event lists and calendars.' },
-  { id: 'inbox', label: 'Inbox', description: 'Form submissions and lead inbox.' },
-  { id: 'logic', label: 'Logic', description: 'Variables, functions, and reference health.' },
-  { id: 'marketing', label: 'Marketing', description: 'Overlays, campaigns, and experiments.' },
-  { id: 'redirects', label: 'Redirects', description: 'URL redirect rules.' },
-  { id: 'workflows', label: 'Workflows', description: 'Automations, webhooks, and run logs.' },
+  { id: 'bookings', label: 'Bookings', description: 'Services, open slots, and paid bookings.', releaseFlag: 'release_bookings' },
+  { id: 'commerce', label: 'Commerce', description: 'Products, carts, checkout, orders, POS.', releaseFlag: 'release_commerce_v2' },
+  { id: 'community', label: 'Community', description: 'Marketplace listings, templates, and installs.', releaseFlag: 'release_community' },
+  { id: 'contacts', label: 'Contacts', description: 'People, segments, and interactions.', releaseFlag: 'release_contacts' },
+  { id: 'data', label: 'Data', description: 'Datasets, records, and CSV import/export.', releaseFlag: 'release_data_store' },
+  { id: 'email', label: 'Email', description: 'Designed emails and campaign sending.', releaseFlag: 'release_email' },
+  { id: 'events-calendar', label: 'Events Calendar', description: 'Event lists and calendars.', releaseFlag: 'release_events' },
+  { id: 'inbox', label: 'Inbox', description: 'Form submissions and lead inbox.', releaseFlag: 'release_inbox' },
+  { id: 'logic', label: 'Logic', description: 'Variables, functions, and reference health.', releaseFlag: 'release_logic' },
+  { id: 'marketing', label: 'Marketing', description: 'Overlays, campaigns, and experiments.', releaseFlag: 'release_marketing' },
+  { id: 'redirects', label: 'Redirects', description: 'URL redirect rules.', releaseFlag: 'release_redirects' },
+  { id: 'workflows', label: 'Workflows', description: 'Automations, webhooks, and run logs.', releaseFlag: 'release_workflows' },
 ] as const
 
 /** Ids loaded for orgs that have never touched the switchboard. */
@@ -88,4 +95,38 @@ export function isPluginEnabled(
   pluginId: string,
 ): boolean {
   return resolveEnabledPlugins(org).includes(pluginId)
+}
+
+/** Reverse lookup: which first-party plugin a release flag gates, if any. */
+export function pluginForReleaseFlag(
+  flagKey: string,
+): FirstPartyPlugin | undefined {
+  return FIRST_PARTY_PLUGINS.find((plugin) => plugin.releaseFlag === flagKey)
+}
+
+/**
+ * Subtracts release-flagged-off plugins from an effective set (AGL-422).
+ * Pure — the caller supplies the verdict source (client: the activated
+ * Remote Config hook state; server: the cached admin-SDK template read),
+ * so the same policy runs identically on every surface:
+ *
+ * - unknown ids (marketplace/realm installs) and always-on ids pass;
+ * - a first-party id with a `releaseFlag` passes only when the flag is on
+ *   for the subject, or `staffBypass` is set (staff preview keeps working
+ *   while a feature is dark).
+ */
+export function filterPluginsByReleaseFlags(
+  pluginIds: readonly string[],
+  isFlagOn: (flagKey: string) => boolean,
+  options?: { staffBypass?: boolean },
+): string[] {
+  if (options?.staffBypass) return [...pluginIds]
+  const catalog = new Map(
+    FIRST_PARTY_PLUGINS.map((plugin) => [plugin.id, plugin]),
+  )
+  return pluginIds.filter((pluginId) => {
+    const plugin = catalog.get(pluginId)
+    if (!plugin?.releaseFlag || plugin.alwaysOn) return true
+    return isFlagOn(plugin.releaseFlag)
+  })
 }
