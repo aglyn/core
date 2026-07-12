@@ -37,6 +37,7 @@ import {
   useFirestoreCollection,
   useUser,
 } from '@aglyn/tenant-feature-instance'
+import { isListingBrowsable } from '../model/community'
 import useCommunityActions from '../hooks/use-community-actions'
 
 // Community console routes live in the app's route table; the patterns are
@@ -165,6 +166,13 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   const items = useMemo(() => {
     const needle = search.trim().toLowerCase()
     const filtered = (listings ?? []).filter((listing: any) => {
+      // Review queue gate (AGL-432): unreviewed/rejected plugin listings
+      // stay off the public browse; the owner still sees their own (the
+      // detail page shows them the status). UX-level only — the docs are
+      // public-readable by design.
+      if (!isListingBrowsable(listing) && listing.profileId !== user?.uid) {
+        return false
+      }
       if (category && listing.category !== category) return false
       if (!needle) return true
       return [listing.displayName, listing.description, listing.category]
@@ -176,7 +184,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         ? (b.installCount ?? 0) - (a.installCount ?? 0)
         : (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
     )
-  }, [listings, search, category, sort])
+  }, [listings, search, category, sort, user?.uid])
 
   return (
     <CardDisplay header={'Community components'} contentGutterX contentGutterY>

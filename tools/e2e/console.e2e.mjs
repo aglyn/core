@@ -175,6 +175,20 @@ const specs = [
     path: '/org/plugins',
     expects: ['Save plugins', 'Marketplace add-ons', 'Installed plugins'],
   },
+  {
+    // Staff review queue (AGL-432): the seeded submitted listing + its
+    // lifecycle actions.
+    name: 'plugin-reviews',
+    path: '/admin/plugin-reviews',
+    expects: ['Pending Review Plugin', 'Start review', 'Grant realm trust'],
+  },
+  {
+    // Listing detail v2 (AGL-430/431): publisher README rendered through
+    // markdown-lite, changelog from the public versions API, links card.
+    name: 'listing-detail',
+    path: `/${HOST_ID}/community/realm-demo`,
+    expects: ['Realm demo', 'Versions & changelog', 'Source repository'],
+  },
 ]
 
 const apiKey = resolveApiKey()

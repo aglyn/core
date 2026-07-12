@@ -24,6 +24,7 @@ export enum Route {
   ADMIN_USERS = '/admin/users',
   ADMIN_USER_DETAIL = '/admin/users/[uid]',
   ADMIN_FLAGS = '/admin/flags',
+  ADMIN_PLUGIN_REVIEWS = '/admin/plugin-reviews',
   ORG_MEDIA = '/org/media',
   ORG_DATA = '/org/data',
   ORG_PLUGINS = '/org/plugins',
@@ -90,6 +91,7 @@ export interface RoutePayload extends Record<keyof any, any> {
   [Route.ADMIN_USERS]: undefined
   [Route.ADMIN_USER_DETAIL]: { uid: string }
   [Route.ADMIN_FLAGS]: undefined
+  [Route.ADMIN_PLUGIN_REVIEWS]: undefined
   [Route.ORG_MEDIA]: undefined
   [Route.ORG_DATA]: undefined
   [Route.ORG_PLUGINS]: undefined

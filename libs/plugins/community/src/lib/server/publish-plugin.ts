@@ -243,7 +243,9 @@ export const publishPluginHandler: PluginApiHandler = async (req, res) => {
         ...contentVerdict.content,
         latestVersion: manifest.version,
         deletedAt: null,
-        ...(existing.empty && { createdAt: now }),
+        // Review queue (AGL-432): first publish enters as 'submitted';
+        // version bumps keep whatever status staff granted.
+        ...(existing.empty && { createdAt: now, reviewStatus: 'submitted' }),
         updatedAt: now,
       },
       { merge: true },

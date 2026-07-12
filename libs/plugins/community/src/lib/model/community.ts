@@ -64,6 +64,33 @@ export interface CommunityListing {
   /** SPDX-ish license label, e.g. "MIT". */
   license?: string
   categories?: string[]
+  /**
+   * Marketplace review lifecycle (AGL-432). Absent = legacy listing,
+   * treated as 'listed'. New plugin listings start 'submitted'; staff move
+   * them through the queue. Only 'listed'/'verified' (or legacy) plugin
+   * listings appear in browse for non-owners.
+   */
+  reviewStatus?: ListingReviewStatus
+}
+
+export type ListingReviewStatus =
+  | 'submitted'
+  | 'in_review'
+  | 'listed'
+  | 'verified'
+  | 'rejected'
+
+/** Whether a plugin listing is publicly browsable (AGL-432). */
+export function isListingBrowsable(listing: {
+  type?: string
+  reviewStatus?: string
+}): boolean {
+  if (listing.type !== 'plugin') return true
+  return (
+    listing.reviewStatus === undefined ||
+    listing.reviewStatus === 'listed' ||
+    listing.reviewStatus === 'verified'
+  )
 }
 
 /** Fixed category taxonomy for marketplace listings (AGL-430). */

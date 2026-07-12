@@ -386,6 +386,7 @@ await put(demoListing, {
   priceUsd: 0,
   latestVersion: '1.0.0',
   deletedAt: null,
+  reviewStatus: 'listed',
   createdAt: now,
 })
 await put(demoListing.collection('pluginVersions').doc('1.0.0'), {
@@ -402,6 +403,41 @@ await put(demoListing.collection('pluginVersions').doc('1.0.0'), {
   changelog: 'First release.',
   publishedAt: now,
 })
+
+// A submitted listing so the staff review queue (AGL-432) has content.
+await put(firestore.collection('communityListings').doc('pending-review'), {
+  type: 'plugin',
+  profileId: 'seed-publisher',
+  pluginId: 'pending-review',
+  displayName: 'Pending Review Plugin',
+  description: 'Awaiting staff review — visible only in the admin queue.',
+  license: 'MIT',
+  priceUsd: 0,
+  latestVersion: '0.1.0',
+  deletedAt: null,
+  reviewStatus: 'submitted',
+  createdAt: now,
+})
+await put(
+  firestore
+    .collection('communityListings')
+    .doc('pending-review')
+    .collection('pluginVersions')
+    .doc('0.1.0'),
+  {
+    version: '0.1.0',
+    sha256: 'seed-sha-pending',
+    objectPath: 'artifacts/pending-review/0.1.0/seed-sha-pending.bundle',
+    manifest: {
+      id: 'pending-review',
+      name: 'Pending Review Plugin',
+      version: '0.1.0',
+      entry: 'plugin.bundle.mjs',
+      hostAbi: 1,
+    },
+    publishedAt: now,
+  },
+)
 
 console.log(
   `Done — ${written} docs. user=${E2E_EMAIL} (uid ${E2E_UID}, staff) ` +
