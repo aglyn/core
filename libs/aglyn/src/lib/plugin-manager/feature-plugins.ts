@@ -189,10 +189,41 @@ export interface ConsoleSettingsSection {
 }
 
 /**
- * A component a plugin renders into a NAMED console slot (AGL-419) — e.g.
- * 'hostActivity' (dashboard + editor view), 'dashboardCard',
- * 'besignerFunctions'. The shell owns placement and passes
- * {@link ConsolePluginPageProps}; the plugin owns the UI.
+ * The injection-zone catalog (AGL-433, Strapi injection-zone parity):
+ * every named slot the console shell renders through `PluginWidgetSlot`,
+ * with what the slot receives. `slot` stays an open string so apps can
+ * add custom zones without a core release; these are the guaranteed ones.
+ */
+export const CONSOLE_WIDGET_SLOTS = {
+  /** Host dashboard + screen view activity column. Props: hostId. */
+  hostActivity: 'hostActivity',
+  /** Host dashboard commerce summary. Props: hostId, tenant. */
+  commerceGlance: 'commerceGlance',
+  /** Org Data page body. Props: orgId, tenant. */
+  orgData: 'orgData',
+  /** Besigner functions (ƒx) panel. Props: hostId. */
+  besignerFunctions: 'besignerFunctions',
+  /** Community listing detail body. Props: hostId, listingId, permissions. */
+  communityListing: 'communityListing',
+  /** Plugins & add-ons hub installs section. Props: hostId. */
+  orgAddons: 'orgAddons',
+  /** Bottom of the host dashboard. Props: hostId, tenant. (AGL-433) */
+  dashboardFooter: 'dashboardFooter',
+  /** Org settings page, below the tabbed cards. Props: orgId, tenant. */
+  orgSettings: 'orgSettings',
+  /** Host setup page, below the built-in cards. Props: hostId, tenant. */
+  hostSettings: 'hostSettings',
+  /** Staff admin org detail (staff-only surfaces). Props: orgId. */
+  adminOrgDetail: 'adminOrgDetail',
+} as const
+
+export type ConsoleWidgetSlot =
+  (typeof CONSOLE_WIDGET_SLOTS)[keyof typeof CONSOLE_WIDGET_SLOTS]
+
+/**
+ * A component a plugin renders into a NAMED console slot (AGL-419/433) —
+ * see {@link CONSOLE_WIDGET_SLOTS} for the guaranteed zones and their
+ * props. The shell owns placement; the plugin owns the UI.
  */
 export interface ConsoleWidget {
   slot: string

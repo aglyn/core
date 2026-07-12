@@ -180,8 +180,12 @@ template + the catalog entry).
 ## Extending beyond pages: slots, providers, runtimes, hooks (AGL-418/419)
 
 - **Widgets** — `ConsoleExtension.widgets` render into named shell slots
-  (`hostActivity`, `commerceGlance`, `orgData`, `besignerFunctions`,
-  `communityListing`) via the app's `PluginWidgetSlot`.
+  via the app's `PluginWidgetSlot`. The guaranteed zones (and the props
+  each receives) are the exported `CONSOLE_WIDGET_SLOTS` catalog
+  (AGL-433): `hostActivity`, `commerceGlance`, `orgData`,
+  `besignerFunctions`, `communityListing`, `orgAddons`,
+  `dashboardFooter`, `orgSettings`, `hostSettings`, and the staff-only
+  `adminOrgDetail`.
 - **Providers** — `ConsoleExtension.providers` mount around every console
   page (e.g. community's AI-assist provider).
 - **Site runtimes** — `registerSiteRuntime` components run on every rendered

@@ -43,6 +43,7 @@ import CardDisplayFormTemplate from '../../../../components/card-display-form-te
 import { useHostId } from '../../../../components/host-id-provider'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
+import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import MainLayout from '../../../../components/layouts/main.layout'
 import CustomDomainCard from '../../../../components/custom-domain-card.component'
 import FaviconCard from '../../../../components/favicon-card.component'
@@ -526,6 +527,8 @@ const HostSetup: NextPageWithLayout = (props) => {
               ]}
             />
           </TabContext>
+          {/* Plugin zone (AGL-433): hostSettings widgets. */}
+          <PluginWidgetSlot slot="hostSettings" hostId={hostId} />
         </Container>
       </DashboardLayout>
     </>

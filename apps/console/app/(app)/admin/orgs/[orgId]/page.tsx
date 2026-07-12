@@ -55,6 +55,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../../components/layouts/dashboard.layout'
+import PluginWidgetSlot from '../../../../../components/plugin-widget-slot.component'
 import MainLayout from '../../../../../components/layouts/main.layout'
 import adminNavTabItems from '../../../../../constants/admin-nav-tabs'
 import MediaUrlField from '../../../../../components/media-url-field.component'
@@ -1017,6 +1018,8 @@ const AdminOrgDetail: NextPageWithLayout = () => {
               />
             </>
           )}
+          {/* Plugin zone (AGL-433): staff adminOrgDetail widgets. */}
+          <PluginWidgetSlot slot="adminOrgDetail" orgId={orgId} />
         </Container>
       </DashboardLayout>
     </>

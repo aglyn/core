@@ -18,6 +18,7 @@
 'use client'
 
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
+import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import { canManageOrg, isValidOrgSlug } from '@aglyn/aglyn'
 import { ICON_VARIANT_APP_SETTINGS } from '@aglyn/shared-data-enums'
 import {
@@ -518,6 +519,8 @@ const OrgSettings: NextPageWithLayout = () => {
               ]}
             />
           )}
+          {/* Plugin zone (AGL-433): orgSettings widgets. */}
+          {currentOrg?.$id ? (<PluginWidgetSlot slot="orgSettings" orgId={currentOrg.$id} tenant={tenant} />) : null}
         </Container>
       </DashboardLayout>
     </>

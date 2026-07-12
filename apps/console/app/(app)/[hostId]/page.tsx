@@ -111,6 +111,8 @@ const Index: NextPageWithLayout = (props) => {
             },
           ]}
         />
+        {/* Plugin zone (AGL-433): widgets registered for dashboardFooter. */}
+        <PluginWidgetSlot slot="dashboardFooter" hostId={hostId} />
       </Container>
     </DashboardLayout>
   )
