@@ -12,6 +12,8 @@ If the domain wizard won't verify, it's almost always DNS. Work through these.
 **Paid**.
 :::
 
+![Domain status in site setup](/img/custom-domains/setup-domains.png)
+
 ## Checklist
 
 1. **Give it time.** DNS changes propagate on a TTL — wait a few minutes and re-run

@@ -13,6 +13,8 @@ schemes — applied consistently across every screen.
 **Free**. Theming is core to every site.
 :::
 
+![The theme editor](/img/theme-builder/theme-editor.png)
+
 ## Edit your theme
 
 - Open the **theme editor** under **Setup**.

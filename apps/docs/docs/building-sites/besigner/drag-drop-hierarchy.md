@@ -9,6 +9,8 @@ description: Reparent and reorder elements by dragging, with placement markers a
 Every element on the canvas is a node in a tree. Rearrange that tree by **dragging** — in the
 hierarchy panel or directly on the canvas.
 
+![A selected element: highlighted on the canvas, in the hierarchy, and in the breadcrumbs](/img/besigner/canvas-selected.png)
+
 ## Reparent and reorder
 
 - Drag a node onto a new parent to **reparent** it, or between siblings to **reorder**.

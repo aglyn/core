@@ -10,6 +10,8 @@ Design campaign emails in the **besigner** — the same editor you use for
 pages — with an email-safe block set. There is no separate email editor
 to learn.
 
+![A designed email open in the Besigner](/img/email-campaigns/email-editor.png)
+
 ## Create a template
 
 On **Marketing → Email**, click **New email template**. That creates an

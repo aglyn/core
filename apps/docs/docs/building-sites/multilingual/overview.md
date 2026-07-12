@@ -12,6 +12,8 @@ Reach a wider audience by publishing your site in more than one language.
 **Paid**. Multilingual is available on paid tiers.
 :::
 
+![The Languages card in site setup](/img/multilingual/setup-languages.png)
+
 ## Locale variants
 
 Create **locale variants** of your content so each language has its own version, while

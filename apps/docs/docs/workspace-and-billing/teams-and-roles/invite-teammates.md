@@ -13,6 +13,8 @@ Bring collaborators into a site so they can build and manage alongside you.
 [Billing & plans](../billing-and-plans/overview.md).
 :::
 
+![Inviting a teammate from the team page](/img/teams-and-roles/org-team-page.png)
+
 ## Invite someone
 
 1. Open the site's **user manager**.

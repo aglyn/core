@@ -13,6 +13,8 @@ bring it back.
 **Pro**.
 :::
 
+![The data page toolbar carries import and export](/img/datasets/data-page.png)
+
 ## Export
 
 Export a dataset's records to **CSV** or **JSON** — useful for backups, bulk edits in a

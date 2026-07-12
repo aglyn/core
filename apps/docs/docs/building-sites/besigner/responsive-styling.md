@@ -6,6 +6,8 @@ description: Style per breakpoint from the artboard preview, use the box stylers
 
 # Responsive styling & custom CSS
 
+![The toolbar with the fluid-responsive mode and device previews](/img/besigner/besigner-editor.png)
+
 ## Style per breakpoint
 
 The artboard preview mode now doubles as your styling scope:

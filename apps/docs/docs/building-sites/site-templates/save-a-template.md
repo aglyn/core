@@ -13,6 +13,8 @@ from the community gallery.
 **Free** to use the starter gallery; sharing scales with your tier.
 :::
 
+![The screens list, where you save a site as a template](/img/getting-started/screens-list.png)
+
 ## Start from a template
 
 Open the **starter template gallery** and install a template. It **instantiates the published

@@ -300,6 +300,49 @@ await put(homeScreen.collection('versions').doc('seed-home-v1'), {
   createdAt: now,
 })
 
+// Designed email template as an email-kind screen (docs screenshots for
+// the email designer, AGL-451; mirrors the seed-demo-host fixture).
+const emailScreen = hostRef.collection('screens').doc('seed-email-welcome')
+await put(emailScreen, {
+  displayName: 'Welcome email',
+  kind: 'email',
+  versionId: 'seed-email-v1',
+  emailSubject: 'Welcome to the bakery, {{contact.firstName}}',
+  emailPreheader: 'Fresh sourdough news inside',
+  createdAt: now,
+})
+await put(emailScreen.collection('versions').doc('seed-email-v1'), {
+  screenId: 'seed-email-welcome',
+  nodes: {
+    '_@_': { $id: '_@_', componentId: 'root', nodes: ['sec'] },
+    sec: {
+      $id: 'sec',
+      componentId: 'emailSection',
+      pluginId: 'email',
+      parentId: '_@_',
+      nodes: ['txt', 'btn'],
+    },
+    txt: {
+      $id: 'txt',
+      componentId: 'emailText',
+      pluginId: 'email',
+      parentId: 'sec',
+      props: {
+        children: 'Welcome to the bakery!',
+        variant: 'heading',
+      },
+    },
+    btn: {
+      $id: 'btn',
+      componentId: 'emailButton',
+      pluginId: 'email',
+      parentId: 'sec',
+      props: { children: 'See this week’s bakes', href: '{{site.url}}' },
+    },
+  },
+  createdAt: now,
+})
+
 // Content collections + entries.
 const blog = hostRef.collection('collections').doc('seed-blog')
 await put(blog, { displayName: 'Blog', slug: 'blog', createdAt: now })

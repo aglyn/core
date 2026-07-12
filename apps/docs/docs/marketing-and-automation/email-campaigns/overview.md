@@ -23,6 +23,8 @@ flowchart LR
 your plan.
 :::
 
+![The email campaigns page with sent and scheduled sends](/img/email-campaigns/campaigns-tab.png)
+
 ## Send a campaign
 
 1. Build an **audience** — leads, site members, [segments](../../content-and-data/contacts/overview.md#segments),

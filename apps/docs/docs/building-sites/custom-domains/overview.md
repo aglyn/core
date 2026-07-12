@@ -13,6 +13,8 @@ a guided, self-service wizard.
 **Paid**. Custom domains are available on paid tiers.
 :::
 
+![The custom domain card in site setup](/img/custom-domains/setup-domains.png)
+
 ## Connect a domain
 
 1. In **Setup**, open the **custom domain** tab.

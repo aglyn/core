@@ -25,6 +25,8 @@ flowchart LR
 **Paid**, gated by the `marketingOverlays` entitlement.
 :::
 
+![The A/B testing tab with a draft experiment](/img/marketing-overlays/experiments-tab.png)
+
 ## Announcement bar
 
 A **site-wide announcement bar** shows a message across every page — ideal for sales,

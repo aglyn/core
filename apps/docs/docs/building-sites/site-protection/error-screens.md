@@ -9,6 +9,8 @@ description: Replace generic 404/401/403/503 pages with branded screens you desi
 When something goes wrong, visitors should still see *your* site. Design custom **error
 screens** for each status.
 
+![Error screens are bound from the screens list](/img/getting-started/screens-list.png)
+
 ## The error screens
 
 | Status | When it shows |

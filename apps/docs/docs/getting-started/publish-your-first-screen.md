@@ -8,6 +8,8 @@ description: Create a screen, design it in the Besigner, and publish it live.
 
 This walks through the core loop: **create → design → publish**.
 
+![The screens list with each screen's publish state](/img/getting-started/screens-list.png)
+
 ## 1. Create a screen
 
 1. Go to **Screens** and choose **New screen**.

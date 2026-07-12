@@ -13,6 +13,8 @@ site. This guide builds one end to end.
 **Pro+**. Workflow **runs are metered** per tier.
 :::
 
+![The workflows page](/img/workflows-and-actions/workflows-page.png)
+
 ## 1. Open the workflows page
 
 In the console, go to **Data → Workflows** and choose **New workflow**. Give it a name that

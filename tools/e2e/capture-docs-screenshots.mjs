@@ -160,6 +160,126 @@ const shots = [
     settleMs: 8000,
   },
   {
+    out: 'getting-started/sites-page.png',
+    path: '/hosts',
+    waitFor: 'Demo Bakery',
+  },
+  {
+    out: 'getting-started/screens-list.png',
+    path: `/${HOST_ID}/screens/list`,
+    waitFor: 'Home',
+    settleMs: 2500,
+  },
+  {
+    out: 'teams-and-roles/host-users-page.png',
+    path: `/${HOST_ID}/users`,
+    waitFor: 'Site users',
+  },
+  {
+    out: 'custom-domains/setup-domains.png',
+    path: `/${HOST_ID}/setup`,
+    waitFor: 'Custom domain',
+    settleMs: 2500,
+  },
+  {
+    out: 'multilingual/setup-languages.png',
+    path: `/${HOST_ID}/setup`,
+    waitFor: 'Custom domain',
+    settleMs: 2500,
+    actions: [{ scroll: 'text=Languages', settleMs: 1000 }],
+  },
+  {
+    out: 'commerce/products-page.png',
+    path: `/${HOST_ID}/products`,
+    waitFor: 'Products',
+    settleMs: 2500,
+  },
+  {
+    out: 'commerce/pos-page.png',
+    path: `/${HOST_ID}/pos`,
+    waitFor: 'POS',
+    settleMs: 2500,
+  },
+  {
+    out: 'theme-builder/theme-editor.png',
+    path: `/${HOST_ID}/theme`,
+    waitFor: 'Theme',
+    settleMs: 6000,
+  },
+  {
+    out: 'besigner/components-page.png',
+    path: `/${HOST_ID}/components`,
+    waitFor: 'Components',
+    settleMs: 2500,
+  },
+  {
+    out: 'staff-console/admin-orgs.png',
+    path: '/admin/orgs',
+    waitFor: 'Organizations',
+  },
+  {
+    out: 'staff-console/admin-flags.png',
+    path: '/admin/flags',
+    waitFor: 'Release',
+  },
+  {
+    out: 'staff-console/admin-audit.png',
+    path: '/admin/audit',
+    waitFor: 'Audit',
+  },
+  {
+    out: 'plugins/plugin-reviews.png',
+    path: '/admin/plugin-reviews',
+    waitFor: 'Review',
+  },
+  {
+    out: 'email-campaigns/campaigns-tab.png',
+    path: `/${HOST_ID}/emails`,
+    waitFor: 'Welcome to the bakery',
+    settleMs: 2500,
+  },
+  {
+    out: 'marketing-overlays/experiments-tab.png',
+    path: `/${HOST_ID}/marketing`,
+    waitFor: 'At a glance',
+    actions: [
+      { click: 'text=A/B testing', waitFor: 'Hero copy test' },
+    ],
+  },
+  {
+    out: 'besigner/hierarchy-panel.png',
+    path: `/${HOST_ID}/screens/seed-home/versions/seed-home-v1/besigner`,
+    waitFor: 'Properties',
+    settleMs: 6000,
+    actions: [{ click: 'text=Document', settleMs: 1200 }],
+    clip: { x: 0, y: 88, width: 290, height: 520 },
+  },
+  {
+    out: 'besigner/elements-drawer.png',
+    path: `/${HOST_ID}/screens/seed-home/versions/seed-home-v1/besigner`,
+    waitFor: 'Properties',
+    settleMs: 6000,
+    actions: [{ click: 'role=tab[name="Elements"]', settleMs: 1500 }],
+    clip: { x: 0, y: 88, width: 290, height: 700 },
+  },
+  {
+    out: 'besigner/canvas-selected.png',
+    path: `/${HOST_ID}/screens/seed-home/versions/seed-home-v1/besigner`,
+    waitFor: 'Properties',
+    settleMs: 6000,
+    actions: [
+      // The canvas renders in a closed shadow root, so locators can't
+      // reach the node — click the title's viewport coordinates instead.
+      { clickXY: [560, 210], settleMs: 1500 },
+    ],
+  },
+  {
+    out: 'email-campaigns/email-editor.png',
+    path: `/${HOST_ID}/screens/seed-email-welcome/versions/seed-email-v1/besigner`,
+    waitFor: 'Properties',
+    settleMs: 8000,
+  },
+  {
     out: 'besigner/besigner-annotated.png',
     path: `/${HOST_ID}/screens/seed-home/versions/seed-home-v1/besigner`,
     waitFor: 'Properties',
@@ -286,11 +406,28 @@ for (const shot of shots) {
         document.querySelectorAll(selector).forEach((el) => el.remove())
       }
     })
+    for (const action of shot.actions ?? []) {
+      // frame: true targets the canvas iframe (the besigner viewport).
+      const scope = action.frame ? page.frameLocator('iframe') : page
+      if (action.scroll) {
+        await scope.locator(action.scroll).first().scrollIntoViewIfNeeded()
+      }
+      if (action.clickXY) {
+        await page.mouse.click(action.clickXY[0], action.clickXY[1])
+      }
+      if (action.click) await scope.locator(action.click).first().click()
+      if (action.waitFor) {
+        await page.waitForSelector(`text=${action.waitFor}`, {
+          timeout: TIMEOUT_MS,
+        })
+      }
+      await page.waitForTimeout(action.settleMs ?? 800)
+    }
     await page.waitForTimeout(shot.settleMs ?? 1500)
     if (shot.annotate) await annotate(page, shot.annotate)
     const outPath = join(IMG_ROOT, shot.out)
     mkdirSync(dirname(outPath), { recursive: true })
-    await page.screenshot({ path: outPath })
+    await page.screenshot({ path: outPath, ...(shot.clip ? { clip: shot.clip } : {}) })
     console.log(`SHOT  ${shot.out}`)
   } catch (error) {
     failures += 1

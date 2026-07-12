@@ -9,6 +9,8 @@ description: Require a password to view a specific screen.
 Lock a single screen behind a **password** — useful for drafts, client previews, or gated
 content, without setting up full membership.
 
+![A screen's visibility is set from the screens list](/img/getting-started/screens-list.png)
+
 ## Steps
 
 1. Open the screen you want to protect.

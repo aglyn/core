@@ -29,6 +29,8 @@ sequenceDiagram
 Pro and Business raise limits and remove fees.
 :::
 
+![The products hub](/img/commerce/products-page.png)
+
 ## Products hub
 
 The **Products** page is the catalog manager:

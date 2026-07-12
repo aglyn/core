@@ -13,6 +13,8 @@ record **reference** other records.
 **Pro**.
 :::
 
+![Datasets on the data page](/img/datasets/data-page.png)
+
 ## Reference fields
 
 Add a **reference** field to a model to point at records in another dataset (or the same

@@ -20,6 +20,8 @@ can install it — free or paid.
 Publishing is open to developers; **paid listings** use Stripe Connect for payouts.
 :::
 
+![The staff review queue every submission passes through](/img/plugins/plugin-reviews.png)
+
 ## The publish pipeline
 
 Plugins go through a **publish + install pipeline** with **version pinning**, so installs

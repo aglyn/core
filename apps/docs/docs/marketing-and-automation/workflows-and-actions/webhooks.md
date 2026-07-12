@@ -14,6 +14,8 @@ something in Aglyn.
 **Business**. Webhooks are a Business-tier feature.
 :::
 
+![Webhook steps run inside workflows](/img/workflows-and-actions/workflows-page.png)
+
 ## Outbound webhooks
 
 Send an HTTP request to a URL you control when a site event fires — for example, post to a

@@ -13,6 +13,8 @@ and previewed live as you edit.
 **Free**.
 :::
 
+![Editing the site theme](/img/theme-builder/theme-editor.png)
+
 ## Open the editor
 
 Go to **Setup → Theme editor**. Changes render in a **live preview** so you see them

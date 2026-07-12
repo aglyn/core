@@ -10,6 +10,8 @@ Everything a community publisher needs. The developer side (building the
 bundle) is the [first-plugin guide](../guides/first-plugin.md); this is
 the marketplace side.
 
+![The plugin review queue](/img/plugins/plugin-reviews.png)
+
 ## Before your first publish
 
 1. **Community profile** (Manage → Community profile) — your handle and

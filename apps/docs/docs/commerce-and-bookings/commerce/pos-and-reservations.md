@@ -11,6 +11,8 @@ POS requires **Pro** or above; the register count follows your plan
 (add-ons available on Business+).
 :::
 
+![The point-of-sale page](/img/commerce/pos-page.png)
+
 ## The register
 
 Open **`/{site}/pos`** in the console for a touch-first register:

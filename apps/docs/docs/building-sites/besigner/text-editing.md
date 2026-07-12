@@ -8,6 +8,8 @@ description: Edit text directly on the canvas, with basic rich text on opt-in el
 
 Text is edited **where it lives** — right on the canvas — so you see the result as you type.
 
+![A selected Typography element with its inline toolbar](/img/besigner/canvas-selected.png)
+
 ## Edit inline
 
 - **Double-click** any text-capable component to edit its text directly on the canvas.

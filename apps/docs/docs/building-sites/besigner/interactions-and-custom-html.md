@@ -6,6 +6,8 @@ description: Build element interactions in one dialog and drop sanitized custom 
 
 # Interactions & custom HTML
 
+![The node toolbar on a selected element](/img/besigner/canvas-selected.png)
+
 ## Fluent interactions
 
 Select any element and use **Add interaction** — everything configures in

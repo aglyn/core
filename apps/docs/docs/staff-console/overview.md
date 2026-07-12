@@ -13,6 +13,10 @@ not accessible to regular host owners.
 
 The **staff console** is where Aglyn operators manage the platform and support customer organizations.
 
+![The staff organizations directory](/img/staff-console/admin-orgs.png)
+
+![The staff audit log](/img/staff-console/admin-audit.png)
+
 ## What's there
 
 - **Staff overview** — platform metrics, the newest organizations, purchases, and

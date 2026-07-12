@@ -13,6 +13,8 @@ against it, so your data stays clean.
 **Pro**. Free sites get a limited number of datasets; add-ons raise the cap.
 :::
 
+![The data page with a dataset open](/img/datasets/data-page.png)
+
 ## Define the model
 
 1. In **Data**, create a dataset and open the **schema dialog**.

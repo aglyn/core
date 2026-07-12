@@ -13,6 +13,8 @@ Aglyn emits the right tags, sitemap, and structured data automatically.
 **Free** for core SEO fields; richer structured data ships for published sites.
 :::
 
+![Site setup, where the SEO settings live](/img/custom-domains/setup-domains.png)
+
 ## Per-screen SEO
 
 Use the **screen-level SEO editor** to set titles, descriptions, and social metadata for

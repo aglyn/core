@@ -12,6 +12,8 @@ Send an old or alternate URL to the right screen.
 **Paid**.
 :::
 
+![The redirects page](/img/redirects/redirects-page.png)
+
 ## Add a rule
 
 1. Open the **redirect manager** page.

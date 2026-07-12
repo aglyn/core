@@ -13,6 +13,8 @@ records — with a **search box**.
 **Paid**.
 :::
 
+![The elements drawer, where the Search component lives](/img/besigner/elements-drawer.png)
+
 ## Steps
 
 1. Add the **search box** component to a screen (or your shared

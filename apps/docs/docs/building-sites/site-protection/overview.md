@@ -13,6 +13,8 @@ Control who can see your pages and what visitors see when something's not availa
 by tier.
 :::
 
+![The screens list, where each screen's visibility is managed](/img/getting-started/screens-list.png)
+
 ## Per-screen passwords
 
 Protect individual screens with a **password**, so only people with the code can view them.

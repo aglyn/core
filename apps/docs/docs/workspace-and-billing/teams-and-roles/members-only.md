@@ -13,6 +13,8 @@ certain screens to signed-in members only.
 **Paid**.
 :::
 
+![A site's users page](/img/teams-and-roles/host-users-page.png)
+
 ## Let visitors sign up
 
 Enable site **membership** so visitors can **sign in / sign up** to your site. New members

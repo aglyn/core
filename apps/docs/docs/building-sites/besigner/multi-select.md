@@ -9,6 +9,8 @@ description: Select several elements at once and move the whole selection togeth
 Working element-by-element is slow. The Besigner lets you **select multiple** nodes — in the
 hierarchy or on the canvas — and act on them together.
 
+![The hierarchy panel with the node tree expanded](/img/besigner/hierarchy-panel.png)
+
 ## Select multiple
 
 - **On the canvas**, add elements to the selection as you click.

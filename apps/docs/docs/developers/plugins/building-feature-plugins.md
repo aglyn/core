@@ -40,6 +40,8 @@ the real dialog) around every plugin page, so a plugin component just calls
 This is the escape hatch for the dependency cascade a naive promotion would
 hit.
 
+![The Plugins & add-ons hub where your plugin lands](/img/plugins/org-plugins-page.png)
+
 ## The UI half
 
 Build a bundle with `defineUiFeatureBundle` from `@aglyn/aglyn` (the

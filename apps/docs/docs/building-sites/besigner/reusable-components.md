@@ -9,6 +9,8 @@ description: Promote a subtree into a reusable component and insert instances ac
 Build something once — a card, a call-to-action, a footer block — and reuse it everywhere as
 a **reusable component**.
 
+![The site's reusable components page](/img/besigner/components-page.png)
+
 ## Promote
 
 1. Select the element (and its children) you want to reuse.

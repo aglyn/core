@@ -13,6 +13,8 @@ can pick their language.
 **Paid**.
 :::
 
+![Site languages in setup](/img/multilingual/setup-languages.png)
+
 ## Steps
 
 1. Add the **language switcher** to a screen or your shared

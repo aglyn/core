@@ -26,6 +26,8 @@ reusable components.
 
 ![Editing a screen in the Besigner](/img/besigner/besigner-editor.png)
 
+![The screens list](/img/getting-started/screens-list.png)
+
 ## Screens & routing
 
 - Each screen has a **title** and a URL **slug**. Aglyn normalizes slugs and keeps a

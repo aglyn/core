@@ -13,6 +13,8 @@ Control what each teammate can do with **roles** — named permission sets — p
 **Paid**.
 :::
 
+![Roles on the organization team page](/img/teams-and-roles/org-team-page.png)
+
 ## Create a custom role
 
 1. On the organization **Team** page, find the **Custom roles** card and choose

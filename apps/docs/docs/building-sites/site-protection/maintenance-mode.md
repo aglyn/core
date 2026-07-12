@@ -9,6 +9,8 @@ description: Temporarily take your site offline behind a designed 503 screen.
 Need to pause your live site while you make changes? **Maintenance mode** serves your
 designed **503** screen to visitors until you switch it back.
 
+![Site setup, where maintenance mode is toggled](/img/custom-domains/setup-domains.png)
+
 ## Turn it on
 
 1. Enable **maintenance mode** for the site.

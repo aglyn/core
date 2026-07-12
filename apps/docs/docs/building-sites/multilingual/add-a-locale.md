@@ -12,6 +12,8 @@ Publish your site in another language by adding a **locale variant**.
 **Paid**. This is **multilingual v1**.
 :::
 
+![Adding a locale in site setup](/img/multilingual/setup-languages.png)
+
 ## Steps
 
 1. Add a **locale** (e.g. `es`, `fr`) to your site.

@@ -9,6 +9,8 @@ description: Products with options and variants, categories, tags, and manual or
 The catalog (AGL-276) is the foundation of Aglyn commerce: every storefront
 block, checkout, and order line points back at these documents.
 
+![The product catalog](/img/commerce/products-page.png)
+
 ## Products, options, and variants
 
 A **product** is what you manage; a **variant** is what a customer actually

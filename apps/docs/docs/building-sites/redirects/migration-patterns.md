@@ -12,6 +12,8 @@ Redirects earn their keep during change. Here are the patterns you'll reach for 
 **Paid**.
 :::
 
+![Redirect rules for a migration](/img/redirects/redirects-page.png)
+
 ## Renamed a screen
 
 When you change a screen's [slug](../screens-and-layouts/overview.md#screens--routing), add a

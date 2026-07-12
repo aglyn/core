@@ -12,6 +12,8 @@ Move your site from its Aglyn subdomain to a domain you own.
 **Paid**.
 :::
 
+![Connecting a custom domain](/img/custom-domains/setup-domains.png)
+
 ## Steps
 
 1. In **Setup**, open the **custom domain** tab and start the **wizard**.

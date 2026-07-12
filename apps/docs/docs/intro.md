@@ -27,6 +27,8 @@ flowchart TD
   S --> P[Published site]
 ```
 
+![A site's dashboard in the Aglyn console](/img/getting-started/console-dashboard.png)
+
 ## The mental model
 
 A few concepts show up everywhere in Aglyn. Learn these first and the rest of the

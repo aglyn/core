@@ -16,6 +16,8 @@ Release flags control whether a feature is **launched** — a separate axis from
 *plan includes* a feature. A customer sees a feature only when it's released **and**
 their plan allows it.
 
+![The release flags page](/img/staff-console/admin-flags.png)
+
 ## How a flag is evaluated
 
 Every check runs client-side against the activated Remote Config template, with the

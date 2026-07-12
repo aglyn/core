@@ -13,6 +13,8 @@ Give visitors a **search box** to find content across your site, including
 **Paid**. Site search is available on paid tiers.
 :::
 
+![The Search component in the elements drawer](/img/besigner/elements-drawer.png)
+
 ## How it works
 
 - Add the **search box** to a screen.

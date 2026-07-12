@@ -21,6 +21,8 @@ flowchart LR
 **Free** to start, with plan caps on the number of variables, functions, and workflows.
 :::
 
+![The Logic page: variables and functions that bindings resolve](/img/workflows-and-actions/logic-page.png)
+
 ## Binding tokens
 
 Bindings appear inside text props as tokens:
