@@ -25,3 +25,7 @@
 export * from './lib/aglyn'
 export * from './lib/app-utils/server'
 export * from './lib/foundation'
+// The Web↔(req,res) API adapter (AGL-407) imports `node:stream`, so it is
+// exposed ONLY through this `/server` entry — never re-exported by the full
+// `@aglyn/aglyn` barrel (which client code bundles).
+export * from './lib/app-utils/api-adapter'
