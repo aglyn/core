@@ -28,7 +28,50 @@ import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
  * component installs: free, purchased (webhook-written), or own listing.
  * The pin references the immutable artifact; the sandboxed loader fetches
  * and integrity-checks it at render time.
+ *
+ * Enablement sync (AGL-424): marketplace plugins ride the same
+ * `org.enabledPlugins` switchboard first-party plugins use — but ONLY for
+ * workspaces that have explicitly configured the field. Install appends
+ * the listing id there; uninstall removes it once no pin (org or acting
+ * host) remains. Workspaces that never touched the switchboard stay
+ * default-open (absent field ⇒ installs load), so pre-sync installs keep
+ * working.
  */
+
+/** Keeps `org.enabledPlugins` in step with install pins (AGL-424). */
+async function syncEnabledPlugins(
+  firestore: FirebaseFirestore.Firestore,
+  orgId: string | null,
+  hostId: string,
+  listingId: string,
+  action: 'add' | 'remove-if-unpinned',
+): Promise<void> {
+  if (!orgId) return
+  const orgRef = firestore.collection('orgs').doc(orgId)
+  const configured = (await orgRef.get()).get('enabledPlugins')
+  // Absent field = default-open workspace; nothing to sync.
+  if (!Array.isArray(configured)) return
+  if (action === 'add') {
+    if (configured.includes(listingId)) return
+    await orgRef.update({
+      enabledPlugins: firebaseAdmin.firestore.FieldValue.arrayUnion(listingId),
+    })
+    return
+  }
+  const [orgPin, hostPin] = await Promise.all([
+    orgRef.collection('installs').doc(listingId).get(),
+    firestore
+      .collection('hosts')
+      .doc(hostId)
+      .collection('installs')
+      .doc(listingId)
+      .get(),
+  ])
+  if (orgPin.exists || hostPin.exists) return
+  await orgRef.update({
+    enabledPlugins: firebaseAdmin.firestore.FieldValue.arrayRemove(listingId),
+  })
+}
 export const installPluginHandler: PluginApiHandler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -68,19 +111,37 @@ export const installPluginHandler: PluginApiHandler = async (req, res) => {
       return res.status(403).json({ error: 'Not a site admin' })
     }
 
-    // Org-tier uninstall (AGL-237): org pins are API-managed (rules deny
-    // client writes), so removal comes through here too.
-    if (req.body?.action === 'uninstall' && req.body?.scope === 'org') {
+    // Uninstalls (AGL-237/424). Org pins are API-managed (rules deny
+    // client writes); host uninstalls also come through here so the
+    // enablement sync runs. Plugin-owned data is never deleted — only the
+    // pin (and the switchboard entry when no pin remains anywhere).
+    if (req.body?.action === 'uninstall') {
       const orgId = await resolveOrgIdForHost(hostId)
-      if (!orgId) {
-        return res.status(409).json({ error: 'This site has no organization yet' })
+      if (req.body?.scope === 'org') {
+        if (!orgId) {
+          return res.status(409).json({ error: 'This site has no organization yet' })
+        }
+        await firestore
+          .collection('orgs')
+          .doc(orgId)
+          .collection('installs')
+          .doc(listingId)
+          .delete()
+      } else {
+        await firestore
+          .collection('hosts')
+          .doc(hostId)
+          .collection('installs')
+          .doc(listingId)
+          .delete()
       }
-      await firestore
-        .collection('orgs')
-        .doc(orgId)
-        .collection('installs')
-        .doc(listingId)
-        .delete()
+      await syncEnabledPlugins(
+        firestore,
+        orgId,
+        hostId,
+        listingId,
+        'remove-if-unpinned',
+      )
       return res.status(200).json({ ok: true })
     }
 
@@ -170,6 +231,16 @@ export const installPluginHandler: PluginApiHandler = async (req, res) => {
         })
         .catch(() => undefined)
     }
+
+    // Enablement sync (AGL-424): the new install loads on next visit for
+    // workspaces with a configured switchboard.
+    await syncEnabledPlugins(
+      firestore,
+      await resolveOrgIdForHost(hostId),
+      hostId,
+      listingId,
+      'add',
+    )
 
     return res.status(200).json({
       installed: true,

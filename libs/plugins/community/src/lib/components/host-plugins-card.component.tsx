@@ -277,7 +277,7 @@ export function HostPluginsCard(props: HostPluginsCardProps) {
         title: `Uninstall "${install.displayName ?? install.$id}" org-wide?`,
         description:
           'Every site in the organization loses this plugin unless it has ' +
-          'its own host-level pin.',
+          'its own host-level pin. Data the plugin created stays untouched.',
         confirmationText: 'Uninstall',
         confirmationButtonProps: { color: 'error' },
       })
@@ -305,20 +305,27 @@ export function HostPluginsCard(props: HostPluginsCardProps) {
         title: `Uninstall "${install.displayName ?? install.$id}"?`,
         description:
           'Plugin elements pointing at it will show a placeholder until ' +
-          'reinstalled.',
+          'reinstalled. Data the plugin created stays untouched.',
         confirmationText: 'Uninstall',
         confirmationButtonProps: { color: 'error' },
       })
         .then(() => true)
         .catch(() => false)
       if (!confirmed) return
-      await deleteDoc(doc(firestore, 'hosts', hostId, 'installs', install.$id))
-      enqueueSnackbar('Plugin uninstalled', {
-        variant: 'success',
-        persist: false,
+      // Through the API (AGL-424) so the org enablement switchboard stays
+      // in step with the removed pin.
+      const payload = await requestPluginApi({
+        listingId: install.$id,
+        action: 'uninstall',
       })
+      if (payload) {
+        enqueueSnackbar('Plugin uninstalled', {
+          variant: 'success',
+          persist: false,
+        })
+      }
     },
-    [confirm, firestore, hostId, enqueueSnackbar],
+    [confirm, requestPluginApi, enqueueSnackbar],
   )
 
   return (

@@ -73,6 +73,19 @@ export async function getRealmPluginInstalls(options: {
     options.orgId ??
     (options.hostId ? await resolveOrgIdForHost(options.hostId) : null)
 
+  // Switchboard gate (AGL-424): a workspace with an EXPLICIT
+  // `enabledPlugins` list only realm-loads listings on it (install sync
+  // keeps the list in step; toggling one off disables it without
+  // uninstalling). Absent field = default-open, so pre-switchboard
+  // installs keep loading.
+  let enabledFilter: readonly string[] | null = null
+  if (orgId) {
+    const configured = (
+      await firestore.collection('orgs').doc(orgId).get()
+    ).get('enabledPlugins')
+    if (Array.isArray(configured)) enabledFilter = configured.map(String)
+  }
+
   const pins = new Map<string, InstallPin>()
   const collect = async (
     ref: FirebaseFirestore.CollectionReference,
@@ -93,6 +106,11 @@ export async function getRealmPluginInstalls(options: {
     await collect(
       firestore.collection('hosts').doc(options.hostId).collection('installs'),
     )
+  }
+  if (enabledFilter) {
+    for (const listingId of [...pins.keys()]) {
+      if (!enabledFilter.includes(listingId)) pins.delete(listingId)
+    }
   }
   if (!pins.size) return []
 

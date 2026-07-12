@@ -101,6 +101,12 @@ Every link must hold before a byte executes:
   admin SDK); the catch-all client loads them in a post-hydration effect —
   realm site runtimes are additive, so first paint never waits on a
   marketplace CDN.
+- **Switchboard integration** (AGL-424): installs append the listing id to
+  `org.enabledPlugins` and uninstalls remove it once no pin remains, but
+  only for workspaces that explicitly configured the field — absent means
+  default-open so pre-switchboard installs keep loading. A configured list
+  also gates the realm join, so toggling an installed plugin off disables
+  it without uninstalling.
 - Failures (fetch, sha, signature, execution) are logged and skipped,
   per bundle. A broken remote plugin cannot take a surface down.
 

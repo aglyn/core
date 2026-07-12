@@ -33,6 +33,9 @@ are paid.
 - Manage everything in one place on the organization's **Plugins & add-ons** page:
   first-party plugin toggles (with release state) plus every marketplace install with
   upgrade, uninstall, and share-with-organization actions.
+- Installing enables the plugin for the workspace automatically; uninstalling disables
+  it once no site keeps its own pin. **Uninstalling never deletes the data a plugin
+  created** — reinstall and it picks up where it left off.
 
 ## How plugins run
 
