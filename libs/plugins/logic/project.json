@@ -4,8 +4,6 @@
   "sourceRoot": "libs/plugins/logic/src",
   "projectType": "library",
   "tags": [
-    "scope:lib",
-    "scope:aglyn",
     "aglyn:addons"
   ],
   "targets": {

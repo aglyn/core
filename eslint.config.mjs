@@ -115,16 +115,22 @@ export default [
               onlyDependOnLibsWithTags: ['scope:util', 'scope:data'],
             },
             {
-              sourceTag: 'scope:addons',
+              // Feature plugins (AGL-409). They carry ONLY `aglyn:addons`
+              // (not the generic `scope:lib`/`scope:aglyn`), so as a
+              // dependency TARGET no core scope's allowlist reaches them —
+              // core libs cannot import a plugin, keeping the app runnable
+              // with any plugin absent. As a SOURCE they may still import
+              // any lib (every lib is `scope:lib`) and each other.
+              sourceTag: 'aglyn:addons',
               onlyDependOnLibsWithTags: [
-                'scope:addons',
+                'aglyn:addons',
+                'aglyn:framework',
+                'aglyn:renderer',
                 'scope:aglyn',
                 'scope:shared',
                 'scope:ui',
-                'scope:framework',
                 'scope:util',
                 'scope:data',
-                'scope:renderer',
                 'scope:feature',
                 'scope:lib',
               ],
