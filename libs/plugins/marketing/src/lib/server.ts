@@ -18,6 +18,7 @@
 import { checkEntitlement } from '@aglyn/aglyn/server'
 import { evaluateAutoWinner, type HostExperiment } from './model'
 import { registerPluginApiRoute, type PluginApiHandler } from '@aglyn/aglyn/server'
+import { emailEventsHandler } from './server/email-events'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 import { campaignProcessScheduledHandler } from './server/campaign-process-scheduled'
@@ -118,6 +119,10 @@ export function registerMarketingApi(): void {
 /** Registers the marketing plugin's console-side API routes (AGL-396). */
 export function registerMarketingConsoleApi(): void {
   registerPluginApiRoute('campaigns/send', campaignSendHandler)
+  // Relocated console route (AGL-418): the Resend/Svix webhook keeps its
+  // /api/email/events URL via the dispatcher; ownership is recorded at
+  // registration so the org gate attributes it to marketing, not email.
+  registerPluginApiRoute('email/events', emailEventsHandler)
   registerPluginApiRoute(
     'campaigns/process-scheduled',
     campaignProcessScheduledHandler,

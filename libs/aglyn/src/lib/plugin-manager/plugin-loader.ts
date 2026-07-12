@@ -53,6 +53,8 @@ export interface PluginLoader {
   pluginIdForApiPath(path: string): string | undefined
 }
 
+import { setRegisteringPluginId } from '../app-utils/api-plugins'
+
 export function createPluginLoader(manifest: PluginLoadManifest): PluginLoader {
   const loads = new Map<string, Promise<Record<string, unknown>>>()
   const registered = new Set<string>()
@@ -89,7 +91,14 @@ export function createPluginLoader(manifest: PluginLoadManifest): PluginLoader {
         console.error(`plugin ${entry.id}: missing register fn ${fnName}`)
         continue
       }
-      ;(fn as () => void)()
+      // Mark ownership while the register fn runs so registerPluginApiRoute
+      // records exact path→plugin attribution for the per-org gate.
+      setRegisteringPluginId(entry.id)
+      try {
+        ;(fn as () => void)()
+      } finally {
+        setRegisteringPluginId(undefined)
+      }
     }
   }
 

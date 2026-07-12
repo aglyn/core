@@ -17,6 +17,7 @@
 
 import {
   createPluginLoader,
+  pluginIdForRegisteredApiPath,
   resolveEnabledPlugins,
   resolvePluginApiRoute,
   runLegacyHandler,
@@ -51,7 +52,10 @@ async function dispatch(
   // Per-request org gate: resolve the owning plugin from the path prefix
   // and the target host from the request (query `hostId`, else JSON body —
   // read off a clone so the handler still gets the untouched stream).
-  const pluginId = loader.pluginIdForApiPath(path)
+  // Exact ownership recorded at registration time; the manifest prefix map
+  // is only the fallback for paths registered outside the loader.
+  const pluginId =
+    pluginIdForRegisteredApiPath(path) ?? loader.pluginIdForApiPath(path)
   if (pluginId) {
     const url = new URL(request.url)
     let hostId = url.searchParams.get('hostId') ?? ''

@@ -16,6 +16,8 @@
  */
 
 import { registerPluginApiRoute } from '@aglyn/aglyn/server'
+import { aiAssistHandler } from './server/ai-assist'
+import { publishPluginHandler } from './server/publish-plugin'
 import { checkoutHandler } from './server/checkout'
 import { connectHandler } from './server/connect'
 import { installHandler } from './server/install'
@@ -40,4 +42,7 @@ export function registerCommunityConsoleApi(): void {
   registerPluginApiRoute('community/install-template', installTemplateHandler)
   registerPluginApiRoute('community/publish', publishHandler)
   registerPluginApiRoute('community/publish-template', publishTemplateHandler)
+  // Relocated console routes (AGL-418): URLs preserved via the dispatcher.
+  registerPluginApiRoute('community/publish-plugin', publishPluginHandler)
+  registerPluginApiRoute('ai/assist', aiAssistHandler)
 }

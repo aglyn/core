@@ -37,6 +37,12 @@ export interface PluginApiRequest {
   // validate it themselves, as they did as Next routes.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body: any
+  /**
+   * The unparsed request text, for handlers that verify signatures over the
+   * exact payload (Stripe/Svix webhooks registered as plugin API paths).
+   * UTF-8 re-encoding of the text is byte-identical for valid UTF-8 JSON.
+   */
+  rawBody?: string
   headers: Partial<Record<string, string | string[]>>
   cookies: Partial<Record<string, string>>
   /** Node socket — used for the client IP fallback (`remoteAddress`). */
@@ -64,6 +70,19 @@ function normalizeApiPath(path: string): string {
 }
 
 const apiRoutes = new Map<string, PluginApiHandler>()
+const apiRouteOwners = new Map<string, string>()
+let registeringPluginId: string | undefined
+
+/**
+ * Marks which plugin's register fn is currently running so
+ * {@link registerPluginApiRoute} can record exact path→plugin ownership —
+ * the dispatcher's per-org enablement gate (AGL-417) reads it back via
+ * {@link pluginIdForRegisteredApiPath}. Set by the plugin loader around
+ * each register-fn invocation; undefined outside registration.
+ */
+export function setRegisteringPluginId(pluginId: string | undefined): void {
+  registeringPluginId = pluginId
+}
 
 /**
  * Registers a plugin API handler at a host-relative path (e.g.
@@ -74,7 +93,14 @@ export function registerPluginApiRoute(
   path: string,
   handler: PluginApiHandler,
 ): void {
-  apiRoutes.set(normalizeApiPath(path), handler)
+  const key = normalizeApiPath(path)
+  apiRoutes.set(key, handler)
+  if (registeringPluginId) apiRouteOwners.set(key, registeringPluginId)
+}
+
+/** The plugin that registered a path, for per-org enablement gating. */
+export function pluginIdForRegisteredApiPath(path: string): string | undefined {
+  return apiRouteOwners.get(normalizeApiPath(path))
 }
 
 export function unregisterPluginApiRoute(path: string): void {

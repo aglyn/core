@@ -82,8 +82,10 @@ export async function pluginRequestFromWeb(
 
   const method = request.method ?? 'GET'
   let body: unknown
+  let rawBody: string | undefined
   if (method !== 'GET' && method !== 'HEAD') {
     const raw = await request.text()
+    rawBody = raw || undefined
     if (raw) {
       const contentType = request.headers.get('content-type') ?? ''
       if (contentType.includes('application/json')) {
@@ -109,6 +111,7 @@ export async function pluginRequestFromWeb(
     method,
     query,
     body,
+    rawBody,
     headers,
     cookies: parseCookies(request.headers),
     socket: { remoteAddress: clientIp(request.headers) },

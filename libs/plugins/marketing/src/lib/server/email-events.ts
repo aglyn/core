@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import { assignExperimentVariant, type HostExperiment } from '@aglyn/plugins-marketing/model'
+import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { FieldValue } from 'firebase-admin/firestore'
+import { assignExperimentVariant, type HostExperiment } from '../model/experiments'
 
 /**
  * Svix signature check (Resend webhooks): HMAC-SHA256 over
@@ -73,29 +74,24 @@ function tagMap(raw: unknown): Record<string, string> {
 }
 
 /**
- * Resend event ingestion (AGL-268): opened/clicked events increment the
- * tagged campaign's stats; clicks on experiment sends also count as the
- * recipient's variant conversion — the variant re-derives
+ * Resend event ingestion (AGL-268), relocated from the console app route
+ * into its owning plugin (AGL-418) — the URL `/api/email/events` is
+ * preserved through the plugin API dispatcher. Opened/clicked events
+ * increment the tagged campaign's stats; clicks on experiment sends also
+ * count as the recipient's variant conversion — the variant re-derives
  * deterministically from the address, so nothing per-send is stored.
- * Counters accept repeat events (Resend fires opens repeatedly); they
- * are engagement meters, not unique counts.
+ * Svix signs the RAW body: `req.rawBody` carries the exact request text.
  */
-async function handler(request: Request): Promise<Response> {
-  // Svix signs the RAW body: read the exact bytes off the Web request
-  // (nothing else may consume the stream first) — no bodyParser config
-  // needed on the App Router.
-  const method = request.method
-  const headers = Object.fromEntries(request.headers) as Partial<
-    Record<string, string>
-  >
-  if (method !== 'POST') {
-    return Response.json({ error: 'Method not allowed' }, { status: 405 })
+export const emailEventsHandler: PluginApiHandler = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
   }
   const secret = process.env.RESEND_WEBHOOK_SECRET
   if (!secret) {
-    return Response.json({ error: 'Webhook is not configured' }, { status: 501 })
+    return res.status(501).json({ error: 'Webhook is not configured' })
   }
-  const payload = Buffer.from(await request.arrayBuffer())
+  const payload = Buffer.from(req.rawBody ?? '', 'utf8')
+  const headers = req.headers as Partial<Record<string, string>>
   const svixId = String(headers['svix-id'] ?? '')
   const svixTimestamp = String(headers['svix-timestamp'] ?? '')
   const svixSignature = String(headers['svix-signature'] ?? '')
@@ -104,21 +100,21 @@ async function handler(request: Request): Promise<Response> {
     !svixTimestamp ||
     !verifySvix(secret, svixId, svixTimestamp, payload, svixSignature)
   ) {
-    return Response.json({ error: 'Bad signature' }, { status: 401 })
+    return res.status(401).json({ error: 'Bad signature' })
   }
 
   try {
     const event = JSON.parse(payload.toString('utf8'))
     const type = String(event?.type ?? '')
     if (type !== 'email.opened' && type !== 'email.clicked') {
-      return Response.json({ ignored: true }, { status: 200 })
+      return res.status(200).json({ ignored: true })
     }
     const data = event?.data ?? {}
     const tags = tagMap(data?.tags)
     const hostId = tags['hostId']
     const campaignId = tags['campaignId']
     if (!hostId || !campaignId) {
-      return Response.json({ ignored: true }, { status: 200 })
+      return res.status(200).json({ ignored: true })
     }
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
@@ -172,12 +168,10 @@ async function handler(request: Request): Promise<Response> {
         }
       }
     }
-    return Response.json({ ok: true }, { status: 200 })
+    return res.status(200).json({ ok: true })
   } catch (error) {
     console.error(error)
-    return Response.json({ ok: true }, { status: 200 }) // never make Resend retry-storm
+    // Never make Resend retry-storm.
+    return res.status(200).json({ ok: true })
   }
 }
-
-export const dynamic = 'force-dynamic'
-export { handler as POST }

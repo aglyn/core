@@ -15,34 +15,42 @@
  * limitations under the License.
  */
 
-import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { COMMUNITY_COMPONENT_ID_ALLOWLIST, sanitizeCommunityDefinition } from '@aglyn/plugins-community/model'
+import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  COMMUNITY_COMPONENT_ID_ALLOWLIST,
+  sanitizeCommunityDefinition,
+} from '../model/community'
 
 const MODEL = 'claude-sonnet-5'
 
 /**
- * AI assist (AGL-89): rewrites/generates copy for a besigner element via
- * the Anthropic Messages API. Env-gated on ANTHROPIC_API_KEY (501 without,
- * same degrade pattern as Stripe); auth via Firebase ID token.
+ * AI assist (AGL-89/130/169), relocated from the console app route into the
+ * community plugin (AGL-418) — the section mode composes over the community
+ * component allowlist and every generated subtree passes the community
+ * install sanitizer, so the plugin owns the contract. URL `/api/ai/assist`
+ * is preserved through the dispatcher. Env-gated on ANTHROPIC_API_KEY (501
+ * without, same degrade pattern as Stripe); auth via Firebase ID token.
  */
-async function handler(request: Request): Promise<Response> {
-  const { method, body, headers: rawHeaders } = await pluginRequestFromWeb(request)
-  const headers = rawHeaders as Partial<Record<string, string>>
-  if (method !== 'POST') {
-    return Response.json({ error: 'Method not allowed' }, { status: 405 })
+export const aiAssistHandler: PluginApiHandler = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' })
   }
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return Response.json({ error: 'AI assist is not configured (ANTHROPIC_API_KEY).' }, { status: 501 })
+    return res
+      .status(501)
+      .json({ error: 'AI assist is not configured (ANTHROPIC_API_KEY).' })
   }
 
+  const headers = req.headers as Partial<Record<string, string>>
   const authorization = headers.authorization ?? ''
   const idToken = authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : undefined
-  if (!idToken) return Response.json({ error: 'Unauthenticated' }, { status: 401 })
+  if (!idToken) return res.status(401).json({ error: 'Unauthenticated' })
 
+  const body = req.body ?? {}
   const text = String(body?.text ?? '').slice(0, 12000)
   const instruction = String(body?.instruction ?? '').slice(0, 500)
   // Modes (AGL-130): 'element' rewrites short copy; 'blog' writes or
@@ -56,7 +64,7 @@ async function handler(request: Request): Promise<Response> {
   const title = String(body?.title ?? '').slice(0, 200)
   const excerpt = String(body?.excerpt ?? '').slice(0, 500)
   if (!instruction) {
-    return Response.json({ error: 'Missing instruction' }, { status: 400 })
+    return res.status(400).json({ error: 'Missing instruction' })
   }
 
   try {
@@ -98,7 +106,9 @@ async function handler(request: Request): Promise<Response> {
       const payload = await response.json()
       if (!response.ok) {
         console.error(payload)
-        return Response.json({ error: payload?.error?.message ?? 'AI request failed' }, { status: 502 })
+        return res
+          .status(502)
+          .json({ error: payload?.error?.message ?? 'AI request failed' })
       }
       const raw = (payload?.content ?? [])
         .filter((block: any) => block?.type === 'text')
@@ -111,16 +121,18 @@ async function handler(request: Request): Promise<Response> {
       try {
         parsed = JSON.parse(raw)
       } catch {
-        return Response.json({ error: 'AI returned invalid JSON' }, { status: 502 })
+        return res.status(502).json({ error: 'AI returned invalid JSON' })
       }
       const sanitized = sanitizeCommunityDefinition({
         rootId: String(parsed?.rootId ?? ''),
         nodes: parsed?.nodes ?? {},
       })
       if (sanitized.ok === false) {
-        return Response.json({ error: sanitized.error }, { status: 422 })
+        return res.status(422).json({ error: sanitized.error })
       }
-      return Response.json({ section: { rootId: sanitized.rootId, nodes: sanitized.nodes } }, { status: 200 })
+      return res
+        .status(200)
+        .json({ section: { rootId: sanitized.rootId, nodes: sanitized.nodes } })
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -166,20 +178,19 @@ async function handler(request: Request): Promise<Response> {
     const payload = await response.json()
     if (!response.ok) {
       console.error(payload)
-      return Response.json({ error: payload?.error?.message ?? 'AI request failed' }, { status: 502 })
+      return res
+        .status(502)
+        .json({ error: payload?.error?.message ?? 'AI request failed' })
     }
     const output = (payload?.content ?? [])
       .filter((block: any) => block?.type === 'text')
       .map((block: any) => block.text)
       .join('')
       .trim()
-    if (!output) return Response.json({ error: 'Empty AI response' }, { status: 502 })
-    return Response.json({ text: output }, { status: 200 })
+    if (!output) return res.status(502).json({ error: 'Empty AI response' })
+    return res.status(200).json({ text: output })
   } catch (error) {
     console.error(error)
-    return Response.json({ error: 'Assist failed' }, { status: 500 })
+    return res.status(500).json({ error: 'Assist failed' })
   }
 }
-
-export const dynamic = 'force-dynamic'
-export { handler as POST }
