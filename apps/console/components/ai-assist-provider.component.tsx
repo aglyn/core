@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommunityModel from '@aglyn/plugins-community/model'
 import { AiAssistContext } from '@aglyn/besigner-ui'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -198,7 +199,7 @@ export function AiAssistProvider(props: AiAssistProviderProps) {
           allowDuplicate: true,
         })
       }
-      const nested = Aglyn.communityDefinitionToNested(
+      const nested = CommunityModel.communityDefinitionToNested(
         payload.section.rootId,
         payload.section.nodes,
       )

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { coerceDocumentValues, type DatasetModel } from './dataset-models'
+import { coerceDocumentValues, type DatasetModel } from '@aglyn/aglyn'
 import {
   datasetRecordsToCsv,
   mapImportColumns,

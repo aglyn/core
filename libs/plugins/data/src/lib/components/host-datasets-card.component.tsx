@@ -16,28 +16,8 @@
  */
 'use client'
 
-import {
-  type AglynTenant,
-  applyDatasetQuery,
-  checkDatasetQuota,
-  checkEntitlement,
-  checkQuota,
-  coerceDocumentValues,
-  datasetRecordsToCsv,
-  createResourceUid,
-  datasetValueToInput,
-  deriveModelFromFields,
-  effectiveDatasetModel,
-  formatDatasetValue,
-  mapImportColumns,
-  parseDatasetFields,
-  parseDatasetFilter,
-  parseImportRows,
-  serializeDatasetValue,
-  parseDatasetSort,
-  sortDatasetRecords,
-  validateDocument,
-} from '@aglyn/aglyn'
+import { type AglynTenant, applyDatasetQuery, checkDatasetQuota, checkEntitlement, checkQuota, coerceDocumentValues, createResourceUid, datasetValueToInput, deriveModelFromFields, effectiveDatasetModel, formatDatasetValue, parseDatasetFields, parseDatasetFilter, parseDatasetSort, sortDatasetRecords, validateDocument } from '@aglyn/aglyn'
+import { datasetRecordsToCsv, mapImportColumns, parseImportRows, serializeDatasetValue } from '../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'

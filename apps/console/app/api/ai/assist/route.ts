@@ -16,10 +16,7 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import {
-  COMMUNITY_COMPONENT_ID_ALLOWLIST,
-  sanitizeCommunityDefinition,
-} from '@aglyn/aglyn/server'
+import { COMMUNITY_COMPONENT_ID_ALLOWLIST, sanitizeCommunityDefinition } from '@aglyn/plugins-community/model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 const MODEL = 'claude-sonnet-5'

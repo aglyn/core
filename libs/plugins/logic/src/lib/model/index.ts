@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
-export * from './lib/constants/bundle-common'
-export * from './lib/plugin'
-export * from './lib/model'
+/**
+ * Logic plugin model (AGL-413): the automations/workflows/variables reference-integrity audit relocated from core app-utils.
+ * Context-free — importable by client components, /server handlers, and
+ * other plugins/apps via `@aglyn/plugins-logic/model`.
+ */
+export * from './reference-audit'

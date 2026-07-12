@@ -20,7 +20,7 @@ import {
   estimateMonthlyUsageCost,
   type HostUsageSnapshot,
   METERED_MARKUP,
-} from '@aglyn/aglyn'
+} from '../../utils/usage-metering'
 import { Stack, Typography } from '@mui/material'
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore'
 import { documentId } from 'firebase/firestore'

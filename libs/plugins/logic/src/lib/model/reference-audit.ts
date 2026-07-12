@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import type { HostAction } from './actions'
-import type { HostVariable } from './variables'
-import type { HostWorkflow } from './workflows'
+import type { HostAction } from '@aglyn/aglyn'
+import type { HostVariable } from '@aglyn/aglyn'
+import type { HostWorkflow } from '@aglyn/aglyn'
 
 /**
  * Reference-integrity audit (wave v7): id references (AGL-261) are

@@ -25,7 +25,7 @@
 import type {
   DatasetFieldDefinition,
   DatasetModel,
-} from './dataset-models'
+} from '@aglyn/aglyn'
 
 /** Storage value → portable string (CSV cell / JSON value). */
 export function serializeDatasetValue(

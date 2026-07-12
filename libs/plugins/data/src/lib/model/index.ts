@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
-export * from './lib/constants/bundle-common'
-export * from './lib/plugin'
-export * from './lib/model'
+/**
+ * Dataset io model (AGL-413): CSV serialize/parse for dataset records relocated from core app-utils.
+ * Context-free — importable by client components, /server handlers, and
+ * other plugins/apps via `@aglyn/plugins-data/model`.
+ */
+export * from './dataset-io'

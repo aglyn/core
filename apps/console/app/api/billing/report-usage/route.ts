@@ -16,11 +16,11 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
+import { checkDataStorageQuota } from '@aglyn/aglyn/server'
 import {
-  checkDataStorageQuota,
   estimateMonthlyUsageCost,
   type HostUsageSnapshot,
-} from '@aglyn/aglyn/server'
+} from '../../../../utils/usage-metering'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 /** Previous calendar month as YYYY-MM (the default rollup target). */

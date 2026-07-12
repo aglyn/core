@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-import {
-  COMMUNITY_PLATFORM_FEE_PERCENT,
-  COMMUNITY_PLATFORM_FEE_PERCENT_FREE_PLAN,
-} from '@aglyn/aglyn/server'
+import { COMMUNITY_PLATFORM_FEE_PERCENT, COMMUNITY_PLATFORM_FEE_PERCENT_FREE_PLAN } from '../model'
 import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
 

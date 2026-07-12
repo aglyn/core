@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { auditHostReferences } from '@aglyn/aglyn'
+import { auditHostReferences } from '../model'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { Alert, Chip, Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'

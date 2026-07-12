@@ -15,13 +15,8 @@
  * limitations under the License.
  */
 
-import {
-  CANVAS_ROOT_ELEMENT_ID,
-  checkEntitlement,
-  COMMUNITY_MAX_PRICE_USD,
-  createResourceUid,
-  sanitizeCommunityDefinition,
-} from '@aglyn/aglyn/server'
+import { CANVAS_ROOT_ELEMENT_ID, checkEntitlement, createResourceUid } from '@aglyn/aglyn/server'
+import { COMMUNITY_MAX_PRICE_USD, sanitizeCommunityDefinition } from '../model'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'

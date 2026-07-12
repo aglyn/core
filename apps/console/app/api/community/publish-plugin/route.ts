@@ -16,13 +16,8 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import {
-  checkEntitlement,
-  COMMUNITY_MAX_PRICE_USD,
-  createResourceUid,
-  pluginArtifactPath,
-  validatePluginManifest,
-} from '@aglyn/aglyn/server'
+import { checkEntitlement, createResourceUid, pluginArtifactPath, validatePluginManifest } from '@aglyn/aglyn/server'
+import { COMMUNITY_MAX_PRICE_USD } from '@aglyn/plugins-community/model'
 import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
 import { createHash } from 'crypto'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'

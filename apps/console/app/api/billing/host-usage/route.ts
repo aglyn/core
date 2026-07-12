@@ -16,7 +16,7 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { ESTIMATED_PAGE_TRANSFER_BYTES } from '@aglyn/aglyn/server'
+import { ESTIMATED_PAGE_TRANSFER_BYTES } from '../../../../utils/usage-metering'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 /** Approximate persisted size of one version doc's node payload. */

@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
-export * from './lib/constants/bundle-common'
-export * from './lib/plugin'
-export * from './lib/model'
+/**
+ * Community marketplace model (AGL-413): listing/profile shapes + publish sanitization relocated from core app-utils.
+ * Context-free — importable by client components, /server handlers, and
+ * other plugins/apps via `@aglyn/plugins-community/model`.
+ */
+export * from './community'
