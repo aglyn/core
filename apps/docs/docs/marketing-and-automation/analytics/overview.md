@@ -14,6 +14,8 @@ per-screen traffic — so you don't need a third-party tool to see the basics.
 entitlement are **Pro+**.
 :::
 
+![The site analytics page](/img/analytics/analytics-page.png)
+
 ## Pageview tracking
 
 A lightweight **pageview beacon** records visits into daily counters. The site dashboard

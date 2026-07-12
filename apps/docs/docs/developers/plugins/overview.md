@@ -12,6 +12,8 @@ compromise your site.
 
 ![The Community page in the Aglyn console, showing the Installed plugins and Community components sections](/img/plugins/community-page.png)
 
+![The Plugins & add-ons hub, where workspace admins enable plugins and manage installs](/img/plugins/org-plugins-page.png)
+
 ```mermaid
 flowchart LR
   Host["Aglyn host runtime"] <-->|sandbox bridge protocol| Frame["Sandboxed PluginFrame<br/>(isolated by origin)"]

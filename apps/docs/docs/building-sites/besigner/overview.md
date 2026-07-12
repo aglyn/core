@@ -10,7 +10,17 @@ The **Besigner** is Aglyn's visual editor. You build a screen by placing compone
 **canvas**, arranging them in a **hierarchy**, and editing content directly on the page.
 It renders your screen under the real site theme, so what you see matches what publishes.
 
-![The Besigner editor: components drawer and hierarchy on the left, the live canvas in the center, and the inspector on the right](/img/besigner-surface.svg)
+![The Besigner editing a screen, with its five areas numbered](/img/besigner/besigner-annotated.png)
+
+1. **Primary bar** — the document switcher, File/Edit/Insert menus, the ƒx
+   functions panel, the version you're editing, and notifications.
+2. **Toolbar** — add elements, undo/redo, scheme and device preview,
+   panel toggles, and the Live/Preview/save state on the right.
+3. **Hierarchy & elements** — the node tree of the screen and the drawer
+   of components you can add.
+4. **Canvas** — your screen rendering live under the real site theme;
+   select, drag, and edit text inline.
+5. **Inspector** — info, attributes, and styles for the selected element.
 
 :::info Plan availability
 **Free**. The Besigner is core to building; some components and actions it exposes are

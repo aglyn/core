@@ -28,7 +28,7 @@
 // Each shot waits for seeded content, strips the emulator warning
 // banner and the Next dev indicator, and lets images/fonts settle.
 
-import { mkdirSync } from 'node:fs'
+import { mkdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-core'
@@ -42,12 +42,29 @@ const EMAIL = process.env.E2E_EMAIL ?? 'e2e@aglyn.test'
 const PASSWORD = process.env.E2E_PASSWORD ?? 'E2e-Password-1'
 const TIMEOUT_MS = Number(process.env.E2E_TIMEOUT_MS ?? 60_000)
 
-/** path → output file (under static/img) + the text to wait for. */
+/**
+ * path → output file (under static/img) + the text to wait for.
+ * `annotate` draws numbered badges + outlines around the located elements
+ * before the shot (the legend lives in the docs page that embeds it).
+ * Run a subset with `--only=<out-substring>`.
+ */
 const shots = [
   {
     out: 'getting-started/console-dashboard.png',
     path: `/${HOST_ID}`,
     waitFor: 'Demo Bakery',
+  },
+  {
+    out: 'getting-started/console-chrome-annotated.png',
+    path: `/${HOST_ID}`,
+    waitFor: 'Demo Bakery',
+    annotate: [
+      { rect: { x: 0, y: 0, width: 1440, height: 42 }, n: 1 },
+      { locator: 'text=e2e-owner', n: 2 },
+      { rect: { x: 158, y: 46, width: 1274, height: 40 }, n: 3 },
+      { locator: 'text=Demo Bakery', n: 4 },
+      { rect: { x: 16, y: 300, width: 1408, height: 540 }, n: 5 },
+    ],
   },
   {
     out: 'datasets/data-page.png',
@@ -79,7 +96,7 @@ const shots = [
   {
     out: 'marketing-overlays/marketing-page.png',
     path: `/${HOST_ID}/marketing`,
-    waitFor: 'Welcome bar',
+    waitFor: 'At a glance',
   },
   {
     out: 'workflows-and-actions/workflows-page.png',
@@ -96,19 +113,92 @@ const shots = [
     path: '/org/billing',
     waitFor: 'Manage payment methods',
   },
+  {
+    out: 'forms/inbox-page.png',
+    path: `/${HOST_ID}/inbox`,
+    waitFor: 'Inbox',
+  },
+  {
+    out: 'redirects/redirects-page.png',
+    path: `/${HOST_ID}/redirects`,
+    waitFor: 'Redirects',
+  },
+  {
+    out: 'plugins/community-page.png',
+    path: `/${HOST_ID}/community`,
+    waitFor: 'Realm demo',
+  },
+  {
+    out: 'plugins/org-plugins-page.png',
+    path: '/org/plugins',
+    waitFor: 'Plugins',
+  },
+  {
+    out: 'teams-and-roles/org-team-page.png',
+    path: '/org/team',
+    waitFor: 'Invite',
+  },
+  {
+    out: 'getting-started/org-settings-page.png',
+    path: '/org/settings',
+    waitFor: 'Workspace',
+  },
+  {
+    out: 'getting-started/notifications-page.png',
+    path: '/manage/notifications',
+    waitFor: 'Notifications',
+  },
+  {
+    out: 'analytics/analytics-page.png',
+    path: `/${HOST_ID}/analytics`,
+    waitFor: 'Analytics',
+  },
+  {
+    out: 'besigner/besigner-editor.png',
+    path: `/${HOST_ID}/screens/seed-home/versions/seed-home-v1/besigner`,
+    waitFor: 'Properties',
+    settleMs: 8000,
+  },
+  {
+    out: 'besigner/besigner-annotated.png',
+    path: `/${HOST_ID}/screens/seed-home/versions/seed-home-v1/besigner`,
+    waitFor: 'Properties',
+    settleMs: 8000,
+    annotate: [
+      { rect: { x: 0, y: 0, width: 1440, height: 46 }, n: 1 },
+      { rect: { x: 0, y: 48, width: 1440, height: 38 }, n: 2 },
+      { rect: { x: 0, y: 90, width: 288, height: 806 }, n: 3 },
+      { rect: { x: 292, y: 90, width: 772, height: 806 }, n: 4 },
+      { rect: { x: 1068, y: 90, width: 370, height: 806 }, n: 5 },
+    ],
+  },
 ]
 
-const browser = await chromium.launch({
-  headless: true,
-  ...(process.env.E2E_CHROME_PATH
-    ? { executablePath: process.env.E2E_CHROME_PATH }
-    : process.platform === 'darwin'
-      ? {
-          executablePath:
-            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-        }
-      : { channel: 'chrome' }),
-})
+// Chrome-flavor fallback, mirroring tools/e2e/console.e2e.mjs: the first
+// installed flavor wins so a Chrome update/uninstall can't break captures.
+function chromeExecutable() {
+  if (process.env.E2E_CHROME_PATH) {
+    return { executablePath: process.env.E2E_CHROME_PATH }
+  }
+  if (process.platform === 'darwin') {
+    const candidates = [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    ]
+    for (const executablePath of candidates) {
+      try {
+        readFileSync(executablePath)
+        return { executablePath }
+      } catch {
+        // Not installed — try the next flavor.
+      }
+    }
+  }
+  return { channel: 'chrome' }
+}
+
+const browser = await chromium.launch({ headless: true, ...chromeExecutable() })
 const context = await browser.newContext({
   viewport: { width: 1440, height: 900 },
   deviceScaleFactor: 1,
@@ -132,8 +222,51 @@ for (const shot of shots) {
   await fetch(`${BASE_URL}${shot.path}`).catch(() => undefined)
 }
 
+/** Draw a numbered badge + outline over each located element. */
+async function annotate(page, marks) {
+  for (const mark of marks) {
+    const box =
+      mark.rect ??
+      (await page
+        .locator(mark.locator)
+        .first()
+        .boundingBox()
+        .catch(() => null))
+    if (!box) {
+      console.warn(`  no box for annotation ${mark.n} (${mark.locator})`)
+      continue
+    }
+    await page.evaluate(
+      ([b, n]) => {
+        const outline = document.createElement('div')
+        outline.style.cssText =
+          `position:fixed;left:${b.x - 3}px;top:${b.y - 3}px;` +
+          `width:${b.width + 6}px;height:${b.height + 6}px;` +
+          'border:3px solid #e040fb;border-radius:6px;z-index:99998;' +
+          'pointer-events:none;box-shadow:0 0 0 2px rgba(255,255,255,0.7);'
+        const badge = document.createElement('div')
+        badge.textContent = String(n)
+        badge.style.cssText =
+          `position:fixed;left:${Math.max(2, b.x - 14)}px;` +
+          `top:${Math.max(2, b.y - 14)}px;width:28px;height:28px;` +
+          'border-radius:50%;background:#e040fb;color:#fff;z-index:99999;' +
+          'display:flex;align-items:center;justify-content:center;' +
+          'font:700 15px Roboto,sans-serif;pointer-events:none;' +
+          'box-shadow:0 1px 4px rgba(0,0,0,0.4);'
+        document.body.append(outline, badge)
+      },
+      [box, mark.n],
+    )
+  }
+}
+
+const only = process.argv
+  .find((arg) => arg.startsWith('--only='))
+  ?.slice('--only='.length)
+
 let failures = 0
 for (const shot of shots) {
+  if (only && !shot.out.includes(only)) continue
   const page = await context.newPage()
   try {
     await page.goto(`${BASE_URL}${shot.path}`, {
@@ -154,6 +287,7 @@ for (const shot of shots) {
       }
     })
     await page.waitForTimeout(shot.settleMs ?? 1500)
+    if (shot.annotate) await annotate(page, shot.annotate)
     const outPath = join(IMG_ROOT, shot.out)
     mkdirSync(dirname(outPath), { recursive: true })
     await page.screenshot({ path: outPath })

@@ -8,7 +8,15 @@ description: Where things live in the Aglyn console app bar and navigation.
 
 The **console** is where you manage a site. Here's what each part of the chrome does.
 
-![The console app bar with the site switcher, breadcrumbs, screen switcher, version dropdown, and account menu labeled](/img/console-chrome.svg)
+![The console chrome with its main areas numbered](/img/getting-started/console-chrome-annotated.png)
+
+1. **App bar** — the Aglyn console wordmark, notifications, theme toggle,
+   and your account menu.
+2. **Workspace switcher** — jump between the organizations you belong to.
+3. **Site sections** — every area of the selected site (Dashboard,
+   Screens, Media, Content, …).
+4. **Site switcher** — switch between the sites in your workspace.
+5. **Page body** — the selected section's cards and tables.
 
 ## The app bar
 
@@ -57,3 +65,15 @@ lives under **Setup → Activity**).
 ## Next
 
 - [Publish your first screen](publish-your-first-screen.md)
+
+## Workspace settings & notifications
+
+Organization-wide settings (name, workspace URL, enabled plugins) live under
+**Organization → Settings**:
+
+![Organization settings](/img/getting-started/org-settings-page.png)
+
+Your in-app notification feed — billing, publishing, workflow failures —
+lives under **Notifications**, with per-category mutes:
+
+![The notifications feed](/img/getting-started/notifications-page.png)

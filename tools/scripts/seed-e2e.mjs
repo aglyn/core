@@ -144,6 +144,7 @@ await put(firestore.collection('hosts').doc(hostId), {
   displayName: 'Demo Bakery',
   orgId,
   memberRoles: { [E2E_UID]: 'admin' },
+  screens: { 'seed-home': 'home' },
   createdAt: now,
 })
 const hostRef = firestore.collection('hosts').doc(hostId)
@@ -243,6 +244,61 @@ for (const [id, name, email, offsetMs, status] of bookings) {
     createdAt: now,
   })
 }
+
+// Designed web screen so the besigner opens seeded content (docs
+// screenshots + editor smoke, AGL-450).
+const homeScreen = hostRef.collection('screens').doc('seed-home')
+await put(homeScreen, {
+  displayName: 'Home',
+  slug: 'home',
+  versionId: 'seed-home-v1',
+  createdAt: now,
+})
+await put(homeScreen.collection('versions').doc('seed-home-v1'), {
+  screenId: 'seed-home',
+  nodes: {
+    // '_@_' is the canvas root id (NODE_ROOT_ID / CANVAS_ROOT_ELEMENT_ID).
+    '_@_': { $id: '_@_', componentId: 'root', nodes: ['hero'] },
+    hero: {
+      $id: 'hero',
+      componentId: 'muiContainer',
+      parentId: '_@_',
+      nodes: ['stack'],
+      props: { maxWidth: 'md' },
+    },
+    stack: {
+      $id: 'stack',
+      componentId: 'muiStack',
+      parentId: 'hero',
+      nodes: ['title', 'body', 'cta'],
+      props: { spacing: 2 },
+      sx: { py: 8 },
+    },
+    title: {
+      $id: 'title',
+      componentId: 'muiTypography',
+      parentId: 'stack',
+      props: { children: 'Fresh sourdough, every morning', variant: 'h3' },
+    },
+    body: {
+      $id: 'body',
+      componentId: 'muiTypography',
+      parentId: 'stack',
+      props: {
+        children:
+          'Small-batch breads and pastries from the Demo Bakery ovens.',
+        variant: 'body1',
+      },
+    },
+    cta: {
+      $id: 'cta',
+      componentId: 'muiButton',
+      parentId: 'stack',
+      props: { children: 'Order now', variant: 'contained' },
+    },
+  },
+  createdAt: now,
+})
 
 // Content collections + entries.
 const blog = hostRef.collection('collections').doc('seed-blog')

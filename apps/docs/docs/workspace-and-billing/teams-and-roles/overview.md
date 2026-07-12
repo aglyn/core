@@ -13,6 +13,8 @@ Aglyn has two kinds of people: your **team** (who build and manage the site) and
 **Paid**. Seats are metered per tier; see [Billing & plans](../billing-and-plans/overview.md).
 :::
 
+![The organization team page: roster, roles, and invites](/img/teams-and-roles/org-team-page.png)
+
 ## Team roles
 
 - Invite teammates to a site and assign **roles**.
