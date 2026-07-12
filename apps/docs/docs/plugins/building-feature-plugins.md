@@ -158,6 +158,34 @@ export default function BookingsConsolePage({
    under `Suspense`, and applies the release-flag `FeatureGate`. Named routes
    (setup, media, …) still win over this dynamic segment.
 
+## Loading: org-gated and dynamic (AGL-417)
+
+Apps never import `@aglyn/plugins-*`. `plugins.config.json` maps plugin ids
+to packages and register entry points; `tools/scripts/generate-plugin-manifests.mjs`
+emits the per-app loader manifests (`plugins.*.generated.ts`) — the ONLY
+sanctioned plugin references outside `libs/plugins` (an nx `scope:app`
+boundary rule enforces this). At runtime the core plugin loader activates
+the plugins in `org.enabledPlugins` (AGL-416, org settings → Plugins):
+console surfaces behind the providers gate, site/canvas surfaces behind the
+editor/tenant suspense gates, API handlers lazily on first dispatch with a
+per-request org gate (a disabled plugin's API 404s for that workspace).
+
+## Extending beyond pages: slots, providers, runtimes, hooks (AGL-418/419)
+
+- **Widgets** — `ConsoleExtension.widgets` render into named shell slots
+  (`hostActivity`, `commerceGlance`, `orgData`, `besignerFunctions`,
+  `communityListing`) via the app's `PluginWidgetSlot`.
+- **Providers** — `ConsoleExtension.providers` mount around every console
+  page (e.g. community's AI-assist provider).
+- **Site runtimes** — `registerSiteRuntime` components run on every rendered
+  tenant page (marketing's overlays/experiments/automations), reading back
+  the props their server enricher wrote.
+- **Site-page hooks** — `/server` entries register redirect resolvers, page
+  resolvers (commerce PDP/PLP), and enrichers into the tenant loader.
+- **Billing webhook hooks** — `registerBillingWebhookHandler` receives the
+  platform Stripe events (commerce orders, booking payments, marketplace
+  purchases live in their plugins).
+
 ## The server half (API routes)
 
 A feature's server logic — Next.js API routes backed by firebase-admin —
