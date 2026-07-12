@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 
 /**
@@ -56,7 +57,7 @@ export const cartCheckoutHandler: PluginApiHandler = async (req, res) => {
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const cartSnapshot = await hostRef.collection('carts').doc(cartId).get()
-    const cart = (cartSnapshot.data() as Aglyn.HostCart | undefined) ?? {
+    const cart = (cartSnapshot.data() as CommerceModel.HostCart | undefined) ?? {
       lines: [],
     }
     if (cart.lines.length === 0) {
@@ -91,7 +92,7 @@ export const cartCheckoutHandler: PluginApiHandler = async (req, res) => {
     const productsById = new Map(
       productSnapshots.map((snapshot) => [
         snapshot.id,
-        snapshot.exists ? Aglyn.liftLegacyProduct(snapshot.data() as any) : null,
+        snapshot.exists ? CommerceModel.liftLegacyProduct(snapshot.data() as any) : null,
       ]),
     )
     let itemsCents = 0
@@ -107,7 +108,7 @@ export const cartCheckoutHandler: PluginApiHandler = async (req, res) => {
       const variant = line.variantId
         ? product.variants.find((item) => item.id === line.variantId)
         : product.variants[0]
-      if (!variant || !Aglyn.canPurchase(product, variant.id, line.quantity)) {
+      if (!variant || !CommerceModel.canPurchase(product, variant.id, line.quantity)) {
         throw Object.assign(new Error('unavailable'), {
           visible: `"${product.name}" is sold out`,
         })
@@ -142,9 +143,9 @@ export const cartCheckoutHandler: PluginApiHandler = async (req, res) => {
       .collection('discounts')
       .limit(100)
       .get()
-    const resolvedDiscount = Aglyn.resolveDiscount(
+    const resolvedDiscount = CommerceModel.resolveDiscount(
       discountsSnapshot.docs.map((docSnapshot) => ({
-        ...(docSnapshot.data() as Aglyn.HostDiscount),
+        ...(docSnapshot.data() as CommerceModel.HostDiscount),
         $id: docSnapshot.id,
       })),
       {
@@ -277,7 +278,7 @@ export const cartCheckoutHandler: PluginApiHandler = async (req, res) => {
       .collection('settings')
       .doc('store')
       .get()
-    const taxSettings = (storeSettings.get('tax') ?? {}) as Aglyn.TaxSettings
+    const taxSettings = (storeSettings.get('tax') ?? {}) as CommerceModel.TaxSettings
     if (taxSettings.mode === 'stripe') {
       params.set('automatic_tax[enabled]', 'true')
     }

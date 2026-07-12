@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -62,7 +63,7 @@ export function SuppliersCard(props: SuppliersCardProps) {
     { idField: '$id' },
   )
   const [draft, setDraft] = useState<
-    (Aglyn.HostSupplier & { id: string | null }) | null
+    (CommerceModel.HostSupplier & { id: string | null }) | null
   >(null)
 
   const handleSave = useCallback(async () => {

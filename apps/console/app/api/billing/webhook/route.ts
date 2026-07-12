@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '@aglyn/plugins-commerce/model'
 import {
   firebaseAdmin,
   getOrgForHost,
@@ -463,7 +464,7 @@ async function handler(request: Request): Promise<Response> {
         const hostRef = firestore.collection('hosts').doc(String(hostId))
         const cartRef = hostRef.collection('carts').doc(String(cartId))
         const cartSnapshot = await cartRef.get()
-        const cart = (cartSnapshot.data() as Aglyn.HostCart | undefined) ?? {
+        const cart = (cartSnapshot.data() as CommerceModel.HostCart | undefined) ?? {
           lines: [],
         }
         const orderRef = hostRef.collection('orders').doc(String(object.id))
@@ -477,11 +478,11 @@ async function handler(request: Request): Promise<Response> {
           productSnapshots.map((snapshot) => [
             snapshot.id,
             snapshot.exists
-              ? Aglyn.liftLegacyProduct(snapshot.data() as any)
+              ? CommerceModel.liftLegacyProduct(snapshot.data() as any)
               : null,
           ]),
         )
-        const lineItems: Aglyn.OrderLineItem[] = cart.lines
+        const lineItems: CommerceModel.OrderLineItem[] = cart.lines
           .map((line) => {
             const product = productsById.get(line.productId)
             if (!product) return null
@@ -510,7 +511,7 @@ async function handler(request: Request): Promise<Response> {
               ),
             }
           })
-          .filter(Boolean) as Aglyn.OrderLineItem[]
+          .filter(Boolean) as CommerceModel.OrderLineItem[]
         const shipping = object?.shipping_details ?? object?.customer_details
         await firestore.runTransaction(async (transaction) => {
           const [existing, counter] = await Promise.all([
@@ -520,7 +521,7 @@ async function handler(request: Request): Promise<Response> {
           if (existing.exists) return
           const number = Number(counter.get('next') ?? 1)
           transaction.set(counterRef, { next: number + 1 }, { merge: true })
-          const totals = Aglyn.computeOrderTotals(lineItems, {
+          const totals = CommerceModel.computeOrderTotals(lineItems, {
             feeCents: Number(feeCents ?? 0),
             taxCents: Number(object?.total_details?.amount_tax ?? 0),
             discountCents: Number(
@@ -671,7 +672,7 @@ async function handler(request: Request): Promise<Response> {
               variant.id === variantId && variant.inventory != null,
           )
           if (!variantId || !tracked) continue
-          const variants = Aglyn.adjustVariantInventory(
+          const variants = CommerceModel.adjustVariantInventory(
             product,
             variantId,
             -line.quantity,
@@ -682,7 +683,7 @@ async function handler(request: Request): Promise<Response> {
             .set(
               {
                 variants,
-                inventory: Aglyn.productInventory({ variants }),
+                inventory: CommerceModel.productInventory({ variants }),
               },
               { merge: true },
             )
@@ -696,7 +697,7 @@ async function handler(request: Request): Promise<Response> {
               reason: 'sale',
               orderId: String(object.id),
               atMs: Date.now(),
-            } satisfies Aglyn.InventoryAdjustment)
+            } satisfies CommerceModel.InventoryAdjustment)
             .catch(() => undefined)
         }
         void notifyHostManagers(String(hostId), {
@@ -820,7 +821,7 @@ async function handler(request: Request): Promise<Response> {
         const hostRef = firestore.collection('hosts').doc(String(hostId))
         const orderRef = hostRef.collection('orders').doc(String(orderId))
         const orderSnapshot = await orderRef.get()
-        const order = Aglyn.liftLegacyOrder(
+        const order = CommerceModel.liftLegacyOrder(
           (orderSnapshot.data() as any) ?? {},
         )
         if (orderSnapshot.exists && order.status === 'pending') {
@@ -830,13 +831,13 @@ async function handler(request: Request): Promise<Response> {
               paymentIntentId: String(object?.payment_intent ?? '') || null,
               customerEmail:
                 object?.customer_details?.email ?? order.customerEmail ?? null,
-              timeline: Aglyn.appendOrderEvent(order, 'paid'),
+              timeline: CommerceModel.appendOrderEvent(order, 'paid'),
             },
             { merge: true },
           )
           void notifyHostManagers(String(hostId), {
             type: 'content.order',
-            title: `Draft order paid — ${Aglyn.formatOrderNumber(order, String(orderId))}`,
+            title: `Draft order paid — ${CommerceModel.formatOrderNumber(order, String(orderId))}`,
             link: `/${hostId}/products`,
           })
           if (productId) {
@@ -844,7 +845,7 @@ async function handler(request: Request): Promise<Response> {
               .collection('products')
               .doc(String(productId))
             const productSnapshot = await productRef.get()
-            const lifted = Aglyn.liftLegacyProduct(
+            const lifted = CommerceModel.liftLegacyProduct(
               (productSnapshot.data() as any) ?? { name: 'Product' },
             )
             const soldVariantId =
@@ -858,7 +859,7 @@ async function handler(request: Request): Promise<Response> {
                   variant.id === soldVariantId && variant.inventory != null,
               )
             ) {
-              const variants = Aglyn.adjustVariantInventory(
+              const variants = CommerceModel.adjustVariantInventory(
                 lifted,
                 soldVariantId,
                 -quantity,
@@ -867,7 +868,7 @@ async function handler(request: Request): Promise<Response> {
                 .set(
                   {
                     variants,
-                    inventory: Aglyn.productInventory({ variants }),
+                    inventory: CommerceModel.productInventory({ variants }),
                   },
                   { merge: true },
                 )
@@ -926,7 +927,7 @@ async function handler(request: Request): Promise<Response> {
                 unitAmountCents: amountCents,
               },
             ],
-            totals: Aglyn.computeOrderTotals(
+            totals: CommerceModel.computeOrderTotals(
               [
                 {
                   productId: String(productId),
@@ -984,7 +985,7 @@ async function handler(request: Request): Promise<Response> {
               .doc(String(supplierId))
               .get()
             const supplier = supplierSnapshot.data() as
-              | Aglyn.HostSupplier
+              | CommerceModel.HostSupplier
               | undefined
             if (!supplier) return
             const supplierToken = createHmac(
@@ -1080,7 +1081,7 @@ async function handler(request: Request): Promise<Response> {
         // and the helper floors at zero. Legacy flat `inventory` stays
         // denormalized for the Product block.
         {
-          const lifted = Aglyn.liftLegacyProduct(
+          const lifted = CommerceModel.liftLegacyProduct(
             (productSnapshot.data() as any) ?? { name: 'Product' },
           )
           const soldVariantId =
@@ -1093,7 +1094,7 @@ async function handler(request: Request): Promise<Response> {
                 variant.id === soldVariantId && variant.inventory != null,
             )
           ) {
-            const variants = Aglyn.adjustVariantInventory(
+            const variants = CommerceModel.adjustVariantInventory(
               lifted,
               soldVariantId,
               -1,
@@ -1103,7 +1104,7 @@ async function handler(request: Request): Promise<Response> {
               .set(
                 {
                   variants,
-                  inventory: Aglyn.productInventory(updated),
+                  inventory: CommerceModel.productInventory(updated),
                 },
                 { merge: true },
               )
@@ -1117,19 +1118,19 @@ async function handler(request: Request): Promise<Response> {
                 reason: 'sale',
                 orderId: String(object.id),
                 atMs: Date.now(),
-              } satisfies Aglyn.InventoryAdjustment)
+              } satisfies CommerceModel.InventoryAdjustment)
               .catch(() => undefined)
             // Low-stock alert (AGL-281): fires on the crossing sale only,
             // so managers get one nudge per threshold breach, not one per
             // order after it.
             if (
-              Aglyn.isLowStock(updated) &&
-              !Aglyn.isLowStock(lifted)
+              CommerceModel.isLowStock(updated) &&
+              !CommerceModel.isLowStock(lifted)
             ) {
               void notifyHostManagers(String(hostId), {
                 type: 'content.lowStock',
                 title: `Low stock — ${updated.name}`,
-                body: `${Aglyn.productInventory(updated) ?? 0} left across tracked variants`,
+                body: `${CommerceModel.productInventory(updated) ?? 0} left across tracked variants`,
                 link: `/${hostId}/products`,
               })
             }

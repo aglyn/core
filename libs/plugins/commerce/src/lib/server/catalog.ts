@@ -17,13 +17,14 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 export interface PublicCatalogItem {
   id: string
   name: string
   slug: string
-  type: Aglyn.ProductType
+  type: CommerceModel.ProductType
   priceUsd: number
   maxPriceUsd: number
   compareAtPriceUsd?: number
@@ -88,14 +89,14 @@ export const catalogHandler: PluginApiHandler = async (req, res) => {
 
     let products = productsSnapshot.docs
       .map((docSnapshot) => ({
-        ...Aglyn.liftLegacyProduct(docSnapshot.data() as any),
+        ...CommerceModel.liftLegacyProduct(docSnapshot.data() as any),
         $id: docSnapshot.id,
       }))
       .filter((product) => !product.deletedAt && product.status === 'active')
     if (collection) {
-      const shaped = collection.data() as Aglyn.HostCollection
+      const shaped = collection.data() as CommerceModel.HostCollection
       products = products.filter((product) =>
-        Aglyn.matchesCollection(product, shaped, product.$id),
+        CommerceModel.matchesCollection(product, shaped, product.$id),
       )
       if (shaped.mode === 'manual') {
         const order = new Map(
@@ -125,8 +126,8 @@ export const catalogHandler: PluginApiHandler = async (req, res) => {
     }
     if (sort === 'price-asc' || sort === 'price-desc') {
       products.sort((a, b) => {
-        const [minA] = Aglyn.productPriceRange(a)
-        const [minB] = Aglyn.productPriceRange(b)
+        const [minA] = CommerceModel.productPriceRange(a)
+        const [minB] = CommerceModel.productPriceRange(b)
         return sort === 'price-asc' ? minA - minB : minB - minA
       })
     } else if (sort === 'newest') {
@@ -139,9 +140,9 @@ export const catalogHandler: PluginApiHandler = async (req, res) => {
     }
 
     const items: PublicCatalogItem[] = products.slice(0, max).map((product) => {
-      const [minPrice, maxPrice] = Aglyn.productPriceRange(product)
+      const [minPrice, maxPrice] = CommerceModel.productPriceRange(product)
       const primary = product.variants[0]
-      const inventory = Aglyn.productInventory(product)
+      const inventory = CommerceModel.productInventory(product)
       return {
         id: product.$id,
         name: product.name,

@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 
 /**
@@ -60,7 +61,7 @@ export const reviewsHandler: PluginApiHandler = async (req, res) => {
         .limit(25)
         .get()
       for (const docSnapshot of orders.docs) {
-        const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
+        const order = CommerceModel.liftLegacyOrder(docSnapshot.data() as any)
         if (['pending', 'cancelled', 'refunded'].includes(order.status)) continue
         if (
           (order.lineItems ?? []).some((line) => line.productId === productId) ||

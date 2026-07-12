@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -63,7 +64,7 @@ export function DiscountsCard(props: DiscountsCardProps) {
     { idField: '$id' },
   )
   const [draft, setDraft] = useState<
-    (Partial<Aglyn.HostDiscount> & { id: string | null }) | null
+    (Partial<CommerceModel.HostDiscount> & { id: string | null }) | null
   >(null)
 
   const handleSave = useCallback(async () => {
@@ -206,7 +207,7 @@ export function DiscountsCard(props: DiscountsCardProps) {
               onChange={(event) =>
                 setDraft((prev) =>
                   prev
-                    ? { ...prev, kind: event.target.value as Aglyn.DiscountKind }
+                    ? { ...prev, kind: event.target.value as CommerceModel.DiscountKind }
                     : prev,
                 )
               }

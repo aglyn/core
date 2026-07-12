@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 
 /**
@@ -37,8 +38,8 @@ export const reserveHandler: PluginApiHandler = async (req, res) => {
     typeof req.body === 'string' ? JSON.parse(req.body) : (req.body ?? {})
   const hostId = String(body.hostId ?? '')
   const resourceId = String(body.resourceId ?? '')
-  const checkInDayMs = Aglyn.toDayMs(Number(body.checkInDayMs ?? 0))
-  const checkOutDayMs = Aglyn.toDayMs(Number(body.checkOutDayMs ?? 0))
+  const checkInDayMs = CommerceModel.toDayMs(Number(body.checkInDayMs ?? 0))
+  const checkOutDayMs = CommerceModel.toDayMs(Number(body.checkOutDayMs ?? 0))
   const guestName = String(body.guestName ?? '').trim().slice(0, 120)
   const guestEmail = String(body.guestEmail ?? '').trim().toLowerCase().slice(0, 120)
   if (!hostId || !resourceId || !checkInDayMs || !checkOutDayMs) {
@@ -56,7 +57,7 @@ export const reserveHandler: PluginApiHandler = async (req, res) => {
         .limit(500)
         .get(),
     ])
-    const resource = resourceSnapshot.data() as Aglyn.HostResource | undefined
+    const resource = resourceSnapshot.data() as CommerceModel.HostResource | undefined
     if (!resource) return res.status(404).json({ error: 'Unknown resource' })
 
     // Pending holds block for 30 minutes only, so abandoned checkouts
@@ -66,7 +67,7 @@ export const reserveHandler: PluginApiHandler = async (req, res) => {
       .map((docSnapshot) => ({
         checkInDayMs: Number(docSnapshot.get('checkInDayMs')),
         checkOutDayMs: Number(docSnapshot.get('checkOutDayMs')),
-        status: String(docSnapshot.get('status')) as Aglyn.ReservationStatus,
+        status: String(docSnapshot.get('status')) as CommerceModel.ReservationStatus,
         createdAtMs: Number(docSnapshot.get('createdAtMs') ?? 0),
       }))
       .filter(
@@ -75,11 +76,11 @@ export const reserveHandler: PluginApiHandler = async (req, res) => {
           now - reservation.createdAtMs < 30 * 60 * 1000,
       )
     if (
-      !Aglyn.isRangeAvailable(resource, live, checkInDayMs, checkOutDayMs)
+      !CommerceModel.isRangeAvailable(resource, live, checkInDayMs, checkOutDayMs)
     ) {
       return res.status(409).json({ error: 'Those dates just sold out' })
     }
-    const quote = Aglyn.computeReservationQuote(
+    const quote = CommerceModel.computeReservationQuote(
       resource,
       checkInDayMs,
       checkOutDayMs,
@@ -116,7 +117,7 @@ export const reserveHandler: PluginApiHandler = async (req, res) => {
       depositCents: quote.depositCents,
       paidCents: 0,
       createdAtMs: now,
-    } satisfies Aglyn.HostReservation)
+    } satisfies CommerceModel.HostReservation)
 
     const referer = String(req.headers.referer ?? '')
     const origin = `https://${req.headers.host}`

@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { readMemberSession } from './membership'
 
@@ -55,7 +56,7 @@ export async function checkMemberEntitlement(
     .limit(50)
     .get()
   for (const docSnapshot of orders.docs) {
-    const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
+    const order = CommerceModel.liftLegacyOrder(docSnapshot.data() as any)
     if (['pending', 'cancelled', 'refunded'].includes(order.status)) continue
     const owns =
       (order.lineItems ?? []).some((line) => line.productId === productId) ||

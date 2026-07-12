@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { createHmac } from 'crypto'
 
@@ -59,7 +60,7 @@ export const downloadHandler: PluginApiHandler = async (req, res) => {
       hostRef.collection('products').doc(productId).get(),
     ])
     if (!orderSnapshot.exists) return res.status(404).send('Unknown order')
-    const order = Aglyn.liftLegacyOrder(orderSnapshot.data() as any)
+    const order = CommerceModel.liftLegacyOrder(orderSnapshot.data() as any)
     if (['pending', 'cancelled', 'refunded'].includes(order.status)) {
       return res.status(403).send('This order cannot download files')
     }
@@ -67,7 +68,7 @@ export const downloadHandler: PluginApiHandler = async (req, res) => {
       (order.lineItems ?? []).some((line) => line.productId === productId) ||
       order.productId === productId
     if (!owns) return res.status(403).send('Not part of this order')
-    const product = Aglyn.liftLegacyProduct(
+    const product = CommerceModel.liftLegacyProduct(
       (productSnapshot.data() as any) ?? {},
     )
     const file = product.digitalFiles?.[fileIndex]

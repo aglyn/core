@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
@@ -56,7 +57,7 @@ export interface ProductsHubCardProps {
   hostId: string
 }
 
-type ProductRow = Aglyn.HostProduct & { $id: string }
+type ProductRow = CommerceModel.HostProduct & { $id: string }
 
 const STATUS_COLOR: Record<string, 'default' | 'success' | 'warning'> = {
   active: 'success',
@@ -84,12 +85,12 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
     product: ProductRow
     variantId: string
     delta: string
-    reason: Aglyn.InventoryAdjustmentReason
+    reason: CommerceModel.InventoryAdjustmentReason
     locationId: string
   } | null>(null)
   const [importing, setImporting] = useState<{
     text: string
-    parsed: Aglyn.ProductCsvImport | null
+    parsed: CommerceModel.ProductCsvImport | null
   } | null>(null)
   const [keysFor, setKeysFor] = useState<ProductRow | null>(null)
   const [keysText, setKeysText] = useState('')
@@ -123,7 +124,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
     return [...(productDocs ?? [])]
       .filter((product: any) => !product.deletedAt)
       .map((product: any) => ({
-        ...Aglyn.liftLegacyProduct(product),
+        ...CommerceModel.liftLegacyProduct(product),
         $id: product.$id,
       }))
       .filter((product: ProductRow) => {
@@ -152,7 +153,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
       await setDoc(doc(firestore, 'hosts', hostId, 'products', id), {
         ...copy,
         name: `${product.name} (copy)`,
-        slug: Aglyn.commerceSlug(`${product.slug}-copy`),
+        slug: CommerceModel.commerceSlug(`${product.slug}-copy`),
         status: 'draft',
         createdAtMs: Date.now(),
         updatedAtMs: Date.now(),
@@ -167,7 +168,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
   )
 
   const handleStatus = useCallback(
-    (product: ProductRow, status: Aglyn.ProductStatus) => async () => {
+    (product: ProductRow, status: CommerceModel.ProductStatus) => async () => {
       await updateDoc(doc(firestore, 'hosts', hostId, 'products', product.$id), {
         status,
         updatedAtMs: Date.now(),
@@ -200,7 +201,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
 
   // CSV import/export (AGL-282): Shopify-dialect columns, dry-run first.
   const handleExport = useCallback(() => {
-    const csv = Aglyn.productsToCsv(products)
+    const csv = CommerceModel.productsToCsv(products)
     const blob = new Blob([csv], { type: 'text/csv' })
     const anchor = document.createElement('a')
     anchor.href = URL.createObjectURL(blob)
@@ -223,7 +224,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
           ...product,
           slug,
           priceUsd: product.variants[0]?.priceUsd ?? 0,
-          inventory: Aglyn.productInventory(product),
+          inventory: CommerceModel.productInventory(product),
           imageUrl: product.mediaUrls?.[0] ?? null,
           createdAtMs: Date.now(),
           updatedAtMs: Date.now(),
@@ -242,7 +243,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
     if (!adjusting) return
     const delta = Math.round(Number(adjusting.delta))
     if (!delta) return
-    const variants = Aglyn.adjustVariantInventory(
+    const variants = CommerceModel.adjustVariantInventory(
       adjusting.product,
       adjusting.variantId,
       delta,
@@ -252,7 +253,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
       doc(firestore, 'hosts', hostId, 'products', adjusting.product.$id),
       {
         variants,
-        inventory: Aglyn.productInventory({ variants }),
+        inventory: CommerceModel.productInventory({ variants }),
         updatedAtMs: Date.now(),
       },
     )
@@ -264,17 +265,17 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
       reason: adjusting.reason,
       ...(adjusting.locationId ? { locationId: adjusting.locationId } : {}),
       atMs: Date.now(),
-    } satisfies Aglyn.InventoryAdjustment)
+    } satisfies CommerceModel.InventoryAdjustment)
     setAdjusting(null)
     enqueueSnackbar('Stock adjusted', { variant: 'success', persist: false })
   }, [adjusting, firestore, hostId, enqueueSnackbar])
 
   const formatPrice = (product: ProductRow) => {
-    const [min, max] = Aglyn.productPriceRange(product)
+    const [min, max] = CommerceModel.productPriceRange(product)
     return min === max ? `$${min}` : `$${min}–$${max}`
   }
   const formatStock = (product: ProductRow) => {
-    const total = Aglyn.productInventory(product)
+    const total = CommerceModel.productInventory(product)
     if (total == null) return '—'
     return total > 0 ? String(total) : 'Sold out'
   }
@@ -391,7 +392,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
                           {'Keys'}
                         </Button>
                       ) : null}
-                      {Aglyn.productInventory(product) != null ? (
+                      {CommerceModel.productInventory(product) != null ? (
                         <Button
                           size="small"
                           onClick={() =>
@@ -552,7 +553,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
                 const file = event.target.files?.[0]
                 if (!file) return
                 const text = await file.text()
-                setImporting({ text, parsed: Aglyn.parseProductsCsv(text) })
+                setImporting({ text, parsed: CommerceModel.parseProductsCsv(text) })
               }}
             />
           </Button>
@@ -563,7 +564,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
               setImporting({
                 text: event.target.value,
                 parsed: event.target.value.trim()
-                  ? Aglyn.parseProductsCsv(event.target.value)
+                  ? CommerceModel.parseProductsCsv(event.target.value)
                   : null,
               })
             }
@@ -676,7 +677,7 @@ export function ProductsHubCard(props: ProductsHubCardProps) {
                   ? {
                       ...prev,
                       reason: event.target
-                        .value as Aglyn.InventoryAdjustmentReason,
+                        .value as CommerceModel.InventoryAdjustmentReason,
                     }
                   : prev,
               )

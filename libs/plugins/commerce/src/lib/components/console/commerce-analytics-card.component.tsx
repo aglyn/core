@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { Box, Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'
@@ -50,7 +51,7 @@ export function CommerceAnalyticsCard(props: CommerceAnalyticsCardProps) {
     const now = Date.now()
     const orders = (orderDocs ?? [])
       .map((order: any) => ({
-        ...Aglyn.liftLegacyOrder(order),
+        ...CommerceModel.liftLegacyOrder(order),
         createdAtMs:
           order.createdAtMs ?? (order.createdAt?.seconds ?? 0) * 1000,
       }))

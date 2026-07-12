@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { createHmac } from 'crypto'
 import { readMemberSession } from './membership'
@@ -95,7 +96,7 @@ export const streamHandler: PluginApiHandler = async (req, res) => {
       .collection('products')
       .doc(productId)
       .get()
-    const product = Aglyn.liftLegacyProduct(
+    const product = CommerceModel.liftLegacyProduct(
       (productSnapshot.data() as any) ?? {},
     )
     const file = product.gatedVideos?.[video]

@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '@aglyn/plugins-commerce/model'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
@@ -112,7 +113,7 @@ const HostPos: NextPageWithLayout = () => {
       [...(productDocs ?? [])]
         .filter((product: any) => !product.deletedAt)
         .map((product: any) => ({
-          ...Aglyn.liftLegacyProduct(product),
+          ...CommerceModel.liftLegacyProduct(product),
           $id: product.$id,
         }))
         .filter((product: any) => product.status === 'active'),

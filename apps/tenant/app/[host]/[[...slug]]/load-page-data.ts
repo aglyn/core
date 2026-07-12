@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '@aglyn/plugins-commerce/model'
 import composeScreenNodes from '@aglyn/tenant-runtime/compose-screen-nodes'
 import getScreen from '@aglyn/tenant-runtime/get-screen'
 import getVariables from '@aglyn/tenant-runtime/get-variables'
@@ -198,13 +199,13 @@ export const loadPageData = cache(
           !productRaw.deletedAt &&
           productRaw.status === 'active'
         ) {
-          const product = Aglyn.liftLegacyProduct(productRaw)
+          const product = CommerceModel.liftLegacyProduct(productRaw)
           const templateRes = await getScreen({
             hostId,
             screenId: pdpScreenId,
           })
           if (templateRes.screen) {
-            const [minPrice, maxPrice] = Aglyn.productPriceRange(product)
+            const [minPrice, maxPrice] = CommerceModel.productPriceRange(product)
             const templateNodes = await composeScreenNodes({
               hostId,
               screenId: pdpScreenId,
@@ -267,7 +268,7 @@ export const loadPageData = cache(
         ])
         const collectionScreenId = storeSettings.get('collectionScreenId')
         const shopCollection = collectionSnapshot.docs[0]?.data() as
-          | Aglyn.HostCollection
+          | CommerceModel.HostCollection
           | undefined
         if (collectionScreenId && shopCollection) {
           const templateRes = await getScreen({

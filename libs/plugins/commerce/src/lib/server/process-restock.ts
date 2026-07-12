@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
 
@@ -45,7 +46,7 @@ export const processRestockHandler: PluginApiHandler = async (req, res) => {
       .limit(200)
       .get()
     let sent = 0
-    const productCache = new Map<string, Aglyn.HostProduct | null>()
+    const productCache = new Map<string, CommerceModel.HostProduct | null>()
     for (const docSnapshot of alerts.docs) {
       const hostRef = docSnapshot.ref.parent.parent
       if (!hostRef) continue
@@ -59,7 +60,7 @@ export const processRestockHandler: PluginApiHandler = async (req, res) => {
         productCache.set(
           cacheKey,
           productSnapshot.exists
-            ? Aglyn.liftLegacyProduct(productSnapshot.data() as any)
+            ? CommerceModel.liftLegacyProduct(productSnapshot.data() as any)
             : null,
         )
       }
@@ -70,7 +71,7 @@ export const processRestockHandler: PluginApiHandler = async (req, res) => {
           .catch(() => undefined)
         continue
       }
-      const total = Aglyn.productInventory(product)
+      const total = CommerceModel.productInventory(product)
       if (total != null && total <= 0) continue
       await fetch('https://api.resend.com/emails', {
         method: 'POST',

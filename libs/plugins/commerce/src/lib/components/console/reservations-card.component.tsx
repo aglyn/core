@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -106,7 +107,7 @@ export function ReservationsCard(props: ReservationsCardProps) {
   )
 
   const [resourceDraft, setResourceDraft] = useState<
-    (Partial<Aglyn.HostResource> & { id: string | null }) | null
+    (Partial<CommerceModel.HostResource> & { id: string | null }) | null
   >(null)
   const [walkIn, setWalkIn] = useState<{
     resourceId: string
@@ -139,7 +140,7 @@ export function ReservationsCard(props: ReservationsCardProps) {
   }, [resourceDraft, firestore, hostId, enqueueSnackbar])
 
   const handleStatus = useCallback(
-    (reservation: any, status: Aglyn.ReservationStatus) => async () => {
+    (reservation: any, status: CommerceModel.ReservationStatus) => async () => {
       await updateDoc(
         doc(firestore, 'hosts', hostId, 'reservations', reservation.$id),
         { status },
@@ -152,7 +153,7 @@ export function ReservationsCard(props: ReservationsCardProps) {
     if (!walkIn?.resourceId || !walkIn.checkIn || !walkIn.checkOut) return
     const resource = (resourceDocs ?? []).find(
       (item: any) => item.$id === walkIn.resourceId,
-    ) as Aglyn.HostResource | undefined
+    ) as CommerceModel.HostResource | undefined
     if (!resource) return
     const checkInDayMs = Date.parse(`${walkIn.checkIn}T00:00:00Z`)
     const checkOutDayMs = Date.parse(`${walkIn.checkOut}T00:00:00Z`)
@@ -164,14 +165,14 @@ export function ReservationsCard(props: ReservationsCardProps) {
         status: item.status,
       }))
     if (
-      !Aglyn.isRangeAvailable(resource, existing, checkInDayMs, checkOutDayMs)
+      !CommerceModel.isRangeAvailable(resource, existing, checkInDayMs, checkOutDayMs)
     ) {
       return void enqueueSnackbar('Those dates are taken', {
         variant: 'warning',
         persist: false,
       })
     }
-    const quote = Aglyn.computeReservationQuote(
+    const quote = CommerceModel.computeReservationQuote(
       resource,
       checkInDayMs,
       checkOutDayMs,
@@ -196,7 +197,7 @@ export function ReservationsCard(props: ReservationsCardProps) {
         depositCents: 0,
         paidCents: 0,
         createdAtMs: Date.now(),
-      } satisfies Aglyn.HostReservation,
+      } satisfies CommerceModel.HostReservation,
     )
     setWalkIn(null)
     enqueueSnackbar('Walk-in reserved — collect payment at POS', {

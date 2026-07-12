@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
 
@@ -64,8 +65,8 @@ export const refundHandler: PluginApiHandler = async (req, res) => {
     if (!orderSnapshot.exists) {
       return res.status(404).json({ error: 'Unknown order' })
     }
-    const order = Aglyn.liftLegacyOrder(orderSnapshot.data() as any)
-    if (!Aglyn.canTransitionOrder(order.status, 'refunded')) {
+    const order = CommerceModel.liftLegacyOrder(orderSnapshot.data() as any)
+    if (!CommerceModel.canTransitionOrder(order.status, 'refunded')) {
       return res
         .status(409)
         .json({ error: `Orders in "${order.status}" cannot refund` })
@@ -129,7 +130,7 @@ export const refundHandler: PluginApiHandler = async (req, res) => {
       {
         refundedCents,
         ...(fullyRefunded ? { status: 'refunded' } : {}),
-        timeline: Aglyn.appendOrderEvent(
+        timeline: CommerceModel.appendOrderEvent(
           order,
           'refund',
           `$${(refundCents / 100).toFixed(2)} refunded` +

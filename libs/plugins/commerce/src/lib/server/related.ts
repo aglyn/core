@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 /**
@@ -38,7 +39,7 @@ export const relatedHandler: PluginApiHandler = async (req, res) => {
       .collection('products')
       .doc(productId)
       .get()
-    const product = Aglyn.liftLegacyProduct(
+    const product = CommerceModel.liftLegacyProduct(
       (productSnapshot.data() as any) ?? {},
     )
 
@@ -49,7 +50,7 @@ export const relatedHandler: PluginApiHandler = async (req, res) => {
       const orders = await hostRef.collection('orders').limit(100).get()
       const counts = new Map<string, number>()
       for (const docSnapshot of orders.docs) {
-        const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
+        const order = CommerceModel.liftLegacyOrder(docSnapshot.data() as any)
         const lineIds = (order.lineItems ?? []).map((line) => line.productId)
         if (!lineIds.includes(productId)) continue
         for (const id of lineIds) {

@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -52,14 +53,14 @@ export function ShippingSettingsCard(props: ShippingSettingsCardProps) {
     () => doc(firestore, 'hosts', hostId, 'settings', 'store'),
     [firestore, hostId],
   )
-  const [draft, setDraft] = useState<Aglyn.ShippingSettings | null>(null)
-  const current: Aglyn.ShippingSettings = draft ?? store?.shipping ?? {}
-  const update = (patch: Partial<Aglyn.ShippingSettings>) =>
+  const [draft, setDraft] = useState<CommerceModel.ShippingSettings | null>(null)
+  const current: CommerceModel.ShippingSettings = draft ?? store?.shipping ?? {}
+  const update = (patch: Partial<CommerceModel.ShippingSettings>) =>
     setDraft({ ...current, ...patch })
 
   const updateZone = (
     index: number,
-    patch: Partial<Aglyn.ShippingZone> | null,
+    patch: Partial<CommerceModel.ShippingZone> | null,
   ) => {
     const zones = [...(current.zones ?? [])]
     if (patch === null) {
@@ -84,7 +85,7 @@ export function ShippingSettingsCard(props: ShippingSettingsCardProps) {
 
   const updateRate = (
     index: number,
-    patch: Partial<Aglyn.ShippingRate> | null,
+    patch: Partial<CommerceModel.ShippingRate> | null,
   ) => {
     const rates = [...(current.rates ?? [])]
     if (patch === null) rates.splice(index, 1)
@@ -201,7 +202,7 @@ export function ShippingSettingsCard(props: ShippingSettingsCardProps) {
                 value={rate.kind}
                 onChange={(event) =>
                   updateRate(index, {
-                    kind: event.target.value as Aglyn.ShippingRate['kind'],
+                    kind: event.target.value as CommerceModel.ShippingRate['kind'],
                   })
                 }
                 size="small"

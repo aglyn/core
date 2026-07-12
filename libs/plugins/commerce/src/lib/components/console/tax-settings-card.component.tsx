@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -51,13 +52,13 @@ export function TaxSettingsCard(props: TaxSettingsCardProps) {
     () => doc(firestore, 'hosts', hostId, 'settings', 'store'),
     [firestore, hostId],
   )
-  const [draft, setDraft] = useState<Aglyn.TaxSettings | null>(null)
-  const current: Aglyn.TaxSettings = draft ?? store?.tax ?? { mode: 'manual' }
-  const update = (patch: Partial<Aglyn.TaxSettings>) =>
+  const [draft, setDraft] = useState<CommerceModel.TaxSettings | null>(null)
+  const current: CommerceModel.TaxSettings = draft ?? store?.tax ?? { mode: 'manual' }
+  const update = (patch: Partial<CommerceModel.TaxSettings>) =>
     setDraft({ ...current, ...patch })
   const updateRate = (
     index: number,
-    patch: Partial<Aglyn.TaxRate> | null,
+    patch: Partial<CommerceModel.TaxRate> | null,
   ) => {
     const rates = [...(current.rates ?? [])]
     if (patch === null) rates.splice(index, 1)

@@ -15,17 +15,8 @@
  * limitations under the License.
  */
 
-import {
-  checkQuota,
-  contactMatchesSegment,
-  createResourceUid,
-  assignExperimentVariant,
-  productPriceRange,
-  renderEmailHtml,
-  resolveMergeTags,
-  type EmailRenderProduct,
-  type HostExperiment,
-} from '@aglyn/aglyn/server'
+import { checkQuota, contactMatchesSegment, createResourceUid, assignExperimentVariant, renderEmailHtml, resolveMergeTags, type EmailRenderProduct, type HostExperiment } from '@aglyn/aglyn/server'
+import { productPriceRange } from '@aglyn/plugins-commerce/model'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
 import {
   orgDataCollectionForHost,

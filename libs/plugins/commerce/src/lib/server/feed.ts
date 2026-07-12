@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 function escapeXml(text: string): string {
@@ -47,15 +48,15 @@ export const feedHandler: PluginApiHandler = async (req, res) => {
     const base = `https://${requestHost}`
     const items = productsSnapshot.docs
       .map((docSnapshot) => ({
-        ...Aglyn.liftLegacyProduct(docSnapshot.data() as any),
+        ...CommerceModel.liftLegacyProduct(docSnapshot.data() as any),
         $id: docSnapshot.id,
       }))
       .filter(
         (product) => !product.deletedAt && product.status === 'active',
       )
       .map((product) => {
-        const [minPrice] = Aglyn.productPriceRange(product)
-        const inventory = Aglyn.productInventory(product)
+        const [minPrice] = CommerceModel.productPriceRange(product)
+        const inventory = CommerceModel.productInventory(product)
         const availability =
           inventory != null &&
           inventory <= 0 &&

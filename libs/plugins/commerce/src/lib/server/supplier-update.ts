@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin, notifyHostManagers } from '@aglyn/tenant-data-admin'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
 
@@ -49,13 +50,13 @@ export const supplierUpdateHandler: PluginApiHandler = async (req, res) => {
     if (orderSnapshot.get('supplierToken') !== token) {
       return res.status(403).json({ error: 'Invalid token' })
     }
-    const order = Aglyn.liftLegacyOrder(orderSnapshot.data() as any)
-    if (!Aglyn.canTransitionOrder(order.status, 'fulfilled')) {
+    const order = CommerceModel.liftLegacyOrder(orderSnapshot.data() as any)
+    if (!CommerceModel.canTransitionOrder(order.status, 'fulfilled')) {
       return res
         .status(409)
         .json({ error: `Order is already ${order.status}` })
     }
-    const fulfillment: Aglyn.OrderFulfillment = {
+    const fulfillment: CommerceModel.OrderFulfillment = {
       id: `supplier-${Date.now().toString(36)}`,
       lineItemIds: (order.lineItems ?? []).map((_line, index) => index),
       ...(carrier ? { carrier } : {}),
@@ -66,7 +67,7 @@ export const supplierUpdateHandler: PluginApiHandler = async (req, res) => {
       {
         status: 'fulfilled',
         fulfillments: [...(order.fulfillments ?? []), fulfillment],
-        timeline: Aglyn.appendOrderEvent(
+        timeline: CommerceModel.appendOrderEvent(
           order,
           'fulfilled',
           `Supplier shipped${trackingNumber ? ` — ${carrier || 'tracking'} ${trackingNumber}` : ''}`,
@@ -76,7 +77,7 @@ export const supplierUpdateHandler: PluginApiHandler = async (req, res) => {
     )
     void notifyHostManagers(hostId, {
       type: 'content.order',
-      title: `Supplier shipped ${Aglyn.formatOrderNumber(order, orderId)}`,
+      title: `Supplier shipped ${CommerceModel.formatOrderNumber(order, orderId)}`,
       ...(trackingNumber ? { body: `${carrier} ${trackingNumber}` } : {}),
       link: `/${hostId}/products`,
     })

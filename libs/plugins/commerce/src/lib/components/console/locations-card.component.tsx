@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Button, Chip, Stack, TextField, Typography } from '@mui/material'
@@ -78,7 +79,7 @@ export function LocationsCard(props: LocationsCardProps) {
       {
         name: name.trim().slice(0, 80),
         ...(locations.length === 0 ? { isDefault: true } : {}),
-      } satisfies Aglyn.InventoryLocation,
+      } satisfies CommerceModel.InventoryLocation,
     )
     setName('')
   }, [name, quota, locations.length, firestore, hostId, enqueueSnackbar])

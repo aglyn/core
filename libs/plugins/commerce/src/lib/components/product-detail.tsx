@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../model'
 import { mdiTagOutline } from '@aglyn/shared-data-mdi'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -57,7 +58,7 @@ interface Detail {
   slug: string
   description?: string
   mediaUrls: string[]
-  options: Aglyn.ProductOption[]
+  options: CommerceModel.ProductOption[]
   variants: DetailVariant[]
 }
 
@@ -154,7 +155,7 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
     const variant = useMemo(() => {
       if (!resolved) return undefined
       return (
-        Aglyn.findVariant(
+        CommerceModel.findVariant(
           { variants: resolved.variants as any },
           selections,
         ) as DetailVariant | undefined

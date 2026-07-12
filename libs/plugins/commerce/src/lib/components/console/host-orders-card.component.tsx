@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -92,7 +93,7 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
     const now = Date.now() / 1000
     return orders.filter((order: any) => {
       if (productFilter && order.productId !== productFilter) return false
-      const lifted = Aglyn.liftLegacyOrder(order)
+      const lifted = CommerceModel.liftLegacyOrder(order)
       if (statusFilter && lifted.status !== statusFilter) return false
       if (channelFilter && (lifted.channel ?? 'online') !== channelFilter) {
         return false
@@ -255,7 +256,7 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
             </Button>
           </Stack>
           {visibleOrders.map((order: any) => {
-            const lifted = Aglyn.liftLegacyOrder(order)
+            const lifted = CommerceModel.liftLegacyOrder(order)
             return (
               <Stack
                 key={order.$id}
@@ -265,7 +266,7 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
               >
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                   <Typography variant="body2" sx={{ flex: 1 }} noWrap>
-                    {`${Aglyn.formatOrderNumber(lifted, order.$id)} · ` +
+                    {`${CommerceModel.formatOrderNumber(lifted, order.$id)} · ` +
                       (lifted.lineItems?.[0]?.name ??
                         productNames[order.productId] ??
                         order.productId ??
@@ -331,7 +332,7 @@ export function HostOrdersCard(props: HostOrdersCardProps) {
               (item: any) => item.$id === draft?.productId,
             )
             const variants = product
-              ? Aglyn.liftLegacyProduct(product).variants
+              ? CommerceModel.liftLegacyProduct(product).variants
               : []
             return variants.length > 1 ? (
               <TextField

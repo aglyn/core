@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 
 /**
@@ -69,19 +70,19 @@ export const checkoutHandler: PluginApiHandler = async (req, res) => {
     }
     // Variant pricing (AGL-292): the buyer's selection maps to a variant;
     // absent variantId keeps the legacy default-variant behavior.
-    const lifted = Aglyn.liftLegacyProduct(product)
+    const lifted = CommerceModel.liftLegacyProduct(product)
     const variant = variantId
       ? lifted.variants.find((item) => item.id === variantId)
       : lifted.variants[0]
     if (!variant) return res.status(404).json({ error: 'Unknown variant' })
     const priceUsd = Number(variant.priceUsd ?? 0)
-    if (!(priceUsd > 0) || priceUsd > Aglyn.COMMERCE_MAX_PRICE_USD) {
+    if (!(priceUsd > 0) || priceUsd > CommerceModel.COMMERCE_MAX_PRICE_USD) {
       return res.status(400).json({ error: 'Product is not purchasable' })
     }
     // Inventory (AGL-281): variant-aware, honoring the product's oversell
     // policy (backorder products keep selling at zero). Enforced here (the
     // block's display is cosmetic) and decremented by the webhook.
-    if (!Aglyn.canPurchase(lifted, variant.id, quantity)) {
+    if (!CommerceModel.canPurchase(lifted, variant.id, quantity)) {
       return res.status(409).json({ error: 'Sold out' })
     }
 
@@ -158,14 +159,14 @@ export const checkoutHandler: PluginApiHandler = async (req, res) => {
       .collection('settings')
       .doc('store')
       .get()
-    const taxSettings = (storeSettings.get('tax') ?? {}) as Aglyn.TaxSettings
+    const taxSettings = (storeSettings.get('tax') ?? {}) as CommerceModel.TaxSettings
     const useStripeTax = taxSettings.mode === 'stripe' && !lifted.taxExempt
     let taxCents = 0
     let taxLabel = ''
     if (taxSettings.mode === 'manual' && !lifted.taxExempt) {
-      const rate = Aglyn.resolveTaxRate(taxSettings, taxSettings.origin ?? {})
+      const rate = CommerceModel.resolveTaxRate(taxSettings, taxSettings.origin ?? {})
       if (rate && !taxSettings.pricesIncludeTax) {
-        taxCents = Aglyn.computeTaxCents(amountCents, rate.pct)
+        taxCents = CommerceModel.computeTaxCents(amountCents, rate.pct)
         taxLabel = rate.label || `Tax (${rate.pct}%)`
       }
     }

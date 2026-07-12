@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { mintDownloadToken } from './download'
 import { readMemberSession } from './membership'
@@ -24,7 +25,7 @@ import { readMemberSession } from './membership'
 export interface AccountOrderView {
   id: string
   number: string
-  status: Aglyn.OrderStatus
+  status: CommerceModel.OrderStatus
   totalCents: number
   createdAtMs: number
   itemsSummary: string
@@ -57,7 +58,7 @@ export const membershipAccountHandler: PluginApiHandler = async (req, res) => {
     if (req.method === 'POST') {
       const displayName = String(req.body?.displayName ?? '').slice(0, 80)
       const addresses = Array.isArray(req.body?.addresses)
-        ? (req.body.addresses as Aglyn.OrderAddress[]).slice(0, 5).map(
+        ? (req.body.addresses as CommerceModel.OrderAddress[]).slice(0, 5).map(
             (address) => ({
               name: String(address.name ?? '').slice(0, 80),
               line1: String(address.line1 ?? '').slice(0, 120),
@@ -86,11 +87,11 @@ export const membershipAccountHandler: PluginApiHandler = async (req, res) => {
       .get()
     const orders: AccountOrderView[] = ordersSnapshot.docs
       .map((docSnapshot) => {
-        const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
+        const order = CommerceModel.liftLegacyOrder(docSnapshot.data() as any)
         const latestFulfillment = (order.fulfillments ?? []).slice(-1)[0]
         return {
           id: docSnapshot.id,
-          number: Aglyn.formatOrderNumber(order, docSnapshot.id),
+          number: CommerceModel.formatOrderNumber(order, docSnapshot.id),
           status: order.status,
           totalCents:
             order.totals?.totalCents ?? Number(order.amountCents ?? 0),
@@ -123,7 +124,7 @@ export const membershipAccountHandler: PluginApiHandler = async (req, res) => {
       licenseKeys?: string[]
     }> = []
     for (const docSnapshot of ordersSnapshot.docs) {
-      const order = Aglyn.liftLegacyOrder(docSnapshot.data() as any)
+      const order = CommerceModel.liftLegacyOrder(docSnapshot.data() as any)
       if (['pending', 'cancelled', 'refunded'].includes(order.status)) continue
       const orderKeys = (docSnapshot.get('licenseKeys') ?? {}) as Record<
         string,

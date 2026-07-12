@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import {
@@ -37,7 +38,7 @@ import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 
 export interface OrderDetailDialogProps {
   hostId: string
-  order: (Aglyn.HostOrder & { $id: string }) | null
+  order: (CommerceModel.HostOrder & { $id: string }) | null
   onClose: () => void
 }
 
@@ -72,7 +73,7 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const order = rawOrder ? Aglyn.liftLegacyOrder(rawOrder) : null
+  const order = rawOrder ? CommerceModel.liftLegacyOrder(rawOrder) : null
   const orderId = rawOrder?.$id
 
   const write = useCallback(
@@ -85,7 +86,7 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
 
   const handleFulfill = useCallback(async () => {
     if (!order || !tracking) return
-    const fulfillment: Aglyn.OrderFulfillment = {
+    const fulfillment: CommerceModel.OrderFulfillment = {
       id: Aglyn.createResourceUid(),
       lineItemIds: (order.lineItems ?? []).map((_line, index) => index),
       ...(tracking.carrier ? { carrier: tracking.carrier } : {}),
@@ -95,7 +96,7 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
     await write({
       status: 'fulfilled',
       fulfillments: [...(order.fulfillments ?? []), fulfillment],
-      timeline: Aglyn.appendOrderEvent(
+      timeline: CommerceModel.appendOrderEvent(
         order,
         'fulfilled',
         tracking.number
@@ -121,7 +122,7 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
     if (!confirmed) return
     await write({
       status: 'cancelled',
-      timeline: Aglyn.appendOrderEvent(order, 'cancelled'),
+      timeline: CommerceModel.appendOrderEvent(order, 'cancelled'),
     })
   }, [order, confirm, write])
 
@@ -167,7 +168,7 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
   const handleNote = useCallback(async () => {
     if (!order || !note.trim()) return
     await write({
-      timeline: Aglyn.appendOrderEvent(order, 'note', note.trim().slice(0, 500)),
+      timeline: CommerceModel.appendOrderEvent(order, 'note', note.trim().slice(0, 500)),
     })
     setNote('')
   }, [order, note, write])
@@ -186,7 +187,7 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
       .join('')
     const address = order.shippingAddress
     win.document.write(
-      `<h2>Packing slip ${Aglyn.formatOrderNumber(order, orderId)}</h2>` +
+      `<h2>Packing slip ${CommerceModel.formatOrderNumber(order, orderId)}</h2>` +
         (address
           ? `<p>${[address.name, address.line1, address.line2, `${address.city ?? ''} ${address.state ?? ''} ${address.postalCode ?? ''}`, address.country].filter(Boolean).join('<br/>')}</p>`
           : '') +
@@ -198,13 +199,13 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
 
   if (!order) return null
   const totals = order.totals
-  const can = (to: Aglyn.OrderStatus) => Aglyn.canTransitionOrder(order.status, to)
+  const can = (to: CommerceModel.OrderStatus) => CommerceModel.canTransitionOrder(order.status, to)
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-          <span>{`Order ${Aglyn.formatOrderNumber(order, orderId)}`}</span>
+          <span>{`Order ${CommerceModel.formatOrderNumber(order, orderId)}`}</span>
           <Chip
             label={order.status.replace('_', ' ')}
             size="small"
@@ -359,7 +360,7 @@ export function OrderDetailDialog(props: OrderDetailDialogProps) {
             onClick={() =>
               write({
                 status: 'delivered',
-                timeline: Aglyn.appendOrderEvent(order, 'delivered'),
+                timeline: CommerceModel.appendOrderEvent(order, 'delivered'),
               })
             }
           >

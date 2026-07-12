@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import {
   firebaseAdmin,
   getOrgForHost,
@@ -80,10 +81,10 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
     const productsById = new Map(
       productSnapshots.map((snapshot) => [
         snapshot.id,
-        snapshot.exists ? Aglyn.liftLegacyProduct(snapshot.data() as any) : null,
+        snapshot.exists ? CommerceModel.liftLegacyProduct(snapshot.data() as any) : null,
       ]),
     )
-    const lineItems: Aglyn.OrderLineItem[] = []
+    const lineItems: CommerceModel.OrderLineItem[] = []
     for (const raw of rawLines) {
       const product = productsById.get(String(raw.productId))
       if (!product) continue
@@ -114,16 +115,16 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
     const discountCents = Math.round((itemsCents * discountPct) / 100)
     // Origin tax (AGL-285) — in-person sales are origin-based by nature.
     const storeSettings = await hostRef.collection('settings').doc('store').get()
-    const taxSettings = (storeSettings.get('tax') ?? {}) as Aglyn.TaxSettings
+    const taxSettings = (storeSettings.get('tax') ?? {}) as CommerceModel.TaxSettings
     const rate =
       taxSettings.mode === 'manual'
-        ? Aglyn.resolveTaxRate(taxSettings, taxSettings.origin ?? {})
+        ? CommerceModel.resolveTaxRate(taxSettings, taxSettings.origin ?? {})
         : null
     const taxCents =
       rate && !taxSettings.pricesIncludeTax
-        ? Aglyn.computeTaxCents(itemsCents - discountCents, rate.pct)
+        ? CommerceModel.computeTaxCents(itemsCents - discountCents, rate.pct)
         : 0
-    const totals = Aglyn.computeOrderTotals(lineItems, {
+    const totals = CommerceModel.computeOrderTotals(lineItems, {
       discountCents,
       taxCents,
     })
@@ -259,7 +260,7 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
         (variant) => variant.id === variantId && variant.inventory != null,
       )
       if (!variantId || !tracked) continue
-      const variants = Aglyn.adjustVariantInventory(
+      const variants = CommerceModel.adjustVariantInventory(
         product,
         variantId,
         -line.quantity,
@@ -269,7 +270,7 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
         .collection('products')
         .doc(line.productId)
         .set(
-          { variants, inventory: Aglyn.productInventory({ variants }) },
+          { variants, inventory: CommerceModel.productInventory({ variants }) },
           { merge: true },
         )
         .catch(() => undefined)
@@ -283,7 +284,7 @@ export const posOrderHandler: PluginApiHandler = async (req, res) => {
           orderId: orderRef.id,
           ...(locationId ? { locationId } : {}),
           atMs: Date.now(),
-        } satisfies Aglyn.InventoryAdjustment)
+        } satisfies CommerceModel.InventoryAdjustment)
         .catch(() => undefined)
     }
     if (customerEmail) {

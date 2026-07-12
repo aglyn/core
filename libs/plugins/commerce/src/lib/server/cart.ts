@@ -17,10 +17,11 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { randomBytes } from 'crypto'
 
-export interface ResolvedCartLine extends Aglyn.CartLine {
+export interface ResolvedCartLine extends CommerceModel.CartLine {
   name: string
   variantLabel?: string
   unitAmountCents: number
@@ -66,11 +67,11 @@ export const cartHandler: PluginApiHandler = async (req, res) => {
     }
     const cartRef = hostRef.collection('carts').doc(cartId)
     const cartSnapshot = await cartRef.get()
-    const cart: Aglyn.HostCart = (cartSnapshot.data() as any) ?? { lines: [] }
+    const cart: CommerceModel.HostCart = (cartSnapshot.data() as any) ?? { lines: [] }
 
     if (isPost) {
       const action = String(body.action ?? 'add')
-      const line: Aglyn.CartLine = {
+      const line: CommerceModel.CartLine = {
         productId: String(body.productId ?? ''),
         ...(body.variantId ? { variantId: String(body.variantId) } : {}),
         quantity: Math.round(Number(body.quantity ?? 1)),
@@ -80,9 +81,9 @@ export const cartHandler: PluginApiHandler = async (req, res) => {
       } else if (!line.productId) {
         return res.status(400).json({ error: 'Missing productId' })
       } else if (action === 'remove') {
-        cart.lines = Aglyn.removeCartLine(cart, line)
+        cart.lines = CommerceModel.removeCartLine(cart, line)
       } else {
-        cart.lines = Aglyn.upsertCartLine(
+        cart.lines = CommerceModel.upsertCartLine(
           cart,
           line,
           action === 'set' ? 'set' : 'add',
@@ -108,7 +109,7 @@ export const cartHandler: PluginApiHandler = async (req, res) => {
     const productsById = new Map(
       productSnapshots.map((snapshot) => [
         snapshot.id,
-        snapshot.exists ? Aglyn.liftLegacyProduct(snapshot.data() as any) : null,
+        snapshot.exists ? CommerceModel.liftLegacyProduct(snapshot.data() as any) : null,
       ]),
     )
     const lines: ResolvedCartLine[] = cart.lines.map((line) => {
@@ -147,7 +148,7 @@ export const cartHandler: PluginApiHandler = async (req, res) => {
                 product.imageUrl,
             }
           : {}),
-        ...(Aglyn.canPurchase(product, variant.id, line.quantity)
+        ...(CommerceModel.canPurchase(product, variant.id, line.quantity)
           ? {}
           : { unavailable: true }),
       }
@@ -157,7 +158,7 @@ export const cartHandler: PluginApiHandler = async (req, res) => {
       .reduce((sum, line) => sum + line.unitAmountCents * line.quantity, 0)
     return res.status(200).json({
       lines,
-      count: Aglyn.cartCount(cart),
+      count: CommerceModel.cartCount(cart),
       subtotalCents,
     })
   } catch (error) {

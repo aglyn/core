@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 export interface PublicProductDetail {
@@ -24,9 +25,9 @@ export interface PublicProductDetail {
   name: string
   slug: string
   description?: string
-  type: Aglyn.ProductType
+  type: CommerceModel.ProductType
   mediaUrls: string[]
-  options: Aglyn.ProductOption[]
+  options: CommerceModel.ProductOption[]
   variants: Array<{
     id: string
     options?: Record<string, string>
@@ -63,7 +64,7 @@ export const productHandler: PluginApiHandler = async (req, res) => {
     if (!raw || raw.deletedAt || raw.status !== 'active') {
       return res.status(404).json({ error: 'Unknown product' })
     }
-    const product = Aglyn.liftLegacyProduct(raw)
+    const product = CommerceModel.liftLegacyProduct(raw)
     const detail: PublicProductDetail = {
       id: docSnapshot.id,
       name: product.name,

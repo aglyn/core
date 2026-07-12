@@ -25,7 +25,15 @@
  * shape via `liftLegacyProduct`, so existing docs keep working.
  */
 
-import { COMMERCE_MAX_PRICE_USD } from './community'
+/**
+ * Platform fee on tenant-site product sales (Commerce Starter, AGL-90) —
+ * the tenant sells to their own visitors through their connected account,
+ * so the platform takes a processing/management share only. (Relocated
+ * from app-utils/community.ts, where it was misfiled — AGL-411.)
+ */
+export const COMMERCE_PLATFORM_FEE_PERCENT = 2
+/** Product price ceiling (whole USD). */
+export const COMMERCE_MAX_PRICE_USD = 10000
 
 export type ProductType = 'physical' | 'digital' | 'service'
 export type ProductStatus = 'draft' | 'active' | 'archived'

@@ -16,7 +16,7 @@
  */
 'use client'
 
-import { formatOrderNumber, isLowStock, liftLegacyProduct } from '@aglyn/aglyn'
+import { formatOrderNumber, isLowStock, liftLegacyProduct } from '@aglyn/plugins-commerce/model'
 import { AppLink, CardDisplay } from '@aglyn/shared-ui-jsx'
 import { Button, Chip, Divider, Stack, Typography } from '@mui/material'
 import { collection, limit, query } from 'firebase/firestore'

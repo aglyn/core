@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import {
@@ -52,7 +53,7 @@ import { type PickedMedia, useMediaPicker } from '@aglyn/aglyn'
 export interface ProductEditorDialogProps {
   hostId: string
   /** Product doc (with `$id`) to edit, `null` for a new product. */
-  product: (Aglyn.HostProduct & { $id: string }) | null
+  product: (CommerceModel.HostProduct & { $id: string }) | null
   open: boolean
   onClose: () => void
 }
@@ -102,10 +103,10 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
   )
 
   const lifted = useMemo(
-    () => (product ? Aglyn.liftLegacyProduct(product) : null),
+    () => (product ? CommerceModel.liftLegacyProduct(product) : null),
     [product],
   )
-  const [draft, setDraft] = useState<Aglyn.HostProduct | null>(null)
+  const [draft, setDraft] = useState<CommerceModel.HostProduct | null>(null)
   const [slugTouched, setSlugTouched] = useState(false)
   // The console media browser is provided by the shell (AGL-395); opening it
   // resolves with the chosen asset (or null if cancelled).
@@ -118,7 +119,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
     [pickMedia],
   )
   // Lazy-init per open; parent remounts via `key` on product change.
-  const current: Aglyn.HostProduct =
+  const current: CommerceModel.HostProduct =
     draft ??
     lifted ?? {
       name: '',
@@ -127,19 +128,19 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
       status: 'draft',
       variants: [{ id: 'default', priceUsd: 0 }],
     }
-  const update = (patch: Partial<Aglyn.HostProduct>) =>
+  const update = (patch: Partial<CommerceModel.HostProduct>) =>
     setDraft({ ...current, ...patch })
 
-  const error = current.name ? Aglyn.validateProduct(current) : null
+  const error = current.name ? CommerceModel.validateProduct(current) : null
 
   const handleName = (name: string) =>
     update({
       name,
-      ...(!product && !slugTouched ? { slug: Aglyn.commerceSlug(name) } : {}),
+      ...(!product && !slugTouched ? { slug: CommerceModel.commerceSlug(name) } : {}),
     })
 
   const handleOptionsChange = useCallback(
-    (index: number, patch: Partial<Aglyn.ProductOption> | null) => {
+    (index: number, patch: Partial<CommerceModel.ProductOption> | null) => {
       const options = [...(current.options ?? [])]
       if (patch === null) options.splice(index, 1)
       else options[index] = { name: '', values: [], ...options[index], ...patch }
@@ -149,7 +150,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
         current.variants.map((variant) => [comboKey(variant.options), variant]),
       )
       const fallback = current.variants[0]
-      const variants = Aglyn.expandVariantMatrix(options).map(
+      const variants = CommerceModel.expandVariantMatrix(options).map(
         (combo, comboIndex) => {
           const existing = previous.get(comboKey(combo))
           return (
@@ -169,7 +170,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
 
   const handleVariantField = (
     index: number,
-    field: keyof Aglyn.ProductVariant,
+    field: keyof CommerceModel.ProductVariant,
     raw: string,
   ) => {
     const variants = [...current.variants]
@@ -204,11 +205,11 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
         {
           ...current,
           name: current.name.trim().slice(0, 120),
-          slug: current.slug || Aglyn.commerceSlug(current.name),
+          slug: current.slug || CommerceModel.commerceSlug(current.name),
           // Legacy denormalization: the AGL-90 checkout + Product block
           // read these flat fields.
           priceUsd: primaryVariant?.priceUsd ?? 0,
-          inventory: Aglyn.productInventory(current),
+          inventory: CommerceModel.productInventory(current),
           imageUrl: current.mediaUrls?.[0] ?? current.imageUrl ?? null,
           updatedAtMs: Date.now(),
           ...(product ? {} : { createdAtMs: Date.now() }),
@@ -245,7 +246,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             value={current.slug}
             onChange={(event) => {
               setSlugTouched(true)
-              update({ slug: Aglyn.commerceSlug(event.target.value) })
+              update({ slug: CommerceModel.commerceSlug(event.target.value) })
             }}
             size="small"
             fullWidth
@@ -257,7 +258,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             label="Type"
             value={current.type}
             onChange={(event) =>
-              update({ type: event.target.value as Aglyn.ProductType })
+              update({ type: event.target.value as CommerceModel.ProductType })
             }
             size="small"
             select
@@ -271,7 +272,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             label="Status"
             value={current.status}
             onChange={(event) =>
-              update({ status: event.target.value as Aglyn.ProductStatus })
+              update({ status: event.target.value as CommerceModel.ProductStatus })
             }
             size="small"
             select
@@ -452,7 +453,7 @@ export function ProductEditorDialog(props: ProductEditorDialogProps) {
             </Button>
           </Stack>
         ))}
-        {(current.options?.length ?? 0) < Aglyn.COMMERCE_MAX_OPTIONS ? (
+        {(current.options?.length ?? 0) < CommerceModel.COMMERCE_MAX_OPTIONS ? (
           <Button
             size="small"
             sx={{ alignSelf: 'flex-start' }}

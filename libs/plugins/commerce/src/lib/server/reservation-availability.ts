@@ -17,6 +17,7 @@
 
 import type { PluginApiHandler } from '@aglyn/aglyn/server'
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 /**
@@ -41,7 +42,7 @@ export const reservationAvailabilityHandler: PluginApiHandler = async (req, res)
         .limit(500)
         .get(),
     ])
-    const resource = resourceSnapshot.data() as Aglyn.HostResource | undefined
+    const resource = resourceSnapshot.data() as CommerceModel.HostResource | undefined
     if (!resource) return res.status(404).json({ error: 'Unknown resource' })
 
     const dead = new Set(['cancelled', 'no_show'])

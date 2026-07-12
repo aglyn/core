@@ -17,6 +17,7 @@
 'use client'
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../../model'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
@@ -52,18 +53,18 @@ export interface CatalogOrganizationCardProps {
   hostId: string
 }
 
-type CategoryRow = Aglyn.ProductCategory & { $id: string }
-type CollectionRow = Aglyn.HostCollection & { $id: string }
-type ProductRow = Aglyn.HostProduct & { $id: string }
+type CategoryRow = CommerceModel.ProductCategory & { $id: string }
+type CollectionRow = CommerceModel.HostCollection & { $id: string }
+type ProductRow = CommerceModel.HostProduct & { $id: string }
 
-const RULE_FIELDS: Array<{ value: Aglyn.CollectionRuleField; label: string }> = [
+const RULE_FIELDS: Array<{ value: CommerceModel.CollectionRuleField; label: string }> = [
   { value: 'tag', label: 'Tag' },
   { value: 'categoryId', label: 'Category' },
   { value: 'priceUsd', label: 'Price' },
   { value: 'name', label: 'Name' },
   { value: 'type', label: 'Type' },
 ]
-const RULE_OPS: Array<{ value: Aglyn.CollectionRuleOp; label: string }> = [
+const RULE_OPS: Array<{ value: CommerceModel.CollectionRuleOp; label: string }> = [
   { value: 'eq', label: 'is' },
   { value: 'neq', label: 'is not' },
   { value: 'lt', label: 'below' },
@@ -109,7 +110,7 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
       [...(productDocs ?? [])]
         .filter((product: any) => !product.deletedAt)
         .map((product: any) => ({
-          ...Aglyn.liftLegacyProduct(product),
+          ...CommerceModel.liftLegacyProduct(product),
           $id: product.$id,
         })),
     [productDocs],
@@ -149,7 +150,7 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
     parentId: string
   } | null>(null)
   const [collectionDraft, setCollectionDraft] = useState<
-    (Aglyn.HostCollection & { id: string | null }) | null
+    (CommerceModel.HostCollection & { id: string | null }) | null
   >(null)
 
   const handleCategorySave = useCallback(async () => {
@@ -157,7 +158,7 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
     const id = categoryDraft.id ?? Aglyn.createResourceUid()
     await setDoc(doc(firestore, 'hosts', hostId, 'productCategories', id), {
       name: categoryDraft.name.trim().slice(0, 80),
-      slug: Aglyn.commerceSlug(categoryDraft.name),
+      slug: CommerceModel.commerceSlug(categoryDraft.name),
       parentId: categoryDraft.parentId || null,
       updatedAt: Timestamp.now(),
     })
@@ -197,22 +198,22 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
 
   const collectionError = collectionDraft
     ? collectionDraft.name
-      ? Aglyn.validateCollection({
+      ? CommerceModel.validateCollection({
           ...collectionDraft,
           slug:
-            collectionDraft.slug || Aglyn.commerceSlug(collectionDraft.name),
+            collectionDraft.slug || CommerceModel.commerceSlug(collectionDraft.name),
         })
       : null
     : null
 
   const previewMatches = useMemo(() => {
     if (!collectionDraft) return []
-    const candidate: Aglyn.HostCollection = {
+    const candidate: CommerceModel.HostCollection = {
       ...collectionDraft,
-      slug: collectionDraft.slug || Aglyn.commerceSlug(collectionDraft.name),
+      slug: collectionDraft.slug || CommerceModel.commerceSlug(collectionDraft.name),
     }
     return products.filter((product) =>
-      Aglyn.matchesCollection(product, candidate, product.$id),
+      CommerceModel.matchesCollection(product, candidate, product.$id),
     )
   }, [collectionDraft, products])
 
@@ -223,7 +224,7 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
     await setDoc(doc(firestore, 'hosts', hostId, 'collections', id), {
       ...data,
       name: collectionDraft.name.trim().slice(0, 80),
-      slug: collectionDraft.slug || Aglyn.commerceSlug(collectionDraft.name),
+      slug: collectionDraft.slug || CommerceModel.commerceSlug(collectionDraft.name),
       updatedAt: Timestamp.now(),
     })
     setCollectionDraft(null)
@@ -248,12 +249,12 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
 
   const collectionCount = (row: CollectionRow) =>
     products.filter((product) =>
-      Aglyn.matchesCollection(product, row, product.$id),
+      CommerceModel.matchesCollection(product, row, product.$id),
     ).length
 
   const updateRule = (
     index: number,
-    patch: Partial<Aglyn.CollectionRule> | null,
+    patch: Partial<CommerceModel.CollectionRule> | null,
   ) => {
     if (!collectionDraft) return
     const rules = [...(collectionDraft.rules ?? [])]
@@ -465,7 +466,7 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
               collectionDraft?.name
                 ? `/collections/${
                     collectionDraft.slug ||
-                    Aglyn.commerceSlug(collectionDraft.name)
+                    CommerceModel.commerceSlug(collectionDraft.name)
                   }`
                 : undefined
             }
@@ -531,7 +532,7 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
                     value={rule.field}
                     onChange={(event) =>
                       updateRule(index, {
-                        field: event.target.value as Aglyn.CollectionRuleField,
+                        field: event.target.value as CommerceModel.CollectionRuleField,
                       })
                     }
                     size="small"
@@ -548,7 +549,7 @@ export function CatalogOrganizationCard(props: CatalogOrganizationCardProps) {
                     value={rule.op}
                     onChange={(event) =>
                       updateRule(index, {
-                        op: event.target.value as Aglyn.CollectionRuleOp,
+                        op: event.target.value as CommerceModel.CollectionRuleOp,
                       })
                     }
                     size="small"

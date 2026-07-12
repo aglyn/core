@@ -16,6 +16,7 @@
  */
 
 export * from './lib/constants/bundle-common'
+export * from './lib/model'
 export * from './lib/plugin'
 // Console cards consumed directly by the app (e.g. inbox Orders tab).
 export { default as HostOrdersCard } from './lib/components/console/host-orders-card.component'

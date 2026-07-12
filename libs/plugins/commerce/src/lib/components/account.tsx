@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../model'
 import { mdiAccountCircleOutline } from '@aglyn/shared-data-mdi'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -41,7 +42,7 @@ interface AccountData {
   member: {
     email: string
     displayName: string
-    addresses: Aglyn.OrderAddress[]
+    addresses: CommerceModel.OrderAddress[]
   }
   downloads?: Array<{
     orderId: string
@@ -88,7 +89,7 @@ const CustomerAccount = forwardRef<HTMLDivElement, CustomerAccountProps>(
     const [displayName, setDisplayName] = useState('')
     const [error, setError] = useState('')
     const [busy, setBusy] = useState(false)
-    const [addressDraft, setAddressDraft] = useState<Aglyn.OrderAddress | null>(
+    const [addressDraft, setAddressDraft] = useState<CommerceModel.OrderAddress | null>(
       null,
     )
 

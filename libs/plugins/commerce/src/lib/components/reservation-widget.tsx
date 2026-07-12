@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn'
+import * as CommerceModel from '../model'
 import { mdiCalendarCheckOutline } from '@aglyn/shared-data-mdi'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -37,7 +38,7 @@ export interface ReservationWidgetProps {
 }
 
 interface Availability {
-  resource: Aglyn.HostResource
+  resource: CommerceModel.HostResource
   unavailable: Array<{ fromDayMs: number; toDayMs: number }>
 }
 
@@ -83,7 +84,7 @@ const ReservationWidget = forwardRef<HTMLDivElement, ReservationWidgetProps>(
 
     const quote = useMemo(() => {
       if (!availability || !checkInDayMs || !checkOutDayMs) return null
-      return Aglyn.computeReservationQuote(
+      return CommerceModel.computeReservationQuote(
         availability.resource,
         checkInDayMs,
         checkOutDayMs,
@@ -92,7 +93,7 @@ const ReservationWidget = forwardRef<HTMLDivElement, ReservationWidgetProps>(
 
     const conflict = useMemo(() => {
       if (!availability || !checkInDayMs || !checkOutDayMs) return false
-      return !Aglyn.isRangeAvailable(
+      return !CommerceModel.isRangeAvailable(
         availability.resource,
         availability.unavailable.map((range) => ({
           checkInDayMs: range.fromDayMs,

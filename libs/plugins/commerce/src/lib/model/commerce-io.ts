@@ -32,7 +32,7 @@ import {
   type ProductStatus,
   type ProductVariant,
 } from './commerce'
-import { parseCsv } from './dataset-io'
+import { parseCsv } from '@aglyn/aglyn'
 
 export const PRODUCT_CSV_HEADER = [
   'Handle',

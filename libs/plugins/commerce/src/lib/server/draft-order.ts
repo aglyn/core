@@ -16,6 +16,7 @@
  */
 
 import * as Aglyn from '@aglyn/aglyn/server'
+import * as CommerceModel from '../model'
 import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
 
@@ -70,7 +71,7 @@ export const draftOrderHandler: PluginApiHandler = async (req, res) => {
     if (!raw || raw.deletedAt) {
       return res.status(404).json({ error: 'Unknown product' })
     }
-    const product = Aglyn.liftLegacyProduct(raw)
+    const product = CommerceModel.liftLegacyProduct(raw)
     const variant = variantId
       ? product.variants.find((item) => item.id === variantId)
       : product.variants[0]
@@ -88,7 +89,7 @@ export const draftOrderHandler: PluginApiHandler = async (req, res) => {
     }
 
     const unitAmountCents = Math.round(Number(variant.priceUsd) * 100)
-    const lineItems: Aglyn.OrderLineItem[] = [
+    const lineItems: CommerceModel.OrderLineItem[] = [
       {
         productId,
         ...(variantId ? { variantId } : {}),
@@ -106,7 +107,7 @@ export const draftOrderHandler: PluginApiHandler = async (req, res) => {
     const itemsCents = unitAmountCents * quantity
     const feeCents =
       feePct > 0 ? Math.max(1, Math.round((itemsCents * feePct) / 100)) : 0
-    const totals = Aglyn.computeOrderTotals(lineItems, { feeCents })
+    const totals = CommerceModel.computeOrderTotals(lineItems, { feeCents })
 
     // Order doc first (transactional number), then the payment link.
     const orderRef = hostRef.collection('orders').doc()
