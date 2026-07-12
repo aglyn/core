@@ -40,6 +40,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useUser } from '@aglyn/tenant-feature-instance'
 import MediaUrlField from '../../../../components/media-url-field.component'
+import OrgPluginsCard from '../../../../components/org-plugins-card.component'
 import useCurrentTenant from '../../../../hooks/use-current-tenant'
 import HubTabs from '../../../../components/hub-tabs.component'
 import useOrgNavTabItems from '../../../../hooks/use-org-nav-tabs'
@@ -419,6 +420,25 @@ const OrgSettings: NextPageWithLayout = () => {
                 </Stack>
               </Stack>
             </CardDisplay>
+                        ),
+                      },
+                      {
+                        id: 'plugins',
+                        label: 'Plugins',
+                        content: (
+                          <OrgPluginsCard
+                            tenant={tenant}
+                            disabled={!canManage || busy}
+                            onSave={async (enabledPlugins) => {
+                              await settingsRequest({
+                                action: 'set-enabled-plugins',
+                                enabledPlugins,
+                              })
+                              enqueueSnackbar('Plugins updated', {
+                                variant: 'success',
+                              })
+                            }}
+                          />
                         ),
                       },
                     ]

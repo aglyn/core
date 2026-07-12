@@ -97,6 +97,42 @@ async function handler(request: Request): Promise<Response> {
       return Response.json({ ok: true, name }, { status: 200 })
     }
 
+    // Plugin switchboard (AGL-416): which plugins the workspace loads.
+    // Ids are opaque strings (first-party catalog + future realm-trusted
+    // marketplace ids); always-on ids are re-unioned at read time by
+    // resolveEnabledPlugins, so a hostile write can't switch off the base
+    // component library.
+    if (body?.action === 'set-enabled-plugins') {
+      const raw = body?.enabledPlugins
+      if (!Array.isArray(raw) || raw.length > 100) {
+        return Response.json({ error: 'Invalid plugin list' }, { status: 400 })
+      }
+      const enabledPlugins = Array.from(
+        new Set(
+          raw.map((id: unknown) => String(id).trim().slice(0, 60)).filter(Boolean),
+        ),
+      )
+      await firebaseAdmin
+        .app()
+        .firestore()
+        .collection('orgs')
+        .doc(orgId)
+        .set(
+          {
+            enabledPlugins,
+            updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true },
+        )
+      void logOrgActivity(
+        orgId,
+        { uid: decoded.uid, email: decoded.email },
+        `Updated enabled plugins (${enabledPlugins.length} on)`,
+        { type: 'org', id: orgId },
+      )
+      return Response.json({ ok: true, enabledPlugins }, { status: 200 })
+    }
+
     // Org profile (AGL-363): logo + contact details, admin-writable.
     // Logo URLs must be https; contact fields are plain strings, length
     // capped — they surface on invoices, the community profile, and the

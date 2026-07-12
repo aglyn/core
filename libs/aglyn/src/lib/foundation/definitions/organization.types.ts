@@ -56,6 +56,12 @@ export interface AglynOrganization extends AglynDocument {
   // Billing (mirrors AglynTenant; source of truth moves here with AGL-237)
   plan?: TenantPlan
   entitlements?: TenantEntitlements
+  /**
+   * Per-org plugin switchboard (AGL-416): ids of plugins the workspace
+   * loads (see plugin-manager/enabled-plugins). Absent = all first-party
+   * plugins; always-on ids (base components) are unioned in regardless.
+   */
+  enabledPlugins?: string[]
   seatAddons?: TenantSeatAddons
   stripeCustomerId?: string
   subscription?: TenantSubscription

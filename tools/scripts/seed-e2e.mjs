@@ -104,6 +104,23 @@ await put(firestore.collection('orgs').doc(orgId), {
   name: 'E2E Bakery Co',
   ownerUid: E2E_UID,
   plan: 'business',
+  // Plugin switchboard (AGL-416): explicit so the e2e exercises the
+  // org-gated loader; keep in sync with FIRST_PARTY_PLUGINS defaults.
+  enabledPlugins: [
+    'mui',
+    'bookings',
+    'commerce',
+    'community',
+    'contacts',
+    'data',
+    'email',
+    'events-calendar',
+    'inbox',
+    'logic',
+    'marketing',
+    'redirects',
+    'workflows',
+  ],
   subscription: { status: 'active' },
   createdAt: now,
 })

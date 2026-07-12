@@ -298,6 +298,8 @@ export interface AglynTenant extends AglynDocument {
   plan?: TenantPlan
   /** Per-tenant entitlement overrides (admin console); win over plan defaults. */
   entitlements?: TenantEntitlements
+  /** Per-org plugin switchboard (AGL-416); see plugin-manager/enabled-plugins. */
+  enabledPlugins?: string[]
   /** Purchased addon seats (AGL-112); billed monthly per seat. */
   seatAddons?: TenantSeatAddons
   stripeCustomerId?: string
