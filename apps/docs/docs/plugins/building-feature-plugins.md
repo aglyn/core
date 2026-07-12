@@ -192,6 +192,13 @@ template + the catalog entry).
 - **Billing webhook hooks** — `registerBillingWebhookHandler` receives the
   platform Stripe events (commerce orders, booking payments, marketplace
   purchases live in their plugins).
+- **Config schemas** (AGL-428) — declare settings once with
+  `registerPluginConfigSchema` (pure-data schema module, registered from
+  BOTH the client barrel and `/server` entry) and the platform provides
+  the rest: a generic settings form on the Plugins & add-ons hub, storage
+  in `orgs/{orgId}/pluginSettings/{pluginId}`, defaults-merged type-coerced
+  reads via `getPluginConfig` (server) and `usePluginConfig` (client).
+  Reference adopter: bookings' `maxDaysAhead` horizon.
 
 ## Remote bundles: the trusted realm tier (AGL-420)
 

@@ -81,6 +81,15 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Per-plugin settings (AGL-428): overrides for a plugin's declared
+      // config schema. Readers defensively coerce types (the doc is
+      // manager-writable), so junk here can misconfigure only that
+      // plugin, never break it.
+      match /pluginSettings/{pluginId} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if isStaff() || (canManageOrg() && orgNotSuspended());
+      }
+
       // Org-shared data (AGL-237): datasets (records included), contacts
       // and segments are shared across every host in the org. Any member
       // reads; editors and up write; viewers stay read-only. Suspension

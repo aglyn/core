@@ -15,19 +15,28 @@
  * limitations under the License.
  */
 
-import { checkEntitlement } from '@aglyn/aglyn/server'
+import { checkEntitlement,
+  registerPluginConfigSchema,
+} from '@aglyn/aglyn/server'
 import { type BookedInterval, BOOKING_MAX_DAYS_AHEAD, computeOpenSlots, type HostBookingService, isSlotOpen } from './model'
 import {
   registerBillingWebhookHandler,
   registerPluginApiRoute,
   type PluginApiHandler,
 } from '@aglyn/aglyn/server'
+import { BOOKINGS_CONFIG_SCHEMA } from './plugin-config'
 import { bookingsBillingWebhookHandler } from './server/billing-webhook'
+
+// Settings schema (AGL-428): registered here too so server-only loads
+// (API dispatchers) get defaults-merged getPluginConfig reads.
+registerPluginConfigSchema(BOOKINGS_CONFIG_SCHEMA)
 import {
   firebaseAdmin,
   getOrgForHost,
   notifyHostManagers,
   upsertHostContact,
+  getPluginConfig,
+  resolveOrgIdForHost,
 } from '@aglyn/tenant-data-admin'
 import { emitHostEvent } from '@aglyn/tenant-runtime'
 import { FieldValue } from 'firebase-admin/firestore'
@@ -92,7 +101,14 @@ const slotsHandler: PluginApiHandler = async (req, res) => {
       return res.status(404).json({ error: 'Unknown service' })
     }
     const fromMs = Date.now()
-    const toMs = fromMs + BOOKING_MAX_DAYS_AHEAD * 24 * 60 * 60_000
+    // Booking horizon (AGL-428): org-configurable via the plugin settings
+    // framework; defaults to BOOKING_MAX_DAYS_AHEAD through the schema.
+    const config = await getPluginConfig(
+      await resolveOrgIdForHost(hostId),
+      'bookings',
+    )
+    const maxDaysAhead = Number(config.maxDaysAhead ?? BOOKING_MAX_DAYS_AHEAD)
+    const toMs = fromMs + maxDaysAhead * 24 * 60 * 60_000
     const bookedSnapshot = await hostRef
       .collection('bookings')
       .where('serviceId', '==', serviceId)

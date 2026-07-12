@@ -21,6 +21,7 @@ import { mdiCalendarClock } from '@aglyn/shared-data-mdi'
 import { lazy } from 'react'
 import * as Booking from './components/booking'
 import { BUNDLE_ID } from './constants/bundle-common'
+import { BOOKINGS_CONFIG_SCHEMA } from './plugin-config'
 
 /** Code-split: the Bookings console page only loads when opened. */
 const BookingsConsolePage = lazy(
@@ -48,6 +49,9 @@ export const BOOKINGS_BUNDLE: PluginSdk.FeatureBundleEntry[] = [
  * at console app load — the page is lazy (no besigner/canvas code).
  */
 export function registerBookingsConsole(): void {
+  // Per-plugin settings (AGL-428): the schema powers the generic form on
+  // the Plugins & add-ons hub and defaults-merged reads everywhere.
+  PluginSdk.registerPluginConfigSchema(BOOKINGS_CONFIG_SCHEMA)
   PluginSdk.registerConsoleExtension({
     pluginId: BUNDLE_ID,
     displayName: 'Bookings',

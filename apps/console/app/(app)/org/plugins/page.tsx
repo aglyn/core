@@ -34,6 +34,7 @@ import { useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import OrgPluginsCard from '../../../../components/org-plugins-card.component'
+import PluginConfigCards from '../../../../components/plugin-config-card.component'
 import PluginWidgetSlot from '../../../../components/plugin-widget-slot.component'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
@@ -121,6 +122,13 @@ const OrgPlugins: NextPageWithLayout = () => {
                 tenant={tenant}
                 disabled={!canManage}
                 onSave={saveEnabledPlugins}
+              />
+
+              {/* Per-plugin settings (AGL-428): one generic form per
+                  schema the loaded plugins declared. */}
+              <PluginConfigCards
+                orgId={currentOrg.$id}
+                disabled={!canManage}
               />
 
               <Stack

@@ -15,9 +15,43 @@
  * limitations under the License.
  */
 
-import type { RealmPluginInstall } from '@aglyn/aglyn/server'
+import {
+  getPluginConfigSchema,
+  mergePluginConfig,
+  type RealmPluginInstall,
+} from '@aglyn/aglyn/server'
 import { firebaseAdmin } from './firebase-admin'
 import { resolveOrgIdForHost } from './organizations'
+
+/**
+ * Server-side plugin config read (AGL-428): the org's stored overrides
+ * merged over the plugin's declared defaults (type-coerced — the doc is
+ * manager-writable). Without a registered schema the raw doc (or {})
+ * comes back, so handlers degrade to their own fallbacks.
+ */
+export async function getPluginConfig(
+  orgId: string | null | undefined,
+  pluginId: string,
+): Promise<Record<string, unknown>> {
+  const schema = getPluginConfigSchema(pluginId)
+  if (!orgId) return schema ? mergePluginConfig(schema, null) : {}
+  let stored: Record<string, unknown> | undefined
+  try {
+    stored = (
+      await firebaseAdmin
+        .app()
+        .firestore()
+        .collection('orgs')
+        .doc(orgId)
+        .collection('pluginSettings')
+        .doc(pluginId)
+        .get()
+    ).data()
+  } catch {
+    stored = undefined
+  }
+  return schema ? mergePluginConfig(schema, stored) : (stored ?? {})
+}
 
 /**
  * Server-side resolution of a workspace's TRUSTED-REALM plugin installs
