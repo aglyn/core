@@ -43,11 +43,16 @@ const config: Config = {
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           editUrl,
-          // Last-updated stamps shell out to `git log` per doc, which
-          // hard-fails on Vercel: the project's root directory is
-          // apps/docs, so the build has no .git to read. Keep them for
-          // local/dev builds where the repo is present.
-          showLastUpdateTime: !process.env.VERCEL,
+          // Last-updated stamps shell out to `git log` per doc. Two
+          // gotchas keep them honest (AGL-454):
+          // - Nx caches docs:build on file CONTENTS, so the build target
+          //   also hashes the HEAD commit (see project.json inputs) —
+          //   otherwise a post-commit rebuild replays pre-commit dates.
+          // - Vercel's default shallow clone has no usable history (the
+          //   project root is apps/docs); set VERCEL_DEEP_CLONE=true in
+          //   the Vercel project env to enable the stamps in prod.
+          showLastUpdateTime:
+            !process.env.VERCEL || process.env.VERCEL_DEEP_CLONE === 'true',
         },
         blog: false,
         theme: {
