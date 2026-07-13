@@ -12,8 +12,9 @@ It renders your screen under the real site theme, so what you see matches what p
 
 ![The Besigner editing a screen, with its five areas numbered](/img/besigner/besigner-annotated.png)
 
-1. **Primary bar** — the document switcher, File/Edit/Insert menus, the ƒx
-   functions panel, the version you're editing, and notifications.
+1. **Primary bar** — the document switcher, File/Edit/Insert menus, the
+   **Publish/Unpublish** button, the ƒx functions panel, the version
+   you're editing, and notifications.
 2. **Toolbar** — add elements, undo/redo, scheme and device preview,
    panel toggles, and the Live/Preview/save state on the right.
 3. **Hierarchy & elements** — the node tree of the screen and the drawer

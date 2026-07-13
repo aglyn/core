@@ -10,6 +10,13 @@ This walks through the core loop: **create → design → publish**.
 
 ![The screens list with each screen's publish state](/img/getting-started/screens-list.png)
 
+:::tip Publish from the editor
+You don't have to leave the Besigner to go live: the **Publish** button in
+the top-right of the editor publishes the version you're editing (and
+flips to **Unpublish** once the screen is live). Screens without a URL
+path yet are prompted to set one in Properties first.
+:::
+
 ## 1. Create a screen
 
 1. Go to **Screens** and choose **New screen**.

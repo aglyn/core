@@ -59,6 +59,7 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material'
 import { collection, deleteField, limit, query } from 'firebase/firestore'
@@ -481,6 +482,83 @@ function BesignerPage(props) {
     enqueueSnackbar,
   ])
 
+  // One-click publish from the app bar (AGL-452). Publish points the live
+  // site at the version being edited AND registers the routing entry;
+  // Unpublish removes the routing entry but keeps the slug on the doc so
+  // re-publishing is one click. The Properties dialog remains the place to
+  // change the path itself.
+  const handleTogglePublish = useCallback(async () => {
+    try {
+      if (publishedPath) {
+        await syncScreenRouteEntries(
+          firestore,
+          hostId,
+          buildRouteEntries({
+            ...screensById,
+            [screenId]: {
+              ...screensById[screenId],
+              slug: undefined,
+              parentId,
+            },
+          }),
+        )
+        enqueueSnackbar('Screen unpublished', {
+          variant: 'success',
+          persist: false,
+        })
+        return
+      }
+      if (!normalizedSlug) {
+        setScreenDialog(true)
+        enqueueSnackbar('Set the screen path to publish it', {
+          variant: 'info',
+          persist: false,
+        })
+        return
+      }
+      if (slugConflict || unpublishedAncestor) {
+        enqueueSnackbar(
+          slugConflict
+            ? 'Another screen is already published at this path'
+            : 'Publish the parent screen first',
+          { variant: 'warning', persist: false },
+        )
+        return
+      }
+      await updateScreenDoc({ slug: normalizedSlug, versionId } as any)
+      await syncScreenRouteEntries(
+        firestore,
+        hostId,
+        buildRouteEntries(candidateById),
+      )
+      enqueueSnackbar(
+        `Published at ${Aglyn.screenRoutePathToUrl(composedPath as string)}`,
+        { variant: 'success', persist: false },
+      )
+    } catch (e) {
+      enqueueSnackbar(`Error: ${JSON.stringify(e)}`, {
+        variant: 'error',
+        allowDuplicate: true,
+      })
+    }
+  }, [
+    publishedPath,
+    normalizedSlug,
+    slugConflict,
+    unpublishedAncestor,
+    composedPath,
+    candidateById,
+    screensById,
+    parentId,
+    buildRouteEntries,
+    updateScreenDoc,
+    firestore,
+    hostId,
+    screenId,
+    versionId,
+    enqueueSnackbar,
+  ])
+
   const handleParentChange = useCallback(
     async (event) => {
       const value = event.target.value as string
@@ -629,6 +707,23 @@ function BesignerPage(props) {
         // appBarSuffix={'Besigner'}
         actionsPrefix={
           <>
+          <Tooltip
+            title={
+              publishedPath
+                ? `Live at ${Aglyn.screenRoutePathToUrl(publishedPath)}`
+                : 'Publish this version to your site'
+            }
+          >
+            <Button
+              size="small"
+              variant={publishedPath ? 'outlined' : 'contained'}
+              color="secondary"
+              onClick={handleTogglePublish}
+              sx={{ mr: 1, whiteSpace: 'nowrap', flexShrink: 0 }}
+            >
+              {publishedPath ? 'Unpublish' : 'Publish'}
+            </Button>
+          </Tooltip>
           <BesignerFunctionsButton hostId={hostId} />
           <BesignerVersionsComponent
             hostId={hostId}
