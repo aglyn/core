@@ -229,8 +229,9 @@ describe('hosts', () => {
     await assertSucceeds(
       updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'variables', 'var-1'), { value: '2' }),
     )
-    // Commerce/bookings/redirects collections are API-create-only too.
-    for (const coll of ['services', 'redirects', 'locations', 'products']) {
+    // Commerce/bookings/redirects/reusable-components collections are
+    // API-create-only too (reusable components render on the live site).
+    for (const coll of ['services', 'redirects', 'locations', 'products', 'components']) {
       await assertFails(
         setDoc(doc(authed(EDITOR), 'hosts', HOST, coll, 'new-doc'), { name: 'x' }),
       )

@@ -35,7 +35,8 @@ import { Timestamp } from 'firebase-admin/firestore'
  */
 const RESOURCES: Record<string, {
   collection: string
-  quotaKey: keyof OrgEntitlements & string
+  /** Numeric per-plan cap; omit for entitlement-only (boolean) features. */
+  quotaKey?: keyof OrgEntitlements & string
   entitlement?: keyof OrgFeatureFlags
   /** Human label for quota error messages. */
   label: string
@@ -73,6 +74,14 @@ const RESOURCES: Record<string, {
     quotaKey: 'productsPerHost',
     entitlement: 'commerce',
     label: 'products',
+  },
+  // Entitlement-only (boolean feature, no numeric cap): reusable
+  // components render on the live site, so a Starter+ gate must be
+  // server-enforced, not just hidden in the console (AGL-473).
+  reusableComponent: {
+    collection: 'components',
+    entitlement: 'reusableComponents',
+    label: 'reusable components',
   },
 }
 
@@ -142,14 +151,16 @@ async function handler(request: Request): Promise<Response> {
     }
 
     const collectionRef = hostRef.collection(resource.collection)
-    const used = (await collectionRef.count().get()).data().count
-    const quota = checkQuota(tenant, resource.quotaKey as any, used)
-    if (!quota.allowed) {
-      return Response.json({
-        error:
-          `Your plan includes ${quota.limit} ${resource.label} — ` +
-          'upgrade in Billing for more',
-      }, { status: 403 })
+    if (resource.quotaKey) {
+      const used = (await collectionRef.count().get()).data().count
+      const quota = checkQuota(tenant, resource.quotaKey as any, used)
+      if (!quota.allowed) {
+        return Response.json({
+          error:
+            `Your plan includes ${quota.limit} ${resource.label} — ` +
+            'upgrade in Billing for more',
+        }, { status: 403 })
+      }
     }
 
     const id = typeof body?.id === 'string' && body.id
