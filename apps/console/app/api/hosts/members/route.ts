@@ -18,6 +18,7 @@
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { checkSeatQuota, createResourceUid } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   firebaseAdmin,
   getOrgForHost,
   grantHostAccess,
@@ -56,6 +57,7 @@ async function handler(request: Request): Promise<Response> {
   try {
     const app = firebaseAdmin.app()
     const decoded = await app.auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const firestore = app.firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()

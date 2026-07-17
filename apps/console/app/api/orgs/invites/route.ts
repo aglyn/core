@@ -24,6 +24,7 @@ import {
   isOrgRole,
 } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   firebaseAdmin,
   logOrgActivity,
   resolveOrgMembership,
@@ -60,6 +61,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
 
     // Cross-org "invites for me" (AGL-234): pending invites addressed to
     // the caller's verified email, joined with the org names so the

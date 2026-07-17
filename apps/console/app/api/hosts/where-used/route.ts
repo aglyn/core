@@ -20,7 +20,10 @@ import {
   type BindingRefVia,
   nodesReferenceBinding,
 } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+} from '@aglyn/tenant-data-admin'
 
 export interface WhereUsedDependent {
   /** Resource collection the dependent lives in. */
@@ -71,6 +74,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const hostRef = firebaseAdmin
       .app()
       .firestore()

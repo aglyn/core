@@ -22,7 +22,11 @@ import {
   rewriteBindingTokensDeep,
   validateDocument,
 } from '@aglyn/aglyn/server'
-import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  getOrgForHost,
+} from '@aglyn/tenant-data-admin'
 import {
   EXPORT_COLLECTION_LIMITS,
   EXPORTABLE_HOST_FIELDS,
@@ -87,6 +91,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()

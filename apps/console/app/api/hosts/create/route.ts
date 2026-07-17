@@ -25,6 +25,7 @@ import {
   suggestSubdomains,
 } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   ensureOrgForUser,
   firebaseAdmin,
   registerOrgHost,
@@ -71,6 +72,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     // Org resolution (AGL-233): hosts belong to an organization. The org
     // comes from the request (workspace context) or the user's first org,
     // auto-creating a personal org for brand-new accounts. Creating hosts

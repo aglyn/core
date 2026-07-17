@@ -25,7 +25,11 @@ import {
   effectiveDatasetModel,
   validateDocument,
 } from '@aglyn/aglyn/server'
-import { firebaseAdmin, resolveOrgMembership } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  resolveOrgMembership,
+} from '@aglyn/tenant-data-admin'
 import { Timestamp } from 'firebase-admin/firestore'
 
 /** Roles allowed to create org data — mirrors rules' canWriteOrgData(). */
@@ -61,6 +65,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const membership = await resolveOrgMembership(decoded.uid, orgId)
     const member = membership?.member as any
     if (

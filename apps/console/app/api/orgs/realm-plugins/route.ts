@@ -16,6 +16,7 @@
  */
 
 import {
+  emailUnverifiedResponse,
   firebaseAdmin,
   getRealmPluginInstalls,
   resolveOrgMembership,
@@ -41,6 +42,7 @@ export async function GET(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const membership = await resolveOrgMembership(decoded.uid, orgId)
     if (decoded['staff'] !== true && !membership) {
       return Response.json({ error: 'Not an org member' }, { status: 403 })

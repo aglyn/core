@@ -23,6 +23,7 @@ import {
   readImageDimensions,
 } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   firebaseAdmin,
   MEDIA_CDN_VARIANT_WIDTHS,
 } from '@aglyn/tenant-data-admin'
@@ -63,6 +64,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const { scope, error } = await resolveMediaScope(
       body,
       query,

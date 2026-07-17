@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { emailUnverifiedResponse, firebaseAdmin } from '@aglyn/tenant-data-admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,6 +84,17 @@ async function handler(request: Request): Promise<Response> {
         ? authorization.slice('Bearer '.length)
         : undefined
       if (!idToken) {
+        return Response.json({ error: 'Unauthenticated' }, { status: 401 })
+      }
+      // Email-verification gate (AGL-479): never mint the cross-subdomain
+      // session cookie for an unverified email/password account. Blocking it
+      // here also covers workspaces — their silent sign-in reads this cookie,
+      // so no cookie means no cross-subdomain access until the email is
+      // verified. OAuth accounts arrive verified and pass through.
+      try {
+        const decoded = await auth.verifyIdToken(idToken)
+        if (!decoded.email_verified) return emailUnverifiedResponse()
+      } catch {
         return Response.json({ error: 'Unauthenticated' }, { status: 401 })
       }
       let sessionCookie: string
