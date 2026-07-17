@@ -26,6 +26,7 @@ import {
   emailUnverifiedResponse,
   firebaseAdmin,
   getOrgForHost,
+  isImpersonationSession,
 } from '@aglyn/tenant-data-admin'
 import {
   EXPORT_COLLECTION_LIMITS,
@@ -91,7 +92,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()

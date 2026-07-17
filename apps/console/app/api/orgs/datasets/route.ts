@@ -28,6 +28,7 @@ import {
 import {
   emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
   resolveOrgMembership,
 } from '@aglyn/tenant-data-admin'
 import { Timestamp } from 'firebase-admin/firestore'
@@ -65,7 +66,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const membership = await resolveOrgMembership(decoded.uid, orgId)
     const member = membership?.member as any
     if (

@@ -19,6 +19,7 @@ import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import {
   emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
 } from '@aglyn/tenant-data-admin'
 import { createPrivateKey, sign as nodeSign } from 'node:crypto'
 import { FieldValue } from 'firebase-admin/firestore'
@@ -53,7 +54,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     if (!decoded['staff']) {
       return Response.json({ error: 'Staff only' }, { status: 403 })
     }

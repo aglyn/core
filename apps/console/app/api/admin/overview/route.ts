@@ -20,6 +20,7 @@ import { PLAN_PRICING, type OrgPlan } from '@aglyn/aglyn/server'
 import {
   emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
 } from '@aglyn/tenant-data-admin'
 
 /** Previous calendar month as YYYY-MM (the rollup key). */
@@ -58,7 +59,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     if (!decoded['staff']) {
       return Response.json({ error: 'Staff only' }, { status: 403 })
     }

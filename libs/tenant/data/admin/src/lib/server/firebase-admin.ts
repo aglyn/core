@@ -166,6 +166,13 @@ const firebaseAdmin = {
  * `emailUnverifiedResponse()` (a 403) so the denial stays distinct from an
  * invalid-token 401. Fails closed: a token with no `email_verified` claim
  * (e.g. some custom-token sign-ins) is treated as unverified.
+ *
+ * Exception (AGL-480): staff impersonation sessions carry an `impersonatedBy`
+ * claim (minted by /api/admin/impersonate). Staff have already authenticated
+ * and the act is audited, so the impersonated account's own verification
+ * state must not gate the support session — otherwise staff can't reach a
+ * brand-new, still-unverified owner, the exact account most likely to need
+ * help. `isImpersonationSession` gates that exemption.
  */
 export class EmailNotVerifiedError extends Error {
   readonly code = 'auth/email-not-verified'
@@ -179,12 +186,20 @@ export function isEmailVerified(decoded: DecodedIdToken): boolean {
   return decoded.email_verified === true
 }
 
+/** Staff impersonation session (AGL-357/AGL-480): token minted with an
+ * `impersonatedBy` claim. Exempt from the email-verification gate. */
+export function isImpersonationSession(decoded: DecodedIdToken): boolean {
+  return typeof decoded['impersonatedBy'] === 'string'
+}
+
 export async function verifyConsoleIdToken(
   idToken: string,
   checkRevoked?: boolean,
 ): Promise<DecodedIdToken> {
   const decoded = await getAuth(getApp()).verifyIdToken(idToken, checkRevoked)
-  if (!isEmailVerified(decoded)) throw new EmailNotVerifiedError()
+  if (!isEmailVerified(decoded) && !isImpersonationSession(decoded)) {
+    throw new EmailNotVerifiedError()
+  }
   return decoded
 }
 

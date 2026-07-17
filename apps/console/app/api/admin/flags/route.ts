@@ -25,6 +25,7 @@ import {
 import {
   emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
 } from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 
@@ -49,7 +50,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     if (!decoded['staff']) {
       return Response.json({ error: 'Staff only' }, { status: 403 })
     }
