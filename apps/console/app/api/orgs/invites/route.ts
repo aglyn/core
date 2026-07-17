@@ -26,6 +26,7 @@ import {
 import {
   emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
   logOrgActivity,
   resolveOrgMembership,
   upsertOrgMember,
@@ -61,7 +62,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
 
     // Cross-org "invites for me" (AGL-234): pending invites addressed to
     // the caller's verified email, joined with the org names so the

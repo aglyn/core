@@ -20,6 +20,7 @@ import { ESTIMATED_PAGE_TRANSFER_BYTES } from '../../../../utils/usage-metering'
 import {
   emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
 } from '@aglyn/tenant-data-admin'
 
 /** Approximate persisted size of one version doc's node payload. */
@@ -59,7 +60,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()

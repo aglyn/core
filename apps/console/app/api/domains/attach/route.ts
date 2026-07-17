@@ -20,6 +20,7 @@ import {
   emailUnverifiedResponse,
   firebaseAdmin,
   getOrgForHost,
+  isImpersonationSession,
 } from '@aglyn/tenant-data-admin'
 
 /**
@@ -54,7 +55,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const hostSnapshot = await firebaseAdmin
       .app()
       .firestore()

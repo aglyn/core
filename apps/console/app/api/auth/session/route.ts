@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { emailUnverifiedResponse, firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,9 +95,14 @@ async function handler(request: Request): Promise<Response> {
       // here also covers workspaces — their silent sign-in reads this cookie,
       // so no cookie means no cross-subdomain access until the email is
       // verified. OAuth accounts arrive verified and pass through.
+      // Exception (AGL-480): staff impersonation sessions (impersonatedBy
+      // claim) are exempt, so an impersonated owner's unverified email
+      // doesn't strand the support session — including across workspaces.
       try {
         const decoded = await auth.verifyIdToken(idToken)
-        if (!decoded.email_verified) return emailUnverifiedResponse()
+        if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+          return emailUnverifiedResponse()
+        }
       } catch {
         return Response.json({ error: 'Unauthenticated' }, { status: 401 })
       }
@@ -144,7 +153,17 @@ async function handler(request: Request): Promise<Response> {
       }
       try {
         const decoded = await auth.verifySessionCookie(cookie, true)
-        const token = await auth.createCustomToken(decoded.uid)
+        // Carry the impersonation claim through the cross-subdomain exchange
+        // (AGL-480). The session cookie preserves it, but the re-minted custom
+        // token would drop it — losing the banner and re-tripping the
+        // email-verify gate on the next subdomain.
+        const developerClaims = isImpersonationSession(decoded)
+          ? {
+              impersonatedBy: decoded['impersonatedBy'],
+              impersonatedByEmail: decoded['impersonatedByEmail'] ?? null,
+            }
+          : undefined
+        const token = await auth.createCustomToken(decoded.uid, developerClaims)
         return Response.json({ token }, { status: 200 })
       } catch (error) {
         const code = (error as { code?: string })?.code ?? ''

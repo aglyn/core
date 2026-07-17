@@ -24,6 +24,7 @@ import {
 import {
   emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
   MEDIA_CDN_VARIANT_WIDTHS,
 } from '@aglyn/tenant-data-admin'
 import {
@@ -80,7 +81,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
-    if (!decoded.email_verified) return emailUnverifiedResponse()
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const { scope, error } = await resolveMediaScope(
       body,
       query,
