@@ -16,7 +16,10 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+} from '@aglyn/tenant-data-admin'
 import {
   mediaObjectPath,
   resolveMediaScope,
@@ -53,6 +56,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const firestore = firebaseAdmin.app().firestore()
     const { scope, error } = await resolveMediaScope(
       body,

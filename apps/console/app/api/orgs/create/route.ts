@@ -19,6 +19,7 @@ import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { generateOrgSlug, isValidOrgSlug } from '@aglyn/aglyn/server'
 import {
   createOrganization,
+  emailUnverifiedResponse,
   firebaseAdmin,
   OrgSlugTakenError,
 } from '@aglyn/tenant-data-admin'
@@ -57,6 +58,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const orgId = await createOrganization({
       name,
       slug,

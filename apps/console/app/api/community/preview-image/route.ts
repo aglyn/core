@@ -16,7 +16,10 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+} from '@aglyn/tenant-data-admin'
 import { randomUUID } from 'crypto'
 
 // Base64 JSON payloads: 2MB of image encodes to ~2.7MB of body.
@@ -46,6 +49,7 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified) return emailUnverifiedResponse()
     const firestore = firebaseAdmin.app().firestore()
     const listingRef = firestore.collection('communityListings').doc(listingId)
     const listingSnapshot = await listingRef.get()
