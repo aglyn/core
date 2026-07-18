@@ -263,12 +263,25 @@ service cloud.firestore {
             (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
         }
       }
+      // Secret-/PII-bearing subcollections are carved out of the viewer-
+      // readable catch-all below (AGL-502): `webhooks` docs hold an HMAC
+      // signing secret + target URL, and `orders` hold customer PII/payment
+      // data — reads are admin/editor only, never viewer. Writes fall through
+      // to the catch-all (the console manages webhooks client-side; orders
+      // are server-written), so only the READ is tightened here.
+      match /webhooks/{webhookId} {
+        allow read: if isStaff() || canWriteHostContent(hostId);
+      }
+      match /orders/{orderId} {
+        allow read: if isStaff() || canWriteHostContent(hostId);
+      }
       // The extra {subcollection} segment matters: a bare {document=**}
       // matches ZERO or more segments in rules v2, i.e. the host doc
       // itself too — which would let editors delete the host through
       // this write rule (caught by rules-tests, AGL-235).
       match /{subcollection}/{document=**} {
-        allow read: if isStaff() || isHostAdmin(hostId);
+        allow read: if isStaff() ||
+          (isHostAdmin(hostId) && !(subcollection in ['webhooks', 'orders']));
         // Quota-governed collections are created via /api/hosts/resources
         // ONLY (AGL-473) — the route enforces the per-plan quota (and the
         // feature entitlement, where paid) server-side. These flat
