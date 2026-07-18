@@ -312,14 +312,28 @@ service cloud.firestore {
     // and names are length-capped here since any owner writes client-side.
     match /profiles/{profileUid} {
       allow read: if true;
-      allow write: if (isStaff() ||
-          (isSignedIn() && request.auth.uid == profileUid)) &&
-        request.resource.data.handle is string &&
-        request.resource.data.handle.size() >= 3 &&
-        request.resource.data.handle.size() <= 30 &&
-        request.resource.data.handle.matches('[a-z0-9][a-z0-9-]*') &&
-        request.resource.data.displayName is string &&
-        request.resource.data.displayName.size() <= 80;
+      // handle/displayName are length-capped since the owner writes client
+      // side. `stripeAccountId` (payout destination) and `stripeChargesEnabled`
+      // (payments-enabled gate) are set ONLY server-side after Connect
+      // onboarding/KYC and are trusted by every checkout path — the client
+      // must never set or change them (block on create, freeze on update).
+      function profileFieldsValid() {
+        return request.resource.data.handle is string &&
+          request.resource.data.handle.size() >= 3 &&
+          request.resource.data.handle.size() <= 30 &&
+          request.resource.data.handle.matches('[a-z0-9][a-z0-9-]*') &&
+          request.resource.data.displayName is string &&
+          request.resource.data.displayName.size() <= 80;
+      }
+      function profileOwner() {
+        return isStaff() || (isSignedIn() && request.auth.uid == profileUid);
+      }
+      allow create: if profileOwner() && profileFieldsValid() &&
+        !request.resource.data.keys()
+          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
+      allow update: if profileOwner() && profileFieldsValid() &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
     }
 
     // Listings are public reads. Creates and version snapshots happen ONLY
