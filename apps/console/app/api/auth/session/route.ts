@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,9 +90,42 @@ async function handler(request: Request): Promise<Response> {
       if (!idToken) {
         return Response.json({ error: 'Unauthenticated' }, { status: 401 })
       }
-      const sessionCookie = await auth.createSessionCookie(idToken, {
-        expiresIn: SESSION_TTL_MS,
-      })
+      // Email-verification gate (AGL-479): never mint the cross-subdomain
+      // session cookie for an unverified email/password account. Blocking it
+      // here also covers workspaces — their silent sign-in reads this cookie,
+      // so no cookie means no cross-subdomain access until the email is
+      // verified. OAuth accounts arrive verified and pass through.
+      // Exception (AGL-480): staff impersonation sessions (impersonatedBy
+      // claim) are exempt, so an impersonated owner's unverified email
+      // doesn't strand the support session — including across workspaces.
+      try {
+        const decoded = await auth.verifyIdToken(idToken)
+        if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+          return emailUnverifiedResponse()
+        }
+      } catch {
+        return Response.json({ error: 'Unauthenticated' }, { status: 401 })
+      }
+      let sessionCookie: string
+      try {
+        sessionCookie = await auth.createSessionCookie(idToken, {
+          expiresIn: SESSION_TTL_MS,
+        })
+      } catch (error) {
+        // AGL-467: a mint failure here strands the delegated cross-subdomain
+        // hand-off (no cookie → workspace bounces back). Log it explicitly.
+        console.error(
+          '[auth/session] POST mint failed',
+          JSON.stringify({
+            code: (error as { code?: string })?.code,
+            message: (error as { message?: string })?.message,
+          }),
+        )
+        return Response.json(
+          { error: 'Mint failed', reason: 'mint-failed' },
+          { status: 401 },
+        )
+      }
       return jsonWithCookie(
         { ok: true },
         200,
@@ -116,10 +153,31 @@ async function handler(request: Request): Promise<Response> {
       }
       try {
         const decoded = await auth.verifySessionCookie(cookie, true)
-        const token = await auth.createCustomToken(decoded.uid)
+        // Carry the impersonation claim through the cross-subdomain exchange
+        // (AGL-480). The session cookie preserves it, but the re-minted custom
+        // token would drop it — losing the banner and re-tripping the
+        // email-verify gate on the next subdomain.
+        const developerClaims = isImpersonationSession(decoded)
+          ? {
+              impersonatedBy: decoded['impersonatedBy'],
+              impersonatedByEmail: decoded['impersonatedByEmail'] ?? null,
+            }
+          : undefined
+        const token = await auth.createCustomToken(decoded.uid, developerClaims)
         return Response.json({ token }, { status: 200 })
       } catch (error) {
         const code = (error as { code?: string })?.code ?? ''
+        // AGL-467: surface WHY the exchange failed. A `createCustomToken`
+        // failure here (vs. a verify failure) breaks cross-subdomain silent
+        // sign-in specifically, and was invisible because it was folded into
+        // a generic 401.
+        console.error(
+          '[auth/session] GET exchange failed',
+          JSON.stringify({
+            code,
+            message: (error as { message?: string })?.message,
+          }),
+        )
         const reason =
           code === 'auth/session-cookie-revoked'
             ? 'revoked'
@@ -149,6 +207,14 @@ async function handler(request: Request): Promise<Response> {
     // Unexpected failures (admin SDK init, malformed request) — report
     // unauthenticated without touching the cookie; the client treats
     // reasonless 401s as re-mintable.
+    console.error(
+      '[auth/session] handler error',
+      JSON.stringify({
+        method: request.method,
+        code: (error as { code?: string })?.code,
+        message: (error as { message?: string })?.message,
+      }),
+    )
     return Response.json(
       { error: 'Session invalid', reason: 'invalid' },
       { status: 401 },

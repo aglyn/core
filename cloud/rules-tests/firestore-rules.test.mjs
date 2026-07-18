@@ -103,6 +103,7 @@ beforeEach(async () => {
       memberRoles: { [OWNER]: 'admin', [EDITOR]: 'editor', [VIEWER]: 'viewer' },
     })
     await setDoc(doc(db, 'hosts', HOST, 'screens', 'screen-1'), { name: 'Home' })
+    await setDoc(doc(db, 'hosts', HOST, 'variables', 'var-1'), { name: 'v', value: '1' })
     // Suspension write-block (AGL-238): host owned by a suspended org.
     await setDoc(doc(db, 'orgs', SUSPENDED_ORG), {
       name: 'Frozen', slug: 'frozen', ownerUid: OWNER,
@@ -193,11 +194,48 @@ describe('hosts', () => {
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'hosts', HOST)))
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'hosts', HOST, 'screens', 'screen-1')))
     await assertFails(
-      setDoc(doc(authed(VIEWER), 'hosts', HOST, 'screens', 'screen-2'), { name: 'No' }),
+      updateDoc(doc(authed(VIEWER), 'hosts', HOST, 'screens', 'screen-1'), { name: 'No' }),
+    )
+    // Screen/layout DOC creates are API-only (AGL-473) — even editors
+    // cannot create directly; updates/deletes on existing docs still work.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-2'), { name: 'New' }),
+    )
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'layouts', 'layout-2'), { name: 'New' }),
     )
     await assertSucceeds(
-      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-2'), { name: 'Yes' }),
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-1'), { name: 'Yes' }),
     )
+    await assertSucceeds(
+      deleteDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-1')),
+    )
+    // Versions (and other screen subcollections) stay editor-writable —
+    // they aren't quota-governed.
+    await assertSucceeds(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'screens', 'screen-1', 'versions', 'v1'), { nodes: {} }),
+    )
+    // Quota-governed logic collections are API-create-only too (AGL-473):
+    // editors cannot create, but can update/delete existing docs.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'variables', 'var-new'), { name: 'v' }),
+    )
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'functions', 'fn-new'), { name: 'f' }),
+    )
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'workflows', 'wf-new'), { name: 'w' }),
+    )
+    await assertSucceeds(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'variables', 'var-1'), { value: '2' }),
+    )
+    // Commerce/bookings/redirects/reusable-components/registers collections
+    // are API-create-only too (registers gate the posRegisters cap).
+    for (const coll of ['services', 'redirects', 'locations', 'products', 'components', 'registers']) {
+      await assertFails(
+        setDoc(doc(authed(EDITOR), 'hosts', HOST, coll, 'new-doc'), { name: 'x' }),
+      )
+    }
     await assertSucceeds(
       updateDoc(doc(authed(EDITOR), 'hosts', HOST), { displayName: 'Renamed' }),
     )
@@ -254,8 +292,24 @@ describe('org-shared data (AGL-237)', () => {
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'orgs', ORG, 'datasets', 'ds1', 'records', 'r1')))
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'orgs', ORG, 'contacts', 'c1')))
     await assertFails(getDoc(doc(authed(OUTSIDER), 'orgs', ORG, 'datasets', 'ds1')))
-    await assertSucceeds(
+    // Dataset/record CREATES are API-only (AGL-473) — the console route
+    // enforces quotas server-side; even editors cannot create directly.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'orgs', ORG, 'datasets', 'ds2'), { name: 'New' }),
+    )
+    await assertFails(
       setDoc(doc(authed(EDITOR), 'orgs', ORG, 'datasets', 'ds1', 'records', 'r2'), { a: 2 }),
+    )
+    // Updates and deletes stay editor-writable — they don't consume quota.
+    await assertSucceeds(
+      setDoc(
+        doc(authed(EDITOR), 'orgs', ORG, 'datasets', 'ds1', 'records', 'r1'),
+        { a: 3 },
+        { merge: true },
+      ),
+    )
+    await assertSucceeds(
+      deleteDoc(doc(authed(EDITOR), 'orgs', ORG, 'datasets', 'ds1', 'records', 'r1')),
     )
     await assertSucceeds(
       setDoc(doc(authed(EDITOR), 'orgs', ORG, 'contacts', 'c2'), { email: 'n@y.z' }),
@@ -310,6 +364,148 @@ describe('staff RBAC on org billing keys (AGL-206/238)', () => {
     await assertSucceeds(getDoc(doc(supportStaffDb, 'orgs', ORG)))
     await assertFails(
       updateDoc(doc(supportStaffDb, 'orgs', ORG), { plan: 'business' }),
+    )
+  })
+})
+
+// Pre-release hardening: field-level guards added by the security audit
+// (AGL-493/494/501/502/503/508). Each proves the guard denies the abusive
+// write/read while leaving the legitimate one intact.
+describe('pre-release hardening guards', () => {
+  const LISTING = 'listing-1'
+  beforeEach(async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore()
+      // Publisher profile owned by OWNER (H3, M6 seed).
+      await setDoc(doc(db, 'profiles', OWNER), {
+        handle: 'owner-pub', displayName: 'Owner',
+      })
+      // Secret-/PII-bearing host subcollections (M5).
+      await setDoc(doc(db, 'hosts', HOST, 'webhooks', 'wh1'), {
+        url: 'https://hook.example', secret: 'sh',
+      })
+      await setDoc(doc(db, 'hosts', HOST, 'orders', 'o1'), {
+        total: 100, email: 'buyer@x.z',
+      })
+      // Host plugin install pin (M11).
+      await setDoc(doc(db, 'hosts', HOST, 'installs', 'p1'), {
+        version: '1.0.0', sha256: 'abc',
+      })
+      // Community listing owned by OWNER with server-managed fields (M6).
+      await setDoc(doc(db, 'communityListings', LISTING), {
+        profileId: OWNER, name: 'Plugin', installCount: 5, priceUsd: 10,
+      })
+    })
+  })
+
+  it('editors/admins cannot rewrite host identity keys; staff can (AGL-493)', async () => {
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST), { memberRoles: { [EDITOR]: 'admin' } }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'hosts', HOST), {
+        memberRoles: { [OWNER]: 'admin', [OUTSIDER]: 'admin' },
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST), { orgId: 'org-fake' }),
+    )
+    // Content updates still work; staff may still adjust the projection.
+    await assertSucceeds(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST), { displayName: 'Renamed' }),
+    )
+    await assertSucceeds(
+      updateDoc(doc(authed(STAFF, { staff: true }), 'hosts', HOST), {
+        memberRoles: { [OWNER]: 'admin' },
+      }),
+    )
+  })
+
+  it('profile owner cannot set Stripe payout fields; metadata is fine (AGL-494)', async () => {
+    await assertSucceeds(
+      setDoc(doc(authed(OWNER), 'profiles', OWNER), {
+        handle: 'owner-pub', displayName: 'Owner', bio: 'hi',
+      }),
+    )
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'profiles', OWNER), {
+        handle: 'owner-pub', displayName: 'Owner', stripeChargesEnabled: true,
+      }),
+    )
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'profiles', OWNER), {
+        handle: 'owner-pub', displayName: 'Owner', stripeAccountId: 'acct_x',
+      }),
+    )
+    // A brand-new profile likewise can't smuggle the payout fields in on create.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'profiles', EDITOR), {
+        handle: 'ed-pub', displayName: 'Ed', stripeAccountId: 'acct_y',
+      }),
+    )
+    await assertSucceeds(
+      setDoc(doc(authed(EDITOR), 'profiles', EDITOR), {
+        handle: 'ed-pub', displayName: 'Ed',
+      }),
+    )
+  })
+
+  it('org admins cannot self-enable plugins; super staff can (AGL-501)', async () => {
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'orgs', ORG), { enabledPlugins: ['paid'] }),
+    )
+    await assertFails(
+      updateDoc(
+        doc(authed(STAFF, { staff: true, staffRole: 'billing' }), 'orgs', ORG),
+        { enabledPlugins: ['paid'] },
+      ),
+    )
+    await assertSucceeds(
+      updateDoc(
+        doc(authed(STAFF, { staff: true, staffRole: 'super' }), 'orgs', ORG),
+        { enabledPlugins: ['paid'] },
+      ),
+    )
+  })
+
+  it('webhook secrets and order PII are hidden from viewers (AGL-502)', async () => {
+    await assertSucceeds(getDoc(doc(authed(EDITOR), 'hosts', HOST, 'webhooks', 'wh1')))
+    await assertSucceeds(getDoc(doc(authed(OWNER), 'hosts', HOST, 'orders', 'o1')))
+    await assertFails(getDoc(doc(authed(VIEWER), 'hosts', HOST, 'webhooks', 'wh1')))
+    await assertFails(getDoc(doc(authed(VIEWER), 'hosts', HOST, 'orders', 'o1')))
+    // A non-secret subcollection stays viewer-readable (catch-all unchanged).
+    await assertSucceeds(getDoc(doc(authed(VIEWER), 'hosts', HOST, 'variables', 'var-1')))
+  })
+
+  it('listing owner cannot tamper server-managed fields (AGL-503)', async () => {
+    await assertSucceeds(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { deletedAt: new Date() }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { installCount: 9999 }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { priceUsd: 0 }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { profileId: OUTSIDER }),
+    )
+    // Non-owners still can't touch someone else's listing.
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'communityListings', LISTING), { deletedAt: new Date() }),
+    )
+  })
+
+  it('host install pins are create/update API-only but client-deletable (AGL-508)', async () => {
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'installs', 'p2'), { version: '2.0.0' }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'installs', 'p1'), { version: '9.0.0' }),
+    )
+    // Uninstall (delete) stays a client action for editors/admins.
+    await assertSucceeds(
+      deleteDoc(doc(authed(EDITOR), 'hosts', HOST, 'installs', 'p1')),
     )
   })
 })

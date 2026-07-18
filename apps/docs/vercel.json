@@ -5,5 +5,13 @@
   "outputDirectory": "build",
   "installCommand": "npm install",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "git": {
+    "deploymentEnabled": {
+      "production": true,
+      "**": false,
+      "*": false,
+      "*/**": false
+    }
+  }
 }

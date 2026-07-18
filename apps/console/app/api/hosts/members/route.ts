@@ -18,9 +18,11 @@
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { checkSeatQuota, createResourceUid } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   firebaseAdmin,
   getOrgForHost,
   grantHostAccess,
+  isImpersonationSession,
   revokeHostAccess,
 } from '@aglyn/tenant-data-admin'
 import { resolveOrgPermissions } from '@aglyn/tenant-runtime/org-permissions'
@@ -56,6 +58,9 @@ async function handler(request: Request): Promise<Response> {
   try {
     const app = firebaseAdmin.app()
     const decoded = await app.auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = app.firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()
@@ -97,10 +102,10 @@ async function handler(request: Request): Promise<Response> {
         return Response.json({ error: 'Already a member' }, { status: 409 })
       }
 
-      // Seat quota (AGL-112): enforced once the org has a plan; addons
-      // raise the limit up to the hard max, beyond which upgrading is the
-      // only path.
-      if (org['plan']) {
+      // Seat quota (AGL-112): enforced for every org — a plan-less org
+      // resolves as `free`, not unmetered. Addons raise the limit up to the
+      // hard max, beyond which upgrading is the only path.
+      {
         const memberCount = (await membersRef.count().get()).data().count
         const quota = checkSeatQuota(org as any, 'members', memberCount)
         if (!quota.allowed) {

@@ -16,7 +16,11 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 import { FieldValue } from 'firebase-admin/firestore'
 
 const ACTIONS = [
@@ -57,12 +61,17 @@ async function handler(request: Request): Promise<Response> {
   try {
     const auth = firebaseAdmin.app().auth()
     const decoded = await auth.verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     if (!decoded['staff']) {
       return Response.json({ error: 'Staff only' }, { status: 403 })
     }
-    // RBAC (AGL-206): user management is super-only; a missing role means
-    // super so pre-RBAC staff keep access.
-    const actorRole = String(decoded['staffRole'] ?? 'super')
+    // RBAC (AGL-206): user management is super-only. A missing role fails
+    // CLOSED to the least-privileged `support` (AGL-495) — never default to
+    // super, or a role-less staff token silently gets super. Existing staff
+    // must be re-granted with an explicit staffRole (set-staff-claim --role).
+    const actorRole = String(decoded['staffRole'] ?? 'support')
     if (actorRole !== 'super') {
       return Response.json({ error: 'Requires the super staff role' }, { status: 403 })
     }

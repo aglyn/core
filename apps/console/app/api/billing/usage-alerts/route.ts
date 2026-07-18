@@ -16,6 +16,7 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
+import { isCronAuthorized } from '../../../../utils/cron-auth'
 import { resolveOrgEntitlements, UNLIMITED } from '@aglyn/aglyn/server'
 import { firebaseAdmin, notifyOrgAdmins } from '@aglyn/tenant-data-admin'
 
@@ -31,14 +32,14 @@ import { firebaseAdmin, notifyOrgAdmins } from '@aglyn/tenant-data-admin'
 async function handler(request: Request): Promise<Response> {
   const { method, headers: rawHeaders } = await pluginRequestFromWeb(request)
   const headers = rawHeaders as Partial<Record<string, string>>
-  if (method !== 'POST') {
+  if (method !== 'POST' && method !== 'GET') {
     return Response.json({ error: 'Method not allowed' }, { status: 405 })
   }
   const cronSecret = process.env.CRON_SECRET
   if (!cronSecret) {
     return Response.json({ error: 'Usage alerts are not configured (CRON_SECRET).' }, { status: 501 })
   }
-  if (headers['x-cron-secret'] !== cronSecret) {
+  if (!isCronAuthorized(headers)) {
     return Response.json({ error: 'Unauthenticated' }, { status: 401 })
   }
 
@@ -62,13 +63,29 @@ async function handler(request: Request): Promise<Response> {
         .limit(100)
         .get()
       let emailSends = 0
+      // Run caps (AGL-477): the runtime silently stops workflow/action
+      // automation at the monthly cap; surface it here so the owner learns
+      // why automations went quiet, once per threshold per month.
+      let workflowRuns = 0
+      let actionRuns = 0
+      // Media storage (AGL-484): total bytes stored across the org's hosts,
+      // to warn when a downgrade leaves an org over its media allowance.
+      let mediaBytes = 0
       for (const host of hosts.docs) {
-        const counter = await host.ref
-          .collection('counters')
-          .doc('emailSends')
-          .get()
-        emailSends += Number(counter.get(month) ?? 0)
+        const [emailCounter, workflowCounter, actionCounter, mediaCounter] =
+          await Promise.all([
+            host.ref.collection('counters').doc('emailSends').get(),
+            host.ref.collection('counters').doc('workflowRuns').get(),
+            host.ref.collection('counters').doc('actionRuns').get(),
+            host.ref.collection('counters').doc('media').get(),
+          ])
+        emailSends += Number(emailCounter.get(month) ?? 0)
+        workflowRuns += Number(workflowCounter.get(month) ?? 0)
+        actionRuns += Number(actionCounter.get(month) ?? 0)
+        mediaBytes += Number(mediaCounter.get('bytes') ?? 0)
       }
+      const hostCount = hosts.size
+      const mediaMb = mediaBytes / (1024 * 1024)
 
       // Org datasets: count + approximate storage from the rollup the
       // monthly report writes (fresh enough for an alert).
@@ -87,6 +104,21 @@ async function handler(request: Request): Promise<Response> {
 
       const checks: Array<{ key: string; label: string; used: number; limit: number }> = [
         {
+          // AGL-484: a downgrade can leave an org over its site/storage
+          // caps; these persist and keep serving, so surface them here.
+          key: 'hosts',
+          label: 'sites',
+          used: hostCount,
+          limit: entitlements.hostLimit,
+        },
+        {
+          key: 'mediaStorage',
+          label: 'media storage',
+          used: mediaMb,
+          // Org-wide media allowance: per-host cap × the site allowance.
+          limit: entitlements.hostLimit * entitlements.storagePerHostMb,
+        },
+        {
           key: 'emailSends',
           label: 'monthly email sends',
           used: emailSends,
@@ -103,6 +135,18 @@ async function handler(request: Request): Promise<Response> {
           label: 'data storage',
           used: dataStorageMb,
           limit: entitlements.dataStorageMbPerOrg,
+        },
+        {
+          key: 'workflowRuns',
+          label: 'monthly workflow runs',
+          used: workflowRuns,
+          limit: entitlements.workflowRunsPerMonth,
+        },
+        {
+          key: 'actionRuns',
+          label: 'monthly automation runs',
+          used: actionRuns,
+          limit: entitlements.actionRunsPerMonth,
         },
       ]
 
@@ -151,4 +195,4 @@ async function handler(request: Request): Promise<Response> {
 }
 
 export const dynamic = 'force-dynamic'
-export { handler as POST }
+export { handler as GET, handler as POST }

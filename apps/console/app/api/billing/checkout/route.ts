@@ -16,7 +16,13 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin, resolveOrgMembership } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+  memberHasOrgPermission,
+  resolveOrgMembership,
+} from '@aglyn/tenant-data-admin'
 
 const PRICE_ENV: Record<string, string | undefined> = {
   starter: process.env.STRIPE_PRICE_STARTER,
@@ -67,6 +73,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     // Org metadata (AGL-445): orgId is the only billing key — the webhook
     // mirrors the subscription onto this org doc. Explicit orgId from
     // the workspace-scoped console wins; otherwise the user's first org.
@@ -78,6 +87,14 @@ async function handler(request: Request): Promise<Response> {
       return Response.json({ error: 'No workspace to bill' }, { status: 403 })
     }
     const orgId = orgMembership.orgId
+    // Opening a checkout session commits the org to a plan/charge, so it is
+    // billing.manage-gated (AGL-511) like subscription management — not just
+    // any-member as before.
+    if (
+      !(await memberHasOrgPermission(orgId, orgMembership.member, 'billing.manage'))
+    ) {
+      return Response.json({ error: 'billing.manage required' }, { status: 403 })
+    }
     const origin = headers.origin ?? `https://${headers.host}`
 
     const params = new URLSearchParams({

@@ -16,9 +16,15 @@
  */
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { type HostAccessRole, isOrgRole } from '@aglyn/aglyn/server'
 import {
+  checkSeatQuota,
+  type HostAccessRole,
+  isOrgRole,
+} from '@aglyn/aglyn/server'
+import {
+  emailUnverifiedResponse,
   firebaseAdmin,
+  isImpersonationSession,
   listOrgMembers,
   logOrgActivity,
   memberHasOrgPermission,
@@ -70,6 +76,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const isStaff = decoded['staff'] === true
     const actor = await resolveOrgMembership(decoded.uid, orgId)
     if (!actor && !isStaff) {
@@ -131,6 +140,33 @@ async function handler(request: Request): Promise<Response> {
           .doc(targetUid)
           .get()
       ).exists
+      // Manager-seat quota (AGL-471): adding a NEW org member consumes a
+      // seat; role changes don't. A plan-less org resolves as `free`
+      // (1 seat — the owner), not unmetered.
+      if (!existedAlready) {
+        const memberCount = (
+          await firestore
+            .collection('orgs')
+            .doc(orgId)
+            .collection('members')
+            .count()
+            .get()
+        ).data().count
+        const quota = checkSeatQuota(
+          orgSnapshot.data() as any,
+          'managers',
+          memberCount,
+        )
+        if (!quota.allowed) {
+          return Response.json({
+            error: quota.upgradeRequired
+              ? `Team seat limit reached (${quota.limit}) — upgrade your ` +
+                'plan to add more members'
+              : `Team seats full (${quota.limit}) — add seats for ` +
+                `$${quota.addonPriceUsd}/mo each from Billing`,
+          }, { status: 403 })
+        }
+      }
       await upsertOrgMember({
         orgId,
         uid: targetUid,

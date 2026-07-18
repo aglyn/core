@@ -155,7 +155,7 @@ export const loadPageData = cache(
     const redirectRule = await Aglyn.resolveSiteRedirect({
       hostId,
       host: hostRes.host,
-      tenant: orgRes.org,
+      org: orgRes.org,
       path,
       slugSegments: [...(slug ?? [])],
     })
@@ -194,7 +194,7 @@ export const loadPageData = cache(
       const resolved = await Aglyn.resolveSitePage({
         hostId,
         host: hostRes.host,
-        tenant: orgRes.org,
+        org: orgRes.org,
         path,
         slugSegments: [...(slug ?? [])],
       })
@@ -418,13 +418,27 @@ export const loadPageData = cache(
     const showBranding = !Aglyn.resolveOrgEntitlements(orgRes.org)
       .features.removeBranding
 
+    // Multilingual (AGL-471): locale variants are a Business+ entitlement.
+    // Strip them at serve time — the console gate alone doesn't stop
+    // variants written directly to Firestore from serving (hreflang
+    // alternates and the client locale switcher both read this payload).
+    if (
+      (screenRes.screen as any)?.localeVariants &&
+      !Aglyn.checkEntitlement(orgRes.org, 'multilingual')
+    ) {
+      screenRes.screen = {
+        ...(screenRes.screen as any),
+        localeVariants: null,
+      }
+    }
+
     // Plugin page enrichers (AGL-418): marketing contributes overlays
     // (announcement bar/popup), site-event automations, and experiments —
     // all entitlement-gated inside the plugin, shapes unchanged.
     const enriched = await Aglyn.runSitePageEnrichers({
       hostId,
       host: hostRes.host,
-      tenant: orgRes.org,
+      org: orgRes.org,
       path,
       slugSegments: [...(slug ?? [])],
       screenId,

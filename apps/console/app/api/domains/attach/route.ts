@@ -15,8 +15,13 @@
  * limitations under the License.
  */
 
-import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { checkEntitlement, pluginRequestFromWeb } from '@aglyn/aglyn/server'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  getOrgForHost,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 
 /**
  * Attaches a verified custom domain to the tenant Vercel project so SSL
@@ -50,6 +55,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const hostSnapshot = await firebaseAdmin
       .app()
       .firestore()
@@ -62,6 +70,15 @@ async function handler(request: Request): Promise<Response> {
     const memberRole = (hostSnapshot.get('memberRoles') ?? {})[decoded.uid]
     if (memberRole !== 'admin') {
       return Response.json({ error: 'Not a site admin' }, { status: 403 })
+    }
+
+    // Plan gate (AGL-469): custom domains are a Starter+ entitlement; a
+    // plan-less org resolves as `free` and is denied.
+    const org = (await getOrgForHost(hostId))?.org ?? {}
+    if (!checkEntitlement(org, 'customDomain')) {
+      return Response.json({
+        error: 'Custom domains require a Starter plan',
+      }, { status: 403 })
     }
 
     // Cname uniqueness (AGL-166): middleware resolution maps hostname ->

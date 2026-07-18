@@ -25,8 +25,10 @@ import {
   suggestSubdomains,
 } from '@aglyn/aglyn/server'
 import {
+  emailUnverifiedResponse,
   ensureOrgForUser,
   firebaseAdmin,
+  isImpersonationSession,
   registerOrgHost,
   resolveOrgMembership,
 } from '@aglyn/tenant-data-admin'
@@ -71,6 +73,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     // Org resolution (AGL-233): hosts belong to an organization. The org
     // comes from the request (workspace context) or the user's first org,
     // auto-creating a personal org for brand-new accounts. Creating hosts
@@ -114,15 +119,17 @@ async function handler(request: Request): Promise<Response> {
       .collection('orgs')
       .doc(orgMembership.orgId)
       .get()
-    const tenant = orgSnapshot.data()
-    if (tenant?.['plan']) {
+    const org = orgSnapshot.data()
+    {
+      // Enforced for every org — a plan-less org resolves as `free`
+      // (hostLimit 1), not unmetered.
       const owned = await firestore
         .collection('hosts')
         .where('orgId', '==', orgMembership.orgId)
         .count()
         .get()
       const quota = checkQuota(
-        tenant as any,
+        org as any,
         'hostLimit',
         owned.data().count,
       )

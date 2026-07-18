@@ -17,7 +17,11 @@
 
 import { pluginRequestFromWeb } from '@aglyn/aglyn/server'
 import { checkEntitlement, checkQuota, createResourceUid } from '@aglyn/aglyn/server'
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 import {
   folderStoragePath,
   resolveMediaScope,
@@ -52,6 +56,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const { scope, error } = await resolveMediaScope(
       body,
       query,
@@ -66,7 +73,7 @@ async function handler(request: Request): Promise<Response> {
       .bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET)
 
     // Quota/entitlements ride the owning org's doc (AGL-238).
-    const tenant = scope.billing
+    const org = scope.billing
     const counterRef = scope.scopeRef.collection('counters').doc('media')
 
     if (method === 'POST') {
@@ -88,14 +95,22 @@ async function handler(request: Request): Promise<Response> {
           }MB`,
         }, { status: 413 })
       }
-      if (tenant['plan'] && !checkEntitlement(tenant as any, 'videoMedia')) {
+      if (!checkEntitlement(org as any, 'videoMedia')) {
         return Response.json({ error: 'Video uploads require a Pro plan' }, { status: 403 })
       }
-      if (tenant['plan']) {
+      {
+        // Storage quota applies to every org; a plan-less org resolves as
+        // `free` (250 MB cap), not unmetered.
         const counterSnapshot = await counterRef.get()
         const usedBytes = Number(counterSnapshot.get('bytes') ?? 0)
         const usedMb = (usedBytes + sizeBytes) / (1024 * 1024)
-        const quota = checkQuota(tenant as any, 'storagePerHostMb', usedMb - 1)
+        // usedMb includes the incoming file; ceil-1 allows exactly up to
+        // the integer MB cap and no further (AGL-471 off-by-one).
+        const quota = checkQuota(
+          org as any,
+          'storagePerHostMb',
+          Math.ceil(usedMb) - 1,
+        )
         if (!quota.allowed) {
           return Response.json({ error: `Storage limit reached (${quota.limit} MB)` }, { status: 403 })
         }
@@ -146,11 +161,19 @@ async function handler(request: Request): Promise<Response> {
       await file.delete().catch(() => undefined)
       return Response.json({ error: 'Uploaded object rejected' }, { status: 415 })
     }
-    if (tenant['plan']) {
+    {
+      // Storage quota applies to every org; a plan-less org resolves as
+      // `free` (250 MB cap), not unmetered.
       const counterSnapshot = await counterRef.get()
       const usedBytes = Number(counterSnapshot.get('bytes') ?? 0)
       const usedMb = (usedBytes + actualBytes) / (1024 * 1024)
-      const quota = checkQuota(tenant as any, 'storagePerHostMb', usedMb - 1)
+      // usedMb includes the finalized object; ceil-1 allows exactly up to
+      // the integer MB cap and no further (AGL-471 off-by-one).
+      const quota = checkQuota(
+        org as any,
+        'storagePerHostMb',
+        Math.ceil(usedMb) - 1,
+      )
       if (!quota.allowed) {
         await file.delete().catch(() => undefined)
         return Response.json({ error: `Storage limit reached (${quota.limit} MB)` }, { status: 403 })

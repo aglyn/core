@@ -37,10 +37,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { collection, limit, query } from 'firebase/firestore'
-import { useCallback, useMemo, useState } from 'react'
+import { collection, doc, limit, query } from 'firebase/firestore'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import { useFirestoreCollection } from '@aglyn/tenant-feature-instance'
+import { useFirestoreDoc, useHostOrgId } from '@aglyn/tenant-feature-instance'
 
 interface RegisterLine {
   productId: string
@@ -75,6 +76,24 @@ export function PosConsolePage({ hostId }: ConsolePluginPageProps) {
     [firestore, hostId],
     { idField: '$id' },
   )
+  const { data: registerDocs } = useFirestoreCollection<any>(
+    () => query(collection(firestore, 'hosts', hostId, 'registers'), limit(25)),
+    [firestore, hostId],
+    { idField: '$id' },
+  )
+  const orgId = useHostOrgId(hostId)
+  const { data: org } = useFirestoreDoc<any>(
+    () => doc(firestore, 'orgs', orgId ?? '-pending-'),
+    [firestore, orgId],
+  )
+  const registers = [...(registerDocs ?? [])].sort((a: any, b: any) =>
+    String(a.name ?? '').localeCompare(String(b.name ?? '')),
+  )
+  // Only registers within the plan cap can transact (pos-order.ts enforces
+  // this at sale time by creation rank, AGL-482) — offer only those.
+  const registerCap = Aglyn.checkQuota(org, 'posRegisters', registers.length).limit
+  const withinCap = CommerceModel.registersWithinCap(registers, registerCap)
+  const usableRegisters = registers.filter((r: any) => withinCap.has(r.$id))
   const { data: reservationDocs } = useFirestoreCollection<any>(
     () =>
       query(
@@ -93,6 +112,17 @@ export function PosConsolePage({ hostId }: ConsolePluginPageProps) {
   const [discountPct, setDiscountPct] = useState(0)
   const [customerEmail, setCustomerEmail] = useState('')
   const [locationId, setLocationId] = useState('')
+  // Register (AGL-472): a sale must run through a named register so the
+  // `posRegisters` cap is meaningful and takings are attributable.
+  const [registerId, setRegisterId] = useState('')
+  // Default to the first register once they load; if that register pins a
+  // location, adopt it (the cashier can still override below).
+  useEffect(() => {
+    if (registerId || usableRegisters.length === 0) return
+    const first = usableRegisters[0]
+    setRegisterId(first.$id)
+    if (first.locationId) setLocationId(first.locationId)
+  }, [usableRegisters, registerId])
   const [paying, setPaying] = useState<'cash' | 'link' | 'folio' | null>(null)
   const [cashReceived, setCashReceived] = useState('')
   const [folioReservation, setFolioReservation] = useState('')
@@ -185,6 +215,12 @@ export function PosConsolePage({ hostId }: ConsolePluginPageProps) {
 
   const settle = useCallback(async () => {
     if (busy || lines.length === 0 || !paying) return
+    if (!registerId) {
+      return void enqueueSnackbar(
+        'Select a register before taking payment',
+        { variant: 'warning', persist: false },
+      )
+    }
     setBusy(true)
     try {
       const idToken = await (user as any)?.getIdToken?.()
@@ -199,6 +235,7 @@ export function PosConsolePage({ hostId }: ConsolePluginPageProps) {
           lines,
           discountPct,
           payment: paying,
+          registerId,
           customerEmail: customerEmail || undefined,
           locationId: locationId || undefined,
           cashReceivedCents: Math.round(Number(cashReceived) * 100) || 0,
@@ -239,6 +276,7 @@ export function PosConsolePage({ hostId }: ConsolePluginPageProps) {
     busy,
     lines,
     paying,
+    registerId,
     user,
     hostId,
     discountPct,
@@ -347,6 +385,33 @@ export function PosConsolePage({ hostId }: ConsolePluginPageProps) {
           }}
         >
           <Typography variant="h6">{'Register'}</Typography>
+          {usableRegisters.length === 0 ? (
+            <Typography variant="body2" color="warning.main">
+              {registers.length > 0
+                ? 'Your registers exceed your plan — remove extras or ' +
+                  'upgrade in Billing to take payments.'
+                : 'No POS register yet. Add one under Commerce → Settings → ' +
+                  'POS registers before taking payments.'}
+            </Typography>
+          ) : usableRegisters.length > 1 ? (
+            <TextField
+              label="Register"
+              value={registerId}
+              onChange={(event) => setRegisterId(event.target.value)}
+              size="small"
+              select
+            >
+              {usableRegisters.map((register: any) => (
+                <MenuItem key={register.$id} value={register.$id}>
+                  {register.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              {usableRegisters[0]?.name}
+            </Typography>
+          )}
           {(locationDocs?.length ?? 0) > 1 ? (
             <TextField
               label="Location"

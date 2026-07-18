@@ -22,7 +22,12 @@ import {
   rewriteBindingTokensDeep,
   validateDocument,
 } from '@aglyn/aglyn/server'
-import { firebaseAdmin, getOrgForHost } from '@aglyn/tenant-data-admin'
+import {
+  emailUnverifiedResponse,
+  firebaseAdmin,
+  getOrgForHost,
+  isImpersonationSession,
+} from '@aglyn/tenant-data-admin'
 import {
   EXPORT_COLLECTION_LIMITS,
   EXPORTABLE_HOST_FIELDS,
@@ -87,6 +92,9 @@ async function handler(request: Request): Promise<Response> {
 
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
+    if (!decoded.email_verified && !isImpersonationSession(decoded)) {
+      return emailUnverifiedResponse()
+    }
     const firestore = firebaseAdmin.app().firestore()
     const hostRef = firestore.collection('hosts').doc(hostId)
     const hostSnapshot = await hostRef.get()
@@ -99,8 +107,8 @@ async function handler(request: Request): Promise<Response> {
     }
     {
       // Plan gate rides the owning org's doc (AGL-238).
-      const tenant = (await getOrgForHost(hostId))?.org
-      if (tenant?.['plan'] && !checkEntitlement(tenant as any, 'siteExport')) {
+      const org = (await getOrgForHost(hostId))?.org
+      if (!checkEntitlement(org as any, 'siteExport')) {
         return Response.json({ error: 'Site restore requires a Pro plan' }, { status: 403 })
       }
     }
