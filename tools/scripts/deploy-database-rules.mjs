@@ -66,14 +66,26 @@ const token = (await app.options.credential.getAccessToken()).access_token
 
 // Overwrite the live ruleset for the instance. A successful PUT echoes the
 // stored rules; a failure returns an `error` field with a non-2xx status.
-const response = await fetch(`${databaseUrl}/.settings/rules.json`, {
-  method: 'PUT',
-  headers: {
-    Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  },
-  body: content,
-})
+// The RTDB REST endpoint accepts the OAuth token either as an Authorization
+// header or the `?access_token=` query param depending on the instance/region
+// — try the header first, fall back to the query param on an auth rejection.
+async function putRules(viaQueryParam) {
+  const url = viaQueryParam
+    ? `${databaseUrl}/.settings/rules.json?access_token=${encodeURIComponent(token)}`
+    : `${databaseUrl}/.settings/rules.json`
+  return fetch(url, {
+    method: 'PUT',
+    headers: viaQueryParam
+      ? { 'Content-Type': 'application/json' }
+      : { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: content,
+  })
+}
+
+let response = await putRules(false)
+if (response.status === 401 || response.status === 403) {
+  response = await putRules(true)
+}
 if (!response.ok) {
   const detail = await response.text()
   console.error(`Rules update failed (HTTP ${response.status}):`, detail)
