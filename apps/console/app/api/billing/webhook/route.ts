@@ -32,6 +32,16 @@ function verifyStripeSignature(
   const timestamp = parts['t']
   const signature = parts['v1']
   if (!timestamp || !signature) return false
+  // Replay window (AGL-499): reject deliveries whose signed timestamp is more
+  // than 5 minutes from now — matching Stripe's constructEvent default — so a
+  // captured, once-valid payload cannot be replayed indefinitely.
+  const timestampSeconds = Number(timestamp)
+  if (
+    !Number.isFinite(timestampSeconds) ||
+    Math.abs(Date.now() / 1000 - timestampSeconds) > 300
+  ) {
+    return false
+  }
   const expected = createHmac('sha256', secret)
     .update(`${timestamp}.${payload.toString('utf8')}`)
     .digest('hex')
