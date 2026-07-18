@@ -60,6 +60,10 @@ describe('ComponentManager.schemasBySortedCategories (AGL-538)', () => {
       makePreset('p-surface', ComponentCategory.SURFACE),
       makePreset('p-nav', ComponentCategory.NAVIGATION),
       makePreset('p-text', ComponentCategory.TEXT),
+      // Logical groups added by the regroup pass (AGL-541).
+      makePreset('p-forms', ComponentCategory.FORMS),
+      makePreset('p-media', ComponentCategory.MEDIA),
+      makePreset('p-commerce', ComponentCategory.COMMERCE),
     ])
   })
 

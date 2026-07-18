@@ -23,6 +23,12 @@ export enum ComponentCategory {
    */
   BLOCKS = 'Sections & Blocks',
   INPUT = 'Input',
+  /** Data-capture elements: forms, fields, search (AGL-541). */
+  FORMS = 'Forms',
+  /** Visual content: images, video, icons (AGL-541). */
+  MEDIA = 'Media',
+  /** Store widgets: products, cart, checkout companions (AGL-541). */
+  COMMERCE = 'Commerce',
   SURFACE = 'Surface',
   NAVIGATION = 'Navigation',
   LAYOUT = 'Layout',
@@ -43,7 +49,10 @@ export const COMPONENT_CATEGORY_ORDER: readonly string[] = [
   ComponentCategory.LAYOUT,
   ComponentCategory.NAVIGATION,
   ComponentCategory.TEXT,
+  ComponentCategory.FORMS,
   ComponentCategory.INPUT,
+  ComponentCategory.MEDIA,
   ComponentCategory.DATA_DISPLAY,
+  ComponentCategory.COMMERCE,
   ComponentCategory.SURFACE,
 ]

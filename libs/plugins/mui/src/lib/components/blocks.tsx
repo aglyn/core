@@ -148,7 +148,7 @@ export const videoEmbedSchema: Aglyn.ComponentSchema<VideoEmbedProps> = {
   $id: VIDEO_EMBED_ID,
   pluginId: BUNDLE_ID,
   displayName: 'Video',
-  category: Aglyn.ComponentCategory.DATA_DISPLAY,
+  category: Aglyn.ComponentCategory.MEDIA,
   icon: { path: mdiPlayCircle.path, sx: { color: '#d32f2f' } },
   flags: { selfClosing: Aglyn.FEATURE_FLAG.ENABLED },
   attributes: [
@@ -349,7 +349,7 @@ export const blockPresets: Aglyn.PresetSchema[] = [
     displayName: 'Video',
     pluginId: BUNDLE_ID,
     description: 'Embedded YouTube or Vimeo video',
-    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    category: Aglyn.ComponentCategory.MEDIA,
     icon: { path: mdiPlayCircle.path, sx: { color: '#d32f2f' } },
     data: {
       $id: null,
