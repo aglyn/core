@@ -31,7 +31,10 @@ plan-gated (noted where relevant).
 ## What you can do
 
 - **Drag-and-drop** components from the drawer onto the canvas, and reparent them by
-  dragging in the hierarchy or on the canvas.
+  dragging in the hierarchy or on the canvas. The drawer and the **New Element** picker
+  group components into curated categories, with the
+  [**Sections & Blocks** library](../site-templates/overview.md#section--block-library)
+  first — composed, ready-made sections ahead of the primitives.
 - **Multi-select** across the hierarchy and canvas, then move the whole selection at once.
 - **Edit text inline** — double-click a text-capable element to type directly; opt-in
   elements support basic rich text.

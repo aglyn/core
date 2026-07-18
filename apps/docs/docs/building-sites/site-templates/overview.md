@@ -27,6 +27,11 @@ scale with your tier.
 Drop in pre-built **sections and blocks** from the library instead of assembling every page
 from primitives — a fast way to build common layouts.
 
+The library is a first-class group in the Besigner: open **INSERT → New Element** (or the
+components drawer) and the **Sections & Blocks** category sits at the top of the list,
+ahead of the primitive element groups. Every entry inserts a ready-made subtree with
+sensible props — drop it in, then edit text and styles in place.
+
 ## Content collections & blog
 
 - Create **collections** managed in the console.

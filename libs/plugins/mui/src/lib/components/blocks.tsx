@@ -345,7 +345,7 @@ export const blockPresets: Aglyn.PresetSchema[] = [
     displayName: 'Image Gallery',
     pluginId: BUNDLE_ID,
     description: 'Three-across image row',
-    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    category: Aglyn.ComponentCategory.BLOCKS,
     icon: { path: mdiImageIcon.path, sx: { color: '#7b1fa2' } },
     data: {
       $id: null,
@@ -366,7 +366,7 @@ export const blockPresets: Aglyn.PresetSchema[] = [
     displayName: 'Testimonials',
     pluginId: BUNDLE_ID,
     description: 'Three customer quotes',
-    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    category: Aglyn.ComponentCategory.BLOCKS,
     icon: { path: mdiFormatQuoteClose.path, sx: { color: '#0288d1' } },
     data: {
       $id: null,
@@ -395,7 +395,7 @@ export const blockPresets: Aglyn.PresetSchema[] = [
     displayName: 'Pricing Table',
     pluginId: BUNDLE_ID,
     description: 'Three plan columns with features and CTAs',
-    category: Aglyn.ComponentCategory.SURFACE,
+    category: Aglyn.ComponentCategory.BLOCKS,
     icon: { path: mdiCurrencyUsd.path, sx: { color: '#2e7d32' } },
     data: {
       $id: null,
@@ -424,7 +424,7 @@ export const blockPresets: Aglyn.PresetSchema[] = [
     displayName: 'FAQ',
     pluginId: BUNDLE_ID,
     description: 'Question and answer list',
-    category: Aglyn.ComponentCategory.TEXT,
+    category: Aglyn.ComponentCategory.BLOCKS,
     icon: { path: mdiHelpCircle.path, sx: { color: '#f57c00' } },
     data: {
       $id: null,
@@ -454,7 +454,7 @@ export const blockPresets: Aglyn.PresetSchema[] = [
     displayName: 'Announcement Bar',
     pluginId: BUNDLE_ID,
     description: 'Accent strip with a message and link',
-    category: Aglyn.ComponentCategory.SURFACE,
+    category: Aglyn.ComponentCategory.BLOCKS,
     icon: { path: mdiBullhorn.path, sx: { color: '#c2185b' } },
     data: {
       $id: null,
