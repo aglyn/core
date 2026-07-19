@@ -18,7 +18,7 @@
 import * as Aglyn from '@aglyn/aglyn'
 import { mdiChevronDown, mdiFormDropdown, mdiViewGridOutline } from '@aglyn/shared-data-mdi'
 import { MdiIcon } from '@aglyn/shared-ui-jsx'
-import Box from '@mui/material/Box'
+import Box, { type BoxProps } from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Paper from '@mui/material/Paper'
@@ -60,6 +60,7 @@ export interface MegaMenuProps {
   trigger?: NavMenuTrigger
   /** Panel width preset: content-sized, wide (720px), or full-bleed. */
   panelWidth?: MegaMenuPanelWidth
+  children?: ReactNode
 }
 
 /**
@@ -100,15 +101,14 @@ export function megaMenuPanelSx(panelWidth: MegaMenuPanelWidth): SxProps {
  * inline instead, like form fields do, so menu contents stay selectable
  * and editable without fighting a popup.
  */
-const MenuShell = forwardRef<HTMLDivElement, {
+interface MenuShellProps extends BoxProps {
   label: string
   trigger: NavMenuTrigger
   editorHint: string
   panelSx: SxProps
-  sx?: SxProps
-  children?: ReactNode
-  [key: string]: unknown
-}>((props, ref) => {
+}
+
+const MenuShell = forwardRef<HTMLDivElement, MenuShellProps>((props, ref) => {
   const { label, trigger, editorHint, panelSx, sx, children, ...rest } = props
   // Node styles ride the sx prop the renderer merges; keep them by
   // composing with the shell's own layout sx (stack.ts pattern).
@@ -254,8 +254,7 @@ NavMenu.displayName = 'AglynNavMenu'
  */
 export const MegaMenu = forwardRef<HTMLDivElement, MegaMenuProps>(
   (props, ref) => {
-    const { label, trigger, panelWidth, children, ...rest } =
-      props as MegaMenuProps & { children?: ReactNode }
+    const { label, trigger, panelWidth, children, ...rest } = props
     return (
       <MenuShell
         ref={ref}
