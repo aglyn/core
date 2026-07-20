@@ -51,7 +51,7 @@ export const DOCS_HELP_TOPICS = {
   addSearch: {
     path: '/building-sites/site-search/add-search',
     title: 'Add search to your site',
-    excerpt: 'Give visitors a search box that finds pages and dataset records.',
+    excerpt: 'Drop the Search Box element onto a screen and publish — the built-in search page does the rest.',
   },
   aiAssist: {
     path: '/marketing-and-automation/ai-assist/overview',
@@ -421,7 +421,7 @@ export const DOCS_HELP_TOPICS = {
   siteSearch: {
     path: '/building-sites/site-search/overview',
     title: 'Site Search',
-    excerpt: 'Let visitors search your site\'s pages and dataset records.',
+    excerpt: 'Let visitors search your site\'s pages, blog entries, and dataset records with a built-in search page.',
   },
   staffConsole: {
     path: '/staff-console/overview',
@@ -545,7 +545,7 @@ export const DOCS_HELP_ANCHORS = {
   seo: ['#per-screen-seo', '#sitemap--robots', '#social-cards', '#structured-data', '#analytics-integration', '#related'],
   serverApis: ['#an-api-route', '#webhooks-with-signature-verification', '#platform-billing-events', '#scheduled-jobs', '#troubleshooting'],
   siteProtection: ['#per-screen-passwords', '#custom-error-screens', '#maintenance-mode', '#related'],
-  siteSearch: ['#how-it-works', '#related'],
+  siteSearch: ['#how-it-works', '#what-it-searches', '#configure-it', '#related'],
   staffConsole: ['#whats-there', '#related'],
   team: ['#team-roles', '#organizations', '#site-membership', '#seats', '#related'],
   termReference: ['#platform--accounts', '#organization-org', '#workspace', '#tenant', '#host', '#site', '#console', '#staff-console', '#member', '#custom-role', '#publisher', '#sites--content', '#screen', '#layout', '#slug', '#version', '#redirect', '#error-screens', '#maintenance-mode', '#locale', '#site-template', '#theme', '#custom-domain', '#subdomain', '#the-node-tree', '#node', '#tree', '#tree-root', '#trunk', '#stem', '#branch', '#leaf', '#component', '#component-bundle', '#preset', '#reusable-component', '#lineal-placement-rules', '#besigner-the-editor', '#besigner', '#canvas', '#hierarchy-panel', '#drawer', '#binding', '#plugins--marketplace', '#plugin', '#add-on', '#surface', '#console-extension', '#widget', '#injection-zone', '#plugin-manifest', '#enabled-plugins', '#feature-flag', '#release-flag', '#plugin-config', '#plugin-permission', '#plugin-job', '#listing', '#install', '#realm-bundle', '#sandbox', '#host-abi', '#review-queue', '#data--logic', '#dataset', '#record', '#field', '#relation', '#contact', '#segment', '#media-library', '#variable', '#function-fx', '#form', '#automation--marketing', '#event', '#workflow', '#action', '#automation', '#overlay', '#experiment', '#email-campaign', '#designed-email', '#merge-tag', '#commerce', '#product', '#order', '#pos', '#booking', '#billing--plans', '#plan', '#entitlement', '#quota', '#seat', '#metered-usage'],
