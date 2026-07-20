@@ -21,8 +21,9 @@
  * console session chokepoint). This file owns the pipeline (auth, entitlement,
  * rate limit, error envelope); resource handlers are wired in AGL-618.
  */
-import { apiJson, ApiErrors } from '@aglyn/tenant-data-admin'
+import { apiJson } from '@aglyn/tenant-data-admin'
 import { authenticateApiV1 } from '../../../../utils/api-v1'
+import { dispatchResource } from '../../../../utils/api-v1-resources'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,36 +38,30 @@ async function dispatch(
   const { context } = authenticated
 
   const { route } = await routeContext.params
-  const path = (route ?? []).join('/')
+  const segments = route ?? []
   const { headers } = context
 
-  if (request.method === 'GET') {
-    if (path === '') {
-      return apiJson(
-        {
-          object: 'api',
-          name: 'Aglyn REST API',
-          version: 'v1',
-          documentation: 'https://docs.aglyn.com/api',
-          resources: ['datasets', 'contacts', 'sites', 'forms'],
-        },
-        { headers },
-      )
-    }
-    if (path === 'me') {
-      return apiJson(
-        { object: 'api_key', org: context.orgId, scopes: context.scopes },
-        { headers },
-      )
-    }
-    return ApiErrors.notFound({
-      message: `Unknown endpoint: /v1/${path}`,
-      headers,
-    })
+  // Root + key introspection stay here; resources dispatch to their handlers.
+  if (segments.length === 0 && request.method === 'GET') {
+    return apiJson(
+      {
+        object: 'api',
+        name: 'Aglyn REST API',
+        version: 'v1',
+        documentation: 'https://docs.aglyn.com/api',
+        resources: ['datasets', 'contacts', 'sites', 'forms'],
+      },
+      { headers },
+    )
+  }
+  if (segments.length === 1 && segments[0] === 'me' && request.method === 'GET') {
+    return apiJson(
+      { object: 'api_key', org: context.orgId, scopes: context.scopes },
+      { headers },
+    )
   }
 
-  // Writes land with the resource handlers (AGL-618).
-  return ApiErrors.methodNotAllowed({ headers })
+  return dispatchResource(request, context, segments)
 }
 
 export function GET(request: Request, routeContext: RouteContext) {
