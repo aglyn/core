@@ -192,6 +192,12 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // REST API idempotency records (AGL-618): dedupe POSTs by Idempotency-Key.
+    // Written and read by the Admin SDK only.
+    match /apiIdempotency/{keyHash} {
+      allow read, write: if false;
+    }
+
     // Hosts and everything under them (content-hardening review,
     // 2026-07-07: tenant sites read through the Admin SDK, so no public
     // read). Access resolves through the org membership projection
