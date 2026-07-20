@@ -161,3 +161,60 @@ html[data-theme='dark'] .docusaurus-mermaid-container svg[aria-roledescription='
 html[data-theme='dark'] .docusaurus-mermaid-container svg[aria-roledescription='sequence'] .actor-man circle {
   stroke: var(--ifm-color-emphasis-500) !important;
 }
+
+/* ── Home landing: hero + card grids (AGL-610) ──────────────────────────
+   A Cursor-style welcome: a lead paragraph, a "Start here" row, and a grid
+   of area cards. Uses console tokens so it matches light/dark automatically. */
+.home-hero {
+  margin: 0 0 2rem;
+}
+.home-hero__lead {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-800);
+  max-width: 46rem;
+}
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+}
+.home-card {
+  display: block;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-surface-color);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+.home-card:hover {
+  text-decoration: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: var(--ifm-global-shadow-lw);
+  transform: translateY(-1px);
+}
+.home-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+}
+.home-card__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ifm-color-emphasis-700);
+}
+/* The "Start here" row is a touch more prominent than the area grid. */
+.home-grid--start .home-card {
+  background: linear-gradient(
+    180deg,
+    var(--ifm-background-surface-color),
+    var(--ifm-color-emphasis-100)
+  );
+}
