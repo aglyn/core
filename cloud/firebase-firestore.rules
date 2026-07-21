@@ -417,12 +417,15 @@ service cloud.firestore {
           request.resource.data.displayName.size() <= 80;
       }
       // The payout keys decide who receives money — Connect route only.
-      allow create: if publisherManager() && publisherFieldsValid() &&
-        !request.resource.data.keys()
-          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
+      // `handle` is equally server-owned: it must be claimed transactionally
+      // in `publisherHandles` (AGL-652), and a client read-then-write lets
+      // two orgs racing for one handle both "succeed", silently taking each
+      // other's marketplace URL. Creates go through the save route entirely;
+      // updates may edit the cosmetic fields but never the handle.
+      allow create: if false;
       allow update: if publisherManager() && publisherFieldsValid() &&
         !request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
+          .hasAny(['handle', 'stripeAccountId', 'stripeChargesEnabled']);
       allow delete: if isStaff();
     }
 

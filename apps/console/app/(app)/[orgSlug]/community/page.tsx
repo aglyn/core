@@ -160,16 +160,31 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
   const handleSave = useCallback(async () => {
     if (!currentOrg?.$id || !validHandle || !displayName.trim()) return
     try {
-      await setDoc(
-        doc(firestore, 'publisherProfiles', currentOrg?.$id ?? '-none-'),
-        {
-          handle,
-          displayName: displayName.trim().slice(0, 80),
-          ...(bio.trim() && { bio: bio.trim().slice(0, 500) }),
-          updatedAt: Timestamp.now(),
+      // Server-owned (AGL-652): the handle must be claimed transactionally in
+      // publisherHandles, which a client write cannot do — two orgs racing
+      // for one handle would both succeed and one would silently lose its
+      // marketplace URL. The rules reject a client handle write outright.
+      const idToken = await (user as any)?.getIdToken?.()
+      const response = await fetch('/api/community/publisher-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
         },
-        { merge: true },
-      )
+        body: JSON.stringify({
+          orgId: currentOrg.$id,
+          handle,
+          displayName: displayName.trim(),
+          bio: bio.trim(),
+        }),
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok) {
+        return enqueueSnackbar(payload?.error ?? 'Could not save the profile', {
+          variant: 'warning',
+          persist: false,
+        })
+      }
       enqueueSnackbar('Profile saved', { variant: 'success', persist: false })
     } catch (error) {
       console.error(error)
@@ -178,7 +193,15 @@ const CommunitySettings: NextPageWithLayout<Record<string, never>> = () => {
         allowDuplicate: true,
       })
     }
-  }, [uid, validHandle, handle, displayName, bio, firestore, enqueueSnackbar])
+  }, [
+    currentOrg?.$id,
+    validHandle,
+    handle,
+    displayName,
+    bio,
+    user,
+    enqueueSnackbar,
+  ])
 
   // Listing preview image (AGL-95): one shared file input; the pending
   // listing id records which row opened the picker.
