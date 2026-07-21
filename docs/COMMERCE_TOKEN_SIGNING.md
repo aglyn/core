@@ -25,57 +25,75 @@ download links that the tenant app verifies. A mismatch does not error anywhere 
 rejects every link as an invalid signature, which reads like "downloads are broken" rather
 than "the secret differs."
 
+Today this is arranged so the mismatch *cannot* happen: `TOKEN_SIGNING_SECRET` is a single
+**team-level shared environment variable** linked to both projects, so there is only ever
+one value. Keep it that way. Replacing it with two per-project variables reintroduces the
+failure mode for no benefit.
+
 **2. Rotation invalidates every outstanding link.** Changing the secret breaks every
 download and gift-card link already in a customer's inbox, permanently — they were signed
 with the old key and there is no grace window or key-ring. Rotate only with a deliberate
 plan to re-issue, and never as a routine hygiene step.
 
-## Provisioning
+## Current state — check before you change anything
 
-Scope of "the same value" is exactly one deployment tier: **console and tenant must match
-each other within an environment.** Local does *not* need to match production, and should
-not — a laptop `.env` is plaintext and `nx` injects it into every task (AGL-690), so
-reusing it in production needlessly widens where the production secret lives.
+As of 2026-07-21 this is **already provisioned** as a shared variable on `preview` and
+`production`, linked to both `app-aglyn-io` and `tenant-aglyn-app`. Setting a "new" value
+would be a live rotation with the consequences in rule 2. Audit first, always.
 
-Generate a fresh value per tier:
+### Auditing it correctly (this is the part that misleads people)
+
+**`vercel env ls` and the project env API do not show shared variables.** Both list
+*project-level* variables only, with nothing to indicate a whole class is missing — so a
+provisioned secret reads as absent, and two checks that look independent agree with each
+other because they share the blind spot.
+
+You must consult both sources:
+
+```bash
+# 1. project-level
+curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+  "https://api.vercel.com/v9/projects/<project>/env?decrypt=false&teamId=$VERCEL_TEAM_ID" \
+  | jq '.envs[] | {key, target}'
+
+# 2. team-level SHARED — note the linkage field is `projectId` (singular)
+#    but holds an ARRAY of project ids. Reading `projectIds` yields nothing
+#    and makes every shared var look unlinked.
+curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+  "https://api.vercel.com/v1/env?teamId=$VERCEL_TEAM_ID" \
+  | jq '.envs[] | {key, target, projectId}'
+```
+
+A shared variable only applies to a project whose id appears in its `projectId` array.
+
+### If you genuinely need to set it
+
+Prefer editing the existing shared variable over adding project-level ones — that preserves
+the single-value guarantee in rule 1. Local is separate and *should* differ: the root `.env`
+is plaintext and `nx` injects it into every task (AGL-690), so reusing a laptop value in
+production needlessly widens where the production secret lives.
 
 ```bash
 openssl rand -hex 32
 ```
 
-Set it on both Vercel projects, all three environments. The root `.env` gets its own
-separate value for local work and `tools/scripts/*`:
+If you do fall back to per-project variables, run from the app directory and link explicitly
+— the root `.vercel/repo.json` maps EVERY directory to `app-aglyn-io`, so an unlinked tenant
+command silently writes to the console project (AGL-542):
 
 | Vercel project | Directory to run from |
 | --- | --- |
 | `app-aglyn-io` (console) | `apps/console` |
 | `tenant-aglyn-app` (tenant) | `apps/tenant` |
 
-```bash
-# Run from the app directory, and link explicitly first — the root
-# .vercel/repo.json maps EVERY directory to app-aglyn-io, so an unlinked
-# tenant command silently writes to the console project (AGL-542).
-cd apps/tenant && vercel link
-for env in production preview development; do
-  vercel env add TOKEN_SIGNING_SECRET "$env"
-done
-```
-
-Repeat from `apps/console`. Then confirm each project actually has it — check the project
-you think you're checking:
-
-```bash
-vercel env ls | grep TOKEN_SIGNING_SECRET
-```
-
 Env values are snapshotted per deployment, so **existing deployments do not pick this up** —
-redeploy each project after adding it.
+redeploy each project after changing it.
 
 ## Verify
 
 Read the dashboard last, not first. The dashboard shows the variable exists; it does not
-show that both projects agree, which is the failure mode that actually happens. Mint a token
-end to end:
+show that both projects resolve the same value, nor that a shared variable is actually
+linked to the project you care about. Mint a token end to end:
 
 1. Complete a test checkout for a digital product on a tenant site.
 2. Open the download link from the receipt — it is minted by the console webhook and
