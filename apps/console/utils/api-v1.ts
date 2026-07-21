@@ -51,6 +51,39 @@ function extractToken(request: Request): string {
   return (request.headers.get('x-api-key') ?? '').trim()
 }
 
+/** Current billing month key, `YYYY-MM`, matching the usage rollup. */
+export function apiUsageMonth(now = new Date()): string {
+  return now.toISOString().slice(0, 7)
+}
+
+/**
+ * Fire-and-forget monthly API-request counter (AGL-635). One increment per
+ * authenticated request on `orgs/{orgId}/apiUsage/{YYYY-MM}.count` — the
+ * durable meter the monthly rollup reads and bills overage from (the rate
+ * limiter is in-memory only). Never blocks or fails the request; single-doc
+ * contention is fine at the rate-limit volume, sharding is a later option.
+ */
+function recordApiRequest(
+  firestore: FirebaseFirestore.Firestore,
+  orgId: string,
+): void {
+  const month = apiUsageMonth()
+  void firestore
+    .collection('orgs')
+    .doc(orgId)
+    .collection('apiUsage')
+    .doc(month)
+    .set(
+      {
+        count: firebaseAdmin.firestore.FieldValue.increment(1),
+        month,
+        updatedAt: firebaseAdmin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    )
+    .catch(() => undefined)
+}
+
 /**
  * Authenticate a v1 request. Returns an `ApiV1Context` on success, or an
  * error `Response` (401 unknown key, 403 plan required, 429 rate limited)
@@ -78,13 +111,20 @@ export async function authenticateApiV1(
     )
   }
 
+  const firestore = firebaseAdmin.app().firestore()
+  // Meter the request for the monthly usage rollup (AGL-635). Fire-and-forget:
+  // billing is a background reconcile, so a lost increment never blocks the
+  // caller. Counted only after auth + rate-limit pass, so refused requests
+  // (401/403/429) are not billed.
+  recordApiRequest(firestore, verified.orgId)
+
   return {
     context: {
       orgId: verified.orgId,
       keyId: verified.keyId,
       scopes: verified.scopes,
       org,
-      firestore: firebaseAdmin.app().firestore(),
+      firestore,
       headers,
     },
   }
