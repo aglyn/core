@@ -85,6 +85,19 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Monthly usage rollups (AGL-41) + the live API-request meter
+      // (AGL-635): member-readable so the Billing page usage meters show real
+      // numbers. Written only by the server — the report-usage cron and the
+      // customer-API auth chokepoint via the Admin SDK, which bypasses rules.
+      match /usage/{month} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+      match /apiUsage/{month} {
+        allow read: if isStaff() || isOrgMember();
+        allow write: if false;
+      }
+
       // Per-plugin settings (AGL-428): overrides for a plugin's declared
       // config schema. Readers defensively coerce types (the doc is
       // manager-writable), so junk here can misconfigure only that
@@ -184,6 +197,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Customer API keys (AGL-616). Secret material: only a SHA-256 hash of
+    // the token is stored (doc id = hash). Deny ALL client access — minting,
+    // listing (metadata only), verification, and revocation happen through
+    // the Admin SDK. Clients never read this collection.
+    match /apiKeys/{keyHash} {
+      allow read, write: if false;
+    }
+
+    // REST API idempotency records (AGL-618): dedupe POSTs by Idempotency-Key.
+    // Written and read by the Admin SDK only.
+    match /apiIdempotency/{keyHash} {
+      allow read, write: if false;
+    }
+
     // Hosts and everything under them (content-hardening review,
     // 2026-07-07: tenant sites read through the Admin SDK, so no public
     // read). Access resolves through the org membership projection
@@ -226,13 +253,17 @@ service cloud.firestore {
       // editors update it too; deletion is admin-only. Editors must NOT be
       // able to rewrite the identity/projection keys: `memberRoles` is the
       // access list (self-escalation / add-outsider / lock-out-owner),
-      // `orgId` gates suspension, and `admins`/`hosts` are legacy/ownership.
+      // `orgId` gates suspension, `admins`/`hosts` are legacy/ownership, and
+      // `subdomain` is the site's public address — a client write could take
+      // a reserved name or collide with another org's site, making
+      // subdomain->host resolution ambiguous (AGL-642). It goes through
+      // /api/hosts/rename, which claims uniqueness transactionally.
       // Those keys are Admin-SDK-only (org APIs bypass rules); staff keep
       // full control for tooling.
       allow update: if isStaff() ||
         (canWriteHostContent(hostId) && !hostOrgSuspended(hostId) &&
           !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['memberRoles', 'orgId', 'admins', 'hosts']));
+            .hasAny(['memberRoles', 'orgId', 'admins', 'hosts', 'subdomain']));
       allow delete: if isStaff() ||
         (hostMemberRole(hostId) == 'admin' && !hostOrgSuspended(hostId));
       // Screen/layout DOC creates are API-only (AGL-473): /api/hosts/
@@ -262,6 +293,43 @@ service cloud.firestore {
           allow write: if isStaff() ||
             (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
         }
+      }
+      // Reusable components (AGL-679) now carry editing history like screens
+      // and layouts. The component DOC stays API-create-only (the catch-all
+      // below excludes `components`, and the resources route enforces the
+      // reusableComponents entitlement) — but its `versions` subcollection
+      // has to be client-writable, and the catch-all's create exclusion is
+      // by collection NAME, so `components/{id}/versions/{v}` was caught by
+      // it too. This dedicated block carves the versions back out.
+      match /components/{componentId} {
+        allow read: if isStaff() || isHostAdmin(hostId);
+        allow create: if isStaff();
+        allow update, delete: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        match /{sub}/{document=**} {
+          allow read: if isStaff() || isHostAdmin(hostId);
+          allow write: if isStaff() ||
+            (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
+        }
+      }
+      // Templates (AGL-666): saved starting points for pages, components and
+      // layouts, and where marketplace downloads land instead of becoming
+      // live pages. Creates go through /api/hosts/resources like screens and
+      // layouts so templatesPerHost is enforced server-side.
+      //
+      // `source` is frozen on update: it records whether a template was
+      // authored here, downloaded from the marketplace, or came from a
+      // first-party starter, and the library shows that to the user. A client
+      // able to rewrite it could stamp marketplace provenance on its own work.
+      match /templates/{templateId} {
+        allow read: if isStaff() || isHostAdmin(hostId);
+        allow create: if isStaff();
+        allow update: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId) &&
+           !request.resource.data.diff(resource.data)
+             .affectedKeys().hasAny(['source']));
+        allow delete: if isStaff() ||
+          (canWriteHostContent(hostId) && !hostOrgSuspended(hostId));
       }
       // Secret-/PII-bearing subcollections are carved out of the viewer-
       // readable catch-all below (AGL-502): `webhooks` docs hold an HMAC
@@ -297,10 +365,15 @@ service cloud.firestore {
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
             !(subcollection in ['screens', 'layouts', 'variables',
               'functions', 'workflows', 'services', 'redirects',
-              'locations', 'products', 'components', 'registers', 'installs']));
+              'locations', 'products', 'components', 'registers', 'installs',
+              'templates']));
+        // `templates` is excluded from update as well as create: its
+        // dedicated block above freezes `source`, and leaving it here would
+        // re-grant the unrestricted update this catch-all allows (AGL-666).
         allow update: if isStaff() ||
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
-            !(subcollection in ['screens', 'layouts', 'installs']));
+            !(subcollection in ['screens', 'layouts', 'installs',
+              'templates']));
         allow delete: if isStaff() ||
           ((canWriteHostContent(hostId) && !hostOrgSuspended(hostId)) &&
             !(subcollection in ['screens', 'layouts']));
@@ -360,6 +433,53 @@ service cloud.firestore {
           .hasAny(['stripeAccountId', 'stripeChargesEnabled']);
     }
 
+    // Org publisher identity (AGL-652). Publishing is ORG-ONLY: this is the
+    // org's public marketplace presence, keyed by org id so authorization is
+    // a plain role check with no ownership indirection. Public read — buyers
+    // see who they are installing from. `profiles/{uid}` above stays as the
+    // personal identity (the support forum renders author names from it) and
+    // is no longer a publisher.
+    match /publisherProfiles/{orgId} {
+      allow read: if true;
+      // The org rules' helpers are scoped to `match /orgs/{orgId}`, so this
+      // block resolves membership itself. `exists()` first: reading `.data`
+      // off a missing member doc errors rather than denying cleanly.
+      function publisherManager() {
+        return isStaff() || (isSignedIn() &&
+          exists(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid))
+            .data.role in ['owner', 'admin']);
+      }
+      function publisherFieldsValid() {
+        return request.resource.data.handle is string &&
+          request.resource.data.handle.size() >= 3 &&
+          request.resource.data.handle.size() <= 30 &&
+          request.resource.data.handle.matches('[a-z0-9][a-z0-9-]*') &&
+          request.resource.data.displayName is string &&
+          request.resource.data.displayName.size() <= 80;
+      }
+      // The payout keys decide who receives money — Connect route only.
+      // `handle` is equally server-owned: it must be claimed transactionally
+      // in `publisherHandles` (AGL-652), and a client read-then-write lets
+      // two orgs racing for one handle both "succeed", silently taking each
+      // other's marketplace URL. Creates go through the save route entirely;
+      // updates may edit the cosmetic fields but never the handle.
+      allow create: if false;
+      allow update: if publisherManager() && publisherFieldsValid() &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['handle', 'stripeAccountId', 'stripeChargesEnabled']);
+      allow delete: if isStaff();
+    }
+
+    // Handle uniqueness (AGL-652), mirroring orgSlugs: public read so a
+    // handle resolves pre-auth, and claimed ONLY by the publish API inside a
+    // transaction. Client-writable reservations would race, and whoever wrote
+    // last would take another publisher's marketplace URL.
+    match /publisherHandles/{handle} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Listings are public reads. Creates and version snapshots happen ONLY
     // through the publish API (Admin SDK, server-side sanitization) — no
     // client create. Owners may update/delete their own listing metadata
@@ -367,22 +487,59 @@ service cloud.firestore {
     match /communityListings/{listingId} {
       allow read: if true;
       allow create: if false;
+      // Listings are ORG-owned since AGL-652, so `profileId` holds an org
+      // id. The owner check used to compare it to `request.auth.uid`, which
+      // a uid can never satisfy — it did not error, it just silently denied
+      // every publisher access to their own listing. Same shape as the
+      // publisherProfiles block above; `exists()` first because reading
+      // `.data` off a missing member doc errors rather than denying.
+      function listingManager() {
+        return isSignedIn() &&
+          exists(/databases/$(database)/documents/orgs/$(resource.data.profileId)/members/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/orgs/$(resource.data.profileId)/members/$(request.auth.uid))
+            .data.role in ['owner', 'admin'];
+      }
       // Owners toggle metadata (deletedAt un/republish) client-side, but
       // must NOT touch server-managed fields (AGL-503): installCount is
       // incremented by the install API (ranking integrity), priceUsd gates
-      // purchases, and profileId is the ownership key. Delete stays open to
-      // the owner; staff moderate anything.
+      // purchases, and profileId is the ownership key. The review verdict is
+      // equally server-owned (AGL-651): `reviewStatus` decides both the
+      // trust badge and whether a plugin is publicly browsable at all, so an
+      // owner who could write it could self-promote to 'verified' and skip
+      // staff review outright. Delete stays open to the owner; staff moderate
+      // anything.
       allow update: if isStaff() ||
-        (isSignedIn() && resource.data.profileId == request.auth.uid &&
+        (listingManager() &&
           !request.resource.data.diff(resource.data).affectedKeys()
-            .hasAny(['installCount', 'priceUsd', 'profileId']));
-      allow delete: if isStaff() ||
-        (isSignedIn() && resource.data.profileId == request.auth.uid);
+            .hasAny(['installCount', 'priceUsd', 'profileId',
+                     'reviewStatus', 'reviewedBy', 'reviewedAt',
+                     'rejectionReason',
+                     // Rating aggregates (AGL-655) drive ranking and the
+                     // trust signal buyers read, so they are maintained by
+                     // the reviews API alone — a publisher who could write
+                     // them could invent a five-star average.
+                     'ratingSum', 'ratingCount', 'ratingAverage',
+                     'commentCount',
+                     // Staff takedown (AGL-658). An owner who could clear
+                     // `hiddenAt` could un-hide their own listing, which
+                     // makes moderation a suggestion.
+                     'hiddenAt', 'hiddenBy', 'hiddenReason']));
+      allow delete: if isStaff() || listingManager();
       // Version snapshots hold the actual (possibly paid) content — no
       // client reads; installs go through /api/community/install, which
       // checks the purchase record server-side (AGL-46).
       match /versions/{version} {
         allow read, write: if isStaff();
+      }
+      // Ratings and comments (AGL-655). Public read so the detail page can
+      // render them without auth. Writes are API-ONLY: the route decides
+      // whether the author is a verified installer, blocks the publisher's
+      // own org, and adjusts the listing aggregates in the same
+      // transaction. Letting a client write here would make every one of
+      // those checks advisory.
+      match /reviews/{authorUid} {
+        allow read: if true;
+        allow write: if false;
       }
       // Plugin version records hold the artifact sha256 + manifest (AGL-45).
       // Server-only, same as component versions: installs go through
@@ -404,10 +561,21 @@ service cloud.firestore {
     // Marketplace purchase records (AGL-46): written only by the Stripe
     // webhook (Admin SDK). Buyers read their own purchases (install
     // gating); sellers read sales of their listings (revenue ledger).
+    // Abuse reports on listings and reviews (AGL-658). Staff-only reads:
+    // a report names its reporter, and letting a publisher see who reported
+    // them invites retaliation. Written through /api/community/report so
+    // the reporter is the verified token, never a client-supplied uid.
+    match /communityReports/{reportId} {
+      allow read, write: if isStaff();
+    }
+
     match /communityPurchases/{purchaseId} {
+      // The seller is an ORG (AGL-652), so the sales side is a membership
+      // check, not a uid match — a uid never equals an org id, and leaving
+      // the old comparison would hide every publisher's own revenue.
       allow read: if isStaff() || (isSignedIn() &&
         (resource.data.buyerUid == request.auth.uid ||
-         resource.data.sellerUid == request.auth.uid));
+         exists(/databases/$(database)/documents/orgs/$(resource.data.sellerOrgId)/members/$(request.auth.uid))));
       allow write: if false;
     }
 

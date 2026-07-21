@@ -20,5 +20,6 @@ import { DndManager } from './dnd-manager'
 export * from './node-refs'
 export * from './dnd-manager'
 export * from './focus-manager'
+export * from './pick-manager'
 
 export const dnd = new DndManager()

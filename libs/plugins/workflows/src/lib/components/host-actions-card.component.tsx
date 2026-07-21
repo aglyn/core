@@ -17,17 +17,22 @@
 'use client'
 
 import {
+  ACTION_MAX_CONDITIONS,
   ACTION_MAX_STEPS,
   type AglynOrgBilling,
   checkEntitlement,
   createResourceUid,
+  ELEMENT_SCOPED_SITE_EVENTS,
   HOST_ACTION_STEP_LABELS,
   isSiteEventType,
+  normalizeTriggerConditions,
   SITE_EVENT_TYPES,
   HOST_EVENT_TYPES,
   type HostAction,
   type HostActionStep,
   type HostActionStepType,
+  type TriggerCombinator,
+  type TriggerConditionOp,
   validateHostAction,
 } from '@aglyn/aglyn'
 import { CardDisplay, useConfirmationContext } from '@aglyn/shared-ui-jsx'
@@ -64,10 +69,25 @@ import HostActivityCard from './host-activity-card.component'
 
 const CUSTOM_EVENT_VALUE = '__custom__'
 
+/** One editable condition row (AGL-565); a lone row with an empty op
+ * means "always run" and clears the stored conditions. */
+interface ConditionRowDraft {
+  op: '' | TriggerConditionOp
+  field: string
+  value: string
+}
+
+const EMPTY_CONDITION_ROW: ConditionRowDraft = { op: '', field: '', value: '' }
+
 interface ActionDraft extends HostAction {
   id: string | null
   /** Raw custom-event text when the trigger select is on "custom". */
   customEvent: string
+  // Structured payload conditions (AGL-557), chainable with AND/OR
+  // (AGL-565) — held as rows like the steps list; legacy
+  // single-`condition` docs hydrate through normalizeTriggerConditions.
+  conditionRows: ConditionRowDraft[]
+  conditionCombinator: TriggerCombinator
 }
 
 function defaultStep(type: HostActionStepType): HostActionStep {
@@ -87,6 +107,20 @@ function defaultStep(type: HostActionStepType): HostActionStep {
     case 'addClass':
     case 'removeClass':
       return { type, selector: '', className: '' }
+    // Element show/hide + drawer commands (AGL-562).
+    case 'showElement':
+    case 'hideElement':
+    case 'toggleElement':
+      return { type, selector: '' }
+    case 'openDrawer':
+    case 'closeDrawer':
+    case 'toggleDrawer':
+      return { type }
+    // Menu commands (AGL-568) mirror the drawer's optional target.
+    case 'openMenu':
+    case 'closeMenu':
+    case 'toggleMenu':
+      return { type }
     case 'showHtml':
       return { type, html: '' }
     case 'runJs':
@@ -250,6 +284,8 @@ export function HostActionsCard(props: {
       steps: [defaultStep('siteAlert')],
       enabled: true,
       customEvent: '',
+      conditionRows: [EMPTY_CONDITION_ROW],
+      conditionCombinator: 'and',
     })
   }, [org, enqueueSnackbar])
 
@@ -320,6 +356,25 @@ export function HostActionsCard(props: {
         ...(Number(draft.trigger.cooldownMinutes) >= 1
           ? { cooldownMinutes: Number(draft.trigger.cooldownMinutes) }
           : {}),
+        ...(draft.trigger.everyTime === true ? { everyTime: true } : {}),
+        // Structured payload conditions (AGL-557; chained AGL-565):
+        // rows keep their blank fields so validateHostAction surfaces
+        // the miss. Saves always write the list shape — the legacy
+        // single `condition` is only ever read, never written back.
+        ...(draft.conditionRows.some((row) => row.op)
+          ? {
+              conditions: draft.conditionRows
+                .filter((row) => row.op)
+                .map((row) => ({
+                  field: row.field.trim(),
+                  op: row.op as TriggerConditionOp,
+                  ...(row.op !== 'notEmpty'
+                    ? { value: row.value.trim() }
+                    : {}),
+                })),
+              combinator: draft.conditionCombinator,
+            }
+          : {}),
       },
       steps: draft.steps,
       enabled: draft.enabled !== false,
@@ -339,6 +394,9 @@ export function HostActionsCard(props: {
           ...candidate,
           // Frequency caps overwrite explicitly (AGL-274): a merge-set
           // keeps omitted keys, so switching one off must write it out.
+          // Conditions follow suit (AGL-557/565): the list + combinator
+          // write null when cleared, and the legacy single `condition`
+          // is always nulled — `conditions` is canonical from now on.
           trigger: {
             ...candidate.trigger,
             oncePerVisitor: draft.trigger.oncePerVisitor === true,
@@ -347,6 +405,10 @@ export function HostActionsCard(props: {
               Number(draft.trigger.cooldownMinutes) >= 1
                 ? Number(draft.trigger.cooldownMinutes)
                 : null,
+            everyTime: draft.trigger.everyTime === true,
+            condition: null,
+            conditions: candidate.trigger.conditions ?? null,
+            combinator: candidate.trigger.combinator ?? null,
           },
           updatedAt: Timestamp.now(),
           ...(draft.id ? {} : { createdAt: Timestamp.now() }),
@@ -447,6 +509,7 @@ export function HostActionsCard(props: {
                     pathPattern: action.trigger?.pathPattern ?? '',
                     oncePerVisitor: action.trigger?.oncePerVisitor === true,
                     oncePerSession: action.trigger?.oncePerSession === true,
+                    everyTime: action.trigger?.everyTime === true,
                     ...(Number(action.trigger?.cooldownMinutes) >= 1
                       ? {
                           cooldownMinutes: Number(
@@ -462,6 +525,22 @@ export function HostActionsCard(props: {
                     isSiteEventType(String(action.trigger?.event ?? ''))
                       ? ''
                       : (action.trigger?.event ?? ''),
+                  // Structured conditions (AGL-557; chained AGL-565):
+                  // legacy single-condition docs normalize to one row.
+                  conditionRows: (() => {
+                    const rows = normalizeTriggerConditions(
+                      action.trigger,
+                    ).map(
+                      (condition): ConditionRowDraft => ({
+                        op: condition.op ?? '',
+                        field: condition.field ?? '',
+                        value: condition.value ?? '',
+                      }),
+                    )
+                    return rows.length ? rows : [EMPTY_CONDITION_ROW]
+                  })(),
+                  conditionCombinator:
+                    action.trigger?.combinator === 'or' ? 'or' : 'and',
                 })
               }
             >
@@ -569,10 +648,163 @@ export function HostActionsCard(props: {
               />
             )}
           </Stack>
+          {/* Structured payload conditions (AGL-557): the no-code sibling
+              of the filter — e.g. only when `subscribe` is not empty.
+              Chainable with AND/OR (AGL-565), rows styled like steps. */}
+          {(draft?.conditionRows ?? []).map((row, index) => (
+            <Stack
+              key={index}
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: 'center' }}
+            >
+              {index > 0 ? (
+                <Typography variant="caption" color="text.secondary">
+                  {draft?.conditionCombinator === 'or' ? 'or' : 'and'}
+                </Typography>
+              ) : null}
+              <TextField
+                select
+                label={index === 0 ? 'Only run when' : 'Condition'}
+                value={row.op}
+                onChange={(event) =>
+                  patch((previous) => ({
+                    ...previous,
+                    conditionRows: previous.conditionRows.map(
+                      (previousRow, index2) =>
+                        index2 === index
+                          ? {
+                              ...previousRow,
+                              op: event.target
+                                .value as ConditionRowDraft['op'],
+                            }
+                          : previousRow,
+                    ),
+                  }))
+                }
+                size="small"
+                sx={{ minWidth: 180 }}
+              >
+                {/* "Always" only exists while this is the sole row —
+                    multi-row chains clear by removing rows instead. */}
+                {(draft?.conditionRows.length ?? 0) === 1 ? (
+                  <MenuItem value="">{'Always (no condition)'}</MenuItem>
+                ) : null}
+                <MenuItem value="notEmpty">{'A field is not empty'}</MenuItem>
+                <MenuItem value="equals">{'A field equals…'}</MenuItem>
+                <MenuItem value="contains">{'A field contains…'}</MenuItem>
+              </TextField>
+              {row.op ? (
+                <TextField
+                  label="Field"
+                  placeholder="subscribe"
+                  value={row.field}
+                  onChange={(event) =>
+                    patch((previous) => ({
+                      ...previous,
+                      conditionRows: previous.conditionRows.map(
+                        (previousRow, index2) =>
+                          index2 === index
+                            ? { ...previousRow, field: event.target.value }
+                            : previousRow,
+                      ),
+                    }))
+                  }
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+              ) : null}
+              {row.op === 'equals' || row.op === 'contains' ? (
+                <TextField
+                  label="Value"
+                  placeholder="Yes"
+                  value={row.value}
+                  onChange={(event) =>
+                    patch((previous) => ({
+                      ...previous,
+                      conditionRows: previous.conditionRows.map(
+                        (previousRow, index2) =>
+                          index2 === index
+                            ? { ...previousRow, value: event.target.value }
+                            : previousRow,
+                      ),
+                    }))
+                  }
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+              ) : null}
+              {(draft?.conditionRows.length ?? 0) > 1 ? (
+                <IconButton
+                  size="small"
+                  aria-label="remove condition"
+                  onClick={() =>
+                    patch((previous) => ({
+                      ...previous,
+                      conditionRows: previous.conditionRows.length > 1
+                        ? previous.conditionRows.filter(
+                            (_, index2) => index2 !== index,
+                          )
+                        : [EMPTY_CONDITION_ROW],
+                    }))
+                  }
+                >
+                  {'×'}
+                </IconButton>
+              ) : null}
+            </Stack>
+          ))}
+          {draft?.conditionRows.every((row) => row.op) ? (
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <Button
+                size="small"
+                disabled={
+                  (draft?.conditionRows.length ?? 0) >= ACTION_MAX_CONDITIONS
+                }
+                onClick={() =>
+                  patch((previous) => ({
+                    ...previous,
+                    conditionRows: [
+                      ...previous.conditionRows,
+                      // New rows start on the simplest operator so the
+                      // field input is immediately visible.
+                      { op: 'notEmpty', field: '', value: '' },
+                    ],
+                  }))
+                }
+              >
+                {'Add condition'}
+              </Button>
+              {(draft?.conditionRows.length ?? 0) >= 2 ? (
+                // AND/OR combinator (AGL-565); applies to every row.
+                <TextField
+                  select
+                  label="Match"
+                  value={draft?.conditionCombinator ?? 'and'}
+                  onChange={(event) =>
+                    patch((previous) => ({
+                      ...previous,
+                      conditionCombinator: event.target
+                        .value as TriggerCombinator,
+                    }))
+                  }
+                  size="small"
+                  sx={{ minWidth: 220 }}
+                >
+                  <MenuItem value="and">
+                    {'All conditions match (AND)'}
+                  </MenuItem>
+                  <MenuItem value="or">
+                    {'Any condition matches (OR)'}
+                  </MenuItem>
+                </TextField>
+              ) : null}
+            </Stack>
+          ) : null}
           {isSiteEventType(draft?.trigger.event ?? '') ? (
             // Site-event config (AGL-256): what/where the trigger watches.
             <Stack direction="row" spacing={1}>
-              {['scrollToElement', 'elementClick', 'elementVisible'].includes(
+              {(ELEMENT_SCOPED_SITE_EVENTS as readonly string[]).includes(
                 draft?.trigger.event ?? '',
               ) ? (
                 <TextField
@@ -645,7 +877,9 @@ export function HostActionsCard(props: {
                       ? 'session'
                       : Number(draft?.trigger.cooldownMinutes) >= 1
                         ? 'cooldown'
-                        : ''
+                        : draft?.trigger.everyTime
+                          ? 'every'
+                          : ''
                 }
                 onChange={(event) => {
                   const mode = event.target.value
@@ -653,6 +887,9 @@ export function HostActionsCard(props: {
                     ...previous,
                     trigger: {
                       ...previous.trigger,
+                      // Every occurrence (AGL-562): repeatable UI
+                      // choreography (menu/drawer toggles).
+                      everyTime: mode === 'every',
                       oncePerVisitor: mode === 'visitor',
                       oncePerSession: mode === 'session',
                       cooldownMinutes:
@@ -666,6 +903,9 @@ export function HostActionsCard(props: {
                 }}
               >
                 <MenuItem value="">{'Every matching pageview'}</MenuItem>
+                <MenuItem value="every">
+                  {'Every occurrence (repeatable)'}
+                </MenuItem>
                 <MenuItem value="session">{'Once per session'}</MenuItem>
                 <MenuItem value="visitor">{'Once per visitor'}</MenuItem>
                 <MenuItem value="cooldown">{'With a cooldown'}</MenuItem>
@@ -988,6 +1228,80 @@ export function HostActionsCard(props: {
                     sx={{ width: 150 }}
                   />
                 </>
+              ) : step.type === 'showElement' ||
+                step.type === 'hideElement' ||
+                step.type === 'toggleElement' ? (
+                // Element choreography (AGL-562). The besigner's builder
+                // offers an element picker; here the CSS selector is the
+                // escape hatch (node targets use [data-aglyn="leaf:…"]).
+                <TextField
+                  label="CSS selector"
+                  placeholder='[data-aglyn="leaf:…"] or .my-class'
+                  value={(step as any).selector ?? ''}
+                  onChange={(event) =>
+                    patch((previous) => ({
+                      ...previous,
+                      steps: previous.steps.map((s, index2) =>
+                        index2 === index
+                          ? { ...s, selector: event.target.value }
+                          : s,
+                      ),
+                    }))
+                  }
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+              ) : step.type === 'openDrawer' ||
+                step.type === 'closeDrawer' ||
+                step.type === 'toggleDrawer' ? (
+                <TextField
+                  label="Drawer node id (optional)"
+                  placeholder="Empty = the page's first drawer"
+                  value={(step as any).drawerNodeId ?? ''}
+                  onChange={(event) =>
+                    patch((previous) => ({
+                      ...previous,
+                      steps: previous.steps.map((s, index2) =>
+                        index2 === index
+                          ? {
+                              ...s,
+                              drawerNodeId:
+                                event.target.value || undefined,
+                            }
+                          : s,
+                      ),
+                    }))
+                  }
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+              ) : step.type === 'openMenu' ||
+                step.type === 'closeMenu' ||
+                step.type === 'toggleMenu' ? (
+                // Menu commands (AGL-568). The besigner's builder offers
+                // a menu picker; here the raw node id is the escape
+                // hatch, like the drawer field above.
+                <TextField
+                  label="Menu node id (optional)"
+                  placeholder="Empty = the page's first menu"
+                  value={(step as any).menuNodeId ?? ''}
+                  onChange={(event) =>
+                    patch((previous) => ({
+                      ...previous,
+                      steps: previous.steps.map((s, index2) =>
+                        index2 === index
+                          ? {
+                              ...s,
+                              menuNodeId:
+                                event.target.value || undefined,
+                            }
+                          : s,
+                      ),
+                    }))
+                  }
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
               ) : step.type === 'showHtml' || step.type === 'runJs' ? (
                 <TextField
                   label={step.type === 'showHtml' ? 'HTML' : 'JavaScript'}

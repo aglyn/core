@@ -39,6 +39,25 @@ npm run serve:console:emulated     # port 4200
 npm run e2e:console                # E2E_BASE_URL overrides the target
 ```
 
+## Tenant production-mode smoke (AGL-595) — REQUIRED before deploying tenant changes
+
+```bash
+# emulators + seed running (steps 1–2 above); port 4500 free
+npm run smoke:tenant:prod
+```
+
+Builds apps/tenant for production, starts the real `next start` server
+against the emulators, and asserts the seeded routes return 200 with
+their content. This is the only local gate that catches
+**request-time-only ISR failures** — the class that took every tenant
+site down on 2026-07-20 (`useSearchParams()` without a Suspense
+boundary → `BAILOUT_TO_CLIENT_SIDE_RENDERING` 500): the dev server
+renders dynamically, the console is fully dynamic, and the Vercel build
+prerenders nothing, so typecheck, dev-server verification, and a green
+build all missed it. Run this for ANY change touching apps/tenant
+rendering paths (layouts, providers, shared client components the
+tenant mounts).
+
 The harness signs in once through the real `/signin` UI (a synthetic
 localStorage session races the app's `connectAuthEmulator` call — don't),
 pre-warms each route so dev-server compiles don't eat the navigation
@@ -141,6 +160,19 @@ Re-run it after UI changes so the docs never drift:
 
 ```bash
 E2E_BASE_URL=http://localhost:4200 node tools/e2e/capture-docs-screenshots.mjs
+```
+
+`tools/e2e/capture-docs-shots.mjs` (AGL-554) does the same for the docs
+**Guides** section (`apps/docs/static/img/guides/`), but flow-driven: it
+seeds guide fixtures on top of `seed:e2e` (a typed survey dataset, a
+published survey screen, storefront products across the billing modes,
+orders, a site member), then walks the guide flows — including a real
+survey submission and member sign-up on the tenant dev server:
+
+```bash
+# needs BOTH dev servers: serve:console:emulated (4200) + serve:tenant:emulated (4500)
+FIRESTORE_EMULATOR_HOST=localhost:8082 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 \
+  node tools/e2e/capture-docs-shots.mjs   # --only=<out-substring>, --no-seed
 ```
 
 ## Adding specs

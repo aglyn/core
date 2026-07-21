@@ -20,9 +20,11 @@ import { FIREBASE_AUTH_EMULATOR_ENABLED } from '@aglyn/shared-data-enums'
 import { useAuth, useUser } from '@aglyn/tenant-feature-instance'
 import { signInWithCustomToken, signOut } from 'firebase/auth'
 import { useEffect, useRef } from 'react'
+import { tombstoneEndsSession } from '../app/api/auth/session/session-tombstone'
 import {
   clearInteractiveSignIn,
   consumeInteractiveSignIn,
+  consumeInteractiveSignOut,
 } from '../utils/interactive-signin'
 
 /**
@@ -40,8 +42,12 @@ import {
  *   origin signs out too (the propagation half of the spec);
  * - load signed out, cookie present → silent sign-in via the
  *   custom-token exchange;
- * - explicit sign-out → clear the cookie (the signout page also clears
- *   it before signOut so a hard navigation can't strand it).
+ * - explicit sign-out (interactive-signout marker set) → clear the
+ *   cookie (the signout page also clears it before signOut so a hard
+ *   navigation can't strand it);
+ * - auth dropped WITHOUT a marker (token-refresh failure in a suspended
+ *   tab) → restore from the shared cookie instead of retiring it, so a
+ *   zombie tab can't tombstone every workspace's session (AGL-543).
  */
 export function useSessionCookie(): void {
   const auth = useAuth()
@@ -104,9 +110,23 @@ export function useSessionCookie(): void {
             if (!active || response.ok || response.status !== 401) return
             const payload = await response.json().catch(() => null)
             const reason = payload?.reason
-            if (reason === 'signed-out' || reason === 'revoked') {
+            // A revocation always ends the session. A `signed-out`
+            // tombstone only does when it is NEWER than this session's last
+            // sign-in — otherwise it is stale (a prior sign-out whose
+            // re-login mint failed/raced) and would otherwise log the user
+            // out on a plain refresh (AGL-624); heal it by re-minting.
+            if (reason === 'revoked') {
               if (active) await signOut(auth)
               return
+            }
+            if (reason === 'signed-out') {
+              const signedOutAt = Number(payload?.signedOutAt) || 0
+              const lastSignInMs =
+                Date.parse(user.metadata?.lastSignInTime ?? '') || 0
+              if (tombstoneEndsSession(signedOutAt, lastSignInMs)) {
+                if (active) await signOut(auth)
+                return
+              }
             }
             mintedForUid.current = user.uid
             const idToken = await user.getIdToken()
@@ -139,12 +159,32 @@ export function useSessionCookie(): void {
       }
 
       if (hadUser.current) {
-        // Explicit sign-out: retire the shared session.
         hadUser.current = false
         mintedForUid.current = null
-        await fetch('/api/auth/session', { method: 'DELETE' }).catch(
-          () => undefined,
-        )
+        if (consumeInteractiveSignOut()) {
+          // Explicit sign-out: retire the shared session.
+          await fetch('/api/auth/session', { method: 'DELETE' }).catch(
+            () => undefined,
+          )
+          return
+        }
+        // The SDK dropped the user without anyone asking — typically a
+        // suspended tab whose ID token expired and whose refresh failed
+        // (AGL-543). The shared cookie is the source of truth here:
+        // restore this tab from it instead of tombstoning every
+        // workspace's session. A genuine sign-out elsewhere reads back
+        // as 401 signed-out, so this can never resurrect one.
+        try {
+          const response = await fetch('/api/auth/session')
+          if (!response.ok || !active) return
+          const payload = await response.json()
+          if (payload?.token && active) {
+            await signInWithCustomToken(auth, payload.token)
+          }
+        } catch {
+          // Network trouble never signs anyone out; the next load's
+          // restore branch gets another chance.
+        }
         return
       }
       if (restoreAttempted.current) return

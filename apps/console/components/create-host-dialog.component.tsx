@@ -94,9 +94,20 @@ export function CreateHostDialog(props: CreateHostDialogProps) {
         variant: 'success',
         persist: false,
       })
-      void router.push(
-        buildRoute(Route.HOST_SETUP, { hostId: payload.hostId }),
-      )
+      // The workspace may have just been auto-created for a first-time user,
+      // so trust the response's orgSlug over the (possibly null) current org.
+      const orgSlug = payload.orgSlug ?? currentOrg?.slug
+      if (orgSlug) {
+        // HOST_SETUP is keyed by the subdomain (AGL-622), not the doc id —
+        // passing `hostId` missed the `host` param entirely and buildRoute
+        // emitted a literal `<host?>` segment into the URL.
+        void router.push(
+          buildRoute(Route.HOST_SETUP, {
+            orgSlug,
+            host: payload.subdomain ?? subdomain,
+          }),
+        )
+      }
     } catch (error) {
       console.error(error)
       enqueueSnackbar('An error has occurred', {

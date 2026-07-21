@@ -16,9 +16,15 @@
  */
 
 import {
+  buildDatasetRecordValues,
+  defaultDatasetFieldId,
+  humanizeDatasetFieldId,
+  parseDatasetFieldEntries,
   parseDatasetFields,
   sanitizeRecordValues,
+  slugifyDatasetFieldId,
   sortDatasetRecords,
+  validateDatasetFieldId,
 } from './datasets'
 
 describe('datasets', () => {
@@ -33,6 +39,63 @@ describe('datasets', () => {
       'body',
     ])
     expect(parseDatasetFields('')).toEqual([])
+  })
+
+  it('slugifies human names into stable field ids (AGL-558)', () => {
+    expect(slugifyDatasetFieldId('Roast preference')).toBe('roast_preference')
+    expect(slugifyDatasetFieldId('  Unit-Price ($) ')).toBe('unit_price')
+    expect(slugifyDatasetFieldId('9 lives')).toBe('lives')
+    expect(slugifyDatasetFieldId('???')).toBe('')
+  })
+
+  describe('reference id defaults + validation (AGL-578)', () => {
+    it('defaults the reference id from the display name, unique within the dataset', () => {
+      expect(defaultDatasetFieldId('Roast preference', new Set())).toBe(
+        'roast_preference',
+      )
+      // Collides with an existing id → suffixes to stay unique.
+      expect(defaultDatasetFieldId('Title', new Set(['title']))).toBe('title_2')
+      expect(
+        defaultDatasetFieldId('Title', new Set(['title', 'title_2'])),
+      ).toBe('title_3')
+      // Uniqueness check is case-insensitive.
+      expect(defaultDatasetFieldId('Title', new Set(['TITLE']))).toBe('title_2')
+      // Nothing salvageable → empty (caller keeps the field un-addable).
+      expect(defaultDatasetFieldId('???', new Set())).toBe('')
+    })
+
+    it('validates a user-entered reference id', () => {
+      expect(validateDatasetFieldId('roast_level', new Set())).toBeNull()
+      expect(validateDatasetFieldId('  spacey  ', new Set())).toBeNull()
+      expect(validateDatasetFieldId('', new Set())).toMatch(/required/i)
+      expect(validateDatasetFieldId('   ', new Set())).toMatch(/required/i)
+      // Must start with a letter; no spaces or punctuation.
+      expect(validateDatasetFieldId('9lives', new Set())).toMatch(/letter/i)
+      expect(validateDatasetFieldId('has space', new Set())).toMatch(/letter/i)
+      expect(validateDatasetFieldId('kebab-case', new Set())).toMatch(/letter/i)
+      // Uniqueness, case-insensitive.
+      expect(validateDatasetFieldId('title', new Set(['title']))).toMatch(
+        /already uses/i,
+      )
+      expect(validateDatasetFieldId('Title', new Set(['title']))).toMatch(
+        /already uses/i,
+      )
+    })
+  })
+
+  it('humanizes raw ids for display', () => {
+    expect(humanizeDatasetFieldId('roast_preference')).toBe('Roast preference')
+    expect(humanizeDatasetFieldId('title')).toBe('Title')
+  })
+
+  it('parses human field entries keeping pretty names (AGL-558)', () => {
+    expect(
+      parseDatasetFieldEntries('Roast preference, flavors, Roast Preference'),
+    ).toEqual([
+      { id: 'roast_preference', name: 'Roast preference' },
+      { id: 'flavors', name: 'Flavors' },
+    ])
+    expect(parseDatasetFieldEntries('???, ,')).toEqual([])
   })
 
   it('sanitizes record values to declared fields as strings', () => {
@@ -53,5 +116,77 @@ describe('datasets', () => {
       { $id: 'a', order: 1 },
     ])
     expect(sorted.map((record) => record.$id)).toEqual(['a', 'b', 'c'])
+  })
+
+  describe('buildDatasetRecordValues (AGL-556)', () => {
+    // Model whose display names were BOTH renamed after creation — the
+    // fieldIds are the original slugs and must stay the binding keys.
+    const renamedModel = {
+      fields: {
+        satisfaction: { name: 'Happiness score', type: 'int32' as const },
+        comments: { name: 'Visitor feedback', type: 'text' as const },
+      },
+      order: ['satisfaction', 'comments'],
+    }
+
+    it('stores mapped values under the stable fieldId despite renames', () => {
+      expect(
+        buildDatasetRecordValues(
+          { model: renamedModel },
+          { rating: '4', feedback: 'Great' },
+          { rating: 'satisfaction', feedback: 'comments' },
+        ),
+      ).toEqual({ satisfaction: '4', comments: 'Great' })
+    })
+
+    it('drops fieldMap entries whose fieldId is not in the model', () => {
+      expect(
+        buildDatasetRecordValues(
+          { model: renamedModel },
+          { rating: '4', hack: 'nope' },
+          { rating: 'satisfaction', hack: 'values.__proto__' },
+        ),
+      ).toEqual({ satisfaction: '4' })
+    })
+
+    it('falls back to name-intersection without a fieldMap', () => {
+      expect(
+        buildDatasetRecordValues(
+          { model: renamedModel },
+          { satisfaction: 5, other: 'dropped' },
+        ),
+      ).toEqual({ satisfaction: '5' })
+    })
+
+    it('mixes mapped and name-matched keys, mappings winning', () => {
+      expect(
+        buildDatasetRecordValues(
+          { model: renamedModel },
+          { rating: '3', comments: 'By name' },
+          { rating: 'satisfaction' },
+        ),
+      ).toEqual({ satisfaction: '3', comments: 'By name' })
+    })
+
+    it('never lets a mapped submitted key double as a name match', () => {
+      // `satisfaction` is explicitly re-mapped to `comments`; it must not
+      // ALSO land under the same-named fieldId.
+      expect(
+        buildDatasetRecordValues(
+          { model: renamedModel },
+          { satisfaction: 'text answer' },
+          { satisfaction: 'comments' },
+        ),
+      ).toEqual({ comments: 'text answer' })
+    })
+
+    it('derives the model from legacy flat fields', () => {
+      expect(
+        buildDatasetRecordValues(
+          { fields: ['title', 'price'] },
+          { title: 'Widget', price: 9, hack: 'nope' },
+        ),
+      ).toEqual({ title: 'Widget', price: '9' })
+    })
   })
 })

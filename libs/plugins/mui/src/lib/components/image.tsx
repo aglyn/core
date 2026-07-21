@@ -61,8 +61,12 @@ const Image = forwardRef<HTMLElement, ImageProps>((props, ref) => {
     radius,
     screenId,
     href: externalHref,
+    // Never forward children to the <img> below — React throws on ANY
+    // children value reaching a void element, which 500'd whole pages
+    // when a renderer passed empty JSX children through (AGL-579).
+    children: _children,
     ...rest
-  } = props
+  } = props as ImageProps & { children?: unknown }
   // Optional link mode (AGL-339): screen id first (rename-safe), external
   // URL as fallback; suppressed in the besigner canvas like Screen Link.
   const { href: resolvedHref, suppressNavigation } =
@@ -144,7 +148,7 @@ export const schema: Aglyn.ComponentSchema<ImageProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Image',
-  category: Aglyn.ComponentCategory.DATA_DISPLAY,
+  category: Aglyn.ComponentCategory.MEDIA,
   icon: {
     path: mdiImage.path,
     sx: { color: '#7b1fa2' },
@@ -216,7 +220,7 @@ export const presets: Aglyn.PresetSchema[] = [
     displayName: 'Image',
     pluginId: BUNDLE_ID,
     description: 'Image from your media library or any URL',
-    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    category: Aglyn.ComponentCategory.MEDIA,
     icon: {
       path: mdiImage.path,
       sx: { color: '#7b1fa2' },

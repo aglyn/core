@@ -45,10 +45,16 @@
     "nx:migrate:run-migrations": "nx migrate --run-migrations --verbose",
     "build:console:dev": "nx build console --verbose --dev",
     "serve:console:dev": "nx serve console --verbose --dev",
-    "serve:console:emulated": "FIREBASE_AUTH_EMULATOR_ENABLED=true FIREBASE_FIRESTORE_EMULATOR_ENABLED=true FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 FIRESTORE_EMULATOR_HOST=localhost:8082 nx serve console",
+    "serve:console:emulated": "FIREBASE_AUTH_EMULATOR_ENABLED=true FIREBASE_FIRESTORE_EMULATOR_ENABLED=true FIREBASE_DATABASE_EMULATOR_ENABLED=true FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 FIRESTORE_EMULATOR_HOST=localhost:8082 FIREBASE_DATABASE_EMULATOR_HOST=localhost:9000 nx serve console",
     "serve:tenant:emulated": "FIREBASE_AUTH_EMULATOR_ENABLED=true FIREBASE_FIRESTORE_EMULATOR_ENABLED=true FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 FIRESTORE_EMULATOR_HOST=localhost:8082 nx serve tenant --port 4500",
     "seed:e2e": "FIRESTORE_EMULATOR_HOST=localhost:8082 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 node tools/scripts/seed-e2e.mjs",
     "e2e:console": "node tools/e2e/console.e2e.mjs",
+    "e2e:besigner": "node tools/e2e/besigner-editors.e2e.mjs",
+    "e2e:presence": "node tools/e2e/presence-two-session.e2e.mjs",
+    "e2e:presence-token": "node tools/e2e/presence-token.e2e.mjs",
+    "e2e:reviews": "node tools/e2e/listing-reviews.e2e.mjs",
+    "e2e:save-as-template": "node tools/e2e/save-as-template.e2e.mjs",
+    "smoke:tenant:prod": "FIRESTORE_EMULATOR_HOST=localhost:8082 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 node tools/e2e/tenant-prod-smoke.mjs",
     "build:console:prod": "nx build console --prod",
     "serve:console:prod": "nx serve console --prod",
     "cz": "cz",
@@ -60,6 +66,8 @@
     "postinstall": "patch-package",
     "test:rules": "bash tools/scripts/test-rules.sh",
     "test:eslint-rules": "node tools/eslint-rules/no-plan-gated-entitlement.test.mjs",
+    "generate:docs-help": "node tools/scripts/generate-docs-help.mjs",
+    "generate:docs-help:check": "node tools/scripts/generate-docs-help.mjs --check",
     "typecheck": "node tools/scripts/typecheck.mjs"
   },
   "dependencies": {
@@ -280,6 +288,8 @@
     "tmp": "^0.2.6",
     "qs": "^6.14.1",
     "postcss": "^8.5.10",
-    "uuid": "^11.1.1"
+    "uuid": "^11.1.1",
+    "axios": "^1.18.0",
+    "brace-expansion@>=3.0.0 <5.0.7": "^5.0.7"
   }
 }

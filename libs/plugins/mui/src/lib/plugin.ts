@@ -29,6 +29,7 @@ import * as ListItemText from './components/list-item-text'
 import * as FunctionWidget from './components/function-widget'
 import * as Product from './components/product'
 import * as Blocks from './components/blocks'
+import * as Collection from './components/collection'
 import * as FormComponents from './components/form'
 import * as Image from './components/image'
 import * as Icon from './components/icon'
@@ -36,6 +37,8 @@ import * as LanguageSwitcher from './components/language-switcher'
 import * as Video from './components/video'
 import * as CommunityPlugin from './components/plugin'
 import * as CustomHtml from './components/custom-html'
+import * as DrawerComponents from './components/drawer'
+import * as NavMenuComponents from './components/nav-menu'
 import * as ReusableInstance from './components/reusable-instance'
 import * as SearchBox from './components/search-box'
 import * as ScreenLink from './components/screen-link'
@@ -79,6 +82,13 @@ export function registerMuiPlugin(): void {
     { component: FormComponents.FormField, schema: FormComponents.formFieldSchema },
     { component: Blocks.VideoEmbed, schema: Blocks.videoEmbedSchema, presets: Blocks.blockPresets },
     { component: Blocks.SocialLinks, schema: Blocks.socialLinksSchema },
+    // Content collections (AGL-551/582): entries repeater, markdown entry
+    // body, related posts, share bar, entry meta.
+    { component: Collection.CollectionEntries, schema: Collection.collectionEntriesSchema, presets: Collection.collectionPresets },
+    { component: Collection.CollectionEntryBody, schema: Collection.collectionEntryBodySchema },
+    { component: Collection.CollectionRelated, schema: Collection.collectionRelatedSchema },
+    { component: Collection.CollectionShare, schema: Collection.collectionShareSchema },
+    { component: Collection.CollectionEntryMeta, schema: Collection.collectionEntryMetaSchema },
     { component: Image.default, schema: Image.schema, presets: Image.presets },
     { component: Video.default, schema: Video.schema, presets: Video.presets },
     { component: Icon.default, schema: Icon.schema, presets: Icon.presets },
@@ -87,6 +97,11 @@ export function registerMuiPlugin(): void {
     { component: LanguageSwitcher.default, schema: LanguageSwitcher.schema, presets: LanguageSwitcher.presets },
     { component: ReusableInstance.default, schema: ReusableInstance.schema, presets: ReusableInstance.presets },
     { component: ScreenLink.default, schema: ScreenLink.schema, presets: ScreenLink.presets },
+    // Nav menu system (AGL-562): dropdown, mega menu, drawer + menu button.
+    { component: NavMenuComponents.default, schema: NavMenuComponents.navMenuSchema, presets: NavMenuComponents.navMenuPresets },
+    { component: NavMenuComponents.MegaMenu, schema: NavMenuComponents.megaMenuSchema },
+    { component: DrawerComponents.default, schema: DrawerComponents.drawerSchema, presets: DrawerComponents.drawerPresets },
+    { component: DrawerComponents.DrawerToggle, schema: DrawerComponents.drawerToggleSchema },
     { component: FunctionWidget.default, schema: FunctionWidget.schema, presets: FunctionWidget.presets },
     { component: Product.default, schema: Product.schema, presets: Product.presets },
     { component: CommunityPlugin.default, schema: CommunityPlugin.schema, presets: CommunityPlugin.presets },

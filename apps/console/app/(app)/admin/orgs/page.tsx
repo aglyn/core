@@ -60,6 +60,7 @@ import AuthenticatedLayout from '../../../../components/layouts/authenticated.la
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import MainLayout from '../../../../components/layouts/main.layout'
 import adminNavTabItems from '../../../../constants/admin-nav-tabs'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
 import useFirestoreCollection from '../../../../hooks/use-firestore-collection'
@@ -102,28 +103,10 @@ const QUOTA_FIELDS: Array<{ key: string; label: string }> = [
 ]
 
 /** Every boolean feature flag, overridable as inherit / on / off. */
-const FLAG_FIELDS: string[] = [
-  'versioning',
-  'reusableComponents',
-  'customDomain',
-  'removeBranding',
-  'scheduledPublishing',
-  'marketplaceSelling',
-  'aiAssist',
-  'workflows',
-  'dataStore',
-  'videoMedia',
-  'bookings',
-  'actions',
-  'webhooks',
-  'siteExport',
-  'multilingual',
-  'eventCalendar',
-  'redirects',
-  'screenAnalytics',
-  'mediaCdn',
-  'marketingOverlays',
-]
+// Every feature key, derived from the plan model so new flags (the
+// commerce wave added 9) can never silently drop out of the staff
+// override dialog again (AGL-549).
+const FLAG_FIELDS: string[] = Object.keys(PLAN_ENTITLEMENTS.free.features)
 
 /** Count of explicit overrides on an org doc, for the row chip. */
 const overrideCount = (org: any): number =>
@@ -410,6 +393,7 @@ const AdminOrgs: NextPageWithLayout<Record<string, never>> = () => {
           { children: 'Staff', href: buildRoute(Route.ADMIN_ORGS) },
           { children: 'Organizations', href: buildRoute(Route.ADMIN_ORGS) },
         ]}
+        help="staffConsole"
         header={{
           children: 'Organization Management',
           icon: { path: ICON_VARIANT_SYMBOL_SECURE.path },
@@ -427,6 +411,11 @@ const AdminOrgs: NextPageWithLayout<Record<string, never>> = () => {
             // user-management page.
             <CardDisplay
               header={'Organizations'}
+              help={docsHelp('billing', {
+                anchor: '#tiers--entitlements',
+                excerpt:
+                  'Audited staff controls per organization — override the plan and entitlements, inspect usage, suspend its sites, or flag GDPR erasure.',
+              })}
               contentGutterX
               contentGutterY
             >

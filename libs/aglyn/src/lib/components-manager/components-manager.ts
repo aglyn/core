@@ -20,7 +20,7 @@ import { makeAutoObservable, toJS } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { Aglyn } from '../aglyn'
 import { lifecycleEvent } from '../lifecycle'
-import { createIdUrlSafe } from '../foundation'
+import { COMPONENT_CATEGORY_ORDER, createIdUrlSafe } from '../foundation'
 import { AglynEvent } from '../emit-manager'
 import type { PluginId } from '../plugin-manager'
 import {
@@ -31,6 +31,7 @@ import {
   type NodeSchemaNested,
   NodeType,
   type PresetId,
+  type PresetInteractionSchema,
   type PresetSchema,
   type SchemasByCategory,
 } from '../types/nodes'
@@ -44,6 +45,7 @@ export class AglynPreset<P = JSX.AnyProps> implements PresetSchema<P> {
   public displayName: string
   public icon: MdiIconProps
   public pluginId: PluginId
+  public interactions?: PresetInteractionSchema[]
 
   constructor(schema: PresetSchema<P>) {
     this.$id = schema.$id
@@ -53,6 +55,10 @@ export class AglynPreset<P = JSX.AnyProps> implements PresetSchema<P> {
     this.displayName = schema.displayName
     this.icon = schema.icon
     this.pluginId = schema.pluginId
+    // Interaction templates ride along so the add-element flow can wire
+    // them at insert (AGL-589) — an explicit copy, or the field is lost
+    // between registration and the drawer's resolved option.
+    this.interactions = schema.interactions
 
     makeAutoObservable(this)
   }
@@ -80,28 +86,31 @@ export class ComponentManager {
   }
 
   public get schemasBySortedCategories() {
+    // Explicit display rank (AGL-538): curated categories first in a
+    // deliberate order (Sections & Blocks on top), plugin-registered
+    // categories after them alphabetically, Uncategorized/All last.
+    const rankOf = (label: string): number => {
+      switch (label) {
+        case ComponentCategory.UNCATEGORIZED:
+          return COMPONENT_CATEGORY_ORDER.length + 1
+        case ComponentCategory.ALL:
+          return COMPONENT_CATEGORY_ORDER.length + 2
+        default: {
+          const rank = COMPONENT_CATEGORY_ORDER.indexOf(label)
+          return rank === -1 ? COMPONENT_CATEGORY_ORDER.length : rank
+        }
+      }
+    }
     return Object.entries(this.schemasByCategory)
       .map(([k, v]) => ({
         $id: k,
         label: k,
         items: v,
       }))
-      .sort(({ label: a }, { label: b }) => {
-        switch (true) {
-          case a === 'All' && b === 'Uncategorized':
-            return 1
-          case a === 'Uncategorized' && b === 'All':
-            return -1
-          case a === 'All':
-          case a === 'Uncategorized':
-            return 1
-          case b === 'All':
-          case b === 'Uncategorized':
-            return -1
-          default:
-            return a.localeCompare(b)
-        }
-      })
+      .sort(
+        ({ label: a }, { label: b }) =>
+          rankOf(a) - rankOf(b) || a.localeCompare(b),
+      )
   }
 
   public getFactory = computedFn((id: ComponentId) => {

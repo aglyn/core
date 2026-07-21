@@ -16,6 +16,7 @@
  */
 
 import {
+  checkApiRequestQuota,
   checkDataStorageQuota,
   checkDatasetQuota,
   checkEntitlement,
@@ -109,6 +110,18 @@ describe('plan entitlements', () => {
     expect(PLAN_ENTITLEMENTS.business.features.mediaCdn).toBe(true)
   })
 
+  it('includes basic interactions on every plan while gating actions (AGL-577)', () => {
+    // Basic presentational interactions (menu/drawer/show-hide) ship on
+    // every tier; the powerful automations stay behind `actions`.
+    for (const plan of Object.values(PLAN_ENTITLEMENTS)) {
+      expect(plan.features.interactions).toBe(true)
+    }
+    expect(PLAN_ENTITLEMENTS.free.features.actions).toBe(false)
+    expect(PLAN_ENTITLEMENTS.starter.features.actions).toBe(false)
+    expect(PLAN_ENTITLEMENTS.pro.features.actions).toBe(true)
+    expect(PLAN_ENTITLEMENTS.business.features.actions).toBe(true)
+  })
+
   it('treats UNLIMITED quotas as always allowed', () => {
     const org = { plan: 'business' } as any
     const result = checkQuota(org, 'screensPerHost', 100000)
@@ -126,6 +139,7 @@ describe('plan entitlements', () => {
         extraMemberMonthlyUsd: null,
         extraDatasetMonthlyUsd: null,
         extraDataGbMonthlyUsd: null,
+        extraApiRequestsUsdPer1k: null,
       },
       starter: {
         basePriceMonthlyUsd: 25,
@@ -135,6 +149,7 @@ describe('plan entitlements', () => {
         extraMemberMonthlyUsd: 3,
         extraDatasetMonthlyUsd: 2,
         extraDataGbMonthlyUsd: 0.25,
+        extraApiRequestsUsdPer1k: null,
       },
       pro: {
         basePriceMonthlyUsd: 56,
@@ -144,6 +159,7 @@ describe('plan entitlements', () => {
         extraMemberMonthlyUsd: 2,
         extraDatasetMonthlyUsd: 2,
         extraDataGbMonthlyUsd: 0.25,
+        extraApiRequestsUsdPer1k: null,
       },
       business: {
         basePriceMonthlyUsd: 139,
@@ -153,6 +169,7 @@ describe('plan entitlements', () => {
         extraMemberMonthlyUsd: 1,
         extraDatasetMonthlyUsd: 1,
         extraDataGbMonthlyUsd: 0.25,
+        extraApiRequestsUsdPer1k: 0.5,
       },
       advanced: {
         basePriceMonthlyUsd: 399,
@@ -162,6 +179,7 @@ describe('plan entitlements', () => {
         extraMemberMonthlyUsd: 1,
         extraDatasetMonthlyUsd: 1,
         extraDataGbMonthlyUsd: 0.25,
+        extraApiRequestsUsdPer1k: 0.2,
       },
     })
   })
@@ -235,6 +253,57 @@ describe('plan entitlements', () => {
     // Free plan sells no dataset addons.
     expect(checkDatasetQuota({ plan: 'free' } as any, 0).upgradeRequired).toBe(
       true,
+    )
+  })
+
+  it('folds purchased host/register/event-calendar add-ons into resolution (AGL-524)', () => {
+    // Extra sites raise hostLimit on top of plan defaults.
+    const withHosts = { plan: 'starter', seatAddons: { hosts: 2 } } as any
+    expect(resolveOrgEntitlements(withHosts).hostLimit).toBe(
+      PLAN_ENTITLEMENTS.starter.hostLimit + 2,
+    )
+    expect(checkQuota(withHosts, 'hostLimit', 2).allowed).toBe(true)
+    // POS registers stack on the plan's included registers.
+    const withRegisters = { plan: 'pro', seatAddons: { posRegisters: 3 } } as any
+    expect(resolveOrgEntitlements(withRegisters).posRegisters).toBe(1 + 3)
+    // Event Calendar: quantity ≥ 1 switches the org-wide feature on.
+    const withEvents = { plan: 'starter', seatAddons: { eventCalendar: 1 } } as any
+    expect(checkEntitlement(withEvents, 'eventCalendar')).toBe(true)
+    expect(checkEntitlement({ plan: 'starter' } as any, 'eventCalendar')).toBe(
+      false,
+    )
+    // Add-on purchases stack on top of staff entitlement overrides.
+    const stacked = {
+      plan: 'starter',
+      entitlements: { hostLimit: 5 },
+      seatAddons: { hosts: 1 },
+    } as any
+    expect(resolveOrgEntitlements(stacked).hostLimit).toBe(6)
+  })
+
+  it('stops counting purchased add-ons on dead subscriptions (AGL-524)', () => {
+    const dead = {
+      plan: 'pro',
+      subscription: { status: 'canceled' },
+      seatAddons: { hosts: 3, posRegisters: 2, eventCalendar: 1, managers: 2 },
+    } as any
+    // Add-ons bill on the subscription — a dead one takes them with it.
+    expect(resolveOrgEntitlements(dead).hostLimit).toBe(
+      PLAN_ENTITLEMENTS.free.hostLimit,
+    )
+    expect(resolveOrgEntitlements(dead).posRegisters).toBe(0)
+    expect(checkEntitlement(dead, 'eventCalendar')).toBe(false)
+    expect(checkSeatQuota(dead, 'managers', 0).purchased).toBe(0)
+    // Dunning grace: past_due keeps them, matching resolveEffectivePlan.
+    const pastDue = { ...dead, subscription: { status: 'past_due' } }
+    expect(resolveOrgEntitlements(pastDue).hostLimit).toBe(
+      PLAN_ENTITLEMENTS.pro.hostLimit + 3,
+    )
+    expect(checkSeatQuota(pastDue, 'managers', 0).purchased).toBe(2)
+    // No subscription state at all keeps staff-set quantities (comped).
+    const comped = { plan: 'pro', seatAddons: { hosts: 1 } } as any
+    expect(resolveOrgEntitlements(comped).hostLimit).toBe(
+      PLAN_ENTITLEMENTS.pro.hostLimit + 1,
     )
   })
 
@@ -333,8 +402,11 @@ describe('plan entitlements', () => {
     expect(checkQuota(created, 'storagePerHostMb', 0).allowed).toBe(true)
     // hosts/create (hostLimit 1) — a plan-less org already has 1 host.
     expect(checkQuota(created, 'hostLimit', 1).allowed).toBe(false)
-    // community/install-template (screensPerHost 5)
+    // pages created from a template (screensPerHost 5). Installing a
+    // marketplace template no longer creates screens — it fills the
+    // template library, capped separately (AGL-669).
     expect(checkQuota(created, 'screensPerHost', 5).allowed).toBe(false)
+    expect(checkQuota(created, 'templatesPerHost', 10).allowed).toBe(false)
     // hosts/members seat quota (free members cap is 1, no addons)
     const seats = checkSeatQuota(created, 'members', 1)
     expect(seats.allowed).toBe(false)
@@ -361,6 +433,29 @@ describe('plan entitlements', () => {
     const free = checkDataStorageQuota({ plan: 'free' } as any, 1)
     expect(free.allowed).toBe(false)
     expect(free.overageRateUsd).toBeNull()
+  })
+
+  it('checkApiRequestQuota meters overage on Business/Advanced, blocks below (AGL-634)', () => {
+    // Business includes 100k requests; 150k used → 50k over at $0.50/1k = $25.
+    const business = checkApiRequestQuota({ plan: 'business' } as any, 150_000)
+    expect(business.allowed).toBe(true)
+    expect(business.included).toBe(100_000)
+    expect(business.overageRequests).toBe(50_000)
+    expect(business.overageMonthlyUsd).toBeCloseTo(25)
+    expect(business.overageRateUsd).toBe(0.5)
+    // Advanced: 1M included, cheaper overage ($0.20/1k). 1.1M → 100k over = $20.
+    const advanced = checkApiRequestQuota({ plan: 'advanced' } as any, 1_100_000)
+    expect(advanced.included).toBe(1_000_000)
+    expect(advanced.overageMonthlyUsd).toBeCloseTo(20)
+    // Within the included quota there is no overage; remaining is tracked.
+    const within = checkApiRequestQuota({ plan: 'business' } as any, 40_000)
+    expect(within.overageRequests).toBe(0)
+    expect(within.remaining).toBe(60_000)
+    // Plans without API access have zero included and always block.
+    const pro = checkApiRequestQuota({ plan: 'pro' } as any, 1)
+    expect(pro.allowed).toBe(false)
+    expect(pro.included).toBe(0)
+    expect(pro.overageRateUsd).toBeNull()
   })
 
   it('gates commerce features per the AGL-278 matrix', () => {

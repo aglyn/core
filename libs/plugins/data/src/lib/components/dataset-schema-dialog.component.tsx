@@ -17,11 +17,12 @@
 'use client'
 
 import {
-  DATASET_FIELD_PATTERN,
   DATASET_FIELD_TYPE_LABELS,
   DATASET_FIELD_TYPES,
+  defaultDatasetFieldId,
   getCustomFieldType,
   listCustomFieldTypes,
+  validateDatasetFieldId,
   type DatasetFieldDefinition,
   type DatasetFieldType,
   type DatasetModel,
@@ -59,22 +60,6 @@ const AUTHORABLE_TYPES: DatasetFieldType[] = [
   'sorted',
   'reference',
 ]
-
-/** Display name → stable fieldId (slug); never changes after creation. */
-function toFieldId(name: string, taken: Set<string>): string | null {
-  let id = name
-    .trim()
-    .replace(/[^A-Za-z0-9_ ]/g, '')
-    .replace(/\s+(.)/g, (_, char: string) => char.toUpperCase())
-    .replace(/\s/g, '')
-  if (!id) return null
-  if (!/^[A-Za-z]/.test(id)) id = `f${id}`
-  if (!DATASET_FIELD_PATTERN.test(id)) return null
-  let candidate = id
-  let suffix = 2
-  while (taken.has(candidate.toLowerCase())) candidate = `${id}${suffix++}`
-  return candidate
-}
 
 export interface DatasetSchemaDialogProps {
   /** Host context; resolves the owning org for the data scope. */
@@ -140,11 +125,16 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
     })
   }, [dataset])
 
-  // Per-field editor (null fieldId = new field).
+  // Per-field editor (null fieldId = new field). `idDraft`/`idTouched` back
+  // the editable Reference ID (AGL-578): for a new field the draft follows
+  // the display name until the user edits it; existing fields keep the id
+  // frozen (idTouched=true, input disabled).
   const [fieldEditor, setFieldEditor] = useState<{
     fieldId: string | null
     definition: DatasetFieldDefinition
     optionsText: string
+    idDraft: string
+    idTouched: boolean
   } | null>(null)
 
   const openFieldEditor = useCallback(
@@ -156,6 +146,8 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
         fieldId,
         definition,
         optionsText: (definition.validation?.options ?? []).join(', '),
+        idDraft: fieldId ?? '',
+        idTouched: fieldId != null,
       })
     },
     [model],
@@ -166,6 +158,11 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
     const definition = { ...fieldEditor.definition }
     if (!definition.name.trim()) return
     definition.name = definition.name.trim()
+    // Descriptions (AGL-560) surface as hints wherever the field appears;
+    // blank ones are dropped so the model doesn't accrete empty strings.
+    const description = definition.description?.trim()
+    if (description) definition.description = description
+    else delete definition.description
     const options = fieldEditor.optionsText
       .split(',')
       .map((option) => option.trim())
@@ -179,16 +176,20 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
 
     let fieldId = fieldEditor.fieldId
     if (!fieldId) {
-      fieldId = toFieldId(
-        definition.name,
-        new Set(model.order.map((id) => id.toLowerCase())),
+      // New field: the reference id comes from the (editable) draft, which
+      // defaulted from the display name. Validate before it becomes a key.
+      const id = fieldEditor.idDraft.trim()
+      const idError = validateDatasetFieldId(
+        id,
+        new Set(model.order.map((existing) => existing.toLowerCase())),
       )
-      if (!fieldId) {
-        return void enqueueSnackbar('Field name must start with a letter', {
+      if (idError) {
+        return void enqueueSnackbar(idError, {
           variant: 'warning',
           persist: false,
         })
       }
+      fieldId = id
     } else if (
       recordCount > 0 &&
       model.fields[fieldId] &&
@@ -284,6 +285,16 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
   }, [dataset, model, names, firestore, hostId, orgId, enqueueSnackbar, onClose])
 
   const editorDefinition = fieldEditor?.definition
+  // Reference ID editing (AGL-578): the id is editable only while creating a
+  // field; live-validate the draft so the input and Save button can react.
+  const isNewField = fieldEditor != null && fieldEditor.fieldId == null
+  const fieldIdError =
+    fieldEditor && isNewField
+      ? validateDatasetFieldId(
+          fieldEditor.idDraft,
+          new Set(model.order.map((id) => id.toLowerCase())),
+        )
+      : null
 
   return (
     <>
@@ -335,16 +346,27 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
                     borderRadius: 1,
                   }}
                 >
-                  <Typography variant="body2" sx={{ flex: 1 }} noWrap>
-                    {field.name}
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      color="text.secondary"
-                    >
-                      {` · ${fieldId}`}
+                  <Stack sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" noWrap>
+                      {field.name}
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        {` · ${fieldId}`}
+                      </Typography>
                     </Typography>
-                  </Typography>
+                    {field.description ? (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        noWrap
+                      >
+                        {field.description}
+                      </Typography>
+                    ) : null}
+                  </Stack>
                   <Chip
                     size="small"
                     label={DATASET_FIELD_TYPE_LABELS[field.type] ?? field.type}
@@ -417,6 +439,58 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
             label="Display name"
             value={editorDefinition?.name ?? ''}
             autoFocus
+            onChange={(event) => {
+              const name = event.target.value
+              setFieldEditor((prev) => {
+                if (!prev) return prev
+                const next = {
+                  ...prev,
+                  definition: { ...prev.definition, name },
+                }
+                // The reference id follows the display name until the user
+                // edits it (new fields only) — AGL-578.
+                if (prev.fieldId == null && !prev.idTouched) {
+                  next.idDraft = defaultDatasetFieldId(
+                    name,
+                    new Set(model.order.map((id) => id.toLowerCase())),
+                  )
+                }
+                return next
+              })
+            }}
+            sx={{ mt: 1 }}
+            helperText="Shown to people editing records and wherever the field appears"
+          />
+          <TextField
+            size="small"
+            label="Reference ID"
+            value={
+              isNewField
+                ? (fieldEditor?.idDraft ?? '')
+                : (fieldEditor?.fieldId ?? '')
+            }
+            disabled={!isNewField}
+            onChange={(event) =>
+              setFieldEditor((prev) =>
+                prev
+                  ? { ...prev, idDraft: event.target.value, idTouched: true }
+                  : prev,
+              )
+            }
+            error={Boolean(fieldIdError)}
+            helperText={
+              isNewField
+                ? (fieldIdError ??
+                  'Stable key used in bindings ({{item.id}}), forms, and imports. Auto-filled from the display name — edit to override. Fixed once the field is created.')
+                : 'Reference IDs are stable keys and cannot change after creation'
+            }
+          />
+          <TextField
+            size="small"
+            label="Description"
+            multiline
+            minRows={2}
+            value={editorDefinition?.description ?? ''}
             onChange={(event) =>
               setFieldEditor((prev) =>
                 prev
@@ -424,18 +498,13 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
                       ...prev,
                       definition: {
                         ...prev.definition,
-                        name: event.target.value,
+                        description: event.target.value,
                       },
                     }
                   : prev,
               )
             }
-            sx={{ mt: 1 }}
-            helperText={
-              fieldEditor?.fieldId
-                ? `Field id "${fieldEditor.fieldId}" is a stable key and cannot change`
-                : 'The field id is derived from this once, then never changes'
-            }
+            helperText="What this field is for — shown as a hint wherever the field appears"
           />
           <TextField
             select
@@ -639,24 +708,6 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
           />
           <TextField
             size="small"
-            label="Description"
-            value={editorDefinition?.description ?? ''}
-            onChange={(event) =>
-              setFieldEditor((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      definition: {
-                        ...prev.definition,
-                        description: event.target.value,
-                      },
-                    }
-                  : prev,
-              )
-            }
-          />
-          <TextField
-            size="small"
             label="Default value"
             value={String(editorDefinition?.default ?? '')}
             onChange={(event) =>
@@ -760,7 +811,7 @@ export function DatasetSchemaDialog(props: DatasetSchemaDialogProps) {
           <Button
             variant="contained"
             color="secondary"
-            disabled={!editorDefinition?.name.trim()}
+            disabled={!editorDefinition?.name.trim() || Boolean(fieldIdError)}
             onClick={handleFieldSave}
           >
             {fieldEditor?.fieldId ? 'Save field' : 'Add field'}

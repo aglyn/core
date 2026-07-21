@@ -16,7 +16,7 @@
  */
 
 import type * as Aglyn from '@aglyn/aglyn/server'
-import type { CollectionContent } from '../../../utils/get-collection-content'
+import type { CollectionContent } from '@aglyn/tenant-runtime/get-collection-content'
 
 /**
  * Composed page payload the server route hands to the client renderer
@@ -32,6 +32,14 @@ export interface Props {
     }
   }
   nodes: Record<Aglyn.NodeId, Aglyn.NodeSchema> | null
+  /**
+   * Data a site-page resolver or enricher already loaded on the server for
+   * this page, keyed by plugin (AGL-659). Reaches blocks through
+   * `SiteContext.pageData` so they can render primary content during SSR
+   * instead of fetching it in an effect, and feeds server-side structured
+   * data (AGL-660).
+   */
+  pageData?: Record<string, unknown>
   /** Org-enabled site plugins the client must load pre-canvas (AGL-417). */
   enabledPlugins?: string[]
   /**
@@ -58,7 +66,7 @@ export interface Props {
   protectedScreen?: boolean
   /** Members-only screen (AGL-109): nodes arrive via /api/membership. */
   memberScreen?: boolean
-  /** Membership form route (AGL-109): 'signin' | 'signup'. */
+  /** Membership form route (AGL-109/552): 'signin' | 'signup' | 'recover'. */
   membershipPage?: string
   /** Rendered as the custom not-found screen (noindex, AGL-87). */
   notFoundFallback?: boolean

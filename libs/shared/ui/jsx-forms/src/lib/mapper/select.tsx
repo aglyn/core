@@ -157,12 +157,17 @@ function InternalSelect<T = OptionValue>({
   onChange,
   onFocus,
   onBlur,
+  help,
   FormFieldGridProps = {},
   TextFieldProps: { inputProps: textFieldInputProps, ...TextFieldProps } = {},
   inputProps = {},
   isClearable,
   isDisabled,
   loadingText = 'Loading...',
+  // @data-driven-forms/common always injects classNamePrefix (a
+  // react-select concern) into its SelectComponent; keep it out of the
+  // Autocomplete spread so it never reaches the DOM (AGL-590).
+  classNamePrefix: _classNamePrefix,
   ...rest
 }: InternalSelectProps<T>) {
   const invalid = validationError(meta, validateOnMount)
@@ -174,7 +179,7 @@ function InternalSelect<T = OptionValue>({
   )
 
   return (
-    <FormFieldGrid {...FormFieldGridProps}>
+    <FormFieldGrid help={help} {...FormFieldGridProps}>
       <Autocomplete
         filterSelectedOptions={hideSelectedOptions}
         disabled={isDisabled}

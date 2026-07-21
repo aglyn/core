@@ -22,6 +22,9 @@ import { Button, Stack, TextField, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useHost, useUser } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../constants/docs-links'
+import { buildRoute, Route } from '../constants/route-links'
+import { useOrgSlug } from '../hooks/use-org-scope'
 
 /**
  * Delete site (AGL-488): site-admin-only. A single site is deleted
@@ -33,6 +36,7 @@ export function DeleteSiteCard(props: { hostId: string }) {
   const { hostId } = props
   const { data: user } = useUser()
   const router = useRouter()
+  const orgSlug = useOrgSlug()
   const { enqueueSnackbar } = useSnackbar()
   const { confirm } = useConfirmationContext()
   const {
@@ -76,7 +80,9 @@ export function DeleteSiteCard(props: { hostId: string }) {
         throw new Error(payload?.error ?? 'Delete failed')
       }
       enqueueSnackbar(`"${siteName}" deleted`, { variant: 'success' })
-      router.push('/hosts')
+      // The sites list moved under the org slug (AGL-621); bare `/hosts` is
+      // no longer a route, so deleting a site landed on a 404.
+      router.push(buildRoute(Route.HOST_LIST, { orgSlug }))
     } catch (error: any) {
       enqueueSnackbar(error?.message ?? 'Could not delete the site', {
         variant: 'error',
@@ -87,7 +93,17 @@ export function DeleteSiteCard(props: { hostId: string }) {
   }
 
   return (
-    <CardDisplay header={'Delete site'} contentGutterX contentGutterY>
+    <CardDisplay
+      header={'Delete site'}
+      help={docsHelp('downgradingAndCanceling', {
+        anchor: '#deleting-a-single-site',
+        excerpt:
+          'Deleting a site is immediate and permanent — export a backup ' +
+          'first if you might want it back.',
+      })}
+      contentGutterX
+      contentGutterY
+    >
       <Stack spacing={2} sx={{ maxWidth: 480 }}>
         <Typography variant="body2" color="text.secondary">
           {'Permanently delete this site — its screens, media, and settings. ' +

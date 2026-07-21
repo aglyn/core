@@ -10,7 +10,7 @@ A **model** is the shape of a dataset — its fields and their types. Records ar
 against it, so your data stays clean.
 
 :::info Plan availability
-**Pro**. Free sites get a limited number of datasets; add-ons raise the cap.
+**Starter** and above. Free plans have no data store; add-ons raise the dataset cap.
 :::
 
 ![The data page with a dataset open](/img/datasets/data-page.png)
@@ -19,8 +19,24 @@ against it, so your data stays clean.
 
 1. In **Data**, create a dataset and open the **schema dialog**.
 2. Add **typed fields** — text, number, date, reference, and more.
-3. Save. The model is backed by the site's `dod.ts` blueprint at runtime, so records are
-   validated on the way in.
+3. Save. The model is stored on the dataset, and records are validated against it on
+   the way in.
+
+### Display name vs reference ID
+
+Every field has two names:
+
+- **Display name** — the human label shown in the record editor, table headers, and
+  anywhere the field appears. Rename it any time.
+- **Reference ID** — the stable key used in [bindings](../../building-sites/bindings/overview.md)
+  (`{{item.reference_id}}`), form field mappings, and CSV import/export.
+
+When you create a field, the Reference ID **auto-fills from the display name** (for
+example, *Roast preference* → `roast_preference`). Edit it in the same dialog to set your
+own — handy when you want a short, code-friendly key that differs from the label. Once the
+field is created the ID is **fixed**: records, bindings, and forms all point at it, so it
+can't change without orphaning that data. Pick it deliberately, then rename the display
+name freely afterward.
 
 ## Edit records
 
@@ -33,6 +49,10 @@ consistent.
 - Model the data first, then bind it — a clean model makes [repeatable
   components](overview.md#repeatable-components) and
   [bindings](../../building-sites/bindings/overview.md) straightforward.
+- Give fields a **description** in the schema dialog — it appears as a hint in
+  the record editor, as a tooltip on table headers, and under the field's name
+  in the schema dialog itself. See
+  [naming & describing fields](../../guides/datasets-and-schema.md#naming--describing-fields).
 - Use a **reference** field to link records; see [relations](relations.md).
 
 ## Related

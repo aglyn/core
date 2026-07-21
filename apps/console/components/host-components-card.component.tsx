@@ -29,10 +29,26 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { collection, doc, limit, query, updateDoc } from 'firebase/firestore'
+import * as Aglyn from '@aglyn/aglyn'
+import {
+  collection,
+  doc,
+  limit,
+  query,
+  setDoc,
+  updateDoc,
+} from 'firebase/firestore'
+import { useRouter } from 'next/navigation'
+import { buildRoute, Route } from '../constants/route-links'
+import { useOrgSlug } from '../hooks/use-org-scope'
+import { useHostSubdomain } from './host-id-provider'
 import { useCallback, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
+import { docsHelp } from '../constants/docs-links'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
+import SaveAsTemplateDialog, {
+  type SaveAsTemplateSource,
+} from './templates/save-as-template-dialog.component'
 
 export interface HostComponentsCardProps {
   hostId: string
@@ -72,6 +88,9 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
   // Community publish (AGL-44): posts to the server-side publish API —
   // sanitization/allowlisting happen there; clients cannot create listings.
   const { data: user } = useUser()
+  const router = useRouter()
+  const orgSlug = useOrgSlug()
+  const host = useHostSubdomain()
   const [publisher, setPublisher] = useState<{
     id: string
     name: string
@@ -80,6 +99,9 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     price: string
     busy?: boolean
   } | null>(null)
+  // Save as template (AGL-668) — same dialog as screens and layouts.
+  const [saveTemplateFor, setSaveTemplateFor] =
+    useState<SaveAsTemplateSource | null>(null)
 
   const handlePublishConfirm = useCallback(async () => {
     if (!publisher || !publisher.name.trim() || publisher.busy) return
@@ -138,6 +160,69 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
     enqueueSnackbar('Component updated', { variant: 'success', persist: false })
   }, [editor, firestore, hostId, enqueueSnackbar])
 
+  /**
+   * Open a component in its own besigner (AGL-680).
+   *
+   * Components that predate the standalone editor have no `versionId` —
+   * they were only ever edited from inside a screen. Opening one creates
+   * version 1 from whatever is published on the doc, so nothing needs
+   * migrating up front and a component nobody opens stays untouched.
+   */
+  const [opening, setOpening] = useState<string | null>(null)
+  const handleOpenInBesigner = useCallback(
+    async (definition: any) => {
+      if (opening) return
+      setOpening(definition.$id)
+      try {
+        let versionId = definition.versionId as string | undefined
+        if (!versionId) {
+          versionId = Aglyn.createResourceUid()
+          const timestamp = Timestamp.now()
+          await setDoc(
+            doc(
+              firestore,
+              'hosts',
+              hostId,
+              'components',
+              definition.$id,
+              'versions',
+              versionId,
+            ),
+            {
+              componentId: definition.$id,
+              hostId,
+              displayName: 'Initial version',
+              rootId: definition.rootId ?? null,
+              nodes: definition.nodes ?? {},
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            },
+          )
+          await updateDoc(
+            doc(firestore, 'hosts', hostId, 'components', definition.$id),
+            { versionId, updatedAt: timestamp },
+          )
+        }
+        router.push(
+          buildRoute(Route.COMPONENT_BESIGNER, {
+            orgSlug,
+            host,
+            componentId: definition.$id,
+            versionId,
+          }),
+        )
+      } catch (error) {
+        enqueueSnackbar(
+          error instanceof Error ? error.message : 'Could not open the component',
+          { variant: 'error', allowDuplicate: true },
+        )
+      } finally {
+        setOpening(null)
+      }
+    },
+    [opening, firestore, hostId, orgSlug, host, router, enqueueSnackbar],
+  )
+
   const handleDelete = useCallback(
     (definition: any) => async () => {
       const confirmed = await confirm({
@@ -165,7 +250,12 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
   )
 
   return (
-    <CardDisplay header={'Reusable components'} contentGutterX contentGutterY>
+    <CardDisplay
+      header={'Reusable components'}
+      help={docsHelp('components', { anchor: '#manage' })}
+      contentGutterX
+      contentGutterY
+    >
       {components.length === 0 ? (
         <Typography variant="body2" color="text.secondary">
           {'Select an element in the besigner and choose "Save as reusable ' +
@@ -200,7 +290,15 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
                   })
                 }
               >
-                {'Edit'}
+                {'Rename'}
+              </Button>
+              <Button
+                size="small"
+                disabled={opening === definition.$id}
+                aria-label={`Open ${definition.displayName ?? definition.$id} in besigner`}
+                onClick={() => void handleOpenInBesigner(definition)}
+              >
+                {opening === definition.$id ? 'Opening…' : 'Open in besigner'}
               </Button>
               <Button
                 size="small"
@@ -215,6 +313,26 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
                 }
               >
                 {'Publish'}
+              </Button>
+              {/* Unlike screens and layouts, a component definition holds
+                  its own nodes — there is no version doc to fetch. */}
+              <Button
+                size="small"
+                onClick={() =>
+                  setSaveTemplateFor({
+                    kind: 'component',
+                    displayName: definition.displayName ?? '',
+                    loadNodes: async () =>
+                      definition.nodes
+                        ? {
+                            nodes: definition.nodes,
+                            rootId: definition.rootId,
+                          }
+                        : null,
+                  })
+                }
+              >
+                {'Save as template'}
               </Button>
               <Button
                 size="small"
@@ -358,6 +476,11 @@ export function HostComponentsCard(props: HostComponentsCardProps) {
           </Button>
         </DialogActions>
       </Dialog>
+      <SaveAsTemplateDialog
+        hostId={hostId}
+        source={saveTemplateFor}
+        onClose={() => setSaveTemplateFor(null)}
+      />
     </CardDisplay>
   )
 }

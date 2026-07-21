@@ -19,11 +19,13 @@ import * as Aglyn from '@aglyn/aglyn'
 import * as Besigner from '@aglyn/besigner'
 import { type NodeId } from '@aglyn/aglyn'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
-import { useCallback } from 'react'
+import { useCallback, useContext } from 'react'
 import {
   type ElementDrawerOptions,
   useElementDrawerContext,
 } from '../contexts/element-drawer-context'
+import { InteractionsContext } from '../contexts/interactions-context'
+import { buildPresetInteractionDrafts } from '../utils/preset-interactions'
 
 export interface UseAddElementCallbackOptions {
   onComplete?: (data: unknown) => void
@@ -39,6 +41,7 @@ type Response = (
 
 export function useAddElementDrawerCallback(): Response {
   const { elementDrawer } = useElementDrawerContext()
+  const { onCreatePresetInteractions } = useContext(InteractionsContext)
   // Null-safe: surfaces render without a snackbar provider in tests.
   const { enqueueSnackbar } = useSnackbar() ?? {}
 
@@ -51,7 +54,20 @@ export function useAddElementDrawerCallback(): Response {
           return res.option
         })
         .then((preset) => {
-          const parentNode = parent || Aglyn.canvas.getNode(Aglyn.NODE_ROOT_ID)!
+          // Resolve where the new node attaches against the live canvas.
+          // Callers wire the current selection in as `parent` (the console
+          // INSERT menu passed the raw menu click event for a while). A
+          // container target receives the node as a child; a leaf selection
+          // (a screen link, button, icon — no children slot) instead places
+          // the node as its next sibling, so it lands somewhere it can
+          // render instead of nesting where drag-and-drop would then refuse
+          // to move it. A non-node — or a node deleted while the picker was
+          // open — falls back to the document root; otherwise the constraint
+          // check runs against a phantom target and the created node is
+          // pushed onto a detached `nodes` array, never reaching the
+          // hierarchy, canvas, or saves (AGL-537).
+          const { parent: parentNode, index } =
+            Aglyn.canvas.resolveInsertTarget(parent)
 
           // Inserting follows the same lineal placement rules as dnd —
           // without this, forbidden arrangements get created here that
@@ -87,7 +103,18 @@ export function useAddElementDrawerCallback(): Response {
             return undefined
           }
 
-          const node = Aglyn.canvas.addNodeFromPreset(preset, parentNode, NaN)
+          const node = Aglyn.canvas.addNodeFromPreset(preset, parentNode, index)
+
+          // Preset-declared interactions (AGL-589): resolve the authored
+          // presetRef markers against the freshly minted subtree and hand
+          // ready drafts to the host app to validate + persist — the
+          // designer stays storage-agnostic (same split as the builder).
+          if (node && preset.interactions?.length && onCreatePresetInteractions) {
+            const drafts = buildPresetInteractionDrafts(preset, node)
+            if (drafts.length) {
+              onCreatePresetInteractions({ interactions: drafts })
+            }
+          }
 
           // const templateData = {
           //   ...(data as any),
@@ -107,7 +134,7 @@ export function useAddElementDrawerCallback(): Response {
           if (typeof err !== 'string') console.error(err)
         })
     },
-    [elementDrawer, enqueueSnackbar],
+    [elementDrawer, enqueueSnackbar, onCreatePresetInteractions],
   )
 }
 

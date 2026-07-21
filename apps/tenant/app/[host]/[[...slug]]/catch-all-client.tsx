@@ -23,6 +23,7 @@ import { observer } from 'mobx-react-lite'
 // next/head is a no-op in the App Router; the <Head> blocks below are inert
 // and real metadata comes from the route's generateMetadata (AGL-398).
 import Head from 'next/head'
+import Script from 'next/script'
 import {
   type CSSProperties,
   use,
@@ -33,6 +34,7 @@ import {
 } from 'react'
 import { loadSiteRealmPlugins } from '../../../utils/realm-plugins.client'
 import { sitePluginLoader } from '../../../utils/site-plugin-loader'
+import MembershipPage from './membership-page'
 import type { Props } from './types'
 
 const CatchAllPage = observer(function CatchAllPage(props: Props) {
@@ -104,8 +106,6 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       active = false
     }
   }, [props.memberScreen, memberHostId, memberScreenId])
-  // Membership forms (AGL-109).
-  const [memberFormError, setMemberFormError] = useState<string | null>(null)
 
   // Fill the canvas DURING render, not only in an effect: the server
   // otherwise emits an empty page (crawlers see nothing) and hydration
@@ -200,89 +200,34 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
       ? `${canonicalBase}${Aglyn.screenRoutePathToUrl(screenPath)}`
       : undefined
 
-  const site = useMemo(() => ({ hostId: host?.$id }), [host?.$id])
+  // `pageData` carries whatever the site-page resolver already loaded on the
+  // server for this path (AGL-659), so blocks can render their primary
+  // content during SSR instead of fetching it in an effect.
+  const site = useMemo(
+    () => ({
+      hostId: host?.$id,
+      pageData: props.pageData as Record<string, unknown> | undefined,
+    }),
+    [host?.$id, props.pageData],
+  )
 
   // Password-protected screens render an unlock form; the composed nodes
   // arrive from /api/protection/unlock after verification (AGL-87).
-  // Membership sign-in/up forms (AGL-109).
-  if (props.membershipPage) {
-    const isSignup = props.membershipPage === 'signup'
+  // Membership sign-in/up/recovery (AGL-109/552): the theme-wrapped
+  // built-in forms (AGL-553). A designated auth screen (host `authScreens`)
+  // arrives WITH composed nodes and falls through to the normal canvas
+  // render below instead.
+  if (props.membershipPage && !nodes) {
     return (
-      <div style={{ maxWidth: 420, margin: '15vh auto', padding: 24 }}>
+      <>
         <Head>
-          <title>{isSignup ? 'Sign up' : 'Sign in'}</title>
           <meta key="robots" name="robots" content="noindex" />
         </Head>
-        <h1 style={{ fontSize: 22 }}>
-          {isSignup ? 'Create your account' : 'Welcome back'}
-        </h1>
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault()
-            setMemberFormError(null)
-            const form = new FormData(event.currentTarget)
-            const response = await fetch(
-              isSignup ? '/api/membership/register' : '/api/membership/login',
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  hostId: props.data?.host?.$id,
-                  email: String(form.get('email') ?? ''),
-                  password: String(form.get('password') ?? ''),
-                  ...(isSignup
-                    ? { displayName: String(form.get('displayName') ?? '') }
-                    : {}),
-                }),
-              },
-            )
-            if (!response.ok) {
-              const payload = await response.json().catch(() => ({}))
-              return setMemberFormError(
-                payload?.error ??
-                  (isSignup ? 'Sign-up failed' : 'Sign-in failed'),
-              )
-            }
-            window.location.href = '/'
-          }}
-        >
-          {isSignup ? (
-            <input
-              name="displayName"
-              placeholder="Name"
-              style={{ width: '100%', padding: 8, marginBottom: 8 }}
-            />
-          ) : null}
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            style={{ width: '100%', padding: 8, marginBottom: 8 }}
-          />
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={isSignup ? 8 : undefined}
-            placeholder="Password"
-            style={{ width: '100%', padding: 8 }}
-          />
-          <button type="submit" style={{ marginTop: 12, padding: '8px 16px' }}>
-            {isSignup ? 'Sign up' : 'Sign in'}
-          </button>
-          {memberFormError ? (
-            <p style={{ color: '#c62828' }}>{memberFormError}</p>
-          ) : null}
-        </form>
-        <p style={{ opacity: 0.8 }}>
-          {isSignup ? (
-            <a href="/signin">{'Already a member? Sign in'}</a>
-          ) : (
-            <a href="/signup">{'New here? Create an account'}</a>
-          )}
-        </p>
-      </div>
+        <MembershipPage
+          page={props.membershipPage}
+          hostId={props.data?.host?.$id}
+        />
+      </>
     )
   }
 
@@ -395,8 +340,10 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
     )
   }
 
-  // Collection surfaces render outside the canvas system (AGL-81).
-  if (props.content?.collection) {
+  // Legacy collection surface (AGL-81): only when AGL-551 could compose
+  // neither a template screen nor the themed built-in (`nodes` present means
+  // the collection page renders through the normal canvas path below).
+  if (props.content?.collection && !nodes) {
     const { collection, entries, entry } = props.content
     const contentTitle = entry?.title ?? collection.displayName
     const contentFullTitle =
@@ -604,27 +551,35 @@ const CatchAllPage = observer(function CatchAllPage(props: Props) {
         {props.notFoundFallback || props.maintenanceFallback || unlisted ? (
           <meta key="robots" name="robots" content="noindex" />
         ) : null}
-        {/* Google Analytics (AGL-138): tenant-configured measurement id. */}
-        {gaMeasurementId ? (
-          <>
-            <script
-              key="ga-src"
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
-            />
-            <script
-              key="ga-init"
-              dangerouslySetInnerHTML={{
-                __html:
-                  'window.dataLayer=window.dataLayer||[];' +
-                  'function gtag(){dataLayer.push(arguments);}' +
-                  "gtag('js', new Date());" +
-                  `gtag('config', '${gaMeasurementId}');`,
-              }}
-            />
-          </>
-        ) : null}
       </Head>
+      {/* Google Analytics (AGL-138/661): tenant-configured measurement id.
+          This used to live inside the <Head> above, which is `next/head` and
+          therefore INERT under the App Router — so every site that configured
+          GA collected nothing. `next/script` renders for real, and Next
+          stamps it with the CSP nonce from the request header that
+          middleware sets, so it keeps working when AGL-523 flips the policy
+          from report-only to enforcing. */}
+      {gaMeasurementId ? (
+        <>
+          <Script
+            id="ga-src"
+            strategy="afterInteractive"
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+          />
+          <Script id="ga-init" strategy="afterInteractive">
+            {'window.dataLayer=window.dataLayer||[];' +
+              'function gtag(){dataLayer.push(arguments);}' +
+              "gtag('js', new Date());" +
+              `gtag('config', '${gaMeasurementId}');`}
+          </Script>
+        </>
+      ) : null}
+      {/* Shared hidden class (AGL-562): ships in the SSR HTML so
+          elements authors start hidden (interaction show/hide targets)
+          paint hidden from the first frame — no flash before the
+          automations engine hydrates. The besigner canvas deliberately
+          omits this rule so hidden elements stay editable. */}
+      <style>{Aglyn.ELEMENT_HIDDEN_STYLE_TEXT}</style>
       {/* Plugin site runtimes (AGL-419): experiment runners, automation
           engines, overlays — each registered from its plugin's site
           surface and reading back the page-props slices its own server

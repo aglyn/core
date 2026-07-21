@@ -22,6 +22,7 @@ import {
   FormSpy,
   type FormTemplateRenderProps,
   FIELD_MAP_CHECKBOX,
+  FIELD_MAP_COLOR_PICKER,
   FIELD_MAP_ICON_PICKER,
   simpleComponentMapper,
   useFormApi,
@@ -44,8 +45,6 @@ import {
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import FormControl from '@mui/material/FormControl'
-import ListSubheader from '@mui/material/ListSubheader'
-import MuiMenu from '@mui/material/Menu'
 import MuiMenuItem from '@mui/material/MenuItem'
 import { Grid } from '@mui/material'
 import { observer } from 'mobx-react-lite'
@@ -53,6 +52,12 @@ import * as Besigner from '@aglyn/besigner'
 import { forwardRef, memo, type SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AiAssistContext } from '../contexts/ai-assist-context'
 import { BindingPickerContext } from '../contexts/binding-picker-context'
+import { InsertTokenMenu } from './insert-token-menu.component'
+import {
+  TokenTextField,
+  TOKEN_TEXT_FIELD_COMPONENT,
+} from './token-text-field.component'
+import useInsertTokenOptions from '../hooks/use-insert-token-options'
 import {
   InteractionsContext,
   nodeElementSelector,
@@ -62,19 +67,78 @@ import { MediaPickerContext } from '../contexts/media-picker-context'
 import { ComponentPromotionContext } from '../contexts/component-promotion-context'
 import useDeleteElementCallback from '../hooks/use-delete-element-callback'
 
-// Subscribes to form value changes via FormSpy and auto-submits when dirty.
-// This is needed because MUI Select uses a Portal, so its onChange never
-// bubbles through the <form> element as a DOM event.
+// Attribute edits commit to the node model on a short debounce, never once
+// per keystroke (AGL-567). A commit runs `canvas.updateNodeProps`, which calls
+// `saveHistory` — deep-cloning the ENTIRE node map onto the undo stack — and
+// mutates the observable props the canvas tree renders from. Firing that on
+// every character of a long value (a 30-plus-character External URL is the
+// reproducer) floods the main thread with full-tree clones and full-tree
+// re-renders faster than it can drain them, until the renderer process is
+// killed ("Aw, Snap"). Short labels never typed enough characters to reach the
+// tipping point, which is why only long URLs crashed. The data-driven-forms
+// field keeps the typed value in its own local state, so typing stays
+// responsive while the (expensive) model commit is deferred.
+export const ATTRIBUTE_COMMIT_DEBOUNCE_MS = 250
+
+/**
+ * Debounces a commit callback and exposes an imperative `flush`. Rapid
+ * `schedule()` calls (keystrokes) coalesce into a single commit; `flush()`
+ * forces a pending commit out immediately (focus leaving a field, an explicit
+ * Save), and a pending commit is also flushed on unmount (panel close) so an
+ * in-flight edit is never dropped. `commit` may change identity between
+ * renders (react-final-form's `handleSubmit` does) — the latest is always used
+ * without resubscribing the timer.
+ */
+export function useDebouncedCommit(
+  commit: () => void,
+  delay: number = ATTRIBUTE_COMMIT_DEBOUNCE_MS,
+) {
+  const commitRef = useRef(commit)
+  commitRef.current = commit
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingRef = useRef(false)
+
+  const flush = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+    if (pendingRef.current) {
+      pendingRef.current = false
+      commitRef.current()
+    }
+  }, [])
+
+  const schedule = useCallback(() => {
+    pendingRef.current = true
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null
+      pendingRef.current = false
+      commitRef.current()
+    }, delay)
+  }, [delay])
+
+  // Flush any pending edit when the form tears down (panel close) so the last
+  // keystrokes are never lost.
+  useEffect(() => flush, [flush])
+
+  return { schedule, flush }
+}
+
+// Subscribes to form value changes via FormSpy and schedules a debounced
+// commit when dirty. The spy is needed because MUI Select uses a Portal, so
+// its onChange never bubbles through the <form> element as a DOM event.
 const AutoSaveOnChange = memo(function AutoSaveOnChange({
   values,
   pristine,
   valid,
-  onSubmit,
+  onSchedule,
 }: {
   values: unknown
   pristine: boolean
   valid: boolean
-  onSubmit: () => void
+  onSchedule: () => void
 }) {
   const isFirstRender = useRef(true)
   useEffect(() => {
@@ -83,7 +147,7 @@ const AutoSaveOnChange = memo(function AutoSaveOnChange({
       return
     }
     if (!pristine && valid) {
-      onSubmit()
+      onSchedule()
     }
   }, [values]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
@@ -99,12 +163,18 @@ export const ElementPropsFormTemplate = forwardRef<
 >((props, ref) => {
   const { formFields, schema, ...rest } = props
   const { handleSubmit } = useFormApi()
+  const { schedule, flush } = useDebouncedCommit(handleSubmit)
   return (
     <form
       ref={ref}
       onSubmit={handleSubmit}
       noValidate
       {...rest}
+      // Focus leaving any field (clicking another node, tabbing away, pressing
+      // Save) forces the pending debounced commit out immediately, so an edit
+      // is never stranded in the debounce window while switching selection
+      // (AGL-567). Placed after {...rest} so this handler always wins.
+      onBlur={flush}
     >
       {schema.title}
       <Grid spacing={2} container>
@@ -116,7 +186,7 @@ export const ElementPropsFormTemplate = forwardRef<
             values={values}
             pristine={pristine}
             valid={valid}
-            onSubmit={handleSubmit}
+            onSchedule={schedule}
           />
         )}
       </FormSpy>
@@ -151,11 +221,17 @@ export interface ElementPropsFormProps extends FormRendererProps {
 
 // Attribute editors available to canvas component schemas: the simple set
 // plus pickers components actually declare (icon picker AGL-146, checkbox
-// AGL-162).
-const elementPropsComponentMapper = {
+// AGL-162, color picker AGL-584 — the email blocks declare 5 color
+// attributes and an unregistered type makes the form renderer throw,
+// which blanked the email designer's whole attributes panel).
+export const elementPropsComponentMapper = {
   ...simpleComponentMapper,
   [Aglyn.FieldComponentType.ICON_PICKER]: FIELD_MAP_ICON_PICKER,
   [Aglyn.FieldComponentType.CHECKBOX]: FIELD_MAP_CHECKBOX,
+  [Aglyn.FieldComponentType.COLOR_PICKER]: FIELD_MAP_COLOR_PICKER,
+  // Pill-rendering editor for token-capable free-text attributes
+  // (AGL-586); the attributes memo rewrites TEXT_FIELD/TEXTAREA to it.
+  [TOKEN_TEXT_FIELD_COMPONENT]: TokenTextField,
 }
 
 const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
@@ -171,6 +247,75 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     // pickers (AGL-343/344) resolve the same way from EntityPickerContext.
     const { screens, labels } = useContext(Aglyn.ScreenLinkContext)
     const entityOptions = useContext(Aglyn.EntityPickerContext)
+    // Canvas-node options for NODE_SELECT attributes (AGL-557): every
+    // other element on the canvas, labeled by component name + a text
+    // snippet, with a short id suffix to tell repeats apart. The edited
+    // node itself is excluded (revealing yourself is never meaningful).
+    const nodeOptions = useMemo(() => {
+      const wantsNodes = (rawAttributes ?? []).some(
+        (field) =>
+          field.component === Aglyn.FieldComponentType.NODE_SELECT,
+      )
+      if (!wantsNodes) return []
+      const canvasNodes = (Aglyn.canvas.toJSON().nodes ?? {}) as Record<
+        string,
+        any
+      >
+      return Object.entries(canvasNodes)
+        .filter(([id]) => id && id !== node?.$id)
+        .map(([id, candidate]) => {
+          const displayName =
+            Aglyn.components.getSchema(candidate?.componentId)
+              ?.displayName ??
+            candidate?.componentId ??
+            'Element'
+          const text =
+            typeof candidate?.props?.children === 'string'
+              ? candidate.props.children.trim().slice(0, 24)
+              : ''
+          return {
+            value: id,
+            label: `${displayName}${text ? ` "${text}"` : ''} · ${id.slice(
+              0,
+              6,
+            )}`,
+          }
+        })
+        .sort((a, b) => a.label.localeCompare(b.label))
+    }, [rawAttributes, node?.$id])
+    // Dataset-field selects (AGL-556) list the model fields of the nearest
+    // ancestor's chosen dataset (e.g. the form field's parent form). The
+    // ancestor persists the dataset id; legacy nodes carrying only a name
+    // resolve it by matching the current display labels.
+    const hasDatasetFieldSelect = (rawAttributes ?? []).some(
+      (field) =>
+        field.component === Aglyn.FieldComponentType.DATASET_FIELD_SELECT,
+    )
+    const ancestorDatasetId = useMemo(() => {
+      if (!hasDatasetFieldSelect || !node?.$id) return undefined
+      const nodes = Aglyn.canvas.toJSON().nodes as Record<string, any>
+      let current = nodes[node.$id]
+      for (let hops = 0; current && hops < 100; hops += 1) {
+        const props = current.props ?? {}
+        if (typeof props.datasetId === 'string' && props.datasetId) {
+          return props.datasetId as string
+        }
+        if (typeof props.datasetName === 'string' && props.datasetName) {
+          const byLabel = (entityOptions.datasets ?? []).find(
+            (dataset) => dataset.label === props.datasetName,
+          )
+          if (byLabel) return byLabel.id
+        }
+        current = current.parentId ? nodes[current.parentId] : undefined
+      }
+      return undefined
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hasDatasetFieldSelect, node, entityOptions.datasets])
+    // Insert-picker options + pill display-name inputs (AGL-583/586),
+    // assembled from this node's ancestor context — shared with the
+    // inline text editor via the extracted hook.
+    const { options: insertOptions, labelContext: tokenLabelContext } =
+      useInsertTokenOptions(node)
     const attributes = useMemo(() => {
       const entityListFor = (component: Aglyn.FieldComponentType) => {
         switch (component) {
@@ -186,7 +331,23 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
             return undefined
         }
       }
-      return (rawAttributes ?? []).map((field) => {
+      // Every described attribute gets a help tooltip beside the field
+      // (AGL-600) — the definition's own description, no docs link since
+      // attributes are component-specific.
+      const withAttributeHelp = <T extends Aglyn.AglynAttributeSchema>(
+        field: T,
+      ): T =>
+        field.description && !field['help']
+          ? {
+              ...field,
+              help: {
+                title: field['label'] ?? field.name,
+                excerpt: field.description,
+              },
+            }
+          : field
+
+      return (rawAttributes ?? []).map(withAttributeHelp).map((field) => {
         if (field.component === Aglyn.FieldComponentType.SCREEN_SELECT) {
           return {
             ...field,
@@ -204,6 +365,38 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
             ],
           }
         }
+        if (field.component === Aglyn.FieldComponentType.NODE_SELECT) {
+          // Canvas-element picker (AGL-557), resolved above.
+          return {
+            ...field,
+            component: Aglyn.FieldComponentType.SELECT,
+            options: [{ value: '', label: 'None' }, ...nodeOptions],
+          }
+        }
+        if (
+          field.component === Aglyn.FieldComponentType.DATASET_FIELD_SELECT
+        ) {
+          // Model order, never alphabetized — it mirrors the schema dialog.
+          const modelFields = ancestorDatasetId
+            ? entityOptions.datasetFields?.[ancestorDatasetId] ?? []
+            : []
+          return {
+            ...field,
+            component: Aglyn.FieldComponentType.SELECT,
+            options: [
+              {
+                value: '',
+                label: modelFields.length
+                  ? 'None (match by field name)'
+                  : 'No dataset selected on the form',
+              },
+              ...modelFields.map((modelField) => ({
+                value: modelField.id,
+                label: modelField.label,
+              })),
+            ],
+          }
+        }
         const entities = entityListFor(field.component as any)
         if (entities !== undefined) {
           return {
@@ -217,9 +410,51 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
             ],
           }
         }
+        if (
+          (field.component === Aglyn.FieldComponentType.TEXT_FIELD ||
+            field.component === Aglyn.FieldComponentType.TEXTAREA) &&
+          !(field as any).isReadOnly
+        ) {
+          // Token-capable free-text fields (children, href, src, …)
+          // render through the pill editor (AGL-586): stored `{{...}}`
+          // tokens display as named colored pills, the {x} adornment
+          // inserts at the caret (AGL-583), and raw {{...}} typing keeps
+          // working (it materializes into a pill on blur).
+          return {
+            ...field,
+            component: TOKEN_TEXT_FIELD_COMPONENT,
+            multiline:
+              field.component === Aglyn.FieldComponentType.TEXTAREA,
+            tokenOptions: insertOptions,
+            tokenLabelContext,
+          }
+        }
         return field
+      }).filter((field) => {
+        // Unknown editor types must degrade to a skipped attribute, never
+        // kill the whole form: the renderer throws on unregistered
+        // components, which blanked the email designer's attributes panel
+        // when COLOR_PICKER wasn't mapped (AGL-584).
+        const known = (field.component as string) in elementPropsComponentMapper
+        if (!known && process.env.NODE_ENV !== 'production') {
+          console.warn(
+            `[ElementPropsForm] attribute "${field.name}" uses unregistered ` +
+              `editor "${field.component}" — skipped; register it in ` +
+              'elementPropsComponentMapper.',
+          )
+        }
+        return known
       })
-    }, [rawAttributes, screens, labels, entityOptions])
+    }, [
+      rawAttributes,
+      screens,
+      labels,
+      entityOptions,
+      nodeOptions,
+      ancestorDatasetId,
+      insertOptions,
+      tokenLabelContext,
+    ])
 
     // Reusable-component flows (AGL-35): actions appear only when the host
     // app provides callbacks; locked nodes (layout chrome) never promote.
@@ -243,13 +478,10 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
     )
 
     // Insert binding (AGL-100): appends a {{token}} to the element text.
-    // Options come from the host app (variables + functions); the commit
-    // spreads current props — updateNodeProps REPLACES the props object.
-    const {
-      options: bindingOptions,
-      variables: bindingVariables,
-      functions: bindingFunctions,
-    } = useContext(BindingPickerContext)
+    // Variable/function docs come from the host app; the commit spreads
+    // current props — updateNodeProps REPLACES the props object.
+    const { variables: bindingVariables, functions: bindingFunctions } =
+      useContext(BindingPickerContext)
     const [bindingAnchor, setBindingAnchor] = useState<HTMLElement | null>(
       null,
     )
@@ -278,15 +510,6 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(nodeProps ?? {}), bindingVariables, bindingFunctions])
 
-    // Hosts can have hundreds of variables (AGL-186) — filter as you type.
-    const [bindingSearch, setBindingSearch] = useState('')
-    const visibleBindingOptions = useMemo(() => {
-      const term = bindingSearch.trim().toLowerCase()
-      if (!term) return bindingOptions ?? []
-      return (bindingOptions ?? []).filter((option) =>
-        option.label.toLowerCase().includes(term),
-      )
-    }, [bindingOptions, bindingSearch])
     const handleInsertBinding = useCallback(
       (token: string) => {
         setBindingAnchor(null)
@@ -430,7 +653,7 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                     ))}
                   </Box>
                 ) : null}
-                {bindingOptions?.length && textEditable ? (
+                {insertOptions.length && textEditable ? (
                   <FormControl margin="none" fullWidth>
                     <Button
                       color="secondary"
@@ -442,66 +665,15 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                     >
                       Insert binding
                     </Button>
-                    <MuiMenu
+                    {/* Element-level picker (AGL-100), now serving the
+                        full catalog (AGL-583); appends to the text. */}
+                    <InsertTokenMenu
                       anchorEl={bindingAnchor}
                       open={Boolean(bindingAnchor)}
-                      onClose={() => {
-                        setBindingAnchor(null)
-                        setBindingSearch('')
-                      }}
-                    >
-                      <Box sx={{ px: 1.5, pb: 1 }}>
-                        <TextField
-                          size="small"
-                          placeholder="Search bindings…"
-                          value={bindingSearch}
-                          onChange={(event) =>
-                            setBindingSearch(event.target.value)
-                          }
-                          onKeyDown={(event) => event.stopPropagation()}
-                          autoFocus
-                          fullWidth
-                        />
-                      </Box>
-                      {visibleBindingOptions.length === 0 ? (
-                        <MuiMenuItem disabled>
-                          {'No bindings match'}
-                        </MuiMenuItem>
-                      ) : null}
-                      {visibleBindingOptions.map((option, index) => {
-                        const previous = visibleBindingOptions[index - 1]
-                        return [
-                          option.group && option.group !== previous?.group ? (
-                            <ListSubheader key={`${option.group}-header`}>
-                              {option.group}
-                            </ListSubheader>
-                          ) : null,
-                          <MuiMenuItem
-                            key={option.token}
-                            onClick={() => {
-                              setBindingSearch('')
-                              handleInsertBinding(option.token)
-                            }}
-                          >
-                            <Stack sx={{ minWidth: 0 }}>
-                              <Typography variant="body2" noWrap>
-                                {option.label}
-                              </Typography>
-                              {/* Live value preview (AGL-262). */}
-                              {option.preview ? (
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                  noWrap
-                                >
-                                  {option.preview}
-                                </Typography>
-                              ) : null}
-                            </Stack>
-                          </MuiMenuItem>,
-                        ]
-                      })}
-                    </MuiMenu>
+                      onClose={() => setBindingAnchor(null)}
+                      options={insertOptions}
+                      onInsert={handleInsertBinding}
+                    />
                   </FormControl>
                 ) : null}
                 {onPickMedia && mediaAttributes.length
@@ -617,6 +789,13 @@ const ElementPropsFormRaw = forwardRef<any, ElementPropsFormProps>(
                     >
                       <MuiMenuItem value="elementClick">
                         {'When clicked…'}
+                      </MuiMenuItem>
+                      {/* Hover choreography (AGL-562). */}
+                      <MuiMenuItem value="elementHoverEnter">
+                        {'When hovered…'}
+                      </MuiMenuItem>
+                      <MuiMenuItem value="elementHoverLeave">
+                        {'When hover ends…'}
                       </MuiMenuItem>
                       <MuiMenuItem value="elementVisible">
                         {'When scrolled into view…'}

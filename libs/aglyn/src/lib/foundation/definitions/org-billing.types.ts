@@ -75,10 +75,20 @@ export interface OrgFeatureFlags {
   videoMedia?: boolean
   /** Appointment bookings (AGL-159). */
   bookings?: boolean
+  /**
+   * Basic presentational interactions (AGL-577): menu/drawer open-close,
+   * element show/hide, class toggles, sticky nav, navigation, site
+   * alerts. Included on ALL plans — pure client-side DOM with no server
+   * cost. The `actions` flag below gates the powerful automation steps
+   * (server dispatch, runJs, analytics, overlays, raw HTML).
+   */
+  interactions?: boolean
   /** Event → action automation builder (AGL-148). */
   actions?: boolean
   /** Outbound/inbound webhooks (AGL-149). */
   webhooks?: boolean
+  /** Customer REST API v1 + API keys (AGL-615); Business tier. */
+  apiAccess?: boolean
   /** Whole-site export/backup + restore (AGL-163). */
   siteExport?: boolean
   /** Multilingual sites (AGL-164): locale variants + switcher. */
@@ -122,6 +132,14 @@ export interface OrgEntitlements {
   hostLimit?: number
   screensPerHost?: number
   sharedLayoutsPerHost?: number
+  /** Saved templates per host (AGL-666) — includes marketplace downloads. */
+  templatesPerHost?: number
+  // NOTE (AGL-658): "add-on" means two unrelated things in this codebase.
+  // `seatAddons` below are BILLING capacity — extra managers, hosts, seats —
+  // surfaced in the UI as "plan add-ons". The marketplace sense (installed
+  // plugins, the `orgAddons` slot) is a different concept entirely. The
+  // marketplace owns the bare word; billing copy always qualifies it.
+  // Firestore and Stripe lookup keys stay as they are — they are persisted.
   storagePerHostMb?: number
   totalSiteSizeMb?: number
   membersPerHost?: number
@@ -151,6 +169,10 @@ export interface OrgEntitlements {
   emailSendsPerMonth?: number
   /** Action runs per calendar month (AGL-148). */
   actionRunsPerMonth?: number
+  /** Included customer REST API requests per calendar month (AGL-634);
+   * beyond it, metered overage per 1,000 where the plan prices it. Only
+   * Business/Advanced carry `apiAccess`, so lower tiers are 0. */
+  apiRequestsPerMonth?: number
   /** Dynamic data caps — org-scoped (AGL-239/240): datasets are shared
    * by every host in the org, so counts and size meter per org. */
   datasetsPerOrg?: number
@@ -180,9 +202,12 @@ export interface OrgEntitlements {
 }
 
 /**
- * Paid addon seats (AGL-112) purchased on top of the plan's included seats.
- * The effective seat limit is `included + purchased`, clamped to the plan's
- * hard max — beyond the max the tenant must upgrade.
+ * Paid addon quantities (AGL-112/524) purchased on top of the plan's
+ * included allowances, billed as items on the org's Stripe subscription.
+ * Seat/dataset kinds resolve as `included + purchased` clamped to the
+ * plan's hard max — beyond the max the org must upgrade. Purchases only
+ * count while the subscription is alive (they bill on it); staff grants
+ * live on `entitlements` overrides instead, so the two never collide.
  */
 export interface OrgSeatAddons {
   /** Extra tenant-manager seats. */
@@ -191,6 +216,12 @@ export interface OrgSeatAddons {
   members?: number
   /** Extra org datasets (AGL-132/240); billed monthly per dataset. */
   datasets?: number
+  /** Extra sites beyond the plan's `hostLimit` (AGL-68/524). */
+  hosts?: number
+  /** Extra POS registers beyond the plan's `posRegisters` (AGL-329/524). */
+  posRegisters?: number
+  /** Event Calendar org-wide toggle, 0/1 (AGL-145/524). */
+  eventCalendar?: number
 }
 
 export interface OrgSubscription {
@@ -202,6 +233,12 @@ export interface OrgSubscription {
     | 'incomplete'
     | 'unpaid'
   priceId?: string
+  /**
+   * Billing interval of the plan item (AGL-532), webhook-mirrored: the
+   * Billing page initializes its monthly/annual toggle from it and plan
+   * switches keep it unless the toggle says otherwise.
+   */
+  interval?: 'month' | 'year'
   currentPeriodEnd?: ITimestamp
 }
 

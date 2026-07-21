@@ -19,6 +19,8 @@
 import {
   LISTING_CATEGORIES,
   LISTING_README_MAX_CHARS,
+  listingArtifactType,
+  installTargetsFor,
 } from '../model/community'
 import {
   parseMarkdownLite,
@@ -39,7 +41,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { collection, doc, limit, query, where } from 'firebase/firestore'
+import { collection, doc, getDoc, limit, query, where } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
 import {
   useFirestore,
@@ -48,6 +50,7 @@ import {
   useUser,
 } from '@aglyn/tenant-feature-instance'
 import HubTabs from '@aglyn/shared-ui-next/components/hub-tabs'
+import ListingReviews from './listing-reviews.component'
 import { MenuItem, TextField } from '@mui/material'
 import { useCommunityActions } from '../hooks/use-community-actions'
 
@@ -297,14 +300,36 @@ export function CommunityListingContent({
   const { data: user } = useUser()
   const { enqueueSnackbar } = useSnackbar()
   const { install, buy } = useCommunityActions(hostId)
+  const [installScope, setInstallScope] = useState<'org' | 'host'>('org')
+  // Listings are org-owned (AGL-652) — "did I publish this" is an org
+  // comparison, resolved from the routing mirror like the browse grid.
+  const [viewerOrgId, setViewerOrgId] = useState<string | null>(null)
+  useEffect(() => {
+    let active = true
+    void getDoc(doc(firestore, 'hostIndex', hostId))
+      .then((snapshot) => {
+        if (active) setViewerOrgId((snapshot.get('orgId') as string) ?? null)
+      })
+      .catch(() => undefined)
+    return () => {
+      active = false
+    }
+  }, [firestore, hostId])
 
   const { data: listing, status } = useFirestoreDoc<any>(
     () => doc(firestore, 'communityListings', listingId || '-missing-'),
     [firestore, listingId],
     { idField: '$id' },
   )
+  // Targets this artifact type can actually install to (AGL-656) — only
+  // plugins have an org-scoped pin, so only plugins get a choice.
+  const installTargets = useMemo(
+    () =>
+      listing ? installTargetsFor(listing) : (['host'] as readonly string[]),
+    [listing],
+  )
   const { data: profile } = useFirestoreDoc<any>(
-    () => doc(firestore, 'profiles', listing?.profileId ?? '-anonymous-'),
+    () => doc(firestore, 'publisherProfiles', listing?.profileId ?? '-anonymous-'),
     [firestore, listing?.profileId],
     { idField: '$id' },
   )
@@ -330,7 +355,7 @@ export function CommunityListingContent({
   // subset (version/changelog/trust/hostAbi/date).
   const [versions, setVersions] = useState<ListingVersionEntry[]>([])
   useEffect(() => {
-    if (listing?.type !== 'plugin' || !listingId) return
+    if (!listing || listingArtifactType(listing) !== 'plugin' || !listingId) return
     let active = true
     void fetch(
       `/api/community/listing-versions?listingId=${encodeURIComponent(listingId)}`,
@@ -373,7 +398,7 @@ export function CommunityListingContent({
   const upToDate = install_ && installedVersion >= listing?.latestVersion
   const priceUsd = Number(listing?.priceUsd ?? 0)
   const mustBuy =
-    priceUsd > 0 && !purchased && listing?.profileId !== user?.uid && !install_
+    priceUsd > 0 && !purchased && listing?.profileId !== viewerOrgId && !install_
   const versionHistory: any[] = Array.isArray(listing?.versionHistory)
     ? [...listing.versionHistory].sort((a, b) => b.version - a.version)
     : []
@@ -530,6 +555,32 @@ export function CommunityListingContent({
                             <ListingReadme readme={listing.readme} />
                           </>
                         ) : null}
+                        {/* Install target (AGL-656). Only shown when the
+                            artifact actually HAS a choice — offering "this
+                            whole organization" for a template would be a
+                            lie, since templates only ever land on a site. */}
+                        {installTargets.length > 1 ? (
+                          <TextField
+                            select
+                            size="small"
+                            label="Install to"
+                            value={installScope}
+                            onChange={(event) =>
+                              setInstallScope(event.target.value as 'org' | 'host')
+                            }
+                            helperText={
+                              installScope === 'org'
+                                ? 'Available to every site in this organization. A site can still override it for itself.'
+                                : 'This site only.'
+                            }
+                            sx={{ maxWidth: 360 }}
+                          >
+                            <MenuItem value="org">
+                              {'This organization — all sites'}
+                            </MenuItem>
+                            <MenuItem value="host">{'This site only'}</MenuItem>
+                          </TextField>
+                        ) : null}
                         <Box>
                           <Button
                             variant={install_ ? 'outlined' : 'contained'}
@@ -538,7 +589,14 @@ export function CommunityListingContent({
                             onClick={
                               permissions.installPlugins
                                 ? () =>
-                                    mustBuy ? buy(listing) : install(listing)
+                                    mustBuy
+                                      ? buy(listing)
+                                      : install(
+                                          listing,
+                                          installTargets.length > 1
+                                            ? installScope
+                                            : undefined,
+                                        )
                                 : () =>
                                     enqueueSnackbar(
                                       'Your team role does not allow installing from the community',
@@ -678,8 +736,11 @@ export function CommunityListingContent({
                           </Stack>
                         </CardDisplay>
                       ) : null}
+                      {/* Org comparison, not uid — see viewerOrgId above
+                          (AGL-652). Against `user.uid` this was never true,
+                          so the edit card silently never rendered. */}
                       {listing?.profileId &&
-                      listing.profileId === user?.uid ? (
+                      listing.profileId === viewerOrgId ? (
                         <ListingEditCard
                           listing={listing}
                           listingId={listingId}
@@ -717,6 +778,10 @@ export function CommunityListingContent({
                         )}
                       </CardDisplay>
                       )}
+                      <ListingReviews
+                        listingId={listingId}
+                        listing={listing}
+                      />
                     </Stack>
                   ),
                 },

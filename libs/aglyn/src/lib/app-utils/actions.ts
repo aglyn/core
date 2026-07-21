@@ -35,15 +35,129 @@ export const SITE_EVENT_TYPES = [
   'scrollToElement',
   'elementClick',
   'elementVisible',
+  // Hover choreography (AGL-562): delegated enter/leave on the trigger
+  // selector — the nav-menu/drawer show-hide building blocks.
+  'elementHoverEnter',
+  'elementHoverLeave',
   'exitIntent',
   'timeOnPage',
   'pageVisit',
+] as const
+
+/** Site events that watch a specific element and need a selector. */
+export const ELEMENT_SCOPED_SITE_EVENTS = [
+  'scrollToElement',
+  'elementClick',
+  'elementVisible',
+  'elementHoverEnter',
+  'elementHoverLeave',
 ] as const
 
 export type SiteEventType = (typeof SITE_EVENT_TYPES)[number]
 
 export function isSiteEventType(event: string): event is SiteEventType {
   return SITE_EVENT_TYPES.includes(event as SiteEventType)
+}
+
+/** Structured condition operators (AGL-557). */
+export const TRIGGER_CONDITION_OPS = [
+  'equals',
+  'contains',
+  'notEmpty',
+] as const
+
+export type TriggerConditionOp = (typeof TRIGGER_CONDITION_OPS)[number]
+
+/**
+ * Structured per-action condition over the event payload (AGL-557): the
+ * no-code sibling of the free-text `filter` expression, e.g. "only run
+ * when the `subscribe` field is not empty". Evaluated against the same
+ * scope as the filter (event name + payload fields); the action is
+ * skipped when unmet.
+ */
+export interface HostActionTriggerCondition {
+  /** Payload field the condition reads (a submitted form field name). */
+  field: string
+  op: TriggerConditionOp
+  /** Comparison value for `equals`/`contains`; unused by `notEmpty`. */
+  value?: string
+}
+
+/**
+ * Evaluates a structured trigger condition (AGL-557). String-coerces the
+ * payload value; `equals`/`contains` compare trimmed + case-insensitive
+ * so checkbox values like "Yes" match an author-typed "yes". A missing
+ * field never matches (and is "empty" for `notEmpty`); an absent or
+ * field-less condition always passes, mirroring the filter's default.
+ */
+export function evaluateTriggerCondition(
+  condition: HostActionTriggerCondition | undefined | null,
+  payload: Record<string, unknown>,
+): boolean {
+  const field = condition?.field?.trim()
+  if (!condition || !field) return true
+  const raw = (payload ?? {})[field]
+  const actual = (raw == null ? '' : String(raw)).trim().toLowerCase()
+  if (condition.op === 'notEmpty') return actual.length > 0
+  const expected = String(condition.value ?? '')
+    .trim()
+    .toLowerCase()
+  if (condition.op === 'equals') return actual === expected
+  if (condition.op === 'contains') {
+    return expected.length > 0 && actual.includes(expected)
+  }
+  return false
+}
+
+/** How chained trigger conditions combine (AGL-565). */
+export const TRIGGER_COMBINATORS = ['and', 'or'] as const
+
+export type TriggerCombinator = (typeof TRIGGER_COMBINATORS)[number]
+
+/** Cap on chained conditions per trigger (AGL-565). */
+export const ACTION_MAX_CONDITIONS = 5
+
+/**
+ * Normalizes a trigger's condition clauses to a list (AGL-565): the
+ * `conditions` array wins when present; a legacy single `condition`
+ * (AGL-557) becomes a one-element list. Read-time only — persisted docs
+ * are never migrated, so pre-565 single-condition docs keep working
+ * unchanged.
+ */
+export function normalizeTriggerConditions(
+  trigger:
+    | Pick<HostActionTrigger, 'condition' | 'conditions'>
+    | undefined
+    | null,
+): HostActionTriggerCondition[] {
+  const conditions = trigger?.conditions
+  if (Array.isArray(conditions)) return conditions.filter(Boolean)
+  return trigger?.condition ? [trigger.condition] : []
+}
+
+/**
+ * Evaluates a trigger's condition list with its combinator (AGL-565):
+ * `and` (the default) requires every condition to pass, `or` any one.
+ * Per-condition semantics are unchanged from AGL-557
+ * (`evaluateTriggerCondition`), and an empty list always passes — which
+ * covers every pre-565 doc without conditions.
+ */
+export function evaluateTriggerConditions(
+  trigger:
+    | Pick<HostActionTrigger, 'condition' | 'conditions' | 'combinator'>
+    | undefined
+    | null,
+  payload: Record<string, unknown>,
+): boolean {
+  const conditions = normalizeTriggerConditions(trigger)
+  if (!conditions.length) return true
+  return trigger?.combinator === 'or'
+    ? conditions.some((condition) =>
+        evaluateTriggerCondition(condition, payload),
+      )
+    : conditions.every((condition) =>
+        evaluateTriggerCondition(condition, payload),
+      )
 }
 
 export interface HostActionTrigger {
@@ -55,6 +169,16 @@ export interface HostActionTrigger {
   event: string
   /** Optional expression over the payload; runs only when truthy. */
   filter?: string
+  /** Optional structured payload condition (AGL-557); null clears it. */
+  condition?: HostActionTriggerCondition | null
+  /**
+   * Chained payload conditions (AGL-565), combined with `combinator`.
+   * When present this list wins over the legacy single `condition`
+   * (see `normalizeTriggerConditions`); null clears it.
+   */
+  conditions?: HostActionTriggerCondition[] | null
+  /** How the chained conditions combine (AGL-565); default `and`. */
+  combinator?: TriggerCombinator | null
   /** CSS selector for element-scoped site events (click/visible/scroll-to). */
   selector?: string
   /** Percent 0-100 (scrollDepth) or seconds (timeOnPage). */
@@ -77,6 +201,13 @@ export interface HostActionTrigger {
    * `oncePerVisitor` is set.
    */
   cooldownMinutes?: number
+  /**
+   * Fire on EVERY occurrence instead of once per pageview (AGL-562) —
+   * required for repeatable UI choreography (menu toggles, drawer
+   * open/close, hover show/hide). Site events only; the explicit
+   * per-session/visitor/cooldown caps above still win when set.
+   */
+  everyTime?: boolean
 }
 
 export type HostActionStep =
@@ -101,6 +232,40 @@ export type HostActionStep =
   | { type: 'addClass'; selector: string; className: string }
   | { type: 'removeClass'; selector: string; className: string }
   | { type: 'toggleClass'; selector: string; className: string }
+  // Element show/hide choreography (AGL-562): sugar over the shared
+  // hidden class (see element-ui.ts) so authors never type class names.
+  // The besigner target picker emits the node's stable data-aglyn
+  // selector; any CSS selector works.
+  // Element visibility (AGL-562) with menu-grade choreography (AGL-589):
+  // `delayMs` defers the change and a later visibility step on the same
+  // selector cancels the pending one (the hover grace period), and
+  // `dismissOn` self-dismisses a shown element on Escape / outside click.
+  | {
+      type: 'showElement'
+      selector: string
+      delayMs?: number
+      dismissOn?: ElementDismissOption[]
+    }
+  | { type: 'hideElement'; selector: string; delayMs?: number }
+  | {
+      type: 'toggleElement'
+      selector: string
+      delayMs?: number
+      dismissOn?: ElementDismissOption[]
+    }
+  // Drawer commands (AGL-562): delivered to muiDrawer instances over the
+  // window event bus keyed by node id; an empty target addresses the
+  // page's first drawer.
+  | { type: 'openDrawer'; drawerNodeId?: string }
+  | { type: 'closeDrawer'; drawerNodeId?: string }
+  | { type: 'toggleDrawer'; drawerNodeId?: string }
+  // Menu commands (AGL-568): the drawer pattern for Dropdown/Mega Menu
+  // elements — delivered over their own window event bus keyed by node
+  // id; an empty target addresses the page's first menu. Hover-triggered
+  // opens carry a hover flag so the menu closes on pointer leave.
+  | { type: 'openMenu'; menuNodeId?: string }
+  | { type: 'closeMenu'; menuNodeId?: string }
+  | { type: 'toggleMenu'; menuNodeId?: string }
   | { type: 'showHtml'; html: string }
   | { type: 'runJs'; code: string }
   // Screen targets are rename-safe (AGL-339): the tenant resolves the
@@ -127,6 +292,15 @@ export const CLIENT_ACTION_STEP_TYPES: ReadonlySet<HostActionStepType> =
     'addClass',
     'removeClass',
     'toggleClass',
+    'showElement',
+    'hideElement',
+    'toggleElement',
+    'openDrawer',
+    'closeDrawer',
+    'toggleDrawer',
+    'openMenu',
+    'closeMenu',
+    'toggleMenu',
     'showHtml',
     'runJs',
     'redirect',
@@ -136,6 +310,67 @@ export const CLIENT_ACTION_STEP_TYPES: ReadonlySet<HostActionStepType> =
 
 export function isClientActionStep(step: HostActionStep): boolean {
   return CLIENT_ACTION_STEP_TYPES.has(step.type)
+}
+
+/**
+ * Basic presentational interactions (AGL-577): the subset of client steps
+ * that are pure DOM choreography — menu/drawer open-close, element
+ * show/hide, class toggles, sticky nav, navigation, and client-only
+ * alerts. They carry NO server cost and touch NO data, so they run on
+ * every plan (the `interactions` feature, on by default everywhere).
+ *
+ * The powerful client steps stay behind the `actions` entitlement:
+ * `showOverlay` (marketing overlays), `showHtml` (arbitrary HTML
+ * injection), and `trackGaEvent` (analytics). `runJs` keeps its own
+ * higher `webhooks` (Business) gate. Server steps
+ * (sendEmail/notifyAdmins/enrollList/updateDataset/assignCampaign) are
+ * re-checked against `actions` server-side in `runEventActions`.
+ */
+export const BASIC_CLIENT_ACTION_STEP_TYPES: ReadonlySet<HostActionStepType> =
+  new Set([
+    'stickyNav',
+    'addClass',
+    'removeClass',
+    'toggleClass',
+    'showElement',
+    'hideElement',
+    'toggleElement',
+    'openDrawer',
+    'closeDrawer',
+    'toggleDrawer',
+    'openMenu',
+    'closeMenu',
+    'toggleMenu',
+    'redirect',
+    'siteAlert',
+  ] as const)
+
+/** A client step available on all plans (no `actions` entitlement). */
+export function isBasicClientActionStep(step: HostActionStep): boolean {
+  return BASIC_CLIENT_ACTION_STEP_TYPES.has(step.type)
+}
+
+/**
+ * Whether a client step may run for the given entitlement tier (AGL-577).
+ * This is the single source of truth the page enricher uses to trim the
+ * client-automation payload per plan:
+ *
+ * - Basic presentational steps → always (every plan).
+ * - `runJs` → `allowJs` (Business `webhooks` tier).
+ * - Remaining advanced client steps (overlay / showHtml / analytics) →
+ *   `actionsEntitled` (`actions` tier).
+ *
+ * Server steps are not client steps and always return false here; they
+ * are dispatched and re-authorized server-side.
+ */
+export function isClientStepEntitled(
+  step: HostActionStep,
+  entitlements: { actionsEntitled: boolean; allowJs: boolean },
+): boolean {
+  if (!isClientActionStep(step)) return false
+  if (isBasicClientActionStep(step)) return true
+  if (step.type === 'runJs') return entitlements.allowJs
+  return entitlements.actionsEntitled
 }
 
 export type HostActionStepType = HostActionStep['type']
@@ -152,6 +387,12 @@ export interface HostAction {
 export const ACTION_MAX_STEPS = 10
 /** Custom-event chaining depth cap (mirrors CROSS_MAX_DEPTH). */
 export const ACTION_MAX_EVENT_DEPTH = 3
+
+/** Self-dismiss triggers for shown elements (AGL-589). */
+export const ELEMENT_DISMISS_OPTIONS = ['escape', 'outsideClick'] as const
+export type ElementDismissOption = (typeof ELEMENT_DISMISS_OPTIONS)[number]
+/** Visibility grace-delay ceiling — enough for hover travel, no dead UIs. */
+export const ELEMENT_VISIBILITY_MAX_DELAY_MS = 5000
 /** Custom event names: short, no collision with built-ins. */
 export const CUSTOM_EVENT_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]{1,39}$/
 
@@ -166,6 +407,15 @@ export const HOST_ACTION_STEP_LABELS: Record<HostActionStepType, string> = {
   addClass: 'Add a CSS class',
   toggleClass: 'Toggle a CSS class',
   removeClass: 'Remove a CSS class',
+  showElement: 'Show an element',
+  hideElement: 'Hide an element',
+  toggleElement: 'Show/hide an element',
+  openDrawer: 'Open a drawer',
+  closeDrawer: 'Close a drawer',
+  toggleDrawer: 'Open/close a drawer',
+  openMenu: 'Open a menu',
+  closeMenu: 'Close a menu',
+  toggleMenu: 'Open/close a menu',
   showHtml: 'Show custom HTML',
   runJs: 'Run custom JS (Business)',
   redirect: 'Redirect the visitor',
@@ -200,9 +450,9 @@ export function validateHostAction(action: HostAction): string | null {
   ) {
     return 'Custom event names are 2–40 letters, digits, dashes'
   }
-  // Site-event trigger config (AGL-256).
+  // Site-event trigger config (AGL-256; hover events AGL-562).
   if (
-    ['scrollToElement', 'elementClick', 'elementVisible'].includes(event) &&
+    (ELEMENT_SCOPED_SITE_EVENTS as readonly string[]).includes(event) &&
     !action.trigger?.selector?.trim()
   ) {
     return 'This trigger needs a CSS selector'
@@ -221,6 +471,29 @@ export function validateHostAction(action: HostAction): string | null {
     !(Number(action.trigger.cooldownMinutes) >= 1)
   ) {
     return 'Cooldown must be at least 1 minute'
+  }
+  // Structured payload conditions (AGL-557; chained AGL-565).
+  const combinator = action.trigger?.combinator
+  if (combinator != null && !TRIGGER_COMBINATORS.includes(combinator)) {
+    return 'Combine conditions with AND or OR'
+  }
+  const conditions = normalizeTriggerConditions(action.trigger)
+  if (conditions.length > ACTION_MAX_CONDITIONS) {
+    return `Conditions are capped at ${ACTION_MAX_CONDITIONS}`
+  }
+  for (const [index, condition] of conditions.entries()) {
+    // Single-condition messages stay exactly as AGL-557 shipped them;
+    // the row marker only appears once there are rows to tell apart.
+    const where = conditions.length > 1 ? ` (condition ${index + 1})` : ''
+    if (!TRIGGER_CONDITION_OPS.includes(condition.op)) {
+      return `Pick a condition operator${where}`
+    }
+    if (!condition.field?.trim()) {
+      return `Name the field the condition checks${where}`
+    }
+    if (condition.op !== 'notEmpty' && !condition.value?.trim()) {
+      return `Enter the value the condition compares against${where}`
+    }
   }
   const steps = action.steps ?? []
   if (!steps.length) return 'Add at least one step'
@@ -266,6 +539,49 @@ export function validateHostAction(action: HostAction): string | null {
     ) {
       if (!step.selector?.trim()) return `${label}: enter a CSS selector`
       if (!step.className?.trim()) return `${label}: enter the class name`
+    }
+    // Element show/hide steps (AGL-562) always target a selector; drawer
+    // (AGL-562) and menu (AGL-568) commands may omit the target (the
+    // page's first drawer/menu answers).
+    if (
+      (step.type === 'showElement' ||
+        step.type === 'hideElement' ||
+        step.type === 'toggleElement') &&
+      !step.selector?.trim()
+    ) {
+      return `${label}: pick the element to show or hide`
+    }
+    if (
+      step.type === 'showElement' ||
+      step.type === 'hideElement' ||
+      step.type === 'toggleElement'
+    ) {
+      // Choreography options (AGL-589).
+      const delay = (step as { delayMs?: unknown }).delayMs
+      if (
+        delay != null &&
+        !(
+          Number.isInteger(delay) &&
+          (delay as number) >= 0 &&
+          (delay as number) <= ELEMENT_VISIBILITY_MAX_DELAY_MS
+        )
+      ) {
+        return `${label}: delay must be 0–${ELEMENT_VISIBILITY_MAX_DELAY_MS}ms`
+      }
+      const dismiss = (step as { dismissOn?: unknown }).dismissOn
+      if (
+        dismiss != null &&
+        !(
+          Array.isArray(dismiss) &&
+          dismiss.every((option) =>
+            (ELEMENT_DISMISS_OPTIONS as readonly string[]).includes(
+              option as string,
+            ),
+          )
+        )
+      ) {
+        return `${label}: dismiss options are escape and outsideClick`
+      }
     }
     if (step.type === 'showHtml' && !step.html?.trim()) {
       return `${label}: enter the HTML`

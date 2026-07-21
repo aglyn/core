@@ -244,7 +244,12 @@ function AutomationsEngine(props: {
             step.type === 'removeClass' ||
             step.type === 'toggleClass'
           ) {
-            document.querySelectorAll(step.selector).forEach((element) => {
+            // Expand the raw-id selector to also match the layout-composed
+            // live id (AGL-573); non-leaf selectors are unchanged.
+            const targets = document.querySelectorAll(
+              Aglyn.expandLeafSelector(step.selector),
+            )
+            targets.forEach((element) => {
               if (step.type === 'addClass') {
                 element.classList.add(step.className)
               } else if (step.type === 'removeClass') {
@@ -255,7 +260,7 @@ function AutomationsEngine(props: {
             })
           } else if (step.type === 'stickyNav') {
             const target = document.querySelector(
-              step.selector?.trim() || 'header, nav',
+              Aglyn.expandLeafSelector(step.selector?.trim() || 'header, nav'),
             )
             if (target instanceof HTMLElement) {
               target.style.position = 'sticky'
@@ -292,6 +297,67 @@ function AutomationsEngine(props: {
                 ? Aglyn.screenRoutePathToUrl(screenSlug)
                 : step.url
             if (destination) window.location.assign(destination)
+          } else if (
+            step.type === 'showElement' ||
+            step.type === 'hideElement' ||
+            step.type === 'toggleElement'
+          ) {
+            // Element choreography (AGL-562): class-based so "show"
+            // reveals targets the author started hidden. The tenant page
+            // ships the hidden-class rule in its SSR HTML; ensure is the
+            // fallback for other embeddings. Grace delays + Escape/
+            // outside-click dismissal ride the same step (AGL-589).
+            Aglyn.ensureElementHiddenStyle()
+            Aglyn.runElementVisibilityStep(
+              step.type === 'showElement'
+                ? 'show'
+                : step.type === 'hideElement'
+                  ? 'hide'
+                  : 'toggle',
+              // Expand so a show/hide/toggle authored against the raw
+              // canvas id still reaches the layout-composed node (AGL-573).
+              Aglyn.expandLeafSelector(step.selector),
+              {
+                delayMs: (step as { delayMs?: number }).delayMs,
+                dismissOn: (
+                  step as { dismissOn?: Aglyn.ElementDismissOption[] }
+                ).dismissOn,
+              },
+            )
+          } else if (
+            step.type === 'openDrawer' ||
+            step.type === 'closeDrawer' ||
+            step.type === 'toggleDrawer'
+          ) {
+            // Drawer commands (AGL-562) ride the window event bus; the
+            // muiDrawer element answers (first drawer for broadcasts).
+            Aglyn.dispatchDrawerCommand(
+              step.type === 'openDrawer'
+                ? 'open'
+                : step.type === 'closeDrawer'
+                  ? 'close'
+                  : 'toggle',
+              step.drawerNodeId || undefined,
+            )
+          } else if (
+            step.type === 'openMenu' ||
+            step.type === 'closeMenu' ||
+            step.type === 'toggleMenu'
+          ) {
+            // Menu commands (AGL-568) ride their own event bus like
+            // drawers; the nav-menu elements answer (first menu for
+            // broadcasts). A hover-enter trigger stamps the hover flag
+            // so a menu opened this way closes itself when the pointer
+            // leaves the trigger + panel surface.
+            Aglyn.dispatchMenuCommand(
+              step.type === 'openMenu'
+                ? 'open'
+                : step.type === 'closeMenu'
+                  ? 'close'
+                  : 'toggle',
+              step.menuNodeId || undefined,
+              { hover: automation.event === 'elementHoverEnter' },
+            )
           } else if (step.type === 'trackGaEvent') {
             ;(window as any).gtag?.('event', step.eventName, step.params ?? {})
           } else if (step.type === 'siteAlert') {
@@ -309,8 +375,12 @@ function AutomationsEngine(props: {
     }
 
     const fire = (automation: ClientAutomation) => {
-      if (fired.has(automation.id)) return
-      fired.add(automation.id)
+      // Repeatable UI choreography (AGL-562): everyTime automations skip
+      // the once-per-pageview gate (explicit caps below still apply).
+      if (!automation.everyTime) {
+        if (fired.has(automation.id)) return
+        fired.add(automation.id)
+      }
       // Once per visitor (AGL-266): a persisted flag outlives the pageview.
       if (automation.oncePerVisitor) {
         const key = `aglyn:auto:${automation.id}`
@@ -362,7 +432,14 @@ function AutomationsEngine(props: {
     }
 
     for (const automation of automations) {
-      const { event, selector, threshold } = automation
+      const { event, threshold } = automation
+      // Layout composition namespaces a node's live `data-aglyn` id, but
+      // the interaction builder records the RAW canvas id in the selector.
+      // Expand it so the trigger still matches the live element (AGL-573);
+      // hand-typed CSS selectors pass through untouched.
+      const selector = automation.selector
+        ? Aglyn.expandLeafSelector(automation.selector)
+        : automation.selector
       if (event === 'pageVisit') {
         fire(automation)
       } else if (event === 'timeOnPage') {
@@ -404,6 +481,27 @@ function AutomationsEngine(props: {
         document.addEventListener('click', onClick, true)
         cleanups.push(() =>
           document.removeEventListener('click', onClick, true),
+        )
+      } else if (
+        event === 'elementHoverEnter' ||
+        event === 'elementHoverLeave'
+      ) {
+        // Hover choreography (AGL-562): delegated mouseover/mouseout with
+        // enter/leave semantics — moves WITHIN the matched element (its
+        // own children) never re-fire.
+        if (!selector) continue
+        const onHover = (mouseEvent: MouseEvent) => {
+          const target = mouseEvent.target as Element | null
+          const match = target?.closest?.(selector)
+          if (!match) return
+          const related = mouseEvent.relatedTarget as Element | null
+          if (related && match.contains(related)) return
+          fire(automation)
+        }
+        const type = event === 'elementHoverEnter' ? 'mouseover' : 'mouseout'
+        document.addEventListener(type, onHover, true)
+        cleanups.push(() =>
+          document.removeEventListener(type, onHover, true),
         )
       } else if (event === 'exitIntent') {
         const onLeave = (mouseEvent: MouseEvent) => {

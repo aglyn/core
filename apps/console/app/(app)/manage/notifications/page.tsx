@@ -23,6 +23,7 @@ import {
 } from '@aglyn/aglyn'
 import { mdiBellOutline } from '@aglyn/shared-data-mdi'
 import { CardDisplay, Container } from '@aglyn/shared-ui-jsx'
+import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { NextPageTitle } from '@aglyn/shared-ui-next/contexts/next-page-title-provider'
 import type { NextPageWithLayout } from '@aglyn/shared-ui-next'
 import {
@@ -54,14 +55,26 @@ import {
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFirestore, useUser } from '@aglyn/tenant-feature-instance'
 import AuthenticatedLayout from '../../../../components/layouts/authenticated.layout'
 import DashboardLayout from '../../../../components/layouts/dashboard.layout'
 import manageNavTabItems from '../../../../constants/manage-nav-tabs'
 import MainLayout from '../../../../components/layouts/main.layout'
+import { docsHelp } from '../../../../constants/docs-links'
 import { buildRoute, Route } from '../../../../constants/route-links'
 import { CONTENT_MAX_WIDTH } from '../../../../constants/shared'
+import useNotificationAlertPrefs from '../../../../hooks/use-notification-prefs'
+import useHostSubdomains from '../../../../hooks/use-host-subdomains'
+import useOrgHosts from '../../../../hooks/use-org-hosts'
+import { useOrgScope, useOrgSlug } from '../../../../hooks/use-org-scope'
+import {
+  desktopNotificationPermission,
+  playNotificationChime,
+  requestDesktopNotifications,
+  showDesktopNotification,
+} from '../../../../utils/notification-alerts'
+import { normalizeNotificationLink } from '../../../../utils/notification-links'
 
 const PAGE_SIZE = 25
 
@@ -74,7 +87,81 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
   const firestore = useFirestore()
   const router = useRouter()
   const uid = (user as any)?.uid as string | undefined
+  // Links are normalized when followed (AGL-644) — stored ones predate the
+  // org-slug/subdomain routes and can't be migrated in place.
+  const orgSlug = useOrgSlug()
+  const { currentOrg, orgs } = useOrgScope()
+  // Per-device alert settings (AGL-650) — separate from the category mutes
+  // below, which are account-wide on the user doc.
+  const [alertPrefs, setAlertPrefs] = useNotificationAlertPrefs()
+  const { enqueueSnackbar } = useSnackbar()
+  const [permission, setPermission] = useState<
+    NotificationPermission | 'unsupported'
+  >('default')
+  useEffect(() => {
+    setPermission(desktopNotificationPermission())
+  }, [])
+  /**
+   * Send a test alert (AGL-650).
+   *
+   * Alert settings are otherwise unverifiable: you cannot tell whether the
+   * chime is audible, whether the browser actually granted permission, or
+   * what a desktop notification looks like on your OS, without waiting for
+   * something real to happen. Waiting to find out that alerts were silently
+   * broken is the failure this prevents.
+   *
+   * The chime always plays — previewing it is the point, and muting the
+   * preview because sound is off would make the button do nothing in the
+   * exact case where you want to hear it before switching it on. Desktop
+   * notifications need permission, so a still-undecided browser is prompted
+   * here; granting in response to a test is a clear enough signal to switch
+   * the preference on.
+   */
+  const handleTestAlerts = useCallback(async () => {
+    playNotificationChime()
+    let current = desktopNotificationPermission()
+    if (current === 'default') current = await requestDesktopNotifications()
+    setPermission(current)
+    if (current === 'granted') {
+      // force: the tab is focused by definition when you click Test, and
+      // desktop alerts are otherwise hidden-tab-only.
+      showDesktopNotification({
+        title: 'Aglyn notifications are on',
+        body: 'This is what a notification looks like.',
+        tag: 'aglyn-test',
+        force: true,
+      })
+      setAlertPrefs({ desktop: true })
+    }
+    enqueueSnackbar(
+      current === 'granted'
+        ? 'Played the chime and sent a test notification.'
+        : current === 'denied'
+          ? 'Chime played. Desktop notifications are blocked for this site — re-allow them in your browser settings.'
+          : current === 'unsupported'
+            ? "Chime played. This browser doesn't support desktop notifications."
+            : 'Chime played. Desktop notifications were not granted.',
+      { variant: current === 'granted' ? 'success' : 'info', persist: false },
+    )
+  }, [setAlertPrefs, enqueueSnackbar])
+
+  const handleDesktopToggle = useCallback(async () => {
+    if (alertPrefs.desktop) {
+      setAlertPrefs({ desktop: false })
+      return
+    }
+    // The prompt only works from a user gesture, which is why this lives on
+    // the toggle rather than firing on page load.
+    let current = desktopNotificationPermission()
+    if (current === 'default') current = await requestDesktopNotifications()
+    setPermission(current)
+    setAlertPrefs({ desktop: current === 'granted' })
+  }, [alertPrefs.desktop, setAlertPrefs])
+  const { hosts } = useOrgHosts(firestore, uid, currentOrg?.$id ?? undefined)
   const [rows, setRows] = useState<any[]>([])
+  const indexedSubdomains = useHostSubdomains(
+    useMemo(() => rows.map((row) => row.hostId), [rows]),
+  )
   const [cursors, setCursors] = useState<QueryDocumentSnapshot[]>([])
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(false)
@@ -187,7 +274,21 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
         { readAt: serverTimestamp() },
       ).catch(console.error)
     }
-    if (notification.link) void router.push(notification.link)
+    const target = normalizeNotificationLink(notification.link, {
+      // The notification's own org, not the one currently open (AGL-644).
+      orgSlug:
+        (notification.orgId
+          ? (orgs ?? []).find((org) => org.$id === notification.orgId)?.slug
+          : null) ?? orgSlug,
+      hostId: notification.hostId,
+      // `hosts` only covers the org currently open; hostIndex covers the
+      // rest, so cross-org notifications resolve too (AGL-672).
+      hostSubdomain: notification.hostId
+        ? ((hosts ?? []).find((host) => host.$id === notification.hostId)
+            ?.subdomain ?? indexedSubdomains.get(notification.hostId))
+        : undefined,
+    })
+    if (target) void router.push(target)
   }
 
   return (
@@ -210,6 +311,12 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
         <Container gutterY maxWidth={CONTENT_MAX_WIDTH}>
           <CardDisplay
             header={'All notifications'}
+            help={docsHelp('consoleTour', {
+              anchor: '#workspace-settings--notifications',
+              excerpt:
+                'Every console notification, newest first — mark all read ' +
+                "and mute the categories you don't want.",
+            })}
             contentGutterX
             contentGutterY
             contentBordered="all"
@@ -253,6 +360,74 @@ const ManageNotifications: NextPageWithLayout<Record<string, never>> = () => {
                     slotProps={{ typography: { variant: 'caption' } }}
                   />
                 ))}
+              </Stack>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ flexWrap: 'wrap', rowGap: 1, alignItems: 'center' }}
+              >
+                <Typography variant="caption" color="text.secondary">
+                  {'Alerts on this device:'}
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={alertPrefs.tabBadge}
+                      onChange={() =>
+                        setAlertPrefs({ tabBadge: !alertPrefs.tabBadge })
+                      }
+                    />
+                  }
+                  label="Unread count in tab title"
+                  slotProps={{ typography: { variant: 'caption' } }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={alertPrefs.sound}
+                      onChange={() =>
+                        setAlertPrefs({ sound: !alertPrefs.sound })
+                      }
+                    />
+                  }
+                  label="Sound"
+                  slotProps={{ typography: { variant: 'caption' } }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size="small"
+                      checked={alertPrefs.desktop}
+                      disabled={
+                        permission === 'unsupported' || permission === 'denied'
+                      }
+                      onChange={() => void handleDesktopToggle()}
+                    />
+                  }
+                  label="Desktop notifications"
+                  slotProps={{ typography: { variant: 'caption' } }}
+                />
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => void handleTestAlerts()}
+                >
+                  {'Send test alert'}
+                </Button>
+                {permission === 'denied' || permission === 'unsupported' ? (
+                  <Typography variant="caption" color="text.secondary">
+                    {permission === 'denied'
+                      ? 'Blocked for this site — re-allow notifications in your ' +
+                        'browser settings to switch this on.'
+                      : 'This browser does not support desktop notifications.'}
+                  </Typography>
+                ) : (
+                  <Typography variant="caption" color="text.secondary">
+                    {'Shown only while this tab is in the background.'}
+                  </Typography>
+                )}
               </Stack>
               {rows.length === 0 && !loading ? (
                 <Typography variant="body2" color="text.secondary">

@@ -104,6 +104,10 @@ beforeEach(async () => {
     })
     await setDoc(doc(db, 'hosts', HOST, 'screens', 'screen-1'), { name: 'Home' })
     await setDoc(doc(db, 'hosts', HOST, 'variables', 'var-1'), { name: 'v', value: '1' })
+    await setDoc(doc(db, 'hosts', HOST, 'templates', 'tpl-1'), {
+      kind: 'page', displayName: 'Hero page',
+      source: { type: 'marketplace', listingId: 'listing-1', version: 2 },
+    })
     // Suspension write-block (AGL-238): host owned by a suspended org.
     await setDoc(doc(db, 'orgs', SUSPENDED_ORG), {
       name: 'Frozen', slug: 'frozen', ownerUid: OWNER,
@@ -231,7 +235,7 @@ describe('hosts', () => {
     )
     // Commerce/bookings/redirects/reusable-components/registers collections
     // are API-create-only too (registers gate the posRegisters cap).
-    for (const coll of ['services', 'redirects', 'locations', 'products', 'components', 'registers']) {
+    for (const coll of ['services', 'redirects', 'locations', 'products', 'components', 'registers', 'templates']) {
       await assertFails(
         setDoc(doc(authed(EDITOR), 'hosts', HOST, coll, 'new-doc'), { name: 'x' }),
       )
@@ -239,8 +243,220 @@ describe('hosts', () => {
     await assertSucceeds(
       updateDoc(doc(authed(EDITOR), 'hosts', HOST), { displayName: 'Renamed' }),
     )
+    // The subdomain is the site's public address, so it is server-only
+    // (AGL-642) — a client write could take a reserved name or collide with
+    // another org's site. Closed even to the site admin; renames go through
+    // /api/hosts/rename, which claims uniqueness transactionally.
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST), { subdomain: 'grabbed' }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'hosts', HOST), { subdomain: 'grabbed' }),
+    )
     await assertFails(deleteDoc(doc(authed(EDITOR), 'hosts', HOST)))
     await assertSucceeds(deleteDoc(doc(authed(OWNER), 'hosts', HOST)))
+  })
+
+  /**
+   * AGL-679. Component versions live under a collection whose NAME is in
+   * the catch-all's create-exclusion list, and `{document=**}` matches
+   * nested paths — so without a dedicated block, creating
+   * `components/{id}/versions/{v}` was denied along with the component doc
+   * itself. The component doc must STAY API-only; only its history opens up.
+   */
+  it('component versions are editor-writable; the component doc stays API-only', async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), 'hosts', HOST, 'components', 'cmp-1'),
+        { displayName: 'Hero', rootId: 'r', nodes: { r: {} } },
+      )
+    })
+    // Editors write history…
+    await assertSucceeds(
+      setDoc(
+        doc(authed(EDITOR), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v1'),
+        { componentId: 'cmp-1', nodes: {} },
+      ),
+    )
+    await assertSucceeds(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'components', 'cmp-1'), {
+        versionId: 'v1',
+      }),
+    )
+    // …but still cannot create a component, which is quota/entitlement
+    // gated through /api/hosts/resources.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'hosts', HOST, 'components', 'cmp-new'), {
+        displayName: 'Sneak',
+      }),
+    )
+    // Viewers read but never write.
+    await assertSucceeds(
+      getDoc(doc(authed(VIEWER), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v1')),
+    )
+    await assertFails(
+      setDoc(
+        doc(authed(VIEWER), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v2'),
+        { nodes: {} },
+      ),
+    )
+    await assertFails(
+      setDoc(
+        doc(authed(OUTSIDER), 'hosts', HOST, 'components', 'cmp-1', 'versions', 'v2'),
+        { nodes: {} },
+      ),
+    )
+  })
+
+  // AGL-655 / AGL-652. Two things this pins:
+  //   1. Listings are ORG-owned, so the owner check must resolve org
+  //      membership. Comparing `profileId` to a uid silently denied every
+  //      publisher access to their own listing.
+  //   2. Rating aggregates drive ranking and the trust signal buyers read,
+  //      so they stay server-only even for the owner.
+  it('listing owners are resolved via the org, and cannot write rating aggregates', async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore()
+      await setDoc(doc(db, 'communityListings', 'listing-rated'), {
+        displayName: 'Thing',
+        profileId: ORG, // org-owned (AGL-652)
+        artifactType: 'component',
+        ratingAverage: 5,
+        ratingCount: 2,
+      })
+      await setDoc(
+        doc(db, 'communityListings', 'listing-rated', 'reviews', VIEWER),
+        { uid: VIEWER, rating: 5 },
+      )
+    })
+    // An org manager may edit their own listing's metadata.
+    await assertSucceeds(
+      updateDoc(doc(authed(OWNER), 'communityListings', 'listing-rated'), {
+        displayName: 'Renamed',
+      }),
+    )
+    // A non-manager member of the same org may not.
+    await assertFails(
+      updateDoc(doc(authed(VIEWER), 'communityListings', 'listing-rated'), {
+        displayName: 'Nope',
+      }),
+    )
+    // Nor may an outsider.
+    await assertFails(
+      updateDoc(doc(authed(OUTSIDER), 'communityListings', 'listing-rated'), {
+        displayName: 'Nope',
+      }),
+    )
+    // Even the owner cannot invent a rating. Values must DIFFER from the
+    // fixture: `diff()` reports changed keys only, so re-writing the same
+    // number is an empty diff and legitimately allowed — that is a quirk of
+    // the test, not a hole in the rule.
+    for (const [field, value] of [
+      ['ratingAverage', 1],
+      ['ratingCount', 99],
+      ['ratingSum', 500],
+    ]) {
+      await assertFails(
+        updateDoc(doc(authed(OWNER), 'communityListings', 'listing-rated'), {
+          [field]: value,
+        }),
+      ).catch((error) => {
+        throw new Error(`owner could write ${field}: ${error.message}`)
+      })
+    }
+    // Reviews are world-readable but never client-written — every gate
+    // (verified installer, publisher self-review) lives in the API.
+    await assertSucceeds(
+      getDoc(doc(authed(OUTSIDER), 'communityListings', 'listing-rated', 'reviews', VIEWER)),
+    )
+    await assertFails(
+      setDoc(
+        doc(authed(OUTSIDER), 'communityListings', 'listing-rated', 'reviews', OUTSIDER),
+        { uid: OUTSIDER, rating: 5, verifiedInstaller: true },
+      ),
+    )
+    // Including overwriting someone else's.
+    await assertFails(
+      updateDoc(
+        doc(authed(OWNER), 'communityListings', 'listing-rated', 'reviews', VIEWER),
+        { rating: 1 },
+      ),
+    )
+  })
+
+  // AGL-658. Takedown has to survive the person being taken down.
+  it('staff takedown fields and abuse reports are out of owner reach', async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore()
+      await setDoc(doc(db, 'communityListings', 'listing-hidden'), {
+        displayName: 'Dodgy', profileId: ORG, artifactType: 'component',
+        hiddenAt: new Date(), hiddenBy: STAFF, hiddenReason: 'spam',
+      })
+      await setDoc(doc(db, 'communityReports', 'report-1'), {
+        targetType: 'listing', listingId: 'listing-hidden',
+        reporterUid: OUTSIDER, reason: 'spam', status: 'open',
+      })
+    })
+    // The owner may still edit ordinary metadata...
+    await assertSucceeds(
+      updateDoc(doc(authed(OWNER), 'communityListings', 'listing-hidden'), {
+        description: 'Reworded',
+      }),
+    )
+    // ...but cannot un-hide themselves, which would make moderation a
+    // suggestion.
+    for (const field of ['hiddenAt', 'hiddenBy', 'hiddenReason']) {
+      await assertFails(
+        updateDoc(doc(authed(OWNER), 'communityListings', 'listing-hidden'), {
+          [field]: null,
+        }),
+      ).catch((error) => {
+        throw new Error(`owner could clear ${field}: ${error.message}`)
+      })
+    }
+    // Reports name their reporter, so only staff read them — otherwise a
+    // publisher learns exactly who to retaliate against.
+    await assertSucceeds(
+      getDoc(doc(authed(STAFF, { staff: true }), 'communityReports', 'report-1')),
+    )
+    await assertFails(getDoc(doc(authed(OWNER), 'communityReports', 'report-1')))
+    await assertFails(
+      getDoc(doc(authed(OUTSIDER), 'communityReports', 'report-1')),
+    )
+    // And nobody files one by writing directly — the route stamps the
+    // reporter from the verified token.
+    await assertFails(
+      setDoc(doc(authed(OUTSIDER), 'communityReports', 'forged'), {
+        targetType: 'listing', listingId: 'listing-hidden',
+        reporterUid: OWNER, reason: 'framed',
+      }),
+    )
+  })
+
+  // AGL-666. `source` says whether a template was authored here, downloaded
+  // from the marketplace, or came from a starter — and the library shows that
+  // as provenance. A client that can rewrite it can stamp "marketplace" on
+  // its own work, so it is frozen even for the editors who own the doc.
+  it('template source is frozen; the rest of the doc stays editable', async () => {
+    await assertSucceeds(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1'), {
+        displayName: 'Renamed hero',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1'), {
+        source: { type: 'marketplace', listingId: 'not-mine' },
+      }),
+    )
+    // Including clearing it, which would erase provenance just as effectively.
+    await assertFails(
+      updateDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1'), {
+        source: { type: 'authored' },
+      }),
+    )
+    await assertSucceeds(
+      deleteDoc(doc(authed(EDITOR), 'hosts', HOST, 'templates', 'tpl-1')),
+    )
   })
 
   it('the retired admins map no longer authorizes; outsiders and anon never do', async () => {
@@ -391,9 +607,17 @@ describe('pre-release hardening guards', () => {
       await setDoc(doc(db, 'hosts', HOST, 'installs', 'p1'), {
         version: '1.0.0', sha256: 'abc',
       })
-      // Community listing owned by OWNER with server-managed fields (M6).
+      // Community listing with server-managed fields (M6). `profileId` holds
+      // the publishing ORG since AGL-652 — the fixture used to carry a uid,
+      // which no publish path has produced since, so the ownership rule was
+      // being exercised against a shape that no longer exists.
       await setDoc(doc(db, 'communityListings', LISTING), {
-        profileId: OWNER, name: 'Plugin', installCount: 5, priceUsd: 10,
+        profileId: ORG, name: 'Plugin', installCount: 5, priceUsd: 10,
+      })
+      // Org publisher profile (AGL-652) — created server-side, so the rules
+      // tests seed it rather than creating it through a client write.
+      await setDoc(doc(db, 'publisherProfiles', ORG), {
+        handle: 'seeded-handle', displayName: 'Acme Labs',
       })
     })
   })
@@ -477,6 +701,88 @@ describe('pre-release hardening guards', () => {
     await assertSucceeds(getDoc(doc(authed(VIEWER), 'hosts', HOST, 'variables', 'var-1')))
   })
 
+  it('org publisher profiles are manager-written, payout keys server-only (AGL-652)', async () => {
+    // Public read — buyers see who they install from.
+    await assertSucceeds(getDoc(doc(anon(), 'publisherProfiles', ORG)))
+    // Creates and handle writes are server-only: the handle must be claimed
+    // transactionally, and a client read-then-write lets two orgs racing for
+    // one handle both win (AGL-652).
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+      }),
+    )
+    // Editors and viewers are members but not managers.
+    await assertFails(
+      setDoc(doc(authed(EDITOR), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+      }),
+    )
+    await assertFails(
+      setDoc(doc(authed(VIEWER), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+      }),
+    )
+    // Another org's owner cannot publish as us.
+    await assertFails(
+      setDoc(doc(authed(OUTSIDER), 'publisherProfiles', ORG), {
+        handle: 'stolen',
+        displayName: 'Stolen',
+      }),
+    )
+    // Payout keys decide who receives money — Connect route (Admin SDK) only.
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'acme-labs',
+        displayName: 'Acme Labs',
+        stripeAccountId: 'acct_attacker',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        stripeChargesEnabled: true,
+      }),
+    )
+    // ...but a manager may still edit the cosmetic fields on an existing
+    // profile, so the handle freeze doesn't lock the page entirely.
+    await assertSucceeds(
+      updateDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'seeded-handle',
+        displayName: 'Acme Labs Renamed',
+        bio: 'We make things.',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'stolen-handle',
+      }),
+    )
+    // Malformed handles are rejected.
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'publisherProfiles', ORG), {
+        handle: 'No Spaces',
+        displayName: 'Acme Labs',
+      }),
+    )
+  })
+
+  it('publisher handle reservations are readable but never client-written (AGL-652)', async () => {
+    await assertSucceeds(getDoc(doc(anon(), 'publisherHandles', 'acme-labs')))
+    // Client-writable reservations would race — last writer would take
+    // another publisher's marketplace URL.
+    await assertFails(
+      setDoc(doc(authed(OWNER), 'publisherHandles', 'acme-labs'), { orgId: ORG }),
+    )
+    await assertFails(
+      setDoc(doc(authed(OUTSIDER), 'publisherHandles', 'acme-labs'), {
+        orgId: OTHER_ORG,
+      }),
+    )
+  })
+
   it('listing owner cannot tamper server-managed fields (AGL-503)', async () => {
     await assertSucceeds(
       updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { deletedAt: new Date() }),
@@ -489,6 +795,25 @@ describe('pre-release hardening guards', () => {
     )
     await assertFails(
       updateDoc(doc(authed(OWNER), 'communityListings', LISTING), { profileId: OUTSIDER }),
+    )
+    // The review verdict is staff-owned (AGL-651). It decides the trust badge
+    // AND whether a plugin is publicly browsable, so an owner able to write it
+    // could self-promote to 'verified' and bypass staff review entirely.
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), {
+        reviewStatus: 'verified',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), {
+        reviewStatus: 'listed',
+      }),
+    )
+    await assertFails(
+      updateDoc(doc(authed(OWNER), 'communityListings', LISTING), {
+        reviewedBy: OWNER,
+        reviewedAt: new Date(),
+      }),
     )
     // Non-owners still can't touch someone else's listing.
     await assertFails(

@@ -20,13 +20,22 @@ import * as Aglyn from '@aglyn/aglyn/server'
 import * as CommerceModel from '../model'
 import { firebaseAdmin } from '@aglyn/tenant-data-admin'
 import { createHmac } from 'crypto'
-import { readMemberSession } from './membership'
+import { requireActiveMember } from './membership'
 import { checkMemberEntitlement } from './gate'
+import { tokenSigningSecret } from './download'
 
 const TTL_MS = 15 * 60 * 1000
 
+/**
+ * Signed with the dedicated, fail-closed `TOKEN_SIGNING_SECRET` (AGL-509).
+ * AGL-509 converted the download and supplier tokens but missed this call
+ * site (AGL-689): the old `STRIPE_SECRET_KEY ?? 'aglyn'` key left the whole
+ * payload — `stream:${hostId}:${productId}:${video}:${exp}`, all public
+ * identifiers — forgeable on any deploy without the Stripe key, and the
+ * short TTL bought nothing because the forger chooses `exp`.
+ */
 function sign(hostId: string, productId: string, video: number, exp: number) {
-  return createHmac('sha256', process.env.STRIPE_SECRET_KEY ?? 'aglyn')
+  return createHmac('sha256', tokenSigningSecret())
     .update(`stream:${hostId}:${productId}:${video}:${exp}`)
     .digest('hex')
     .slice(0, 32)
@@ -57,17 +66,11 @@ export const streamHandler: PluginApiHandler = async (req, res) => {
 
   try {
     if (req.method === 'POST') {
-      const memberId = readMemberSession(req, hostId)
-      if (!memberId) return res.status(401).json({ error: 'Sign in first' })
-      const memberSnapshot = await firebaseAdmin
-        .app()
-        .firestore()
-        .collection('hosts')
-        .doc(hostId)
-        .collection('siteMembers')
-        .doc(memberId)
-        .get()
-      const email = String(memberSnapshot.get('email') ?? '')
+      // Suspension gate (AGL-550): suspended members (AGL-546) cannot
+      // mint stream URLs — 403'd with the session cookie cleared.
+      const auth = await requireActiveMember(req, res, hostId, 'Sign in first')
+      if (!auth) return
+      const email = String(auth.member.get('email') ?? '')
       const entitled =
         email && (await checkMemberEntitlement(hostId, email, productId))
       if (!entitled) {

@@ -25,11 +25,15 @@ import Chip from '@mui/material/Chip'
 import MenuItem from '@mui/material/MenuItem'
 import Skeleton from '@mui/material/Skeleton'
 import TextField from '@mui/material/TextField'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { BUNDLE_ID } from '../constants/bundle-common'
 import { generatePresetId } from '../utils/generate-preset-id'
 import { CART_UPDATED_EVENT } from './cart'
+import { ID as PRODUCT_REVIEWS_ID } from './product-reviews'
+import { ID as RELATED_PRODUCTS_ID } from './related-products'
 import { readLocalWishlist, toggleWishlist } from './wishlist'
 
 // Component ids are persisted in screen documents; never rename.
@@ -60,6 +64,10 @@ interface Detail {
   mediaUrls: string[]
   options: CommerceModel.ProductOption[]
   variants: DetailVariant[]
+  /** Recurring billing (AGL-303); framing + buyer choice on the PDP. */
+  subscription?: { interval: 'month' | 'year'; trialDays?: number }
+  /** Buyer picks one-time or subscribe at the same price (AGL-545). */
+  subscriptionOptional?: boolean
 }
 
 const SAMPLE: Detail = {
@@ -92,8 +100,19 @@ function slugFromLocation(): string {
 const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
   (props, ref) => {
     const { slug: slugProp, buyLabel, hideDescription, ...rest } = props
-    const { hostId } = Aglyn.useSite()
-    const [detail, setDetail] = useState<Detail | null | 'missing'>(null)
+    const site = Aglyn.useSite()
+    const { hostId } = site
+    // Seeded from the server-resolved page data (AGL-659) so the PDP renders
+    // its real content in the SSR HTML. Starting at null meant the server
+    // emitted a <Skeleton> and the crawler got a product page with no
+    // product in it. Absent in the besigner/preview, where the effect below
+    // still fetches — so this is an optimisation, not a new requirement.
+    const seededProduct = (
+      site.pageData as { commerce?: { product?: Detail } } | undefined
+    )?.commerce?.product
+    const [detail, setDetail] = useState<Detail | null | 'missing'>(
+      seededProduct ?? null,
+    )
     const [selections, setSelections] = useState<Record<string, string>>({})
     const [quantity, setQuantity] = useState(1)
     const [activeImage, setActiveImage] = useState(0)
@@ -103,6 +122,11 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
     const [wishlisted, setWishlisted] = useState(false)
     const [notifyEmail, setNotifyEmail] = useState('')
     const [notifyState, setNotifyState] = useState<'idle' | 'done'>('idle')
+    // Buyer-chosen billing (AGL-545): only meaningful when the product
+    // is subscriptionOptional; defaults to a one-time purchase.
+    const [billing, setBilling] = useState<CommerceModel.CheckoutBillingChoice>(
+      'once',
+    )
 
     const slug = slugProp || slugFromLocation()
 
@@ -115,6 +139,9 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
 
     useEffect(() => {
       if (!hostId || !slug) return
+      // Already delivered with the page (AGL-659) — refetching the identical
+      // payload on hydrate would just be a wasted round trip per visitor.
+      if (seededProduct && seededProduct.slug === slug) return
       let active = true
       void fetch(
         `/api/commerce/product?hostId=${encodeURIComponent(hostId)}` +
@@ -199,6 +226,9 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
             productId: resolved.id,
             variantId: variant.id,
             quantity,
+            // Billing choice (AGL-545): the server re-validates against
+            // the product doc, so this is a request, not an instruction.
+            ...(resolved.subscriptionOptional ? { billing } : {}),
           }),
         })
         const payload = await response.json().catch(() => ({}))
@@ -238,10 +268,23 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
     const galleryImage =
       variant?.imageUrl ?? resolved.mediaUrls[activeImage] ?? resolved.mediaUrls[0]
 
-    // schema.org Product/Offer (AGL-299), same inline-script convention
-    // as the event-list block (AGL-143).
+    // Subscription framing (AGL-545): subscription-only products price as
+    // $X/mo|/yr with a "Subscribe" button; subscriptionOptional products
+    // surface the one-time/subscribe toggle instead. Same price either way
+    // — the server re-prices from the product doc regardless.
+    const subscription = resolved.subscription
+    const intervalSuffix = subscription?.interval === 'year' ? '/yr' : '/mo'
+    const subscribing =
+      Boolean(subscription) &&
+      (!resolved.subscriptionOptional || billing === 'subscribe')
+
+    // schema.org Product/Offer (AGL-299). Kept ONLY for the case where this
+    // block renders without server-seeded page data — the besigner preview,
+    // or a page whose resolver didn't supply it. When the tenant page seeds
+    // us it emits the same Product node server-side (AGL-660), and two
+    // Product nodes for one item is worse than one, so we stand down.
     const structuredData =
-      hostId && resolvedId
+      hostId && resolvedId && !seededProduct
         ? {
             '@context': 'https://schema.org',
             '@type': 'Product',
@@ -331,7 +374,14 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
             {resolved.name}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">{`$${variant?.priceUsd ?? 0}`}</Typography>
+            <Typography variant="h6">
+              {`$${variant?.priceUsd ?? 0}${subscribing ? intervalSuffix : ''}`}
+            </Typography>
+            {subscribing && subscription?.trialDays ? (
+              <Typography variant="caption" color="text.secondary">
+                {`${subscription.trialDays}-day free trial`}
+              </Typography>
+            ) : null}
             {variant?.compareAtPriceUsd ? (
               <>
                 <Typography
@@ -358,6 +408,26 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
               {wishlisted ? '♥ Saved' : '♡ Save'}
             </Button>
           </Box>
+          {subscription && resolved.subscriptionOptional ? (
+            <ToggleButtonGroup
+              value={billing}
+              exclusive
+              size="small"
+              onChange={(_event, value) => {
+                if (value === 'once' || value === 'subscribe') {
+                  setBilling(value)
+                }
+              }}
+              sx={{ mb: 2 }}
+            >
+              <ToggleButton value="once">
+                {`One-time $${variant?.priceUsd ?? 0}`}
+              </ToggleButton>
+              <ToggleButton value="subscribe">
+                {`Subscribe $${variant?.priceUsd ?? 0}${intervalSuffix}`}
+              </ToggleButton>
+            </ToggleButtonGroup>
+          ) : null}
           {resolved.options.map((option) => (
             <TextField
               key={option.name}
@@ -418,7 +488,7 @@ const ProductDetail = forwardRef<HTMLDivElement, ProductDetailProps>(
                 ? 'Sold out'
                 : status === 'sending'
                   ? 'Redirecting…'
-                  : buyLabel || 'Buy now'}
+                  : buyLabel || (subscribing ? 'Subscribe' : 'Buy now')}
             </Button>
           </Box>
           {status === 'error' ? (
@@ -482,7 +552,7 @@ export const schema: Aglyn.ComponentSchema<ProductDetailProps> = {
   $id: ID,
   pluginId: BUNDLE_ID,
   displayName: 'Product detail',
-  category: Aglyn.ComponentCategory.DATA_DISPLAY,
+  category: Aglyn.ComponentCategory.COMMERCE,
   icon: { path: mdiTagOutline.path, sx: { color: '#2e7d32' } },
   flags: { selfClosing: Aglyn.FEATURE_FLAG.ENABLED },
   attributes: [
@@ -516,13 +586,79 @@ export const presets: Aglyn.PresetSchema[] = [
     displayName: 'Product detail',
     pluginId: BUNDLE_ID,
     description: 'Gallery, variant picker, and buy button for one product',
-    category: Aglyn.ComponentCategory.DATA_DISPLAY,
+    category: Aglyn.ComponentCategory.COMMERCE,
     icon: { path: mdiTagOutline.path, sx: { color: '#2e7d32' } },
     data: {
       $id: null,
       componentId: ID,
       pluginId: BUNDLE_ID,
       props: {},
+    },
+  },
+  {
+    // Product page (AGL-561): the commerce-standard PDP subtree —
+    // breadcrumb, detail, related products, reviews — for the product
+    // page template screen. `{{product.name}}` resolves there via the
+    // site page resolver's token pass (AGL-292); node shapes follow
+    // the Sections & Blocks convention (AGL-539) and reference only
+    // persisted component ids.
+    $id: generatePresetId(ID, 'page'),
+    type: Aglyn.NodeType.PRESET,
+    displayName: 'Product page',
+    pluginId: BUNDLE_ID,
+    description:
+      'Breadcrumb, product detail, related products, and reviews',
+    category: Aglyn.ComponentCategory.COMMERCE,
+    icon: { path: mdiTagOutline.path, sx: { color: '#2e7d32' } },
+    data: {
+      $id: null,
+      componentId: 'muiStack',
+      pluginId: Aglyn.MUI_BUNDLE_ID,
+      props: { spacing: 4, sx: { py: 2 } },
+      nodes: [
+        {
+          $id: null,
+          componentId: 'muiStack',
+          pluginId: Aglyn.MUI_BUNDLE_ID,
+          props: {
+            direction: 'row',
+            spacing: 1,
+            sx: { alignItems: 'center' },
+          },
+          nodes: [
+            {
+              $id: null,
+              componentId: 'muiScreenLink',
+              pluginId: Aglyn.MUI_BUNDLE_ID,
+              props: { children: 'Shop', size: 'small', color: 'inherit' },
+            },
+            {
+              $id: null,
+              componentId: 'muiTypography',
+              pluginId: Aglyn.MUI_BUNDLE_ID,
+              props: { variant: 'body2', children: '/ {{product.name}}' },
+            },
+          ],
+        },
+        {
+          $id: null,
+          componentId: ID,
+          pluginId: BUNDLE_ID,
+          props: {},
+        },
+        {
+          $id: null,
+          componentId: RELATED_PRODUCTS_ID,
+          pluginId: BUNDLE_ID,
+          props: {},
+        },
+        {
+          $id: null,
+          componentId: PRODUCT_REVIEWS_ID,
+          pluginId: BUNDLE_ID,
+          props: {},
+        },
+      ],
     },
   },
 ]

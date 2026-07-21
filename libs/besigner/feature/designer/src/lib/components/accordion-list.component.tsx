@@ -16,7 +16,7 @@
  */
 
 import { ICON_VARIANT_COLLAPSIBLE_OPEN } from '@aglyn/shared-data-enums'
-import { MdiIcon } from '@aglyn/shared-ui-jsx'
+import { HelpTip, type HelpTipContent, MdiIcon } from '@aglyn/shared-ui-jsx'
 import { styled } from '@aglyn/shared-ui-theme'
 import {
   Accordion as MuiAccordion,
@@ -37,8 +37,14 @@ const StyledAccordion = styled(MuiAccordion)(({ theme }) => {
   border: `1px solid ${tv.palette.divider}`,
   borderLeft: 0,
   borderRight: 0,
-  '&:not(:last-of-type)': {
-    borderBottom: 0,
+  // Collapse the shared edge between stacked accordions. Keyed off the
+  // preceding sibling rather than `:not(:last-of-type)`, which compares
+  // against every sibling *div* — so a run followed by any other element
+  // (the styles panel ends with a Container) matched no accordion at all
+  // and the stack lost its closing border. For a contiguous run the two
+  // are equivalent: n top edges + 1 bottom, vs 1 top + n bottom edges.
+  '& + &': {
+    borderTop: 0,
   },
   '&:before': {
     display: 'none',
@@ -71,6 +77,8 @@ export interface AccordionProps extends MuiAccordionProps {
   AccordionSummaryProps?: MuiAccordionSummaryProps
   AccordionDetailsProps?: MuiAccordionDetailsProps
   summary?: JSX.Children
+  /** Contextual help affordance rendered after the summary label (AGL-600). */
+  help?: HelpTipContent
 }
 
 export const Accordion = forwardRef<any, AccordionProps>((props, ref) => {
@@ -80,10 +88,14 @@ export const Accordion = forwardRef<any, AccordionProps>((props, ref) => {
     AccordionSummaryProps,
     AccordionDetailsProps,
     summary,
+    help,
     children,
     ...rest
   } = props
-  const [expanded, setExpanded] = useState(expandedProp)
+  // Always a boolean so MUI sees a controlled Accordion from the first
+  // render — seeding with an omitted (undefined) prop rendered it
+  // uncontrolled until the first toggle flipped it controlled (AGL-590).
+  const [expanded, setExpanded] = useState(Boolean(expandedProp))
   const handleToggle = useCallback(
     (e, expanded: boolean) => {
       setExpanded(Boolean(expanded))
@@ -113,6 +125,13 @@ export const Accordion = forwardRef<any, AccordionProps>((props, ref) => {
         {...AccordionSummaryProps}
       >
         {summary}
+        {help && (
+          <HelpTip
+            {...help}
+            sx={{ fontSize: '0.8em', ml: 0.5, my: -0.5 }}
+            onClick={(event) => event.stopPropagation()}
+          />
+        )}
       </MuiAccordionSummary>
       <MuiAccordionDetails sx={{ zIndex: 1 }} {...AccordionDetailsProps}>
         {children}

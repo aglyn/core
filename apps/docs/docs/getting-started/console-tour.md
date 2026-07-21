@@ -30,7 +30,16 @@ The **console** is where you manage a site. Here's what each part of the chrome 
   notifications (form submissions, bookings, invoices, team changes); "View all" opens
   the full paginated feed.
 - **Theme toggle** — cycle between light, dark, and system display mode.
-- **Account menu** — settings, billing, community profile, and sign-out.
+- **Account menu** — settings, billing, community profile, a **Documentation**
+  link that opens this docs site in a new tab, and sign-out.
+
+## In-context help
+
+Look for the small **?** icons throughout the console — next to page titles,
+card titles, form fields, table column headers, and the Besigner's style and
+attribute panels. Hover one for a one- or two-line explanation, and click it
+(or the **Open documentation** link in the tooltip) to jump straight to the
+matching section of these docs in a new tab.
 
 ## Primary navigation
 
@@ -77,3 +86,36 @@ Your in-app notification feed — billing, publishing, workflow failures —
 lives under **Notifications**, with per-category mutes:
 
 ![The notifications feed](/img/getting-started/notifications-page.png)
+
+### Alerts on this device
+
+Below the category mutes, three switches control how a new notification
+reaches you in **this browser**:
+
+- **Unread count in tab title** — badges the browser tab, e.g. `(3) Aglyn`,
+  so you can see new activity from another tab. On by default.
+- **Sound** — a short chime when a notification arrives. Off by default.
+- **Desktop notifications** — a system notification, shown only while the
+  Aglyn tab is in the background (in the foreground, the bell and chime
+  already tell you). Off by default; switching it on asks your browser for
+  permission. If you previously blocked notifications for the site, re-allow
+  them in your browser settings first.
+
+These are per-device, not per-account: notification permission is granted
+per browser, so muting sound on your laptop leaves your other devices alone.
+The **category mutes** above are account-wide and apply everywhere.
+
+**Send test alert** plays the chime and, if you've allowed them, fires a desktop
+notification — so you can confirm your setup works instead of discovering weeks
+later that you never heard a thing. The chime always plays, even with **Sound**
+switched off, so you can hear it before deciding.
+
+Aglyn asks you in-app before triggering your browser's own permission prompt.
+That's deliberate: **browsers allow exactly one permission request per site**.
+Dismiss the browser's prompt and the answer is remembered as a permanent *no* —
+Aglyn can't ask again, and only you can undo it from your browser's site
+settings. The in-app card gives you a "Not now" that costs nothing, so the real
+prompt is only raised once you've said yes. To clear a previous block, open your
+browser's site settings for Aglyn (the icon at the left of the address bar in
+Chrome and Edge; **Settings → Websites → Notifications** in Safari) and set
+notifications back to *Allow*.

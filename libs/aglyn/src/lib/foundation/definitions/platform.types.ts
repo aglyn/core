@@ -153,6 +153,12 @@ export interface AglynHost extends AglynDocument {
   /** Promotional popup (AGL-196); marketingOverlays-gated. */
   popup?: HostPopup
   displayName?: string
+  /**
+   * Site logo URL (AGL-594): the host's own brand mark, shown by the
+   * tenant's navigation loader (and future chrome). Distinct from
+   * `seo.entity.logo`, which is publisher-semantic JSON-LD.
+   */
+  logoUrl?: string
   seo?: {
     title?: string
     description?: string
@@ -314,11 +320,13 @@ export interface AglynScreen extends AglynDocument {
   // CONCEPT: Contextual visibility
   visibility?: HostScreenVisibility
 
-  // CONCEPT: Attribute editors
-  owner?: UserUid
-  contributors?: {
-    [P in string & UserUid]: true
-  }
+  // NOTE (AGL-676): `owner` and `contributors` were declared here and NEVER
+  // read or written by anything — zero call sites across the whole repo.
+  // Removed rather than left dangling: a declared-but-unmaintained field is
+  // how the next person builds on something that was never real. Editor
+  // attribution lives in `hosts/{hostId}/activity`, which is actually
+  // written. If a contributor set is wanted later, add one that is kept up
+  // to date.
 
   /** Shared layout this screen renders inside (see {@link AglynLayout}). */
   layoutId?: LayoutUid
@@ -355,12 +363,48 @@ export interface AglynHostComponent<N = AglynNodeSchema>
   hostId?: HostUid
   displayName?: string
   description?: string
-  /** Definition tree root id within {@link AglynHostComponent.nodes}. */
+  /**
+   * Definition tree root id within {@link AglynHostComponent.nodes}.
+   *
+   * `rootId` and `nodes` on THIS doc are the published snapshot — the copy
+   * the tenant runtime renders. `getComponents` reads every component in a
+   * single collection query on each page render, so they deliberately stay
+   * here rather than moving into the version docs below: relocating them
+   * would turn one query into N+1 on the hot path of every published site
+   * (AGL-679).
+   */
+  rootId?: NodeId
+  nodes?: Record<NodeId, N>
+  /**
+   * Working version pointer (AGL-679). Absent on components that predate
+   * the standalone editor — those still render from the fields above, and
+   * opening one creates version 1 from them.
+   */
+  versionId?: VersionUid
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
+  deletedAt?: ITimestamp
+}
+
+/**
+ * A reusable component's editing history (AGL-679), at
+ * `hosts/{hostId}/components/{componentId}/versions/{versionId}`.
+ *
+ * Same shape as a screen version, with the component's `rootId` carried so
+ * publishing is a copy of both fields onto the parent rather than a
+ * reconstruction. Edits here are invisible to live sites until published —
+ * the same mental model screens already have.
+ */
+export interface AglynHostComponentVersion<N = AglynNodeSchema>
+  extends AglynDocument {
+  $id: VersionUid
+  hostId?: HostUid
+  componentId?: ComponentDefUid
+  displayName?: string
   rootId?: NodeId
   nodes?: Record<NodeId, N>
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
-  deletedAt?: ITimestamp
 }
 
 /**
@@ -377,7 +421,7 @@ export interface AglynLayout extends AglynDocument {
   versions?: Array<VersionUid>
   displayName?: string
   description?: string
-  contributors?: Array<UserUid>
+  // `contributors` removed here too — see the note on AglynScreen (AGL-676).
   createdAt?: ITimestamp
   updatedAt?: ITimestamp
 }
@@ -392,6 +436,86 @@ export interface AglynLayoutVersion<N = AglynNodeSchema>
   extends AglynScreenVersion<N> {
   layoutId?: LayoutUid
   hostId?: HostUid
+}
+
+export type TemplateUid = string
+
+/** What a template can be instantiated as. */
+export type TemplateKind = 'page' | 'component' | 'layout'
+
+/**
+ * A named substitution offered when the template is instantiated. Values are
+ * applied with `resolveNamedTokens` — the same `{{name}}` mechanism that
+ * renders collection entry templates — so a template author marks copy as
+ * `{{productName}}` and is prompted for it on use.
+ */
+export interface TemplatePlaceholder {
+  /** Token name as it appears in the nodes, without the braces. */
+  name: string
+  /** Prompt label shown when instantiating. */
+  label?: string
+  defaultValue?: string
+}
+
+/**
+ * Where a template came from.
+ *
+ * SERVER-MANAGED. A client that could write this would be able to stamp
+ * `marketplace` provenance on something it authored, and the library shows
+ * this to the user as a trust signal.
+ */
+export interface TemplateSource {
+  type: 'authored' | 'marketplace' | 'starter'
+  /** Marketplace listing this was installed from. */
+  listingId?: string
+  /** Listing version installed — compared against `latestVersion` to
+   *  surface "update available" without storing anything extra. */
+  version?: number | string
+  /** First-party starter id from `starter-templates.ts`. */
+  starterId?: string
+}
+
+/**
+ * Reusable starting point for a page, component or layout (AGL-666).
+ * Host-scoped document at `hosts/{hostId}/templates/{templateId}`.
+ *
+ * Distinct from the things it produces: a template is inert until
+ * instantiated, so marketplace downloads land here rather than becoming live
+ * pages. `nodes` carries the same node-map shape screens, components and
+ * layouts already use, which is what lets one collection serve all three
+ * kinds.
+ */
+export interface AglynTemplate<N = AglynNodeSchema> extends AglynDocument {
+  $id: TemplateUid
+  hostId?: HostUid
+  kind?: TemplateKind
+  displayName?: string
+  description?: string
+  category?: string
+  nodes?: Record<NodeId, N>
+  /** Definition tree root — `component` kind, mirroring AglynHostComponent. */
+  rootId?: NodeId
+  /** Suggested slug — `page` kind; de-conflicted against the host on use. */
+  slug?: string
+  /** Mirrors AglynScreen.seo — carried through to the created page. */
+  seo?: {
+    title?: string
+    description?: string
+    breadcrumb?: string
+    image?: HostMediaUid
+  }
+  placeholders?: Array<TemplatePlaceholder>
+  /**
+   * Theme the template was designed against, carried over from a site
+   * template's snapshot. Held rather than applied: applying a theme changes
+   * the whole site's appearance, which is exactly the kind of instant,
+   * site-wide change installing is not allowed to make (AGL-669).
+   */
+  theme?: Record<string, unknown>
+  source?: TemplateSource
+  createdAt?: ITimestamp
+  updatedAt?: ITimestamp
+  deletedAt?: ITimestamp
 }
 
 export type RedirectUid = string

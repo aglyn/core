@@ -16,17 +16,23 @@
  */
 'use client'
 
-import { createResourceUid, isSiteEventType } from '@aglyn/aglyn'
+import {
+  createResourceUid,
+  isSiteEventType,
+  validateHostAction,
+} from '@aglyn/aglyn'
 import {
   InteractionsContext,
   type InteractionsContextValue,
 } from '@aglyn/besigner-ui'
+import { buildInteractionCandidate } from './interaction-builder-doc'
 import { useSnackbar } from '@aglyn/shared-ui-snackstack'
 import { Timestamp } from '@aglyn/shared-util-timestamp'
 import { collection, doc, limit, query, setDoc } from 'firebase/firestore'
 import { useMemo, useState } from 'react'
 import InteractionBuilderDialog, {
   type InteractionBuilderState,
+  PickModeBanner,
 } from './interaction-builder-dialog.component'
 import { useFirestore } from '@aglyn/tenant-feature-instance'
 import useFirestoreCollection from '../hooks/use-firestore-collection'
@@ -35,6 +41,14 @@ export interface InteractionsProviderProps {
   hostId: string
   /** Section experiments need the screen under edit; layouts omit it. */
   screenId?: string
+  /**
+   * Renders children with an empty interactions context (AGL-587): email
+   * documents run no client JS, so the attributes panel must not offer
+   * the Interactions section. The designer hides it when no creator
+   * callbacks are present; disabling here also skips the automations and
+   * experiments subscriptions and the builder dialog entirely.
+   */
+  disabled?: boolean
   children?: JSX.Children
 }
 
@@ -46,24 +60,35 @@ export interface InteractionsProviderProps {
  * save enabled. Section experiments still draft to the Marketing page.
  */
 export function InteractionsProvider(props: InteractionsProviderProps) {
-  const { hostId, screenId, children } = props
+  const { hostId, screenId, disabled, children } = props
   const firestore = useFirestore()
   const { enqueueSnackbar } = useSnackbar()
   const [builder, setBuilder] = useState<InteractionBuilderState | null>(null)
 
   const { data: actionDocs } = useFirestoreCollection<any>(
-    () => query(collection(firestore, 'hosts', hostId, 'actions'), limit(100)),
-    [firestore, hostId],
+    () =>
+      disabled
+        ? null
+        : query(collection(firestore, 'hosts', hostId, 'actions'), limit(100)),
+    [firestore, hostId, disabled],
     { idField: '$id' },
   )
   const { data: experimentDocs } = useFirestoreCollection<any>(
     () =>
-      query(collection(firestore, 'hosts', hostId, 'experiments'), limit(50)),
-    [firestore, hostId],
+      disabled
+        ? null
+        : query(
+            collection(firestore, 'hosts', hostId, 'experiments'),
+            limit(50),
+          ),
+    [firestore, hostId, disabled],
     { idField: '$id' },
   )
 
   const value = useMemo<InteractionsContextValue>(() => {
+    // Unavailable (AGL-587): no callbacks means the designer's props form
+    // never renders the Interactions section (it gates on the creators).
+    if (disabled) return {}
     const automations = (actionDocs ?? [])
       .filter(
         (action: any) =>
@@ -128,6 +153,53 @@ export function InteractionsProvider(props: InteractionsProviderProps) {
             })
           })
       },
+      // Preset-wired interactions (AGL-589): a preset like Dropdown
+      // Panel declares its hover choreography; persist each resolved
+      // draft exactly like a builder save — validated, undefined-pruned
+      // via buildInteractionCandidate, and enabled immediately.
+      onCreatePresetInteractions: ({ interactions }) => {
+        void (async () => {
+          let saved = 0
+          for (const draft of interactions) {
+            const candidate = buildInteractionCandidate({
+              name: draft.name,
+              event: draft.event,
+              selector: draft.selector,
+              frequency: 'every',
+              cooldownMinutes: 0,
+              steps: draft.steps.map((step) => ({ ...step })),
+            })
+            const problem = validateHostAction(candidate as any)
+            if (problem) {
+              console.error('Preset interaction rejected:', problem, draft)
+              continue
+            }
+            await setDoc(
+              doc(firestore, 'hosts', hostId, 'actions', createResourceUid()),
+              {
+                ...candidate,
+                createdAt: Timestamp.now(),
+                updatedAt: Timestamp.now(),
+              },
+              { merge: true },
+            )
+            saved += 1
+          }
+          if (saved) {
+            enqueueSnackbar(
+              saved === 1
+                ? 'Interaction wired and enabled'
+                : `${saved} interactions wired and enabled`,
+              { variant: 'success', persist: false },
+            )
+          }
+        })().catch((error) => {
+          console.error(error)
+          enqueueSnackbar('Could not wire the preset interactions', {
+            variant: 'error',
+          })
+        })
+      },
       // Fluent builder (AGL-319): configure everything inline.
       onCreateInteraction: ({ nodeId, event }) => {
         setBuilder({ id: null, nodeId, event })
@@ -172,7 +244,15 @@ export function InteractionsProvider(props: InteractionsProviderProps) {
           }
         : {}),
     }
-  }, [actionDocs, experimentDocs, firestore, hostId, screenId, enqueueSnackbar])
+  }, [
+    actionDocs,
+    experimentDocs,
+    firestore,
+    hostId,
+    screenId,
+    disabled,
+    enqueueSnackbar,
+  ])
 
   const editingDoc = builder?.id
     ? (actionDocs ?? []).find((action: any) => action.$id === builder.id)
@@ -181,7 +261,7 @@ export function InteractionsProvider(props: InteractionsProviderProps) {
   return (
     <InteractionsContext.Provider value={value}>
       {children}
-      {builder ? (
+      {!disabled && builder ? (
         <InteractionBuilderDialog
           key={builder.id ?? 'new'}
           hostId={hostId}
@@ -190,6 +270,9 @@ export function InteractionsProvider(props: InteractionsProviderProps) {
           onClose={() => setBuilder(null)}
         />
       ) : null}
+      {/* Floating pick affordance while a builder target is picked on the
+          canvas (AGL-574) — shown over the minimized dialog. */}
+      {disabled ? null : <PickModeBanner />}
     </InteractionsContext.Provider>
   )
 }

@@ -68,6 +68,7 @@ import ComponentAccordionList from './component-accordion-list'
 import ElementPropsForm from './element-props-form.component'
 import ElementStylesForm from './element-styles-form.component'
 import NodeTreeView, { type NodeTreeViewProps } from './node-tree-view'
+import SiteThemeColorTokensProvider from './site-theme-color-tokens-provider.component'
 import WorkspacePanelComponent, {
   type WorkspacePanelComponentProps,
 } from './workspace-panel.component'
@@ -327,23 +328,17 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
     ],
   },
   panelRight: {
-    defaultTab: BesignerPanelTabFlag.ELEMENT_INFO,
+    // Attributes first and open by default — it is what you reach for on
+    // selecting an element; Info is reference detail, so it moves last.
+    // Tab order here is display order only; the flag values are persisted
+    // in panel state, so they stay put.
+    defaultTab: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
     panel: {
       id: 'right',
       anchor: 'right',
       'aria-label': 'right toolbox panel',
     },
     tabs: [
-      {
-        value: BesignerPanelTabFlag.ELEMENT_INFO,
-        tab: {
-          icon: { path: ICON_VARIANT_ELEMENT_DETAILS.path },
-          label: 'Info',
-        },
-        panel: {
-          Component: withLastSelectedNode(ElementInfo),
-        },
-      },
       {
         value: BesignerPanelTabFlag.ELEMENT_PROPS_FORM,
         tab: {
@@ -362,6 +357,16 @@ const panelTabs: Partial<Record<BesignerPanelKey, any>> = {
         },
         panel: {
           Component: withLastSelectedNode(ElementStylesForm as any),
+        },
+      },
+      {
+        value: BesignerPanelTabFlag.ELEMENT_INFO,
+        tab: {
+          icon: { path: ICON_VARIANT_ELEMENT_DETAILS.path },
+          label: 'Info',
+        },
+        panel: {
+          Component: withLastSelectedNode(ElementInfo),
         },
       },
     ],
@@ -450,11 +455,20 @@ export const AsidePanelComponent = forwardRef<any, AsidePanelComponentProps>(
             </MuiAppBar>
           </Box>
 
-          {tabs.map(({ value, panel: { Component, ...panel } }) => (
-            <TabPanel key={value} value={numberToHexadecimal(value)} {...panel}>
-              <Component />
-            </TabPanel>
-          ))}
+          {/* Site-theme color tokens (AGL-588): every COLOR_PICKER field
+              in these panels — styles panel, attribute forms, email
+              blocks — offers the site palette's token references. */}
+          <SiteThemeColorTokensProvider>
+            {tabs.map(({ value, panel: { Component, ...panel } }) => (
+              <TabPanel
+                key={value}
+                value={numberToHexadecimal(value)}
+                {...panel}
+              >
+                <Component />
+              </TabPanel>
+            ))}
+          </SiteThemeColorTokensProvider>
         </MuiTabContext>
 
         {children}

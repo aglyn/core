@@ -1,13 +1,15 @@
 ---
 sidebar_position: 2
 title: Build a blog
-description: Create a collection, publish rich entries, and template their pages with entry bindings.
+description: Create a collection, publish rich entries, and design the list and entry pages with template screens.
 ---
 
 # Build a blog
 
-Aglyn's blog is built on **collections** — a collection holds your entries, and an
-**entry-template screen** renders each one.
+Aglyn's blog is built on **collections** — a collection holds your entries, and its pages
+are **first-class designed pages**: the list at `/{collection}` and each entry at
+`/{collection}/{entry}` render through your site's theme and shared layout, and can be
+fully designed in the besigner via **template screens**.
 
 ![The Content page in the Aglyn console, showing a Blog collection with its published entries](/img/content/content-page.png)
 
@@ -21,18 +23,145 @@ In **Content**, create a **collection** for your posts. Manage entries from the 
 
 ## 2. Write entries
 
-Add **rich blog entries** with images, a **preview**, and **scheduling** so posts publish at
-the right time.
+Add **rich blog entries** with images, a **live preview**, and **scheduling** so posts
+publish at the right time.
 
-## 3. Template the entry page
+Each entry carries, besides the title, excerpt, cover image, and markdown body:
 
-Create an **entry-template screen** and use `{{entry.*}}` bindings (e.g. `{{entry.title}}`,
-`{{entry.body}}`) so every entry renders through the same design.
+- **Category** — a single bucket (e.g. `Guides`) used for filtering and related posts,
+  **picked from the collection's category list** (see below), never typed free-form.
+- **Tags** — comma-separated labels (e.g. `nextjs, seo`).
+- **SEO title / SEO description** — search & social overrides; they fall back to the
+  title and excerpt when blank.
+
+### Categories
+
+Categories are **managed per collection** — open **Categories** next to the template
+pickers (or **Manage categories…** inside the entry editor) to add, rename, or delete
+them. Entries reference a category by a **stable id**, so **renaming a category updates
+every post instantly without touching a single entry** — the display name is resolved at
+render time wherever it appears (entry pages, meta lines, related posts, RSS, JSON-LD).
+Deleting a category leaves its entries uncategorized until they are reassigned. A
+collection holds up to 50 categories.
+
+Posts written before category lookup existed keep rendering their old free-typed
+category; the entry editor flags them so you can migrate each post to a real category
+with one save.
+
+### Visual editor
+
+The body opens in a **Visual** tab — a WYSIWYG surface where you edit the formatted
+article directly. It is native to the markdown dialect: what you type round-trips
+losslessly to the same markdown string the site stores and renders, so nothing is ever
+saved as HTML. A **Markdown** tab sits beside it with the raw source and a live preview
+pane (rendered with the exact same parser the published site uses); both tabs edit the
+same content, so you can switch freely.
+
+The shared **toolbar** works in both tabs:
+
+- **B / I** — bold or italicize the selection (`Cmd/Ctrl+B`, `Cmd/Ctrl+I` in Visual).
+- **H2** — toggle the current line between paragraph and heading.
+- **Link** — wrap the selection as a link; you're prompted for an `https://` URL or a
+  site path like `/pricing`. In Visual mode, clicking an existing link opens a small
+  popover to **edit or remove** it (it never navigates).
+- **Image** — insert an image by URL, or hit **Choose from media** in the same dialog
+  to pick one from your media library; the standalone **Insert image** button opens the
+  media picker directly.
+
+Visual-mode shortcuts: type `## `, `### `, or `- ` at the start of a line to convert it
+to a heading or list item; **Enter** splits a block (and exits a list from an empty
+item); **Backspace** at a line start demotes headings/list items and then merges
+paragraphs; `Cmd/Ctrl+Z` / `Cmd/Ctrl+Shift+Z` undo and redo. Pasting rich text (from a
+web page, Google Docs, etc.) keeps everything the markdown dialect can express — bold,
+italic, links, headings, lists, and images — and flattens the rest to plain text.
+
+Markdown supports `**bold**`, `*italic*`,
+`## headings`, `- lists`, `[links](https://…)` — including **site-relative links**
+(`[pricing](/pricing)`) that get client-side navigation — and `![images](https://…)`.
+
+## 3. Design the pages with template screens
+
+Each collection has two template pickers in **Content**:
+
+- **List template screen** — renders `/{collection}`. Drop the **Collection Entries**
+  block on it: its children repeat once per published entry, with `{{entry.*}}` tokens
+  substituted per entry. The default card ships title, date, excerpt, and a Read more
+  link, so dropping it in works instantly.
+- **Entry template screen** — renders `/{collection}/{entry}`. Use `{{entry.*}}` bindings
+  and the **Entry Body** block, which renders the entry's markdown as themed headings,
+  paragraphs, lists, links, and images.
+
+Template screens go through the **normal published pipeline** — site theme, shared
+layout, reusable components, variables — exactly like any other screen (the same
+mechanism as commerce product/collection templates).
+
+### Blog blocks
+
+Besides **Collection Entries** and **Entry Body**, three entry-page blocks are available
+in the block library:
+
+- **Entry Meta** — a `date · category` line plus tag chips. Keep the default
+  `{{entry.date}}` / `{{entry.category}}` / `{{entry.tags}}` bindings on entry
+  templates; each part can be hidden with its **Show** switch.
+- **Related Posts** — other entries of the same collection that share the current
+  entry's **category or a tag**, newest first. Attributes: **Heading** (default
+  "Related articles") and **Limit** (default 3). Renders nothing when the entry has no
+  category/tags or nothing matches.
+- **Share Bar** — X, LinkedIn, Facebook, and copy-link buttons for the current page
+  URL. Attribute: **Heading** (default "Share").
+
+### Entry tokens
+
+| Token | Value |
+| --- | --- |
+| `{{entry.title}}` | Entry title |
+| `{{entry.excerpt}}` | Short summary |
+| `{{entry.body}}` | Raw markdown source (use the Entry Body block to render it) |
+| `{{entry.date}}` | Published date |
+| `{{entry.slug}}` | Entry slug |
+| `{{entry.url}}` | Entry route, e.g. `/blog/my-post` |
+| `{{entry.coverImage}}` | Cover image URL |
+| `{{entry.category}}` | Entry category |
+| `{{entry.tags}}` | Comma-joined tags, e.g. `nextjs, seo` |
+| `{{entry.seoTitle}}` | SEO title (falls back to the title) |
+| `{{entry.seoDescription}}` | SEO description (falls back to the excerpt) |
+| `{{collection.name}}` / `{{collection.slug}}` | The routed collection |
+
+:::tip Recent posts anywhere
+The Collection Entries block also works on **any** screen — set its **Collection slug**
+attribute (e.g. `blog`) and an **Entries limit** to build a "Latest posts" section on
+your home page. Its **Filter by category** / **Filter by tag** attributes narrow the
+list (e.g. a "Guides only" rail), so filtered landing pages are built as filtered
+blocks. The category filter matches either the category's display name or its stable
+id, so it keeps working across renames.
+:::
+
+### No template? Still designed
+
+When no template screen is set, the built-in list and article render **inside your site
+theme and default shared layout** (the home screen's layout), so blog pages never look
+detached from the rest of the site. The built-in article includes the entry meta line
+under the title, the cover image, the body, related posts, and a share bar. The built-in
+list is **paginated** (see below).
+
+### Paginated page sets
+
+Long collections split into pages. The built-in list shows a page of entries with
+**← Newer / Older →** links; deeper pages live at `/{collection}/page/2`,
+`/{collection}/page/3`, and so on (page 1 is the bare `/{collection}`). A page past the
+end returns 404.
+
+On your own **list template screen**, turn on pagination by setting the **Collection
+Entries** block's **Entries per page** attribute; it then renders the page from the URL
+(the **Page** attribute overrides it for a fixed page). Without **Entries per page**, the
+block shows the top **Entries limit** entries as before.
 
 ## 4. Publish & syndicate
 
-Publish the collection. Aglyn generates an **RSS** feed so readers and aggregators can
-subscribe.
+Publish the collection. Aglyn generates an **RSS** feed (entries include their category
+and tags) so readers and aggregators can subscribe, and blog pages join the site's
+**sitemap** automatically. Each entry's `<head>` uses its SEO title/description
+(falling back to title/excerpt) and its cover image as the social card.
 
 ## Tips
 

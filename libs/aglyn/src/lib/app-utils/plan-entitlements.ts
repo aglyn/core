@@ -20,6 +20,7 @@ import type {
   OrgEntitlements,
   OrgFeatureFlags,
   OrgPlan,
+  OrgSeatAddons,
 } from '../foundation'
 
 /** Sentinel for quotas a plan does not cap; `checkQuota` always allows. */
@@ -48,6 +49,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     hostLimit: 1,
     screensPerHost: 5,
     sharedLayoutsPerHost: 1,
+    templatesPerHost: 10,
     storagePerHostMb: 250,
     totalSiteSizeMb: 100,
     membersPerHost: 1,
@@ -65,6 +67,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     contactsPerHost: 100,
     emailSendsPerMonth: 0,
     actionRunsPerMonth: 0,
+    apiRequestsPerMonth: 0,
     datasetsPerOrg: 0,
     maxDatasetsPerOrg: 0,
     recordsPerDataset: 0,
@@ -87,8 +90,10 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
       dataStore: false,
       videoMedia: false,
       bookings: false,
+      interactions: true,
       actions: false,
       webhooks: false,
+      apiAccess: false,
       siteExport: false,
       multilingual: false,
       eventCalendar: false,
@@ -111,6 +116,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     hostLimit: 1,
     screensPerHost: 25,
     sharedLayoutsPerHost: 3,
+    templatesPerHost: 50,
     storagePerHostMb: 2048,
     totalSiteSizeMb: 1024,
     membersPerHost: 3,
@@ -128,6 +134,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     contactsPerHost: 1000,
     emailSendsPerMonth: 500,
     actionRunsPerMonth: 0,
+    apiRequestsPerMonth: 0,
     datasetsPerOrg: 3,
     maxDatasetsPerOrg: 10,
     recordsPerDataset: 1000,
@@ -150,8 +157,10 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
       dataStore: true,
       videoMedia: false,
       bookings: true,
+      interactions: true,
       actions: false,
       webhooks: false,
+      apiAccess: false,
       siteExport: false,
       multilingual: false,
       eventCalendar: false,
@@ -174,6 +183,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     hostLimit: 3,
     screensPerHost: 100,
     sharedLayoutsPerHost: UNLIMITED,
+    templatesPerHost: UNLIMITED,
     storagePerHostMb: 10240,
     totalSiteSizeMb: 5120,
     membersPerHost: 10,
@@ -191,6 +201,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     contactsPerHost: 10000,
     emailSendsPerMonth: 5000,
     actionRunsPerMonth: 5000,
+    apiRequestsPerMonth: 0,
     datasetsPerOrg: 15,
     maxDatasetsPerOrg: 50,
     recordsPerDataset: 10000,
@@ -213,8 +224,10 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
       dataStore: true,
       videoMedia: true,
       bookings: true,
+      interactions: true,
       actions: true,
       webhooks: false,
+      apiAccess: false,
       siteExport: true,
       multilingual: false,
       eventCalendar: false,
@@ -237,6 +250,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     hostLimit: 10,
     screensPerHost: UNLIMITED,
     sharedLayoutsPerHost: UNLIMITED,
+    templatesPerHost: UNLIMITED,
     storagePerHostMb: 51200,
     totalSiteSizeMb: 25600,
     membersPerHost: 50,
@@ -254,6 +268,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     contactsPerHost: 100000,
     emailSendsPerMonth: 50000,
     actionRunsPerMonth: 50000,
+    apiRequestsPerMonth: 100_000,
     datasetsPerOrg: 100,
     maxDatasetsPerOrg: 250,
     recordsPerDataset: 100000,
@@ -276,8 +291,10 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
       dataStore: true,
       videoMedia: true,
       bookings: true,
+      interactions: true,
       actions: true,
       webhooks: true,
+      apiAccess: true,
       siteExport: true,
       multilingual: true,
       eventCalendar: false,
@@ -300,6 +317,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     hostLimit: 25,
     screensPerHost: UNLIMITED,
     sharedLayoutsPerHost: UNLIMITED,
+    templatesPerHost: UNLIMITED,
     storagePerHostMb: 102400,
     totalSiteSizeMb: 51200,
     membersPerHost: 100,
@@ -317,6 +335,7 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
     contactsPerHost: 1000000,
     emailSendsPerMonth: 250000,
     actionRunsPerMonth: 250000,
+    apiRequestsPerMonth: 1_000_000,
     datasetsPerOrg: 500,
     maxDatasetsPerOrg: 1000,
     recordsPerDataset: 1000000,
@@ -339,8 +358,10 @@ export const PLAN_ENTITLEMENTS: Record<OrgPlan, ResolvedOrgEntitlements> = {
       dataStore: true,
       videoMedia: true,
       bookings: true,
+      interactions: true,
       actions: true,
       webhooks: true,
+      apiAccess: true,
       siteExport: true,
       multilingual: true,
       eventCalendar: false,
@@ -411,6 +432,12 @@ export interface PlanPricing {
    * when the plan hard-blocks at the included size instead of metering.
    */
   extraDataGbMonthlyUsd: number | null
+  /**
+   * Metered overage per 1,000 customer REST API requests beyond
+   * `apiRequestsPerMonth` (AGL-634). Only Business/Advanced carry API
+   * access, so lower tiers are null (no API to meter).
+   */
+  extraApiRequestsUsdPer1k: number | null
 }
 
 /**
@@ -427,6 +454,7 @@ export const PLAN_PRICING: Record<OrgPlan, PlanPricing> = {
     extraMemberMonthlyUsd: null,
     extraDatasetMonthlyUsd: null,
     extraDataGbMonthlyUsd: null,
+    extraApiRequestsUsdPer1k: null,
   },
   starter: {
     basePriceMonthlyUsd: 25,
@@ -436,6 +464,7 @@ export const PLAN_PRICING: Record<OrgPlan, PlanPricing> = {
     extraMemberMonthlyUsd: 3,
     extraDatasetMonthlyUsd: 2,
     extraDataGbMonthlyUsd: 0.25,
+    extraApiRequestsUsdPer1k: null,
   },
   pro: {
     basePriceMonthlyUsd: 56,
@@ -445,6 +474,7 @@ export const PLAN_PRICING: Record<OrgPlan, PlanPricing> = {
     extraMemberMonthlyUsd: 2,
     extraDatasetMonthlyUsd: 2,
     extraDataGbMonthlyUsd: 0.25,
+    extraApiRequestsUsdPer1k: null,
   },
   business: {
     basePriceMonthlyUsd: 139,
@@ -454,6 +484,7 @@ export const PLAN_PRICING: Record<OrgPlan, PlanPricing> = {
     extraMemberMonthlyUsd: 1,
     extraDatasetMonthlyUsd: 1,
     extraDataGbMonthlyUsd: 0.25,
+    extraApiRequestsUsdPer1k: 0.5,
   },
   advanced: {
     basePriceMonthlyUsd: 399,
@@ -463,6 +494,7 @@ export const PLAN_PRICING: Record<OrgPlan, PlanPricing> = {
     extraMemberMonthlyUsd: 1,
     extraDatasetMonthlyUsd: 1,
     extraDataGbMonthlyUsd: 0.25,
+    extraApiRequestsUsdPer1k: 0.2,
   },
 }
 
@@ -495,40 +527,75 @@ function resolvePlan(org: Partial<AglynOrgBilling> | null | undefined) {
 }
 
 /**
+ * Purchased add-on quantities that currently apply (AGL-524): add-ons
+ * bill as items on the org's Stripe subscription, so a dead subscription
+ * (the `resolveEffectivePlan` set) stops them counting until the webhook
+ * restores it. Orgs with no subscription state keep staff-set quantities
+ * (comped add-ons predating self-serve billing).
+ */
+function resolvePurchasedAddons(
+  org: Partial<AglynOrgBilling> | null | undefined,
+): OrgSeatAddons {
+  const status = org?.subscription?.status
+  if (status && DEAD_SUBSCRIPTION_STATUSES.has(status)) return {}
+  return org?.seatAddons ?? {}
+}
+
+/**
  * Effective entitlements for an org: plan defaults with the org doc's
- * per-key overrides applied (features merge key-by-key too). Missing or
- * unknown plans resolve as `free`.
+ * per-key overrides applied (features merge key-by-key too), then
+ * purchased add-ons stacked on top (AGL-524): `seatAddons.hosts` raises
+ * `hostLimit`, `seatAddons.posRegisters` raises `posRegisters`, and
+ * `seatAddons.eventCalendar` switches the `eventCalendar` feature on.
+ * (Seat/dataset add-ons instead fold in at `checkSeatQuota` /
+ * `checkDatasetQuota`, where the per-plan hard max clamps them.)
+ * Missing or unknown plans resolve as `free`.
  */
 export function resolveOrgEntitlements(
   org: Partial<AglynOrgBilling> | null | undefined,
 ): ResolvedOrgEntitlements {
   const defaults = PLAN_ENTITLEMENTS[resolvePlan(org)]
   const overrides = org?.entitlements
-  if (!overrides) return defaults
-  const {
-    features: featureOverrides,
-    datasetsPerHost: legacyDatasets,
-    maxDatasetsPerHost: legacyMaxDatasets,
-    ...quotaOverrides
-  } = overrides
-  const merged = { ...defaults }
-  for (const [key, value] of Object.entries(quotaOverrides)) {
-    if (typeof value === 'number') (merged as any)[key] = value
+  let resolved = defaults
+  if (overrides) {
+    const {
+      features: featureOverrides,
+      datasetsPerHost: legacyDatasets,
+      maxDatasetsPerHost: legacyMaxDatasets,
+      ...quotaOverrides
+    } = overrides
+    const merged = { ...defaults }
+    for (const [key, value] of Object.entries(quotaOverrides)) {
+      if (typeof value === 'number') (merged as any)[key] = value
+    }
+    // Pre-AGL-240 override docs keyed datasets per host; resolve them into
+    // the org keys unless an org-keyed override is present.
+    if (typeof legacyDatasets === 'number' && overrides.datasetsPerOrg == null) {
+      merged.datasetsPerOrg = legacyDatasets
+    }
+    if (
+      typeof legacyMaxDatasets === 'number' &&
+      overrides.maxDatasetsPerOrg == null
+    ) {
+      merged.maxDatasetsPerOrg = legacyMaxDatasets
+    }
+    resolved = {
+      ...merged,
+      features: { ...defaults.features, ...featureOverrides },
+    }
   }
-  // Pre-AGL-240 override docs keyed datasets per host; resolve them into
-  // the org keys unless an org-keyed override is present.
-  if (typeof legacyDatasets === 'number' && overrides.datasetsPerOrg == null) {
-    merged.datasetsPerOrg = legacyDatasets
-  }
-  if (
-    typeof legacyMaxDatasets === 'number' &&
-    overrides.maxDatasetsPerOrg == null
-  ) {
-    merged.maxDatasetsPerOrg = legacyMaxDatasets
-  }
+  const purchased = resolvePurchasedAddons(org)
+  const extraHosts = Math.max(0, purchased.hosts ?? 0)
+  const extraRegisters = Math.max(0, purchased.posRegisters ?? 0)
+  const eventCalendar = (purchased.eventCalendar ?? 0) >= 1
+  if (!extraHosts && !extraRegisters && !eventCalendar) return resolved
   return {
-    ...merged,
-    features: { ...defaults.features, ...featureOverrides },
+    ...resolved,
+    hostLimit: resolved.hostLimit + extraHosts,
+    posRegisters: resolved.posRegisters + extraRegisters,
+    features: eventCalendar
+      ? { ...resolved.features, eventCalendar: true }
+      : resolved.features,
   }
 }
 
@@ -612,7 +679,7 @@ export function checkSeatQuota(
     kind === 'managers'
       ? pricing.extraSeatMonthlyUsd
       : pricing.extraMemberMonthlyUsd
-  const purchased = Math.max(0, org?.seatAddons?.[kind] ?? 0)
+  const purchased = Math.max(0, resolvePurchasedAddons(org)[kind] ?? 0)
   const limit = Math.min(included + purchased, maxSeats)
   return {
     allowed: currentUsage < limit,
@@ -668,7 +735,7 @@ export function checkDatasetQuota(
   const included = entitlements.datasetsPerOrg
   const maxDatasets = entitlements.maxDatasetsPerOrg
   const addonPriceUsd = pricing.extraDatasetMonthlyUsd
-  const purchased = Math.max(0, org?.seatAddons?.datasets ?? 0)
+  const purchased = Math.max(0, resolvePurchasedAddons(org).datasets ?? 0)
   const limit = Math.min(included + purchased, maxDatasets)
   return {
     allowed: currentUsage < limit,
@@ -728,6 +795,53 @@ export function checkDataStorageQuota(
       overageRateUsd === null
         ? 0
         : Math.round(overageGb * overageRateUsd * 100) / 100,
+    overageRateUsd,
+  }
+}
+
+export interface ApiRequestQuotaResult {
+  /** Metered plans always allow; plans without API access block. */
+  allowed: boolean
+  /** Included requests this month at the plan. */
+  included: number
+  used: number
+  /** Remaining included requests; 0 once into overage. */
+  remaining: number
+  /** Requests beyond the included quota (0 within the plan). */
+  overageRequests: number
+  /** Estimated overage this month at the plan's per-1,000 rate. */
+  overageMonthlyUsd: number
+  /** Per-1,000 overage rate; null when the plan has no API. */
+  overageRateUsd: number | null
+}
+
+/**
+ * Customer REST API request meter (AGL-634): the monthly request count for an
+ * org. Business/Advanced carry `apiAccess` and an `extraApiRequestsUsdPer1k`
+ * rate, so requests past the included quota meter onto the monthly invoice
+ * (cost-plus, like storage overage — never a hard wall mid-integration); plans
+ * without API access have `included: 0` and always block.
+ */
+export function checkApiRequestQuota(
+  org: Partial<AglynOrgBilling> | null | undefined,
+  usedRequests: number,
+): ApiRequestQuotaResult {
+  const entitlements = resolveOrgEntitlements(org)
+  const pricing = PLAN_PRICING[resolvePlan(org)]
+  const included = entitlements.apiRequestsPerMonth
+  const overageRateUsd = pricing.extraApiRequestsUsdPer1k
+  const used = Math.max(0, usedRequests)
+  const overageRequests = Math.max(0, used - included)
+  return {
+    allowed: overageRateUsd !== null ? true : used < included,
+    included,
+    used,
+    remaining: Math.max(0, included - used),
+    overageRequests,
+    overageMonthlyUsd:
+      overageRateUsd === null
+        ? 0
+        : Math.round((overageRequests / 1000) * overageRateUsd * 100) / 100,
     overageRateUsd,
   }
 }

@@ -43,6 +43,28 @@ export type InteractionTriggerEvent =
   | 'elementClick'
   | 'elementVisible'
   | 'scrollToElement'
+  // Hover choreography (AGL-562): mega menus, drawers, show/hide.
+  | 'elementHoverEnter'
+  | 'elementHoverLeave'
+
+/**
+ * A ready-to-persist interaction resolved from a preset's templates
+ * (AGL-589): every ref is already a concrete `[data-aglyn="leaf:<id>"]`
+ * selector. The host app validates and writes it like a builder save.
+ */
+export interface PresetInteractionDraftStep {
+  type: string
+  selector: string
+  delayMs?: number
+  dismissOn?: string[]
+}
+
+export interface PresetInteractionDraft {
+  name: string
+  event: InteractionTriggerEvent | string
+  selector: string
+  steps: PresetInteractionDraftStep[]
+}
 
 export interface InteractionsContextValue {
   /** The host's site-event automations (for per-element listing). */
@@ -64,6 +86,15 @@ export interface InteractionsContextValue {
   onCreateSectionExperiment?: (options: { nodeId: string }) => void
   /** Enables/disables an element automation in place (wave v7). */
   onToggleInteraction?: (options: { id: string; enabled: boolean }) => void
+  /**
+   * Persists interactions a preset declared for its inserted nodes
+   * (AGL-589) — fired by the add-element flow after the subtree lands
+   * so presets like Dropdown Panel arrive with their hover choreography
+   * already wired and enabled.
+   */
+  onCreatePresetInteractions?: (options: {
+    interactions: PresetInteractionDraft[]
+  }) => void
   /** Soft-deletes an element automation (wave v7). */
   onDeleteInteraction?: (options: { id: string }) => void
 }

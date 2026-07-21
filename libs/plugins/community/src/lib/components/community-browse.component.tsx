@@ -33,6 +33,7 @@ import { collection, doc, getDoc, limit, query, where } from 'firebase/firestore
 import { useEffect, useMemo, useState } from 'react'
 import type { OrgPermissions } from '@aglyn/aglyn'
 import {
+  useConsoleHostRoute,
   useFirestore,
   useFirestoreCollection,
   useUser,
@@ -42,10 +43,10 @@ import useCommunityActions from '../hooks/use-community-actions'
 
 // Community console routes live in the app's route table; the patterns are
 // stable, so the plugin builds them directly (AGL-395).
-const listingHref = (hostId: string, listingId: string) =>
-  `/${hostId}/community/${listingId}`
-const publisherHref = (hostId: string, profileId: string) =>
-  `/${hostId}/community/publisher/${profileId}`
+const listingHref = (base: string, listingId: string) =>
+  `${base}/community/${listingId}`
+const publisherHref = (base: string, profileId: string) =>
+  `${base}/community/publisher/${profileId}`
 
 export interface CommunityBrowseProps {
   hostId: string
@@ -69,6 +70,26 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   const { permissions } = props
   const { install: runInstall, buy: runBuy } = useCommunityActions(hostId)
   const [handles, setHandles] = useState<Record<string, string>>({})
+  // Listings are org-owned (AGL-652), so "is this mine" is an org comparison.
+  // Resolved from the routing mirror rather than a new prop so the component
+  // stays self-contained; hostIndex is signed-in readable.
+  const [viewerOrgId, setViewerOrgId] = useState<string | null>(null)
+  useEffect(() => {
+    let active = true
+    void getDoc(doc(firestore, 'hostIndex', hostId))
+      .then((snapshot) => {
+        if (active) setViewerOrgId((snapshot.get('orgId') as string) ?? null)
+      })
+      .catch(() => undefined)
+    return () => {
+      active = false
+    }
+  }, [firestore, hostId])
+  // Card links were built as `/{hostDocId}/community/…`, a shape that has
+  // not resolved since AGL-621/622 — every listing and publisher link on
+  // this grid 404'd. One shared resolution (AGL-673); null renders plain
+  // text rather than a link to nowhere.
+  const { base: routeBase } = useConsoleHostRoute(hostId)
 
   const { data: listings } = useFirestoreCollection<any>(
     () =>
@@ -124,7 +145,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
     Promise.all(
       profileIds.map(async (profileId) => {
         const snapshot = await getDoc(
-          doc(firestore, 'profiles', String(profileId)),
+          doc(firestore, 'publisherProfiles', String(profileId)),
         ).catch(() => null)
         return [profileId, snapshot?.get('handle') ?? ''] as const
       }),
@@ -151,7 +172,9 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
   // fetched page of listings.
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<string | null>(null)
-  const [sort, setSort] = useState<'newest' | 'installed'>('newest')
+  const [sort, setSort] = useState<'newest' | 'installed' | 'rated'>(
+    'newest',
+  )
   const categories = useMemo(
     () =>
       [
@@ -170,7 +193,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
       // stay off the public browse; the owner still sees their own (the
       // detail page shows them the status). UX-level only — the docs are
       // public-readable by design.
-      if (!isListingBrowsable(listing) && listing.profileId !== user?.uid) {
+      if (!isListingBrowsable(listing) && listing.profileId !== viewerOrgId) {
         return false
       }
       if (category && listing.category !== category) return false
@@ -179,11 +202,19 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         .filter(Boolean)
         .some((value: string) => value.toLowerCase().includes(needle))
     })
-    return [...filtered].sort((a: any, b: any) =>
-      sort === 'installed'
-        ? (b.installCount ?? 0) - (a.installCount ?? 0)
-        : (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0),
-    )
+    return [...filtered].sort((a: any, b: any) => {
+      if (sort === 'installed') {
+        return (b.installCount ?? 0) - (a.installCount ?? 0)
+      }
+      if (sort === 'rated') {
+        // Unrated listings sort last rather than as zero-stars — a new
+        // listing has not been judged badly, it has not been judged.
+        const byAverage =
+          (b.ratingAverage ?? -1) - (a.ratingAverage ?? -1)
+        return byAverage || (b.ratingCount ?? 0) - (a.ratingCount ?? 0)
+      }
+      return (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0)
+    })
   }, [listings, search, category, sort, user?.uid])
 
   return (
@@ -220,6 +251,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
         >
           <MenuItem value="newest">{'Newest'}</MenuItem>
           <MenuItem value="installed">{'Most installed'}</MenuItem>
+          <MenuItem value="rated">{'Highest rated'}</MenuItem>
         </TextField>
       </Stack>
       {items.length === 0 ? (
@@ -238,7 +270,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
             const mustBuy =
               priceUsd > 0 &&
               !purchased[listing.$id] &&
-              listing.profileId !== user?.uid &&
+              listing.profileId !== viewerOrgId &&
               !install
             return (
               <Grid key={listing.$id} size={{ xs: 12, sm: 6, md: 4 }}>
@@ -271,7 +303,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                     sx={{ alignItems: 'center' }}
                   >
                     <MuiLink
-                      href={listingHref(hostId, listing.$id)}
+                      href={routeBase ? listingHref(routeBase, listing.$id) : undefined}
                       color="inherit"
                       underline="hover"
                       variant="subtitle2"
@@ -297,7 +329,7 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                       <>
                         {' · by '}
                         <MuiLink
-                          href={publisherHref(hostId, listing.profileId)}
+                          href={routeBase ? publisherHref(routeBase, listing.profileId) : undefined}
                           color="secondary"
                           underline="hover"
                         >
@@ -311,6 +343,13 @@ export function CommunityBrowse(props: CommunityBrowseProps) {
                       ? ` · ${listing.installCount} install${
                           listing.installCount === 1 ? '' : 's'
                         }`
+                      : ''}
+                    {/* Count alongside the average: "5.0" from one rating
+                        and from forty are not the same claim (AGL-655). */}
+                    {listing.ratingCount
+                      ? ` · ★ ${listing.ratingAverage ?? 0} (${
+                          listing.ratingCount
+                        })`
                       : ''}
                   </Typography>
                   {listing.description ? (

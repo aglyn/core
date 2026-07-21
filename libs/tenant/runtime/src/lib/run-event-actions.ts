@@ -22,15 +22,16 @@ import {
   type HostWebhook,
   WEBHOOK_URL_PATTERN,
   evaluateExpression,
+  evaluateTriggerConditions,
   isClientActionStep,
   type HostAction,
   type HostActionAlert,
   type HostFunction,
   type HostVariable,
   type HostWorkflow,
+  buildDatasetRecordValues,
   resolveOrgEntitlements,
   runWorkflow,
-  sanitizeRecordValues,
 } from '@aglyn/aglyn/server'
 import {
   firebaseAdmin,
@@ -41,6 +42,7 @@ import {
 } from '@aglyn/tenant-data-admin'
 import { createHmac } from 'crypto'
 import { FieldValue } from 'firebase-admin/firestore'
+import { resolveDatasetDoc } from './resolve-dataset'
 import type { HostEventPayload } from './run-event-workflows'
 
 /** Bounded fan-out per event, mirroring the workflow runner. */
@@ -218,28 +220,26 @@ async function executeAction(
           )
         }
       } else if (step.type === 'datasetAppend') {
-        // Id-first lookup (AGL-261); the name query is the legacy path.
+        // Id-first lookup (AGL-261/556); the name query is the legacy path.
         const datasetsRef = await orgDataCollectionForHost(hostId, 'datasets')
-        const datasetDoc = step.datasetId?.trim()
-          ? await datasetsRef.doc(step.datasetId.trim()).get()
-          : (
-              await datasetsRef
-                .where('name', '==', step.datasetName?.trim() ?? '')
-                .limit(1)
-                .get()
-            ).docs[0]
+        const datasetDoc = await resolveDatasetDoc(datasetsRef, step)
         if (!datasetDoc?.exists || datasetDoc.get('deletedAt')) {
           stepErrors.push(
             `unknown dataset "${step.datasetName || step.datasetId}"`,
           )
           continue
         }
-        const declaredFields: string[] = Array.isArray(
-          datasetDoc.get('fields'),
+        // Restrict to the model's field ids (AGL-556) — covers model-only
+        // datasets whose flat v1 `fields` mirror is absent.
+        const values = buildDatasetRecordValues(
+          {
+            model: datasetDoc.get('model'),
+            fields: Array.isArray(datasetDoc.get('fields'))
+              ? datasetDoc.get('fields')
+              : [],
+          },
+          payload,
         )
-          ? datasetDoc.get('fields')
-          : []
-        const values = sanitizeRecordValues(declaredFields, payload)
         if (Object.keys(values).length) {
           await datasetDoc.ref.collection('records').add({
             values,
@@ -250,26 +250,22 @@ async function executeAction(
         // Update-or-append (AGL-257): matches the record whose `email`
         // field equals the payload's email; appends when nothing matches.
         const datasetsRef = await orgDataCollectionForHost(hostId, 'datasets')
-        const datasetDoc = step.datasetId?.trim()
-          ? await datasetsRef.doc(step.datasetId.trim()).get()
-          : (
-              await datasetsRef
-                .where('name', '==', step.datasetName?.trim() ?? '')
-                .limit(1)
-                .get()
-            ).docs[0]
+        const datasetDoc = await resolveDatasetDoc(datasetsRef, step)
         if (!datasetDoc?.exists || datasetDoc.get('deletedAt')) {
           stepErrors.push(
             `unknown dataset "${step.datasetName || step.datasetId}"`,
           )
           continue
         }
-        const declaredFields: string[] = Array.isArray(
-          datasetDoc.get('fields'),
+        const values = buildDatasetRecordValues(
+          {
+            model: datasetDoc.get('model'),
+            fields: Array.isArray(datasetDoc.get('fields'))
+              ? datasetDoc.get('fields')
+              : [],
+          },
+          payload,
         )
-          ? datasetDoc.get('fields')
-          : []
-        const values = sanitizeRecordValues(declaredFields, payload)
         if (!Object.keys(values).length) continue
         const email = String((payload as any).email ?? '').trim()
         const existing = email
@@ -482,6 +478,12 @@ export async function runEventActions(
           continue // A broken filter never fires.
         }
       }
+      // Structured payload conditions (AGL-557; AND/OR chaining AGL-565):
+      // same scope as the filter; unmet conditions skip the action (and
+      // never count as a run).
+      if (!evaluateTriggerConditions(action.trigger, { event, ...payload })) {
+        continue
+      }
       executed += 1
       await executeAction(env, doc.id, action, event, payload)
     }
@@ -521,6 +523,12 @@ export async function runSingleAction(
     // Only site-event actions may be dispatched externally — server
     // events flow through their own emitters.
     if (String(action.trigger?.event ?? '') !== String(event)) return alerts
+    // Structured payload conditions (AGL-557; AND/OR chaining AGL-565):
+    // the single-action dispatch path honors them too, so
+    // client-evaluated triggers can't bypass them.
+    if (!evaluateTriggerConditions(action.trigger, { event, ...payload })) {
+      return alerts
+    }
 
     const monthKey = new Date().toISOString().slice(0, 7)
     const runCounterRef = hostRef.collection('counters').doc('actionRuns')

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 11
+sidebar_position: 12
 slug: /whats-new
 title: What's New
 description: The features Aglyn shipped most recently, grouped by area with links into the docs.
@@ -10,7 +10,65 @@ description: The features Aglyn shipped most recently, grouped by area with link
 A huge wave of features shipped over the last few days. Here's the tour, grouped by area.
 Each links into its section for the how-to.
 
-## Designer & email wave (newest)
+## REST API & API keys (newest)
+
+- **[The Aglyn REST API](https://docs.aglyn.com/api)** — programmatic access to
+  your organization's datasets and records (full CRUD), contacts, sites, and
+  form submissions, authenticated with **API keys** you create under
+  **Organization → Settings → API keys**. Keys are scoped, shown once, and
+  Business-tier; the API supports cursor pagination, per-key rate limits,
+  idempotent writes, and a consistent error envelope. See the new
+  [API reference](https://docs.aglyn.com/api).
+
+## In-console help
+
+- **[Documentation from the console](getting-started/console-tour.md#the-app-bar)** —
+  the account menu now has a **Documentation** entry that opens this site in a
+  new tab, and feature pages grew a small **?** icon next to their titles: hover
+  for a one-line summary, click through for the full docs page.
+- **[Help everywhere](getting-started/console-tour.md#in-context-help)** — the
+  same **?** affordance now covers cards, form fields, table headers, the
+  staff console, and the Besigner's style and attribute panels, each
+  deep-linking to the exact docs section it explains.
+
+## Nav menu system
+
+- **[Dropdown Panel preset](building-sites/menus-and-navigation/overview.md#the-dropdown-panel-preset)** —
+  a primitive-built hover panel (Stack + Button + hidden panel) that inserts
+  with its hover choreography **pre-wired as editable interactions**: show on
+  hover with Esc/outside-click dismissal, hide on leave with a 250ms grace
+  delay. Show/hide steps themselves gained **Delay** and **Close on
+  Esc / outside click** options in the interaction builder.
+- **[Menus & navigation](building-sites/menus-and-navigation/overview.md)** — a
+  **Dropdown Menu**, a **Mega Menu** with a free-form wide panel, a slide-in
+  **Drawer** with a **Menu Button**, and a one-insert **Mobile Nav** preset.
+  Every menu click-toggles out of the box; hover opening (and anything
+  fancier) is authored as an interaction. Interactions gained hover
+  enter/leave triggers, a repeatable *every time* frequency, element
+  **show/hide** actions with a canvas element picker, and **menu** and
+  **drawer open/close** actions; the styles panel gained a per-device-band
+  **Visibility** control.
+
+## Designed content collections
+
+- **[First-class blog pages](building-sites/site-templates/build-a-blog.md)** — collection
+  list and entry routes render through your site theme and shared layout. Pick a
+  **List template screen** and an **Entry template screen** per collection in
+  **Content**, drop the new **Collection Entries** block (repeats title, date,
+  excerpt, Read more per published entry — works on any screen via its
+  collection-slug attribute), and render markdown with the themed **Entry
+  Body** block. With no template set, the built-in pages still compose inside
+  your theme and default layout.
+
+## Self-serve add-ons
+
+- **[Add-ons](workspace-and-billing/billing-and-plans/add-ons.md)** — buy manager and
+  member seats, extra datasets, extra sites, POS registers, and the Event Calendar
+  straight from **Billing → Add-ons**: prorated previews before every change, hard caps
+  where your plan tops out, and quantities that re-price automatically on plan switches.
+  No more asking support to enable an add-on.
+
+## Designer & email wave
 
 - **[Responsive styling](building-sites/besigner/responsive-styling.md)** — the artboard
   preview mode now scopes style edits per breakpoint (XS–XL), the box

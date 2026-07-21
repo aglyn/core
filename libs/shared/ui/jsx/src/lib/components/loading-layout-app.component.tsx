@@ -17,7 +17,13 @@
 'use client'
 
 import { usePathname, useSearchParams } from 'next/navigation'
-import { forwardRef, type ReactNode, useEffect, useRef } from 'react'
+import {
+  forwardRef,
+  type ReactNode,
+  Suspense,
+  useEffect,
+  useRef,
+} from 'react'
 import {
   LoadingProviderComponent,
   useLoading,
@@ -36,7 +42,7 @@ const NAVIGATION_OVERLAY_MAX_MS = 10_000
  * changes (`usePathname`/`useSearchParams`), on `popstate`, or after a
  * safety timeout.
  */
-function RouterLoadingApp({ children }: { children: ReactNode }) {
+function RouterLoadingApp({ children }: { children?: ReactNode }) {
   const { queueLoading } = useLoading()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -86,7 +92,7 @@ function RouterLoadingApp({ children }: { children: ReactNode }) {
     }
   }, [queueLoading])
 
-  return children
+  return children ?? null
 }
 RouterLoadingApp.displayName = 'RouterLoadingApp'
 RouterLoadingApp.aglyn = true
@@ -99,14 +105,37 @@ RouterLoadingApp.aglyn = true
  * instead, and imperative `useLoading().queueLoading()` calls still render
  * the modal.
  */
-const LoadingLayoutAppComponent = forwardRef<any, LoadingLayoutComponentProps>(
+export interface LoadingLayoutAppComponentProps
+  extends Omit<LoadingLayoutComponentProps, 'children'> {
+  /** Per-site branding for the overlay (AGL-594) — see LoadingModal. */
+  brandLogoUrl?: string
+  brandName?: string
+  /** Any renderable children — the tenant layout passes a ReactNode. */
+  children?: ReactNode
+}
+
+const LoadingLayoutAppComponent = forwardRef<
+  any,
+  LoadingLayoutAppComponentProps
+>(
   (props, ref) => {
     const { children, ...rest } = props
 
     return (
       <LoadingProviderComponent>
         <LoadingModal ref={ref} {...rest}>
-          <RouterLoadingApp>{children}</RouterLoadingApp>
+          {/* The listener holds useSearchParams(), which MUST sit under
+              its own Suspense boundary or ISR/SSG routes 500 at request
+              time (BAILOUT_TO_CLIENT_SIDE_RENDERING — took the tenant
+              down, AGL-594). Children stay OUTSIDE the boundary so site
+              pages keep their server-rendered HTML; only the
+              null-rendering listener client-renders. */}
+          <>
+            <Suspense fallback={null}>
+              <RouterLoadingApp />
+            </Suspense>
+            {children}
+          </>
         </LoadingModal>
       </LoadingProviderComponent>
     )

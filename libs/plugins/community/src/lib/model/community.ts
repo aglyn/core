@@ -21,12 +21,65 @@
  * public listing. Pure data module — safe to import from API routes.
  */
 
-/** `profiles/{uid}` — one public publisher profile per account. */
+/**
+ * `profiles/{uid}` — a person's public identity.
+ *
+ * NOT a publisher identity as of AGL-652: publishing is org-only, and the
+ * marketplace presence lives on `publisherProfiles/{orgId}` below. This doc
+ * survives because it is also the support forum's author identity, which
+ * renders poster names from `displayName`.
+ */
 export interface CommunityProfile {
   handle: string
   displayName: string
   bio?: string
   avatarUrl?: string
+}
+
+/**
+ * `publisherProfiles/{orgId}` — an organization's marketplace presence
+ * (AGL-652). Publishing is org-only: an org publishes, an org gets paid, and
+ * the org is who buyers see. Keyed by org id so authorization is a plain org
+ * role check with no ownership indirection.
+ *
+ * `stripeAccountId` / `stripeChargesEnabled` are written only by the Connect
+ * route via the Admin SDK and are frozen from client writes by the rules —
+ * they decide who receives money.
+ */
+export interface CommunityPublisherProfile {
+  /** Unique marketplace handle; reserved in `publisherHandles/{handle}`. */
+  handle: string
+  displayName: string
+  bio?: string
+  avatarUrl?: string
+  website?: string
+  /** Server-only. */
+  stripeAccountId?: string
+  /** Server-only; true once Connect onboarding can accept charges. */
+  stripeChargesEnabled?: boolean
+}
+
+/**
+ * `publisherHandles/{handle}` — uniqueness reservation for publisher handles,
+ * mirroring `orgSlugs` (AGL-652). Without it two publishers could claim the
+ * same handle, which the marketplace URL space cannot represent. `movedTo`
+ * tombstones a renamed handle so old links can still resolve.
+ */
+export interface PublisherHandleReservation {
+  orgId: string
+  movedTo?: string
+}
+
+/**
+ * Publisher handles share the org-slug shape: 3–30 chars, lowercase
+ * alphanumeric plus internal hyphens. Single source of truth — the two
+ * community pages historically applied two subtly different regexes to the
+ * same field (AGL-653).
+ */
+export const PUBLISHER_HANDLE_PATTERN = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/
+
+export function isValidPublisherHandle(handle: string): boolean {
+  return PUBLISHER_HANDLE_PATTERN.test(handle)
 }
 
 /**
@@ -41,10 +94,21 @@ export interface CommunityListing {
   description?: string
   category?: string
   /**
-   * Declarative component (default) or executable plugin (AGL-45).
-   * Plugins version by semver string; components by integer.
+   * What this listing publishes (AGL-654). One discriminator for every
+   * artifact type — the previous scheme split across two orthogonal fields
+   * (`type: 'component'|'plugin'` plus a separate `kind: 'template'`), so a
+   * template was "kind template with no type" and each installer branched on
+   * whichever field it happened to care about. That does not survive adding
+   * layouts, dataset schemas and email templates.
+   *
+   * Read it through `listingArtifactType()`, never directly — listings
+   * written before this field still carry only the legacy pair.
    */
+  artifactType?: CommunityArtifactType
+  /** @deprecated Legacy discriminator; use `artifactType` (AGL-654). */
   type?: 'component' | 'plugin'
+  /** @deprecated Legacy discriminator; use `artifactType` (AGL-654). */
+  kind?: 'template'
   latestVersion: number | string
   /** Plugin manifest id, for `type: 'plugin'` listings (AGL-45). */
   pluginId?: string
@@ -71,6 +135,92 @@ export interface CommunityListing {
    * listings appear in browse for non-owners.
    */
   reviewStatus?: ListingReviewStatus
+  // Server-managed. These were written by the publish/install/review paths
+  // but never declared, so callers reached for `as any` (AGL-654).
+  /** Publishing org id — the publisher profile's doc id (AGL-652). */
+  publisherOrgId?: string
+  /** Source component for a `component` listing. */
+  sourceComponentId?: string
+  /** Source site for a `template` listing. */
+  sourceHostId?: string
+  /** Incremented by the install API; frozen from client writes. */
+  installCount?: number
+  previewImageUrl?: string
+  screenCount?: number
+  versionHistory?: Array<{ version: number | string; publishedAt?: unknown }>
+  createdAt?: unknown
+  updatedAt?: unknown
+  /** Staff review audit (AGL-432); server-owned (AGL-651). */
+  reviewedBy?: string
+  reviewedAt?: unknown
+  rejectionReason?: string
+}
+
+/** Everything an org can publish to the marketplace (AGL-654). */
+export type CommunityArtifactType =
+  | 'component'
+  | 'template'
+  | 'plugin'
+  | 'layout'
+  | 'datasetSchema'
+  | 'emailTemplate'
+
+/** Where an installed artifact lives. */
+export type InstallTarget = 'org' | 'host'
+
+/**
+ * Install targets each artifact type actually supports (AGL-656).
+ *
+ * This is not a policy choice — it is where the install routes physically
+ * write. Only plugins have an org-scoped pin
+ * (`orgs/{orgId}/installs/{listingId}`, applying to every site, shadowed by
+ * a host pin). Components land in `hosts/{h}/components`, templates and
+ * layouts in `hosts/{h}/templates`: all host-scoped by nature, because a
+ * screen tree belongs to a site.
+ *
+ * Exported so the UI can ask rather than assume — an install picker that
+ * offers "this whole organization" for a template would be lying.
+ */
+export const INSTALL_TARGETS: Record<
+  CommunityArtifactType,
+  readonly InstallTarget[]
+> = {
+  plugin: ['org', 'host'],
+  component: ['host'],
+  template: ['host'],
+  layout: ['host'],
+  // Dataset schemas are org-shared data (AGL-237), so they will pin at org
+  // scope when publishing them lands (AGL-657).
+  datasetSchema: ['org'],
+  emailTemplate: ['host'],
+}
+
+/** Targets a listing can be installed to, defaulting to host-only. */
+export function installTargetsFor(listing: {
+  artifactType?: string
+  type?: string
+  kind?: string
+}): readonly InstallTarget[] {
+  return INSTALL_TARGETS[listingArtifactType(listing)] ?? ['host']
+}
+
+/**
+ * The listing's artifact type, tolerating the pre-AGL-654 shape.
+ *
+ * Legacy listings carry `type`/`kind` instead; a component was the absence
+ * of both, which is why this defaults there rather than throwing. Keeping
+ * the fallback means old docs keep resolving correctly instead of silently
+ * becoming un-installable.
+ */
+export function listingArtifactType(listing: {
+  artifactType?: string
+  type?: string
+  kind?: string
+}): CommunityArtifactType {
+  if (listing.artifactType) return listing.artifactType as CommunityArtifactType
+  if (listing.kind === 'template') return 'template'
+  if (listing.type === 'plugin') return 'plugin'
+  return 'component'
 }
 
 export type ListingReviewStatus =
@@ -82,10 +232,19 @@ export type ListingReviewStatus =
 
 /** Whether a plugin listing is publicly browsable (AGL-432). */
 export function isListingBrowsable(listing: {
+  artifactType?: string
   type?: string
+  kind?: string
   reviewStatus?: string
+  hiddenAt?: unknown
 }): boolean {
-  if (listing.type !== 'plugin') return true
+  // Staff takedown applies to EVERY artifact type (AGL-658). Pre-publication
+  // review is plugin-only — plugins execute code, so they earn the wait —
+  // but a component or template that turns out to be abusive must be
+  // removable too, and before this it simply was not: the early return
+  // below meant anything non-plugin was permanently browsable.
+  if (listing.hiddenAt) return false
+  if (listingArtifactType(listing) !== 'plugin') return true
   return (
     listing.reviewStatus === undefined ||
     listing.reviewStatus === 'listed' ||
@@ -251,13 +410,29 @@ export type CommunityDefinitionNodes = Record<
  * SAFE_HREF), which also covers definitions written to Firestore directly
  * (see docs/SECURITY_CONTENT_REVIEW.md).
  */
-export function sanitizeCommunityDefinition(definition: {
-  rootId: string
-  nodes: Record<string, any>
-}):
+export function sanitizeCommunityDefinition(
+  definition: {
+    rootId: string
+    nodes: Record<string, any>
+  },
+  options?: {
+    /**
+     * Additional component ids permitted for this artifact type.
+     *
+     * `layoutSlot` is excluded from the shared allowlist because a slot in
+     * page content has nowhere to graft — but a published LAYOUT is
+     * meaningless without one (AGL-671). Scoped per call rather than added
+     * globally so page and component publishing stay unchanged.
+     */
+    extraComponentIds?: readonly string[]
+  },
+):
   | { ok: true; rootId: string; nodes: CommunityDefinitionNodes }
   | { ok: false; error: string } {
   const { rootId, nodes } = definition
+  const allowed = options?.extraComponentIds?.length
+    ? [...COMMUNITY_COMPONENT_ID_ALLOWLIST, ...options.extraComponentIds]
+    : COMMUNITY_COMPONENT_ID_ALLOWLIST
   if (!rootId || !nodes?.[rootId]) {
     return { ok: false, error: 'Definition has no root node' }
   }
@@ -268,7 +443,7 @@ export function sanitizeCommunityDefinition(definition: {
     if (sanitized[id]) continue
     const node = nodes[id]
     if (!node) return { ok: false, error: `Missing node "${id}"` }
-    if (!COMMUNITY_COMPONENT_ID_ALLOWLIST.includes(node.componentId)) {
+    if (!allowed.includes(node.componentId)) {
       return {
         ok: false,
         error: `Component "${node.componentId}" cannot be published`,

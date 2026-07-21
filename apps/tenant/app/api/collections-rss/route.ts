@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import getCollectionContent from '../../../utils/get-collection-content'
+import { resolveEntryCategoryName } from '@aglyn/aglyn/server'
+import getCollectionContent from '@aglyn/tenant-runtime/get-collection-content'
 import getHost from '../../../utils/get-host'
 
 export const dynamic = 'force-dynamic'
@@ -46,6 +47,7 @@ export async function GET(request: Request): Promise<Response> {
   if (!content.collection) return new Response('Not found', { status: 404 })
 
   const base = `https://${request.headers.get('host') ?? host}`
+  const categories = content.collection.categories
   const items = content.entries
     .map(
       (entry) =>
@@ -59,6 +61,13 @@ export async function GET(request: Request): Promise<Response> {
         (entry.excerpt
           ? `    <description>${escapeXml(entry.excerpt)}</description>\n`
           : '') +
+        // Entry model v2 (AGL-582): category + tags ride along as RSS
+        // <category> elements. The category name resolves against the
+        // collection's taxonomy (categoryId first, legacy fallback).
+        [resolveEntryCategoryName(entry, categories), ...(entry.tags ?? [])]
+          .filter((value): value is string => Boolean(value))
+          .map((value) => `    <category>${escapeXml(value)}</category>\n`)
+          .join('') +
         '  </item>',
     )
     .join('\n')

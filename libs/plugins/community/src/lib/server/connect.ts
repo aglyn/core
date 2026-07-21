@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import { firebaseAdmin } from '@aglyn/tenant-data-admin'
+import { firebaseAdmin, getOrgForUser } from '@aglyn/tenant-data-admin'
 import { type PluginApiHandler } from '@aglyn/aglyn/server'
+import { canActAsPublisher } from './publisher-profile'
 
 async function stripe(path: string, params?: URLSearchParams) {
   const response = await fetch(`https://api.stripe.com/v1/${path}`, {
@@ -60,12 +61,24 @@ export const connectHandler: PluginApiHandler = async (req, res) => {
   try {
     const decoded = await firebaseAdmin.app().auth().verifyIdToken(idToken)
     const firestore = firebaseAdmin.app().firestore()
-    const profileRef = firestore.collection('profiles').doc(decoded.uid)
+    // Payouts belong to the publishing ORG (AGL-652) — the marketplace pays
+    // the organization that published, not whoever set the account up. Only
+    // a manager may bind a payout destination.
+    const orgForUser = await getOrgForUser(decoded.uid)
+    const orgId = orgForUser?.orgId
+    if (!orgId || !(await canActAsPublisher(firestore, decoded.uid, orgId))) {
+      return res.status(403).json({
+        error: 'Only an organization owner or admin can set up payouts',
+      })
+    }
+    const profileRef = firestore.collection('publisherProfiles').doc(orgId)
     const profileSnapshot = await profileRef.get()
     if (!profileSnapshot.exists) {
-      return res
-        .status(412)
-        .json({ error: 'Create your community profile first' })
+      return res.status(412).json({
+        error:
+          'Set up your organization’s publisher profile first ' +
+          '(Organization → Community)',
+      })
     }
 
     let accountId = profileSnapshot.get('stripeAccountId') as
@@ -76,7 +89,7 @@ export const connectHandler: PluginApiHandler = async (req, res) => {
         'accounts',
         new URLSearchParams({
           type: 'express',
-          'metadata[profileId]': decoded.uid,
+          'metadata[publisherOrgId]': orgId,
           ...(decoded.email ? { email: decoded.email } : {}),
         }),
       )
@@ -98,13 +111,20 @@ export const connectHandler: PluginApiHandler = async (req, res) => {
     }
 
     const origin = req.headers.origin ?? `https://${req.headers.host}`
+    const orgSlug = (
+      await firestore.collection('orgs').doc(orgId).get()
+    ).get('slug') as string | undefined
+    const payoutsPath = orgSlug ? `/${orgSlug}/community` : '/manage/community'
     const link = await stripe(
       'account_links',
       new URLSearchParams({
         account: accountId as string,
         type: 'account_onboarding',
-        refresh_url: `${origin}/manage/community?connect=refresh`,
-        return_url: `${origin}/manage/community?connect=done`,
+        // Canonical org surface (AGL-653). `/manage/community` is now only a
+        // redirect, and Stripe bakes these URLs into the onboarding link —
+        // sending people through an extra hop mid-onboarding is avoidable.
+        refresh_url: `${origin}${payoutsPath}?connect=refresh`,
+        return_url: `${origin}${payoutsPath}?connect=done`,
       }),
     )
     return res
